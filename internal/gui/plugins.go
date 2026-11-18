@@ -230,9 +230,6 @@ type pluginsJSON struct {
 	// Movable are the built-ins with accounts a plugin could run, which
 	// its card and its row offer to move
 	Movable []provider.MoveCandidate `json:"movable"`
-	// Mirror is the 「国内镜像」 switch: the list, npm and Bun asked of
-	// mirrors in China first (settings.ChinaMirror)
-	Mirror bool `json:"mirror"`
 	// Registry is the npm registry plugins are installed from and npm's
 	// answers asked of, and where it came from (plugin.Registry)
 	Registry plugin.RegistryInUse `json:"registry"`
@@ -252,7 +249,7 @@ func registryJSON() plugin.RegistryInUse {
 }
 
 func pluginsState(ctx context.Context, w Windows) pluginsJSON {
-	s := pluginsJSON{Plugins: []pluginEntryJSON{}, Bun: plugin.HasBun(), BunVer: plugin.BunInUse(), Movable: provider.MoveCandidates(), Picker: w != nil && !isWeb(w), Mirror: settings.Shared().ChinaMirror, Registry: registryJSON(), Leftovers: plugin.Leftovers()}
+	s := pluginsJSON{Plugins: []pluginEntryJSON{}, Bun: plugin.HasBun(), BunVer: plugin.BunInUse(), Movable: provider.MoveCandidates(), Picker: w != nil && !isWeb(w), Registry: registryJSON(), Leftovers: plugin.Leftovers()}
 	if s.Leftovers == nil {
 		s.Leftovers = []plugin.Leftover{}
 	}
@@ -728,20 +725,6 @@ func pluginRoutes(mux *http.ServeMux, w Windows) {
 		c := plugin.CheckNow(ctx)
 		writeJSON(rw, map[string]any{"at": c.At, "plugins": c.Plugins, "state": pluginsState(ctx, w)})
 	})
-	// the 「国内镜像」 switch: what the page downloads (the list, npm's
-	// packages and answers, Bun) is asked of mirrors in China first
-	mux.HandleFunc("POST /api/plugins/mirror", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ On bool }
-		if err := json.NewDecoder(io.LimitReader(r.Body, 4<<10)).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		if err := setChinaMirror(in.On); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeJSON(rw, map[string]bool{"mirror": in.On})
-	})
 	// the npm registry set in magpie, "" for none of its own: an address
 	// that isn't an http(s) one is refused, not kept
 	mux.HandleFunc("POST /api/plugins/registry", func(rw http.ResponseWriter, r *http.Request) {
@@ -902,23 +885,6 @@ func pluginProviderByID(id string) (plugin.Provider, bool) {
 		}
 	}
 	return plugin.Provider{}, false
-}
-
-// setChinaMirror turns the 「国内镜像」 switch on or off; a plugin list
-// fetched from GitHub's slow address, or not at all, is asked again.
-func setChinaMirror(on bool) error {
-	s := settings.Load()
-	if s.ChinaMirror == on {
-		return nil
-	}
-	s.ChinaMirror = on
-	if err := settings.Save(s); err != nil {
-		return err
-	}
-	if on {
-		plugin.RefreshMarket()
-	}
-	return nil
 }
 
 // pluginAgentJSON is the agent a plugin adds, as its row says it.

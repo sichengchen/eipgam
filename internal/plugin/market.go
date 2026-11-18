@@ -240,9 +240,7 @@ func market(ctx context.Context) ([]Listing, error) {
 	ferr := errors.New("the list is off (MAGPIE_PLUGIN_MARKET=off)")
 	if src != "off" {
 		c, cancel := context.WithTimeout(ctx, 6*time.Second)
-		// the list names the packages installed: a copy of the very file
-		// may stand in for it (with 「国内镜像」), a proxy may not
-		b, err := fetchJSONFaithful(c, src, 1<<20)
+		b, err := fetchJSON(c, src, 1<<20)
 		cancel()
 		if err == nil {
 			l, perr := parseMarket(b)
@@ -268,8 +266,8 @@ func market(ctx context.Context) ([]Listing, error) {
 	return l, ferr
 }
 
-// RefreshMarket has the next Market fetch the list again, as with the
-// 「国内镜像」 switch just turned on; the one held is kept till then.
+// RefreshMarket has the next Market fetch the list again; the one held is
+// kept till then.
 func RefreshMarket() {
 	marketMu.Lock()
 	marketAt = time.Time{}
@@ -277,14 +275,6 @@ func RefreshMarket() {
 }
 
 func fetchJSON(ctx context.Context, u string, limit int64) ([]byte, error) {
-	return fetchJSONFrom(ctx, u, limit, source.Do)
-}
-
-func fetchJSONFaithful(ctx context.Context, u string, limit int64) ([]byte, error) {
-	return fetchJSONFrom(ctx, u, limit, source.DoFaithful)
-}
-
-func fetchJSONFrom(ctx context.Context, u string, limit int64, do func(*http.Client, *http.Request) (*http.Response, error)) ([]byte, error) {
 	// through plugin downloads' proxy, where Settings sets one
 	ctx = netproxy.Downloads(ctx)
 	req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
@@ -299,7 +289,7 @@ func fetchJSONFrom(ctx context.Context, u string, limit int64, do func(*http.Cli
 	// an environment token GitHub refuses is dropped for an anonymous
 	// request (till on Discord)
 	res, token, err := ghtoken.Do(req, githubAPI, func(r *http.Request) (*http.Response, error) {
-		return do(http.DefaultClient, r)
+		return source.Do(http.DefaultClient, r)
 	})
 	if err != nil {
 		return nil, err

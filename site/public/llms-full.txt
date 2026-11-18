@@ -8798,7 +8798,7 @@ Command Code, Cursor, Devin, Factory, Grok, Kiro, Xiaomi MiMo, Qoder, WorkBuddy,
 
 An error after the move comes from the plugin, which does the sign-in, models and requests.
 
-[Mirrors in China: faster magpie plugin, Bun and update downloads](https://usemagpie.ai/docs/mirrors)
+[Mirrors and proxies: installing and updating magpie behind a firewall](https://usemagpie.ai/docs/mirrors)
 
 ## FAQ
 
@@ -10266,20 +10266,9 @@ Related: [Get started](https://usemagpie.ai/docs/start), [magpie in Docker](http
 
 Source: https://usemagpie.ai/docs/mirrors
 
-# Mirrors in China: faster magpie plugin, Bun and update downloads
+# Mirrors and proxies: installing and updating magpie behind a firewall
 
-From China, npm and GitHub are often slow or unreachable when installing plugins. magpie can have those downloads asked of a mirror in China first; the mirror's file is the very same, checked the same way.
-
-## The Plugins page's Mirrors in China
-
-1. **Open the Plugins page..**
-2. **Turn on Mirrors in China..** The page's downloads then ask a mirror in China first and the official address after.
-
-- **npm** (plugin packages, versions and search): `registry.npmmirror.com`.
-- **Bun**: npmmirror's binary mirror.
-- **The plugin list**: jsDelivr (`cdn.jsdelivr.net/gh/magpie-community/plugins`).
-
-What the mirror hasn't copied yet is asked of the official address. npm's weekly download counts stay npmjs's own. `bun add` is pointed at npmmirror too, unless `BUN_CONFIG_REGISTRY` or `NPM_CONFIG_REGISTRY` names a registry already. The switch never sends anything through a proxy such as gh-proxy.
+Where usemagpie.ai and GitHub are slow or unreachable, the installer and `magpie update` can go through a proxy, or through a GitHub download mirror you choose. magpie names no mirror of its own, and the file is still checked against the official checksum.
 
 ## Installs and updates through a mirror or proxy
 
@@ -10308,40 +10297,22 @@ Two rows in the app's Settings decide where an update comes from. Neither needs 
 
 ### What a mirror's address is
 
-A mirror here is a GitHub download proxy: a site that fetches any github.com link put after its own address, as in `https://mirror.example/https://github.com/yetone/magpie-releases/releases/download/…`. Type only the part before `https://github.com`, a full `https://` address such as `https://mirror.example/`. Public GitHub download proxies work this way; `gh-proxy.com`, the one `MAGPIE_MIRRORS` falls back to, is one of them. magpie names no mirror of its own and vouches for none: whichever you use, the file is checked against usemagpie.ai's checksum and the release's signature, and one that doesn't match is not installed.
+A mirror here is a GitHub download proxy: a site that fetches any github.com link put after its own address, as in `https://mirror.example/https://github.com/yetone/magpie-releases/releases/download/…`. Type only the part before `https://github.com`, a full `https://` address such as `https://mirror.example/`. Public GitHub download proxies work this way. magpie names no mirror of its own and vouches for none: whichever you use, the file is checked against usemagpie.ai's checksum and the release's signature, and one that doesn't match is not installed.
 
 ### When to use one
 
-- An update stalls or fails with a timeout or `EOF`, and both usemagpie.ai and github.com are slow or blocked where you are (often in mainland China): set a mirror.
+- An update stalls or fails with a timeout or `EOF`, and both usemagpie.ai and github.com are slow or blocked where you are: set a mirror.
 - usemagpie.ai is slow and GitHub is fast: pick GitHub only, no mirror needed.
 - You have a proxy: put it in Network and sharing › App updates instead; a mirror is for when you have none.
 - A download that failed through the mirror says so, and offers to download from GitHub instead, which removes the mirror.
 
-## MAGPIE_MIRRORS: a mirror after a failure
-
-Another way is off by default. With `MAGPIE_MIRRORS=on`, the official source is tried first, and a mirror only after a network error, HTTP 429, HTTP 5xx or GitHub's rate-limit 403. The defaults are `registry.npmmirror.com` for npm and `gh-proxy.com` for GitHub; `MAGPIE_NPM_REGISTRY` and `MAGPIE_GITHUB_MIRROR` replace them:
-
-```
-MAGPIE_MIRRORS=on \
-MAGPIE_NPM_REGISTRY=https://registry.example.com \
-MAGPIE_GITHUB_MIRROR=https://gh.example magpie serve
-```
-
-The official source and the mirror share one request budget, so a hanging official source doesn't make the wait twice as long.
-
 ## Is a mirror safe
 
 - magpie's own update files are checked against a SHA-256 from usemagpie.ai, never from the mirror; a file that doesn't match is not installed.
-- Bun's zip is checked against Bun's SHA-256s, and a plugin package against the integrity npm gave.
-- Requests that carry credentials (`Authorization`, a cookie, an API key, a token in the URL) never use a mirror; they go to the official source alone.
-- Skill tarballs always use the official source.
-- npm metadata, plugin READMEs and search results and version checks are not checksummed; a mirror can report a different version.
+- Only magpie's own release files go through the mirror, as plain downloads: no request carrying a key, token or cookie does.
+- Everything else magpie downloads (plugins, Bun, skills, the masking models) comes from its official address, or from the npm registry you set for plugins.
 
 ## FAQ
-
-### Plugins install slowly in magpie. What helps?
-
-Turn on Mirrors in China on the Plugins page. The plugin list comes from jsDelivr, npm packages and Bun from npmmirror, and the official address after.
 
 ### A magpie update fails to download. What do I do?
 
@@ -10349,11 +10320,7 @@ Run magpie update --mirror , or magpie update mirror to keep it for every update
 
 ### Can a mirror see my API keys?
 
-No. Requests carrying Authorization, a cookie, an API key or a URL token never use a mirror; they go to the official source alone.
-
-### How is MAGPIE_MIRRORS different from the Mirrors in China switch?
-
-The switch has the Plugins page ask a mirror in China first. MAGPIE_MIRRORS=on asks the official source first and a mirror only after a network error, 429, 5xx or GitHub's rate limit.
+No. Only magpie's own release files go through a mirror, as plain downloads; no request carrying a key, token or cookie does.
 
 Related: [Get started](https://usemagpie.ai/docs/start), [Fixing common errors: 401, 429, 502, 504 and more](https://usemagpie.ai/docs/troubleshooting). Questions go to [Discord](https://discord.gg/vGSnD3ZKQF).
 
@@ -11247,7 +11214,7 @@ Agents now reach its models as `acme/acme-coder`, the same way as any other prov
 - **Bun..** magpie downloads Bun the first time a plugin is added, and runs every plugin on it. Bun runs TypeScript as is, so an entry can be `index.ts`.
 - **One host process..** Every plugin that is on loads into one Bun process, started the first time one is needed. magpie and the host talk over stdin and stdout, one JSON message a line. Anything a plugin prints, `console.log` and `process.stdout` included, is sent to stderr. magpie logs it as `plugin: …`.
 - **Installing..** An npm package is installed with `bun add`, with its install scripts left unrun, as OpenCode installs plugins. A dependency that needs a `postinstall` build won’t work.
-- Packages come from the npm registry you already use: the `registry=` in your `~/.npmrc`, `install.registry` in `~/.bunfig.toml`, or `NPM_CONFIG_REGISTRY` / `BUN_CONFIG_REGISTRY` in your shell, before the Mirrors in China switch. A token your `.npmrc` keeps for that registry is sent to it alone. To use another, change npm registry on Plugins → Discover, or run `magpie plugin registry <url>` (`default` goes back).
+- Packages come from the npm registry you already use: the `registry=` in your `~/.npmrc`, `install.registry` in `~/.bunfig.toml`, or `NPM_CONFIG_REGISTRY` / `BUN_CONFIG_REGISTRY` in your shell. A token your `.npmrc` keeps for that registry is sent to it alone. To use another, change npm registry on Plugins → Discover, or run `magpie plugin registry <url>` (`default` goes back).
 - A git repository is fetched by Bun: `github:owner/repo[#ref]`, `git+https://…` or `owner/repo`.
 - A path to a folder or file is loaded where it is.
 

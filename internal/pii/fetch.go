@@ -310,7 +310,6 @@ func get(ctx context.Context, url, part string, from int64, done *atomic.Int64) 
 	if from > 0 {
 		req.Header.Set("Range", "bytes="+strconv.FormatInt(from, 10)+"-")
 	}
-	// a mirror may serve it: what it serves is checked against the pin
 	res, err := source.Do(client, req)
 	if err != nil {
 		return 0, err

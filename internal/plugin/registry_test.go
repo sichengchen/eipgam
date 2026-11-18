@@ -12,13 +12,12 @@ import (
 	"testing"
 
 	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/source"
 	"github.com/yetone/magpie/internal/testenv"
 )
 
 // registryHome is a home of its own with no registry anywhere: none in
-// the environment, the login shell's, a bunfig or an .npmrc, the 「国内镜像」
-// switch off and nothing set in magpie.
+// the environment, the login shell's, a bunfig or an .npmrc, and nothing
+// set in magpie.
 func registryHome(t *testing.T) (home string, shell map[string]string) {
 	t.Helper()
 	home = t.TempDir()
@@ -29,10 +28,9 @@ func registryHome(t *testing.T) (home string, shell map[string]string) {
 		t.Setenv(k, "")
 	}
 	shell = map[string]string{}
-	le, china := loginEnv, source.China
+	le := loginEnv
 	loginEnv = func(k string) string { return shell[k] }
-	source.China = func() bool { return false }
-	t.Cleanup(func() { loginEnv, source.China = le, china })
+	t.Cleanup(func() { loginEnv = le })
 	return home, shell
 }
 
@@ -48,8 +46,7 @@ func writeFile(t *testing.T, path, body string) {
 
 // Each place a registry can be named, each before the ones after it:
 // magpie's own setting, the environment, the login shell, a bunfig, an
-// .npmrc, the 「国内镜像」 switch, npm's own (timwangdev on X). The switch
-// never comes before a registry the user named.
+// .npmrc, npm's own (timwangdev on X).
 func TestRegistryPrecedence(t *testing.T) {
 	home, shell := registryHome(t)
 	want := func(url, from string) {
@@ -59,8 +56,6 @@ func TestRegistryPrecedence(t *testing.T) {
 		}
 	}
 	want("https://registry.npmjs.org", FromDefault)
-	source.China = func() bool { return true }
-	want("https://registry.npmmirror.com", FromChina)
 	writeFile(t, filepath.Join(home, ".npmrc"), "# mine\nregistry = \"https://npm.corp.example/repo/\"\n")
 	want("https://npm.corp.example/repo", FromNPMRC)
 	writeFile(t, filepath.Join(home, ".bunfig.toml"), "[install]\nregistry = { url = \"https://bun.corp.example/\", token = \"x\" }\n")
@@ -106,9 +101,8 @@ func TestSetRegistryRefusesWhatIsntOne(t *testing.T) {
 }
 
 // bun is told the registry where it wouldn't find it itself: magpie's
-// setting, over the environment's; the login shell's; npmmirror with the
-// switch on. A registry in the user's .npmrc or bunfig is bun's to read,
-// and the switch's mirror is never put over it.
+// setting, over the environment's; the login shell's. npm's own, and a
+// registry in the user's .npmrc or bunfig, are bun's to read.
 func TestBunTakesTheUsersRegistry(t *testing.T) {
 	home, shell := registryHome(t)
 	reg := func() string {
@@ -120,9 +114,8 @@ func TestBunTakesTheUsersRegistry(t *testing.T) {
 		}
 		return got
 	}
-	source.China = func() bool { return true }
-	if r := reg(); r != "https://registry.npmmirror.com/" {
-		t.Fatalf("switch on: %q", r)
+	if r := reg(); r != "" {
+		t.Fatalf("with no registry named, bun is told %q", r)
 	}
 	writeFile(t, filepath.Join(home, ".npmrc"), "registry=https://npm.corp.example/\n")
 	if r := reg(); r != "" {
@@ -147,10 +140,9 @@ func TestBunTakesTheUsersRegistry(t *testing.T) {
 // magpie asks npm's questions (a package's newest version, its README,
 // the search) of the user's registry, with the token their .npmrc keeps
 // for that host and for no other; a scope's own registry is asked of its
-// packages. npm's own is never asked, with the switch on or off.
+// packages. npm's own is never asked.
 func TestLookupsAskTheUsersRegistry(t *testing.T) {
 	home, _ := registryHome(t)
-	source.China = func() bool { return true }
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	var mu sync.Mutex
 	var seen []string

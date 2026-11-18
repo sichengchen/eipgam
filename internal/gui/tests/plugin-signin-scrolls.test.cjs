@@ -25,7 +25,7 @@ subs.push({ id: "zzlast", pid: "zzlast", name: "Last One", icon: "generic", spec
 
 function server(lang) {
   const providers = { providers: [], presets: [], excluded: [], gateway: { running: true, window: true }, plugins: subs };
-  const plugins = { plugins: subs.map((x) => ({ spec: x.spec, providers: [x.name], named: true, version: "0.1.0", moved: [] })), bun: true, bunVersion: "1.3.0", picker: false, mirror: false };
+  const plugins = { plugins: subs.map((x) => ({ spec: x.spec, providers: [x.name], named: true, version: "0.1.0", moved: [] })), bun: true, bunVersion: "1.3.0", picker: false };
   return async (route) => {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });

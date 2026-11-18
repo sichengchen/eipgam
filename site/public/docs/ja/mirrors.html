@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>magpie の中国のミラー：プラグイン・Bun・アップデートのダウンロードを速く（npmmirror・jsDelivr） · magpie</title>
-<meta name="description" content="中国からプラグイン・Bun・アップデートのダウンロードが遅い、失敗する？プラグインページの中国のミラーをオンにすると npmmirror と jsDelivr に先に聞きます。インストーラーと magpie update は --proxy と --mirror を受け付け、ファイルは公式のチェックサムで確かめます。">
+<title>magpie のミラーとプロキシ：制限のあるネットワークでのインストールとアップデート · magpie</title>
+<meta name="description" content="magpie のインストールやアップデートのダウンロードが遅い、失敗する？インストーラーと magpie update は --proxy と --mirror を受け付け、設定にはアプリのアップデート用のミラーを保存できます。ファイルは公式のチェックサムで確かめます。">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fafafa">
 <script>
@@ -34,8 +34,8 @@
 <link rel="canonical" href="https://usemagpie.ai/docs/ja/mirrors">
 <link rel="stylesheet" href="/docs.css">
 <meta property="og:site_name" content="magpie">
-<meta property="og:title" content="中国のミラー：magpie のプラグイン・Bun・アップデートを速くダウンロード">
-<meta property="og:description" content="中国からプラグイン・Bun・アップデートのダウンロードが遅い、失敗する？プラグインページの中国のミラーをオンにすると npmmirror と jsDelivr に先に聞きます。インストーラーと magpie update は --proxy と --mirror を受け付け、ファイルは公式のチェックサムで確かめます。">
+<meta property="og:title" content="ミラーとプロキシ：制限のあるネットワークで magpie をインストール・アップデート">
+<meta property="og:description" content="magpie のインストールやアップデートのダウンロードが遅い、失敗する？インストーラーと magpie update は --proxy と --mirror を受け付け、設定にはアプリのアップデート用のミラーを保存できます。ファイルは公式のチェックサムで確かめます。">
 <meta property="og:image" content="https://usemagpie.ai/img/og.png">
 <meta property="og:url" content="https://usemagpie.ai/docs/ja/mirrors">
 <meta name="twitter:card" content="summary_large_image">
@@ -45,8 +45,8 @@
  "@graph": [
   {
    "@type": "TechArticle",
-   "headline": "中国のミラー：magpie のプラグイン・Bun・アップデートを速くダウンロード",
-   "description": "中国からプラグイン・Bun・アップデートのダウンロードが遅い、失敗する？プラグインページの中国のミラーをオンにすると npmmirror と jsDelivr に先に聞きます。インストーラーと magpie update は --proxy と --mirror を受け付け、ファイルは公式のチェックサムで確かめます。",
+   "headline": "ミラーとプロキシ：制限のあるネットワークで magpie をインストール・アップデート",
+   "description": "magpie のインストールやアップデートのダウンロードが遅い、失敗する？インストーラーと magpie update は --proxy と --mirror を受け付け、設定にはアプリのアップデート用のミラーを保存できます。ファイルは公式のチェックサムで確かめます。",
    "inLanguage": "ja",
    "url": "https://usemagpie.ai/docs/ja/mirrors",
    "about": {
@@ -66,14 +66,6 @@
    "mainEntity": [
     {
      "@type": "Question",
-     "name": "magpie でプラグインのインストールが遅いときは？",
-     "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "プラグインページで中国のミラーをオンにします。プラグイン一覧は jsDelivr、npm パッケージと Bun は npmmirror から取り、だめなら公式のアドレスを使います。"
-     }
-    },
-    {
-     "@type": "Question",
      "name": "magpie のアップデートがダウンロードできないときは？",
      "acceptedAnswer": {
       "@type": "Answer",
@@ -85,15 +77,7 @@
      "name": "ミラーに API キーが見えますか？",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "見えません。Authorization・Cookie・API キー・URL のトークンを含むリクエストはミラーを使わず、公式のソースにだけ送ります。"
-     }
-    },
-    {
-     "@type": "Question",
-     "name": "MAGPIE_MIRRORS と中国のミラーのスイッチの違いは？",
-     "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "スイッチはプラグインページのダウンロードを中国のミラーに先に聞きます。MAGPIE_MIRRORS=on は公式を先に試し、ネットワークエラー・429・5xx・GitHub のレート制限のときだけミラーを使います。"
+      "text": "見えません。ミラーを通るのは magpie 自身のリリースファイルだけで、ふつうのダウンロードです。キー・トークン・Cookie を含むリクエストはミラーを通りません。"
      }
     }
    ]
@@ -116,7 +100,7 @@
     {
      "@type": "ListItem",
      "position": 3,
-     "name": "中国のミラー：magpie のプラグイン・Bun・アップデートを速くダウンロード",
+     "name": "ミラーとプロキシ：制限のあるネットワークで magpie をインストール・アップデート",
      "item": "https://usemagpie.ai/docs/ja/mirrors"
     }
    ]
@@ -167,26 +151,17 @@
 
 <main class="wrap doc">
   <aside class="toc">
-    <p>中国のミラー</p>
+    <p>ミラーとプロキシ</p>
     <a href="#overview">概要</a>
-    <a href="#plugins">プラグインページの中国のミラー</a>
     <a href="#update">インストールとアップデートをミラーやプロキシ経由で</a>
     <a href="#settings">ダウンロード元とアップデート元</a>
-    <a href="#fallback">MAGPIE_MIRRORS：失敗したらミラー</a>
     <a href="#safe">ミラーは安全か</a>
   </aside>
 
   <article>
     <p class="eyebrow" id="overview">ドキュメント · ガイド</p>
-    <h1>中国のミラー：magpie のプラグイン・Bun・アップデートを速くダウンロード</h1>
-    <p class="lede">中国からプラグインを入れるとき、npm や GitHub はよく遅く、つながらないこともあります。magpie はそのダウンロードを中国のミラーに先に聞けます。ミラーのファイルは公式と同じもので、同じように確かめます。</p>
-    <h2 id="plugins"><a class="anchor" href="#plugins">プラグインページの中国のミラー</a></h2>
-    <ol class="steps">
-      <li><b><span class="ui">プラグイン</span> ページを開く。</b></li>
-      <li><b><span class="ui">中国のミラー</span> をオンにする。</b>そのページのダウンロードは中国のミラーに先に聞き、だめなら公式のアドレスを使います。</li>
-    </ol>
-    <ul><li><strong>npm</strong>（プラグインのパッケージ・バージョン・検索）：<code>registry.npmmirror.com</code>。</li><li><strong>Bun</strong>：npmmirror のバイナリミラー。</li><li><strong>プラグイン一覧</strong>：jsDelivr（<code>cdn.jsdelivr.net/gh/magpie-community/plugins</code>）。</li></ul>
-    <p>ミラーにまだないものは公式のアドレスから取ります。npm の週間ダウンロード数は npmjs のものです。<code>bun add</code> も npmmirror に向けます。ただし <code>BUN_CONFIG_REGISTRY</code> か <code>NPM_CONFIG_REGISTRY</code> がすでにレジストリを指定していればそのままです。このスイッチは gh-proxy のようなプロキシには何も送りません。</p>
+    <h1>ミラーとプロキシ：制限のあるネットワークで magpie をインストール・アップデート</h1>
+    <p class="lede">usemagpie.ai や GitHub が遅い、届かないとき、インストーラーと <code>magpie update</code> はプロキシ経由や、自分で選んだ GitHub ダウンロードミラー経由で取得できます。magpie は独自のミラーを持たず、ファイルは公式のチェックサムで確かめます。</p>
     <h2 id="update"><a class="anchor" href="#update">インストールとアップデートをミラーやプロキシ経由で</a></h2>
     <p>インストーラーと <code>magpie update</code> はどちらも <code>--proxy</code>（http・https・socks5・socks5h。<code>MAGPIE_PROXY</code>・<code>HTTPS_PROXY</code>・<code>ALL_PROXY</code> でも可）と、リリースの github.com URL の前に付ける GitHub ダウンロードミラー <code>--mirror</code>（<code>MAGPIE_MIRROR</code> でも可）を受け付けます。</p>
     <div class="code"><span class="lang">ターミナル</span><button class="copy" data-copy="mi-update">コピー</button><pre id="mi-update">curl -fsSL https://usemagpie.ai/install.sh | sh -s -- --proxy http://127.0.0.1:7890
@@ -205,27 +180,17 @@ magpie update mirror off</pre></div>
       <tr><td></td><td><span class="ui">GitHub のみ</span></td><td>github.com だけ（ミラーがあればミラー経由）。usemagpie.ai には行きません。</td></tr>
     </table></div>
     <h3>ミラーのアドレスとは</h3>
-    <p>ここでのミラーは GitHub ダウンロードプロキシです。自分のアドレスの後ろに github.com のリンクをそのまま付けると、そのファイルを取ってきます（例：<code>https://mirror.example/https://github.com/yetone/magpie-releases/releases/download/…</code>）。入力するのは <code>https://github.com</code> より前の部分、<code>https://mirror.example/</code> のような完全な <code>https://</code> アドレスです。公開の GitHub ダウンロードプロキシはこの形で、<code>MAGPIE_MIRRORS</code> が使う <code>gh-proxy.com</code> もその一つです。magpie は独自のミラーを持たず、どれも保証しません。どのミラーでも、ファイルは usemagpie.ai のチェックサムとリリースの署名で確かめられ、一致しなければインストールされません。</p>
+    <p>ここでのミラーは GitHub ダウンロードプロキシです。自分のアドレスの後ろに github.com のリンクをそのまま付けると、そのファイルを取ってきます（例：<code>https://mirror.example/https://github.com/yetone/magpie-releases/releases/download/…</code>）。入力するのは <code>https://github.com</code> より前の部分、<code>https://mirror.example/</code> のような完全な <code>https://</code> アドレスです。公開の GitHub ダウンロードプロキシはこの形です。magpie は独自のミラーを持たず、どれも保証しません。どのミラーでも、ファイルは usemagpie.ai のチェックサムとリリースの署名で確かめられ、一致しなければインストールされません。</p>
     <h3>ミラーを使うとき</h3>
-    <ul><li>アップデートが止まる、タイムアウトや <code>EOF</code> で失敗する、そして usemagpie.ai も github.com も遅いか届かない（中国本土でよくあります）：ミラーを設定します。</li><li>usemagpie.ai が遅く GitHub が速い：<span class="ui">GitHub のみ</span> を選びます。ミラーは不要です。</li><li>プロキシがある：<span class="ui">ネットワークと共有 › アプリのアップデート</span> に入れます。ミラーはプロキシがないときのものです。</li><li>ミラー経由のダウンロードが失敗すると、ミラーのせいだと表示され、GitHub から取り直す（ミラーを外す）ボタンが出ます。</li></ul>
-    <h2 id="fallback"><a class="anchor" href="#fallback">MAGPIE_MIRRORS：失敗したらミラー</a></h2>
-    <p>もう 1 つの方法は既定でオフです。<code>MAGPIE_MIRRORS=on</code> にすると、まず公式のソースを試し、ネットワークエラー・HTTP 429・HTTP 5xx・GitHub のレート制限の 403 のときだけミラーを使います。既定のミラーは npm が <code>registry.npmmirror.com</code>、GitHub が <code>gh-proxy.com</code> で、<code>MAGPIE_NPM_REGISTRY</code> と <code>MAGPIE_GITHUB_MIRROR</code> で置き換えられます。</p>
-    <div class="code"><span class="lang">ターミナル</span><button class="copy" data-copy="mi-env">コピー</button><pre id="mi-env">MAGPIE_MIRRORS=on \
-MAGPIE_NPM_REGISTRY=https://registry.example.com \
-MAGPIE_GITHUB_MIRROR=https://gh.example magpie serve</pre></div>
-    <p>公式のソースとミラーは 1 つのリクエスト時間を分け合うので、公式が止まっても待ち時間は倍になりません。</p>
+    <ul><li>アップデートが止まる、タイムアウトや <code>EOF</code> で失敗する、そして usemagpie.ai も github.com も遅いか届かない：ミラーを設定します。</li><li>usemagpie.ai が遅く GitHub が速い：<span class="ui">GitHub のみ</span> を選びます。ミラーは不要です。</li><li>プロキシがある：<span class="ui">ネットワークと共有 › アプリのアップデート</span> に入れます。ミラーはプロキシがないときのものです。</li><li>ミラー経由のダウンロードが失敗すると、ミラーのせいだと表示され、GitHub から取り直す（ミラーを外す）ボタンが出ます。</li></ul>
     <h2 id="safe"><a class="anchor" href="#safe">ミラーは安全か</a></h2>
-    <ul><li>magpie 自身のアップデートは、ミラーではなく usemagpie.ai の SHA-256 で確かめます。合わないファイルはインストールしません。</li><li>Bun の zip は Bun の SHA-256 で、プラグインのパッケージは npm が示した integrity で確かめます。</li><li>認証情報を含むリクエスト（<code>Authorization</code>・Cookie・API キー・URL 内のトークン）はミラーを使わず、公式のソースにだけ送ります。</li><li>スキルの tarball は常に公式のソースから取ります。</li><li>npm のメタデータ、プラグインの README と検索結果、バージョン確認にはチェックサムがなく、ミラーが違うバージョンを返すことがあります。</li></ul>
+    <ul><li>magpie 自身のアップデートは、ミラーではなく usemagpie.ai の SHA-256 で確かめます。合わないファイルはインストールしません。</li><li>ミラーを通るのは magpie 自身のリリースファイルだけで、ふつうのダウンロードです。キー・トークン・Cookie を含むリクエストはミラーを通りません。</li><li>magpie がダウンロードするほかのもの（プラグイン・Bun・スキル・プライバシーマスキングのモデル）は、それぞれ公式のアドレスから取ります。プラグインは設定した npm レジストリからも取れます。</li></ul>
 
     <h2 id="faq"><a class="anchor" href="#faq">よくある質問</a></h2>
-    <h3>magpie でプラグインのインストールが遅いときは？</h3>
-    <p>プラグインページで中国のミラーをオンにします。プラグイン一覧は jsDelivr、npm パッケージと Bun は npmmirror から取り、だめなら公式のアドレスを使います。</p>
     <h3>magpie のアップデートがダウンロードできないときは？</h3>
     <p>magpie update --mirror <プレフィックス> を実行するか、magpie update mirror <プレフィックス> で以後のアップデートすべてに使います。--proxy でプロキシ経由にもできます。チェックサムは常に usemagpie.ai のものです。</p>
     <h3>ミラーに API キーが見えますか？</h3>
-    <p>見えません。Authorization・Cookie・API キー・URL のトークンを含むリクエストはミラーを使わず、公式のソースにだけ送ります。</p>
-    <h3>MAGPIE_MIRRORS と中国のミラーのスイッチの違いは？</h3>
-    <p>スイッチはプラグインページのダウンロードを中国のミラーに先に聞きます。MAGPIE_MIRRORS=on は公式を先に試し、ネットワークエラー・429・5xx・GitHub のレート制限のときだけミラーを使います。</p>
+    <p>見えません。ミラーを通るのは magpie 自身のリリースファイルだけで、ふつうのダウンロードです。キー・トークン・Cookie を含むリクエストはミラーを通りません。</p>
 
     <p style="margin-top:48px">関連ページ：<a href="/docs/ja/start">はじめに</a>、<a href="/docs/ja/troubleshooting">よくあるエラーの直し方：401・429・502・504 など</a>。質問は <a href="https://discord.gg/vGSnD3ZKQF">Discord</a> へどうぞ。</p>
   </article>

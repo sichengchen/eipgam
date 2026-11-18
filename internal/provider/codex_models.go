@@ -197,9 +197,8 @@ var codexPublishedCache struct {
 }
 
 // codexPublished is npm's latest Codex CLI as last read, "" before it is:
-// asked in the background at most every codexPublishedEvery, through the
-// mirrors when npm doesn't answer, and never from a test binary unless a
-// test points codexNpmLatest at a fake.
+// asked in the background at most every codexPublishedEvery, and never
+// from a test binary unless a test points codexNpmLatest at a fake.
 func codexPublished() string {
 	codexPublishedCache.Lock()
 	defer codexPublishedCache.Unlock()

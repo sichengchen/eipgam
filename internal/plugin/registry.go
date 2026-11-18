@@ -27,7 +27,6 @@ const (
 	FromShell   = "shell"   // the login shell's, which magpie opened from the Dock doesn't have
 	FromBunfig  = "bunfig"  // install.registry in a .bunfig.toml
 	FromNPMRC   = "npmrc"   // registry= in an .npmrc
-	FromChina   = "china"   // the 「国内镜像」 switch: npmmirror
 	FromDefault = "default" // npm's own
 )
 
@@ -51,18 +50,14 @@ var loginEnv = proc.LoginEnvKnown
 // Registry is the npm registry in use: the one set in magpie, then one the
 // user's own setup names (magpie's environment, the login shell's, a
 // .bunfig.toml, an .npmrc: a registry of the user's own, which bun reads
-// too), then npmmirror with the 「国内镜像」 switch on, then npm's own. A
-// registry the user set is never put behind magpie's switch (timwangdev
-// on X: plugins from a custom npm registry).
+// too), then npm's own (timwangdev on X: plugins from a custom npm
+// registry).
 func Registry() RegistryInUse {
 	if u, err := CleanRegistry(settings.Shared().NPMRegistry); err == nil && u != "" {
 		return RegistryInUse{URL: u, From: FromMagpie}
 	}
 	if r, ok := userRegistry(); ok {
 		return r
-	}
-	if source.China() {
-		return RegistryInUse{URL: source.NPMMirror, From: FromChina}
 	}
 	return RegistryInUse{URL: npmDefault, From: FromDefault}
 }
@@ -130,7 +125,7 @@ func CleanRegistry(u string) (string, error) {
 	}
 	p, err := url.Parse(u)
 	if err != nil || (p.Scheme != "http" && p.Scheme != "https") || p.Host == "" || p.User != nil || p.RawQuery != "" || p.Fragment != "" {
-		return "", fmt.Errorf("%q isn't a registry's address: give an http:// or https:// one, like https://registry.npmmirror.com", u)
+		return "", fmt.Errorf("%q isn't a registry's address: give an http:// or https:// one, like https://registry.example.com", u)
 	}
 	return strings.TrimRight(u, "/"), nil
 }
@@ -157,13 +152,12 @@ func SetRegistry(u string) (RegistryInUse, error) {
 }
 
 // registryEnv is the registry bun installs from, given the environment it
-// runs in: the one set in magpie, the login shell's (which env lacks) and
-// npmmirror with the switch on are told to it; one env, a bunfig or an
-// .npmrc names bun reads itself, and the switch's mirror is not put over it.
+// runs in: the one set in magpie and the login shell's (which env lacks)
+// are told to it; one env, a bunfig or an .npmrc names bun reads itself.
 func registryEnv(env []string) []string {
 	r := Registry()
 	switch r.From {
-	case FromMagpie, FromShell, FromChina:
+	case FromMagpie, FromShell:
 	default:
 		return nil
 	}
@@ -260,8 +254,7 @@ func npmrcs() []npmrc {
 // npmBase is the registry magpie asks of package name, and the token an
 // .npmrc keeps for it: a scope's own registry (@scope:registry=) for a
 // package of that scope (bun installs it from there whatever the default
-// registry is); Registry's otherwise. official is whether it is npm's own (which the 「国内镜像」
-// switch may put npmmirror before, source.Do).
+// registry is); Registry's otherwise. official is whether it is npm's own.
 func npmBase(name string) (base, token string, official bool) {
 	r := Registry()
 	rcs := npmrcs()
@@ -272,8 +265,7 @@ func npmBase(name string) (base, token string, official bool) {
 			}
 		}
 	}
-	switch r.From {
-	case FromDefault, FromChina:
+	if r.From == FromDefault {
 		return npmRegistry, "", true
 	}
 	return r.URL, tokenFor(rcs, r.URL), false
@@ -301,9 +293,9 @@ func tokenFor(rcs []npmrc, base string) string {
 }
 
 // fetchNPM is what the registry in use says at suffix (/<package>,
-// /<package>/latest), for package name. npm's own is asked as before (its
-// mirror in China first with the switch on); a registry the user named is
-// asked alone, with the token their .npmrc keeps for it and no other.
+// /<package>/latest), for package name. npm's own is asked without a
+// token; a registry the user named is asked with the token their .npmrc
+// keeps for it and no other.
 func fetchNPM(ctx context.Context, name, suffix string, limit int64) ([]byte, error) {
 	base, token, official := npmBase(name)
 	if official {
@@ -313,7 +305,7 @@ func fetchNPM(ctx context.Context, name, suffix string, limit int64) ([]byte, er
 }
 
 // fetchRegistry gets u from a registry of the user's, with its token; the
-// token never goes to any other address (a mirror, a redirect elsewhere).
+// token never goes to any other address (a redirect elsewhere).
 func fetchRegistry(ctx context.Context, u, token string, limit int64) ([]byte, error) {
 	ctx = netproxy.Downloads(ctx) // plugin downloads' proxy
 	req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
@@ -335,7 +327,7 @@ func fetchRegistry(ctx context.Context, u, token string, limit int64) ([]byte, e
 		}
 		return nil
 	}
-	res, err := source.DoOfficial(&c, req)
+	res, err := source.Do(&c, req)
 	if err != nil {
 		return nil, err
 	}

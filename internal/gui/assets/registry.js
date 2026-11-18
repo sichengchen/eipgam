@@ -1,6 +1,6 @@
 // The Plugins page's npm registry row: the registry plugins are installed
 // from and npm is asked of, and where it came from (the user's .npmrc,
-// bunfig or shell, the 「国内镜像」 switch, npm's own); one set here comes
+// bunfig or shell, npm's own); one set here comes
 // before all of them (timwangdev on X). plugins.js imports this when
 // Discover draws the row, so it weighs nothing on the core. The row is
 // plugins.js's box, kept across its redraws, and drawn here alone: a draft
@@ -15,7 +15,6 @@
       case "env": return t("from {name}", { name: r.var });
       case "shell": return t("from your shell's {name}", { name: r.var });
       case "bunfig": case "npmrc": return t("from {name}", { name: r.path });
-      case "china": return t("Mirrors in China");
     }
     return t("npm's own");
   }
@@ -61,7 +60,7 @@
     }
     const i = el("input", "pm-minput pm-reg-input");
     i.value = draft;
-    i.placeholder = "https://registry.npmmirror.com";
+    i.placeholder = "https://registry.example.com";
     i.spellcheck = false;
     i.autocomplete = "off";
     i.setAttribute("aria-label", t("npm registry"));

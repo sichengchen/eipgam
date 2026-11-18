@@ -18,8 +18,8 @@ import (
 // community repo's `tagged` workflow reads them every half hour instead,
 // onto its dist branch (scripts/tagged.mjs there, the same reading as
 // readTagged), and usemagpie.ai passes the file on. magpie asks there
-// first, then the dist branch itself (through the 「国内镜像」 jsDelivr copy
-// with the switch on), and reads GitHub only when neither answers.
+// first, then the dist branch itself, and reads GitHub only when neither
+// answers.
 
 // catalogURLs is where the list is asked, in order; moved by tests.
 // MAGPIE_PLUGIN_CATALOG puts one address in front, and "off" keeps to

@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               { spec: NEW, providers: [], version: "0.1.0", moved: [] },
               { spec: EMPTY, providers: [], named: true, version: "0.1.0", moved: [] },
             ],
-            bun: true, bunVersion: "1.3.0", picker: false, mirror: false,
+            bun: true, bunVersion: "1.3.0", picker: false,
           },
           providers: { providers: [], gateway: { running: true } },
         };

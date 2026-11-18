@@ -5,9 +5,8 @@
 // which a check of a few repositories, or a network shared with others,
 // uses up; with a token it answers 5,000 an hour. The token is the one set
 // in Settings (GitHubToken), else GITHUB_TOKEN or GH_TOKEN from the
-// environment. It goes to GitHub's API's host alone, never to codeload, raw
-// files or a mirror (source.Do sends no request with Authorization to one),
-// and is never written to a log or an error. The library's skills and the
+// environment. It goes to GitHub's API's host alone, never to codeload or
+// raw files, and is never written to a log or an error. The library's skills and the
 // Plugins page's git plugins both ask GitHub through here (#1942).
 //
 // A token GitHub refuses (401) is one that no longer reads: the request is
@@ -117,8 +116,9 @@ func SettingsRefused() (time.Time, bool) {
 func Do(req *http.Request, api string, send func(*http.Request) (*http.Response, error)) (*http.Response, bool, error) {
 	t, from := authorize(req, api)
 	resp, err := send(req)
-	// a mirror answers a request sent it without the token
-	// (source.Do), and its 401 isn't GitHub refusing the token
+	// an answer to a request that went without the token (a redirect
+	// to another host drops it) didn't carry it, and its 401 isn't
+	// GitHub refusing the token
 	if t != "" && err == nil && resp.Request != nil && resp.Request.Header.Get("Authorization") == "" {
 		t = ""
 	}

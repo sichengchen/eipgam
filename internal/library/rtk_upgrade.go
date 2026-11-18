@@ -497,8 +497,8 @@ var rtkArch = runtime.GOARCH
 
 // installRTKWindowsRelease replaces bin with rtk.exe out of rtk's Windows
 // release v version (#2006). The zip and the checksums.txt it is checked
-// against both come from rtk's own release (source.DoOfficial), so a
-// download that doesn't match is a real failure and nothing is replaced.
+// against both come from rtk's own release (rtkFetch), so a download that
+// doesn't match is a real failure and nothing is replaced.
 func installRTKWindowsRelease(version, bin string) error {
 	const asset = "rtk-x86_64-pc-windows-msvc.zip"
 	base := rtkDownloadBase + "/v" + version + "/"
@@ -524,8 +524,8 @@ func installRTKWindowsRelease(version, bin string) error {
 	return replaceRTKBinary(bin, exe)
 }
 
-// rtkFetch is a release file from its official address (source.DoOfficial:
-// the file's checksum must come from the same trusted place as the file).
+// rtkFetch is a release file from its official address (source.Do: the
+// file's checksum must come from the same trusted place as the file).
 func rtkFetch(url string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -533,7 +533,7 @@ func rtkFetch(url string) ([]byte, error) {
 	}
 	req.Header.Set("User-Agent", "magpie")
 	c := &http.Client{Timeout: 5 * time.Minute}
-	resp, err := source.DoOfficial(c, req)
+	resp, err := source.Do(c, req)
 	if err != nil {
 		return nil, err
 	}

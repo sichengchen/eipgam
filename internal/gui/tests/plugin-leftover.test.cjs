@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               asked: [],
               plugins: {
                 plugins: installed ? [{ spec: "opencode-copilot-auth", providers: ["GitHub Copilot"], named: true, version: "0.1.0", moved: [] }] : [],
-                bun: true, bunVersion: "1.4.2", picker: false, mirror: false,
+                bun: true, bunVersion: "1.4.2", picker: false,
                 leftovers: [{ name: LEFT, spec: "github:msitarzewski/agency-agents" }],
               },
             };

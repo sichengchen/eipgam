@@ -275,7 +275,7 @@ func fetchBlob(c *http.Client, src Source, path, sha, dst string, exec bool) err
 		if accept != "" {
 			req.Header.Set("Accept", accept)
 		}
-		resp, t, err := doGitHub(req, func(r *http.Request) (*http.Response, error) { return source.DoOfficial(c, r) })
+		resp, t, err := doGitHub(req, func(r *http.Request) (*http.Response, error) { return source.Do(c, r) })
 		token = t
 		return resp, err
 	}

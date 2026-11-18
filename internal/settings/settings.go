@@ -1020,16 +1020,10 @@ type Settings struct {
 	CodexAsyncCompact bool `json:"codexAsyncCompact,omitempty"`
 	// CodexAsyncCompactPercent is that share, 1–100; 0 is Codex's own, 65.
 	CodexAsyncCompactPercent int `json:"codexAsyncCompactPercent,omitempty"`
-	// ChinaMirror is the Plugins page's 「国内镜像」 switch: the plugin list,
-	// npm (the plugins' packages and what npm says of them) and Bun's
-	// downloads are asked of mirrors in China first, and of their official
-	// addresses after (see source.China).
-	ChinaMirror bool `json:"chinaMirror,omitempty"`
 	// NPMRegistry is the npm registry set on the Plugins page or with
 	// `magpie plugin registry`: plugins are installed from it and npm's
 	// answers asked of it, before a registry the user's .npmrc, bunfig or
-	// shell names and before the 「国内镜像」 switch (plugin.Registry).
-	// "" leaves it to those.
+	// shell names (plugin.Registry). "" leaves it to those.
 	NPMRegistry string `json:"npmRegistry,omitempty"`
 	// TextSize is how large the window's and the tray panel's pages are
 	// drawn, in percent (one of TextSizes): the webviews' own zoom, as a

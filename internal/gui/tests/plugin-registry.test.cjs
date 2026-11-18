@@ -22,7 +22,7 @@ const NPMRC = { url: "https://npm.corp.example/repo", from: "npmrc", path: "~/.n
 
 function server(lang, asked) {
   let registry = { ...NPMRC };
-  const state = () => ({ bun: true, bunVersion: "1.3.0", plugins: [], mirror: true, registry });
+  const state = () => ({ bun: true, bunVersion: "1.3.0", plugins: [], registry });
   return async (route) => {
     const url = new URL(route.request().url());
     const json = (data, status) => route.fulfill({ json: data, status });
@@ -38,7 +38,7 @@ function server(lang, asked) {
     if (url.pathname === "/api/plugins/registry") {
       const { url: u } = body();
       asked.push(u);
-      if (u && !/^https?:\/\/[^/]/.test(u)) return json({ error: `"${u}" isn't a registry's address: give an http:// or https:// one, like https://registry.npmmirror.com` }, 400);
+      if (u && !/^https?:\/\/[^/]/.test(u)) return json({ error: `"${u}" isn't a registry's address: give an http:// or https:// one, like https://registry.example.com` }, 400);
       registry = u ? { url: u.replace(/\/+$/, ""), from: "magpie" } : { ...NPMRC };
       return json({ registry });
     }
@@ -97,15 +97,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.ok(await input.isVisible(), "a refused address stays in the field");
           assert.equal(await input.inputValue(), "ftp://npm.example");
 
-          await input.fill("https://registry.npmmirror.com/");
+          await input.fill("https://registry.example.com/");
           await row.locator("button", { hasText: w.save }).click();
           await row.locator(".pm-reg-from", { hasText: w.here }).waitFor();
-          assert.equal((await row.locator(".pm-reg-url").innerText()).trim(), "https://registry.npmmirror.com");
+          assert.equal((await row.locator(".pm-reg-url").innerText()).trim(), "https://registry.example.com");
           const def = row.locator("button", { hasText: w.def });
           await def.click();
           await row.locator(".pm-reg-from", { hasText: w.from }).waitFor();
           assert.equal(await def.count(), 0);
-          assert.deepEqual(asked, ["ftp://npm.example", "https://registry.npmmirror.com/", ""]);
+          assert.deepEqual(asked, ["ftp://npm.example", "https://registry.example.com/", ""]);
           assert.deepEqual(errors, []);
           await page.context().close();
         }

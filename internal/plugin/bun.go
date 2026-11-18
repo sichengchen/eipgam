@@ -37,8 +37,8 @@ import (
 const BunVersion = "1.4.2"
 
 // bunSums are the SHA-256s of BunVersion's builds, from Bun's own
-// SHASUMS256.txt. They let the default Bun be downloaded through a mirror
-// when Bun's GitHub release page can't be reached.
+// SHASUMS256.txt. They check the default Bun's zip without asking for
+// that file.
 var bunSums = map[string]string{
 	"bun-darwin-aarch64.zip":             "90987a3a16d7db556d886ac3d551e7b6d3edf0a1cf43acaed622e8676be1d12f",
 	"bun-darwin-x64.zip":                 "80520d7e17526308c9185d261679ac6d27798d3803a0e9f7ff9121ab8affb012",
@@ -283,7 +283,7 @@ func downloadBun(ctx context.Context, version, exe string) error {
 	base := bunRelease + "/bun-v" + version + "/"
 	want := bunChecksum(version, target)
 	if want == "" {
-		sums, err := getURLOfficial(ctx, base+"SHASUMS256.txt", 1<<20)
+		sums, err := getURL(ctx, base+"SHASUMS256.txt", 1<<20)
 		if err != nil {
 			return err
 		}
@@ -340,22 +340,14 @@ func downloadBun(ctx context.Context, version, exe string) error {
 	return fmt.Errorf("%s.zip has no %s", target, bunExe())
 }
 
-func getURL(ctx context.Context, url string, limit int64) ([]byte, error) {
-	return getURLFrom(ctx, url, limit, true)
-}
-
-func getURLOfficial(ctx context.Context, url string, limit int64) ([]byte, error) {
-	return getURLFrom(ctx, url, limit, false)
-}
-
-// getURLFrom reads url, once more over HTTP/1.1 when the connection broke
+// getURL reads url, once more over HTTP/1.1 when the connection broke
 // off (netproxy.AgainOverHTTP1): Bun's zip is tens of MB, which a proxy
 // that cuts HTTP/2 streams part way breaks on each try over HTTP/2.
-func getURLFrom(ctx context.Context, url string, limit int64, mirror bool) ([]byte, error) {
+func getURL(ctx context.Context, url string, limit int64) ([]byte, error) {
 	ctx = netproxy.Downloads(ctx)
 	var b []byte
 	err := netproxy.AgainOverHTTP1(ctx, func(ctx context.Context) (err error) {
-		b, err = getURLOnce(ctx, url, limit, mirror)
+		b, err = getURLOnce(ctx, url, limit)
 		return err
 	})
 	return b, err
@@ -366,7 +358,7 @@ func getURLFrom(ctx context.Context, url string, limit int64, mirror bool) ([]by
 // finishes (#5572). A var for tests.
 var downloadStall = 60 * time.Second
 
-func getURLOnce(ctx context.Context, url string, limit int64, mirror bool) (b []byte, err error) {
+func getURLOnce(ctx context.Context, url string, limit int64) (b []byte, err error) {
 	ctx, w := stall.Start(ctx, downloadStall)
 	defer w.Stop()
 	defer func() { err = w.Err(err) }()
@@ -377,10 +369,7 @@ func getURLOnce(ctx context.Context, url string, limit int64, mirror bool) (b []
 	// Bun's newest release is asked of GitHub's API: with the user's
 	// GitHub token, as every request magpie makes to it is (#1942)
 	res, _, err := ghtoken.Do(req, githubAPI, func(r *http.Request) (*http.Response, error) {
-		if mirror {
-			return source.Do(http.DefaultClient, r)
-		}
-		return source.DoOfficial(http.DefaultClient, r)
+		return source.Do(http.DefaultClient, r)
 	})
 	if err != nil {
 		return nil, err
@@ -402,9 +391,8 @@ func getURLOnce(ctx context.Context, url string, limit int64, mirror bool) (b []
 // bunCommand runs bun with args in dir, the environment's proxy settings
 // passed on (a SOCKS5 one bridged, as Bun can't use it: #1409), the roots
 // the system trusts added to Bun's (caEnv), and the npm registry in use
-// where bun wouldn't find it itself (registryEnv): one set in magpie, the
-// login shell's, or npm's registry in China with the 「国内镜像」 switch on
-// (its packages are npm's own, checked against the integrity npm gave).
+// where bun wouldn't find it itself (registryEnv): one set in magpie or the
+// login shell's.
 var bunCommand = func(ctx context.Context, bun, dir string, args ...string) *exec.Cmd {
 	cmd := command(ctx, bun, args...)
 	cmd.Dir = dir

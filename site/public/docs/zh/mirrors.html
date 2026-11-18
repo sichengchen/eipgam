@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>magpie 国内镜像：插件、Bun 和更新下载加速（npmmirror、jsDelivr） · magpie</title>
-<meta name="description" content="国内网络下载 magpie 插件、Bun 或更新太慢、失败？打开插件页的国内镜像开关，插件列表、npm 包和 Bun 先走 npmmirror 和 jsDelivr；安装和更新可以加 --proxy 或 --mirror，下载的文件仍按官方校验和核对。">
+<title>magpie 镜像与代理：在受限网络下安装和更新 · magpie</title>
+<meta name="description" content="magpie 的安装或更新下载太慢、失败？安装脚本和 magpie update 可以加 --proxy 或 --mirror，设置里可以为应用更新存一个镜像，下载的文件仍按官方校验和核对。">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fafafa">
 <script>
@@ -34,8 +34,8 @@
 <link rel="canonical" href="https://usemagpie.ai/docs/zh/mirrors">
 <link rel="stylesheet" href="/docs.css">
 <meta property="og:site_name" content="magpie">
-<meta property="og:title" content="国内镜像：magpie 插件、Bun 和更新下载加速">
-<meta property="og:description" content="国内网络下载 magpie 插件、Bun 或更新太慢、失败？打开插件页的国内镜像开关，插件列表、npm 包和 Bun 先走 npmmirror 和 jsDelivr；安装和更新可以加 --proxy 或 --mirror，下载的文件仍按官方校验和核对。">
+<meta property="og:title" content="镜像与代理：在受限网络下安装和更新 magpie">
+<meta property="og:description" content="magpie 的安装或更新下载太慢、失败？安装脚本和 magpie update 可以加 --proxy 或 --mirror，设置里可以为应用更新存一个镜像，下载的文件仍按官方校验和核对。">
 <meta property="og:image" content="https://usemagpie.ai/img/og.png">
 <meta property="og:url" content="https://usemagpie.ai/docs/zh/mirrors">
 <meta name="twitter:card" content="summary_large_image">
@@ -45,8 +45,8 @@
  "@graph": [
   {
    "@type": "TechArticle",
-   "headline": "国内镜像：magpie 插件、Bun 和更新下载加速",
-   "description": "国内网络下载 magpie 插件、Bun 或更新太慢、失败？打开插件页的国内镜像开关，插件列表、npm 包和 Bun 先走 npmmirror 和 jsDelivr；安装和更新可以加 --proxy 或 --mirror，下载的文件仍按官方校验和核对。",
+   "headline": "镜像与代理：在受限网络下安装和更新 magpie",
+   "description": "magpie 的安装或更新下载太慢、失败？安装脚本和 magpie update 可以加 --proxy 或 --mirror，设置里可以为应用更新存一个镜像，下载的文件仍按官方校验和核对。",
    "inLanguage": "zh-CN",
    "url": "https://usemagpie.ai/docs/zh/mirrors",
    "about": {
@@ -66,14 +66,6 @@
    "mainEntity": [
     {
      "@type": "Question",
-     "name": "magpie 装插件很慢怎么办？",
-     "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "在插件页打开国内镜像开关。插件列表走 jsDelivr，npm 包和 Bun 走 npmmirror，失败再用官方地址。"
-     }
-    },
-    {
-     "@type": "Question",
      "name": "magpie 更新下载失败怎么办？",
      "acceptedAnswer": {
       "@type": "Answer",
@@ -85,15 +77,7 @@
      "name": "用镜像会泄露我的 API Key 吗？",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "不会。带 Authorization、Cookie、API Key 或 URL 令牌的请求从不走镜像，只发给官方源。"
-     }
-    },
-    {
-     "@type": "Question",
-     "name": "MAGPIE_MIRRORS 和国内镜像开关有什么不同？",
-     "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "国内镜像开关让插件页的下载先走国内镜像。MAGPIE_MIRRORS=on 是先请求官方源，遇到网络错误、429、5xx 或 GitHub 限流才用镜像。"
+      "text": "不会。只有 magpie 自己的发布文件会经镜像下载，而且是普通下载；带密钥、令牌或 Cookie 的请求都不会走镜像。"
      }
     }
    ]
@@ -116,7 +100,7 @@
     {
      "@type": "ListItem",
      "position": 3,
-     "name": "国内镜像：magpie 插件、Bun 和更新下载加速",
+     "name": "镜像与代理：在受限网络下安装和更新 magpie",
      "item": "https://usemagpie.ai/docs/zh/mirrors"
     }
    ]
@@ -167,26 +151,17 @@
 
 <main class="wrap doc">
   <aside class="toc">
-    <p>国内镜像</p>
+    <p>镜像与代理</p>
     <a href="#overview">是什么</a>
-    <a href="#plugins">插件页的国内镜像开关</a>
     <a href="#update">安装和更新走镜像或代理</a>
     <a href="#settings">下载源和更新源</a>
-    <a href="#fallback">MAGPIE_MIRRORS：失败后再用镜像</a>
     <a href="#safe">镜像安全吗</a>
   </aside>
 
   <article>
     <p class="eyebrow" id="overview">文档 · 指南</p>
-    <h1>国内镜像：magpie 插件、Bun 和更新下载加速</h1>
-    <p class="lede">在国内装插件时，npm 和 GitHub 常常很慢，甚至连不上。magpie 可以让这些下载先走国内镜像，镜像上的文件和官方的是同一个，校验方式也一样。</p>
-    <h2 id="plugins"><a class="anchor" href="#plugins">插件页的国内镜像开关</a></h2>
-    <ol class="steps">
-      <li><b>打开 <span class="ui">插件</span> 页。</b></li>
-      <li><b>打开 <span class="ui">国内镜像</span> 开关。</b>之后插件页的下载先问国内镜像，失败再用官方地址。</li>
-    </ol>
-    <ul><li><strong>npm 包</strong>（插件包、版本和搜索）：<code>registry.npmmirror.com</code>。</li><li><strong>Bun</strong>：npmmirror 的二进制镜像。</li><li><strong>插件列表</strong>：jsDelivr（<code>cdn.jsdelivr.net/gh/magpie-community/plugins</code>）。</li></ul>
-    <p>镜像还没同步到的文件，会去官方地址下载。npm 的每周下载量仍然显示 npmjs 自己的数字。<code>bun add</code> 也会指向 npmmirror，除非 <code>BUN_CONFIG_REGISTRY</code> 或 <code>NPM_CONFIG_REGISTRY</code> 已经指定了别的源。这个开关不会把任何请求转给 gh-proxy 这类代理。</p>
+    <h1>镜像与代理：在受限网络下安装和更新 magpie</h1>
+    <p class="lede">usemagpie.ai 和 GitHub 慢或连不上时，安装脚本和 <code>magpie update</code> 可以走代理，或走你自己选的 GitHub 下载镜像。magpie 不内置任何镜像，下载的文件仍按官方校验和核对。</p>
     <h2 id="update"><a class="anchor" href="#update">安装和更新走镜像或代理</a></h2>
     <p>安装脚本和 <code>magpie update</code> 都接受 <code>--proxy</code>（http、https、socks5、socks5h，也可以用 <code>MAGPIE_PROXY</code>、<code>HTTPS_PROXY</code>、<code>ALL_PROXY</code>）和 <code>--mirror</code>：一个放在 GitHub 下载地址前面的镜像前缀（也可以用 <code>MAGPIE_MIRROR</code>）。</p>
     <div class="code"><span class="lang">终端</span><button class="copy" data-copy="mi-update">复制</button><pre id="mi-update">curl -fsSL https://usemagpie.ai/install.sh | sh -s -- --proxy http://127.0.0.1:7890
@@ -205,27 +180,17 @@ magpie update mirror off</pre></div>
       <tr><td></td><td><span class="ui">仅 GitHub</span></td><td>只用 github.com（设了镜像就经镜像），不去 usemagpie.ai。</td></tr>
     </table></div>
     <h3>镜像地址填什么</h3>
-    <p>这里的镜像指 GitHub 下载加速代理：把完整的 github.com 链接接在它自己的地址后面就能下载，例如 <code>https://mirror.example/https://github.com/yetone/magpie-releases/releases/download/…</code>。只填 <code>https://github.com</code> 前面的部分，即完整的 <code>https://</code> 地址，如 <code>https://mirror.example/</code>。公开的 GitHub 下载加速代理都是这种用法，<code>MAGPIE_MIRRORS</code> 默认用的 <code>gh-proxy.com</code> 就是其中之一。magpie 不内置、也不担保任何镜像：无论用哪个，文件都要对上 usemagpie.ai 的校验和和发布签名，对不上就不会安装。</p>
+    <p>这里的镜像指 GitHub 下载加速代理：把完整的 github.com 链接接在它自己的地址后面就能下载，例如 <code>https://mirror.example/https://github.com/yetone/magpie-releases/releases/download/…</code>。只填 <code>https://github.com</code> 前面的部分，即完整的 <code>https://</code> 地址，如 <code>https://mirror.example/</code>。公开的 GitHub 下载加速代理都是这种用法。magpie 不内置、也不担保任何镜像：无论用哪个，文件都要对上 usemagpie.ai 的校验和和发布签名，对不上就不会安装。</p>
     <h3>什么时候用镜像</h3>
-    <ul><li>更新卡住，或报超时、<code>EOF</code>，而且 usemagpie.ai 和 github.com 在你那里都慢或连不上（国内常见）：设一个镜像。</li><li>usemagpie.ai 慢、GitHub 快：选 <span class="ui">仅 GitHub</span>，不用镜像。</li><li>你有代理：填到 <span class="ui">网络与共享 › 应用更新</span>，不必用镜像；镜像是给没有代理的情况用的。</li><li>经镜像下载失败时，magpie 会说明是镜像的问题，并提供“改用官方下载”，点了就去掉镜像重新下载。</li></ul>
-    <h2 id="fallback"><a class="anchor" href="#fallback">MAGPIE_MIRRORS：失败后再用镜像</a></h2>
-    <p>另一种方式默认关闭。设置 <code>MAGPIE_MIRRORS=on</code> 后，magpie 先请求官方源，只有遇到网络错误、HTTP 429、HTTP 5xx 或 GitHub 的限流 403 才改用镜像。默认镜像是 npm 的 <code>registry.npmmirror.com</code> 和 GitHub 的 <code>gh-proxy.com</code>，可以用 <code>MAGPIE_NPM_REGISTRY</code> 和 <code>MAGPIE_GITHUB_MIRROR</code> 换成你自己的：</p>
-    <div class="code"><span class="lang">终端</span><button class="copy" data-copy="mi-env">复制</button><pre id="mi-env">MAGPIE_MIRRORS=on \
-MAGPIE_NPM_REGISTRY=https://registry.example.com \
-MAGPIE_GITHUB_MIRROR=https://gh.example magpie serve</pre></div>
-    <p>官方源和镜像共用一个请求时限，官方源卡住时，总等待时间不会翻倍。</p>
+    <ul><li>更新卡住，或报超时、<code>EOF</code>，而且 usemagpie.ai 和 github.com 在你那里都慢或连不上：设一个镜像。</li><li>usemagpie.ai 慢、GitHub 快：选 <span class="ui">仅 GitHub</span>，不用镜像。</li><li>你有代理：填到 <span class="ui">网络与共享 › 应用更新</span>，不必用镜像；镜像是给没有代理的情况用的。</li><li>经镜像下载失败时，magpie 会说明是镜像的问题，并提供“改用官方下载”，点了就去掉镜像重新下载。</li></ul>
     <h2 id="safe"><a class="anchor" href="#safe">镜像安全吗</a></h2>
-    <ul><li>magpie 的更新文件，校验和始终来自 usemagpie.ai，不来自镜像；不符的文件不会安装。</li><li>Bun 的 zip 按 Bun 官方的 SHA-256 核对；插件包按 npm 给出的 integrity 核对。</li><li>带凭据的请求（<code>Authorization</code>、Cookie、API Key、URL 里的令牌）从不走镜像，只发给官方源。</li><li>技能的压缩包始终从官方源下载。</li><li>npm 的元数据、插件的 README 和搜索结果、版本检查没有校验和，镜像报的版本可能和官方不同。</li></ul>
+    <ul><li>magpie 的更新文件，校验和始终来自 usemagpie.ai，不来自镜像；不符的文件不会安装。</li><li>只有 magpie 自己的发布文件会经镜像下载，而且是普通下载：带密钥、令牌或 Cookie 的请求都不会走镜像。</li><li>magpie 下载的其他东西（插件、Bun、技能、本地脱敏模型）都从各自的官方地址下载，插件也可以从你设的 npm 源下载。</li></ul>
 
     <h2 id="faq"><a class="anchor" href="#faq">常见问题</a></h2>
-    <h3>magpie 装插件很慢怎么办？</h3>
-    <p>在插件页打开国内镜像开关。插件列表走 jsDelivr，npm 包和 Bun 走 npmmirror，失败再用官方地址。</p>
     <h3>magpie 更新下载失败怎么办？</h3>
     <p>运行 magpie update --mirror <镜像前缀>，或者 magpie update mirror <镜像前缀> 让以后每次更新都走它；也可以加 --proxy 走代理。校验和始终来自 usemagpie.ai。</p>
     <h3>用镜像会泄露我的 API Key 吗？</h3>
-    <p>不会。带 Authorization、Cookie、API Key 或 URL 令牌的请求从不走镜像，只发给官方源。</p>
-    <h3>MAGPIE_MIRRORS 和国内镜像开关有什么不同？</h3>
-    <p>国内镜像开关让插件页的下载先走国内镜像。MAGPIE_MIRRORS=on 是先请求官方源，遇到网络错误、429、5xx 或 GitHub 限流才用镜像。</p>
+    <p>不会。只有 magpie 自己的发布文件会经镜像下载，而且是普通下载；带密钥、令牌或 Cookie 的请求都不会走镜像。</p>
 
     <p style="margin-top:48px">相关页面：<a href="/docs/zh/start">快速上手</a>、<a href="/docs/zh/troubleshooting">常见错误排查：401、429、502、504 等</a>。遇到问题请到 <a href="https://discord.gg/vGSnD3ZKQF">Discord</a> 提问。</p>
   </article>

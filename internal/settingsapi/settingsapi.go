@@ -404,8 +404,7 @@ func Merge(body []byte, cur settings.Settings, web bool) (settings.Settings, err
 	// and the model for requests masking would change (redact-route)
 	in.RedactRouteTo = cur.RedactRouteTo
 	in.DesktopSubagentEffort = cur.DesktopSubagentEffort
-	in.ChinaMirror = cur.ChinaMirror // the Plugins page's, set on its own
-	in.NPMRegistry = cur.NPMRegistry // and its npm registry
+	in.NPMRegistry = cur.NPMRegistry // the Plugins page's npm registry, set on its own
 	// which Codex accounts spend a reset by themselves, set on the Usage card
 	in.CodexAutoReset = cur.CodexAutoReset
 	in.CodexAutoResetOnly = cur.CodexAutoResetOnly // and at which of the two times

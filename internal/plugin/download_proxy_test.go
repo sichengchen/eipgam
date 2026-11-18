@@ -13,7 +13,6 @@ import (
 
 	"github.com/yetone/magpie/internal/netproxy"
 	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/source"
 )
 
 // JonahFu on X: GitHub is reached only through a proxy, the vendors
@@ -60,7 +59,7 @@ func TestPluginDownloadsTakeTheirOwnProxy(t *testing.T) {
 	}
 	ctx := context.Background()
 	const list = "http://plugins.example.invalid/registry.json"
-	if b, err := fetchJSONFrom(ctx, list, 1<<10, source.DoOfficial); err != nil || !strings.Contains(string(b), "ok") {
+	if b, err := fetchJSON(ctx, list, 1<<10); err != nil || !strings.Contains(string(b), "ok") {
 		t.Fatalf("the plugins list through plugin downloads' proxy: %q %v", b, err)
 	}
 	const reg = "http://npm.example.invalid/@me%2fx"
@@ -68,7 +67,7 @@ func TestPluginDownloadsTakeTheirOwnProxy(t *testing.T) {
 		t.Fatalf("a registry of the user's through plugin downloads' proxy: %q %v", b, err)
 	}
 	const bunZip = "http://github.example.invalid/bun.zip"
-	if b, err := getURLOfficial(ctx, bunZip, 1<<10); err != nil || !strings.Contains(string(b), "ok") {
+	if b, err := getURL(ctx, bunZip, 1<<10); err != nil || !strings.Contains(string(b), "ok") {
 		t.Fatalf("Bun's download through plugin downloads' proxy: %q %v", b, err)
 	}
 	if got := seen(); !slices.Contains(got, list) || !slices.Contains(got, reg) || !slices.Contains(got, bunZip) {
@@ -106,7 +105,7 @@ func TestPluginDownloadsTakeTheirOwnProxy(t *testing.T) {
 		t.Fatalf("bun add went through %q with plugin downloads set direct", p)
 	}
 	n := len(seen())
-	if _, err := fetchJSONFrom(ctx, "http://other.example.invalid/registry.json", 1<<10, source.DoOfficial); err == nil {
+	if _, err := fetchJSON(ctx, "http://other.example.invalid/registry.json", 1<<10); err == nil {
 		t.Fatal("a download set direct was answered")
 	}
 	if len(seen()) != n {
@@ -118,7 +117,7 @@ func TestPluginDownloadsTakeTheirOwnProxy(t *testing.T) {
 		t.Fatal(err)
 	}
 	const later = "http://plugins.example.invalid/later.json"
-	if _, err := fetchJSONFrom(ctx, later, 1<<10, source.DoOfficial); err != nil || !slices.Contains(seen(), later) {
+	if _, err := fetchJSON(ctx, later, 1<<10); err != nil || !slices.Contains(seen(), later) {
 		t.Fatalf("an unset plugin downloads' proxy didn't follow the global one: %v %v", err, seen())
 	}
 	if p := proxyOf(bunCommand(ctx, "bun", dir, "add", "x").Env); p != proxy.URL {

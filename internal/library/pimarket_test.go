@@ -50,8 +50,7 @@ func piNPM(t *testing.T, popular, found []string) (asked *atomic.Int32, texts *[
 }
 
 // The registry in use is searched first (a user behind a registry of their
-// own, or npmmirror with the 「国内镜像」 switch), and npm's own only when it
-// can't search.
+// own), and npm's own only when it can't search.
 func TestPiSearchAsksTheRegistryInUse(t *testing.T) {
 	piCacheHere(t)
 	pkg := `{"package":{"name":"pi-own","version":"1.0.0","keywords":["pi-package"]}}`

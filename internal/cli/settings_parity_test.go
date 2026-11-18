@@ -465,7 +465,6 @@ var notYet = map[string]string{
 	"POST /api/plugin-signin/prompt":             P,  // plugins.go
 	"POST /api/plugins/check":                    P,  // plugins.go
 	"POST /api/plugins/choose":                   W,  // plugins.go
-	"POST /api/plugins/mirror":                   P,  // plugins.go
 	"POST /api/plugins/registry":                 P,  // plugins.go
 	"GET /api/privacy-model":                     S2, // privacymodel.go
 	"POST /api/privacy-model":                    S2, // privacymodel.go

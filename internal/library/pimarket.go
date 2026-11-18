@@ -68,7 +68,7 @@ type piListed struct {
 }
 
 // piNPMURL is npm's own search, asked when the registry in use (the
-// user's own, or npmmirror with the 「国内镜像」 switch) can't search;
+// user's own) can't search;
 // piRegistry is that registry. Variables for tests.
 var (
 	piNPMURL   = "https://registry.npmjs.org/-/v1/search"

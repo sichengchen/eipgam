@@ -604,9 +604,9 @@ body.side-nav :is(#view-library .lib-headacts) { flex-wrap: nowrap; }
    run left over the title. First the buttons give their words up for
    their icons, the name kept as the button's and its tooltip; only then
    is the title cut: its first parts go, then its last is cut at its end */
-body.side-nav :is(#view-library .lib-headacts, #view-plugins .pm-mirror) { flex: none; }
+body.side-nav #view-library .lib-headacts { flex: none; }
 body.side-nav #view-plugins .pm-find { min-width: 120px; }
-body.side-nav.tools-tight :is(#view-library .lib-headacts button, #view-plugins .pm-mirror) > span:not(.lib-mini, .lib-switch) { display: none; }
+body.side-nav.tools-tight #view-library .lib-headacts button > span:not(.lib-mini) { display: none; }
 body.side-nav .crumb { max-width: var(--crumb-max, none); }
 body.side-nav .crumb > [hidden] { display: none; }
 body.side-nav :is(#view-library, #view-plugins, #view-settings) { padding-top: 8px; }

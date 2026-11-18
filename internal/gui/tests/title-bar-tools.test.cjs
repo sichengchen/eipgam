@@ -35,7 +35,7 @@ function serve(lang) {
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
-    if (url.pathname === "/api/plugins") return json({ plugins: [], mirror: false });
+    if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") return json(view);
     if (url.pathname === "/api/library/market/servers") return json({ items: [{ id: "fetch", name: "fetch", title: "Fetch", description: "Read the web.", transport: "stdio", runs: "uvx", featured: true }] });
     if (url.pathname === "/api/library/market/skills") return json({ items: [] });
@@ -111,7 +111,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // the Library's buttons have their tooltips once it has loaded
           if (p.name.startsWith("library")) await page.locator("#view-library .lib-more:not([disabled])").waitFor();
           if (p.name === "library mcp") await page.locator("#view-library .lib-discover").waitFor();
-          if (/plugins (discover|installed)/.test(p.name)) await page.locator("#view-plugins .pm-mirror").waitFor();
+          if (/plugins (discover|installed)/.test(p.name)) await page.locator("#view-plugins .pm-find").waitFor();
           // settled: two frames with the same bar
           let b = null;
           for (let i = 0; i < 40; i++) {
@@ -121,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             b = now;
           }
           const at = `${width}px ${p.name}: ${JSON.stringify(b)}`;
-          // Plugins' Built-in has no search and no mirrors to pick
+          // Plugins' Built-in has no search
           assert(b.tools.length > 0 || p.name === "plugins builtin", `no tools in the bar at ${at}`);
           const title = b.parts[b.parts.length - 1];
           const shown = Math.max(...b.parts.map((x) => x.right));

@@ -948,55 +948,15 @@
     q.placeholder = t("Search plugins and npm…");
     if (q.value !== query) q.value = query;
     q.setAttribute("aria-label", t("Search plugins"));
-    mirror = mirrorSwitch();
-    replaceKeeping(headBox, [tabs, el("span", "grow"), mirror, find]);
+    replaceKeeping(headBox, [tabs, el("span", "grow"), find]);
     searchShown();
     headBox.classList.toggle("stuck", page.scrollTop > 0);
     return headBox;
   }
 
-  // 「国内镜像」: the list, npm's packages and answers, and Bun asked of
-  // mirrors in China first (npmmirror, jsDelivr); none before what's
-  // installed has come, which says how it is set
-  let mirrorSaving = false;
   // the built-in plugins are a short list of switches: nothing to search
-  // or fetch through a mirror
-  let mirror = null;
   function searchShown() {
     find.hidden = tab === "builtin";
-    if (mirror) mirror.hidden = !mine || tab === "builtin";
-  }
-  function mirrorSwitch() {
-    const on = !!mine?.mirror;
-    const b = el("button", "pm-mirror" + (on ? " on" : ""));
-    b.type = "button";
-    b.hidden = !mine;
-    b.disabled = mirrorSaving;
-    b.setAttribute("role", "switch");
-    b.setAttribute("aria-checked", on ? "true" : "false");
-    b.setAttribute("aria-label", t("Mirrors in China"));
-    b.title = t("Download the plugin list, plugins and Bun from mirrors in China first (npmmirror, jsDelivr), their official addresses after. Each is a copy of the very file, checked as the original is");
-    const sw = el("span", "lib-switch" + (on ? " on" : ""));
-    sw.append(el("i"));
-    b.append(el("span", "", t("Mirrors in China")), sw);
-    b.onclick = async () => {
-      if (mirrorSaving || !mine) return;
-      mirrorSaving = true;
-      mine.mirror = !on;
-      draw();
-      try {
-        const r = await api("plugins/mirror", { on: !on });
-        mine.mirror = r.mirror;
-        // the list again, now from the mirror, and npm's answers with it
-        if (r.mirror) loadListings().then(() => { draw(); askNPM(); });
-      } catch (e) {
-        mine.mirror = on;
-        statusTErr(e);
-      }
-      mirrorSaving = false;
-      draw();
-    };
-    return b;
   }
 
   async function searchNPM(s) {

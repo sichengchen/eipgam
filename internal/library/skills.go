@@ -1168,7 +1168,7 @@ func fetchWhole(src Source, name string) (string, error) {
 	get := func(u string) (*http.Response, bool, error) {
 		req, _ := http.NewRequest("GET", u, nil)
 		req.Header.Set("User-Agent", "magpie")
-		return doGitHub(req, func(r *http.Request) (*http.Response, error) { return source.DoOfficial(c, r) })
+		return doGitHub(req, func(r *http.Request) (*http.Response, error) { return source.Do(c, r) })
 	}
 	if tooBig.has(src) {
 		return fetchSkillFiles(src, name)

@@ -45,10 +45,7 @@ func gatedDist(t *testing.T, pkg string, versions []string, fail *atomic.Bool) (
 	}))
 	t.Cleanup(srv.Close)
 	t.Cleanup(func() { open(); distSettled(t) })
-	was := distMirror
 	distBase = srv.URL
-	distMirror = func(string) string { return "" }
-	t.Cleanup(func() { distMirror = was })
 	return open
 }
 

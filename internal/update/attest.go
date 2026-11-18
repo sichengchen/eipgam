@@ -243,8 +243,7 @@ func fetchSiteBundles(ctx context.Context, u string) []json.RawMessage {
 }
 
 // fetchAttestations asks GitHub for the bundles attesting digest. The
-// bundles check themselves, so a mirror of the API (source.Do) can't make a
-// bad one pass.
+// bundles check themselves, so whoever answers can't make a bad one pass.
 func fetchAttestations(ctx context.Context, digest string) ([]json.RawMessage, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", attestAPI+"/repos/"+attestRepo+"/attestations/sha256:"+digest, nil)
 	if err != nil {

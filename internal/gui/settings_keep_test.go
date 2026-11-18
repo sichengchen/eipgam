@@ -184,7 +184,6 @@ func TestSettingsSaveKeepsWhatItDoesNotSend(t *testing.T) {
 		DesktopGateway:       "https://192.168.1.20:3425",
 		DshCompactModel:      "fake/m1",
 		CodexCompactModel:    "fake/m1",
-		ChinaMirror:          true,
 		NPMRegistry:          "https://npm.corp.example",
 		CodexAutoReset:       []string{"me@example.com"},
 		CodexAutoResetOnly:   map[string]string{"me@example.com": "expiring"},
