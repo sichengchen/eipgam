@@ -6,38 +6,11 @@ package uilang
 
 import "strings"
 
-// Pick is the language for the setting pref: pref itself when it names
-// one, else, with "system" (or none), the system's: Traditional Chinese
-// for Taiwan, Hong Kong, Macau and any zh-Hant (zh_TW.UTF-8, zh-Hant-TW),
-// Simplified for any other zh, Japanese for any ja, German for any de,
-// English for the rest.
+// Pick is the language for the setting pref: English, whatever pref or
+// the system says. This fork keeps no other language; the tray, notices
+// and the TUI still ask here, so one can come back in one place.
 func Pick(pref string, system func() string) string {
-	switch pref {
-	case "en", "zh", "zh-TW", "ja", "de":
-		return pref
-	}
-	switch sys := strings.ReplaceAll(strings.ToLower(system()), "_", "-"); {
-	case zhTraditional(sys):
-		return "zh-TW"
-	case strings.HasPrefix(sys, "zh"):
-		return "zh"
-	case strings.HasPrefix(sys, "ja"):
-		return "ja"
-	case strings.HasPrefix(sys, "de"):
-		return "de"
-	}
 	return "en"
-}
-
-// zhTraditional says a lowercased, dashed system tag is Traditional
-// Chinese, as the page's sysLocale does.
-func zhTraditional(sys string) bool {
-	for _, p := range []string{"zh-tw", "zh-hk", "zh-mo", "zh-hant"} {
-		if sys == p || strings.HasPrefix(sys, p+"-") || strings.HasPrefix(sys, p+".") || strings.HasPrefix(sys, p+"@") {
-			return true
-		}
-	}
-	return false
 }
 
 // Env is the language the environment names: the first of LC_ALL,

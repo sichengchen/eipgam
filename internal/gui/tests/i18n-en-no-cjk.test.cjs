@@ -35,7 +35,7 @@ test("no English key in i18n.js or a plugin's i18n.js holds CJK text", () => {
 
 test("no advice template holds CJK text", () => {
   const src = fs.readFileSync(path.join(assets, "i18n.js"), "utf8");
-  const NOTICES = new Function(src.slice(0, src.indexOf("\n};") + 3) + src.slice(src.indexOf("const NOTICES"), src.indexOf("\n];", src.indexOf("const NOTICES")) + 3) + "; return NOTICES;")();
+  const NOTICES = new Function(src.slice(src.indexOf("const NOTICES"), src.indexOf("\n];", src.indexOf("const NOTICES")) + 3) + "; return NOTICES;")();
   assert.ok(NOTICES.length > 10, "NOTICES read");
   assert.deepEqual(bad(NOTICES), []);
 });

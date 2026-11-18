@@ -215,4 +215,4 @@ jobs:
         # the rest of internal/gui/tests needs Playwright and isn't run here;
         # these read the sources, and went red on main after pushes that ran
         # chosen GUI files only (#5425)
-        run: node --test internal/gui/tests/nav-timeout.test.cjs internal/gui/tests/i18n-keys.test.cjs internal/gui/tests/i18n-en-no-cjk.test.cjs
+        run: node --test internal/gui/tests/nav-timeout.test.cjs internal/gui/tests/i18n-en-no-cjk.test.cjs

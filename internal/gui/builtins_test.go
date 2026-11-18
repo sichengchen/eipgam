@@ -290,38 +290,6 @@ func TestBuiltinClientsLoaded(t *testing.T) {
 	}
 }
 
-// Every string of every built-in plugin is said in every language.
-func TestBuiltinsTranslated(t *testing.T) {
-	src, err := os.ReadFile("assets/i18n.js")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, lang := range []string{"zh: {", `"zh-TW": {`, "ja: {", "de: {"} {
-		_, block, ok := strings.Cut(string(src), "\n  "+lang+"\n")
-		if !ok {
-			t.Fatalf("no %s block", lang)
-		}
-		block, _, _ = strings.Cut(block, "\n  },")
-		for _, m := range pluginrt.Registered() {
-			says := []string{m.Name, m.Sub, m.One, m.Many}
-			if sc := m.Schema(); sc != nil {
-				for _, p := range sc.Properties {
-					says = append(says, p.Title, p.Description)
-				}
-			}
-			for _, s := range says {
-				if s == "" {
-					continue
-				}
-				k, _ := json.Marshal(s)
-				if !strings.Contains(block, "\n    "+string(k)+": ") {
-					t.Errorf("%s doesn't say %s", lang, k)
-				}
-			}
-		}
-	}
-}
-
 // Web search's row says what a model that can't search is searched with
 // now (netube99 on X): nothing yet in a new home, a search API once one
 // is set, and none while it is off.

@@ -39,7 +39,6 @@ var (
 	wordsAsked   map[string]string
 	wordsTable   map[string]string
 	wordsTableAt time.Time
-	wordsParsed  int // how many times a table was parsed, for tests
 )
 
 const (
@@ -115,7 +114,6 @@ func askWord(lang, s string, now time.Time) string {
 	}
 	if wordsTable == nil {
 		wordsTable, wordsTableAt = pageWords(lang), now
-		wordsParsed++
 	}
 	v := wordsTable[s]
 	if wordsAsked == nil || len(wordsAsked) >= wordsAskedMax {
