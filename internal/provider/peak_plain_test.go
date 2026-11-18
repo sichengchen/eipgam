@@ -16,7 +16,4 @@ func TestPeakOfPlainModelsAllocateNothing(t *testing.T) {
 	if gw.PeakOf("deepseek-v4-pro") == "" {
 		t.Fatal("OpenCode Go's deepseek-v4-pro has no peak hours")
 	}
-	if (Provider{ID: "ds", Chat: "https://api.deepseek.com/v1"}).PeakOf("anything") == "" {
-		t.Fatal("DeepSeek's own models have no peak hours")
-	}
 }

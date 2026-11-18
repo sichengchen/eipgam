@@ -109,7 +109,6 @@ func TestTildeFolderVariables(t *testing.T) {
 		{"MAGPIE_BIN_DIR", "~/.local/bin", false},
 		{"CODEX_HOME", "~/.codex", false},
 		{"OPENCODE_CONFIG_DIR", "~/opencode", false},
-		{"OPENCHAMBER_DATA_DIR", "~", false},
 		{"PI_CODING_AGENT_DIR", "~/pi", true},
 		{"PI_CODING_AGENT_SESSION_DIR", "~/sessions", true},
 		{"HANA_HOME", "~", true},

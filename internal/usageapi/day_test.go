@@ -35,7 +35,7 @@ func TestDayOf(t *testing.T) {
 	yesterday := midnight.Add(-12 * time.Hour)
 	for _, r := range []usage.Record{
 		{Time: at, Agent: "claude", Provider: "anthropic", Model: "claude-x", Input: 100, Output: 10, CacheRead: 300, ProviderAccount: "me@example.com", CallerKeyName: "secret-key"},
-		{Time: at, Agent: "claude", Provider: "deepseek", Model: "deepseek-y", Input: 50, Output: 5},
+		{Time: at, Agent: "claude", Provider: "moonshot", Model: "deepseek-y", Input: 50, Output: 5},
 		{Time: at, Agent: "codex", Provider: "openai", Model: "gpt-z", Input: 10, Output: 1},
 		{Time: yesterday, Agent: "codex", Provider: "openai", Model: "gpt-z", Input: 7, Output: 1},
 	} {
@@ -56,7 +56,7 @@ func TestDayOf(t *testing.T) {
 	if len(day.Agents) != 2 || day.Agents[0].ID != "claude" || day.Agents[0].Name != "Claude Code" || day.Agents[1].ID != "codex" || day.Agents[0].Icon != "claude-color" || day.Agents[1].Name != "codex" || day.Agents[1].Icon != "generic" {
 		t.Fatalf("agents %+v", day.Agents)
 	}
-	if a := day.Agents[0]; a.Calls != 2 || len(a.Models) != 2 || a.Models[0].Model != "claude-x" || a.Models[0].Provider != "anthropic" || a.Models[1].Model != "deepseek-y" || a.Models[1].ProviderName != "DeepSeek" {
+	if a := day.Agents[0]; a.Calls != 2 || len(a.Models) != 2 || a.Models[0].Model != "claude-x" || a.Models[0].Provider != "anthropic" || a.Models[1].Model != "deepseek-y" || a.Models[1].ProviderName != "Kimi" {
 		t.Errorf("claude's models %+v", a.Models)
 	}
 	if a := day.Agents[1]; a.Calls != 1 || len(a.Models) != 1 || a.Models[0].Model != "gpt-z" {

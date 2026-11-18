@@ -23,15 +23,15 @@ func TestMain(m *testing.M) { testenv.Main(m) }
 // and accounts.
 func TestProvidersNotSetUpAreNamed(t *testing.T) {
 	for _, p := range provider.All() {
-		if p.ID == "claude" || p.ID == "deepseek" {
+		if p.ID == "claude" || p.ID == "moonshot" {
 			t.Fatalf("the test home has %s set up", p.ID)
 		}
 	}
 	now := time.Now()
-	for i, pid := range []string{"claude", "deepseek", "gone-custom"} {
+	for i, pid := range []string{"claude", "moonshot", "gone-custom"} {
 		usage.Append(usage.Record{Time: now.Add(-time.Duration(i+1) * time.Minute), Agent: "claude", Provider: pid, Model: "m-" + pid, Input: 10, Output: 2, ProviderAccount: "me@example.com"})
 	}
-	want := map[string]string{"claude": "Claude Code", "deepseek": "DeepSeek", "gone-custom": "gone-custom"}
+	want := map[string]string{"claude": "Claude Code", "moonshot": "Kimi", "gone-custom": "gone-custom"}
 
 	l := LedgerPage(usage.All, usage.Filter{}, 0, 100)
 	if len(l.Providers) != len(want) {
@@ -62,7 +62,7 @@ func TestProvidersNotSetUpAreNamed(t *testing.T) {
 	}
 	for _, a := range l.Accounts {
 		for _, n := range a.Providers {
-			if n == "claude" || n == "deepseek" {
+			if n == "claude" || n == "moonshot" {
 				t.Errorf("the Account filter names a provider %q", n)
 			}
 		}
@@ -70,7 +70,7 @@ func TestProvidersNotSetUpAreNamed(t *testing.T) {
 
 	s := State(usage.All)
 	for _, g := range append(s.Models, s.Accounts...) {
-		if g.Sub == "claude" || g.Sub == "deepseek" {
+		if g.Sub == "claude" || g.Sub == "moonshot" {
 			t.Errorf("the summary names %q's provider %q", g.Name, g.Sub)
 		}
 	}

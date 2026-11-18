@@ -365,7 +365,7 @@ func TestRestoreOnQuitKeptUnlessSent(t *testing.T) {
 // "no model … to generate images" when the key serves no chat model.
 func TestImageGenAcceptsMiniMaxImageModel(t *testing.T) {
 	home(t)
-	for _, preset := range []string{"minimax-cn", "minimax"} {
+	for _, preset := range []string{"minimax"} {
 		p, err := provider.FromPreset(preset)
 		if err != nil {
 			t.Fatal(err)
@@ -381,7 +381,7 @@ func TestImageGenAcceptsMiniMaxImageModel(t *testing.T) {
 			}
 		}
 	}
-	body, _ := json.Marshal(map[string]any{"imageGen": "minimax-cn/nothing"})
+	body, _ := json.Marshal(map[string]any{"imageGen": "minimax/nothing"})
 	if _, err := Merge(body, settings.Settings{}, true); err == nil {
 		t.Error("a model it doesn't draw was taken")
 	}
