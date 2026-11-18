@@ -4586,8 +4586,6 @@ Kept for the window:
 - `last-version`, `whatsnew-quiet-day` — the version that ran last, for
   What's new, and the day you said not to show it again
 - `start-menu-shortcut` — the Start menu shortcut was made (Windows)
-- `install-id`, `stats-sent` — the [user count](#counting-users)'s
-  random id and the last day it went
 
 In `~/.cache/magpie`:
 
@@ -4597,74 +4595,42 @@ In `~/.cache/magpie`:
 - `models.json` — models.dev catalog (OpenCode's cache at
   `~/.cache/opencode/models.json` is used when present)
 - `models/<provider>.json` — model lists fetched from vendors
-- `partner-counts.json` — partner counts not yet sent (at most
-  14 days)
 
 `XDG_CONFIG_HOME` and `XDG_CACHE_HOME` are respected.
 
-## Counting users
+## What magpie sends by itself
 
-Once a day, a running magpie (the app, or `magpie serve`) sends one event to
-PostHog so we know how many people use it: a random id made up on your
-computer (`~/.config/magpie/install-id`, made the first time the event is
-sent), magpie's version, and your system and architecture. The day it last
-went is in `~/.config/magpie/stats-sent`, so a day is sent once; the
-event is tried at start and then every hour.
+magpie sends no telemetry. It counts no users, makes no install id, and
+sends nothing about which agents, providers, models, plugins or MCP
+servers it is used with. What it does ask for by itself is on the
+[Privacy page](https://usemagpie.ai/docs/privacy): updates from
+usemagpie.ai (`/api/latest`, every 6 hours by default and never by
+itself with `noAutoUpdate` set; `/api/notes` after an update; `/files/…`
+for a download), the partner list, icons, the
+[models.dev](https://models.dev) catalog and the exchange rate. None of
+these requests carries an id or an account.
 
-With it goes what magpie is used with, so we know which agents, providers
-and models to look after first, by magpie's own ids only:
+Discover's counts of who uses and likes each plugin, and the Library
+market's of who uses each MCP server, are read from usemagpie.ai
+(`GET /api/plugins/stats`, at most once an hour, with no id). They come
+from other magpies; this one reports nothing and sends no likes. The code
+is [internal/stats/plugins.go](../internal/stats/plugins.go).
 
-- the agents connected to magpie (`claude`, `codex`); an omp profile is
-  only `omp`;
-- the providers that are on: a preset's id (`deepseek`), a subscription's
-  (`codex`, `copilot`), a community plugin's (`plugin:kiro`); a provider you
-  added yourself is only `custom`, another plugin only `plugin`;
-- the models the connected agents are set to, as the provider's id and the
-  vendor's model id (`deepseek/deepseek-v4`); on a key's provider, a model
-  id that [models.dev](https://models.dev) doesn't list (a local model, a
-  fine-tune) is only `<provider>/other`; one on a provider of your own is
-  only `custom`, a routing group only `group`;
-- how many of each, and how many routing groups you have.
-- for each partner (a sponsor listed first in the add sheet), by its id, how
-  many times a day the add sheet showed it, its row was opened, its key
-  page was opened and a provider was added from it (at most 20 of each,
-  5 adds), kept in `~/.cache/magpie/partner-counts.json` for at most 14
-  days and sent the day after as `magpie partner` events;
-- to usemagpie.ai, not PostHog, which of the plugins Discover lists are
-  installed and on (npm names, or `github:owner/repo` for a repository
-  tagged `magpie-plugin`; never a folder, a private repository or an
-  unlisted package), with the same id, so Discover can say how many use
-  each (the ids that reported it in 7 days). The same report names the
-  Library's MCP servers that an agent is given and that the market lists
-  from what ships with magpie (featured, or the registry snapshot), by
-  their market ids only (`context7`, `io.github.owner/name`; at most 50),
-  so the market can put the most used first; a server of the user's own,
-  one found only by a search, and its address, command or keys never go
-  (`library.PublicServers`). A like on a plugin's page
-  goes there too, only for a plugin installed here, and is kept in
-  `~/.config/magpie/plugin-likes.json`. The code is
-  [internal/stats/plugins.go](../internal/stats/plugins.go) and
-  [site/pluginstats.js](../site/pluginstats.js).
+The add sheet (and the TUI's, and `magpie providers presets`) tells the
+app which partners it showed, through `POST /api/partner` in the window,
+only so that a partner it showed is no longer new and the add button's
+dot goes (`NoticePartners`). Nothing is counted or sent.
 
-No names, base URLs, accounts, keys, prompts or usage go. Turn that part off
-in Settings → Privacy → Share the agents, providers, models and plugins I use; the
-day's event then has the id, version and system only. Turn it all off in
-Settings → Privacy → Count me as a user, or with `DO_NOT_TRACK=1` or
-`MAGPIE_NO_STATS=1`. Builds from source never send it. The code is
-[internal/stats](../internal/stats/stats.go). Deleting `install-id` makes a
-new one at the next send. The [Privacy page](https://usemagpie.ai/docs/privacy)
-shows a whole batch and everything else magpie sends by itself.
-
-Partners are also counted where usemagpie.ai sees them, whatever these
-settings say, as any website sees its visits. The partner list
-(`/api/partners`) gives each partner's website and key page as a
+usemagpie.ai counts partners where it sees them, as any website counts
+its visits. The partner list (`/api/partners`) gives each partner's
+website and key page as a
 `https://usemagpie.ai/go/<id>/site|keys[/<region>]` link, which sends a
 `magpie partner go` event (the partner, which link, the region, and the
 country Cloudflare gives) before sending the browser on; and one in ten
 fetches of the list sends a `magpie partners fetch` event with weight 10
-and the country, while a partner is listed. Each event has an id of its
-own: no install id, address or account goes with it. The code is
-[site/worker.js](../site/worker.js).
+and the country, while a partner is listed. Each event has a random id
+of its own: the app sends no id, and no address or account goes with
+it. The code is [site/worker.js](../site/worker.js).
 
 A plugin's, an import link's and the library's icons sit on hosts their
 authors picked. magpie fetches each through

@@ -358,7 +358,6 @@ var notYet = map[string]string{
 	"POST /api/plugins/builtin":                  P,  // builtins.go
 	"GET /api/plugins/counts":                    P,  // plugins_counts.go: Discover's installs and likes
 	"GET /api/catalog/models":                    P,  // catalog_models.go: the model editor's Same as picker
-	"POST /api/plugins/like":                     P,  // plugins_counts.go
 	"GET /api/library/browser":                   L,  // browser.go
 	"POST /api/library/browser/setup":            L,  // browser.go
 	"POST /api/library/browser/drag":             L,  // browser.go

@@ -131,9 +131,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.context().close();
       });
     }
-    // how often each partner is shown, opened and its key page opened is
-    // counted (provider.CountPartner): shown once per opening of the sheet,
-    // not again as it is redrawn or searched
+    // the partners shown are told once per opening of the sheet, not again
+    // as it is redrawn or searched, so they are new no more; opening one or
+    // its key page tells nothing
     await t.test("counted", async () => {
       const page = await (await browser.newContext({ viewport: { width: 900, height: 800 } })).newPage();
       const counted = [];
@@ -151,7 +151,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await sheet.locator(".tile", { hasText: "Acme AI" }).click();
       await page.locator("#modal .editor").getByRole("button", { name: "Get a key ↗" }).click();
       await page.waitForTimeout(100);
-      assert.deepEqual(counted.slice(1), [{ what: "opened", ids: ["acme"] }, { what: "keys", ids: ["acme"] }]);
+      assert.deepEqual(counted.slice(1), []);
       await page.context().close();
     });
     // a partner listed since the sheet last showed them puts a small dot on

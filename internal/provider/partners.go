@@ -41,6 +41,10 @@ const KindPartner Kind = "partner"
 // left out.
 const MaxPartners = 12
 
+// PartnerShown is what the add sheet says when it has listed partners, so
+// they are no longer new (NoticePartners).
+const PartnerShown = "shown"
+
 // Partner is one entry of the list: a preset, its tagline in each
 // language, the languages it is shown in, and when it is shown.
 type Partner struct {
@@ -316,7 +320,7 @@ func savePartners() {
 }
 
 // NoticePartners keeps that the user has been shown the partners ids, so
-// they are no longer new. It is kept whether or not they are counted.
+// they are no longer new. Nothing is counted or sent.
 func NoticePartners(ids ...string) {
 	if partnersSource() == "off" {
 		return

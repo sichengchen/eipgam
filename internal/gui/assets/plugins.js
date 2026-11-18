@@ -1857,8 +1857,6 @@
     if (!local) link("npm", "https://www.npmjs.com/package/" + l.package);
     link(l.github ? "GitHub" : t("Source"), l.npm?.repository);
     if (l.npm?.homepage && l.npm.homepage !== l.npm.repository && !l.npm.homepage.startsWith(l.npm.repository + "#")) link(t("Homepage"), l.npm.homepage);
-    const like = local ? null : window.pmCounts?.like(l.package, () => { const e = entryOf(l.package); return !!e && !e.off; });
-    if (like) links.append(like);
     main.append(links);
     if (l.github) {
       const w = el("p", "pm-note warn");
@@ -1892,7 +1890,7 @@
     confirmAsk = ed;
     openModal(ed);
     // the button follows an install or a sign-in made while it's open
-    const tick = setInterval(() => { if (!ed.isConnected) return stop(); redrawAct(); like?.sync(); }, 600);
+    const tick = setInterval(() => { if (!ed.isConnected) return stop(); redrawAct(); }, 600);
     function stop() { clearInterval(tick); }
     // the README takes the skeleton's place, and the dialog grows to it on
     // the spring it opened on, centred as it goes, not in one jump; the

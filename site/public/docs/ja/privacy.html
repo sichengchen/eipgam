@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>プライバシー · magpie ドキュメント</title>
-<meta name="description" content="magpie が自分から何をどこへ送るか：1 日 1 回のユーザー数のカウント、更新確認とその他の公開リスト、usemagpie.ai に見えるもの、OTLP エクスポート、そしてそれぞれを止めるスイッチ。">
+<meta name="description" content="magpie はテレメトリーを送りません。自分から何をどこへ送るか：更新確認とその他の公開リスト、usemagpie.ai に見えるもの、OTLP エクスポート、そしてそれを止めるスイッチ。">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fafafa">
 <script>
@@ -35,7 +35,7 @@
 <link rel="stylesheet" href="/docs.css">
 <meta property="og:site_name" content="magpie">
 <meta property="og:title" content="プライバシー">
-<meta property="og:description" content="magpie が自分から送るものすべてと、その止め方。">
+<meta property="og:description" content="magpie はテレメトリーを送りません。自分から送るものすべてと、その止め方。">
 <meta property="og:image" content="https://usemagpie.ai/img/og.png">
 <meta property="og:url" content="https://usemagpie.ai/docs/ja/privacy">
 <meta name="twitter:card" content="summary_large_image">
@@ -46,7 +46,7 @@
   {
    "@type": "TechArticle",
    "headline": "プライバシー",
-   "description": "magpie が自分から何をどこへ送るか：1 日 1 回のユーザー数のカウント、更新確認とその他の公開リスト、usemagpie.ai に見えるもの、OTLP エクスポート、そしてそれぞれを止めるスイッチ。",
+   "description": "magpie はテレメトリーを送りません。自分から何をどこへ送るか：更新確認とその他の公開リスト、usemagpie.ai に見えるもの、OTLP エクスポート、そしてそれを止めるスイッチ。",
    "inLanguage": "ja",
    "url": "https://usemagpie.ai/docs/ja/privacy",
    "about": {
@@ -132,113 +132,38 @@
   <aside class="toc">
     <p>プライバシー</p>
     <a href="#overview">概要</a>
-    <a href="#count">毎日のカウント</a>
-    <a href="#off">オフにする</a>
     <a href="#files">コンピューター上のファイル</a>
     <a href="#site">usemagpie.ai に見えるもの</a>
     <a href="#lists">magpie が取得する公開リスト</a>
     <a href="#otel">OTLP エクスポート</a>
     <a href="#masking">プロバイダに送る内容のマスク</a>
-    <a href="#why">カウントが既定でオンの理由</a>
   </aside>
 
   <article>
     <p class="eyebrow" id="overview">ドキュメント · プライバシー</p>
     <h1>プライバシー</h1>
-    <p class="lede">プロンプト、返答、キー、アカウントは、使っているプロバイダーにだけ送られます。間に magpie 自身のサーバーはありません。このページは、それ以外に magpie が自分から送るものすべてと、それを止めるスイッチを挙げます。内容はコードから書いており、各節にコードへのリンクがあります。</p>
+    <p class="lede">magpie はテレメトリーを送りません。ユーザー数を数えず、インストール ID も作らず、どのエージェント、プロバイダー、モデル、プラグインを使っているかも送りません。プロンプト、返答、キー、アカウントは、使っているプロバイダーにだけ送られます。間に magpie 自身のサーバーはありません。このページは、それ以外に magpie が自分から送るものすべてと、それを止めるスイッチを挙げます。内容はコードから書いており、各節にコードへのリンクがあります。</p>
 
     <div class="table-wrap"><table>
       <tr><th>内容</th><th>送り先</th><th>既定</th><th>止め方</th></tr>
-      <tr><td><a href="#count">毎日のカウント</a></td><td>PostHog（<code>us.i.posthog.com</code>）</td><td>リリース版でオン。ソースからのビルドは送らない</td><td><span class="ui">設定</span> → <span class="ui">プライバシー</span>、<code>DO_NOT_TRACK=1</code></td></tr>
       <tr><td><a href="#site">更新確認</a>、リリースノート、パートナー一覧、アイコン</td><td><code>usemagpie.ai</code></td><td>オン</td><td>更新確認は <code>noAutoUpdate</code>。ほかはアプリの動作に必要</td></tr>
       <tr><td><a href="#lists">モデルカタログと為替レート</a></td><td><code>models.dev</code>、<code>open.er-api.com</code></td><td>オン</td><td>切り替え不可。あなたの情報は送らない</td></tr>
       <tr><td><a href="#otel">OTLP エクスポート</a></td><td>あなたが指定したコレクター</td><td>オフ</td><td>オフのままにする</td></tr>
     </table></div>
 
-    <h2 id="count"><a class="anchor" href="#count">毎日のカウント</a></h2>
-    <p>動いているリリース版の magpie（アプリ、または <code>magpie serve</code>）は、1 日（UTC）に 1 回 PostHog へイベントをまとめて送ります。何人が使っていて、どのエージェント、プロバイダー、モデルを優先して面倒を見るべきかを知るためです。起動時に送り、以後 1 時間ごとに確認し、その日すでに送っていれば何もしません。ソースからのビルドは送りません。</p>
-    <p>まとめの中には <code>magpie active</code> イベントが 1 つあり、次を含みます。</p>
-    <ul>
-      <li>このコンピューターで作ったランダムな ID（16 進 32 文字。あなたやマシンとは無関係）。<code>distinct_id</code> として送ります。</li>
-      <li>magpie のバージョン、<code>kind</code>（<code>app</code> か <code>serve</code>）、システム（<code>$os</code>）とアーキテクチャ。</li>
-      <li>使っているエージェント、プロバイダー、モデルの数とルーティンググループの数（使っているものの共有をオフにすると送りません）。</li>
-    </ul>
-    <p>その部分をオフにしない限り、エージェント、プロバイダー、モデルごとに <code>magpie uses</code> イベントが続きます。magpie 自身の ID だけで、それぞれ最大 50 個です。</p>
-    <ul>
-      <li><b>エージェント</b>：magpie につないだもの（<code>claude</code>、<code>codex</code>）。WSL のディストリ名や omp のプロファイル名は外します（<code>omp</code> だけ）。</li>
-      <li><b>プロバイダー</b>：オンのもの。プリセットの ID（<code>deepseek</code>）、サブスクリプションの ID（<code>codex</code>、<code>copilot</code>）、既知のコミュニティプラグインの ID（<code>plugin:kiro</code>）。自分で追加したプロバイダーは <code>custom</code>、それ以外のプラグインは <code>plugin</code> とだけ記録します。</li>
-      <li><b>モデル</b>：つないだエージェントに設定されたモデルを、プロバイダー ID とベンダーのモデル ID で（<code>deepseek/deepseek-v4</code>）。キーのプロバイダーで <a href="https://models.dev">models.dev</a> に載っていないモデル ID（ローカルモデル、ファインチューン）は <code>&lt;プロバイダー&gt;/other</code>、自分のプロバイダーのモデルは <code>custom</code>、ルーティンググループは <code>group</code> です。</li>
-    </ul>
-    <p>あわせて <code>magpie partner</code> イベントも送ります。プロバイダー追加シートの先頭に載る各パートナーについて、その ID で、終わった日にシートに表示された回数、行が開かれた回数、キーのページが開かれた回数、そこからプロバイダーが追加された回数です（<code>what</code>：<code>shown</code>、<code>opened</code>、<code>keys</code>、<code>added</code>。1 日にそれぞれ最大 20 回、追加は 5 回）。回数だけで、自分のプロバイダーは含みません。</p>
-    <p id="plugins">この部分がオンのとき、magpie は同じ日に、Discover に載っているどのプラグインを入れて（オンにして）いるかを <code>usemagpie.ai</code> に伝え、Discover が各プラグインの利用者数を示せるようにします：<code>POST /api/plugins/report</code> に同じランダムな ID とプラグインの npm パッケージ名、<code>magpie-plugin</code> タグのリポジトリは <code>github:owner/repo</code>（最大 50 個）。フォルダーから入れたもの、非公開リポジトリ、Discover に載っていないパッケージのプラグインは送りません。同じ報告で、ライブラリの MCP サーバーのうち、エージェントに渡していて、magpie に同梱のライブラリのマーケット一覧に載っているものを、マーケットの ID だけで送ります（<code>context7</code>、<code>io.github.owner/name</code>。最大 50 個）。マーケットで利用者の多いものを先に並べるためです。自分で作ったサーバーや検索でだけ見つかるサーバーは送らず、アドレス、コマンド、キーも送りません。プラグインのページでのいいねは <code>POST /api/plugins/like</code> で、ID、プラグイン、オンかオフかを送ります。いいねできるのはこのコンピューターに入っているプラグインだけで、いいねしたものは <code>plugin-likes.json</code> に残ります。サイトは直近 7 日に報告した ID の数を数え、報告は 30 日で消します。アドレスはハッシュだけを 1 時間、頻度の制限のために残します。Discover は ID を含まない <code>GET /api/plugins/stats</code> で数を読みます。コードは <a href="https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go">internal/stats/plugins.go</a> と <a href="https://github.com/yetone/magpie/blob/main/site/pluginstats.js">site/pluginstats.js</a> です。</p>
-    <p>どのイベントにも <code>$process_person_profile: false</code> が付き、PostHog はこの ID の人物プロファイルを作りません。名前、Base URL、アカウント、キー、プロンプト、返答、使用量は送りません。まとめ全体はこのような形です。</p>
-    <div class="code">
-      <span class="lang">POST https://us.i.posthog.com/batch/</span>
-      <button class="copy" data-copy="ex-payload">コピー</button>
-      <pre id="ex-payload">{
-  &quot;api_key&quot;: &quot;phc_nyDyYyrUTRGvNq5U7FBesCyM2j4GdKeqGp8ko7DBerTC&quot;,
-  &quot;batch&quot;: [
-    {
-      &quot;event&quot;: &quot;magpie active&quot;,
-      &quot;distinct_id&quot;: &quot;3f9c…(32 hex)&quot;,
-      &quot;timestamp&quot;: &quot;2026-10-13T08:00:00Z&quot;,
-      &quot;properties&quot;: {
-        &quot;version&quot;: &quot;0.1.1190&quot;, &quot;kind&quot;: &quot;app&quot;, &quot;$os&quot;: &quot;Mac OS X&quot;, &quot;arch&quot;: &quot;arm64&quot;,
-        &quot;agents&quot;: 2, &quot;providers&quot;: 3, &quot;models&quot;: 2, &quot;groups&quot;: 1,
-        &quot;$process_person_profile&quot;: false, &quot;distinct_id&quot;: &quot;3f9c…&quot;
-      }
-    },
-    { &quot;event&quot;: &quot;magpie uses&quot;, &quot;distinct_id&quot;: &quot;3f9c…&quot;, &quot;timestamp&quot;: &quot;2026-10-13T08:00:00Z&quot;,
-      &quot;properties&quot;: { &quot;kind&quot;: &quot;agent&quot;, &quot;id&quot;: &quot;claude&quot;, &quot;$process_person_profile&quot;: false, &quot;distinct_id&quot;: &quot;3f9c…&quot; } },
-    { &quot;event&quot;: &quot;magpie uses&quot;, &quot;properties&quot;: { &quot;kind&quot;: &quot;provider&quot;, &quot;id&quot;: &quot;custom&quot;, … } },
-    { &quot;event&quot;: &quot;magpie uses&quot;, &quot;properties&quot;: { &quot;kind&quot;: &quot;model&quot;, &quot;id&quot;: &quot;deepseek/deepseek-v4&quot;, … } },
-    { &quot;event&quot;: &quot;magpie partner&quot;, &quot;timestamp&quot;: &quot;2026-10-12T12:00:00Z&quot;,
-      &quot;properties&quot;: { &quot;id&quot;: &quot;&lt;partner id&gt;&quot;, &quot;what&quot;: &quot;shown&quot;, &quot;count&quot;: 3, &quot;day&quot;: &quot;2026-10-12&quot;, … } }
-  ]
-}</pre>
-    </div>
-    <p><code>api_key</code> はプロジェクトの PostHog キーで、イベントを送れるだけで読むことはできません。コードは <a href="https://github.com/yetone/magpie/blob/main/internal/stats/stats.go">internal/stats</a> と <a href="https://github.com/yetone/magpie/blob/main/internal/provider/partner_events.go">partner_events.go</a> です。</p>
-
-    <h2 id="off"><a class="anchor" href="#off">オフにする</a></h2>
-    <p>次のスイッチで、その一部または全部を止められます。</p>
-    <ul>
-      <li><span class="ui">設定</span> → <span class="ui">プライバシー</span> → <span class="ui">ユーザー数に含める</span> をオフ、または <code>settings.json</code> に <code>"noStats": true</code>：毎日のカウント全体。</li>
-      <li>magpie の環境に <code>DO_NOT_TRACK=1</code> か <code>MAGPIE_NO_STATS=1</code>（空、<code>0</code>、<code>false</code> 以外の値）：設定にかかわらず、毎日のカウント全体。</li>
-      <li><span class="ui">設定</span> → <span class="ui">プライバシー</span> → <span class="ui">使っているエージェント、プロバイダー、モデル、プラグインを共有</span> をオフ、または <code>"noUsageStats": true</code>：<code>magpie uses</code> と <code>magpie partner</code> イベント、<code>magpie active</code> の数、<a href="#plugins">プラグインの報告</a>。ID、バージョン、システムは送られます。パートナーの回数も記録しなくなります。</li>
-      <li><span class="ui">設定</span> → <span class="ui">情報</span> → <span class="ui">自動アップデート</span> をオフ、または <code>"noAutoUpdate": true</code>：magpie が自分から <code>usemagpie.ai</code> に新しいバージョンを尋ねること（そうでなければ 6 時間ごと）。カウントの一部ではありません。</li>
-    </ul>
-    <p>設定の変更は次の 1 時間ごとの確認で反映され、再起動はいりません。<code>settings.json</code> は magpie のフォルダーにあります（<a href="#files">下記</a>）。</p>
-    <div class="code">
-      <span class="lang">settings.json</span>
-      <button class="copy" data-copy="ex-settings">コピー</button>
-      <pre id="ex-settings">{
-  "noStats": true,
-  "noUsageStats": true,
-  "noAutoUpdate": true
-}</pre>
-    </div>
-    <p><code>MAGPIE_STATS_HOST</code> はカウントを別のホストへ送ります（テスト用で、設定するとソースからのビルドも送ります）。</p>
-
     <h2 id="files"><a class="anchor" href="#files">コンピューター上のファイル</a></h2>
-    <div class="table-wrap"><table>
-      <tr><th>ファイル</th><th>内容</th></tr>
-      <tr><td><code>install-id</code></td><td>ランダムな ID。初めてカウントを送るときに作られます</td></tr>
-      <tr><td><code>stats-sent</code></td><td>最後に送った日（UTC）。1 日 1 回にするため</td></tr>
-      <tr><td><code>plugin-likes.json</code></td><td>Discover でいいねしたプラグイン</td></tr>
-      <tr><td><code>partner-counts.json</code>（キャッシュフォルダー）</td><td>まだ送っていないパートナーの回数。最大 14 日分</td></tr>
-    </table></div>
-    <p><code>install-id</code> と <code>stats-sent</code> は magpie のフォルダーにあります。macOS と Linux では <code>~/.config/magpie</code>、Windows では <code>%USERPROFILE%\.config\magpie</code>、<code>$XDG_CONFIG_HOME</code> が設定されていれば <code>$XDG_CONFIG_HOME/magpie</code>、ポータブル版ではそのデータフォルダーです。<code>partner-counts.json</code> は <code>~/.cache/magpie</code>（<code>$XDG_CACHE_HOME/magpie</code>、ポータブル版ではデータフォルダーの <code>cache</code>）にあります。どれも削除できます。<code>install-id</code> を消すと次の送信で新しいランダムな ID が作られ、新しいユーザーとして数えられます。カウントをオフにすれば、どれも再び書かれません。</p>
+    <p>magpie はこのコンピューターに ID もカウントも残しません。設定、プロバイダー、使用量は magpie のフォルダーにあります。macOS と Linux では <code>~/.config/magpie</code>、Windows では <code>%USERPROFILE%\.config\magpie</code>、<code>$XDG_CONFIG_HOME</code> が設定されていれば <code>$XDG_CONFIG_HOME/magpie</code>、ポータブル版ではそのデータフォルダーです。ほかに magpie が書くもので、知っておくとよいものが 2 つあります。</p>
     <p>リクエストアーカイブ（<span class="ui">使用量</span>ページのリクエスト一覧の上にある<span class="ui">リクエストアーカイブ</span>スイッチ）は<b>既定でオフ</b>です。同期に S3 バケットがないときにオンにすると、ゲートウェイを通る各呼び出しのヘッダーと本文を、S3 アーカイブと同じようにシークレットを伏せて、magpie のフォルダーの <code>request-archive</code> に 1 呼び出し 1 ファイルで保存します。読めるのはあなたのユーザーだけです。上限は 1 GiB（settings.json の <code>requestArchiveLocalMB</code>）で、超えると古い呼び出しから削除します。このスイッチはこのコンピューターだけのもので、同期で別のコンピューターでオンになることはありません。S3 バケットがあるときはバケットに送られ（そちらも 1 GiB まで、<code>requestArchiveMB</code>。超えると古い呼び出しから削除します）、ここには何も書かれません。フォルダーはいつでも削除できます。</p>
     <p>アプリは自分のしたことをログ <code>app.log</code> に書きます。macOS では <code>~/Library/Logs/magpie</code>、Windows では <code>%LOCALAPPDATA%\magpie\logs</code>、Linux では <code>~/.local/state/magpie</code> です（<a href="/docs/ja/start#log">magpie のログはどこにありますか？</a>）。読めるのはあなたのユーザーだけです。magpie がしたことと出会ったエラーを記録し、キー、プロンプト、返答は記録しません。あなたが送らない限り、このコンピューターから出ません。上限は 5 MiB で、古いもの 1 つ（<code>app.old.log</code>）を残します。いつでも削除できます。</p>
 
     <h2 id="site"><a class="anchor" href="#site">usemagpie.ai に見えるもの</a></h2>
-    <p>magpie はプライバシー設定にかかわらず、どのアプリも自分の更新サーバーに尋ねるのと同じように、自分のサイトにいくつか尋ねます。どのリクエストにもインストール ID やアカウントは付きません。</p>
+    <p>magpie は、どのアプリも自分の更新サーバーに尋ねるのと同じように、自分のサイトにいくつか尋ねます。どのリクエストにも ID やアカウントは付きません。</p>
     <ul>
-      <li><code>/api/latest</code>：更新情報。<code>noAutoUpdate</code> がオンでなければ 6 時間ごと。<code>?lang=</code> であなたの言語のノートを取ります。<span class="ui">設定</span> → <span class="ui">情報</span> → <span class="ui">アップデートチャネル</span>が安定版かデイリーなら <code>?channel=stable</code> か <code>?channel=daily</code> も付けます。新しくインストールした magpie も一度 <code>?channel=stable</code> を尋ね、自分が安定版なら安定版にとどまります。どちらもあなたが誰かは含みません。<code>/api/notes</code> は更新後の「新機能」です。</li>
+      <li><code>/api/latest</code>：更新情報。既定では 6 時間ごと。<code>?lang=</code> であなたの言語のノートを取ります。<span class="ui">設定</span> → <span class="ui">情報</span> → <span class="ui">アップデートチャネル</span>が安定版かデイリーなら <code>?channel=stable</code> か <code>?channel=daily</code> も付けます。新しくインストールした magpie も一度 <code>?channel=stable</code> を尋ね、自分が安定版なら安定版にとどまります。どちらもあなたが誰かは含みません。<code>/api/notes</code> は更新後の「新機能」です。<span class="ui">設定</span> → <span class="ui">情報</span> → <span class="ui">自動アップデート</span> をオフにするか、<code>settings.json</code> に <code>"noAutoUpdate": true</code> と書くと、magpie は自分からは尋ねず、設定で確認したときか <code>magpie update</code> を実行したときだけ尋ねます。</li>
       <li><code>/files/&lt;バージョン&gt;/&lt;ファイル&gt;</code>：更新とインストーラがダウンロードするリリースファイルで、Cloudflare R2 から配信されます。サイトにないファイルは github.com へ転送されます。何も計測しません。</li>
-      <li><code>/api/partners</code>：プロバイダー追加シートのパートナー一覧。6 時間ごと。パートナーが載っている間、10 回に 1 回の取得を Cloudflare が示す国とともに <code>magpie partners fetch</code> として数えます。</li>
-      <li><code>/go/&lt;パートナー&gt;/site</code> と <code>/go/&lt;パートナー&gt;/keys</code>：パートナーの公式サイトとキーのページへのリンクをブラウザーで開くと、移動の前に <code>magpie partner go</code>（どのパートナーか、どのリンクか、地域、国）として数えます。</li>
-      <li><code>/api/plugins/stats</code>：Discover の各プラグインの利用者数といいねの数と、ライブラリのマーケットの各 MCP サーバーの利用者数。多くて 1 時間に 1 回で、ID は含みません。<a href="#plugins">プラグインの報告</a>といいねは ID を含み、共有がオンのときだけ送ります。</li>
+      <li><code>/api/partners</code>：プロバイダー追加シートのパートナー一覧。1 時間ごと。パートナーが載っている間、サイトは 10 回に 1 回の取得を Cloudflare が示す国とともに <code>magpie partners fetch</code> として数えます。</li>
+      <li><code>/go/&lt;パートナー&gt;/site</code> と <code>/go/&lt;パートナー&gt;/keys</code>：パートナーの公式サイトとキーのページへのリンクをブラウザーで開くと、移動の前に <code>magpie partner go</code>（どのパートナーか、どのリンクか、地域、国）として数えます。どちらのイベントにも、アプリからの ID、IP アドレス、アカウントは付きません。</li>
+      <li><code>/api/plugins/stats</code>：Discover の各プラグインの利用者数といいねの数と、ライブラリのマーケットの各 MCP サーバーの利用者数。多くて 1 時間に 1 回で、ID は含みません。この数はほかの magpie から集まったもので、この magpie は報告もいいねも送りません。コードは <a href="https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go">internal/stats/plugins.go</a> です。</li>
       <li><code>/api/icon?url=…</code>：プラグイン、インポートリンク、ライブラリが示すアイコンはここを経由して取得するので、アイコンのあるホストに見えるのはあなたではなく Cloudflare のアドレスです。画像を中継するだけで、数えることも記録することもしません。</li>
     </ul>
     <p>サイト自身のページ（このドキュメント、ホーム）には Cloudflare Web Analytics と PostHog Web Analytics（<code>us.i.posthog.com</code>）が入っており、どちらも Cookie は使いません。PostHog はこのサイト用のランダムな訪問者 ID をブラウザのローカルストレージに保存し、再訪問を同じ訪問者として数えます。受け取るのは各ページのアドレス、参照元のページ、ページ上でクリックしたもの（入力内容は含みません）、ページとそのリクエストの読み込み速度、ページで起きたエラー、ブラウザ・OS・画面サイズ、IP アドレスの国と都市、そして訪問の録画（ページの表示、マウスの動き、クリック、スクロール、コンソールのメッセージ）で、入力欄はすべて伏せられます。ブラウザが Do Not Track か Global Privacy Control を送っていれば何も送りません。PostHog へのリクエストはこのサイトの <code>usemagpie.ai/r/</code> を経由し、IP アドレスとともに PostHog へ渡されます。サイトの Cookie は渡しません。<code>/download</code> のリンクを開くか <code>install.sh</code> を取得すると、PostHog に別のカウントが 1 件送られます。どのファイルか、国、ブラウザかコマンドか、だけで、ID も IP アドレスも含みません。アプリはどちらも読み込みません。コードは <a href="https://github.com/yetone/magpie/blob/main/site/worker.js">site/worker.js</a> です。</p>
@@ -264,9 +189,6 @@
       <li>モデルに見えるのはプレースホルダーで、値そのものではありません。そのまま使う必要のある値（チームのアドレス、テスト用のキー）は <span class="ui">マスクしない</span> に入れてください。</li>
     </ul>
     <p>オンにする方法、各スイッチがマスクするもの、例、効いているかの確かめ方は <a href="/docs/ja/masking">プライバシーマスキング</a> へ。</p>
-
-    <h2 id="why"><a class="anchor" href="#why">カウントが既定でオンの理由</a></h2>
-    <p>magpie は何十ものエージェントとプロバイダーに対応し、少人数で保守しています。毎日のカウントは、実際に使われているものを知り、それを優先して動くように保つための手段です。リリース版で既定オンなのは、自分でオンにする人の数だけでは少なすぎて、それがわからないからです。その代わり、送るものは小さく保っています。ランダムな ID、組み込みの ID、数だけです。スイッチ 1 つか <code>DO_NOT_TRACK=1</code> でオフにでき、ソースからのビルドは送らず、送るものはすべてこのページに挙げています。</p>
   </article>
 </main>
 

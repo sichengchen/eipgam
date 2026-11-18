@@ -3824,20 +3824,16 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		}
 		rw.WriteHeader(http.StatusNoContent)
 	})
-	// the add sheet counts what it showed of the partners and what was
-	// opened of them (provider.CountPartner); only listed partners count.
-	// Those shown are no longer new (provider.NoticePartners).
+	// the add sheet says which partners it showed: those are no longer
+	// new (provider.NoticePartners). Nothing is counted or sent.
 	mux.HandleFunc("POST /api/partner", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
 			What string
 			IDs  []string
 		}
 		_ = json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&in)
-		if len(in.IDs) <= provider.MaxPartners {
-			provider.CountPartner(in.What, in.IDs...)
-			if in.What == provider.PartnerShown {
-				provider.NoticePartners(in.IDs...)
-			}
+		if len(in.IDs) <= provider.MaxPartners && in.What == provider.PartnerShown {
+			provider.NoticePartners(in.IDs...)
 		}
 		rw.WriteHeader(http.StatusNoContent)
 	})

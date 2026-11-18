@@ -24,7 +24,6 @@ import (
 	"github.com/yetone/magpie/internal/plugin"
 	"github.com/yetone/magpie/internal/provider"
 	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/stats"
 )
 
 var amber = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#B45309", Dark: "#F2B544"})
@@ -374,7 +373,6 @@ func presets() error {
 		all = append(all, pa.PresetDef)
 		shown = append(shown, pa.ID)
 	}
-	provider.CountPartner(provider.PartnerShown, shown...)
 	provider.NoticePartners(shown...)
 	for _, pr := range append(all, provider.Presets()...) {
 		if pr.Kind != kind {
@@ -1732,7 +1730,6 @@ func advertisedURL() string {
 // serve: `magpie serve` — the gateway alone, in the foreground.
 func serve() error {
 	s := gateway.New()
-	go stats.Run(version, "serve")
 	catalog.Seed()         // the shipped copy, when models.dev can't be reached
 	go catalog.KeepFresh() // new models' prices, in a gateway left running
 	// a signed-in account's list exists only at its vendor: asked for here

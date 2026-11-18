@@ -272,7 +272,7 @@ The app (its window, the menu bar or tray icon and the panel, however it was ope
 
 ### What does magpie send about me?
 
-Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in the path. Once a day a released magpie tells us it is in use, so we know how many people use it and what to look after first: a random id made up on your computer, magpie’s version and your system, and which agents, providers and models it is used with, by magpie’s own ids (`claude`, `deepseek`, `deepseek/deepseek-v4`) with how many of each. A provider you added yourself, and a model on it, is only `custom`. For each partner listed first in the add sheet, how many times a day it was shown, opened and added from goes with them, as counts only. No names, base URLs, accounts, keys, prompts or usage are sent. Settings → Privacy → Share the agents, providers, models and plugins I use leaves out the agents, providers and models, the partner counts and which of Discover’s plugins are installed and which of the Library market’s MCP servers are used (for their counts of who uses and likes each); Count me as a user, `DO_NOT_TRACK=1` or `MAGPIE_NO_STATS=1` turns it all off. Builds from source never send it. A partner's website and key-page links go through `usemagpie.ai/go/…`, which counts the click (the partner, which link, and a country) before sending you on, and usemagpie.ai counts how many times the partner list is fetched. The server sees these whatever the settings say, as any website sees its visits; no id, address or account is kept with them. Icons named by a plugin, an import link or the library are fetched through `usemagpie.ai/api/icon`, so their hosts see Cloudflare's address, not yours; the server only passes the picture on, and counts and keeps nothing. The [Privacy page](https://usemagpie.ai/docs/privacy) lists everything magpie sends by itself, with an example of the daily count, the files it keeps and every switch.
+Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in the path. magpie sends no telemetry: no count of its users, no id, and nothing about which agents, providers, models or plugins you use. It asks usemagpie.ai for updates (every 6 hours by default, unless automatic updates are off), release notes and the add sheet’s partner list, and Discover reads its public plugin counts there; none of these requests carries an id or an account. A partner's website and key-page links go through `usemagpie.ai/go/…`, which counts the click (the partner, which link, and a country) before sending you on, and usemagpie.ai counts how many times the partner list is fetched, as any website counts its visits; no id, address or account is kept with them. Icons named by a plugin, an import link or the library are fetched through `usemagpie.ai/api/icon`, so their hosts see Cloudflare's address, not yours; the server only passes the picture on, and counts and keeps nothing. The [Privacy page](https://usemagpie.ai/docs/privacy) lists everything magpie sends by itself, the files it keeps and every switch.
 
 ### The agent gets 502 or can’t connect, and nothing shows in magpie’s Routing tab?
 
@@ -12110,94 +12110,17 @@ Source: https://usemagpie.ai/docs/privacy
 
 # Privacy
 
-Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in that path. This page lists everything magpie sends by itself, beside those requests, and every switch that stops it. It is written from the code, which is linked in each section.
+magpie sends no telemetry. It counts no users, makes no install id, and sends nothing about which agents, providers, models or plugins you use. Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in that path. This page lists everything magpie does send by itself, beside those requests, and the switches that stop it. It is written from the code, which is linked in each section.
 
 | What | Where to | Off by default? | How to stop it |
 | --- | --- | --- | --- |
-| The daily count | PostHog (`us.i.posthog.com`) | On in releases; never in builds from source | Settings → Privacy, `DO_NOT_TRACK=1` |
 | Update checks, release notes, the partner list, icons | `usemagpie.ai` | On | `noAutoUpdate` for update checks; the rest are needed by the app |
 | Model catalog and exchange rate | `models.dev`, `open.er-api.com` | On | Not switchable; nothing of yours is sent |
 | OTLP export | A collector you name | Off | Leave it off |
 
-## The daily count
-
-Once a day (UTC), a running release of magpie (the app, or `magpie serve`) sends one batch to PostHog, so we know how many people use it and which agents, providers and models to look after first. It is sent at start and then looked at every hour; a day already sent is skipped. Builds from source never send it.
-
-The batch has one `magpie active` event with:
-
-- a random id made up on your computer (32 hex characters, tied to nothing about you or the machine), sent as `distinct_id`;
-- magpie’s version, `kind` (`app` or `serve`), your system (`$os`) and architecture;
-- how many agents, providers and models it is used with, and how many routing groups (left out when you turn off sharing what you use).
-
-Unless you turn that part off, one `magpie uses` event follows for each agent, provider and model, by magpie’s own ids only (at most 50 of each):
-
-- **agents.** connected to magpie: `claude`, `codex`. A WSL distro or an omp profile name is cut off (`omp`).
-- **providers.** that are on: a preset’s id (`deepseek`), a subscription’s (`codex`, `copilot`), a known community plugin’s (`plugin:kiro`). A provider you added yourself is only `custom`; any other plugin only `plugin`.
-- **models.** the connected agents are set to, as provider id and vendor model id (`deepseek/deepseek-v4`). On a key’s provider, a model id that [models.dev](https://models.dev) doesn’t list (a local model, a fine-tune) is only `<provider>/other`; a model on your own provider is `custom`; a routing group is `group`.
-
-With them go `magpie partner` events: for each partner listed first in the add sheet, by its id, how many times on a day that has ended the sheet showed it, its row was opened, its key page was opened, and a provider was added from it (`what`: `shown`, `opened`, `keys`, `added`; at most 20 a day each, 5 adds). Counts only, never a provider of your own.
-
-With that part on, magpie also tells `usemagpie.ai`, on the same day, which of the plugins Discover lists are installed and on, so Discover can say how many use each one: `POST /api/plugins/report` with the same random id and the plugins’ npm names, or `github:owner/repo` for a repository tagged `magpie-plugin` (at most 50). A plugin from a folder, a private repository or a package Discover doesn’t list is never named. The same report names the MCP servers in your Library that an agent is given and that the Library’s market lists from what ships with magpie, by their market ids only (`context7`, `io.github.owner/name`; at most 50), so the market can put the most used first; a server of your own, or one found only by a search, is never named, nor its address, command or keys. A like on a plugin’s page goes as `POST /api/plugins/like` with the id, the plugin and whether it is on, and only for a plugin installed here; the plugins you liked are kept in `plugin-likes.json`. The site counts the ids that reported a plugin in the last 7 days, drops a report after 30 days, and keeps your address only hashed, for an hour, to limit how often it is asked. Discover reads the counts from `GET /api/plugins/stats`, which carries no id. The code is [internal/stats/plugins.go](https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go) and [site/pluginstats.js](https://github.com/yetone/magpie/blob/main/site/pluginstats.js).
-
-Every event carries `$process_person_profile: false`, so PostHog keeps no person profile for the id. No names, base URLs, accounts, keys, prompts, replies or usage are sent. A whole batch looks like this:
-
-```
-{
-  "api_key": "phc_nyDyYyrUTRGvNq5U7FBesCyM2j4GdKeqGp8ko7DBerTC",
-  "batch": [
-    {
-      "event": "magpie active",
-      "distinct_id": "3f9c…(32 hex)",
-      "timestamp": "2026-10-13T08:00:00Z",
-      "properties": {
-        "version": "0.1.1190", "kind": "app", "$os": "Mac OS X", "arch": "arm64",
-        "agents": 2, "providers": 3, "models": 2, "groups": 1,
-        "$process_person_profile": false, "distinct_id": "3f9c…"
-      }
-    },
-    { "event": "magpie uses", "distinct_id": "3f9c…", "timestamp": "2026-10-13T08:00:00Z",
-      "properties": { "kind": "agent", "id": "claude", "$process_person_profile": false, "distinct_id": "3f9c…" } },
-    { "event": "magpie uses", "properties": { "kind": "provider", "id": "custom", … } },
-    { "event": "magpie uses", "properties": { "kind": "model", "id": "deepseek/deepseek-v4", … } },
-    { "event": "magpie partner", "timestamp": "2026-10-12T12:00:00Z",
-      "properties": { "id": "<partner id>", "what": "shown", "count": 3, "day": "2026-10-12", … } }
-  ]
-}
-```
-
-The `api_key` is the project’s PostHog key; it can only send events, not read them. The code is [internal/stats](https://github.com/yetone/magpie/blob/main/internal/stats/stats.go) and [partner_events.go](https://github.com/yetone/magpie/blob/main/internal/provider/partner_events.go).
-
-## Turning it off
-
-Each of these switches stops part or all of it:
-
-- Settings → Privacy → Count me as a user off, or `"noStats": true` in `settings.json` stops the whole daily count.
-- `DO_NOT_TRACK=1` or `MAGPIE_NO_STATS=1` in magpie’s environment (any value but empty, `0` or `false`) stops the whole daily count, whatever the settings say.
-- Settings → Privacy → Share the agents, providers, models and plugins I use off, or `"noUsageStats": true` leaves out the `magpie uses` and `magpie partner` events, the counts in `magpie active` and the plugin report; the id, version and system are still sent. Partner counts stop being kept too.
-- Settings → About → Automatic updates off, or `"noAutoUpdate": true` stops magpie asking `usemagpie.ai` for a newer version by itself (it asks every 6 hours otherwise). This is not part of the count.
-
-A change in Settings takes effect at the next hourly look; no restart is needed. `settings.json` sits in magpie’s folder (see below):
-
-```
-{
-  "noStats": true,
-  "noUsageStats": true,
-  "noAutoUpdate": true
-}
-```
-
-`MAGPIE_STATS_HOST` sends the count to another host instead (it is for testing, and also makes a build from source send).
-
 ## Files on your computer
 
-| File | What it is |
-| --- | --- |
-| `install-id` | The random id, made the first time the count is sent |
-| `stats-sent` | The last day (UTC) the count went, so a day is sent once |
-| `plugin-likes.json` | The plugins you liked in Discover |
-| `partner-counts.json` (in the cache folder) | Partner counts not yet sent, at most 14 days |
-
-`install-id` and `stats-sent` are in magpie’s folder: `~/.config/magpie` on macOS and Linux, `%USERPROFILE%\.config\magpie` on Windows, `$XDG_CONFIG_HOME/magpie` when that is set, and the data folder of a portable magpie. `partner-counts.json` is in `~/.cache/magpie` (`$XDG_CACHE_HOME/magpie`, or `cache` in a portable magpie’s data folder). You can delete any of them: a deleted `install-id` is replaced by a new random one at the next send, so you are counted as a new user; with the count off, none of them is written again.
+magpie keeps no id and no count on your computer. Its settings, providers and usage stay in its folder: `~/.config/magpie` on macOS and Linux, `%USERPROFILE%\.config\magpie` on Windows, `$XDG_CONFIG_HOME/magpie` when that is set, and the data folder of a portable magpie. Two more things it writes are worth knowing about.
 
 The request archive (the Request archive switch on the Usage page, above the list of requests) is **off by default**. Turned on while sync has no S3 bucket, it keeps each gateway call’s headers and bodies, secrets masked as for the S3 archive, in `request-archive` in magpie’s folder, one file per call, readable by your user only. It grows to 1 GiB (`requestArchiveLocalMB` in settings.json) and the oldest calls are removed past that. The switch is this computer’s own: sync never turns it on at another computer. With an S3 bucket the calls go to the bucket instead, kept to 1 GiB there too (`requestArchiveMB`), the oldest removed past it, and nothing is written here. Delete the folder whenever you like.
 
@@ -12205,13 +12128,13 @@ The app writes a log of what it did, `app.log`, in `~/Library/Logs/magpie` on ma
 
 ## What usemagpie.ai sees
 
-magpie asks its own site for a few things, whatever the privacy settings say, as any app asks its update server. None of these requests carries the install id or an account.
+magpie asks its own site for a few things, as any app asks its update server. None of these requests carries an id or an account.
 
-- `/api/latest`: the update feed, every 6 hours unless `noAutoUpdate` is on, with `?lang=` for the notes in your language, and `?channel=stable` or `?channel=daily` when Settings → About → Update channel is Stable or Daily; a fresh install asks `?channel=stable` once too, to stay on Stable when it is Stable’s version. Neither says who you are. `/api/notes` gives What’s new after an update.
+- `/api/latest`: the update feed, every 6 hours by default, with `?lang=` for the notes in your language, and `?channel=stable` or `?channel=daily` when Settings → About → Update channel is Stable or Daily; a fresh install asks `?channel=stable` once too, to stay on Stable when it is Stable’s version. Neither says who you are. `/api/notes` gives What’s new after an update. Settings → About → Automatic updates off, or `"noAutoUpdate": true` in `settings.json`, stops magpie asking by itself; it then asks only when you check, in Settings or with `magpie update`.
 - `/files/<version>/<file>`: the release files an update and the installer download, served from Cloudflare R2. A file the site doesn’t hold is sent on to github.com. Nothing is counted.
-- `/api/partners`: the add sheet’s partner list, every 6 hours. One fetch in ten is counted as a `magpie partners fetch` event, with the country Cloudflare gives, while a partner is listed.
-- `/go/<partner>/site` and `/go/<partner>/keys`: a partner’s website and key-page links, opened in your browser, are counted (the partner, which link, a region, a country) as `magpie partner go` before you are sent on.
-- `/api/plugins/stats`: Discover’s counts of how many use and like each plugin, and the Library market’s of how many use each MCP server, at most once an hour. It carries no id; the plugin report and likes do, and go only with sharing what you use on.
+- `/api/partners`: the add sheet’s partner list, every hour. While a partner is listed, the site counts one fetch in ten as a `magpie partners fetch` event, with the country Cloudflare gives.
+- `/go/<partner>/site` and `/go/<partner>/keys`: a partner’s website and key-page links, opened in your browser, are counted (the partner, which link, a region, a country) as `magpie partner go` before you are sent on. Neither event carries an id from the app, your address or an account.
+- `/api/plugins/stats`: Discover’s counts of how many use and like each plugin, and the Library market’s of how many use each MCP server, at most once an hour. It carries no id. The counts come from other magpies; this one sends no report and no likes. The code is [internal/stats/plugins.go](https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go).
 - `/api/icon?url=…`: icons named by a plugin, an import link or the library are fetched through it, so their hosts see Cloudflare’s address, not yours. The worker passes the picture on and counts and keeps nothing.
 
 The site’s own pages (these docs, the home page) carry Cloudflare Web Analytics and PostHog Web Analytics (`us.i.posthog.com`), without cookies. PostHog keeps a random visitor id in your browser’s local storage for this site, so a return visit counts as the same visitor. It gets each page’s address, the page that sent you, what you click on the page (not what you type), how fast the page and its requests loaded, errors the page hit, your browser, system and screen size, the country and city your address is in, and a recording of the visit (what the page showed, mouse moves, clicks and scrolls, its console messages) with every input box masked; nothing at all when your browser sends Do Not Track or Global Privacy Control. PostHog’s requests go through this site, under `usemagpie.ai/r/`, which passes them and your address on to PostHog and keeps the site’s cookies. Following a `/download` link, or fetching `install.sh`, sends PostHog a count of its own: which file, your country, and whether a browser or a command asked; no id and no address. The app doesn’t load either. The code is [site/worker.js](https://github.com/yetone/magpie/blob/main/site/worker.js).
@@ -12235,7 +12158,3 @@ The sections above are what magpie sends by itself. What your agents send goes t
 - The model sees the placeholder, not the value. A value a task needs as it is (a team address, a test key) goes under Never mask.
 
 How to turn it on, what each switch masks, an example and how to check it: [Privacy masking](https://usemagpie.ai/docs/masking).
-
-## Why the count is on
-
-magpie works with dozens of agents and providers, and is maintained by a small team. The daily count is how we know which of them people actually use, so they are kept working first. It is on in releases because counts from those who turn it on would be too few to tell that. In exchange it is kept small: a random id, built-in ids, numbers; one switch or `DO_NOT_TRACK=1` turns it off, builds from source never send it, and this page lists everything that goes.

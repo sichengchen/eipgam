@@ -1546,10 +1546,6 @@ func add(p Provider, once bool) (string, error) {
 	if err := Save(p); err != nil {
 		return p.ID, err
 	}
-	if p.Preset != "" {
-		// a provider added from a partner counts for it (partner_events.go)
-		CountPartner(PartnerAdded, p.Preset)
-	}
 	return p.ID, nil
 }
 

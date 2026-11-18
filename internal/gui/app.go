@@ -30,7 +30,6 @@ import (
 	"github.com/yetone/magpie/internal/proc"
 	"github.com/yetone/magpie/internal/settings"
 	"github.com/yetone/magpie/internal/shortcut"
-	"github.com/yetone/magpie/internal/stats"
 	"github.com/yetone/magpie/internal/update"
 	"github.com/yetone/magpie/internal/webview2env"
 )
@@ -402,7 +401,6 @@ func Run(version string, showMain bool, link string) error {
 	// the app has started (applyZoom)
 	h.textSize.Store(int64(settings.Shared().TextSize))
 	zoom := h.zoom()
-	go stats.Run(version, "app")
 	handler := devShell(h)
 	ownPage := handler == nil
 	var gw *gateway.Server

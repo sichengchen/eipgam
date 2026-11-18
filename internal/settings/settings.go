@@ -560,12 +560,6 @@ type Settings struct {
 	// plugin whose own CLI opens its page (Grok Build on macOS and
 	// Windows) still does: magpie can't stop that.
 	SignInLinkOnly bool `json:"signInLinkOnly,omitempty"`
-	// NoStats stops the one event a day that counts magpie's users (see
-	// internal/stats).
-	NoStats bool `json:"noStats,omitempty"`
-	// NoUsageStats keeps which agents, providers and models magpie is
-	// used with out of that event, which then counts the user only.
-	NoUsageStats bool `json:"noUsageStats,omitempty"`
 	// AgentTelemetryOff turns off the telemetry of every agent with a
 	// switch for it, an agent found later too, over each agent's own
 	// Telemetry row (agent/telemetry_all.go; OipsAnthony on X). Set only

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy · magpie docs</title>
-<meta name="description" content="What magpie sends on its own and where: the once-a-day user count, the update feed and other public lists, what usemagpie.ai sees, OTLP export, and every switch that turns them off.">
+<meta name="description" content="magpie sends no telemetry. What it does send on its own and where: the update feed and other public lists, what usemagpie.ai sees, OTLP export, and the switches that stop them.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fafafa">
 <script>
@@ -35,7 +35,7 @@
 <link rel="stylesheet" href="/docs.css">
 <meta property="og:site_name" content="magpie">
 <meta property="og:title" content="Privacy">
-<meta property="og:description" content="Everything magpie sends by itself, and how to turn it off.">
+<meta property="og:description" content="magpie sends no telemetry. Everything it does send by itself, and how to stop it.">
 <meta property="og:image" content="https://usemagpie.ai/img/og.png">
 <meta property="og:url" content="https://usemagpie.ai/docs/privacy">
 <meta name="twitter:card" content="summary_large_image">
@@ -46,7 +46,7 @@
   {
    "@type": "TechArticle",
    "headline": "Privacy",
-   "description": "What magpie sends on its own and where: the once-a-day user count, the update feed and other public lists, what usemagpie.ai sees, OTLP export, and every switch that turns them off.",
+   "description": "magpie sends no telemetry. What it does send on its own and where: the update feed and other public lists, what usemagpie.ai sees, OTLP export, and the switches that stop them.",
    "inLanguage": "en",
    "url": "https://usemagpie.ai/docs/privacy",
    "about": {
@@ -132,113 +132,38 @@
   <aside class="toc">
     <p>Privacy</p>
     <a href="#overview">Overview</a>
-    <a href="#count">The daily count</a>
-    <a href="#off">Turning it off</a>
     <a href="#files">Files on your computer</a>
     <a href="#site">What usemagpie.ai sees</a>
     <a href="#lists">Public lists magpie fetches</a>
     <a href="#otel">OTLP export</a>
     <a href="#masking">Masking what goes to providers</a>
-    <a href="#why">Why the count is on</a>
   </aside>
 
   <article>
     <p class="eyebrow" id="overview">Docs · Privacy</p>
     <h1>Privacy</h1>
-    <p class="lede">Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in that path. This page lists everything magpie sends by itself, beside those requests, and every switch that stops it. It is written from the code, which is linked in each section.</p>
+    <p class="lede">magpie sends no telemetry. It counts no users, makes no install id, and sends nothing about which agents, providers, models or plugins you use. Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in that path. This page lists everything magpie does send by itself, beside those requests, and the switches that stop it. It is written from the code, which is linked in each section.</p>
 
     <div class="table-wrap"><table>
       <tr><th>What</th><th>Where to</th><th>Off by default?</th><th>How to stop it</th></tr>
-      <tr><td><a href="#count">The daily count</a></td><td>PostHog (<code>us.i.posthog.com</code>)</td><td>On in releases; never in builds from source</td><td><span class="ui">Settings</span> → <span class="ui">Privacy</span>, <code>DO_NOT_TRACK=1</code></td></tr>
       <tr><td><a href="#site">Update checks</a>, release notes, the partner list, icons</td><td><code>usemagpie.ai</code></td><td>On</td><td><code>noAutoUpdate</code> for update checks; the rest are needed by the app</td></tr>
       <tr><td><a href="#lists">Model catalog and exchange rate</a></td><td><code>models.dev</code>, <code>open.er-api.com</code></td><td>On</td><td>Not switchable; nothing of yours is sent</td></tr>
       <tr><td><a href="#otel">OTLP export</a></td><td>A collector you name</td><td>Off</td><td>Leave it off</td></tr>
     </table></div>
 
-    <h2 id="count"><a class="anchor" href="#count">The daily count</a></h2>
-    <p>Once a day (UTC), a running release of magpie (the app, or <code>magpie serve</code>) sends one batch to PostHog, so we know how many people use it and which agents, providers and models to look after first. It is sent at start and then looked at every hour; a day already sent is skipped. Builds from source never send it.</p>
-    <p>The batch has one <code>magpie active</code> event with:</p>
-    <ul>
-      <li>a random id made up on your computer (32 hex characters, tied to nothing about you or the machine), sent as <code>distinct_id</code>;</li>
-      <li>magpie’s version, <code>kind</code> (<code>app</code> or <code>serve</code>), your system (<code>$os</code>) and architecture;</li>
-      <li>how many agents, providers and models it is used with, and how many routing groups (left out when you turn off sharing what you use).</li>
-    </ul>
-    <p>Unless you turn that part off, one <code>magpie uses</code> event follows for each agent, provider and model, by magpie’s own ids only (at most 50 of each):</p>
-    <ul>
-      <li><b>agents</b> connected to magpie: <code>claude</code>, <code>codex</code>. A WSL distro or an omp profile name is cut off (<code>omp</code>).</li>
-      <li><b>providers</b> that are on: a preset’s id (<code>deepseek</code>), a subscription’s (<code>codex</code>, <code>copilot</code>), a known community plugin’s (<code>plugin:kiro</code>). A provider you added yourself is only <code>custom</code>; any other plugin only <code>plugin</code>.</li>
-      <li><b>models</b> the connected agents are set to, as provider id and vendor model id (<code>deepseek/deepseek-v4</code>). On a key’s provider, a model id that <a href="https://models.dev">models.dev</a> doesn’t list (a local model, a fine-tune) is only <code>&lt;provider&gt;/other</code>; a model on your own provider is <code>custom</code>; a routing group is <code>group</code>.</li>
-    </ul>
-    <p>With them go <code>magpie partner</code> events: for each partner listed first in the add sheet, by its id, how many times on a day that has ended the sheet showed it, its row was opened, its key page was opened, and a provider was added from it (<code>what</code>: <code>shown</code>, <code>opened</code>, <code>keys</code>, <code>added</code>; at most 20 a day each, 5 adds). Counts only, never a provider of your own.</p>
-    <p id="plugins">With that part on, magpie also tells <code>usemagpie.ai</code>, on the same day, which of the plugins Discover lists are installed and on, so Discover can say how many use each one: <code>POST /api/plugins/report</code> with the same random id and the plugins’ npm names, or <code>github:owner/repo</code> for a repository tagged <code>magpie-plugin</code> (at most 50). A plugin from a folder, a private repository or a package Discover doesn’t list is never named. The same report names the MCP servers in your Library that an agent is given and that the Library’s market lists from what ships with magpie, by their market ids only (<code>context7</code>, <code>io.github.owner/name</code>; at most 50), so the market can put the most used first; a server of your own, or one found only by a search, is never named, nor its address, command or keys. A like on a plugin’s page goes as <code>POST /api/plugins/like</code> with the id, the plugin and whether it is on, and only for a plugin installed here; the plugins you liked are kept in <code>plugin-likes.json</code>. The site counts the ids that reported a plugin in the last 7 days, drops a report after 30 days, and keeps your address only hashed, for an hour, to limit how often it is asked. Discover reads the counts from <code>GET /api/plugins/stats</code>, which carries no id. The code is <a href="https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go">internal/stats/plugins.go</a> and <a href="https://github.com/yetone/magpie/blob/main/site/pluginstats.js">site/pluginstats.js</a>.</p>
-    <p>Every event carries <code>$process_person_profile: false</code>, so PostHog keeps no person profile for the id. No names, base URLs, accounts, keys, prompts, replies or usage are sent. A whole batch looks like this:</p>
-    <div class="code">
-      <span class="lang">POST https://us.i.posthog.com/batch/</span>
-      <button class="copy" data-copy="ex-payload">Copy</button>
-      <pre id="ex-payload">{
-  &quot;api_key&quot;: &quot;phc_nyDyYyrUTRGvNq5U7FBesCyM2j4GdKeqGp8ko7DBerTC&quot;,
-  &quot;batch&quot;: [
-    {
-      &quot;event&quot;: &quot;magpie active&quot;,
-      &quot;distinct_id&quot;: &quot;3f9c…(32 hex)&quot;,
-      &quot;timestamp&quot;: &quot;2026-10-13T08:00:00Z&quot;,
-      &quot;properties&quot;: {
-        &quot;version&quot;: &quot;0.1.1190&quot;, &quot;kind&quot;: &quot;app&quot;, &quot;$os&quot;: &quot;Mac OS X&quot;, &quot;arch&quot;: &quot;arm64&quot;,
-        &quot;agents&quot;: 2, &quot;providers&quot;: 3, &quot;models&quot;: 2, &quot;groups&quot;: 1,
-        &quot;$process_person_profile&quot;: false, &quot;distinct_id&quot;: &quot;3f9c…&quot;
-      }
-    },
-    { &quot;event&quot;: &quot;magpie uses&quot;, &quot;distinct_id&quot;: &quot;3f9c…&quot;, &quot;timestamp&quot;: &quot;2026-10-13T08:00:00Z&quot;,
-      &quot;properties&quot;: { &quot;kind&quot;: &quot;agent&quot;, &quot;id&quot;: &quot;claude&quot;, &quot;$process_person_profile&quot;: false, &quot;distinct_id&quot;: &quot;3f9c…&quot; } },
-    { &quot;event&quot;: &quot;magpie uses&quot;, &quot;properties&quot;: { &quot;kind&quot;: &quot;provider&quot;, &quot;id&quot;: &quot;custom&quot;, … } },
-    { &quot;event&quot;: &quot;magpie uses&quot;, &quot;properties&quot;: { &quot;kind&quot;: &quot;model&quot;, &quot;id&quot;: &quot;deepseek/deepseek-v4&quot;, … } },
-    { &quot;event&quot;: &quot;magpie partner&quot;, &quot;timestamp&quot;: &quot;2026-10-12T12:00:00Z&quot;,
-      &quot;properties&quot;: { &quot;id&quot;: &quot;&lt;partner id&gt;&quot;, &quot;what&quot;: &quot;shown&quot;, &quot;count&quot;: 3, &quot;day&quot;: &quot;2026-10-12&quot;, … } }
-  ]
-}</pre>
-    </div>
-    <p>The <code>api_key</code> is the project’s PostHog key; it can only send events, not read them. The code is <a href="https://github.com/yetone/magpie/blob/main/internal/stats/stats.go">internal/stats</a> and <a href="https://github.com/yetone/magpie/blob/main/internal/provider/partner_events.go">partner_events.go</a>.</p>
-
-    <h2 id="off"><a class="anchor" href="#off">Turning it off</a></h2>
-    <p>Each of these switches stops part or all of it:</p>
-    <ul>
-      <li><span class="ui">Settings</span> → <span class="ui">Privacy</span> → <span class="ui">Count me as a user</span> off, or <code>"noStats": true</code> in <code>settings.json</code> stops the whole daily count.</li>
-      <li><code>DO_NOT_TRACK=1</code> or <code>MAGPIE_NO_STATS=1</code> in magpie’s environment (any value but empty, <code>0</code> or <code>false</code>) stops the whole daily count, whatever the settings say.</li>
-      <li><span class="ui">Settings</span> → <span class="ui">Privacy</span> → <span class="ui">Share the agents, providers, models and plugins I use</span> off, or <code>"noUsageStats": true</code> leaves out the <code>magpie uses</code> and <code>magpie partner</code> events, the counts in <code>magpie active</code> and the <a href="#plugins">plugin report</a>; the id, version and system are still sent. Partner counts stop being kept too.</li>
-      <li><span class="ui">Settings</span> → <span class="ui">About</span> → <span class="ui">Automatic updates</span> off, or <code>"noAutoUpdate": true</code> stops magpie asking <code>usemagpie.ai</code> for a newer version by itself (it asks every 6 hours otherwise). This is not part of the count.</li>
-    </ul>
-    <p>A change in Settings takes effect at the next hourly look; no restart is needed. <code>settings.json</code> sits in magpie’s folder (see <a href="#files">below</a>):</p>
-    <div class="code">
-      <span class="lang">settings.json</span>
-      <button class="copy" data-copy="ex-settings">Copy</button>
-      <pre id="ex-settings">{
-  "noStats": true,
-  "noUsageStats": true,
-  "noAutoUpdate": true
-}</pre>
-    </div>
-    <p><code>MAGPIE_STATS_HOST</code> sends the count to another host instead (it is for testing, and also makes a build from source send).</p>
-
     <h2 id="files"><a class="anchor" href="#files">Files on your computer</a></h2>
-    <div class="table-wrap"><table>
-      <tr><th>File</th><th>What it is</th></tr>
-      <tr><td><code>install-id</code></td><td>The random id, made the first time the count is sent</td></tr>
-      <tr><td><code>stats-sent</code></td><td>The last day (UTC) the count went, so a day is sent once</td></tr>
-      <tr><td><code>plugin-likes.json</code></td><td>The plugins you liked in Discover</td></tr>
-      <tr><td><code>partner-counts.json</code> (in the cache folder)</td><td>Partner counts not yet sent, at most 14 days</td></tr>
-    </table></div>
-    <p><code>install-id</code> and <code>stats-sent</code> are in magpie’s folder: <code>~/.config/magpie</code> on macOS and Linux, <code>%USERPROFILE%\.config\magpie</code> on Windows, <code>$XDG_CONFIG_HOME/magpie</code> when that is set, and the data folder of a portable magpie. <code>partner-counts.json</code> is in <code>~/.cache/magpie</code> (<code>$XDG_CACHE_HOME/magpie</code>, or <code>cache</code> in a portable magpie’s data folder). You can delete any of them: a deleted <code>install-id</code> is replaced by a new random one at the next send, so you are counted as a new user; with the count off, none of them is written again.</p>
+    <p>magpie keeps no id and no count on your computer. Its settings, providers and usage stay in its folder: <code>~/.config/magpie</code> on macOS and Linux, <code>%USERPROFILE%\.config\magpie</code> on Windows, <code>$XDG_CONFIG_HOME/magpie</code> when that is set, and the data folder of a portable magpie. Two more things it writes are worth knowing about.</p>
     <p>The request archive (the <span class="ui">Request archive</span> switch on the <span class="ui">Usage</span> page, above the list of requests) is <b>off by default</b>. Turned on while sync has no S3 bucket, it keeps each gateway call’s headers and bodies, secrets masked as for the S3 archive, in <code>request-archive</code> in magpie’s folder, one file per call, readable by your user only. It grows to 1 GiB (<code>requestArchiveLocalMB</code> in settings.json) and the oldest calls are removed past that. The switch is this computer’s own: sync never turns it on at another computer. With an S3 bucket the calls go to the bucket instead, kept to 1 GiB there too (<code>requestArchiveMB</code>), the oldest removed past it, and nothing is written here. Delete the folder whenever you like.</p>
     <p>The app writes a log of what it did, <code>app.log</code>, in <code>~/Library/Logs/magpie</code> on macOS, <code>%LOCALAPPDATA%\magpie\logs</code> on Windows and <code>~/.local/state/magpie</code> on Linux (see <a href="/docs/start#log">Where is magpie’s log?</a>), readable by your user only. It names what magpie did and the errors it met, never keys, prompts or replies, and stays on your computer unless you send it. It is kept to 5 MiB, with one older file, <code>app.old.log</code>. Delete them whenever you like.</p>
 
     <h2 id="site"><a class="anchor" href="#site">What usemagpie.ai sees</a></h2>
-    <p>magpie asks its own site for a few things, whatever the privacy settings say, as any app asks its update server. None of these requests carries the install id or an account.</p>
+    <p>magpie asks its own site for a few things, as any app asks its update server. None of these requests carries an id or an account.</p>
     <ul>
-      <li><code>/api/latest</code>: the update feed, every 6 hours unless <code>noAutoUpdate</code> is on, with <code>?lang=</code> for the notes in your language, and <code>?channel=stable</code> or <code>?channel=daily</code> when <span class="ui">Settings</span> → <span class="ui">About</span> → <span class="ui">Update channel</span> is Stable or Daily; a fresh install asks <code>?channel=stable</code> once too, to stay on Stable when it is Stable’s version. Neither says who you are. <code>/api/notes</code> gives What’s new after an update.</li>
+      <li><code>/api/latest</code>: the update feed, every 6 hours by default, with <code>?lang=</code> for the notes in your language, and <code>?channel=stable</code> or <code>?channel=daily</code> when <span class="ui">Settings</span> → <span class="ui">About</span> → <span class="ui">Update channel</span> is Stable or Daily; a fresh install asks <code>?channel=stable</code> once too, to stay on Stable when it is Stable’s version. Neither says who you are. <code>/api/notes</code> gives What’s new after an update. <span class="ui">Settings</span> → <span class="ui">About</span> → <span class="ui">Automatic updates</span> off, or <code>"noAutoUpdate": true</code> in <code>settings.json</code>, stops magpie asking by itself; it then asks only when you check, in Settings or with <code>magpie update</code>.</li>
       <li><code>/files/&lt;version&gt;/&lt;file&gt;</code>: the release files an update and the installer download, served from Cloudflare R2. A file the site doesn’t hold is sent on to github.com. Nothing is counted.</li>
-      <li><code>/api/partners</code>: the add sheet’s partner list, every 6 hours. One fetch in ten is counted as a <code>magpie partners fetch</code> event, with the country Cloudflare gives, while a partner is listed.</li>
-      <li><code>/go/&lt;partner&gt;/site</code> and <code>/go/&lt;partner&gt;/keys</code>: a partner’s website and key-page links, opened in your browser, are counted (the partner, which link, a region, a country) as <code>magpie partner go</code> before you are sent on.</li>
-      <li><code>/api/plugins/stats</code>: Discover’s counts of how many use and like each plugin, and the Library market’s of how many use each MCP server, at most once an hour. It carries no id; the <a href="#plugins">plugin report</a> and likes do, and go only with sharing what you use on.</li>
+      <li><code>/api/partners</code>: the add sheet’s partner list, every hour. While a partner is listed, the site counts one fetch in ten as a <code>magpie partners fetch</code> event, with the country Cloudflare gives.</li>
+      <li><code>/go/&lt;partner&gt;/site</code> and <code>/go/&lt;partner&gt;/keys</code>: a partner’s website and key-page links, opened in your browser, are counted (the partner, which link, a region, a country) as <code>magpie partner go</code> before you are sent on. Neither event carries an id from the app, your address or an account.</li>
+      <li><code>/api/plugins/stats</code>: Discover’s counts of how many use and like each plugin, and the Library market’s of how many use each MCP server, at most once an hour. It carries no id. The counts come from other magpies; this one sends no report and no likes. The code is <a href="https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go">internal/stats/plugins.go</a>.</li>
       <li><code>/api/icon?url=…</code>: icons named by a plugin, an import link or the library are fetched through it, so their hosts see Cloudflare’s address, not yours. The worker passes the picture on and counts and keeps nothing.</li>
     </ul>
     <p>The site’s own pages (these docs, the home page) carry Cloudflare Web Analytics and PostHog Web Analytics (<code>us.i.posthog.com</code>), without cookies. PostHog keeps a random visitor id in your browser’s local storage for this site, so a return visit counts as the same visitor. It gets each page’s address, the page that sent you, what you click on the page (not what you type), how fast the page and its requests loaded, errors the page hit, your browser, system and screen size, the country and city your address is in, and a recording of the visit (what the page showed, mouse moves, clicks and scrolls, its console messages) with every input box masked; nothing at all when your browser sends Do Not Track or Global Privacy Control. PostHog’s requests go through this site, under <code>usemagpie.ai/r/</code>, which passes them and your address on to PostHog and keeps the site’s cookies. Following a <code>/download</code> link, or fetching <code>install.sh</code>, sends PostHog a count of its own: which file, your country, and whether a browser or a command asked; no id and no address. The app doesn’t load either. The code is <a href="https://github.com/yetone/magpie/blob/main/site/worker.js">site/worker.js</a>.</p>
@@ -264,9 +189,6 @@
       <li>The model sees the placeholder, not the value. A value a task needs as it is (a team address, a test key) goes under <span class="ui">Never mask</span>.</li>
     </ul>
     <p>How to turn it on, what each switch masks, an example and how to check it: <a href="/docs/masking">Privacy masking</a>.</p>
-
-    <h2 id="why"><a class="anchor" href="#why">Why the count is on</a></h2>
-    <p>magpie works with dozens of agents and providers, and is maintained by a small team. The daily count is how we know which of them people actually use, so they are kept working first. It is on in releases because counts from those who turn it on would be too few to tell that. In exchange it is kept small: a random id, built-in ids, numbers; one switch or <code>DO_NOT_TRACK=1</code> turns it off, builds from source never send it, and this page lists everything that goes.</p>
   </article>
 </main>
 
