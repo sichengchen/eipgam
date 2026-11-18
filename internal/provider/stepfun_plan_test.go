@@ -84,7 +84,6 @@ func stepfunTokens(account string, exp time.Time, activated bool) (string, strin
 func TestStepFunSite(t *testing.T) {
 	for base, want := range map[string]string{
 		"https://api.stepfun.ai/step_plan/v1": "ai",
-		"https://api.stepfun.com/v1":          "com",
 		"https://api.deepseek.com/v1":         "",
 	} {
 		if got := StepFunSite(Provider{Chat: base}); got != want {
@@ -222,7 +221,7 @@ func TestSaveStepFunPaste(t *testing.T) {
 // The bookmarklet knows both sites and the app id each page sends.
 func TestStepFunBookmarklet(t *testing.T) {
 	b := StepFunBookmarklet()
-	for _, want := range []string{"javascript:", `"https://platform.stepfun.ai":["ai","20700"]`, `"https://platform.stepfun.com":["com","10300"]`, stepfunPaste, "PassportService/RefreshToken"} {
+	for _, want := range []string{"javascript:", `"https://platform.stepfun.ai":["ai","20700"]`, stepfunPaste, "PassportService/RefreshToken"} {
 		if !strings.Contains(b, want) {
 			t.Errorf("bookmarklet lacks %s", want)
 		}

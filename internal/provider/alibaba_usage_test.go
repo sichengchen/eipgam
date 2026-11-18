@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -19,7 +20,7 @@ import (
 // openssl from the canonical request below
 func TestAliACSSignIsACS3(t *testing.T) {
 	now := time.Date(2026, 11, 12, 1, 2, 3, 0, time.UTC)
-	h := aliACSSign("AKID", "SECRET", "modelstudio.cn-beijing.aliyuncs.com", aliACSPath, aliACSAction, aliACSVersion, nil, now, "nonce1")
+	h := aliACSSign("AKID", "SECRET", "modelstudio.ap-southeast-1.aliyuncs.com", aliACSPath, aliACSAction, aliACSVersion, nil, now, "nonce1")
 	const empty = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 	if h["x-acs-content-sha256"] != empty || h["x-acs-date"] != "2026-11-12T01:02:03Z" {
 		t.Fatalf("%v", h)
@@ -31,7 +32,7 @@ func TestAliACSSignIsACS3(t *testing.T) {
 		t.Fatalf("Authorization %q", auth)
 	}
 	// another secret, another signature
-	if aliACSSign("AKID", "OTHER", "modelstudio.cn-beijing.aliyuncs.com", aliACSPath, aliACSAction, aliACSVersion, nil, now, "nonce1")["authorization"] == auth {
+	if aliACSSign("AKID", "OTHER", "modelstudio.ap-southeast-1.aliyuncs.com", aliACSPath, aliACSAction, aliACSVersion, nil, now, "nonce1")["authorization"] == auth {
 		t.Fatal("the secret doesn't sign")
 	}
 }
@@ -51,9 +52,10 @@ func TestAliReadWindows(t *testing.T) {
 
 func TestAliPlanSite(t *testing.T) {
 	for url, region := range map[string]string{
-		"https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1": "cn-beijing",
-		"https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic": "ap-southeast-1",
-		"https://token-plan.maas.qianwenaiapi.com/compatible-mode/v1":        "",
+		"https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1": "ap-southeast-1",
+		"https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic":     "ap-southeast-1",
+		// Bailian's plan in Beijing is mainland China's, which magpie leaves out
+		"https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1": "",
 		"https://token-plan.maas.qwencloudapi.com/compatible-mode/v1":        "",
 		"https://dashscope-intl.aliyuncs.com/compatible-mode/v1":             "",
 		"https://ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1":        "",
@@ -63,14 +65,11 @@ func TestAliPlanSite(t *testing.T) {
 			t.Errorf("%s: %v %q", url, ok, s.region)
 		}
 	}
-	if _, ok := aliPlanSite(Provider{Chat: "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1", Account: &Account{}}); ok {
+	if _, ok := aliPlanSite(Provider{Chat: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1", Account: &Account{}}); ok {
 		t.Error("an account is a plan's")
 	}
-	for _, id := range []string{"bailian-token-plan", "alibaba-token-plan"} {
-		p, err := FromPreset(id)
-		if err != nil || AccessKeyVendor(p) != "alibaba" {
-			t.Errorf("%s: %v", id, err)
-		}
+	if p, err := FromPreset("alibaba-token-plan"); err != nil || AccessKeyVendor(p) != "alibaba" {
+		t.Errorf("alibaba-token-plan: %q %v", AccessKeyVendor(p), err)
 	}
 }
 
@@ -93,7 +92,7 @@ func TestAliPlanQuotas(t *testing.T) {
 		mu.Lock()
 		defer mu.Unlock()
 		switch host {
-		case "modelstudio.cn-beijing.aliyuncs.com":
+		case "modelstudio.ap-southeast-1.aliyuncs.com":
 			if r.Method != http.MethodPost || r.URL.Path != aliACSPath || r.URL.RawQuery != "" || len(body) != 0 ||
 				r.Header.Get("x-acs-action") != aliACSAction || r.Header.Get("x-acs-version") != aliACSVersion {
 				t.Errorf("mint %s %s with %q", r.Method, r.URL, body)
@@ -116,12 +115,12 @@ func TestAliPlanQuotas(t *testing.T) {
 			}
 			mints++
 			io.WriteString(w, `{"cliAccessToken":"tok2"}`)
-		case "bailian-cs.console.aliyun.com":
+		case "bailian-singapore-cs.alibabacloud.com":
 			reads++
 			q := r.URL.Query()
 			f, _ := url.ParseQuery(string(body))
-			if r.Method != http.MethodPost || r.URL.Path != "/cli/api.json" || q.Get("action") != "BroadScopeAspnGateway" || q.Get("product") != "sfm_bailian" ||
-				q.Get("api") != aliUsageAPI || f.Get("region") != "cn-beijing" || !strings.Contains(f.Get("params"), aliUsageAPI) {
+			if r.Method != http.MethodPost || r.URL.Path != "/cli/api.json" || q.Get("action") != "IntlBroadScopeAspnGateway" || q.Get("product") != "sfm_bailian" ||
+				q.Get("api") != aliUsageAPI || f.Get("region") != "ap-southeast-1" || !strings.Contains(f.Get("params"), aliUsageAPI) {
 				t.Errorf("usage %s %s with %q", r.Method, r.URL, body)
 			}
 			// the first token is refused once: the reader makes another
@@ -144,36 +143,43 @@ func TestAliPlanQuotas(t *testing.T) {
 	t.Cleanup(func() { http.DefaultClient.Transport = old })
 	aliTokensMu.Lock()
 	// a token kept from before, which the console no longer takes
-	aliTokens = map[string]aliToken{"AK1 cn-beijing": {"tok1", time.Now()}}
+	aliTokens = map[string]aliToken{"AK1 ap-southeast-1": {"tok1", time.Now()}}
 	aliTokensMu.Unlock()
 	forgetPlanQuotas()
 	t.Cleanup(forgetPlanQuotas)
 
-	const cn = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
-	for _, p := range []Provider{
-		{ID: "bailian-token-plan", Name: "Bailian Token Plan", Chat: cn, Key: "sk-sp-key", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
+	const sg = "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+	keyed := []Provider{
+		{ID: "alibaba-token-plan", Name: "Alibaba Cloud Token Plan", Preset: "alibaba-token-plan", Chat: sg, Key: "sk-sp-key", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
 		// the same access key: one card
-		{ID: "bailian-copy", Name: "Bailian copy", Chat: cn, Key: "sk-sp-key", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
-		{ID: "bailian-bad", Name: "Bailian bad", Chat: cn, Key: "sk-sp-key", AccessKeyID: "AKbad", SecretAccessKey: "SKbad"},
-		// no access key for the Singapore region: a card that asks for it
-		{ID: "alibaba-token-plan", Name: "Alibaba Cloud Token Plan", Preset: "alibaba-token-plan", Chat: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1", Key: "sk-sp-key"},
+		{ID: "ali-copy", Name: "Alibaba copy", Chat: sg, Key: "sk-sp-key", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
+		{ID: "ali-bad", Name: "Alibaba bad", Chat: sg, Key: "sk-sp-key", AccessKeyID: "AKbad", SecretAccessKey: "SKbad"},
+	}
+	for _, p := range append(slices.Clone(keyed),
+		// no access key, in a region another provider has one for: no card
+		// of its own
+		Provider{ID: "ali-keyless", Name: "Alibaba keyless", Preset: "alibaba-token-plan", Chat: sg, Key: "sk-sp-key2"},
 		// not a plan's host
-		{ID: "qwen", Name: "Qwen", Chat: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", Key: "sk-x", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
-	} {
+		Provider{ID: "qwen", Name: "Qwen", Chat: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", Key: "sk-x", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
+	) {
 		if err := Save(p); err != nil {
 			t.Fatal(err)
 		}
 	}
-	got := map[string]SubscriptionQuota{}
-	for _, q := range PlanQuotas(context.Background()) {
-		if q.Provider == "bailian-token-plan" || q.Provider == "bailian-copy" || q.Provider == "bailian-bad" || q.Provider == "alibaba-token-plan" || q.Provider == "qwen" {
-			got[q.Provider] = q
+	cards := func() map[string]SubscriptionQuota {
+		got := map[string]SubscriptionQuota{}
+		for _, q := range PlanQuotas(context.Background()) {
+			if strings.HasPrefix(q.Provider, "ali") || q.Provider == "qwen" {
+				got[q.Provider] = q
+			}
 		}
+		return got
 	}
-	if len(got) != 3 {
+	got := cards()
+	if len(got) != 2 {
 		t.Fatalf("%+v", got)
 	}
-	q := got["bailian-token-plan"]
+	q := got["alibaba-token-plan"]
 	if q.Error != "" || len(q.Windows) != 3 || q.Windows[0].Name != "5 hours" || q.Windows[0].Used != 10 || q.Windows[2].Name != "Month" || q.Windows[2].Used != 30 {
 		t.Fatalf("%+v", q)
 	}
@@ -181,11 +187,21 @@ func TestAliPlanQuotas(t *testing.T) {
 		// tok1 refused, tok2 made and read once; AKbad's mint is refused
 		t.Errorf("mints %d, reads %d", mints, reads)
 	}
-	if b := got["bailian-bad"]; !strings.Contains(b.Error, "AccessKey") || strings.Contains(b.Error, "SKbad") {
+	if b := got["ali-bad"]; !strings.Contains(b.Error, "AccessKey") || strings.Contains(b.Error, "SKbad") {
 		t.Errorf("bad key: %+v", b)
 	}
-	if a := got["alibaba-token-plan"]; a.Error == "" || !strings.Contains(a.Error, "AccessKey") {
-		t.Errorf("keyless: %+v", a)
+
+	// no provider in the region has the access key: a card that asks for it
+	for _, p := range keyed {
+		p.Off = true
+		if err := Save(p); err != nil {
+			t.Fatal(err)
+		}
+	}
+	forgetPlanQuotas()
+	got = cards()
+	if a, ok := got["ali-keyless"]; len(got) != 1 || !ok || !a.NeedsAccessKey || !strings.Contains(a.Error, "AccessKey") {
+		t.Errorf("keyless: %+v", got)
 	}
 }
 
@@ -199,7 +215,7 @@ func TestAliPlanQuotas(t *testing.T) {
 func TestAliGatewayRAMNotAuthorised(t *testing.T) {
 	reply := `{"code":"200","data":{"success":false,"errorCode":"BailianGateway.Team.NotAuthorised","errorMsg":"team not authorised","requestId":"r1"}}`
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Host") != "bailian-cs.console.aliyun.com" {
+		if r.Header.Get("X-Host") != "bailian-singapore-cs.alibabacloud.com" {
 			t.Errorf("asked %s", r.Header.Get("X-Host"))
 		}
 		io.WriteString(w, reply)
@@ -209,7 +225,7 @@ func TestAliGatewayRAMNotAuthorised(t *testing.T) {
 	http.DefaultClient.Transport = rewrite{srv}
 	t.Cleanup(func() { http.DefaultClient.Transport = old })
 
-	_, err := aliGateway(context.Background(), "tok", aliSites["cn-beijing"])
+	_, err := aliGateway(context.Background(), "tok", aliSites["ap-southeast-1"])
 	if err == nil {
 		t.Fatal("no error")
 	}
@@ -219,7 +235,7 @@ func TestAliGatewayRAMNotAuthorised(t *testing.T) {
 		}
 	}
 	reply = `{"code":"200","data":{"success":false,"errorCode":"BailianGateway.Something.Else","errorMsg":"something else went wrong"}}`
-	if _, err := aliGateway(context.Background(), "tok", aliSites["cn-beijing"]); err == nil || err.Error() != "Alibaba Cloud's console: BailianGateway.Something.Else: something else went wrong" {
+	if _, err := aliGateway(context.Background(), "tok", aliSites["ap-southeast-1"]); err == nil || err.Error() != "Alibaba Cloud's console: BailianGateway.Something.Else: something else went wrong" {
 		t.Errorf("other refusal: %v", err)
 	}
 }

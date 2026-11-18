@@ -38,9 +38,6 @@ func TestPeakHours(t *testing.T) {
 	} {
 		for hm, peak := range edges {
 			tm := at(c.day, hm)
-			if got := PeakDeepSeek.At(tm); got != (peak && c.deepseek) {
-				t.Errorf("deepseek %s %s: peak %v", c.day, hm, got)
-			}
 			if got := PeakWeekdays.At(tm); got != (peak && c.weekdays) {
 				t.Errorf("weekdays %s %s: peak %v", c.day, hm, got)
 			}
@@ -50,8 +47,8 @@ func TestPeakHours(t *testing.T) {
 				if err != nil {
 					loc = time.FixedZone(z, map[string]int{"Asia/Shanghai": 8, "America/New_York": -4}[z]*3600)
 				}
-				if got := PeakDeepSeek.At(tm.In(loc)); got != (peak && c.deepseek) {
-					t.Errorf("deepseek %s %s in %s: peak %v", c.day, hm, z, got)
+				if got := PeakWeekdays.At(tm.In(loc)); got != (peak && c.weekdays) {
+					t.Errorf("weekdays %s %s in %s: peak %v", c.day, hm, z, got)
 				}
 			}
 			if Peak("").At(tm) {
@@ -59,7 +56,7 @@ func TestPeakHours(t *testing.T) {
 			}
 		}
 	}
-	if PeakDeepSeek.At(time.Time{}) {
+	if PeakWeekdays.At(time.Time{}) {
 		t.Error("a call with no time is at peak")
 	}
 }
@@ -114,7 +111,7 @@ func TestOllamaPeakHours(t *testing.T) {
 func TestPriceIn(t *testing.T) {
 	peak := time.Date(2026, 10, 29, 2, 0, 0, 0, time.UTC)
 	off := time.Date(2026, 10, 29, 12, 0, 0, 0, time.UTC)
-	flash := Price{Input: 0.15, Output: 0.6, CacheRead: 0.003, Peak: PeakDeepSeek}
+	flash := Price{Input: 0.15, Output: 0.6, CacheRead: 0.003, Peak: PeakWeekdays}
 	if got, want := flash.In(peak), (Price{Input: 0.3, Output: 1.2, CacheRead: 0.006}); !got.Same(want) {
 		t.Errorf("peak: %+v, want %+v", got, want)
 	}
@@ -139,21 +136,5 @@ func TestPriceIn(t *testing.T) {
 	}
 	if a, b := flash.In(peak).CostSplit(1e6, 1e6, 0, 0, 0), flash.In(off).CostSplit(1e6, 1e6, 0, 0, 0); a != 2*b {
 		t.Errorf("peak cost %v, off-peak %v: want twice", a, b)
-	}
-}
-
-// cnHolidays needs each year's days added once the State Council's notice
-// is out (each November): this fails in a year it doesn't have, so the
-// table is never silently a year behind.
-func TestCNHolidaysCoverThisYear(t *testing.T) {
-	if y := time.Now().In(chinaTime).Year(); len(cnHolidays[y]) == 0 {
-		t.Fatalf("cnHolidays has no %d: add the State Council's notice for it", y)
-	}
-	for y, days := range cnHolidays {
-		for _, d := range days {
-			if _, err := time.Parse("2006-01-02", time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC).Format("2006")+"-"+d); err != nil {
-				t.Errorf("%d %q: %v", y, d, err)
-			}
-		}
 	}
 }

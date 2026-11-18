@@ -44,21 +44,19 @@ import (
 	"github.com/yetone/magpie/internal/lastgood"
 )
 
-// stepfunSites are StepFun's two platforms, by the API host a provider uses.
+// stepfunSites are StepFun's platforms, by the API host a provider uses:
+// its international one alone (platform.stepfun.com, mainland China's,
+// is left out).
 var stepfunSites = map[string]struct{ platform, app string }{
-	"ai":  {"https://platform.stepfun.ai", "20700"},
-	"com": {"https://platform.stepfun.com", "10300"},
+	"ai": {"https://platform.stepfun.ai", "20700"},
 }
 
 // StepFunSite is which of StepFun's platforms the provider's key is for,
-// "ai" or "com", or "" for another vendor.
+// "ai", or "" for another vendor.
 func StepFunSite(p Provider) string {
 	for _, base := range []string{p.Chat, p.Anthropic, p.Responses} {
-		switch hostOf(base) {
-		case "api.stepfun.ai":
+		if hostOf(base) == "api.stepfun.ai" {
 			return "ai"
-		case "api.stepfun.com":
-			return "com"
 		}
 	}
 	return ""

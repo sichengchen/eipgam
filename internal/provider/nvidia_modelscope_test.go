@@ -17,7 +17,6 @@ func TestNvidiaModelScopePresets(t *testing.T) {
 		id, name, icon, catalog, chat, responses, keys string
 	}{
 		{"nvidia", "NVIDIA NIM", "nvidia-color", "nvidia", "https://integrate.api.nvidia.com/v1", "", "https://build.nvidia.com/settings/api-keys"},
-		{"modelscope", "ModelScope", "modelscope-color", "modelscope", "https://api-inference.modelscope.cn/v1", "https://api-inference.modelscope.cn/v1", "https://modelscope.cn/my/myaccesstoken"},
 	} {
 		p, err := FromPreset(c.id)
 		if err != nil {
@@ -36,10 +35,6 @@ func TestNvidiaModelScopePresets(t *testing.T) {
 		if im.Preset != c.id || im.Icon != c.icon {
 			t.Fatalf("%s imported: %+v", c.id, im)
 		}
-	}
-	// ModelScope is not DashScope: the Qwen presets stay where they were
-	if Preset("qwen-cn").Chat != "https://dashscope.aliyuncs.com/compatible-mode/v1" {
-		t.Fatal("qwen-cn moved")
 	}
 }
 

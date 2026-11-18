@@ -1,7 +1,6 @@
 package gateway
 
-// Alibaba's Token Plan (the Qwen AI platform's, Bailian's, Model Studio's
-// and Qwen Cloud's) reads text aloud and transcribes audio with its
+// Alibaba's Token Plan (Model Studio's and Qwen Cloud's) reads text aloud and transcribes audio with its
 // qwen-audio models at DashScope's own API, which has no OpenAI-style
 // /audio/speech or /audio/transcriptions (help.aliyun.com/zh/model-studio/
 // qwen-audio-tts-http-api and qwen-audio-asr-http-api, read 11-18):

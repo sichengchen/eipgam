@@ -76,7 +76,7 @@ func TestChatRelayPairsToolsForKimi(t *testing.T) {
 	f := &fake{t: t, reply: chatWholeOK, ctype: "application/json", refuse: kimiRefusePairs}
 	up := setup(t, provider.Chat, f)
 	if err := provider.Save(provider.Provider{ID: "kimi-code-cn", Name: "Kimi Code (China)", Key: "k", Models: []string{"k3"},
-		Preset: "kimi-code-cn", Chat: up.URL + "/v1"}); err != nil {
+		Preset: "kimi-code", Chat: up.URL + "/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	srv := New()

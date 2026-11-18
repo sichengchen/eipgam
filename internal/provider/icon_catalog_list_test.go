@@ -7,8 +7,7 @@ import "testing"
 func TestIconForCatalogFindsAListedCatalog(t *testing.T) {
 	for id, want := range map[string]string{
 		"stepfun-ai": "stepfun", "stepfun-ai-step-plan": "stepfun",
-		"stepfun": "stepfun", "stepfun-step-plan": "stepfun",
-		"xiaomi": "mimocode", "xiaomi-token-plan-cn": "mimocode",
+		"xiaomi": "mimocode", "xiaomi-token-plan-sgp": "mimocode",
 		"openai": "openai", "azure": "azure-color", "": "",
 	} {
 		if got := IconForCatalog(id); got != want {

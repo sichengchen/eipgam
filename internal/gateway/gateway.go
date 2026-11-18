@@ -3623,7 +3623,6 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	wentTier := ""   // the service tier the last try went out at (noteWireTier, #1784)
 	where := ""      // the last try's provider.Where, for the usage
 	again := 0       // times the last one left has been tried again
-	planAgain := 0   // times a group's member was asked again in place for the Qwen Token Plan's concurrency 429 (qwenPlanBusy)
 	resealed := 0    // what of the conversation another account sealed was taken out: its reasoning, then its compaction
 	repicked := 0    // times Copilot's Auto was asked again for a model the account is served
 	floored := false // the reply's length raised to what the provider takes
@@ -4142,10 +4141,6 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		} else if n := userOutput(c.p, c.model); n > 0 {
 			attemptBody = withMaxOutput(from, attemptBody, n)
 		}
-		// a request naming no reply limit, to an API that would cut it
-		// short (DeepSeek's 8K), asks for the model's own, relayed or
-		// translated (withOwnOutput)
-		attemptBody = withOwnOutput(c.p, c.model, from, attemptBody)
 		attemptBody = withThinkingRoom(c.p, c.model, from, attemptBody)
 		if roomFor == c.who()+"|"+c.model {
 			if b, ok := withReplyCap(from, attemptBody, roomCap); ok {
@@ -5224,26 +5219,6 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			small, smallW = elsewhereWeighed(small, smallW, c)
 			last = i == len(cands)-1
 		}
-		if wait, ok := passingFor(c, hw.code(), hw.header, hw.errBody(), planAgain); ok && !protected && !last && !hw.passing && !hw.turnedAway && hw.failed() && qwenPlanBusy(c.p, hw.code(), hw.errBody()) && !kept.tooQuiet(wait) && !kept.outlives(wait) {
-			// the Qwen Token Plan turned the request away for its
-			// concurrency, its quota far from used (pelikanade on X): the
-			// same account is asked again after a jittered moment, a few
-			// times, before the group moves on to its next member, the
-			// account resting then as for a rate limit (dashScopeRate)
-			try.Fail, try.Again = failRate, wait.Milliseconds()
-			s.trace.update(tr, func(t *Route) { t.Tries[len(t.Tries)-1] = try })
-			skipped = append(skipped, c.label()+": "+call.Error)
-			planAgain++
-			if pauseUntilReaddressed(r.Context(), wait, readdressedOf([]candidate{c})) {
-				i--
-				continue
-			}
-			call.Status, call.Error = canceled(r.Context())
-			try.Gone = true
-			s.trace.update(tr, func(t *Route) { t.Tries[len(t.Tries)-1] = try })
-			break
-		}
-		planAgain = 0
 		if wait, ok := passing(hw.code(), hw.header, hw.errBody(), again); ok && !protected && !last && hw.failed() && spentAfter(cands[i+1:]) {
 			// the others left are out of their allowance (Discord, waroy: a
 			// Codex account run out, Grok busy a moment): this one is the
@@ -5481,7 +5456,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 				forbade = append(forbade, forbidden{c: c, rest: rest, try: at, words: words5xx})
 			}
 			skipped = append(skipped, c.label()+": "+call.Error)
-			if waitsOf(c.patience, patienceFallback) > 0 && !hw.turnedAway && busyFor(c, hw.code(), hw.errBody()) && !routedThere(hw.header) {
+			if waitsOf(c.patience, patienceFallback) > 0 && !hw.turnedAway && busy(hw.code(), hw.errBody()) && !routedThere(hw.header) {
 				busyNow = noteBusy(busyNow, c, hw.header)
 			}
 			continue
@@ -5498,9 +5473,9 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		// its allowance, asked only as the one back soonest, isn't: the
 		// members before it were asked again as the last that may answer
 		// (spentAfter) and the agent is told theirs
-		lastSpent := last && isGroup && len(busyNow) > 0 && !hw.passing && hw.failed() && !busyFor(c, hw.code(), hw.errBody()) &&
+		lastSpent := last && isGroup && len(busyNow) > 0 && !hw.passing && hw.failed() && !busy(hw.code(), hw.errBody()) &&
 			slices.Contains([]string{failQuota, failCredit}, failure(hw.code(), hw.errBody())) && !spentAfter([]candidate{c})
-		if _, same := passingFor(c, hw.code(), hw.header, hw.errBody(), again); last && patience > 0 && !protected && !sameRefusal && !hw.turnedAway && !hw.refused && hw.failed() && (busyFor(c, hw.code(), hw.errBody()) && (!routedThere(hw.header) || len(busyNow) > 0) || lastSpent) &&
+		if _, same := passing(hw.code(), hw.header, hw.errBody(), again); last && patience > 0 && !protected && !sameRefusal && !hw.turnedAway && !hw.refused && hw.failed() && (busy(hw.code(), hw.errBody()) && (!routedThere(hw.header) || len(busyNow) > 0) || lastSpent) &&
 			(isGroup || !codexReset(hw.code(), hw.errBody())) &&
 			(len(busyNow) > 0 || waitsOf(c.patience, patienceFallback) > 0 && !same) {
 			// every member has failed, each in a way that passes — busy,
@@ -5552,7 +5527,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 				break
 			}
 		}
-		if wait, ok := passingFor(c, hw.code(), hw.header, hw.errBody(), again); ok && !protected && !sameRefusal && !hw.turnedAway && hw.failed() && waitFrom.IsZero() && !kept.tooQuiet(wait) && !kept.outlives(wait) {
+		if wait, ok := passing(hw.code(), hw.header, hw.errBody(), again); ok && !protected && !sameRefusal && !hw.turnedAway && hw.failed() && waitFrom.IsZero() && !kept.tooQuiet(wait) && !kept.outlives(wait) {
 			// nobody else is left: the same one again, after a moment (not
 			// what Antigravity turned away: it turns it away again; nor
 			// once the group's patience is spent)
@@ -5900,7 +5875,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		}
 		if up := upBytesOf(r.Context()); up != nil {
 			rec.UpBytes, rec.PlainBytes, rec.Socket = up.wire, up.plain, up.socket
-			rec.DownBytes, rec.ImageFilesSaved, rec.ImageFiles = up.downOf(), up.saved, up.images
+			rec.DownBytes = up.downOf()
 			rec.UpParts = upParts(prompt, up)
 		}
 		failedWith(&rec, call.Status, call.Error, call.Usage.ErrType)
@@ -6242,10 +6217,6 @@ func (s *Server) forward(ctx context.Context, p provider.Provider, to provider.P
 	if _, err := keySlot(ctx); err != nil {
 		return nil, err
 	}
-	if p.ImageFilesAt(to) {
-		// which images a try named by file (deepseek_files.go)
-		ctx = context.WithValue(ctx, dsSentKey{}, &dsSent{})
-	}
 	res, err = s.forwardOnce(ctx, p, to, path, body, in)
 	if err != nil {
 		// a Remote magpie whose computer came back at another address
@@ -6254,13 +6225,6 @@ func (s *Server) forward(ctx context.Context, p provider.Provider, to provider.P
 			p = q
 			res, err = s.forwardOnce(ctx, p, to, path, body, in)
 		}
-	}
-	if err == nil && res.StatusCode >= 400 {
-		// a file DeepSeek no longer holds: uploaded again, or the
-		// images sent inline (deepseek_files.go). The file id was
-		// magpie's, so this one is asked again whatever the provider's
-		// errors setting
-		res, err = s.dsRetryGone(ctx, p, to, path, body, in, res)
 	}
 	if p.PassesErrors() {
 		// its errors are the client's to deal with (errors=pass): asked
@@ -6337,9 +6301,7 @@ func (s *Server) forward(ctx context.Context, p provider.Provider, to provider.P
 
 // forwardOnce is one request to the provider, as forward makes it.
 func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provider.Protocol, path string, body []byte, in http.Header) (*http.Response, error) {
-	reqCtx := ctx
 	ctx = s.metered(p.Via(ctx), p, "")
-	body = deepseekToolPatterns(p, to, body)
 	body = grokToolPatterns(p, to, body)
 	body = deepseekTokenField(p, to, body)
 	body = s.chatTokenField(p, to, body)
@@ -6358,9 +6320,6 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 	// the tool turns' thinking a provider's model asked for before
 	// (thinking_back.go)
 	body = s.withThinkingBack(p, to, body)
-	// DeepSeek's own API: inline images it holds for this key named by
-	// file id, uploaded once (deepseek_files.go)
-	body, byFile := s.withDeepSeekFiles(reqCtx, p, to, path, body)
 	// under the byte cap the provider refused a larger request over,
 	// its oldest images left out (body_cap.go)
 	body = s.withinCap(p, to, path, body)
@@ -6402,11 +6361,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		if deferredOutUpFront(p, to, body) {
 			// Claude Code's deferred-tool blocks, for which Kimi's
 			// Anthropic endpoint turns the whole request away with a 400
-			// that names nothing to learn from (#2042). DeepSeek's own
-			// Anthropic endpoint now takes a tool_addition at no position
-			// it can appear in (#5404, a 2026-11-05 check against
-			// api.deepseek.com), so its blocks come out up front too,
-			// not after a refusal taught it. OpenCode's
+			// that names nothing to learn from (#2042). OpenCode's
 			// DeepSeek route hides the refusal behind a 422 "Endpoint
 			// is unavailable."; other OpenCode models keep their blocks.
 			body = withoutDeferredTools(body)
@@ -6419,9 +6374,6 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		}
 		// auto mode's review goes to Claude alone (automode.go)
 		betas, body = s.serverReview(p, asked, body)
-		if byFile {
-			betas = dsBeta(betas)
-		}
 	}
 	// the conversation ${sessionId} and ${threadId} stand for in the
 	// user's own fields and headers for the provider (conversation.go);
@@ -6909,9 +6861,6 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 			body, searchFn = searchAsFunction(body)
 		}
 		body = forVendor(p, body, asksCompaction(r.Context()))
-		// Ark takes web_search in the shape its docs give, and only the include
-		// values it knows (search_ark.go)
-		body = forArkSearch(p, body)
 		if replay {
 			// its reasoning goes back as text, never left out: DeepSeek
 			// refuses a request without it (#1104)
@@ -7078,12 +7027,8 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 			// goes as it was sent, safeguards and all
 			body = autoModeClassifierBody(model, body)
 		}
-		if outputEffortAt(p.VendorHost(), model) {
-			levels := p.Efforts(model)
-			if len(levels) == 0 && p.VendorHost() == deepseekHost {
-				levels = deepseekEfforts
-			}
-			body = withOutputEffort(body, levels)
+		if outputEffortAt(model) {
+			body = withOutputEffort(body, p.Efforts(model))
 		}
 		if !s.fits(p.ID, offRefused(model), proto) {
 			// a model that refused thinking turned off before (below):
@@ -8671,12 +8616,6 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 			body = rewriteModel(body, wire)
 		}
 		path := upstreamPath(p, to, wire)
-		if req.Resume && to == provider.Chat && chatPrefill(p.VendorHost(), model) == "prefix" {
-			// DeepSeek serves its prefix mode under /beta, beside the /v1
-			// the base carries
-			p.Chat = strings.TrimSuffix(p.Chat, "/v1")
-			path = "/beta" + path
-		}
 		fctx := ctx
 		if p.IsPlugin() && req.Effort != "" {
 			// the effort picked, which a plugin's model with variants is
@@ -10000,7 +9939,7 @@ func build(proto provider.Protocol, r *Request, model, host string, rejectTemp b
 		return buildGemini(r, model)
 	}
 	replay := anthropicReplaysThinking(host, model)
-	out := anthropicBody(r, model, host, replay)
+	out := anthropicBody(r, model, replay)
 	if replay {
 		// a tool call with no thinking before it, which DeepSeek turns
 		// the whole request away for (#1611)
@@ -10236,16 +10175,16 @@ func render(proto provider.Protocol, res Result, r *Request) []byte {
 // ---- small helpers ------------------------------------------------------------
 
 // dashScope reports whether p is Alibaba Cloud's Model Studio (DashScope,
-// Bailian, Qwen Cloud): Qwen's presets, or one of its hosts given as a
-// custom provider.
+// Qwen Cloud): Qwen's presets, or one of its hosts given as a custom
+// provider.
 func dashScope(p provider.Provider) bool {
 	switch p.VendorPreset() {
-	case "qwen", "qwen-cn", "qwen-token-plan", "bailian-token-plan", "alibaba-token-plan", "qwencloud", "qwencloud-token-plan":
+	case "qwen", "alibaba-token-plan", "qwencloud", "qwencloud-token-plan":
 		return true
 	}
 	h := p.VendorHost()
 	return strings.HasPrefix(h, "dashscope") && strings.HasSuffix(h, ".aliyuncs.com") ||
-		strings.HasSuffix(h, ".maas.aliyuncs.com") || h == "maas.qianwenaiapi.com" || strings.HasSuffix(h, ".maas.qianwenaiapi.com") ||
+		strings.HasSuffix(h, ".maas.aliyuncs.com") ||
 		h == "maas.qwencloudapi.com" || strings.HasSuffix(h, ".maas.qwencloudapi.com")
 }
 

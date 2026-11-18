@@ -23,7 +23,7 @@ func TestKimiCodeLoadedToolsReachKimi(t *testing.T) {
 		`data: {"id":"c1","choices":[{"delta":{},"finish_reason":"stop"}]}`,
 		`data: [DONE]`)}
 	up := setup(t, provider.Chat, f)
-	if err := provider.Save(provider.Provider{ID: "kimi-code-cn", Name: "Kimi Code (China)", Preset: "kimi-code-cn", Key: "k",
+	if err := provider.Save(provider.Provider{ID: "kimi-code-cn", Name: "Kimi Code (China)", Preset: "kimi-code", Key: "k",
 		Chat: up.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}); err != nil {
 		t.Fatal(err)
 	}

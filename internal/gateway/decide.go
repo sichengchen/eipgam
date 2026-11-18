@@ -536,7 +536,6 @@ func (s *Server) postDecideSent(ctx context.Context, p provider.Provider, model 
 		req.Header.Set("User-Agent", "magpie/"+Version)
 		passOnCaller(ctx, req)
 	}
-	p.DecideHeaders(req.Header)
 	if via == provider.ViaVercelEval {
 		// what the AI SDK's gateway provider sends with an evaluation
 		req.Header.Set("ai-gateway-protocol-version", "0.0.1")

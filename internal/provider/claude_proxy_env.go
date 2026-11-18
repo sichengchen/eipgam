@@ -22,12 +22,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/yetone/magpie/internal/settings"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/yetone/magpie/internal/settings"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"

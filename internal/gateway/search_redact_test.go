@@ -55,7 +55,7 @@ func TestSearchQueryMasked(t *testing.T) {
 
 	// a Kimi Code plan's search service
 	k := newKimiPlan(t)
-	kimi := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi", Chat: k.URL + "/coding/v1"}
+	kimi := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi", Chat: k.URL + "/coding/v1"}
 	if _, _, err := New().kimiSearch(context.Background(), kimi, query); err != nil {
 		t.Fatal(err)
 	}

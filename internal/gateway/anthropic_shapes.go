@@ -49,15 +49,14 @@ import (
 // put blocks of their own in a message: {"type":"tool_addition","tool":
 // {"type":"tool_reference","name":…}} (or a tool_definition) when a tool
 // is loaded, a tool_removal when one goes, and a tool_reference. DeepSeek's
-// Anthropic endpoint took a tool_addition naming a tool once (10-14), but
-// takes one at no position now: "`tool_addition` blocks can only be in
+// models take one at no position: "`tool_addition` blocks can only be in
 // `system` messages", and a system message's with "unknown variant
-// `tool_addition`, expected `text`" (#5404, checked against
-// api.deepseek.com on 2026-11-05), so its blocks come out before the
-// first ask (isDeepSeekAnthropic). A provider that refuses one is sent
-// none of them from then on (withoutDeferredTools); Kimi, whose 400
-// names nothing, is never sent them (forwardOnce, #2042). OpenCode's
-// DeepSeek route also names nothing: 422 "Endpoint is unavailable.".
+// `tool_addition`, expected `text`" (#5404, checked on 2026-11-05). A
+// provider that refuses one is sent none of them from then on
+// (withoutDeferredTools); Kimi, whose 400 names nothing, is never sent
+// them (forwardOnce, #2042). OpenCode's DeepSeek route also names
+// nothing: 422 "Endpoint is unavailable.", so its blocks come out before
+// the first ask too.
 //
 // ToolSearch's answer is a tool_result whose content is tool_reference
 // blocks alone — or, in newer builds, the loaded tool's definition itself,
@@ -818,9 +817,8 @@ func withRefsAsText(body []byte) []byte {
 // deferredOutUpFront is a provider sent no deferred-tool block from the
 // first ask (withoutDeferredTools), as forwardOnce sends it: Kimi's
 // Anthropic endpoint turns the whole request away with a 400 that names
-// nothing to learn from (#2042), DeepSeek's own takes a tool_addition at
-// no position (#5404), and OpenCode's DeepSeek route hides the refusal
-// behind a 422 "Endpoint is unavailable.".
+// nothing to learn from (#2042), and OpenCode's DeepSeek route hides the
+// refusal behind a 422 "Endpoint is unavailable.".
 func deferredOutUpFront(p provider.Provider, to provider.Protocol, body []byte) bool {
-	return isKimi(p, to) || isDeepSeekAnthropic(p, to) || p.IsOpenCode() && strings.Contains(strings.ToLower(modelOf(body)), "deepseek")
+	return isKimi(p, to) || p.IsOpenCode() && strings.Contains(strings.ToLower(modelOf(body)), "deepseek")
 }

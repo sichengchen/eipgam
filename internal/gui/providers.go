@@ -227,11 +227,6 @@ type providerJSON struct {
 	// a Remote magpie's models named by the provider serving each there
 	// (provider.UpstreamProviders, lcc580 on X)
 	UpstreamProviders bool `json:"upstreamProviders,omitempty"`
-	// DeepSeek's own API sent an agent's images inline on every turn, not
-	// once by file id (provider.ImageFilesOff, #5407); TakesImageFiles:
-	// it is DeepSeek's own API, so the editor offers it
-	ImageFilesOff   bool `json:"imageFilesOff"`
-	TakesImageFiles bool `json:"takesImageFiles,omitempty"`
 	// Codex's compaction asked of it as Codex sent it, its sealed item
 	// back as it came (provider.NativeCompaction, #1099); CarriesCompaction: its
 	// wire can carry it, so the editor offers it
@@ -323,18 +318,11 @@ type providerJSON struct {
 	// a StepFun provider's Step Plan windows, told only to a platform
 	// sign-in: which site's, and whether one is kept
 	StepPlan *stepPlanJSON `json:"stepPlan,omitempty"`
-	// a Qwen AI platform Token Plan's windows, told only to a sign-in on
-	// the platform: whether magpie has one, and whose
-	QianwenPlan *qianwenPlanJSON `json:"qianwenPlan,omitempty"`
-	// a Baidu Qianfan Token Plan Personal's month, told only to a sign-in
-	// on Baidu Cloud's console, brought from the user's browser as
-	// StepFun's is: whether one is kept, and where and how to get one
-	QianfanPlan *stepPlanJSON `json:"qianfanPlan,omitempty"`
 	// a Zhipu or Z.ai key's team, for a team's GLM Coding Plan (#236):
 	// set, if empty, for those providers alone, which the editor asks it of
 	ZhipuTeam *provider.ZhipuTeam `json:"zhipuTeam,omitempty"`
-	// a Volcengine account's access key or a Tencent Cloud account's
-	// SecretId and SecretKey, which its plan's windows are read with
+	// a Tencent Cloud account's SecretId and SecretKey or an Alibaba
+	// Cloud account's AccessKey, which its plan's windows are read with
 	// (provider.AccessKeyVendor): whether the provider takes one, whose,
 	// its ID, and whether a Secret is saved; never the Secret itself
 	AccessKey *accessKeyJSON `json:"accessKey,omitempty"`
@@ -548,7 +536,7 @@ type moveJSON struct {
 }
 
 // accessKeyJSON is a provider's account access key as the editor sees
-// it: whose ("volcengine", "tencent"), the ID, and whether a Secret is
+// it: whose ("tencent", "alibaba"), the ID, and whether a Secret is
 // saved, never the Secret.
 type accessKeyJSON struct {
 	Vendor    string `json:"vendor"`
@@ -557,9 +545,9 @@ type accessKeyJSON struct {
 }
 
 // presetAccessKey is whose account access key a preset's plans are read
-// with ("volcengine", "tencent", "" for none) and, when only some of its
+// with ("tencent", "alibaba", "" for none) and, when only some of its
 // regions are such a plan (Tencent Cloud's Token Plan 企业版 beside its
-// personal plan and pay as you go, #1574), their ids; nil when all are.
+// pay as you go, #1574), their ids; nil when all are.
 func presetAccessKey(pr provider.PresetDef) (string, []string) {
 	vendor := provider.AccessKeyVendor(provider.Provider{Chat: pr.Chat, Responses: pr.Responses, Anthropic: pr.Anthropic})
 	var ids []string
@@ -584,16 +572,6 @@ type stepPlanJSON struct {
 	SignedIn    bool   `json:"signedIn"`
 	URL         string `json:"url"`
 	Bookmarklet string `json:"bookmarklet"`
-	// Ended: the vendor has ended the kept sign-in, and a new one is asked
-	// for (Baidu Qianfan's alone tells it)
-	Ended bool `json:"ended,omitempty"`
-}
-
-// qianwenPlanJSON: whether magpie has a sign-in to the Qwen AI platform
-// for the provider, and its account
-type qianwenPlanJSON struct {
-	SignedIn bool   `json:"signedIn"`
-	Account  string `json:"account,omitempty"`
 }
 
 type accountJSON struct {
@@ -979,7 +957,7 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 		ID: p.ID, Name: p.Name, Icon: p.Icon, IconFrom: p.IconFrom, Preset: p.Preset, Host: p.Host(),
 		Chat: p.Chat, Responses: p.Responses, Anthropic: p.Anthropic, Gemini: p.Gemini, Decide: p.Decide, BaseAPI: p.BaseAPI, ModelTest: p.ModelTest(), TestsAs: p.TestClients(), TestPicks: p.TestPicks(), DecideTest: p.AsksDecideModels(), MarksKinds: p.MarksKinds(),
 		Catalog: p.Catalog, Website: p.Website, KeysURL: p.KeysURL,
-		Proxy: p.Proxy, AccountProxies: p.AccountProxies, AccountModels: p.AccountModels, AccountCaps: p.AccountCaps, AccountWindowCaps: p.AccountWindowCaps, AccountWindowAmounts: p.AccountWindowAmounts, AccountNames: p.AccountNames, Headers: p.Headers, ExtraBody: p.ExtraBody, ReplyHeaders: p.ReplyHeaders, PassHeaders: p.PassHeaders, Searches: p.Searches, Cline: p.ClinePinnable(), PinUpstream: p.PinUpstream, Unredacted: p.Unredacted, CountFree: p.CountFree, Billing: p.Billing, BillingKind: p.BillingKind(), InsecureTLS: p.InsecureTLS, TakesInsecureTLS: p.TakesInsecureTLS(), HTTP1: p.HTTP1, ClientCert: tilde(p.ClientCert), ClientKey: tilde(p.ClientKey), ServerCA: tilde(p.ServerCA), TakesClientCert: p.TakesClientCert(), ServerPin: p.ServerPin, TakesServerPin: p.TakesServerPin(), Resolve: p.Resolve, TakesResolve: p.TakesResolve(), Socket: p.Socket, TakesSocket: p.TakesSocket(), LimitRestOff: p.LimitRestOff, UpstreamProviders: p.UpstreamProviders, ImageFilesOff: p.ImageFilesOff, TakesImageFiles: p.TakesImageFiles(), NativeCompaction: p.NativeCompaction, CarriesCompaction: p.CarriesCompaction(), PassUserAgent: !p.MagpieUserAgent, OwnClient: p.OwnClient(), PassErrors: p.PassErrors, TakesPassErrors: p.TakesPassErrors(), AuthHeader: p.AuthHeader, BothAuth: p.BothAuth(), BalanceURL: p.BalanceURL, BalancePath: p.BalancePath, BalanceMethod: p.BalanceMethod, NoBalanceProbe: p.NoBalanceProbe, ModelsURL: p.ModelsURL, ListOff: p.ListsOff(), TakesListOff: p.Account == nil && !p.IsPlugin() && !p.DecideOnly(), TakesModelHeaders: p.Account == nil, DecideAPIKind: p.DecideAPIKind(),
+		Proxy: p.Proxy, AccountProxies: p.AccountProxies, AccountModels: p.AccountModels, AccountCaps: p.AccountCaps, AccountWindowCaps: p.AccountWindowCaps, AccountWindowAmounts: p.AccountWindowAmounts, AccountNames: p.AccountNames, Headers: p.Headers, ExtraBody: p.ExtraBody, ReplyHeaders: p.ReplyHeaders, PassHeaders: p.PassHeaders, Searches: p.Searches, Cline: p.ClinePinnable(), PinUpstream: p.PinUpstream, Unredacted: p.Unredacted, CountFree: p.CountFree, Billing: p.Billing, BillingKind: p.BillingKind(), InsecureTLS: p.InsecureTLS, TakesInsecureTLS: p.TakesInsecureTLS(), HTTP1: p.HTTP1, ClientCert: tilde(p.ClientCert), ClientKey: tilde(p.ClientKey), ServerCA: tilde(p.ServerCA), TakesClientCert: p.TakesClientCert(), ServerPin: p.ServerPin, TakesServerPin: p.TakesServerPin(), Resolve: p.Resolve, TakesResolve: p.TakesResolve(), Socket: p.Socket, TakesSocket: p.TakesSocket(), LimitRestOff: p.LimitRestOff, UpstreamProviders: p.UpstreamProviders, NativeCompaction: p.NativeCompaction, CarriesCompaction: p.CarriesCompaction(), PassUserAgent: !p.MagpieUserAgent, OwnClient: p.OwnClient(), PassErrors: p.PassErrors, TakesPassErrors: p.TakesPassErrors(), AuthHeader: p.AuthHeader, BothAuth: p.BothAuth(), BalanceURL: p.BalanceURL, BalancePath: p.BalancePath, BalanceMethod: p.BalanceMethod, NoBalanceProbe: p.NoBalanceProbe, ModelsURL: p.ModelsURL, ListOff: p.ListsOff(), TakesListOff: p.Account == nil && !p.IsPlugin() && !p.DecideOnly(), TakesModelHeaders: p.Account == nil, DecideAPIKind: p.DecideAPIKind(),
 		Ready: p.Ready(), Chosen: p.PicksOf(avail), Agents: make([]providerAgent, 0, len(agents)),
 		Fallback: p.Fallback, Routing: p.Routing, Sink: p.Sink, UseFirst: p.UseFirst, NoStandIn: p.NoStandIn, Affinity: p.Affinity, KeepLogin: p.KeepLogin, KeepLoginAs: p.KeepLoginAs, SwitchOnly: p.SwitchOnly, RestartApp: p.RestartApp, Self: p.SelfAnswered(), KeepSelf: p.KeepSelf, ThisDevice: p.ThisDevice, CapStop: p.CapStop, CapCareful: p.CapCareful, Unlisted: p.Unlisted, NoModels: p.ServesNone(), BestInFamily: p.BestInFamily && len(p.Models) == 0 && !p.NoModels, Off: p.Off, Contexts: p.Contexts,
 		MaxConcurrency: p.MaxConcurrency, PluginConcurrency: p.PluginConcurrency(), MaxAccounts: p.MaxAccounts, PluginAccounts: p.PluginAtOnce(), PriceRate: p.PriceRate, KeyPriceRates: p.KeyPriceRates,
@@ -1048,13 +1026,7 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 		}
 	}
 	if site := provider.StepFunSite(p); site != "" {
-		out.StepPlan = &stepPlanJSON{site, provider.StepFunSignedIn(p.ID), provider.StepFunSignInURL(site), provider.StepFunBookmarklet(), false}
-	}
-	if provider.QianwenPlan(p) {
-		out.QianwenPlan = &qianwenPlanJSON{provider.QianwenSignedIn(p.ID), provider.QianwenAccount(p.ID)}
-	}
-	if provider.QianfanPlan(p) {
-		out.QianfanPlan = &stepPlanJSON{"", provider.QianfanSignedIn(p.ID), provider.QianfanSignInURL, provider.QianfanBookmarklet(), provider.QianfanEnded(p.ID)}
+		out.StepPlan = &stepPlanJSON{site, provider.StepFunSignedIn(p.ID), provider.StepFunSignInURL(site), provider.StepFunBookmarklet()}
 	}
 	out.Key.Set = p.Key != ""
 	out.Key.Masked = provider.Mask(p.Key)
@@ -1918,10 +1890,6 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			// UpstreamProviders, on a Remote magpie, names its models by the
 			// provider serving each there; a save that leaves it out keeps it
 			UpstreamProviders *bool `json:"upstreamProviders"`
-			// ImageFilesOff is whether DeepSeek's own API is sent an
-			// agent's images inline (#5407); a save that leaves it out
-			// keeps it, as `magpie provider set <id> image-files=off` set it
-			ImageFilesOff *bool `json:"imageFilesOff"`
 			// PassErrors is whether its errors go to the agent as the
 			// vendor sent them (ne9ko9); a save that leaves it out keeps
 			// it, as `magpie provider set <id> errors=pass` set it
@@ -2394,9 +2362,6 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 				if req.UpstreamProviders != nil {
 					in.UpstreamProviders = *req.UpstreamProviders && in.IsRemoteMagpie()
 				}
-				if req.ImageFilesOff != nil {
-					in.ImageFilesOff = *req.ImageFilesOff
-				}
 				if req.PassErrors != nil {
 					in.PassErrors = *req.PassErrors
 				}
@@ -2457,13 +2422,6 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 					in.UpstreamProviders = *req.UpstreamProviders && in.IsRemoteMagpie()
 				} else if old != nil {
 					in.UpstreamProviders = old.UpstreamProviders
-				}
-				// DeepSeek's images sent inline, set here or with `magpie
-				// provider set <id> image-files=off` (#5407)
-				if req.ImageFilesOff != nil {
-					in.ImageFilesOff = *req.ImageFilesOff
-				} else if old != nil {
-					in.ImageFilesOff = old.ImageFilesOff
 				}
 				if req.PassErrors != nil {
 					in.PassErrors = *req.PassErrors
@@ -3692,101 +3650,6 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			return
 		}
 		if err := provider.SignOutStepFun(id); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeProvidersJSON(rw, providersState())
-	})
-	// Baidu Qianfan's Token Plan Personal: the console session the user
-	// copied from their browser, the provider's own
-	qianfanOf := func(rw http.ResponseWriter, r *http.Request) (*provider.Provider, bool) {
-		p, err := provider.Find(r.PathValue("id"))
-		if err != nil || !provider.QianfanPlan(*p) {
-			http.NotFound(rw, r)
-			return nil, false
-		}
-		return p, true
-	}
-	mux.HandleFunc("POST /api/qianfan/{id}/session", func(rw http.ResponseWriter, r *http.Request) {
-		p, ok := qianfanOf(rw, r)
-		if !ok {
-			return
-		}
-		var in struct{ Text string }
-		if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
-		defer cancel()
-		if err := provider.SaveQianfanPaste(p.Via(ctx), p.ID, in.Text); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeProvidersJSON(rw, providersState())
-	})
-	mux.HandleFunc("POST /api/qianfan/{id}/signout", func(rw http.ResponseWriter, r *http.Request) {
-		p, ok := qianfanOf(rw, r)
-		if !ok {
-			return
-		}
-		if err := provider.SignOutQianfan(p.ID); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeProvidersJSON(rw, providersState())
-	})
-	// the Qwen AI platform's Token Plan windows: a sign-in to the
-	// platform, approved in the user's browser, the provider's own
-	qianwenOf := func(rw http.ResponseWriter, r *http.Request) (string, bool) {
-		p, err := provider.Find(r.PathValue("id"))
-		if err != nil || !provider.QianwenPlan(*p) {
-			http.NotFound(rw, r)
-			return "", false
-		}
-		return p.ID, true
-	}
-	mux.HandleFunc("POST /api/qianwen/{id}/signin", func(rw http.ResponseWriter, r *http.Request) {
-		id, ok := qianwenOf(rw, r)
-		if !ok {
-			return
-		}
-		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
-		defer cancel()
-		u, err := provider.StartQianwenSignIn(ctx, id)
-		if err != nil {
-			fail(rw, err)
-			return
-		}
-		writeJSON(rw, struct {
-			URL string `json:"url"`
-		}{u})
-	})
-	mux.HandleFunc("GET /api/qianwen/{id}/signin", func(rw http.ResponseWriter, r *http.Request) {
-		id, ok := qianwenOf(rw, r)
-		if !ok {
-			return
-		}
-		state, why := provider.QianwenSignInState(id)
-		writeJSON(rw, struct {
-			State string `json:"state"`
-			Error string `json:"error,omitempty"`
-		}{state, why})
-	})
-	mux.HandleFunc("POST /api/qianwen/{id}/signin/cancel", func(rw http.ResponseWriter, r *http.Request) {
-		id, ok := qianwenOf(rw, r)
-		if !ok {
-			return
-		}
-		provider.CancelQianwenSignIn(id)
-		rw.WriteHeader(http.StatusNoContent)
-	})
-	mux.HandleFunc("POST /api/qianwen/{id}/signout", func(rw http.ResponseWriter, r *http.Request) {
-		id, ok := qianwenOf(rw, r)
-		if !ok {
-			return
-		}
-		if err := provider.SignOutQianwen(id); err != nil {
 			fail(rw, err)
 			return
 		}

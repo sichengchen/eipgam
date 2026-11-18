@@ -23,7 +23,7 @@ func TestTC3SignMatchesDoc(t *testing.T) {
 	// the doc sends the name as JSON escapes (a backslash and u672a…), not UTF-8
 	esc := strings.ReplaceAll("#u672a#u547d#u540d", "#", `\`)
 	payload := []byte(`{"Limit": 1, "Filters": [{"Values": ["` + esc + `"], "Name": "instance-name"}]}`)
-	if got := volcHex(payload); got != "35e9c5b0e3ae67532d3c9f17ead6c90222632e5b1ff7f6e89887f1398934f064" {
+	if got := sha256Hex(payload); got != "35e9c5b0e3ae67532d3c9f17ead6c90222632e5b1ff7f6e89887f1398934f064" {
 		t.Fatalf("payload hash %s", got)
 	}
 	id, key := "AKID"+strings.Repeat("*", 32), strings.Repeat("*", 32)
@@ -40,21 +40,25 @@ func TestTC3SignMatchesDoc(t *testing.T) {
 }
 
 // Only the enterprise plan's endpoints take an access key: /plan on
-// TokenHub's hosts. Its pay as you go, the personal plan, another vendor
-// and an account don't; Volcengine's stay Volcengine's.
+// TokenHub's Singapore host. Its pay as you go, its China host (left out
+// with the rest of mainland China's), the personal plan, another vendor
+// and an account don't; Alibaba's stay Alibaba's.
 func TestTencentPlanRegion(t *testing.T) {
 	for _, c := range []struct {
 		p      Provider
 		region string
 	}{
-		{Provider{Chat: "https://tokenhub.tencentmaas.com/plan/v3"}, "ap-guangzhou"},
-		{Provider{Anthropic: "https://tokenhub.tencentmaas.com/plan/anthropic"}, "ap-guangzhou"},
+		{Provider{Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3"}, "ap-singapore"},
+		{Provider{Anthropic: "https://tokenhub-intl.tencentmaas.com/plan/anthropic"}, "ap-singapore"},
 		{Provider{Responses: "https://TokenHub-Intl.tencentmaas.com/plan/v3/"}, "ap-singapore"},
+		{Provider{Chat: "https://tokenhub-intl.tencentmaas.com/v1"}, ""},
+		{Provider{Chat: "https://tokenhub.tencentmaas.com/plan/v3"}, ""},
+		{Provider{Anthropic: "https://tokenhub.tencentmaas.com/plan/anthropic"}, ""},
 		{Provider{Chat: "https://tokenhub.tencentmaas.com/v1"}, ""},
 		{Provider{Chat: "https://api.lkeap.cloud.tencent.com/plan/v3"}, ""},
 		{Provider{Chat: "https://relay.example.com/plan/v3"}, ""},
-		{Provider{Chat: "https://tokenhub.tencentmaas.com/planx/v3"}, ""},
-		{Provider{Chat: "https://tokenhub.tencentmaas.com/plan/v3", Account: &Account{}}, ""},
+		{Provider{Chat: "https://tokenhub-intl.tencentmaas.com/planx/v3"}, ""},
+		{Provider{Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3", Account: &Account{}}, ""},
 	} {
 		region, ok := tencentPlanRegion(c.p)
 		if region != c.region || ok != (c.region != "") || TakesTencentAccessKey(c.p) != ok {
@@ -65,8 +69,9 @@ func TestTencentPlanRegion(t *testing.T) {
 		p      Provider
 		vendor string
 	}{
-		{Provider{Chat: "https://tokenhub.tencentmaas.com/plan/v3"}, "tencent"},
-		{Provider{Chat: "https://ark.cn-beijing.volces.com/api/coding/v3"}, "volcengine"},
+		{Provider{Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3"}, "tencent"},
+		{Provider{Chat: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"}, "alibaba"},
+		{Provider{Chat: "https://tokenhub.tencentmaas.com/plan/v3"}, ""},
 		{Provider{Chat: "https://api.lkeap.cloud.tencent.com/plan/v3"}, ""},
 	} {
 		if got := AccessKeyVendor(c.p); got != c.vendor {
@@ -131,7 +136,8 @@ func TestTencentPlanWindow(t *testing.T) {
 // from tokenhub.tencentcloudapi.com only, each request signed as TC3 with
 // the SecretKey and never with the plan's own key; a refused key says
 // what to check, an account with no plan says so, and the personal plan,
-// a provider with no SecretKey and one switched off have none.
+// a plan on TokenHub's China host, a provider with no SecretKey and one
+// switched off have none.
 func TestTencentPlanQuotas(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()
@@ -201,15 +207,16 @@ func TestTencentPlanQuotas(t *testing.T) {
 	forgetPlanQuotas()
 	t.Cleanup(forgetPlanQuotas)
 
-	ent, intl := "https://tokenhub.tencentmaas.com/plan/v3", "https://tokenhub-intl.tencentmaas.com/plan/v3"
+	ent := "https://tokenhub-intl.tencentmaas.com/plan/v3"
 	for _, p := range []Provider{
-		{ID: "tencent-cloud", Name: "Tencent Cloud", Chat: ent, Anthropic: "https://tokenhub.tencentmaas.com/plan/anthropic", Key: "sk-tp-1", AccessKeyID: "AKIDone", SecretAccessKey: "SK1"},
+		{ID: "tencent-cloud", Name: "Tencent Cloud", Chat: ent, Anthropic: "https://tokenhub-intl.tencentmaas.com/plan/anthropic", Key: "sk-tp-1", AccessKeyID: "AKIDone", SecretAccessKey: "SK1"},
 		// the same key and region again: asked once
 		{ID: "tc-copy", Name: "Tencent copy", Chat: ent, Key: "sk-tp-1", AccessKeyID: "AKIDone", SecretAccessKey: "SK1"},
-		{ID: "tc-intl", Name: "Tencent intl", Chat: intl, Key: "sk-tp-2", AccessKeyID: "AKIDtwo", SecretAccessKey: "SK2"},
+		{ID: "tc-two", Name: "Tencent two", Chat: ent, Key: "sk-tp-2", AccessKeyID: "AKIDtwo", SecretAccessKey: "SK2"},
 		{ID: "tc-none", Name: "Tencent none", Chat: ent, Key: "sk-tp-3", AccessKeyID: "AKIDnone", SecretAccessKey: "SK4"},
 		{ID: "tc-bad", Name: "Tencent bad", Chat: ent, Key: "sk-tp-4", AccessKeyID: "AKIDbad", SecretAccessKey: "wrong"},
 		{ID: "tc-personal", Name: "Tencent personal", Chat: "https://api.lkeap.cloud.tencent.com/plan/v3", Key: "sk-tp-5", AccessKeyID: "AKIDone", SecretAccessKey: "SK1"},
+		{ID: "tc-china", Name: "Tencent China", Chat: "https://tokenhub.tencentmaas.com/plan/v3", Key: "sk-tp-8", AccessKeyID: "AKIDone", SecretAccessKey: "SK1"},
 		{ID: "tc-nosecret", Name: "Tencent half", Chat: ent, Key: "sk-tp-6", AccessKeyID: "AKIDhalf"},
 		{ID: "tc-off", Name: "Tencent off", Chat: ent, Key: "sk-tp-7", AccessKeyID: "AKIDoff", SecretAccessKey: "SKoff", Off: true},
 	} {
@@ -238,15 +245,15 @@ func TestTencentPlanQuotas(t *testing.T) {
 		one.Windows[0].ResetsAt == nil || !one.Windows[0].ResetsAt.Equal(time.Date(2026, 4, 30, 16, 0, 0, 0, time.UTC)) {
 		t.Errorf("one plan: %+v", one)
 	}
-	alpha := by["tc-intl|alpha"]
+	alpha := by["tc-two|alpha"]
 	if alpha.Error != "" || len(alpha.Windows) != 1 || alpha.Windows[0].Used != 25 || alpha.Windows[0].Unit != "tokens" || alpha.Windows[0].ResetsAt == nil {
 		t.Errorf("alpha: %+v", alpha)
 	}
-	beta := by["tc-intl|beta"]
+	beta := by["tc-two|beta"]
 	if beta.Plan != "Token Plan Enterprise · isolate, arrears" || !strings.Contains(beta.Error, "told no quota") {
 		t.Errorf("beta: %+v", beta)
 	}
-	if q := by["tc-none|"]; !strings.Contains(q.Error, "no Token Plan Enterprise in ap-guangzhou") {
+	if q := by["tc-none|"]; !strings.Contains(q.Error, "no Token Plan Enterprise in ap-singapore") {
 		t.Errorf("no plan: %+v", q)
 	}
 	if q := by["tc-bad|"]; !strings.Contains(q.Error, "AuthFailure.SignatureFailure") || !strings.Contains(q.Error, "SecretId and SecretKey") {
@@ -255,9 +262,9 @@ func TestTencentPlanQuotas(t *testing.T) {
 	mu.Lock()
 	defer mu.Unlock()
 	for k, want := range map[string]int{
-		"AKIDone ap-guangzhou DescribeTokenPlanList": 1, "AKIDone ap-guangzhou DescribeTokenPlan": 1,
+		"AKIDone ap-singapore DescribeTokenPlanList": 1, "AKIDone ap-singapore DescribeTokenPlan": 1,
 		"AKIDtwo ap-singapore DescribeTokenPlanList": 1, "AKIDtwo ap-singapore DescribeTokenPlan": 2,
-		"AKIDnone ap-guangzhou DescribeTokenPlanList": 1,
+		"AKIDnone ap-singapore DescribeTokenPlanList": 1,
 	} {
 		if asked[k] != want {
 			t.Errorf("%s asked %d times, want %d (%v)", k, asked[k], want, asked)
@@ -272,7 +279,7 @@ func TestTencentPlanQuotas(t *testing.T) {
 // its key goes as typed, as a Bearer token on chat and Responses, with no
 // Tencent Cloud signing, and nothing asks it for a SecretId and SecretKey.
 func TestCustomTokenHubIsSentAsTyped(t *testing.T) {
-	p := Provider{ID: "mine", Chat: "https://tokenhub.tencentmaas.com/plan/v3", Key: "sk-tFAKEueJF"}
+	p := Provider{ID: "mine", Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3", Key: "sk-tFAKEueJF"}
 	for _, proto := range []Protocol{Chat, Responses} {
 		if h := AuthHeaders(p, proto); len(h) != 1 || h["Authorization"] != "Bearer sk-tFAKEueJF" {
 			t.Errorf("%s: %v", proto, h)

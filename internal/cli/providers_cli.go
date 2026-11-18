@@ -32,10 +32,10 @@ const providerUsage = `usage:
   magpie providers                        list providers, keys and who uses them
   magpie presets                          list the vendors magpie knows out of the box
   magpie provider <id>                    show one provider and its models
-  magpie provider add <preset> <key>      add a preset vendor   e.g. magpie provider add deepseek sk-…
-                                          again, it adds another (deepseek-2); k=v pairs too: id, name, header.X-Foo
+  magpie provider add <preset> <key>      add a preset vendor   e.g. magpie provider add moonshot sk-…
+                                          again, it adds another (moonshot-2); k=v pairs too: id, name, header.X-Foo
   magpie provider add <name> k=v…         add a custom vendor   k: url, anthropic, responses, gemini, decide, key, models, catalog, icon, header.X-Foo, balance, balance.path, balance.method, balance.token, models.url, list, search, user-agent,
-                                          access.key, access.secret (a Volcengine access key, or a Tencent Cloud SecretId and SecretKey, for its plan's windows)
+                                          access.key, access.secret (a Tencent Cloud SecretId and SecretKey, or an Alibaba Cloud AccessKey, for its plan's windows)
   magpie provider set <id> k=v…           change a provider's settings, with the same k=v pairs as add;
                                           codex=as-sent sends Codex's Responses requests as Codex sent them
                                           (a relay that checks they are Codex's own), codex=default fits them;
@@ -58,9 +58,6 @@ const providerUsage = `usage:
                                           resolve.<host>=<IP>[,dns:<name>…] connects a host of its base URLs there
                                           (curl --resolve: the URL's name stays for TLS and Host); empty takes the
                                           host's out, resolve= clears them all
-                                          image-files=off sends DeepSeek's API an agent's images inline on every
-                                          turn; image-files=on, the default, uploads each once (for a day)
-                                          and names it by its file id
                                           upstream-providers=on, on a Remote magpie, names its models by the
                                           provider serving each there (Claude · Office › RelayA); off, the
                                           default, as that magpie's own list names them
@@ -164,9 +161,6 @@ const providerUsage = `usage:
        magpie provider add remote-magpie sk-magpie-… url=http://192.168.1.20:3425 id=office
                                    (another computer's magpie, shared on its network: its models and routing
                                     groups as office/…, each request sent on in the API the agent spoke)
-       magpie provider add bailian-decision sk-… workspace=<workspace id>   (or region=ap-southeast-1, or region=token-plan with an sk-sp- key)
-       magpie provider add bailian-token-plan sk-sp-…   (Bailian's Token Plan: its chat models, and its decision model for routing groups;
-                                    qwen-token-plan is the Qwen AI platform's, qwen-decision its pay-as-you-go decision model)
        magpie provider add qwencloud sk-ws-… region=us-east-1   (Qwen Cloud, Alibaba's international platform, pay as you go;
                                     qwencloud-token-plan sk-sp-… is its Token Plan)
        magpie provider add google-vertex project=my-project impersonate=vertex@my-project.iam.gserviceaccount.com
@@ -182,7 +176,7 @@ const providerUsage = `usage:
                                    (a System One API, POST …/systemone: it routes groups, its models are never an agent's)
        magpie provider add anthropic sk-… id=anthropic-ws2 name="Anthropic WS2" header.anthropic-workspace-id=wrkspc_…
        magpie provider set my-relay models.url=https://relay.example.com/api/models catalog=
-       magpie provider set volcengine list=off models=ep-20261108-abcde
+       magpie provider set my-relay list=off models=my-model-1
                                    (its model list is never asked for: only the models given by id are served)
        magpie provider set my-relay resolve.relay.example.com=10.0.0.5,dns:gw.corp.example
                                    (Advanced › Connect to: connects to 10.0.0.5, then gw.corp.example's
@@ -278,7 +272,7 @@ func providers() error {
 		if bad != nil {
 			return bad
 		}
-		fmt.Println(muted.Render("no providers yet ·"), "magpie provider add deepseek sk-…", muted.Render("· magpie presets lists the vendors"))
+		fmt.Println(muted.Render("no providers yet ·"), "magpie provider add moonshot sk-…", muted.Render("· magpie presets lists the vendors"))
 		return nil
 	}
 	uses := usesByProvider()
@@ -414,7 +408,7 @@ func models(args []string) error {
 	} else if len(entries) == 0 && bad != nil {
 		return bad
 	} else if len(entries) == 0 {
-		fmt.Println(muted.Render("no models yet · add a provider first:"), "magpie provider add deepseek sk-…")
+		fmt.Println(muted.Render("no models yet · add a provider first:"), "magpie provider add moonshot sk-…")
 		return nil
 	}
 	w := 0
@@ -1207,8 +1201,7 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 			for _, r := range pr.Regions {
 				ids = append(ids, r.ID)
 			}
-			id := provider.RegionID(p.Preset, v)
-			i := slices.IndexFunc(pr.Regions, func(r provider.Region) bool { return strings.EqualFold(r.ID, id) })
+			i := slices.IndexFunc(pr.Regions, func(r provider.Region) bool { return strings.EqualFold(r.ID, v) })
 			if i < 0 {
 				return fmt.Errorf("%s=%s: %s's are %s", k, v, pr.Name, strings.Join(ids, ", "))
 			}
@@ -1274,17 +1267,6 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 				p.CodexAsSent = false
 			default:
 				return fmt.Errorf("codex=as-sent|default, not %q", v)
-			}
-		case "image-files":
-			// off: DeepSeek's own API is sent an agent's images inline on
-			// every turn, not uploaded once and named by file id (#5407)
-			switch strings.ToLower(v) {
-			case "off", "no", "inline":
-				p.ImageFilesOff = true
-			case "on", "yes", "default":
-				p.ImageFilesOff = false
-			default:
-				return fmt.Errorf("image-files=on|off, not %q", v)
 			}
 		case "upstream-providers":
 			// on: a Remote magpie's models named by the provider serving
@@ -1751,7 +1733,7 @@ func serve() error {
 		fmt.Println(amber.Render("!"), err) // served without it, as no providers
 	}
 	if n == 0 {
-		fmt.Println(amber.Render("!"), "no models yet ·", "magpie provider add deepseek sk-…")
+		fmt.Println(amber.Render("!"), "no models yet ·", "magpie provider add moonshot sk-…")
 	} else {
 		fmt.Printf("  %d models · %s\n", n, muted.Render("magpie models"))
 	}

@@ -271,7 +271,7 @@ func TestSearchFollowsTheSearchersProxy(t *testing.T) {
 	if err := settings.Save(st); err != nil {
 		t.Fatal(err)
 	}
-	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi",
+	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi",
 		Chat: "https://kimi.test/coding/v1", Models: []string{"kimi-for-coding"}, Proxy: proxy.URL()}); err != nil {
 		t.Fatal(err)
 	}

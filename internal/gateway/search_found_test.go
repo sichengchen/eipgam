@@ -279,16 +279,6 @@ func TestSearchFallbackSkipsARelaySaidToSearch(t *testing.T) {
 // client gets them without DeepSeek's encrypted_content, which is sealed
 // for DeepSeek alone.
 func TestDeepSeekNativeSearchResults(t *testing.T) {
-	p, err := provider.FromPreset("deepseek")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, proto := range []provider.Protocol{provider.Anthropic, provider.Responses} {
-		if !searchesItself(p, proto) {
-			t.Errorf("DeepSeek doesn't search by itself on %s", proto)
-		}
-	}
-
 	searchSandbox(t)
 	ds := newFakeDeepSeek(t)
 	glm, result := newBlindModel(t)

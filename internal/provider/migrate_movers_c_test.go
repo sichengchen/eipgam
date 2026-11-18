@@ -3,14 +3,15 @@ package provider
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/update"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/yetone/magpie/internal/catalog"
+	"github.com/yetone/magpie/internal/update"
 )
 
 // saveLogins writes logins.json as ls.

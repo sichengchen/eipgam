@@ -215,7 +215,7 @@ func TestKimiPlanSearchRoutedAndArchived(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	setHome(t, t.TempDir())
 	kimi := newKimiPlan(t)
-	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi",
+	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi",
 		Chat: kimi.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -248,7 +248,7 @@ func TestKimiPlanSearchRoutedAndArchived(t *testing.T) {
 func TestGLMPlanSearchArchivesItsToolsCall(t *testing.T) {
 	fresh(t)
 	g := newGLMSearchPlan(t)
-	glm := provider.Provider{ID: "glm", Name: "GLM Coding Plan", Preset: "zhipu", Key: "sk-glm", Chat: g.URL + "/api/coding/paas/v4", Models: []string{"glm-4.6"}}
+	glm := provider.Provider{ID: "glm", Name: "GLM Coding Plan", Preset: "zai", Key: "sk-glm", Chat: g.URL + "/api/coding/paas/v4", Models: []string{"glm-4.6"}}
 	if err := provider.Save(glm); err != nil {
 		t.Fatal(err)
 	}

@@ -1,7 +1,7 @@
 package provider
 
-// Alibaba Cloud's Token Plan (Bailian's, at token-plan.<region>.maas.
-// aliyuncs.com, sk-sp- keys) has a monthly window and, on some plans, 5-hour
+// Alibaba Cloud's international Token Plan (Model Studio's, at
+// token-plan.ap-southeast-1.maas.aliyuncs.com, sk-sp- keys) has a monthly window and, on some plans, 5-hour
 // and weekly ones, which Alibaba tells only to its console's gateway, never
 // to the plan's inference key (the key gets BailianGateway.Login.NotLogined
 // there, and 400 "model missing" on every path of the model host). The
@@ -22,10 +22,9 @@ package provider
 //
 // The gateway has no public documentation: the fields are read as the
 // client does, from whichever per<N><Unit> pairs the reply has. Only the
-// personal plan's API is known. The Qwen AI platform's plan is read the
-// same way at its own console, with a sign-in to the platform instead of
-// an access key (qianwen_plan.go); Qwen Cloud's sits behind a console that
-// takes a browser sign-in, so it has no card (#5829).
+// personal plan's API is known. Qwen Cloud's sits behind a console that
+// takes a browser sign-in, so it has no card (#5829). Bailian's own plan
+// in Beijing is left out with the rest of mainland China's.
 //
 // A RAM user's key is refused by the console (BailianGateway.Team.
 // NotAuthorised) until the main account grants what Alibaba's Token Plan
@@ -78,14 +77,12 @@ type aliSite struct {
 }
 
 var aliSites = map[string]aliSite{
-	"cn-beijing":     {"cn-beijing", "modelstudio.cn-beijing.aliyuncs.com", "bailian-cs.console.aliyun.com", "BroadScopeAspnGateway"},
 	"ap-southeast-1": {"ap-southeast-1", "modelstudio.ap-southeast-1.aliyuncs.com", "bailian-singapore-cs.alibabacloud.com", "IntlBroadScopeAspnGateway"},
 }
 
 // aliPlanSite is the region of the Alibaba Cloud Token Plan p's endpoint is
-// on (token-plan.cn-beijing.maas.aliyuncs.com, token-plan.ap-southeast-1.
-// maas.aliyuncs.com); ok false for another host, a plan of the Qwen AI
-// platform or Qwen Cloud, or an account.
+// on (token-plan.ap-southeast-1.maas.aliyuncs.com); ok false for another
+// host, a plan of Qwen Cloud, or an account.
 func aliPlanSite(p Provider) (aliSite, bool) {
 	if p.Account != nil {
 		return aliSite{}, false
@@ -230,7 +227,7 @@ func aliReadUsage(ctx context.Context, ak, sk string, site aliSite, now func() t
 		}
 		ws := aliReadWindows(raw)
 		if len(ws) == 0 {
-			return nil, fmt.Errorf("Alibaba Cloud's console told no window for this plan (it may be unlimited, or not a personal Token Plan): %s", volcHead(raw))
+			return nil, fmt.Errorf("Alibaba Cloud's console told no window for this plan (it may be unlimited, or not a personal Token Plan): %s", replyHead(raw))
 		}
 		return ws, nil
 	}
@@ -317,9 +314,9 @@ func aliMintToken(ctx context.Context, ak, sk string, site aliSite, now time.Tim
 	case res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden:
 		return "", fmt.Errorf("Alibaba Cloud %s: %s; %s", aliACSAction, res.Status, aliKeyHint)
 	case res.StatusCode >= 300:
-		return "", fmt.Errorf("Alibaba Cloud %s: %s: %s", aliACSAction, res.Status, volcHead(raw))
+		return "", fmt.Errorf("Alibaba Cloud %s: %s: %s", aliACSAction, res.Status, replyHead(raw))
 	}
-	return "", fmt.Errorf("Alibaba Cloud %s gave no token: %s", aliACSAction, volcHead(raw))
+	return "", fmt.Errorf("Alibaba Cloud %s gave no token: %s", aliACSAction, replyHead(raw))
 }
 
 // aliGateway asks the console's usage API with token and gives the
@@ -369,7 +366,7 @@ func aliAskUsage(ctx context.Context, token string, c aliConsole) ([]byte, error
 		return nil, err
 	}
 	if res.StatusCode >= 300 {
-		return nil, fmt.Errorf("%s: %s: %s", c.who, res.Status, volcHead(raw))
+		return nil, fmt.Errorf("%s: %s: %s", c.who, res.Status, replyHead(raw))
 	}
 	var env struct {
 		Data struct {
@@ -380,7 +377,7 @@ func aliAskUsage(ctx context.Context, token string, c aliConsole) ([]byte, error
 		} `json:"data"`
 	}
 	if json.Unmarshal(raw, &env) != nil {
-		return nil, fmt.Errorf("%s answered in a form magpie doesn't know: %s", c.who, volcHead(raw))
+		return nil, fmt.Errorf("%s answered in a form magpie doesn't know: %s", c.who, replyHead(raw))
 	}
 	if env.Data.Success != nil && !*env.Data.Success && len(env.Data.ErrorCode) > 0 {
 		code := strings.Trim(string(env.Data.ErrorCode), `"`)
@@ -440,7 +437,7 @@ func aliReadWindows(raw []byte) []QuotaWindow {
 		}
 		if g[3] == "ResetTime" {
 			w.at = v
-		} else if f, ok := volcNum(v); ok {
+		} else if f, ok := jsonNumber(v); ok {
 			w.used = &f
 		}
 	}
@@ -456,7 +453,7 @@ func aliReadWindows(raw []byte) []QuotaWindow {
 	})
 	var out []QuotaWindow
 	for _, w := range all {
-		q := QuotaWindow{Used: *w.used * 100, Span: time.Duration(w.n) * hours[w.unit], ResetsAt: volcTime(w.at)}
+		q := QuotaWindow{Used: *w.used * 100, Span: time.Duration(w.n) * hours[w.unit], ResetsAt: resetTime(w.at)}
 		switch {
 		case w.n == 5 && w.unit == "Hour":
 			q.Name = "5 hours"

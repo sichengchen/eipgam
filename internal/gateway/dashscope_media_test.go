@@ -147,7 +147,7 @@ func TestTokenPlansNameEveryKind(t *testing.T) {
 		}
 		return out
 	}
-	for _, preset := range []string{"qwen-token-plan", "bailian-token-plan", "alibaba-token-plan", "qwencloud-token-plan"} {
+	for _, preset := range []string{"alibaba-token-plan", "qwencloud-token-plan"} {
 		p, err := provider.FromPreset(preset)
 		if err != nil {
 			t.Fatal(err)
@@ -192,7 +192,7 @@ func TestTokenPlansNameEveryKind(t *testing.T) {
 // rate, and the audio fetched from the URL it answers with.
 func TestTokenPlanSpeaks(t *testing.T) {
 	up := newFakeDashScopeMedia(t)
-	tokenPlan(t, "qwen-token-plan", up)
+	tokenPlan(t, "alibaba-token-plan", up)
 	s := New()
 	code, h, got := postSpeech(t, s, "/v1/audio/speech", `{"model":"qwen/qwen-audio-3.0-tts-plus","input":"欢迎使用喜鹊。","voice":"alloy","instructions":"用开心的语气","speed":3}`)
 	if code != 200 || string(got) != "ID3-mp3-bytes" || h.Get("Content-Type") != "audio/mpeg" {
@@ -255,7 +255,7 @@ func TestTokenPlanSpeaks(t *testing.T) {
 // OpenAI's shapes; a translation and srt are turned away.
 func TestTokenPlanTranscribes(t *testing.T) {
 	up := newFakeDashScopeMedia(t)
-	tokenPlan(t, "bailian-token-plan", up)
+	tokenPlan(t, "alibaba-token-plan", up)
 	s := New()
 	body, ctype := audioFormBody(t, "model", "qwen/qwen-audio-3.0-asr-flash", "language", "zh", "prompt", "喜鹊")
 	code, h, got := postAudio(t, s, "/v1/audio/transcriptions", ctype, body)

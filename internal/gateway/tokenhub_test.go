@@ -80,8 +80,7 @@ func (q *tokenhub) last() tokenhubCall {
 // Tencent Cloud at either region alike.
 func TestTencentTokenHubRoutes(t *testing.T) {
 	for _, c := range []struct{ id, preset string }{
-		{"tencent-tokenhub-cn", "tencent-tokenhub-cn"}, {"tencent-tokenhub", "tencent-tokenhub"},
-		{"tencent-cloud", "tencent-tokenhub-cn"}, {"tencent-cloud", "tencent-tokenhub"},
+		{"tencent-tokenhub", "tencent-tokenhub"}, {"tencent-cloud", "tencent-tokenhub"},
 	} {
 		id := c.id
 		t.Run(id+"@"+c.preset, func(t *testing.T) {

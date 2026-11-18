@@ -33,7 +33,7 @@ func TestFXByProvider(t *testing.T) {
 	}
 	fx.Reset()
 	for _, p := range []provider.Provider{
-		{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Chat: "https://api.deepseek.com/v1"},
+		{ID: "mine-cn", Name: "Mine", Key: "k", Chat: "https://api.example.cn/v1"},
 		{ID: "zai", Name: "Z.ai", Preset: "zai", Key: "k", Chat: "https://api.z.ai/api/paas/v4"},
 		{ID: "openai", Name: "OpenAI", Preset: "openai", Key: "k", Chat: "https://api.openai.com/v1"},
 	} {
@@ -53,8 +53,8 @@ func TestFXByProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, got := range []fxJSON{state().FX, settingsState().FX} {
-		if got.Rate != 7.25 || !slices.Contains(got.Yuan, "deepseek") || slices.Contains(got.Yuan, "zai") || slices.Contains(got.Yuan, "openai") {
-			t.Fatalf("by provider: FX = %+v, want the rate and deepseek alone in yuan", got)
+		if got.Rate != 7.25 || !slices.Contains(got.Yuan, "mine-cn") || slices.Contains(got.Yuan, "zai") || slices.Contains(got.Yuan, "openai") {
+			t.Fatalf("by provider: FX = %+v, want the rate and mine-cn alone in yuan", got)
 		}
 	}
 	if c, _ := trayCurrency(); c != "usd" {

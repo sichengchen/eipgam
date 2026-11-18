@@ -21,9 +21,8 @@ import (
 // own asynchronous API (platform.minimax.io/docs/api-reference/
 // video-generation-v2-create): POST <host>/v2/video_generation answers with
 // a task_id, GET <host>/v2/query/video_generation/<task_id> with the task,
-// whose content.url is the MP4 once it has succeeded. The host is the
-// key's own: api.minimax.io for the international platform,
-// api.minimaxi.com (or api.minimax.cn) for the Chinese one. H3 is paid
+// whose content.url is the MP4 once it has succeeded, at api.minimax.io,
+// the international platform's host. H3 is paid
 // from the pay-as-you-go balance; a Token Plan key or a video package
 // doesn't make it, which the vendor says with its own code (2061, 2068).
 
@@ -53,13 +52,9 @@ var minimaxVideoLimits = map[string]struct {
 var minimaxVideoRatios = []string{"21:9", "16:9", "4:3", "1:1", "3:4", "9:16"}
 
 // isMiniMaxHost is whether host is MiniMax's API. A var so tests can point a
-// MiniMax provider at a fake server, as isArk does.
+// MiniMax provider at a fake server.
 var isMiniMaxHost = func(host string) bool {
-	switch strings.ToLower(host) {
-	case "api.minimax.io", "api.minimaxi.com", "api.minimax.cn":
-		return true
-	}
-	return false
+	return strings.ToLower(host) == "api.minimax.io"
 }
 
 // minimaxHost is scheme://host of the MiniMax API p's key is for, from its

@@ -75,12 +75,12 @@ func TestTUIAddsARemoteMagpieWithItsAddress(t *testing.T) {
 
 	// a vendor of its own address has none to change (a provider of the
 	// user's own does: TestTUIEditsACustomProvidersBaseURL)
-	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "kd", Chat: "https://api.deepseek.com/v1"}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "moonshot", Name: "Kimi", Preset: "moonshot", Key: "kd", Chat: "https://api.moonshot.ai/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	m.reloadProviders()
 	for i, q := range m.provs {
-		if q.ID == "deepseek" {
+		if q.ID == "moonshot" {
 			m.prow = i
 		}
 	}

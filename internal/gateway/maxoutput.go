@@ -252,56 +252,10 @@ func withReplyCap(proto provider.Protocol, body []byte, limit int) ([]byte, bool
 	return withFields(body, map[string]any{key: limit}), true
 }
 
-// namesOutput is whether body, in proto's words, names a reply limit.
-func namesOutput(proto provider.Protocol, body []byte) bool {
-	switch proto {
-	case provider.Chat:
-		return gjson.GetBytes(body, "max_tokens").Exists() || gjson.GetBytes(body, "max_completion_tokens").Exists()
-	case provider.Responses:
-		return gjson.GetBytes(body, "max_output_tokens").Exists()
-	case provider.Anthropic:
-		return gjson.GetBytes(body, "max_tokens").Exists()
-	case provider.Gemini:
-		return gjson.GetBytes(body, "generationConfig.maxOutputTokens").Exists()
-	}
-	return true
-}
-
-// shortByDefault is whether p's API cuts a reply that names no limit far
-// short of what its model can give: DeepSeek's gives 8K without thinking
-// and 64K with it (api-docs.deepseek.com, create-chat-completion:
-// "When not set, the default is 8K in non-thinking mode, 64K in thinking
-// mode"), on /v1/responses too, where its models go to 384K. Codex names
-// no max_output_tokens, so its turns there stopped at 8192 tokens, "Incomplete
-// response returned, reason: max_output_tokens" (xuanwo on X). Checked
-// against api.deepseek.com on 2026-10-27: deepseek-flash, effort none, no
-// limit: incomplete at 8192; max_output_tokens 393216: completed at 17602.
-func shortByDefault(p provider.Provider) bool {
-	return p.VendorHost() == "api.deepseek.com"
-}
-
-// withOwnOutput is body, in proto's words, asking p's model for the reply
-// its own limit allows (askedOutput) when it names none and p's API would
-// otherwise cut it short (shortByDefault). A limit the client named goes
-// as it is.
-func withOwnOutput(p provider.Provider, model string, proto provider.Protocol, body []byte) []byte {
-	if !shortByDefault(p) || namesOutput(proto, body) {
-		return body
-	}
-	n := roomedOutput(askedOutput(p, model), contextOf(p, model), len(body)/4)
-	if n <= 0 {
-		return body
-	}
-	if b, ok := withReplyCap(proto, body, n); ok {
-		return b
-	}
-	return body
-}
-
 // fillsOutput is whether a request translated for p's API on to that
 // names no reply limit is sent its model's own (askedOutput): the client's
 // API reads none as the model's whole, which another vendor's needn't
-// (DeepSeek's reads it as 8K, shortByDefault). Anthropic's always is, as
+// (DeepSeek's reads it as 8K). Anthropic's always is, as
 // it needs one. An account's own backend (the ChatGPT one turns
 // max_output_tokens away) isn't. Another magpie is: this fills only a
 // translated turn (forwardTranslated), and one translated here goes to

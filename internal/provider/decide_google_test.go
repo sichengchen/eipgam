@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
@@ -158,7 +159,7 @@ func fakeGoogleDecisions(t *testing.T) *googleUp {
 // typed, keeps it out of its chat models, and is the one asked for it;
 // Vertex and other hosts are as they were.
 func TestGoogleKeyDecides(t *testing.T) {
-	arkHome(t)
+	decideHome(t)
 	up := fakeGoogleDecisions(t)
 	g, err := FromPreset("google")
 	if err != nil {
@@ -243,4 +244,13 @@ func TestGoogleKeyDecides(t *testing.T) {
 	if d := (Provider{Preset: VertexPreset, Gemini: AIStudioGemini}).googleDecisions(); d != "" {
 		t.Fatalf("vertex: %q", d)
 	}
+}
+
+// decideHome gives a test a HOME of its own.
+func decideHome(t *testing.T) {
+	h := t.TempDir()
+	t.Setenv("HOME", h)
+	t.Setenv("USERPROFILE", h)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
+	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 }

@@ -34,17 +34,17 @@ func TestBillingKind(t *testing.T) {
 		p    Provider
 		want string
 	}{
-		{"GLM Coding Plan", billAt(t, "zhipu", "coding"), BillingPlan},
-		{"GLM pay as you go", billAt(t, "zhipu", "api"), BillingPAYG},
+		{"GLM Coding Plan", billAt(t, "zai", "coding"), BillingPlan},
+		{"GLM pay as you go", billAt(t, "zai", "api"), BillingPAYG},
 		{"Step Plan", billAt(t, "stepfun", "plan"), BillingPlan},
 		{"Kimi Code", billAt(t, "kimi-code", ""), BillingPlan},
 		{"OpenRouter", billAt(t, "openrouter", ""), BillingPAYG},
-		{"DeepSeek", billAt(t, "deepseek", ""), BillingPAYG},
+		{"Kimi", billAt(t, "moonshot", ""), BillingPAYG},
 		{"MiniMax: one endpoint for both", billAt(t, "minimax", ""), ""},
 		{"Ollama on this computer", billAt(t, "ollama", ""), ""},
 		{"added by its address", Provider{ID: "x", Name: "X", Chat: "https://x.example/v1", Key: "k"}, ""},
 		{"signed-in account", Provider{ID: "codex", Name: "Codex", Account: &Account{}}, BillingPlan},
-		{"user says pay as you go", func() Provider { p := billAt(t, "zhipu", "coding"); p.Billing = BillingPAYG; return p }(), BillingPAYG},
+		{"user says pay as you go", func() Provider { p := billAt(t, "zai", "coding"); p.Billing = BillingPAYG; return p }(), BillingPAYG},
 		{"user says plan of a relay", func() Provider { p := billAt(t, "openrouter", ""); p.Billing = BillingPlan; return p }(), BillingPlan},
 		{"user's word on an unknown one", Provider{ID: "x", Name: "X", Chat: "https://x.example/v1", Billing: BillingPlan}, BillingPlan},
 	}
@@ -55,18 +55,20 @@ func TestBillingKind(t *testing.T) {
 	}
 }
 
-// Volcengine at its Coding Plan with a pay-as-you-go key beside (yckonnnn
-// on X) is both; with only another plan's key, a plan still.
+// Tencent Cloud at its Token Plan with a pay-as-you-go key beside
+// (yckonnnn on X, on Volcengine) is both; Xiaomi's plan with only another
+// plan's key, a plan still.
 func TestBillingKindMixedKeys(t *testing.T) {
-	if got := volcMixed().BillingKind(); got != BillingMixed {
-		t.Fatalf("coding plan + pay-as-you-go key: %q, want mixed", got)
+	if got := tcMixed().BillingKind(); got != BillingMixed {
+		t.Fatalf("plan + pay-as-you-go key: %q, want mixed", got)
 	}
-	p := volcMixed()
-	p.Keys = []KeyAccount{{Key: "k-agent", Plan: "agent"}}
-	if got := p.BillingKind(); got != BillingPlan {
-		t.Fatalf("coding + agent plan keys: %q, want plan", got)
+	x := billAt(t, "xiaomi", "plan-sgp")
+	x.Keys = []KeyAccount{{Key: "k-ams", Plan: "plan-ams"}}
+	if got := x.BillingKind(); got != BillingPlan {
+		t.Fatalf("two plans' keys: %q, want plan", got)
 	}
-	p.Keys = []KeyAccount{{Key: "k-api", Plan: "api", Off: true}}
+	p := tcMixed()
+	p.Keys[0].Off = true
 	if got := p.BillingKind(); got != BillingPlan {
 		t.Fatalf("pay-as-you-go key switched off: %q, want plan", got)
 	}

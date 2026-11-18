@@ -150,8 +150,8 @@ func TestAddCopyKeepsAccessKeySecret(t *testing.T) {
 	}
 }
 
-// #1821: a Volcengine or Tencent plan whose provider has no access key
-// was no card at all, so a key gone from providers.json looked like a
+// #1821: an Alibaba Cloud or Tencent plan whose provider has no access
+// key was no card at all, so a key gone from providers.json looked like a
 // card gone for no reason. It is a card that says what to give, once a
 // plan, and none when another provider on the plan has the key.
 func TestPlanCardWithoutAccessKey(t *testing.T) {
@@ -169,21 +169,22 @@ func TestPlanCardWithoutAccessKey(t *testing.T) {
 	t.Cleanup(func() { http.DefaultClient.Transport = old })
 	forgetPlanQuotas()
 	t.Cleanup(forgetPlanQuotas)
+	const aliPlan = "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
 	for _, p := range []Provider{
-		{ID: "volcengine", Name: "Volcengine Ark", Preset: "volcengine", Chat: "https://ark.cn-beijing.volces.com/api/coding/v3", Key: "ark-k"},
+		{ID: "alibaba-token-plan", Name: "Alibaba Cloud Token Plan", Preset: "alibaba-token-plan", Chat: aliPlan, Key: "sk-sp-k"},
 		// the same plan again: one card
-		{ID: "volc-copy", Name: "Ark copy", Preset: "volcengine", Anthropic: "https://ark.cn-beijing.volces.com/api/coding", Key: "ark-k", AccessKeyID: "AK-half"},
+		{ID: "ali-copy", Name: "Alibaba copy", Preset: "alibaba-token-plan", Anthropic: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic", Key: "sk-sp-k", AccessKeyID: "AK-half"},
 		// pay-as-you-go reads nothing with an access key
-		{ID: "volc-payg", Name: "Ark API", Preset: "volcengine", Chat: "https://ark.cn-beijing.volces.com/api/v3", Key: "ark-k"},
-		{ID: "volc-off", Name: "Ark off", Preset: "volcengine", Chat: "https://ark.cn-beijing.volces.com/api/plan/v3", Key: "ark-k", Off: true},
+		{ID: "qwen-payg", Name: "Qwen", Preset: "qwen", Chat: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", Key: "sk-k"},
+		{ID: "ali-off", Name: "Alibaba off", Preset: "alibaba-token-plan", Chat: aliPlan, Key: "sk-sp-k", Off: true},
 		{ID: "tencent-cloud", Name: "Tencent Cloud", Preset: "tencent-cloud", Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3", Key: "sk-tp-1"},
-		// China's /plan is Token Plan 个人版's too, which has no usage to
-		// read (ysm119): no card asks it for an access key
+		// TokenHub's China host is no plan magpie reads: no card asks it
+		// for an access key
 		{ID: "tc-gz", Name: "Tencent China", Preset: "tencent-cloud", Chat: "https://tokenhub.tencentmaas.com/plan/v3", Key: "sk-tp-2"},
 		// a custom provider at a plan's address is the user's own: no card
 		// asks it for an access key either (ysm119)
 		{ID: "my-intl", Name: "My TokenHub", Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3", Key: "sk-tp-3"},
-		{ID: "my-ark", Name: "My Ark", Chat: "https://ark.cn-beijing.volces.com/api/plan/v3", Key: "ark-k3"},
+		{ID: "my-ali", Name: "My Alibaba", Chat: aliPlan, Key: "sk-sp-3"},
 	} {
 		if err := Save(p); err != nil {
 			t.Fatal(err)
@@ -198,16 +199,16 @@ func TestPlanCardWithoutAccessKey(t *testing.T) {
 			got[q.Provider] = q
 		}
 	}
-	volc, okV := got["volcengine"]
-	if !okV {
-		volc, okV = got["volc-copy"]
+	ali, okA := got["alibaba-token-plan"]
+	if !okA {
+		ali, okA = got["ali-copy"]
 	}
 	tc, okT := got["tencent-cloud"]
-	if len(got) != 2 || !okV || !okT {
+	if len(got) != 2 || !okA || !okT {
 		t.Fatalf("cards: %+v", got)
 	}
-	if !strings.Contains(volc.Error, "AccessKey ID and Secret") || volc.Plan == "" || volc.Windows == nil {
-		t.Errorf("volcengine: %+v", volc)
+	if !strings.Contains(ali.Error, "AccessKey ID and Secret") || ali.Plan == "" || ali.Windows == nil {
+		t.Errorf("alibaba: %+v", ali)
 	}
 	if !strings.Contains(tc.Error, "SecretId and SecretKey") || tc.Plan != tcPlanName {
 		t.Errorf("tencent: %+v", tc)
@@ -215,18 +216,18 @@ func TestPlanCardWithoutAccessKey(t *testing.T) {
 
 	// another provider on the plan with the key: its card, not this one
 	keyedIn.Store(true)
-	if err := Save(Provider{ID: "volc-keyed", Name: "Ark keyed", Chat: "https://ark.cn-beijing.volces.com/api/coding/v3", Key: "ark-k2", AccessKeyID: "AK1", SecretAccessKey: "SK1"}); err != nil {
+	if err := Save(Provider{ID: "ali-keyed", Name: "Alibaba keyed", Preset: "alibaba-token-plan", Chat: aliPlan, Key: "sk-sp-k2", AccessKeyID: "AK1", SecretAccessKey: "SK1"}); err != nil {
 		t.Fatal(err)
 	}
 	forgetPlanQuotas()
 	var cards []string
-	for _, q := range volcPlanQuotas(context.Background()) {
+	for _, q := range aliPlanQuotas(context.Background()) {
 		cards = append(cards, q.Provider)
 		if q.NeedsAccessKey {
 			t.Errorf("a keyless card beside the keyed one: %+v", q)
 		}
 	}
-	if len(cards) != 1 || cards[0] != "volc-keyed" {
+	if len(cards) != 1 || cards[0] != "ali-keyed" {
 		t.Errorf("cards: %v", cards)
 	}
 }

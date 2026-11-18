@@ -42,7 +42,7 @@ func TestProviderSaveKeepsWhatTheEditorDoesntShow(t *testing.T) {
 
 	// a preset's provider: the editor sends its key, picks and settings,
 	// never these
-	ds, err := provider.FromPreset("deepseek")
+	ds, err := provider.FromPreset("moonshot")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,9 +56,9 @@ func TestProviderSaveKeepsWhatTheEditorDoesntShow(t *testing.T) {
 	if err := provider.Save(ds); err != nil {
 		t.Fatal(err)
 	}
-	want := keptOf("deepseek")
-	post(`{"id":"deepseek","from":"deepseek","name":"DeepSeek","preset":"deepseek","key":"","chat":"` + ds.Chat + `","responses":"` + ds.Responses + `","anthropic":"` + ds.Anthropic + `","catalog":"deepseek","models":[],"headers":{},"searches":false,"pinUpstream":false,"unredacted":false,"contexts":{},"outputs":{},"compacts":{},"proxy":"","maxConcurrency":null,"queueLimit":0,"queueWait":0,"priceRate":null}`)
-	if got := keptOf("deepseek"); got != want {
+	want := keptOf("moonshot")
+	post(`{"id":"moonshot","from":"moonshot","name":"Kimi","preset":"moonshot","key":"","chat":"` + ds.Chat + `","responses":"` + ds.Responses + `","anthropic":"` + ds.Anthropic + `","catalog":"moonshotai","models":[],"headers":{},"searches":false,"pinUpstream":false,"unredacted":false,"contexts":{},"outputs":{},"compacts":{},"proxy":"","maxConcurrency":null,"queueLimit":0,"queueWait":0,"priceRate":null}`)
+	if got := keptOf("moonshot"); got != want {
 		t.Errorf("preset's editor Save:\n got %+v\nwant %+v", got, want)
 	}
 

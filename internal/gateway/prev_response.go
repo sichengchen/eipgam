@@ -239,21 +239,15 @@ func prevRoute(p provider.Provider) string {
 }
 
 // prevKeeps is whether p keeps the responses it gives and takes
-// previous_response_id: OpenAI's API and Azure OpenAI, and Ark's own
-// /api/v3 (tried with a real key on 10-29: a stored response's word came
-// back after its id, and an unknown id is a 400 PreviousResponseNotFound).
-// A subscription's or a plugin's account is never asked so.
+// previous_response_id: OpenAI's API and Azure OpenAI. A subscription's or
+// a plugin's account is never asked so.
 var prevKeptBy = prevKeeps
 
 func prevKeeps(p provider.Provider) bool {
 	if p.Account != nil || p.PluginProvider() != "" {
 		return false
 	}
-	host := p.VendorHost()
-	if host == "api.openai.com" || p.IsAzure() {
-		return true
-	}
-	return host == "ark.cn-beijing.volces.com" && strings.Contains(p.Base(provider.Responses), "/api/v3")
+	return p.VendorHost() == "api.openai.com" || p.IsAzure()
 }
 
 // prevAsk is what serveAgent made of a request's previous_response_id,

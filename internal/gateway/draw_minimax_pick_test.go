@@ -10,7 +10,7 @@ import (
 // a few chat picks) refused minimax-cn/MiniMax-H3-Image in Settings → Images
 // with "no model … to generate images".
 func TestMiniMaxImageModelPickable(t *testing.T) {
-	for _, preset := range []string{"minimax-cn", "minimax"} {
+	for _, preset := range []string{"minimax"} {
 		for _, state := range []string{"all", "none", "picks"} {
 			t.Run(preset+"/"+state, func(t *testing.T) {
 				s, _, p := minimaxDrawing(t, preset)

@@ -37,57 +37,11 @@ const JevLatest = "jev-latest"
 // same System One API as Jev (#647).
 const BailianDecision = "decision-model-preview"
 
-// bailianDecides reports whether base is Bailian's: a workspace's host or
-// the Token Plan's, <x>.<region>.maas.aliyuncs.com, or the Qwen AI
-// platform's, maas.qianwenaiapi.com and its plan's under it (#1506). Its
-// /models lists Qwen's chat models, never the decision model.
+// bailianDecides reports whether base is Alibaba Cloud Model Studio's: a
+// workspace's host or the Token Plan's, <x>.<region>.maas.aliyuncs.com
+// (#1506). Its /models lists Qwen's chat models, never the decision model.
 func bailianDecides(base string) bool {
-	h := HostOf(base)
-	return strings.HasSuffix(h, ".maas.aliyuncs.com") || h == "maas.qianwenaiapi.com" || strings.HasSuffix(h, ".maas.qianwenaiapi.com")
-}
-
-// ArkDecision is the model Volcengine Ark answers System One with, in its
-// beta (axelburks on Discord): doubao-seed-2-1-lite-260915. Asked on
-// 11-01, Ark's other Seed models it serves the account
-// (doubao-seed-2-1-pro-260628, doubao-seed-2-0-lite-260428) and
-// deepseek-v4-1-flash were each refused 400 "does not support the
-// SystemOne API".
-const ArkDecision = "doubao-seed-2-1-lite-260915"
-
-// ArkSystemOneHeader is the header Ark's System One API is turned on by
-// while it is in beta: without it, POST …/systemone is a bare 404.
-const ArkSystemOneHeader = "ark-beta-systemone-api"
-
-// arkDecides reports whether base is Volcengine Ark's own API host,
-// ark.<region>.volces.com, whose pay-as-you-go /api/v1 and /api/v3 answer
-// System One at …/systemone. Its Coding and Agent Plans' paths
-// (/api/coding/v3, /api/plan/v3) answer it nothing (404), and neither
-// /models lists the decision model.
-func arkDecides(base string) bool {
-	h := HostOf(base)
-	return strings.HasPrefix(h, "ark.") && strings.HasSuffix(h, ".volces.com")
-}
-
-// arkSystemOne is the System One base of a key's provider asked at
-// Volcengine Ark's pay as you go (ark.<region>.volces.com/api/v3, as chat
-// completions or Responses): …/api/v1 on the same host, where
-// volcengine-decision asks it; "" for any other provider. The Coding and
-// Agent Plans' paths answer System One nothing, and a signed-in account,
-// a plugin, a remote magpie and Vertex say their own.
-func (p Provider) arkSystemOne() string {
-	if p.Account != nil || p.IsRemoteMagpie() || p.IsVertex() {
-		return ""
-	}
-	for _, raw := range []string{p.Chat, p.Responses} {
-		if !arkDecides(raw) {
-			continue
-		}
-		u, err := url.Parse(raw)
-		if err == nil && strings.TrimRight(u.Path, "/") == "/api/v3" {
-			return u.Scheme + "://" + u.Host + "/api/v1"
-		}
-	}
-	return ""
+	return strings.HasSuffix(HostOf(base), ".maas.aliyuncs.com")
 }
 
 // GoogleDecision is Google's decision model, gemini-decision-1, which the
@@ -123,7 +77,7 @@ func (p Provider) googleDecisions() string {
 }
 
 // vendorDecision is the decision model of the vendor whose System One
-// API base is, Bailian's, Ark's or Google's, which its model list never
+// API base is, Model Studio's or Google's, which its model list never
 // names (Google's: its chat list is the chat models').
 func vendorDecision(base string) (catalog.Model, bool) {
 	switch {
@@ -131,18 +85,8 @@ func vendorDecision(base string) (catalog.Model, bool) {
 		return catalog.Model{ID: GoogleDecision, Name: "Gemini Decision 1"}, true
 	case bailianDecides(base):
 		return catalog.Model{ID: BailianDecision, Name: "Decision model (preview)"}, true
-	case arkDecides(base):
-		return catalog.Model{ID: ArkDecision, Name: "Doubao Seed 2.1 Lite"}, true
 	}
 	return catalog.Model{}, false
-}
-
-// DecideHeaders sets on h what p's decision API needs besides its key:
-// Ark's beta switch (ArkSystemOneHeader) on Ark's host.
-func (p Provider) DecideHeaders(h http.Header) {
-	if arkDecides(p.Decide) {
-		h.Set(ArkSystemOneHeader, "true")
-	}
 }
 
 // bailianApart reports whether p serves conversations and a vendor's own
@@ -507,11 +451,6 @@ func decideFactOf(id string) (decideFact, bool) {
 		// "up to 262,144 tokens" of text, images, video, audio and PDFs
 		// (its model page)
 		return decideFact{context: 262_144, images: true}, true
-	case last == ArkDecision:
-		// its window on System One is not documented; an image in the
-		// request was left unread on 11-01 (a red square asked "is it
-		// red?" came back 0.48, its input tokens as for no image)
-		return decideFact{}, true
 	}
 	return decideFact{}, false
 }
@@ -1111,7 +1050,6 @@ func (p Provider) AskSystemOne(ctx context.Context, model string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	p.DecideHeaders(req.Header)
 	if err := p.Sign(ctx, req, p.DecideProtocol(), nil); err != nil {
 		return err
 	}

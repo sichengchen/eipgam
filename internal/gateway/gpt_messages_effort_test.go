@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -77,4 +78,18 @@ func TestGPTMessagesEffortThroughGateway(t *testing.T) {
 			t.Errorf("%s budget %s: output_config.effort %q, want %q: %s", c.model, c.budget, got, c.want, f.got)
 		}
 	}
+}
+
+// sentOutputEffort is the output_config.effort a Messages body asks for.
+func sentOutputEffort(t *testing.T, body []byte) string {
+	t.Helper()
+	var q struct {
+		OutputConfig struct {
+			Effort string `json:"effort"`
+		} `json:"output_config"`
+	}
+	if err := json.Unmarshal(body, &q); err != nil {
+		t.Fatalf("%v: %s", err, body)
+	}
+	return q.OutputConfig.Effort
 }

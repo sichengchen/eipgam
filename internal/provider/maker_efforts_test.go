@@ -12,7 +12,7 @@ import (
 // makerCatalog is models.dev as it had mimo-v2.6-flash (#214): Xiaomi's own
 // entry with a thinking switch alone, resellers giving levels up to max.
 const makerCatalog = `{
-  "xiaomi-token-plan-cn": {"models": {
+  "xiaomi-token-plan-sgp": {"models": {
     "mimo-v2.6-flash": {"id":"mimo-v2.6-flash","reasoning":true,"reasoning_options":[{"type":"toggle"}]},
     "mimo-v2.6-flash-preview": {"id":"mimo-v2.6-flash-preview","reasoning":true,"reasoning_options":[{"type":"toggle"}]}}},
   "xiaomi": {"models": {

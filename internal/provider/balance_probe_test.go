@@ -134,11 +134,11 @@ func TestHandAddedRelayWithNoBalance(t *testing.T) {
 func TestBalanceProbeLeavesOthersAlone(t *testing.T) {
 	for _, p := range []Provider{
 		{Chat: "https://relay.example.com/v1", Key: "k", BalanceURL: "https://relay.example.com/x"},
-		{Chat: "https://relay.example.com/v1", Key: "k", Preset: "deepseek"},
+		{Chat: "https://relay.example.com/v1", Key: "k", Preset: "moonshot"},
 		{Chat: "https://opencode.ai/inference/custom/acme/v1", Key: "k"},
 		{Chat: "https://opencode.ai/zen/go/v1", Key: "k", Preset: "opencode-go"},
 		{Chat: "https://relay.example.com/v1"},
-		{Chat: "https://api.deepseek.com/v1", Key: "k"},
+		{Chat: "https://api.moonshot.ai/v1", Key: "k"},
 		{Chat: "https://api.openai.com/v1", Key: "k"},
 		{Anthropic: "https://api.anthropic.com", Key: "k"},
 		{Chat: "http://127.0.0.1:11434/v1", Key: "k"},
@@ -148,10 +148,10 @@ func TestBalanceProbeLeavesOthersAlone(t *testing.T) {
 			t.Errorf("looked at: %+v", p)
 		}
 	}
-	if !probesBalance(Provider{Chat: "https://app.yylx.io/v1", Key: "k"}) {
+	if !probesBalance(Provider{Chat: "https://relay.example.com/v1", Key: "k"}) {
 		t.Error("a relay added by hand is not looked at")
 	}
-	if !probesBalance(Provider{Chat: "https://app.yylx.io/v1", Key: "k", Preset: "yylx"}) {
+	if gmi := Preset("gmicloud"); gmi == nil || !probesBalance(Provider{Chat: gmi.Chat, Anthropic: gmi.Anthropic, Key: "k", Preset: "gmicloud"}) {
 		t.Error("a relay's preset is not looked at")
 	}
 	if got := strings.Join(probeOrigins(Provider{Chat: "https://R.example.com/v1", Responses: "https://r.example.com/v1", Anthropic: "https://r.example.com"}), ","); got != "https://r.example.com" {

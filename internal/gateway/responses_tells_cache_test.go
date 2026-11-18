@@ -107,64 +107,6 @@ func messagesUsage(t *testing.T, reply string) map[string]int {
 	return out
 }
 
-// Claude Desktop's Messages to a ModelScope model are asked on ModelScope's
-// Responses API, which tells what its cache answered, not on Chat, which
-// doesn't (#1578, sparrowbits: 0 of 34.9M tokens read from cache over 202
-// requests on Chat, where Codex on Responses read 94%). The client is told
-// the 12288 tokens read from cache, streamed and whole.
-func TestModelScopeMessagesTellTheCache(t *testing.T) {
-	srv, seen := fakeModelScope(t, modelScopeChatUsage)
-	for _, stream := range []string{"true", "false"} {
-		fresh(t)
-		if err := provider.Save(provider.Provider{ID: "modelscope", Preset: "modelscope", Name: "ModelScope", Key: "k",
-			Chat: srv.URL + "/v1", Responses: srv.URL + "/v1", Models: []string{"Qwen/Qwen3.8-Flash-Next"}}); err != nil {
-			t.Fatal(err)
-		}
-		seen()
-		code, reply := post(t, "/v1/messages", `{"model":"modelscope/Qwen/Qwen3.8-Flash-Next","max_tokens":100,"stream":`+stream+
-			`,"system":[{"type":"text","text":"you are","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":"hi"}]}`)
-		if code != 200 {
-			t.Fatalf("%d %s", code, reply)
-		}
-		if paths := seen(); len(paths) != 1 || paths[0] != "/v1/responses" {
-			t.Fatalf("stream=%s: Messages went to %v, want /v1/responses", stream, paths)
-		}
-		if u := messagesUsage(t, reply); u["cache_read_input_tokens"] != 12288 || u["input_tokens"] != 108 || u["output_tokens"] != 32 {
-			t.Errorf("stream=%s: usage %v, want 12288 read from cache, 108 input, 32 output\n%s", stream, u, reply)
-		}
-	}
-}
-
-// A model ModelScope doesn't serve on Responses (404 there) is asked on
-// Chat, as before, and stays there.
-func TestModelScopeModelNotOnResponsesGoesToChat(t *testing.T) {
-	srv, seen := fakeModelScope(t, modelScopeChatUsage, "Qwen/Qwen-Chat-Only")
-	fresh(t)
-	if err := provider.Save(provider.Provider{ID: "modelscope", Preset: "modelscope", Name: "ModelScope", Key: "k",
-		Chat: srv.URL + "/v1", Responses: srv.URL + "/v1", Models: []string{"Qwen/Qwen-Chat-Only"}}); err != nil {
-		t.Fatal(err)
-	}
-	h := New().Handler()
-	ask := func() {
-		t.Helper()
-		rec := httptest.NewRecorder()
-		h.ServeHTTP(rec, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(
-			`{"model":"modelscope/Qwen/Qwen-Chat-Only","max_tokens":100,"stream":true,"messages":[{"role":"user","content":"hi"}]}`)))
-		if rec.Code != 200 || !strings.Contains(rec.Body.String(), "ok") {
-			t.Fatalf("%d %s", rec.Code, rec.Body.String())
-		}
-	}
-	seen()
-	ask()
-	if paths := seen(); len(paths) != 2 || paths[0] != "/v1/responses" || paths[1] != "/v1/chat/completions" {
-		t.Fatalf("went to %v, want Responses then Chat", paths)
-	}
-	ask()
-	if paths := seen(); len(paths) != 1 || paths[0] != "/v1/chat/completions" {
-		t.Fatalf("second request went to %v, want Chat alone", paths)
-	}
-}
-
 // A provider with Chat and Responses that isn't ModelScope keeps Chat for a
 // translated request (nothing is known of its Responses API), and a Chat
 // API that tells its cache in prompt_tokens_details.cached_tokens reaches a
@@ -187,25 +129,6 @@ func TestOtherChatAndResponsesKeepChat(t *testing.T) {
 		}
 		if u := messagesUsage(t, reply); u["cache_read_input_tokens"] != 12288 || u["input_tokens"] != 76 {
 			t.Errorf("stream=%s: usage %v, want 12288 read from cache, 76 input", stream, u)
-		}
-	}
-}
-
-// Agents that ask each model on one API (Pi, omp, droid) are wired to
-// ModelScope's Responses, by its preset or its host; another vendor with
-// both keeps Chat.
-func TestModelScopeNativeIsResponses(t *testing.T) {
-	for _, c := range []struct {
-		p    provider.Provider
-		want provider.Protocol
-	}{
-		{provider.Provider{Preset: "modelscope", Chat: "http://127.0.0.1:1/v1", Responses: "http://127.0.0.1:1/v1"}, provider.Responses},
-		{provider.Provider{Chat: "https://api-inference.modelscope.cn/v1", Responses: "https://api-inference.modelscope.cn/v1"}, provider.Responses},
-		{provider.Provider{Chat: "https://api-inference.modelscope.cn/v1"}, provider.Chat},
-		{provider.Provider{Preset: "groq", Chat: "https://api.groq.com/openai/v1", Responses: "https://api.groq.com/openai/v1"}, provider.Chat},
-	} {
-		if got := c.p.Native("Qwen/Qwen3.8-Flash-Next"); got != c.want {
-			t.Errorf("preset %q, chat %s, responses %s: Native %q, want %q", c.p.Preset, c.p.Chat, c.p.Responses, got, c.want)
 		}
 	}
 }

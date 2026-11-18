@@ -23,9 +23,9 @@ func TestImportIsReadOnce(t *testing.T) {
 		return rec, in
 	}
 
-	id := stashImport("magpie://import?preset=deepseek&key=sk-test")
+	id := stashImport("magpie://import?preset=moonshot&key=sk-test")
 	rec, in := get(id)
-	if rec.Code != 200 || in.Provider.ID != "deepseek" || in.Provider.Key != "sk-test" || in.Error != "" {
+	if rec.Code != 200 || in.Provider.ID != "moonshot" || in.Provider.Key != "sk-test" || in.Error != "" {
 		t.Fatalf("%d %+v", rec.Code, in)
 	}
 	if rec, _ := get(id); rec.Code != 404 {

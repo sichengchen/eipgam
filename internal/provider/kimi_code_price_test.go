@@ -54,7 +54,7 @@ func TestKimiCodeListPrice(t *testing.T) {
 	k31 := catalog.Price{Input: 2, Output: 10, CacheRead: 0.2, CacheWrite: 2}
 	k31highspeed := catalog.Price{Input: 4, Output: 20, CacheRead: 0.2, CacheWrite: 4}
 	highspeed := catalog.Price{Input: 1.9, Output: 8, CacheRead: 0.38}
-	for _, preset := range []string{"kimi-code", "kimi-code-cn"} {
+	for _, preset := range []string{"kimi-code"} {
 		p, err := FromPreset(preset)
 		if err != nil {
 			t.Fatal(err)
@@ -101,7 +101,7 @@ func TestKimiCodeListPrice(t *testing.T) {
 	}
 
 	// the Requests list names the API model a k3 is priced as, a relay's k3 none
-	kc, _ := FromPreset("kimi-code-cn")
+	kc, _ := FromPreset("kimi-code")
 	kc.Key = "sk-test"
 	relay.Name, relay.Key, relay.Chat = "Relay", "sk-test", "https://relay.example/v1"
 	for _, p := range []Provider{kc, relay} {
@@ -109,11 +109,11 @@ func TestKimiCodeListPrice(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if got := PricedNameFor("kimi-code-cn", "k3-256k"); got != "kimi-k3" {
-		t.Errorf("PricedNameFor(kimi-code-cn, k3-256k) = %q", got)
+	if got := PricedNameFor("kimi-code", "k3-256k"); got != "kimi-k3" {
+		t.Errorf("PricedNameFor(kimi-code, k3-256k) = %q", got)
 	}
-	if got := PricedNameFor("kimi-code-cn", "k3.1-pro"); got != "kimi-k3.1-pro" {
-		t.Errorf("PricedNameFor(kimi-code-cn, k3.1-pro) = %q", got)
+	if got := PricedNameFor("kimi-code", "k3.1-pro"); got != "kimi-k3.1-pro" {
+		t.Errorf("PricedNameFor(kimi-code, k3.1-pro) = %q", got)
 	}
 	if got := PricedNameFor("relay", "k3"); got != "k3" {
 		t.Errorf("PricedNameFor(relay, k3) = %q", got)
@@ -121,8 +121,8 @@ func TestKimiCodeListPrice(t *testing.T) {
 	if got := PricedNameFor("relay", "k3.1-pro"); got != "k3.1-pro" {
 		t.Errorf("PricedNameFor(relay, k3.1-pro) = %q", got)
 	}
-	if got := PricedNameFor("kimi-code-cn", "k3.1-pro-highspeed"); got != "kimi-k3.1-pro-highspeed" {
-		t.Errorf("PricedNameFor(kimi-code-cn, k3.1-pro-highspeed) = %q", got)
+	if got := PricedNameFor("kimi-code", "k3.1-pro-highspeed"); got != "kimi-k3.1-pro-highspeed" {
+		t.Errorf("PricedNameFor(kimi-code, k3.1-pro-highspeed) = %q", got)
 	}
 	// free on a ChatGPT sign-in, so priced as nothing else (codexReviewFree)
 	if got := PricedNameFor("codex", "codex-auto-review"); got != "codex-auto-review" {

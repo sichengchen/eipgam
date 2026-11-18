@@ -306,18 +306,13 @@ func prefillHow(p provider.Provider, to provider.Protocol, model string) string 
 }
 
 // chatPrefill is the prefill mode of a Chat upstream at host serving
-// model: DeepSeek's prefix (its own API, where the mode is served under
-// /beta, with "prefix": true on the message) or Kimi's partial
-// ("partial": true). Partial is a field of the message itself and prefix
-// a path the relay forwards, so a relay on this machine or the LAN
-// serving one of their models is taken to front the vendor, as
+// model: Kimi's partial ("partial": true on the message). Partial is a
+// field of the message itself, so a relay on this machine or the LAN
+// serving one of its models is taken to front the vendor, as
 // geminiCompat takes one to front Gemini. "" elsewhere.
 func chatPrefill(host, model string) string {
 	h := strings.ToLower(host)
-	switch {
-	case h == "api.deepseek.com" || strings.HasSuffix(h, ".deepseek.com"):
-		return "prefix"
-	case strings.Contains(h, "moonshot") || strings.Contains(h, "kimi"):
+	if strings.Contains(h, "moonshot") || strings.Contains(h, "kimi") {
 		return "partial"
 	}
 	if s, _, err := net.SplitHostPort(h); err == nil {
@@ -329,10 +324,7 @@ func chatPrefill(host, model string) string {
 			return ""
 		}
 	}
-	switch m := strings.ToLower(model); {
-	case strings.Contains(m, "deepseek"):
-		return "prefix"
-	case strings.Contains(m, "kimi"):
+	if strings.Contains(strings.ToLower(model), "kimi") {
 		return "partial"
 	}
 	return ""

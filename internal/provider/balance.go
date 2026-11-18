@@ -62,41 +62,23 @@ func balanceSourceOf(p Provider) (balanceSource, bool) {
 	hosts := []string{hostOf(p.Chat), hostOf(p.Responses), hostOf(p.Anthropic)}
 	for _, h := range hosts {
 		switch h {
-		case "api.deepseek.com":
-			return balanceSource{"https://api.deepseek.com/user/balance", readDeepSeek, "", nil, readDeepSeekSplit}, true
-		case "api.moonshot.cn":
-			return balanceSource{"https://api.moonshot.cn/v1/users/me/balance", readMoonshot("¥"), "", nil, nil}, true
 		case "api.moonshot.ai":
 			return balanceSource{"https://api.moonshot.ai/v1/users/me/balance", readMoonshot("$"), "", nil, nil}, true
 		case "openrouter.ai":
 			return balanceSource{"https://openrouter.ai/api/v1/credits", readOpenRouter, "", nil, nil}, true
-		case "api.siliconflow.cn":
-			return balanceSource{"https://api.siliconflow.cn/v1/user/info", readSiliconFlow("¥"), "", siliconFlowGone("https://cloud.siliconflow.cn", " (余额充值 → 代金券)"), nil}, true
 		case "api.siliconflow.com":
 			return balanceSource{"https://api.siliconflow.com/v1/user/info", readSiliconFlow("$"), "", siliconFlowGone("https://cloud.siliconflow.com", ""), nil}, true
-		case "api.stepfun.com":
-			return balanceSource{"https://api.stepfun.com/v1/accounts", readStepFun("¥"), "", nil, nil}, true
 		case "api.stepfun.ai":
 			return balanceSource{"https://api.stepfun.ai/v1/accounts", readStepFun("$"), "", nil, nil}, true
 		case "api.commandcode.ai":
 			return balanceSource{"https://api.commandcode.ai/alpha/billing/credits", readCommandCode, "", nil, nil}, true
-		case "api-inference.modelscope.cn":
-			return balanceSource{modelScopeBalanceURL, readModelScope, "", nil, nil}, true
 		case "ollama.com":
 			// the credits bought past the plan's allowance (#1888)
 			return balanceSource{ollamaBalanceURL, readOllamaCredits, "", nil, nil}, true
-		case "aihubmix.com":
-			if p.BalanceToken != "" {
-				return balanceSource{"https://aihubmix.com/api/user/self", readAiHubMixAccount, p.BalanceToken, nil, nil}, true
-			}
-			return balanceSource{aiHubMixKeyRemain, readAiHubMix, "", nil, nil}, true
 		}
 	}
 	return balanceSource{}, false
 }
-
-// aiHubMixKeyRemain is AiHubMix's query for what is left on a key
-const aiHubMixKeyRemain = "https://aihubmix.com/dashboard/billing/remain"
 
 // balancePathOf is the balance field of a provider that named its Balance
 // URL.
@@ -276,32 +258,12 @@ func newAPIUserHint(msg string) string {
 // TakesBalanceToken says the provider's vendor tells the account's balance
 // to a token of its own (BalanceToken), which the editor then asks for.
 func TakesBalanceToken(p Provider) bool {
-	if p.BalanceURL != "" {
-		return true
-	}
-	for _, h := range []string{hostOf(p.Chat), hostOf(p.Responses), hostOf(p.Anthropic)} {
-		if h == "aihubmix.com" {
-			return true
-		}
-	}
-	return false
+	return p.BalanceURL != ""
 }
 
 // money is an amount with its currency's sign in front: "¥12.34".
 func money(sign string, v float64) string {
 	return sign + strconv.FormatFloat(v, 'f', 2, 64)
-}
-
-func currencySign(code string) string {
-	switch strings.ToUpper(code) {
-	case "CNY", "RMB":
-		return "¥"
-	case "USD":
-		return "$"
-	case "":
-		return ""
-	}
-	return strings.ToUpper(code) + " "
 }
 
 // number reads an amount given as a JSON number or as a string of one.
@@ -317,75 +279,6 @@ func number(v any) (float64, bool) {
 		return f, err == nil
 	}
 	return 0, false
-}
-
-// deepSeekAmount is one currency of a DeepSeek account: its total, and
-// the granted (赠送) and topped-up (充值) amounts it is made of, when the
-// reply tells them.
-type deepSeekAmount struct {
-	code                   string
-	total, granted, topped float64
-	split                  bool
-}
-
-// deepSeekAmounts: {"is_available":true,"balance_infos":[{"currency":"CNY","total_balance":"110.00","granted_balance":"10.00","topped_up_balance":"100.00"}]}
-func deepSeekAmounts(b []byte) ([]deepSeekAmount, error) {
-	var r struct {
-		Infos []struct {
-			Currency string `json:"currency"`
-			Total    any    `json:"total_balance"`
-			Granted  any    `json:"granted_balance"`
-			Topped   any    `json:"topped_up_balance"`
-		} `json:"balance_infos"`
-	}
-	if err := json.Unmarshal(b, &r); err != nil {
-		return nil, err
-	}
-	var amts []deepSeekAmount
-	for _, in := range r.Infos {
-		v, ok := number(in.Total)
-		if !ok {
-			continue
-		}
-		a := deepSeekAmount{code: strings.ToUpper(in.Currency), total: v}
-		g, gok := number(in.Granted)
-		t, tok := number(in.Topped)
-		if gok && tok {
-			a.granted, a.topped, a.split = g, t, true
-		}
-		amts = append(amts, a)
-	}
-	if len(amts) == 0 {
-		return nil, errors.New("no balance in the reply")
-	}
-	// DeepSeek lists an account's currencies (CNY, USD) in an order that
-	// changes from one read to the next (gakki on Discord), so they are
-	// put in one of magpie's own: a currency with money left first, then
-	// by its code. The first is the one the trend follows and an alert
-	// reads (balanceSeries, BalanceNumber), so it mustn't swap places
-	// between reads either.
-	slices.SortStableFunc(amts, func(a, b deepSeekAmount) int {
-		if (a.total > 0) != (b.total > 0) {
-			if a.total > 0 {
-				return -1
-			}
-			return 1
-		}
-		return strings.Compare(a.code, b.code)
-	})
-	return amts, nil
-}
-
-func readDeepSeek(b []byte) (string, error) {
-	amts, err := deepSeekAmounts(b)
-	if err != nil {
-		return "", err
-	}
-	parts := make([]string, len(amts))
-	for i, a := range amts {
-		parts[i] = money(currencySign(a.code), a.total)
-	}
-	return strings.Join(parts, " · "), nil
 }
 
 // Split labels: what a balance is made of, each a key the GUI words in
@@ -408,26 +301,6 @@ func SplitWords(split []BalancePart) string {
 		out = append(out, strings.ToLower(p.Label)+" "+p.Text)
 	}
 	return strings.Join(out, " · ")
-}
-
-// readDeepSeekSplit is what each currency's balance is made of: the
-// granted credit apart from the money topped up (wwcraft_ on Discord),
-// for a currency that has some granted. One with none granted is all
-// topped up, its total already that, so it adds nothing.
-func readDeepSeekSplit(b []byte) []BalancePart {
-	amts, err := deepSeekAmounts(b)
-	if err != nil {
-		return nil
-	}
-	var out []BalancePart
-	for _, a := range amts {
-		if !a.split || a.granted == 0 {
-			continue
-		}
-		sign := currencySign(a.code)
-		out = append(out, BalancePart{Label: SplitGranted, Text: money(sign, a.granted)}, BalancePart{Label: SplitTopUp, Text: money(sign, a.topped)})
-	}
-	return out
 }
 
 // readMoonshot: {"code":0,"data":{"available_balance":49.58,…},"status":true}
@@ -642,55 +515,6 @@ func readStepFun(sign string) func([]byte) (string, error) {
 	}
 }
 
-// modelScopeBalanceURL is ModelScope's 魔粒 balance in its OpenAPI
-// (modelscope.cn/.well-known/openapi.json, GET /magicubes/balance), asked
-// with the same API token API-Inference takes, as a Bearer (jiabubu on
-// Discord). The page's daily list (/magicubes/transactions) is not in the
-// OpenAPI, so what is spent a day is the card's own trend.
-const modelScopeBalanceURL = "https://modelscope.cn/openapi/v1/magicubes/balance"
-
-// readModelScope: {"success":true,"data":{"total_balance":1500,
-// "available_balance":1300,"frozen_amount":200},"request_id":"…"}, in 魔粒.
-// What can be spent is available_balance: the total holds what running
-// tasks have frozen. A refusal ({"success":false,"message":…}) is told
-// by balanceRefusal before this.
-func readModelScope(b []byte) (string, error) {
-	var r struct {
-		Data struct {
-			Available any `json:"available_balance"`
-		} `json:"data"`
-	}
-	if err := json.Unmarshal(b, &r); err != nil {
-		return "", err
-	}
-	v, ok := number(r.Data.Available)
-	if !ok {
-		return "", errors.New("no balance in the reply")
-	}
-	return strconv.FormatFloat(v, 'f', -1, 64) + " 魔粒", nil
-}
-
-// readAiHubMix: {"object":"list","total_usage":12.5}, what is left on the
-// key in dollars, despite the name. A key without a limit answers -1 of
-// AiHubMix's units ($1 is 500000 of them): it has no balance of its own, and
-// the account's is told only to the account's access token, not to a key.
-func readAiHubMix(b []byte) (string, error) {
-	var r struct {
-		Remain any `json:"total_usage"`
-	}
-	if err := json.Unmarshal(b, &r); err != nil {
-		return "", err
-	}
-	v, ok := number(r.Remain)
-	if !ok {
-		return "", errors.New("no balance in the reply")
-	}
-	if v < 0 {
-		return "", errors.New("this key has no limit, and AiHubMix tells a key only what is left on it: give magpie the account's access token (AiHubMix → Settings → Generate System Access Token) in this provider's settings to see the account's balance, or give the key a limit in AiHubMix's console")
-	}
-	return money("$", v), nil
-}
-
 // readCommandCode: the dollars left on a Command Code key's account, the
 // month's credits and the bought and free ones (see cmdCredits), as the
 // CLI's totalRemaining. The plan's 5-hour and weekly windows are a card
@@ -706,32 +530,6 @@ func readCommandCode(b []byte) (string, error) {
 		return "", errors.New("no balance in the reply")
 	}
 	return money("$", left), nil
-}
-
-// readAiHubMixAccount: {"success":true,"data":{"quota":2500000,…}}, the
-// account's balance in AiHubMix's units, $1 to 500000 of them.
-func readAiHubMixAccount(b []byte) (string, error) {
-	var r struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
-		Data    struct {
-			Quota any `json:"quota"`
-		} `json:"data"`
-	}
-	if err := json.Unmarshal(b, &r); err != nil {
-		return "", err
-	}
-	if !r.Success {
-		if r.Message == "" {
-			r.Message = "AiHubMix didn't take the access token"
-		}
-		return "", errors.New(r.Message)
-	}
-	v, ok := number(r.Data.Quota)
-	if !ok {
-		return "", errors.New("no balance in the reply")
-	}
-	return money("$", v/500000), nil
 }
 
 // readBalancePath picks the amount out of a reply by a dotted path, array
@@ -1505,11 +1303,9 @@ func balanceRead(ctx context.Context, p Provider) (amount string, parts, split [
 // the same whichever of the account's keys asks, rather than the key's
 // own (mimi on Discord: three keys of one site each showed its $8.39).
 // It goes by what was asked, never the vendor's name: an account query
-// asked with its token; a vendor's own query magpie knows (DeepSeek's
-// /user/balance, Moonshot's /users/me/balance, OpenRouter's /credits,
-// SiliconFlow's, StepFun's, Command Code's and Ollama's), all but
-// AiHubMix's /dashboard/billing/remain, which tells the key's own; and a
-// sub2api key's /v1/usage when the key has no quota or limits of its own
+// asked with its token; a vendor's own query magpie knows (Moonshot's
+// /users/me/balance, OpenRouter's /credits, SiliconFlow's, StepFun's,
+// Command Code's and Ollama's); and a sub2api key's /v1/usage when the key has no quota or limits of its own
 // (mode "unrestricted"), which tells the user's wallet or the group's
 // subscription. new-api's /api/usage/token and any other query the user
 // named are a key's own.
@@ -1518,7 +1314,7 @@ func balanceAccountWide(p Provider, src balanceSource, body []byte) bool {
 		return true
 	}
 	if p.BalanceURL == "" {
-		return src.url != aiHubMixKeyRemain
+		return true
 	}
 	if !sub2APIKeyLimits(p) {
 		return false

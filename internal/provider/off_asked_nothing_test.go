@@ -51,7 +51,7 @@ func TestPluginsOffNamesThePluginsOwnIDs(t *testing.T) {
 		{ID: "fakeco", Name: "Fake", Off: true},
 		{ID: "openai-plugin", Name: "OpenAI (plugin)", Off: true},
 		{ID: "onco", Name: "On"},
-		{ID: "deepseek", Name: "DeepSeek", Key: "sk-d", Off: true},
+		{ID: "moonshot", Name: "Kimi", Key: "sk-d", Off: true},
 	}})
 	if err := os.MkdirAll(filepath.Dir(Path()), 0o700); err != nil {
 		t.Fatal(err)

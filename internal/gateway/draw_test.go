@@ -450,23 +450,6 @@ func TestAspectOf(t *testing.T) {
 	}
 }
 
-func TestVolcengineAgentPlanDrawers(t *testing.T) {
-	p, err := provider.FromPreset("volcengine")
-	if err != nil {
-		t.Fatal(err)
-	}
-	pr := provider.Preset("volcengine")
-	p.Chat, p.Responses, p.Anthropic = pr.Regions[1].Chat, pr.Regions[1].Responses, pr.Regions[1].Anthropic
-	ds, want := Drawers(p), p.PlanDrawers()
-	if len(ds) == 0 || !slices.EqualFunc(ds, want, func(a, b catalog.Model) bool { return a.ID == b.ID }) {
-		t.Fatalf("Agent Plan drawers: %+v, want preset plan's %+v", ds, want)
-	}
-	p.Chat, p.Responses, p.Anthropic = pr.Regions[0].Chat, pr.Regions[0].Responses, pr.Regions[0].Anthropic
-	if ds := Drawers(p); len(ds) != 0 {
-		t.Fatalf("Coding Plan drawers: %+v", ds)
-	}
-}
-
 func TestCatalogDrawers(t *testing.T) {
 	fresh(t)
 	for _, id := range catalog.Providers() {
@@ -930,5 +913,21 @@ func TestCodexDrawsPastAccountModelLists(t *testing.T) {
 	defer mu.Unlock()
 	if len(tried) != 2 {
 		t.Fatalf("asked %v", tried)
+	}
+}
+
+// Any images API that answers without an image says what it answered.
+func TestImagesAPINoImageSaysWhy(t *testing.T) {
+	fresh(t)
+	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, `{"errors":{"message":"model not supported for images"}}`)
+	}))
+	t.Cleanup(up.Close)
+	if err := provider.Save(provider.Provider{ID: "art", Name: "Art", Chat: up.URL + "/v1", Key: "key", Models: []string{"gpt-image-1"}}); err != nil {
+		t.Fatal(err)
+	}
+	code, _, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"art/gpt-image-1","prompt":"a cat"}`)
+	if code != 502 || !strings.Contains(raw, "model not supported for images") {
+		t.Fatalf("%d %s", code, raw)
 	}
 }

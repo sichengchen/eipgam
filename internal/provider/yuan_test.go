@@ -34,8 +34,6 @@ func TestPricesInYuan(t *testing.T) {
 		p    Provider
 		want bool
 	}{
-		{"deepseek", Provider{ID: "deepseek", Preset: "deepseek", Chat: "https://api.deepseek.com/v1"}, true},
-		{"deepseek, endpoints left to the preset", Provider{ID: "ds", Preset: "deepseek"}, true},
 		{"a relay made from deepseek's preset", Provider{ID: "deepseek", Preset: "deepseek", Chat: "https://relay.example/v1"}, false},
 		{"zhipu", Provider{ID: "zhipu", Preset: "zhipu", Chat: "https://open.bigmodel.cn/api/paas/v4", Catalog: "zhipuai"}, true},
 		{"z.ai shares zhipu's catalog", Provider{ID: "zai", Preset: "zai", Chat: "https://api.z.ai/api/paas/v4", Catalog: "zhipuai"}, false},
@@ -47,7 +45,6 @@ func TestPricesInYuan(t *testing.T) {
 		{"minimax china", Provider{ID: "minimax-cn", Preset: "minimax-cn", Chat: "https://api.minimaxi.com/v1", Catalog: "minimax"}, true},
 		{"xiaomi's china plan", Provider{ID: "xiaomi", Preset: "xiaomi", Chat: "https://token-plan-cn.xiaomimimo.com/v1", Catalog: "xiaomi-token-plan-cn, xiaomi"}, true},
 		{"xiaomi's singapore plan", Provider{ID: "xiaomi", Preset: "xiaomi", Chat: "https://token-plan-sgp.xiaomimimo.com/v1", Catalog: "xiaomi-token-plan-sgp, xiaomi"}, false},
-		{"volcengine", Provider{ID: "ark", Preset: "volcengine", Chat: "https://ark.cn-beijing.volces.com/api/v3"}, true},
 		{"anthropic", Provider{ID: "anthropic", Preset: "anthropic", Anthropic: "https://api.anthropic.com"}, false},
 		{"openai", Provider{ID: "openai", Preset: "openai", Chat: "https://api.openai.com/v1", Catalog: "openai"}, false},
 		{"openrouter", Provider{ID: "openrouter", Preset: "openrouter", Chat: "https://openrouter.ai/api/v1", Catalog: "openrouter"}, false},

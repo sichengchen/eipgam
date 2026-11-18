@@ -358,12 +358,6 @@ type Provider struct {
 	// fitting, which a backend that isn't OpenAI's needs (#350).
 	CodexAsSent bool `json:"codexAsSent,omitempty"`
 
-	// ImageFilesOff, `image-files=off`, has DeepSeek's own API sent an
-	// agent's inline images inline on every turn. By default each goes up
-	// once through DeepSeek's Files API, for a day, and the turns name it
-	// by its file id (gateway's deepseek_files.go, #5407).
-	ImageFilesOff bool `json:"imageFilesOff,omitempty"`
-
 	// UpstreamProviders, on a Remote magpie, `upstream-providers=on`, names each
 	// of its models in the agents' lists by the provider serving it on
 	// the other magpie, the first in a chain of them: "Claude Sonnet 5 ·
@@ -1813,15 +1807,9 @@ func Delete(id string) error {
 	if err := store(f); err != nil {
 		return err
 	}
-	// its StepFun, Qwen AI platform and Baidu Cloud console sign-ins go
-	// with it, not to a provider added later under the same id
-	if err := forgetStepFun(id); err != nil {
-		return err
-	}
-	if err := forgetQianwen(id); err != nil {
-		return err
-	}
-	return forgetQianfan(id)
+	// its StepFun sign-in goes with it, not to a provider added later
+	// under the same id
+	return forgetStepFun(id)
 }
 
 // keyOptional is true for a server on this computer or on the user's own
@@ -1941,16 +1929,12 @@ func normalize(p Provider) Provider {
 	}
 	p.Fallback = cleanList(p.Fallback)
 	// a provider saved under an id a preset carried before (presetAliases:
-	// qianfan's first day's, Tencent Cloud's plan and TokenHub's two) is
-	// the preset since: its endpoints say the region, and its own id
-	// stays, so whatever the agents, groups and usage named it by keeps
-	// finding it
+	// TokenHub's global pay as you go) is the preset since: its endpoints
+	// say the region, and its own id stays, so whatever the agents, groups
+	// and usage named it by keeps finding it
 	if a, ok := presetAliases[p.Preset]; ok {
 		p.Preset = a.preset
 	}
-	// a preset's endpoints its vendor has moved since (Tencent Cloud's
-	// Token Plan 个人版, ysm119) are where they are now
-	p.moveEndpoints()
 	// OpenCode Zen serves its free models (-free) signed out, to the key
 	// OpenCode itself sends then: a Zen provider saved with no key of its
 	// own asks with that one
@@ -1970,13 +1954,6 @@ func normalize(p Provider) Provider {
 	// completions are, at whatever address it was given
 	if (p.Preset == OMLXPreset || p.Preset == MLXServePreset || p.Preset == "ollama" || p.Preset == "ollama-cloud") && p.Decide == "" && p.Chat != "" {
 		p.Decide = p.Chat
-	}
-	// one asked at Volcengine Ark's pay as you go, its preset's or a
-	// custom one of either protocol, answers System One on the same key:
-	// its decision model is offered with no URL to type (a user on
-	// Discord found no System One endpoint for Ark, custom or preset)
-	if p.Decide == "" {
-		p.Decide = p.arkSystemOne()
 	}
 	// one asked at the Gemini Developer API on an AI Studio key, the
 	// google preset's or a custom one, answers gemini-decision-1 at its

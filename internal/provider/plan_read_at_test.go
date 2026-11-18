@@ -29,7 +29,7 @@ func TestPlanKeyCardSaysWhenRead(t *testing.T) {
 		t.Setenv(v, "")
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Host")+r.URL.Path != "api.kimi.com/coding/v1/usages" {
+		if r.Header.Get("X-Host")+r.URL.Path != "api.kimi.ai/coding/v1/usages" {
 			t.Errorf("asked %s%s", r.Header.Get("X-Host"), r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -41,13 +41,13 @@ func TestPlanKeyCardSaysWhenRead(t *testing.T) {
 	old := http.DefaultClient.Transport
 	http.DefaultClient.Transport = rewrite{srv}
 	t.Cleanup(func() { http.DefaultClient.Transport = old })
-	if err := Save(FromPresetKey(t, "kimi-code-cn", "sk-kimi-cn")); err != nil {
+	if err := Save(FromPresetKey(t, "kimi-code", "sk-kimi")); err != nil {
 		t.Fatal(err)
 	}
 	before := time.Now()
 	var q *SubscriptionQuota
 	for _, c := range PlanQuotas(context.Background()) {
-		if c.Provider == "kimi-code-cn" {
+		if c.Provider == "kimi-code" {
 			q = &c
 		}
 	}

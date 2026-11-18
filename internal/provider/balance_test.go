@@ -22,10 +22,6 @@ func TestBalanceReaders(t *testing.T) {
 		body string
 		want string
 	}{
-		{"deepseek", readDeepSeek, `{"is_available":true,"balance_infos":[{"currency":"CNY","total_balance":"110.00","granted_balance":"10.00"}]}`, "¥110.00"},
-		{"deepseek two", readDeepSeek, `{"balance_infos":[{"currency":"CNY","total_balance":"1"},{"currency":"USD","total_balance":"2.5"}]}`, "¥1.00 · $2.50"},
-		{"deepseek two, USD first", readDeepSeek, `{"balance_infos":[{"currency":"USD","total_balance":"2.5"},{"currency":"CNY","total_balance":"1"}]}`, "¥1.00 · $2.50"},
-		{"deepseek, the CNY spent", readDeepSeek, `{"is_available":true,"balance_infos":[{"currency":"CNY","total_balance":"-0.05","granted_balance":"0.00","topped_up_balance":"-0.05"},{"currency":"USD","total_balance":"11.12","granted_balance":"0.00","topped_up_balance":"11.12"}]}`, "$11.12 · ¥-0.05"},
 		{"kimi", readMoonshot("¥"), `{"code":0,"data":{"available_balance":49.58894,"voucher_balance":46.5,"cash_balance":3.0},"status":true}`, "¥49.59"},
 		{"openrouter", readOpenRouter, `{"data":{"total_credits":20,"total_usage":3.5}}`, "$16.50"},
 		{"commandcode", readCommandCode, `{"credits":{"monthlyCredits":12.3,"purchasedCredits":2,"freeCredits":0},"windowLimits":{"limited":true,"fiveHour":{"used":4.2,"cap":10},"weekly":{"used":9,"cap":50}}}`, "$14.30"},
@@ -33,16 +29,11 @@ func TestBalanceReaders(t *testing.T) {
 		{"siliconflow", readSiliconFlow("¥"), `{"code":20000,"data":{"balance":"0.88","totalBalance":"88.88"}}`, "¥88.88"},
 		{"stepfun", readStepFun("¥"), `{"object":"account","type":"prepaid","balance":26.00,"total_cash_balance":0.00,"total_voucher_balance":26.00}`, "¥26.00"},
 		{"stepfun intl", readStepFun("$"), `{"object":"account","type":"prepaid","balance":0.00,"total_cash_balance":0.00,"total_voucher_balance":0.00}`, "$0.00"},
-		{"modelscope", readModelScope, `{"success":true,"data":{"total_balance":1500,"available_balance":1300,"frozen_amount":200},"request_id":"r1"}`, "1300 魔粒"},
-		{"modelscope half", readModelScope, `{"success":true,"data":{"total_balance":249.5,"available_balance":249.5,"frozen_amount":0}}`, "249.5 魔粒"},
 	} {
 		got, err := c.read([]byte(c.body))
 		if err != nil || got != c.want {
 			t.Errorf("%s: %q %v, want %q", c.name, got, err, c.want)
 		}
-	}
-	if _, err := readDeepSeek([]byte(`{"error":{"message":"bad key"}}`)); err == nil {
-		t.Error("deepseek: no balance read as one")
 	}
 }
 
@@ -168,18 +159,21 @@ func TestBalancePathLists(t *testing.T) {
 
 func TestBalanceSourceByHost(t *testing.T) {
 	for base, want := range map[string]string{
-		"https://api.deepseek.com/v1":            "https://api.deepseek.com/user/balance",
-		"https://api.moonshot.cn/v1":             "https://api.moonshot.cn/v1/users/me/balance",
+		"https://api.moonshot.ai/v1":             "https://api.moonshot.ai/v1/users/me/balance",
 		"https://openrouter.ai/api/v1":           "https://openrouter.ai/api/v1/credits",
-		"https://api.siliconflow.cn/v1":          "https://api.siliconflow.cn/v1/user/info",
+		"https://api.siliconflow.com/v1":         "https://api.siliconflow.com/v1/user/info",
 		"https://api.commandcode.ai/provider/v1": "https://api.commandcode.ai/alpha/billing/credits",
-		"https://api.stepfun.com/step_plan/v1":   "https://api.stepfun.com/v1/accounts",
+		"https://api.stepfun.ai/step_plan/v1":    "https://api.stepfun.ai/v1/accounts",
 		"https://api.stepfun.ai/v1":              "https://api.stepfun.ai/v1/accounts",
 		"https://ollama.com/v1":                  "https://ollama.com/api/balance",
-		"https://api-inference.modelscope.cn/v1": "https://modelscope.cn/openapi/v1/magicubes/balance",
 		"http://localhost:11434/v1":              "",
 		"https://relay.example.com/v1":           "",
-		"https://api.deepseek.com.evil/":         "",
+		"https://api.moonshot.ai.evil/":          "",
+		// the vendors' mainland China sites, which magpie leaves out, are
+		// asked nothing
+		"https://api.moonshot.cn/v1":           "",
+		"https://api.siliconflow.cn/v1":        "",
+		"https://api.stepfun.com/step_plan/v1": "",
 	} {
 		src, ok := balanceSourceOf(Provider{Chat: base})
 		if ok != (want != "") || src.url != want {
@@ -187,7 +181,7 @@ func TestBalanceSourceByHost(t *testing.T) {
 		}
 	}
 	// the provider's own endpoint wins over the host's
-	if src, _ := balanceSourceOf(Provider{Chat: "https://api.deepseek.com/v1", BalanceURL: "https://x.example/b"}); src.url != "https://x.example/b" {
+	if src, _ := balanceSourceOf(Provider{Chat: "https://api.moonshot.ai/v1", BalanceURL: "https://x.example/b"}); src.url != "https://x.example/b" {
 		t.Errorf("own endpoint: %q", src.url)
 	}
 }
@@ -253,36 +247,6 @@ func TestKeyBalances(t *testing.T) {
 	}
 	if len(bh) != 2 {
 		t.Fatalf("balance history = %+v", bh)
-	}
-}
-
-func TestReadAiHubMix(t *testing.T) {
-	if got, err := readAiHubMix([]byte(`{"object":"list","total_usage":12.5}`)); err != nil || got != "$12.50" {
-		t.Fatalf("got %q, %v", got, err)
-	}
-	// a key without a limit: -1 of AiHubMix's units
-	if _, err := readAiHubMix([]byte(`{"object":"list","total_usage":-0.000002}`)); err == nil {
-		t.Fatal("an unlimited key read as a balance")
-	}
-}
-
-func TestAiHubMixAccountBalance(t *testing.T) {
-	if got, err := readAiHubMixAccount([]byte(`{"success":true,"data":{"username":"x","quota":2500000}}`)); err != nil || got != "$5.00" {
-		t.Fatalf("got %q, %v", got, err)
-	}
-	if _, err := readAiHubMixAccount([]byte(`{"success":false,"message":"no such token"}`)); err == nil || err.Error() != "no such token" {
-		t.Fatalf("a refused token: %v", err)
-	}
-	p := Provider{Chat: "https://aihubmix.com/v1", Key: "sk-1"}
-	if !TakesBalanceToken(p) || TakesBalanceToken(Provider{Chat: "https://api.deepseek.com"}) {
-		t.Fatal("TakesBalanceToken")
-	}
-	if src, _ := balanceSourceOf(p); src.token != "" || !strings.HasSuffix(src.url, "/dashboard/billing/remain") {
-		t.Fatalf("without a token: %+v", src)
-	}
-	p.BalanceToken = "tok"
-	if src, _ := balanceSourceOf(p); src.token != "tok" || !strings.HasSuffix(src.url, "/api/user/self") {
-		t.Fatalf("with a token: %+v", src)
 	}
 }
 
@@ -620,53 +584,6 @@ func TestKnownBalanceFieldLeftEmpty(t *testing.T) {
 	}
 }
 
-// ModelScope's 魔粒 (jiabubu on Discord): the API-Inference token is
-// asked of the OpenAPI's /magicubes/balance as a Bearer, the card tells
-// what can be spent (not what running tasks hold), and a token refused
-// says what ModelScope said.
-func TestModelScopeBalance(t *testing.T) {
-	var auth, host string
-	var status int
-	var body string
-	srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/openapi/v1/magicubes/balance" {
-			http.NotFound(w, r)
-			return
-		}
-		auth, host = r.Header.Get("Authorization"), r.Host
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-		w.Write([]byte(body))
-	}))
-	t.Cleanup(srv.Close)
-	addr := srv.Listener.Addr().String()
-	old := http.DefaultClient.Transport
-	http.DefaultClient.Transport = &http.Transport{
-		DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
-			return (&net.Dialer{Timeout: 5 * time.Second}).DialContext(ctx, network, addr)
-		},
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	t.Cleanup(func() { http.DefaultClient.Transport = old })
-
-	p := Provider{ID: "modelscope", Chat: "https://api-inference.modelscope.cn/v1", Responses: "https://api-inference.modelscope.cn/v1", Key: "ms-test"}
-	status, body = http.StatusOK, `{"success":true,"data":{"total_balance":450,"available_balance":250,"frozen_amount":200},"request_id":"r1"}`
-	got, ok, err := Balance(context.Background(), p)
-	if !ok || err != nil || got != "250 魔粒" {
-		t.Fatalf("balance: %q %v %v, want 250 魔粒", got, ok, err)
-	}
-	if auth != "Bearer ms-test" || host != "modelscope.cn" {
-		t.Errorf("asked %s with %q, want modelscope.cn with the token as a Bearer", host, auth)
-	}
-	if n, ok := BalanceNumber(got); !ok || n != 250 {
-		t.Errorf("BalanceNumber(%q) = %v %v, want 250 for its trend", got, n, ok)
-	}
-	status, body = http.StatusUnauthorized, `{"success":false,"code":"InvalidAuthentication","message":"Invalid authentication: authentication required"}`
-	if _, ok, err := Balance(context.Background(), p); !ok || err == nil || !strings.Contains(err.Error(), "Invalid authentication") {
-		t.Errorf("refused: %v %v, want ModelScope's message", ok, err)
-	}
-}
-
 // SiliconFlow retired /v1/user/info (#1094): its 410, as the reporter's card
 // showed it, says the query is gone and where the balance and vouchers are
 // read now, not the raw reply; a key it refuses still says so as it came.
@@ -696,7 +613,6 @@ func TestSiliconFlowRetiredBalanceQuery(t *testing.T) {
 	for _, c := range []struct {
 		base, console string
 	}{
-		{"https://api.siliconflow.cn/v1", "https://cloud.siliconflow.cn"},
 		{"https://api.siliconflow.com/v1", "https://cloud.siliconflow.com"},
 	} {
 		p := Provider{ID: "siliconflow", Chat: c.base, Key: "sk-test"}
@@ -821,76 +737,5 @@ func TestBalanceMethod(t *testing.T) {
 		if _, _, err := Balance(context.Background(), p); err == nil || len(asked) != 0 {
 			t.Errorf("%q: err %v, asked %q", m, err, asked)
 		}
-	}
-}
-
-// DeepSeek's card tells its granted credit apart from the money topped
-// up (wwcraft_ on Discord), under the total, which stays the figure the
-// trend follows and an alert reads; an account with nothing granted has
-// no split, all of it topped up.
-func TestDeepSeekBalanceSplit(t *testing.T) {
-	isolate(t)
-	h := t.TempDir()
-	t.Setenv("HOME", h)
-	t.Setenv("USERPROFILE", h)
-	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
-	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
-	t.Setenv("PATH", h)
-	for _, v := range agentenv.Vars {
-		t.Setenv(v, "")
-	}
-	keyBalanceCache.data = nil
-	t.Cleanup(func() { keyBalanceCache.data = nil })
-
-	srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Host != "api.deepseek.com" || r.URL.Path != "/user/balance" {
-			http.NotFound(w, r)
-			return
-		}
-		switch r.Header.Get("Authorization") {
-		case "Bearer sk-gift":
-			w.Write([]byte(`{"is_available":true,"balance_infos":[{"currency":"CNY","total_balance":"110.00","granted_balance":"10.00","topped_up_balance":"100.00"}]}`))
-		case "Bearer sk-two":
-			w.Write([]byte(`{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"0.00","granted_balance":"0.00","topped_up_balance":"0.00"},{"currency":"CNY","total_balance":"7.50","granted_balance":"2.50","topped_up_balance":"5.00"}]}`))
-		default:
-			w.Write([]byte(`{"is_available":true,"balance_infos":[{"currency":"CNY","total_balance":"42.00","granted_balance":"0.00","topped_up_balance":"42.00"}]}`))
-		}
-	}))
-	t.Cleanup(srv.Close)
-	addr := srv.Listener.Addr().String()
-	old := http.DefaultClient.Transport
-	http.DefaultClient.Transport = &http.Transport{
-		DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
-			return (&net.Dialer{Timeout: 5 * time.Second}).DialContext(ctx, network, addr)
-		},
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	t.Cleanup(func() { http.DefaultClient.Transport = old })
-
-	if err := Save(Provider{ID: "deepseek", Name: "DeepSeek", Chat: "https://api.deepseek.com", Key: "sk-gift", KeyName: "gift",
-		Keys: []KeyAccount{{Name: "two", Key: "sk-two"}, {Name: "paid", Key: "sk-paid"}}}); err != nil {
-		t.Fatal(err)
-	}
-	got := map[string]SubscriptionQuota{}
-	for _, q := range KeyBalances(context.Background()) {
-		got[q.User] = q
-	}
-	gift := got["gift"]
-	if gift.Error != "" || gift.Balance != "¥110.00" || len(gift.BalanceParts) != 0 {
-		t.Fatalf("gift = %+v", gift)
-	}
-	if w := "granted ¥10.00 · topped up ¥100.00"; SplitWords(gift.BalanceSplit) != w {
-		t.Fatalf("gift's split = %q, want %q", SplitWords(gift.BalanceSplit), w)
-	}
-	// two currencies: the one with money first, its split alone
-	if two := got["two"]; two.Balance != "¥7.50 · $0.00" || SplitWords(two.BalanceSplit) != "granted ¥2.50 · topped up ¥5.00" {
-		t.Fatalf("two = %q %q", two.Balance, SplitWords(two.BalanceSplit))
-	}
-	if paid := got["paid"]; paid.Balance != "¥42.00" || paid.BalanceSplit != nil {
-		t.Fatalf("paid = %q %+v, want no split", paid.Balance, paid.BalanceSplit)
-	}
-	// the total is still kept over time
-	if pts := readBalanceHist()[quotaHistKey("deepseek", "gift")]; len(pts) != 1 || pts[0].Amount != 110 {
-		t.Fatalf("gift's balance history = %+v", pts)
 	}
 }

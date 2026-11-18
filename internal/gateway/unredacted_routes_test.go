@@ -17,7 +17,8 @@ import (
 // CrazyMouse_TT on X: masking turned off for a provider of the user's own
 // model (Send requests unmasked, provider.Unredacted) holds on every route
 // that reaches it, a chat's and a token count's (unredacted_test.go) and a
-// picture's, a video's and Ark's own API's here. A provider left on, or a
+// picture's, a video's and the vendor's own API's (the native route)
+// here. A provider left on, or a
 // group with a member left on, stays masked.
 
 const unmaskWord = "acmecorp"
@@ -120,7 +121,7 @@ func TestUnredactedProviderMakesVideosWhole(t *testing.T) {
 	}
 }
 
-func TestUnredactedProviderArkNativeWhole(t *testing.T) {
+func TestUnredactedProviderNativeWhole(t *testing.T) {
 	for _, c := range []struct {
 		name       string
 		set, whole bool
@@ -130,21 +131,18 @@ func TestUnredactedProviderArkNativeWhole(t *testing.T) {
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			fresh(t)
-			up := newArkNative(t)
-			was := isArk
-			isArk = func(p provider.Provider) bool { return p.ID == "ark" }
-			t.Cleanup(func() { isArk = was })
-			if err := provider.Save(provider.Provider{ID: "ark", Name: "Volcengine Ark", Chat: up.URL + "/api/v3", Key: "key", Models: []string{"doubao-seedream-4-5-251128"}, Unredacted: c.set}); err != nil {
-				t.Fatal(err)
-			}
+			up := newVendorAPI(t)
+			saveVendor(t, provider.Provider{ID: "vendor", Name: "Vendor", Chat: up.URL + "/v1", Key: "key", Models: []string{"img-1"}, Unredacted: c.set})
 			maskWordOn(t)
-			rec := arkNativeAsk(t, arkNativeMux(New()), access.Identity{KeyID: "desk", KeyName: "Desk"}, "POST", NativePath+"ark/images/generations", `{"model":"doubao-seedream-4-5-251128","prompt":"the `+unmaskWord+` logo"}`)
-			if rec.Code != 200 {
+			rec := nativeAskAs(t, nativeMux(New()), access.Identity{KeyID: "desk", KeyName: "Desk"}, "POST", NativePath+"vendor/v1/images/generations", `{"model":"img-1","prompt":"the `+unmaskWord+` logo"}`)
+			if rec.Code != 201 {
 				t.Fatalf("%d %s", rec.Code, rec.Body)
 			}
-			up.mu.Lock()
-			seen := strings.Join(up.seen, "\n")
-			up.mu.Unlock()
+			var bodies []string
+			for _, v := range up.asked() {
+				bodies = append(bodies, v.body)
+			}
+			seen := strings.Join(bodies, "\n")
 			if whole := strings.Contains(seen, unmaskWord); whole != c.whole {
 				t.Fatalf("sent whole %v, want %v: %s", whole, c.whole, seen)
 			}

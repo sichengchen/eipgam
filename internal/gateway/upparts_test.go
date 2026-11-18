@@ -78,7 +78,6 @@ func TestUpPartsScaleToTheWire(t *testing.T) {
 		"not read":       {nil, &upBytes{wire: 500}},
 		"nothing went":   {p, &upBytes{}},
 		"a socket delta": {p, &upBytes{wire: 500, socket: true}},
-		"images by file": {p, &upBytes{wire: 500, images: 2}},
 		"empty body":     {&Prompt{}, &upBytes{wire: 500}},
 	} {
 		if got := upParts(c.p, c.u); got != nil {

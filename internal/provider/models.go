@@ -2356,6 +2356,14 @@ var makerCatalogs = sync.OnceValue(func() []string {
 			}
 		}
 	}
+	// makers whose own API has no preset (DeepSeek's, mainland China's):
+	// their models served elsewhere (a relay, Command Code, Ollama Cloud)
+	// still take their maker's price and levels
+	for _, c := range []string{"deepseek"} {
+		if !slices.Contains(out, c) {
+			out = append(out, c)
+		}
+	}
 	return out
 })
 

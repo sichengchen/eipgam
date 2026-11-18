@@ -33,7 +33,7 @@ func TestKimiCodeCost(t *testing.T) {
 	}
 	catalog.Reset()
 	t.Cleanup(catalog.Reset)
-	for _, id := range []string{"kimi-code-cn", "moonshot"} {
+	for _, id := range []string{"kimi-code", "moonshot"} {
 		p, err := provider.FromPreset(id)
 		if err != nil {
 			t.Fatal(err)
@@ -53,9 +53,9 @@ func TestKimiCodeCost(t *testing.T) {
 		priced      bool
 		want        float64
 	}{
-		{"kimi-code-cn", "k3", true, k3},
-		{"kimi-code-cn", "k3.1-pro", true, k31},
-		{"kimi-code-cn", "kimi-for-coding", false, 0},
+		{"kimi-code", "k3", true, k3},
+		{"kimi-code", "k3.1-pro", true, k31},
+		{"kimi-code", "kimi-for-coding", false, 0},
 		{"moonshot", "kimi-k3", true, k3},
 	}
 	for i, c := range calls {

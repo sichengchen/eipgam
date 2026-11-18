@@ -1,13 +1,11 @@
 package provider
 
 import (
-	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 )
 
-// A Volcengine Agent Plan's month (20,000) is ranked by its week (7,000)
+// A plan's month (20,000, a Volcengine Agent Plan's) is ranked by its week (7,000)
 // once the weeks still to come before the month renews can't carry what
 // the month has left: what the week leaves at its reset is lost then
 // (#5639, louisgreen0726's reading on v0.1.3260: 1,628 used of the week
@@ -17,16 +15,14 @@ func TestMonthOutOfReachRanksByWeek(t *testing.T) {
 	now := time.Now().Truncate(time.Second)
 	day, week := 24*time.Hour, 7*24*time.Hour
 	weekRenews := now.Add(23*time.Hour + 36*time.Minute)
-	// the Agent Plan's GetAFPUsage, its resets in milliseconds
+	// a plan of a 5-hour (2,000), a weekly (7,000) and a monthly
+	// (20,000) window, as a vendor's usage reply gives them
 	plan := func(weekUsed, monthUsed float64, month time.Time) Allowance {
 		t.Helper()
-		ws, _ := volcReadAFP(json.RawMessage(fmt.Sprintf(`{"Tier":"Pro",
-			"AFPFiveHour":{"Quota":2000,"Used":0},
-			"AFPWeekly":{"Quota":7000,"Used":%v,"ResetTimestamp":%d},
-			"AFPMonthly":{"Quota":20000,"Used":%v,"ResetTimestamp":%d}}`,
-			weekUsed, weekRenews.UnixMilli(), monthUsed, month.UnixMilli())))
-		if len(ws) != 3 {
-			t.Fatalf("windows: %+v", ws)
+		ws := []QuotaWindow{
+			{Name: "5 hours", Span: 5 * time.Hour, Used: 0, Amount: 0, Limit: 2000},
+			{Name: "Weekly", Span: week, Used: weekUsed / 7000 * 100, Amount: weekUsed, Limit: 7000, ResetsAt: &weekRenews},
+			{Name: "Month", Span: 30 * day, Used: monthUsed / 20000 * 100, Amount: monthUsed, Limit: 20000, ResetsAt: &month},
 		}
 		return allowanceOf(ws, now)
 	}

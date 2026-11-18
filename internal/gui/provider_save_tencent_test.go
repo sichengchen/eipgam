@@ -114,18 +114,18 @@ func TestProviderListTellsTencentAccessKey(t *testing.T) {
 		switch pr.ID {
 		case "tencent-cloud":
 			seen++
-			if !pr.AccessKey || pr.AccessKeyVendor != "tencent" || !slices.Equal(pr.AccessKeyRegions, []string{"plan", "enterprise-intl"}) {
+			if !pr.AccessKey || pr.AccessKeyVendor != "tencent" || !slices.Equal(pr.AccessKeyRegions, []string{"enterprise-intl"}) {
 				t.Errorf("tencent-cloud preset: %+v", pr)
 			}
-		case "volcengine":
+		case "alibaba-token-plan":
 			seen++
-			if !pr.AccessKey || pr.AccessKeyVendor != "volcengine" || pr.AccessKeyRegions != nil {
-				t.Errorf("volcengine preset: %+v", pr)
+			if !pr.AccessKey || pr.AccessKeyVendor != "alibaba" || pr.AccessKeyRegions != nil {
+				t.Errorf("alibaba-token-plan preset: %+v", pr)
 			}
-		case "deepseek":
+		case "moonshot":
 			seen++
 			if pr.AccessKey || pr.AccessKeyVendor != "" {
-				t.Errorf("deepseek preset: %+v", pr)
+				t.Errorf("moonshot preset: %+v", pr)
 			}
 		}
 	}

@@ -16,7 +16,7 @@ import (
 // and so does one at a price the user set (no Peak). Both the record's
 // cost (Totals, Groups) and a packed gateway block's are.
 func TestCostAtTheCallsHour(t *testing.T) {
-	flash := catalog.Price{Input: 0.15, Output: 0.6, CacheRead: 0.003, Peak: catalog.PeakDeepSeek}
+	flash := catalog.Price{Input: 0.15, Output: 0.6, CacheRead: 0.003, Peak: catalog.PeakWeekdays}
 	other := catalog.Price{Input: 2, Output: 8, CacheRead: 0.2}
 	peak := time.Date(2026, 10, 29, 2, 0, 0, 0, time.UTC)
 	off := time.Date(2026, 10, 29, 11, 0, 0, 0, time.UTC)

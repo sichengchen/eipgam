@@ -98,7 +98,7 @@ func minimaxDrawing(t *testing.T, preset string) (*Server, *minimaxImages, provi
 // key, intl and CN alike, draws image-01 on its image_generation API, its
 // size as an aspect ratio, its image read from data.image_base64.
 func TestMiniMaxDrawsOnImageGeneration(t *testing.T) {
-	for _, preset := range []string{"minimax-cn", "minimax"} {
+	for _, preset := range []string{"minimax"} {
 		t.Run(preset, func(t *testing.T) {
 			s, f, p := minimaxDrawing(t, preset)
 			var ids []string
@@ -152,8 +152,8 @@ func TestMiniMaxDrawingFields(t *testing.T) {
 		}
 	}
 
-	s, f, _ := minimaxDrawing(t, "minimax-cn")
-	code, _, raw := postImages(t, s, "/v1/images/edits", "application/json", `{"model":"minimax-cn/image-01","prompt":"in a garden","image":["https://example.com/me.jpg"],"seed":7,"prompt_optimizer":true}`)
+	s, f, _ := minimaxDrawing(t, "minimax")
+	code, _, raw := postImages(t, s, "/v1/images/edits", "application/json", `{"model":"minimax/image-01","prompt":"in a garden","image":["https://example.com/me.jpg"],"seed":7,"prompt_optimizer":true}`)
 	if code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -164,7 +164,7 @@ func TestMiniMaxDrawingFields(t *testing.T) {
 		t.Fatalf("sent %v", m)
 	}
 
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"minimax-cn/image-01","prompt":"cats","n":3,"size":"21:9"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"minimax/image-01","prompt":"cats","n":3,"size":"21:9"}`)
 	if m = f.sent(t); code != 200 || m["n"] != float64(3) || m["aspect_ratio"] != "21:9" {
 		t.Fatalf("%d %s, sent %v", code, raw, m)
 	}
@@ -200,8 +200,7 @@ func TestMiniMaxDrawingOnlyAtMiniMax(t *testing.T) {
 	if drawsMiniMax(p, "image-01") {
 		t.Fatal("a relay draws on MiniMax's API")
 	}
-	if !drawsMiniMax(provider.Provider{ID: "minimax-cn", Chat: "https://api.minimaxi.com/v1", Key: "k"}, "image-01") ||
-		!drawsMiniMax(provider.Provider{ID: "mm", Chat: "https://api.minimax.cn/v1", Key: "k"}, "image-01-live") ||
+	if !drawsMiniMax(provider.Provider{ID: "mm", Chat: "https://api.minimax.io/v1", Key: "k"}, "image-01-live") ||
 		drawsMiniMax(provider.Provider{ID: "minimax", Chat: "https://api.minimax.io/v1", Key: "k"}, "MiniMax-M3") {
 		t.Fatal("drawsMiniMax")
 	}
@@ -212,7 +211,7 @@ func TestMiniMaxDrawingOnlyAtMiniMax(t *testing.T) {
 // with images[].image_url), not image_generation; the failed item of a
 // partial answer is skipped.
 func TestMiniMaxH3ImageDraws(t *testing.T) {
-	for _, preset := range []string{"minimax", "minimax-cn"} {
+	for _, preset := range []string{"minimax"} {
 		t.Run(preset, func(t *testing.T) {
 			s, f, p := minimaxDrawing(t, preset)
 			have := map[string]bool{}

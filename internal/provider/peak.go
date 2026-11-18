@@ -31,9 +31,6 @@ type peakBill struct {
 }
 
 var peakBills = []peakBill{
-	// DeepSeek's own API, every model: "Off-peak rates are half of the
-	// peak rates" (https://api-docs.deepseek.com/quick_start/pricing)
-	{at: func(b string) bool { return HostOf(b) == "api.deepseek.com" }, ids: []string{"deepseek"}, peak: catalog.PeakDeepSeek},
 	// Command Code's DeepSeek V4 models, its Provider API's and its plan's
 	// (https://commandcode.ai/docs/resources/pricing-limits): its
 	// deepseek-v4-flash-fast is one price at every hour

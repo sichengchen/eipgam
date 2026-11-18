@@ -63,7 +63,6 @@ func (g *glmPlan) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // chat completions and Claude Code on its messages.
 func TestGLMCodingPlanResponses(t *testing.T) {
 	for _, tc := range []struct{ preset, host string }{
-		{"zhipu", "https://open.bigmodel.cn"},
 		{"zai", "https://api.z.ai"},
 	} {
 		t.Run(tc.preset, func(t *testing.T) {

@@ -115,7 +115,7 @@ func TestFmtCostShowsChosenCurrency(t *testing.T) {
 	// By provider (onkashiko on X): DeepSeek's row in yuan, OpenAI's in
 	// dollars, a total in the currency picked for totals
 	for _, p := range []provider.Provider{
-		{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Chat: "https://api.deepseek.com/v1"},
+		{ID: "mine-cn", Name: "Mine", Key: "k", Chat: "https://api.example.cn/v1"},
 		{ID: "openai", Name: "OpenAI", Preset: "openai", Key: "k", Chat: "https://api.openai.com/v1"},
 	} {
 		if err := provider.Save(p); err != nil {
@@ -126,7 +126,7 @@ func TestFmtCostShowsChosenCurrency(t *testing.T) {
 		t.Fatal(err)
 	}
 	costAt = time.Time{}
-	for _, c := range []struct{ id, want string }{{"deepseek", "≈¥8.86"}, {"openai", "≈$1.23"}, {"", "≈$1.23"}, {usage.UnknownProvider, "≈$1.23"}} {
+	for _, c := range []struct{ id, want string }{{"mine-cn", "≈¥8.86"}, {"openai", "≈$1.23"}, {"", "≈$1.23"}, {usage.UnknownProvider, "≈$1.23"}} {
 		if got := fmtCostOf(usage.Totals{Cost: 1.23}, c.id); got != c.want {
 			t.Errorf("by provider, %q: %q, want %q", c.id, got, c.want)
 		}

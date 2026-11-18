@@ -120,27 +120,14 @@ func TestBalanceTrendRunsOut(t *testing.T) {
 func TestBalanceHistoryTwoCurrencies(t *testing.T) {
 	testenv.SetHome(t, t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	cny := `{"currency":"CNY","total_balance":"-0.05","granted_balance":"0.00","topped_up_balance":"-0.05"}`
-	usd := func(v string) string {
-		return `{"currency":"USD","total_balance":"` + v + `","granted_balance":"0.00","topped_up_balance":"` + v + `"}`
-	}
 	t0 := time.Date(2026, 10, 8, 8, 0, 0, 0, time.UTC)
 	key := quotaHistKey("deepseek", "main")
 	// what an earlier magpie kept: whichever amount came first
 	writeBalanceHist(balanceHist{key: {{t0.Add(-30 * time.Minute), 11.2}, {t0.Add(-20 * time.Minute), -0.05}, {t0.Add(-10 * time.Minute), 11.15}}})
 	var last []SubscriptionQuota
 	for i, v := range []string{"11.12", "11.10", "11.08", "11.05"} {
-		body := `{"is_available":true,"balance_infos":[` + cny + `,` + usd(v) + `]}`
-		if i%2 == 1 {
-			body = `{"is_available":true,"balance_infos":[` + usd(v) + `,` + cny + `]}`
-		}
-		bal, err := readDeepSeek([]byte(body))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if want := "$" + v + " · ¥-0.05"; bal != want {
-			t.Fatalf("read %d: card says %q, want %q", i, bal, want)
-		}
+		// a balance in two currencies, as a vendor's card says it
+		bal := "$" + v + " · ¥-0.05"
 		last = []SubscriptionQuota{balCard("Main", bal)}
 		noteBalanceHistory(last, t0.Add(time.Duration(i)*10*time.Minute))
 	}

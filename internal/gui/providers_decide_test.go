@@ -40,8 +40,8 @@ func TestProviderSaveDecideEndpoint(t *testing.T) {
 		t.Fatalf("%q, want %q", p.Decide, pr.Decide)
 	}
 	// a preset with no decision API isn't given one
-	post(`{"id":"deepseek","preset":"deepseek","key":"k","decide":"` + own + `","new":true}`)
-	if p, _ := provider.Find("deepseek"); p.Decide != "" {
-		t.Fatalf("deepseek got %q", p.Decide)
+	post(`{"id":"moonshot","preset":"moonshot","key":"k","decide":"` + own + `","new":true}`)
+	if p, _ := provider.Find("moonshot"); p.Decide != "" {
+		t.Fatalf("moonshot got %q", p.Decide)
 	}
 }

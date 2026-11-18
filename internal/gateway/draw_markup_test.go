@@ -185,9 +185,6 @@ func TestEditWithAMarkupItCantSendIsRefused(t *testing.T) {
 func TestMarkupRefusedWhereNoLayerIsTaken(t *testing.T) {
 	mk := picture{Mime: "image/png", Data: markupPNG}
 	d := drawing{Prompt: "apply the annotation", N: 1, Images: []picture{{Mime: "image/png", Data: pngBytes}}, Markup: &mk}
-	if _, err := arkBody("doubao-seedream-4-0", d); err == nil || !strings.Contains(err.Error(), "markup") {
-		t.Errorf("Ark: %v, want a refusal naming the markup", err)
-	}
 	if _, err := dashScopeBody("qwen-image-edit", d); err == nil || !strings.Contains(err.Error(), "markup") {
 		t.Errorf("DashScope: %v, want a refusal naming the markup", err)
 	}

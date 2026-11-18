@@ -23,28 +23,27 @@ func TestZhipuCodingSearchAddress(t *testing.T) {
 		p    provider.Provider
 		want string
 	}{
-		{provider.Provider{Key: "k", Chat: "https://open.bigmodel.cn/api/coding/paas/v4"}, "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"},
 		{provider.Provider{Key: "k", Chat: "https://api.z.ai/api/coding/paas/v4/"}, "https://api.z.ai/api/mcp/web_search_prime/mcp"},
 		{provider.Provider{Key: "k", Preset: "zai", Chat: "http://127.0.0.1:9/api/coding/paas/v4"}, "http://127.0.0.1:9/api/mcp/web_search_prime/mcp"},
-		{provider.Provider{Chat: "https://open.bigmodel.cn/api/coding/paas/v4"}, ""},           // no key
-		{provider.Provider{Key: "k", Chat: "https://open.bigmodel.cn/api/paas/v4"}, ""},        // pay as you go
-		{provider.Provider{Key: "k", Anthropic: "https://open.bigmodel.cn/api/anthropic"}, ""}, // a plan's or not: unknown
-		{provider.Provider{Key: "k", Chat: "http://127.0.0.1:9/api/coding/paas/v4"}, ""},       // another host, no preset
-		{provider.Provider{Key: "k", Preset: "kimi-code-cn", Chat: "http://127.0.0.1:9/api/coding/paas/v4"}, ""},
+		{provider.Provider{Chat: "https://api.z.ai/api/coding/paas/v4"}, ""},             // no key
+		{provider.Provider{Key: "k", Chat: "https://api.z.ai/api/paas/v4"}, ""},          // pay as you go
+		{provider.Provider{Key: "k", Anthropic: "https://api.z.ai/api/anthropic"}, ""},   // a plan's or not: unknown
+		{provider.Provider{Key: "k", Chat: "http://127.0.0.1:9/api/coding/paas/v4"}, ""}, // another host, no preset
+		{provider.Provider{Key: "k", Preset: "kimi-code", Chat: "http://127.0.0.1:9/api/coding/paas/v4"}, ""},
 	} {
 		if got := provider.ZhipuCodingSearch(c.p); got != c.want {
 			t.Errorf("%+v: %q, want %q", c.p, got, c.want)
 		}
 	}
 	// a pay-as-you-go provider with a plan's key beside: that key searches
-	pr := provider.Preset("zhipu")
-	p := provider.Provider{ID: "glm", Preset: "zhipu", Key: "payg", Chat: pr.Chat, Anthropic: pr.Anthropic,
+	pr := provider.Preset("zai")
+	p := provider.Provider{ID: "glm", Preset: "zai", Key: "payg", Chat: pr.Chat, Anthropic: pr.Anthropic,
 		Keys: []provider.KeyAccount{{Key: "off", Plan: "coding", Off: true}, {Key: "plan", Plan: "coding"}}}
 	if !provider.ZhipuSearches(p) {
 		t.Fatal("the plan's key doesn't search")
 	}
 	ks := provider.ZhipuSearchKeys(p)
-	if len(ks) != 1 || ks[0].Key != "plan" || provider.ZhipuCodingSearch(ks[0]) != "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp" {
+	if len(ks) != 1 || ks[0].Key != "plan" || provider.ZhipuCodingSearch(ks[0]) != "https://api.z.ai/api/mcp/web_search_prime/mcp" {
 		t.Fatalf("keys %+v", ks)
 	}
 	p.Keys = p.Keys[:1]
@@ -174,7 +173,7 @@ func TestGLMCodingPlanSearchesForItsModels(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	setHome(t, t.TempDir()) // no signed-in agent searches
 	g := newGLMSearchPlan(t)
-	glm := provider.Provider{ID: "glm", Name: "GLM Coding Plan", Preset: "zhipu", Key: "sk-glm",
+	glm := provider.Provider{ID: "glm", Name: "GLM Coding Plan", Preset: "zai", Key: "sk-glm",
 		Chat: g.URL + "/api/coding/paas/v4", Models: []string{"glm-4.6"}}
 	if err := provider.Save(glm); err != nil {
 		t.Fatal(err)

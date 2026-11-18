@@ -4,8 +4,8 @@ The full manual: every agent magpie wires, every provider option, the gateway, r
 
 Renamed a project folder? See [relocating Claude Code sessions](session-relocation.md).
 
-One place to pick every agent's model: Codex on DeepSeek, Claude Code
-on Kimi, Gemini CLI on GLM, from the menu bar. [usemagpie.ai](https://usemagpie.ai)
+One place to pick every agent's model: Codex on Kimi, Claude Code
+on GLM, Gemini CLI on Qwen, from the menu bar. [usemagpie.ai](https://usemagpie.ai)
 
 [![Discord](https://img.shields.io/badge/Discord-join%20the%20community-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF)
 
@@ -54,9 +54,9 @@ line; agents connected to magpie lose it when it quits.
   use its models through the gateway, with nothing copied and no key to
   paste.
 - **Providers with one field.** Pick a preset (Anthropic, OpenAI, Gemini,
-  Amazon Bedrock and its Mantle endpoint, DeepSeek, Kimi, GLM, MiniMax, StepFun, LongCat, Qwen, Baidu Qianfan, Tencent Cloud Token Plan,
-  Huawei Cloud MaaS, Volcengine Ark, Mistral, Groq, Nous Portal, xAI, OpenRouter, Together,
-  Fireworks, Fireworks Nexus, SiliconFlow, NVIDIA NIM, ModelScope, AiHubMix, PipeLLM, 302.AI, Ollama, LM Studio…),
+  Amazon Bedrock and its Mantle endpoint, Kimi, Z.ai, MiniMax, StepFun, Xiaomi MiMo, Qwen, Tencent Cloud Token Plan,
+  Mistral, Groq, Nous Portal, xAI, OpenRouter, Together,
+  Fireworks, Fireworks Nexus, SiliconFlow, NVIDIA NIM, PipeLLM, Ollama, LM Studio…),
   paste a key, done. Custom vendors need a name and a base URL. magpie never
   reads keys from your shell environment.
 - **Real model lists, nothing compiled in.** With a key in hand magpie asks
@@ -64,7 +64,7 @@ line; agents connected to magpie lose it when it quits.
   [models.dev](https://models.dev) catalog fills in names, reasoning efforts
   and the list for vendors that have none (a model the vendor's own entry
   doesn't list is named as the other providers serving it name it, so
-  glm-5-turbo reads GLM-5-Turbo under Zhipu as under ZCode; an Azure
+  glm-5-turbo reads GLM-5-Turbo under Z.ai as under ZCode; an Azure
   deployment keeps its own name), and refreshes itself in the
   background once it goes stale. Where models.dev can't be reached, the
   last copy fetched keeps answering, a first run answers from the copy
@@ -352,22 +352,22 @@ provider, and its models appear in every agent's picker:
 
 ```sh
 magpie presets                          # the vendors magpie knows, grouped: vendors, relays, local
-magpie provider add deepseek sk-…       # a preset needs only the key
+magpie provider add moonshot sk-…       # a preset needs only the key
 magpie provider add ollama              # local servers need none
 magpie provider add "My Relay" url=https://relay.example.com/v1 key=sk-… models=gpt-5.5,claude-sonnet-5
 magpie providers                        # host, key, exposed models, who uses what
-magpie provider deepseek                # one provider in detail
-magpie provider models deepseek         # re-fetch the vendor's list (add ids to choose which to expose)
-magpie provider models deepseek +deepseek-v4 -deepseek-chat   # expose one more, take one out; the rest stay
-magpie provider models deepseek a b c   # the whole list of models to expose, replacing it (all: the default)
-magpie provider refresh deepseek        # re-fetch it, and drop picks it no longer has (the TUI: m)
+magpie provider moonshot                # one provider in detail
+magpie provider models moonshot         # re-fetch the vendor's list (add ids to choose which to expose)
+magpie provider models moonshot +kimi-k2.6 -kimi-k2.5   # expose one more, take one out; the rest stay
+magpie provider models moonshot a b c   # the whole list of models to expose, replacing it (all: the default)
+magpie provider refresh moonshot        # re-fetch it, and drop picks it no longer has (the TUI: m)
 magpie provider refresh-every relay 6h  # the gateway fetches its list every 6h (1d, 30m; off; at least 10m; a Remote magpie 10m unless set)
 magpie provider auto-include relay 'gpt-*' 're:claude-.*'  # a newly listed model these match is exposed (none clears)
-magpie provider test deepseek           # one tiny request per API, with latency
-magpie provider key deepseek sk-…       # replace the key
-magpie provider rm deepseek
+magpie provider test moonshot           # one tiny request per API, with latency
+magpie provider key moonshot sk-…       # replace the key
+magpie provider rm moonshot
 magpie models                           # the catalog agents see
-magpie claude deepseek/deepseek-chat    # use it
+magpie claude moonshot/kimi-k2.6        # use it
 ```
 
 Custom providers take `url=` (an OpenAI-compatible base), `anthropic=` (an
@@ -1113,44 +1113,19 @@ accepting its old credential. Independent named keys remain manageable.
 Gateway credentials stay in `~/.config/magpie/caller-keys.json` (XDG-aware,
 mode `0600`), never in usage records or list responses.
 
-Baidu Qianfan's [Token Plans](https://cloud.baidu.com/doc/qianfan/s/Dmrabu8b6)
-are available as `baidu-qianfan`: a personal (个人版) and an enterprise (企业版)
-plan and pay as you go, each with its own Chat Completions, Responses and
-Anthropic Messages endpoints, and a key that works only on its own plan. Add
-it with `magpie provider add baidu-qianfan <api-key>` — the id it carried its
-first day, `qianfan-token-plan`, is taken too. The plans serve no model list,
-so the preset carries their documented models; pay as you go serves its own
-at `/v2/models`.
-
-Alibaba's Token Plan is sold in two places, each with its own `sk-sp-` key
-that only its own host takes: on the Qwen AI platform as `qwen-token-plan`
-(`token-plan.maas.qianwenaiapi.com`), and on Alibaba Cloud Bailian as
-`bailian-token-plan` (`token-plan.cn-beijing.maas.aliyuncs.com`). Alibaba Cloud's international
-plan is `alibaba-token-plan` (`token-plan.ap-southeast-1.maas.aliyuncs.com`),
-and the two at aliyuncs.com show the plan's windows on the Usage page once the
+Alibaba Cloud's international Token Plan is `alibaba-token-plan`
+(`token-plan.ap-southeast-1.maas.aliyuncs.com`, `sk-sp-` keys that only its
+host takes). It shows the plan's windows on the Usage page once the
 provider's editor is given the Alibaba Cloud account's AccessKey ID and Secret
-(the `sk-sp-` key cannot read them). All serve
-Chat Completions at `/compatible-mode/v1` and Anthropic Messages at
-`/apps/anthropic`, and carry the plans' documented text models for when the
-host lists none. Bailian's also answers its decision model,
-`decision-model-preview`, on System One at `/compatible-mode/v1/systemone`
-with the same key, so a routing group can pick it as its classifier. The
-same model on the Qwen AI platform's pay as you go is `qwen-decision`
-(`maas.qianwenaiapi.com`), and on a Bailian workspace `bailian-decision`.
-Neither plan has an API for its credits: the console's subscription page
-shows them, so magpie shows no plan usage for these keys.
-
-Volcengine Ark's System One API, in beta, is `volcengine-decision`: an Ark
-API key, asked at `https://ark.cn-beijing.volces.com/api/v1/systemone` with
-the `ark-beta-systemone-api: true` header magpie adds on Ark's host, and its
-one decision model `doubao-seed-2-1-lite-260915`. The Coding and Agent
-Plans' paths don't serve it, so it bills as pay as you go.
+(the `sk-sp-` key cannot read them). It serves Chat Completions at
+`/compatible-mode/v1` and Anthropic Messages at `/apps/anthropic`, and carries
+the plan's documented text models for when the host lists none.
 
 Qwen Cloud (qwencloud.com), Alibaba's international Qwen platform, has keys
 of its own, made at home.qwencloud.com. Its pay as you go is `qwencloud`,
-at `{region}.maas.qwencloudapi.com` in six regions (`ap-southeast-1`, the
-default, `us-east-1`, `eu-central-1`, `ap-northeast-1`, `cn-hongkong` and
-`cn-beijing`), each region's `sk-ws-` key taken only there. Its Token Plan is
+at `{region}.maas.qwencloudapi.com` in five regions (`ap-southeast-1`, the
+default, `us-east-1`, `eu-central-1`, `ap-northeast-1` and `cn-hongkong`),
+each region's `sk-ws-` key taken only there. Its Token Plan is
 `qwencloud-token-plan` (`token-plan.maas.qwencloudapi.com`, Singapore only,
 `sk-sp-` keys), with the plan's documented text models. Both serve Chat
 Completions at `/compatible-mode/v1` and Anthropic Messages at
@@ -1252,9 +1227,8 @@ only `model` changed, to an OpenAI API key, to Azure OpenAI (at
 magpie. Any other provider is refused with a 400 that says so. Only input
 tokens are counted, cached ones apart.
 
-A decision model that answers System One instead (Qwen's
-`decision-model-preview`, Ark's, a Jev, a Clef, a plugin's, or a decision
-group) is asked there: a predicate goes as a `noul` question, a choice's
+A decision model that answers System One instead (a Jev, a Clef, a
+plugin's, or a decision group) is asked there: a predicate goes as a `noul` question, a choice's
 values as its criteria, a score's levels as its criteria least first, and
 `input` as the state (a string as it is, messages as
 `{"messages":[{role, content}]}`, JSON parts as their JSON). The answer comes
@@ -1603,7 +1577,7 @@ leave it; `onEvent` returns `null` to drop an event, and
 export const events = ["message_start"]
 export function onRequest(body, ctx) {
   ctx.state.asked = body.model
-  if (body.model === "fast") body.model = "deepseek/deepseek-chat"
+  if (body.model === "fast") body.model = "moonshot/kimi-k2.6"
   return body
 }
 export function onEvent(ev, ctx) {
@@ -1631,7 +1605,7 @@ isn't serving, a request gets a 503 and nothing is sent.
 them with its **Options** button in Plugins › Installed, or
 
 ```sh
-magpie plugin options model-map '{"mapping": {"fast": "deepseek/deepseek-chat"}}'
+magpie plugin options model-map '{"mapping": {"fast": "moonshot/kimi-k2.6"}}'
 magpie plugin options model-map off   # clears them
 ```
 
@@ -1689,7 +1663,7 @@ call costs. Each is left out when it isn't known (a routing group has no
 `native_endpoints`, an unpriced model no `pricing`), never empty or 0:
 
 ```json
-{ "id": "deepseek/pro", "name": "pro · DeepSeek", "context": 0, "output": 0, "images": false, "efforts": [],
+{ "id": "moonshot/kimi-k2.6", "name": "Kimi K2.6 · Kimi", "context": 0, "output": 0, "images": false, "efforts": [],
   "native_endpoints": ["/v1/chat/completions"],
   "pricing": { "prompt": "0.0000003", "completion": "0.0000012", "input_cache_read": "0.00000003" } }
 ```
@@ -2074,13 +2048,13 @@ model to `decide` (System One in the editor): the model becomes one of its
 decision models. It is asked on the System One URL by its own name, offered
 to routing groups as a decision model, and kept out of the conversation
 models, and a conversation turn for it is refused. This is how a relay that
-serves its decision model under a name of its own, such as an Ark endpoint
+serves its decision model under a name of its own, such as an endpoint
 id, is used for System One. Auto gives it back to the conversation models. A
 provider with no System One URL, one with only that URL, and a signed-in
 account refuse it.
 
 ```sh
-magpie model api ark/ep-decide decide   # asked on System One
+magpie model api relay/ep-decide decide   # asked on System One
 ```
 
 ### Routing groups
@@ -2149,7 +2123,7 @@ a whole provider for groups, use its **Only through routing groups** switch
 instead.
 
 A group can also be of decision models alone (Jev and the like: TypeSafe's,
-Bailian's `decision-model-preview`, a plugin's marked models) — never mixed
+Cloudflare's Clef, a plugin's marked models) — never mixed
 with models that hold a conversation. It is not offered to agents; it is asked
 at `POST /v1/systemone` with `"model":"group/<id>"` (or its id or name), and a
 chat group can take it as its classifier. Each of its models' keys and
@@ -2159,7 +2133,7 @@ key) rests and the next is asked, and the Routing page's Requests list shows
 every try. It takes no patterns, rules, classifier, effort or fast mode.
 
 ```sh
-magpie group add Jevs models=typesafe/jev-latest,bailian-token-plan/decision-model-preview routing=order
+magpie group add Jevs models=typesafe/jev-latest,openrouter/~typesafe/jev-latest routing=order
 curl -s localhost:3425/v1/systemone -H 'Authorization: Bearer magpie' \
   -d '{"model":"group/jevs","state":{"message":"fix the login bug"},"questions":{"intent":{"type":"choice","choices":["bug","feature"]}}}'
 ```
@@ -2215,7 +2189,7 @@ The same dialog reads OpenCode's own sign-ins, `auth.json` in
 `$XDG_DATA_HOME/opencode` (`~/.local/share/opencode` when unset, on Windows
 too), where `opencode auth login` keeps them. An API key comes in on the
 magpie preset at the same address: OpenCode Go's key on OpenCode Go, Zen's
-(`opencode`) on OpenCode Zen, and a vendor's (OpenAI, Anthropic, DeepSeek,
+(`opencode`) on OpenCode Zen, and a vendor's (OpenAI, Anthropic, Kimi,
 OpenRouter and others) on its own. OpenCode keeps no address beside a key,
 so one of a provider magpie has no preset for is listed and skipped. Sign-ins
 (Claude Pro/Max, Copilot, an enterprise server's token) are listed and
@@ -2306,7 +2280,7 @@ each of these groups ordered by the share used.
   lost at the week's reset, as the
   month still has it to spend later. Once the weeks still to come before
   the month renews can't let through what the month has left (a
-  Volcengine Agent Plan: 20,000 a month, 7,000 a week), what a week
+  plan of 20,000 a month and 7,000 a week), what a week
   leaves is lost at its reset after all, and the account goes by its
   week. Its row
   on the Routing page says the fullest window's share with when that
@@ -2699,8 +2673,8 @@ request, or one with a gateway key, and no other web page
 `/v1/magpie/native/<provider>/<path>` reaches a provider's own API
 through magpie, for what the OpenAI shape doesn't carry. `<provider>` is
 the provider's id; `<path>` is joined to its host, not to its base URL,
-so `/v1/magpie/native/ark/api/v3/contents/generations/tasks` asks
-`https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks`.
+so `/v1/magpie/native/qwen/api/v1/tasks/<task_id>` asks
+`https://dashscope-intl.aliyuncs.com/api/v1/tasks/<task_id>`.
 GET, POST, PUT, PATCH and DELETE are passed on with the query and body as
 sent, and the answer comes back as it came, a stream as it arrives.
 magpie signs it with the provider's key, the way that provider takes one;
@@ -2713,9 +2687,7 @@ every route does, and a key held to models, accounts or a spend limit is
 refused it. With Settings › Privacy masking on, a JSON body is masked and
 put back in the answer, and a body that isn't JSON is refused. Each
 request is a Requests row and a usage record, with tokens when the
-answer reports them. Ark's short paths (`images/generations`,
-`contents/generations/tasks[/<id>]`) still go under the key's base as
-before.
+answer reports them.
 
 Each `/v1/models` entry includes `reasoning` and `supported_reasoning_levels`
 (`[{"effort":"low"}, ...]`), and the same levels as plain names in
@@ -3354,7 +3326,7 @@ when WSL comes back on another one.
 A vendor or relay can hand its users a ready-made provider as a link:
 
 ```
-magpie://import?preset=deepseek&key=sk-…
+magpie://import?preset=moonshot&key=sk-…
 magpie://import?name=Acme%20Relay&chat=https://api.acme.example/v1&anthropic=https://api.acme.example&key=sk-…&models=gpt-5.5,claude-sonnet-5
 ```
 
@@ -4035,9 +4007,9 @@ magpie codex gpt-5.6-sol
 magpie codex effort high        # other fields
 magpie codex effort             # one field, as it is now
 magpie codex xhigh              # bare effort levels are recognised too
-magpie codex deepseek/deepseek-chat   # any catalog model, through the gateway
+magpie codex zai/glm-5.3        # any catalog model, through the gateway
 magpie claude moonshot/kimi-k2.5
-magpie claude haiku deepseek/deepseek-v4-flash   # one tier on its own model
+magpie claude haiku minimax/MiniMax-M3   # one tier on its own model
 magpie claude haiku ""          # back to the main model
 magpie gemini auth api-key
 magpie opencode anthropic/claude-sonnet-5

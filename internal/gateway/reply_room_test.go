@@ -68,15 +68,8 @@ func TestDeepSeekReplyFitsTheWindowLeft(t *testing.T) {
 	d := &deepseekWindow{window: 1000000, prompt: 706784}
 	up := httptest.NewServer(d)
 	defer up.Close()
-	p, err := provider.FromPreset("deepseek")
-	if err != nil {
-		t.Fatal(err)
-	}
-	p.Key = "fixture-key"
-	p.Chat = up.URL + "/v1"
-	// its chat API alone, the fake: no request reaches DeepSeek
-	p.Responses, p.Anthropic = "", ""
-	p.Models = []string{"deepseek-flash"}
+	p := provider.Provider{ID: "deepseek", Name: "DeepSeek", Catalog: "deepseek", Key: "fixture-key", Chat: up.URL + "/v1",
+		Models: []string{"deepseek-flash"}}
 	if err := provider.Save(p); err != nil {
 		t.Fatal(err)
 	}

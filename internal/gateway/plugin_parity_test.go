@@ -122,7 +122,7 @@ func TestCommandCodePluginReasoning(t *testing.T) {
 	reasoning := func(host string) any {
 		return chatBody(t, host)["messages"].([]any)[1].(map[string]any)["reasoning_content"]
 	}
-	for _, host := range []string{provider.CommandCodePlanID, "api.deepseek.com", "qoder", "qoder-cn"} {
+	for _, host := range []string{provider.CommandCodePlanID, "qoder", "qoder-cn"} {
 		if got := reasoning(host); got != "pondered" {
 			t.Errorf("%s got reasoning %v", host, got)
 		}

@@ -177,8 +177,8 @@ type currencyAmount struct {
 var currencyPart = lazyre.New(`^([^\d-]+?)(-?\d[\d,]*(?:\.\d+)?)$`)
 
 // balanceCurrencies is a balance's amounts when it is told in several
-// currencies, each a sign and a number, apart by " · " as readDeepSeek
-// writes them ("$11.12 · ¥-0.05"), in the order shown; nil for one amount,
+// currencies, each a sign and a number, apart by " · " ("$11.12 ·
+// ¥-0.05"), in the order shown; nil for one amount,
 // or for anything else ("$3 · 2 keys", the same sign twice).
 func balanceCurrencies(s string) []currencyAmount {
 	parts := strings.Split(s, " · ")

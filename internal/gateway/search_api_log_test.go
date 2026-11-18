@@ -160,7 +160,7 @@ func TestOwnSearchIsLogged(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	setHome(t, t.TempDir())
 	kimi := newKimiPlan(t)
-	p := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi", Chat: kimi.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}
+	p := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi", Chat: kimi.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}
 	if err := provider.Save(p); err != nil {
 		t.Fatal(err)
 	}

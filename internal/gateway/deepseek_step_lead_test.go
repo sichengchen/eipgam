@@ -50,7 +50,7 @@ func TestDeepSeekStepSaysBeforeItsCall(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "opencode-go", Name: "OpenCode Go", Key: "k", Models: []string{"deepseek-v4.1-flash"}, Responses: srv.URL + "/zen/go/v1"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Models: []string{"deepseek-flash"}, Responses: srv.URL + "/v1"}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k", Models: []string{"deepseek-flash"}, Responses: srv.URL + "/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := provider.SaveGroup(provider.Group{ID: "codex-brain", Name: "codex-brain", Members: []string{"opencode-go/deepseek-v4.1-flash"}, Routing: provider.Ordered}); err != nil {

@@ -66,7 +66,7 @@ func TestDisplayGoesToClaudeOnly(t *testing.T) {
 	up := &displayStrictVendor{}
 	srv := httptest.NewServer(up)
 	t.Cleanup(srv.Close)
-	if err := provider.Save(provider.Provider{ID: "bailian", Name: "Bailian Token Plan", Key: "k", Preset: "bailian-token-plan",
+	if err := provider.Save(provider.Provider{ID: "bailian", Name: "Bailian Token Plan", Key: "k", Preset: "alibaba-token-plan",
 		Anthropic: srv.URL + "/apps/anthropic", Models: []string{"qwen3.7-plus", "glm-5", "kimi-k2.5"}}); err != nil {
 		t.Fatal(err)
 	}

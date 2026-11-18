@@ -129,7 +129,6 @@ func TestTakesOriginalDetail(t *testing.T) {
 	for base, want := range map[string]bool{
 		"https://api.openai.com/v1":             true,
 		"https://chatgpt.com/backend-api/codex": true,
-		"https://api.deepseek.com/v1":           true,
 		"https://opencode.ai/zen/go/v1":         false,
 		"https://openrouter.ai/api/v1":          false,
 		"":                                      false,

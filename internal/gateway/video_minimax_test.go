@@ -139,7 +139,7 @@ func minimaxProvider(t *testing.T, preset, id string, up *fakeMiniMax) provider.
 // host; none of the H3 models is a chat model.
 func TestMiniMaxKeysMakeH3Videos(t *testing.T) {
 	fresh(t)
-	for _, preset := range []string{"minimax", "minimax-cn"} {
+	for _, preset := range []string{"minimax"} {
 		p, err := provider.FromPreset(preset)
 		if err != nil {
 			t.Fatal(err)
@@ -164,12 +164,6 @@ func TestMiniMaxKeysMakeH3Videos(t *testing.T) {
 	}
 	if h := minimaxHost(provider.Provider{Chat: "https://api.minimax.io/v1"}); h != "https://api.minimax.io" {
 		t.Fatalf("intl host %q", h)
-	}
-	if h := minimaxHost(provider.Provider{Anthropic: "https://api.minimaxi.com/anthropic"}); h != "https://api.minimaxi.com" {
-		t.Fatalf("CN host %q", h)
-	}
-	if h := minimaxHost(provider.Provider{Chat: "https://api.minimax.cn/v1"}); h != "https://api.minimax.cn" {
-		t.Fatalf("CN docs host %q", h)
 	}
 	// another vendor, a relay serving MiniMax's models, a sign-in: none
 	for _, p := range []provider.Provider{
@@ -390,8 +384,8 @@ func TestMiniMaxVideoFailuresSayWhy(t *testing.T) {
 func TestImageMCPMakesMiniMaxVideos(t *testing.T) {
 	fresh(t)
 	up := newFakeMiniMax(t)
-	minimaxProvider(t, "minimax-cn", "minimax-cn", up)
-	if m := AutoVideomaker(); m != "minimax-cn/MiniMax-H3" {
+	minimaxProvider(t, "minimax", "minimax", up)
+	if m := AutoVideomaker(); m != "minimax/MiniMax-H3" {
 		t.Fatalf("auto videomaker %q", m)
 	}
 	t.Setenv("MAGPIE_PUBLIC_URL", "")
@@ -402,7 +396,7 @@ func TestImageMCPMakesMiniMaxVideos(t *testing.T) {
 	imageMCPWithin, imageMCPPoll = 30*time.Millisecond, time.Millisecond
 	m := readImageReply(t, imagePost(h, "127.0.0.1:5000", imageToolCall(GenerateVideoTool, map[string]any{"prompt": "STUCK kite", "seconds": 4})))
 	text := m.Result.Content[0].Text
-	i := strings.Index(text, `"video_minimax-cn.424010985738699.`)
+	i := strings.Index(text, `"video_minimax.424010985738699.`)
 	if m.Result.IsError || i < 0 || !strings.Contains(text, GenerationResultTool) {
 		t.Fatalf("still queued: %+v", m)
 	}

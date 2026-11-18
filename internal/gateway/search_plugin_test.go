@@ -24,7 +24,7 @@ func TestSearchOnAndOff(t *testing.T) {
 	fresh(t)
 	relay, seen := relayOfEvery(t)
 	kimi := newKimiPlan(t)
-	plan := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi",
+	plan := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi",
 		Chat: kimi.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}
 	if err := provider.Save(plan); err != nil {
 		t.Fatal(err)

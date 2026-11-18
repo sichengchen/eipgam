@@ -1,7 +1,6 @@
 package gateway
 
-// Alibaba's Token Plan (the Qwen AI platform's, Bailian's, Model Studio's
-// and Qwen Cloud's) makes videos with Wan 3.0 and HappyHorse 1.1 at
+// Alibaba's Token Plan (Model Studio's and Qwen Cloud's) makes videos with Wan 3.0 and HappyHorse 1.1 at
 // DashScope's own asynchronous API (help.aliyun.com/zh/model-studio/
 // wan3-video-generation-api-reference, docs.qwencloud.com's Token Plan
 // "Integrate multimodal generation", read 11-18):

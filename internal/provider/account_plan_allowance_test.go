@@ -11,51 +11,68 @@ import (
 	"time"
 )
 
-// volcAllowanceServer is open.volcengineapi.com answering an access key's
-// Coding Plan as the Usage page's card reads it, counting the asks.
-func volcAllowanceServer(t *testing.T) *atomic.Int32 {
+// aliAllowanceServer is Alibaba Cloud's Singapore console answering an
+// access key's Token Plan as the Usage page's card reads it: the token
+// minted for the access key, then the plan's windows, counting the reads.
+func aliAllowanceServer(t *testing.T) *atomic.Int32 {
 	t.Helper()
 	asked := &atomic.Int32{}
-	five := time.Now().Add(3 * time.Hour).Unix()
-	week := time.Now().Add(4 * 24 * time.Hour).Unix()
+	five := time.Now().Add(3 * time.Hour).UnixMilli()
+	week := time.Now().Add(4 * 24 * time.Hour).UnixMilli()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Host") != "open.volcengineapi.com" || r.URL.Query().Get("Action") != "GetCodingPlanUsage" {
+		switch r.Header.Get("X-Host") {
+		case "modelstudio.ap-southeast-1.aliyuncs.com":
+			io.WriteString(w, `{"cliAccessToken":"tok-allowance"}`)
+		case "bailian-singapore-cs.alibabacloud.com":
+			if r.Header.Get("Authorization") != "Bearer tok-allowance" {
+				t.Errorf("read with %q", r.Header.Get("Authorization"))
+			}
+			asked.Add(1)
+			io.WriteString(w, `{"code":"200","data":{"success":true,"DataV2":{"data":{"data":{`+
+				`"per5HourPercentage":0.008,"per5HourResetTime":`+unixText(five)+`,`+
+				`"per1WeekPercentage":0.8714,"per1WeekResetTime":`+unixText(week)+`}}}}}`)
+		default:
 			t.Errorf("asked %s%s", r.Header.Get("X-Host"), r.URL)
 			w.WriteHeader(http.StatusNotFound)
-			return
 		}
-		asked.Add(1)
-		io.WriteString(w, `{"ResponseMetadata":{"RequestId":"r1"},"Result":{"Status":"ok","QuotaUsage":[`+
-			`{"Level":"session","Percent":0.8,"ResetTimestamp":`+unixText(five)+`},`+
-			`{"Level":"weekly","Percent":87.14,"ResetTimestamp":`+unixText(week)+`}]}}`)
 	}))
 	t.Cleanup(srv.Close)
 	old := http.DefaultClient.Transport
 	http.DefaultClient.Transport = rewrite{srv}
 	t.Cleanup(func() { http.DefaultClient.Transport = old })
+	// no console token kept from another test
+	aliTokensMu.Lock()
+	aliTokens = map[string]aliToken{}
+	aliTokensMu.Unlock()
+	t.Cleanup(func() {
+		aliTokensMu.Lock()
+		aliTokens = map[string]aliToken{}
+		aliTokensMu.Unlock()
+	})
 	return asked
 }
 
-var arkPlan = Provider{ID: "volcengine", Name: "Volcengine Ark", Key: "ark-k",
-	Chat: "https://ark.cn-beijing.volces.com/api/coding/v3", AccessKeyID: "AK1", SecretAccessKey: "SK1"}
+var aliPlan = Provider{ID: "alibaba-token-plan", Name: "Alibaba Cloud Token Plan", Key: "sk-sp-k",
+	Chat: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1", AccessKeyID: "AK1", SecretAccessKey: "SK1"}
 
-// chen on Discord: the Usage page had an Ark Coding Plan's windows while
-// the Routing page said "one key" of it, as routing never read them. A
-// key whose account tells its plan's windows (Ark's, Tencent's, StepFun's)
-// is weighed by them as a Kimi Code or GLM Coding Plan key is.
+// chen on Discord: the Usage page had a plan's windows read with the
+// account's access key while the Routing page said "one key" of it, as
+// routing never read them. A key whose account tells its plan's windows
+// (Alibaba's, Tencent's, StepFun's) is weighed by them as a Kimi Code or
+// GLM Coding Plan key is.
 func TestAccountPlanKeyAllowance(t *testing.T) {
 	keyLimitsHome(t)
 	forgetPlanQuotas()
 	t.Cleanup(forgetPlanQuotas)
-	asked := volcAllowanceServer(t)
-	if err := Save(arkPlan); err != nil {
+	asked := aliAllowanceServer(t)
+	if err := Save(aliPlan); err != nil {
 		t.Fatal(err)
 	}
-	if KeyAllowanceID(arkPlan) == "" {
-		t.Fatal("an Ark plan key has no windows routing reads")
+	if KeyAllowanceID(aliPlan) == "" {
+		t.Fatal("an Alibaba Token Plan key has no windows routing reads")
 	}
-	a := waitAllowance(t, arkPlan, func(Allowance) bool { return true })
-	used, renews := a.For("deepseek-v4.1-flash", time.Now())
+	a := waitAllowance(t, aliPlan, func(Allowance) bool { return true })
+	used, renews := a.For("qwen3.6-plus", time.Now())
 	if used < 87 || used > 87.2 || len(renews) != 2 {
 		t.Fatalf("used %v, renews %v of %+v", used, renews, a)
 	}
@@ -74,7 +91,7 @@ func TestAccountPlanKeyAllowance(t *testing.T) {
 	if qs := PlanQuotas(context.Background()); len(qs) != 1 || len(qs[0].Windows) != 2 {
 		t.Fatalf("cards: %+v", qs)
 	}
-	if a, ok := KeyAllowance(arkPlan); !ok || len(a) != 2 {
+	if a, ok := KeyAllowance(aliPlan); !ok || len(a) != 2 {
 		t.Fatalf("after the card's read: %v %+v", ok, a)
 	}
 	if n := asked.Load(); n != 2 {
@@ -88,7 +105,7 @@ func TestAccountPlanKeyAllowance(t *testing.T) {
 	lastQuotas.Lock()
 	lastQuotas.m, lastQuotas.loaded = nil, false
 	lastQuotas.Unlock()
-	if a, ok := KeyAllowance(arkPlan); !ok || len(a) != 2 {
+	if a, ok := KeyAllowance(aliPlan); !ok || len(a) != 2 {
 		t.Fatalf("from the card on disk: %v %+v", ok, a)
 	}
 	waitRead(t)
@@ -96,9 +113,9 @@ func TestAccountPlanKeyAllowance(t *testing.T) {
 	// pay-as-you-go, or a plan without the account's access key, has none
 	// and is never asked
 	for _, p := range []Provider{
-		{ID: "volc-payg", Key: "ark-k", Chat: "https://ark.cn-beijing.volces.com/api/v3", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
-		{ID: "volc-nosecret", Key: "ark-k", Chat: "https://ark.cn-beijing.volces.com/api/coding/v3", AccessKeyID: "AK1"},
-		{ID: "tc-payg", Key: "tc-k", Chat: "https://tokenhub.tencentmaas.com/v1", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
+		{ID: "qwen-payg", Key: "sk-k", Chat: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
+		{ID: "ali-nosecret", Key: "sk-sp-k", Chat: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1", AccessKeyID: "AK1"},
+		{ID: "tc-payg", Key: "tc-k", Chat: "https://tokenhub-intl.tencentmaas.com/v1", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
 	} {
 		if _, ok := KeyAllowance(p); ok || KeyAllowanceID(p) != "" {
 			t.Errorf("%s reads key windows", p.ID)
@@ -106,7 +123,7 @@ func TestAccountPlanKeyAllowance(t *testing.T) {
 	}
 	// a Tencent Token Plan Enterprise key and a StepFun key are read too
 	for _, p := range []Provider{
-		{ID: "tc-plan", Key: "tc-k", Chat: "https://tokenhub.tencentmaas.com/plan/v3", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
+		{ID: "tc-plan", Key: "tc-k", Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3", AccessKeyID: "AK1", SecretAccessKey: "SK1"},
 		{ID: "stepfun", Key: "sf-k", Chat: "https://api.stepfun.ai/step_plan/v1"},
 	} {
 		if KeyAllowanceID(p) == "" {

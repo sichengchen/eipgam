@@ -20,7 +20,7 @@ func TestPluginVendor(t *testing.T) {
 		name, api, preset, host string
 	}{
 		{"mistral", "https://api.mistral.ai/v1", "mistral", "api.mistral.ai"},
-		{"deepseek", "https://api.deepseek.com/v1", "deepseek", "api.deepseek.com"},
+		{"kimi", "https://api.moonshot.ai/v1", "moonshot", "api.moonshot.ai"},
 		{"openrouter", "https://openrouter.ai/api/v1", "openrouter", "openrouter.ai"},
 		{"unknown host", "https://vibe.example.com/v1", "", ""},
 		{"no api", "", "", ""},

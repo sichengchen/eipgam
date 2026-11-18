@@ -12,12 +12,10 @@ import (
 )
 
 // PublicCatalogs are vendors whose /models, asked with a key, leaves out
-// the image models the key can use: AIHubMix lists only its Gemini image
-// models there, while gpt-image-2 and the rest draw with the same key. Its
-// public catalog, by the host of the vendor's base URL, has them.
-// OpenRouter's /models lists only the models that answer in text, so of
-// its image models only those that chat (Nano Banana, GPT-5 Image) were
-// there; FLUX, Seedream, Riverflow, Recraft, GPT Image and the rest, which
+// the image models the key can use; the public catalog, by the host of the
+// vendor's base URL, has them. OpenRouter's /models lists only the
+// models that answer in text, so of its image models only those that chat
+// (Nano Banana, GPT-5 Image) were there; FLUX, Seedream, Riverflow, Recraft, GPT Image and the rest, which
 // answer with an image alone, are listed by its Image API's own
 // /images/models (iwinux on Discord). They draw at its /images, as the
 // gateway asks it. That list leaves out a model's variants, though:
@@ -25,7 +23,6 @@ import (
 // output alone (AllenH__ on X), which lists every model /images/models
 // does as well, each row with the endpoints it is asked at.
 var PublicCatalogs = map[string]string{
-	"aihubmix.com":  "https://aihubmix.com/api/v1/models",
 	"openrouter.ai": "https://openrouter.ai/api/v1/models?output_modalities=image",
 }
 

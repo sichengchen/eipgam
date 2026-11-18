@@ -95,14 +95,6 @@ var SearchVendors = []SearchVendor{
 	{ID: "exa", Name: "Exa", Base: "https://api.exa.ai", KeysURL: "https://dashboard.exa.ai/api-keys", Paths: []string{"/search"}},
 	{ID: "firecrawl", Name: "Firecrawl", Base: "https://api.firecrawl.dev", KeysURL: "https://www.firecrawl.dev/app/api-keys", Paths: []string{"/v2/search"}},
 	{ID: "you", Name: "You.com", Base: "https://ydc-index.io", KeysURL: "https://you.com/platform", KeyOptional: true, Paths: []string{"/v1/search", "/v1/agents/search"}},
-	{ID: "deepseek", Name: "DeepSeek", Base: "https://api.deepseek.com", KeysURL: "https://platform.deepseek.com/api_keys", Paths: []string{"/v1/tools/search"}},
-	// Volcengine's Doubao Search Custom (豆包搜索 Custom版, once 联网搜索 /
-	// 融合信息搜索), with an API key from its console (CyberCaius on Discord)
-	{ID: "volcengine", Name: "Doubao Search (Volcengine)", Base: "https://open.feedcoopapi.com", KeysURL: "https://console.volcengine.com/search-infinity/api-key", Paths: []string{"/search_api/web_search"}},
-	// Tencent Cloud's Yuanbao Search (元宝搜索, wsa) by its service API
-	// key (服务 API KEY 方式, cloud.tencent.com/document/product/1806/130615),
-	// made in its console's 概览 › 服务 API KEY 方式 (plugins#509)
-	{ID: "wsa", Name: "Yuanbao Search (Tencent Cloud)", Base: "https://api.wsa.cloud.tencent.com", KeysURL: "https://console.cloud.tencent.com/wsapi/index", Paths: []string{"/SearchPro"}},
 	// TinyFish's Search API (docs.tinyfish.ai/search-api/reference): a
 	// GET at its root (/), keys from agent.tinyfish.ai/api-keys (Niapyaya
 	// on X)

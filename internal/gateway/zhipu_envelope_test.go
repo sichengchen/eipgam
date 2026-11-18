@@ -32,7 +32,6 @@ func (zhipuResponses) RoundTrip(r *http.Request) (*http.Response, error) {
 // envelope as a 200 reply; a key Zhipu takes is answered as before.
 func TestZhipuResponsesRefusalIsRefusal(t *testing.T) {
 	for _, tc := range []struct{ preset, host string }{
-		{"zhipu", "open.bigmodel.cn"},
 		{"zai", "api.z.ai"},
 	} {
 		t.Run(tc.preset, func(t *testing.T) {

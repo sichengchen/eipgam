@@ -83,7 +83,7 @@ func TestZhipuCodingPlanKeyTested(t *testing.T) {
 		return Result{}
 	}
 	mk := func(id, key string) Provider {
-		p, err := FromPreset("zhipu")
+		p, err := FromPreset("zai")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -104,7 +104,7 @@ func TestZhipuCodingPlanKeyTested(t *testing.T) {
 	if r := openai(mk("draft", "plan")); !r.OK {
 		t.Errorf("draft with a plan key: %+v", r)
 	}
-	if len(fake.asked) != 2 || fake.asked[1] != "open.bigmodel.cn/api/coding/paas/v4/chat/completions" {
+	if len(fake.asked) != 2 || fake.asked[1] != "api.z.ai/api/coding/paas/v4/chat/completions" {
 		t.Errorf("draft asked %v", fake.asked)
 	}
 
@@ -116,21 +116,21 @@ func TestZhipuCodingPlanKeyTested(t *testing.T) {
 	if r := openai(plan); !r.OK {
 		t.Errorf("plan key: %+v", r)
 	}
-	if p := stored("glm"); p.Chat != "https://open.bigmodel.cn/api/coding/paas/v4" || p.Responses != "https://open.bigmodel.cn/api/v1" {
+	if p := stored("glm"); p.Chat != "https://api.z.ai/api/coding/paas/v4" || p.Responses != "https://api.z.ai/api/v1" {
 		t.Errorf("plan provider at chat %s responses %s, want the Coding Plan's", p.Chat, p.Responses)
 	}
 
 	// pasted by hand, the Anthropic URL and pay as you go's: the OpenAI URL
 	// alone moves, nothing added
 	custom := Provider{ID: "mine", Name: "mine", Key: "plan", Models: []string{"glm-5.1"},
-		Chat: "https://open.bigmodel.cn/api/paas/v4/", Anthropic: "https://open.bigmodel.cn/api/anthropic"}
+		Chat: "https://api.z.ai/api/paas/v4/", Anthropic: "https://api.z.ai/api/anthropic"}
 	if err := Save(custom); err != nil {
 		t.Fatal(err)
 	}
 	if r := openai(custom); !r.OK {
 		t.Errorf("custom plan key: %+v", r)
 	}
-	if p := stored("mine"); p.Chat != "https://open.bigmodel.cn/api/coding/paas/v4" || p.Responses != "" || p.Anthropic != "https://open.bigmodel.cn/api/anthropic" {
+	if p := stored("mine"); p.Chat != "https://api.z.ai/api/coding/paas/v4" || p.Responses != "" || p.Anthropic != "https://api.z.ai/api/anthropic" {
 		t.Errorf("custom provider at chat %s responses %s anthropic %s", p.Chat, p.Responses, p.Anthropic)
 	}
 
@@ -144,7 +144,7 @@ func TestZhipuCodingPlanKeyTested(t *testing.T) {
 	if r := openai(stored("multi")); !r.OK {
 		t.Errorf("multi plan key: %+v", r)
 	}
-	if p := stored("multi"); p.Chat != "https://open.bigmodel.cn/api/paas/v4" {
+	if p := stored("multi"); p.Chat != "https://api.z.ai/api/paas/v4" {
 		t.Errorf("provider with other keys moved to %s", p.Chat)
 	}
 
@@ -157,10 +157,10 @@ func TestZhipuCodingPlanKeyTested(t *testing.T) {
 	if r := openai(payg); !r.OK {
 		t.Errorf("payg key: %+v", r)
 	}
-	if len(fake.asked) != 1 || fake.asked[0] != "open.bigmodel.cn/api/paas/v4/chat/completions" {
+	if len(fake.asked) != 1 || fake.asked[0] != "api.z.ai/api/paas/v4/chat/completions" {
 		t.Errorf("payg key asked %v", fake.asked)
 	}
-	if p := stored("payg"); p.Chat != "https://open.bigmodel.cn/api/paas/v4" {
+	if p := stored("payg"); p.Chat != "https://api.z.ai/api/paas/v4" {
 		t.Errorf("payg provider moved to %s", p.Chat)
 	}
 
@@ -173,18 +173,18 @@ func TestZhipuCodingPlanKeyTested(t *testing.T) {
 	if r.OK || r.Status != 429 {
 		t.Fatalf("broke key: %+v", r)
 	}
-	for _, want := range []string{"余额不足", "https://open.bigmodel.cn/api/paas/v4", "Plan to Coding Plan", "https://open.bigmodel.cn/api/coding/paas/v4", "top up"} {
+	for _, want := range []string{"余额不足", "https://api.z.ai/api/paas/v4", "Plan to Coding Plan", "https://api.z.ai/api/coding/paas/v4", "top up"} {
 		if !strings.Contains(r.Error, want) {
 			t.Errorf("broke key's error %q doesn't say %q", r.Error, want)
 		}
 	}
-	if p := stored("broke"); p.Chat != "https://open.bigmodel.cn/api/paas/v4" {
+	if p := stored("broke"); p.Chat != "https://api.z.ai/api/paas/v4" {
 		t.Errorf("broke provider moved to %s", p.Chat)
 	}
 
 	// moved by the user since the request went out: theirs
-	LearnZhipuCoding(Provider{ID: "payg", Key: "other-key"}, "https://open.bigmodel.cn/api/paas/v4")
-	if p := stored("payg"); p.Chat != "https://open.bigmodel.cn/api/paas/v4" {
+	LearnZhipuCoding(Provider{ID: "payg", Key: "other-key"}, "https://api.z.ai/api/paas/v4")
+	if p := stored("payg"); p.Chat != "https://api.z.ai/api/paas/v4" {
 		t.Errorf("provider with another key now moved to %s", p.Chat)
 	}
 }

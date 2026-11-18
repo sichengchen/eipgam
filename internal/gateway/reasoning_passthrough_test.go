@@ -180,7 +180,7 @@ func TestDeepSeekGroupMemberAfterChatGPT(t *testing.T) {
 	up := &deepseekResponses{}
 	srv := httptest.NewServer(up)
 	defer srv.Close()
-	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Models: []string{"deepseek-flash"}, Responses: srv.URL + "/v1"}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k", Models: []string{"deepseek-flash"}, Responses: srv.URL + "/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	user := `{"type":"message","role":"user","content":[{"type":"input_text","text":"fix the login bug"}]}`

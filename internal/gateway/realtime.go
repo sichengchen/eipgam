@@ -28,8 +28,7 @@ import (
 // realtime models take it (gaubeebangeel on X: a Qwen Token Plan's
 // realtime voice through magpie). Alibaba sells the Token Plan's
 // realtime voice model, qwen-audio-3.0-realtime-plus, on the plan's own
-// host at /api-ws/v1/realtime with the plan's sk-sp- key
-// (platform.qianwenai.com/docs/token-plan/best-practices/realtime-voice).
+// host at /api-ws/v1/realtime with the plan's sk-sp- key.
 //
 // The session goes to one model's provider, over its keys or accounts as
 // a chat would, and is passed on frame by frame both ways; magpie reads
@@ -173,7 +172,7 @@ func (s *Server) realtime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if asked == "" {
-		refuse(http.StatusBadRequest, "name the model: /v1/realtime?model=<provider>/<model> (qwen-token-plan/qwen-audio-3.0-realtime-plus, openai/gpt-realtime)")
+		refuse(http.StatusBadRequest, "name the model: /v1/realtime?model=<provider>/<model> (alibaba-token-plan/qwen-audio-3.0-realtime-plus, openai/gpt-realtime)")
 		return
 	}
 	if msg, off := idOff(asked); off {

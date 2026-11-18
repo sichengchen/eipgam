@@ -23,7 +23,6 @@ import (
 type cutChat struct {
 	mu     sync.Mutex
 	bodies []map[string]any
-	paths  []string
 	cuts   map[int][]string
 	whole  []string
 }
@@ -38,7 +37,6 @@ func (f *cutChat) serve(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	f.mu.Lock()
 	call := len(f.bodies)
 	f.bodies = append(f.bodies, body)
-	f.paths = append(f.paths, r.URL.Path)
 	events, cut := f.cuts[call]
 	whole := f.whole
 	f.mu.Unlock()
@@ -82,13 +80,6 @@ func (f *cutChat) calls() int {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return len(f.bodies)
-}
-
-// path is the path call was asked on.
-func (f *cutChat) path(call int) string {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-	return f.paths[call]
 }
 
 // lastAssistant is the last message a call was asked with, when it's the
@@ -566,30 +557,6 @@ func TestStreamCutOnPlainChatEndsAsBefore(t *testing.T) {
 	}
 }
 
-// DeepSeek goes on from the reply's part in its prefix mode: the
-// continuation is asked of the /beta endpoint with "prefix": true on the
-// message.
-func TestStreamCutContinuesWithDeepSeekPrefix(t *testing.T) {
-	f := &cutChat{
-		cuts:  map[int][]string{0: {chatText("deepseek-chat", "hel")}},
-		whole: []string{chatText("deepseek-chat", "lo"), chatStop("deepseek-chat")},
-	}
-	body := continuationServer(t, "deepseek-chat", f)
-	if f.calls() != 2 {
-		t.Fatalf("calls = %d, want 2", f.calls())
-	}
-	if p := f.path(1); p != "/beta/chat/completions" {
-		t.Fatalf("the continuation went to %q, want DeepSeek's prefix-mode /beta path", p)
-	}
-	m := f.lastAssistant(t, 1)
-	if m == nil || m["content"] != "hel" || m["prefix"] != true {
-		t.Fatalf("the continuation wasn't DeepSeek's prefix mode: %v", m)
-	}
-	if got := textOf(body); got != "hello" {
-		t.Fatalf("client's text = %q, want %q", got, "hello")
-	}
-}
-
 // An Anthropic upstream goes on from the reply's part natively: the
 // continuation is the same conversation with it as the last, assistant,
 // message — no mode field — and the client reads one whole reply.
@@ -678,15 +645,13 @@ func TestStreamCutUsageTellsLastTry(t *testing.T) {
 // models to front the vendor; every other Chat upstream re-answers.
 func TestChatPrefill(t *testing.T) {
 	for _, c := range []struct{ host, model, want string }{
-		{"api.deepseek.com", "deepseek-chat", "prefix"},
-		{"api.moonshot.cn", "kimi-k3", "partial"},
 		{"api.moonshot.ai", "kimi-k3", "partial"},
 		{"api.kimi.ai", "kimi-for-coding", "partial"},
 		{"api.openai.com", "gpt-5", ""},
 		{"openrouter.ai", "moonshotai/kimi-k3", ""}, // a relay elsewhere isn't taken to pass it on
 		{"relay.example.com", "kimi-k3", ""},
 		{"127.0.0.1:8080", "kimi-k3", "partial"},
-		{"127.0.0.1:8080", "deepseek-chat", "prefix"},
+		{"127.0.0.1:8080", "deepseek-chat", ""},
 		{"[::1]:8080", "kimi-k3", "partial"},
 		{"192.168.1.5:8080", "kimi-k3", "partial"},
 		{"localhost:8317", "kimi-for-coding", "partial"},
@@ -702,7 +667,7 @@ func TestChatPrefill(t *testing.T) {
 // assistant message natively, a Chat one in its vendor's own mode, and
 // every other API not at all.
 func TestPrefillHow(t *testing.T) {
-	chat := provider.Provider{Chat: "https://api.moonshot.cn/v1"}
+	chat := provider.Provider{Chat: "https://api.moonshot.ai/v1"}
 	if got := prefillHow(chat, provider.Chat, "kimi-k3"); got != "partial" {
 		t.Errorf("prefillHow(moonshot, Chat) = %q, want partial", got)
 	}
@@ -736,11 +701,7 @@ func TestBuildChatResumePrefillMarks(t *testing.T) {
 		}
 		return v.Messages[len(v.Messages)-1]
 	}
-	m := lastOf(buildChat(r, "deepseek-chat", "api.deepseek.com", false))
-	if m["prefix"] != true || m["reasoning_content"] != "think-1" {
-		t.Errorf("DeepSeek's prefill = %v, want prefix and the reasoning", m)
-	}
-	m = lastOf(buildChat(r, "kimi-k3", "api.moonshot.cn", false))
+	m := lastOf(buildChat(r, "kimi-k3", "api.moonshot.ai", false))
 	if m["partial"] != true || m["reasoning_content"] != "think-1" {
 		t.Errorf("Kimi's prefill = %v, want partial and the reasoning", m)
 	}

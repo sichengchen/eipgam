@@ -10,33 +10,30 @@ import (
 	"github.com/yetone/magpie/internal/provider"
 )
 
-// axelburks on Discord: a Volcengine Ark key's Seedance models are ticked
-// in its editor as its Seedream ones are. One unticked there
-// (HiddenVideomakers) leaves generate_video's list, another magpie's list
-// and Automatic, and still makes its video when named; its image models
-// are left as they were.
+// axelburks on Discord: a provider's video models are ticked in its
+// editor as its image ones are. One unticked there (HiddenVideomakers)
+// leaves generate_video's list, another magpie's list and Automatic, and
+// still makes its video when named; its image models are left as they
+// were.
 func TestHiddenVideomakerLeavesListsButStillFilms(t *testing.T) {
 	fresh(t)
-	was := isArk
-	isArk = func(p provider.Provider) bool { return p.ID == "ark" }
-	t.Cleanup(func() { isArk = was })
-	if err := provider.Save(provider.Provider{ID: "ark", Name: "Volcengine Ark", Chat: "https://ark.example/api/v3", Key: "key",
-		Models: []string{"doubao-seed-2-1-pro-260915"}}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "vendor", Name: "Vendor", Chat: "https://vendor.example/v1", Key: "key",
+		Models: []string{"chat-1"}}); err != nil {
 		t.Fatal(err)
 	}
-	// the list as Ark gives it now: Seedance marked as video models, no
-	// longer among the chat ones (catalog's TestFetchArkMarksVideoModels)
-	if err := catalog.SaveLive("ark", "https://ark.example/api/v3", []catalog.Model{
-		{ID: "doubao-seed-2-1-pro-260915"},
-		{ID: "doubao-seedance-2-0-260128", Films: true},
-		{ID: "doubao-seedance-2-0-fast-260128", Films: true},
-		{ID: "doubao-seedream-5-0-pro-260628", Draws: true},
+	// the list as the vendor gives it: two video models, marked so, and
+	// an image model
+	if err := catalog.SaveLive("vendor", "https://vendor.example/v1", []catalog.Model{
+		{ID: "chat-1"},
+		{ID: "video-1", Films: true},
+		{ID: "video-1-fast", Films: true},
+		{ID: "image-1", Draws: true},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	set := func(hidden []string) provider.Provider {
 		t.Helper()
-		found, err := provider.Find("ark")
+		found, err := provider.Find("vendor")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -45,7 +42,7 @@ func TestHiddenVideomakerLeavesListsButStillFilms(t *testing.T) {
 		if err := provider.Save(p); err != nil {
 			t.Fatal(err)
 		}
-		found, _ = provider.Find("ark")
+		found, _ = provider.Find("vendor")
 		return *found
 	}
 	ids := func(ms []catalog.Model) (out []string) {
@@ -55,45 +52,45 @@ func TestHiddenVideomakerLeavesListsButStillFilms(t *testing.T) {
 		return
 	}
 	p := set(nil)
-	if got := ids(OfferedVideomakers(p)); !slices.Equal(got, []string{"doubao-seedance-2-0-260128", "doubao-seedance-2-0-fast-260128"}) {
+	if got := ids(OfferedVideomakers(p)); !slices.Equal(got, []string{"video-1", "video-1-fast"}) {
 		t.Fatalf("offered with none hidden %v", got)
 	}
 
-	p = set([]string{"doubao-seedance-2-0-260128"})
-	if !slices.Equal(p.HiddenVideomakers, []string{"doubao-seedance-2-0-260128"}) {
+	p = set([]string{"video-1"})
+	if !slices.Equal(p.HiddenVideomakers, []string{"video-1"}) {
 		t.Fatalf("saved %v", p.HiddenVideomakers)
 	}
-	if got := ids(OfferedVideomakers(p)); !slices.Equal(got, []string{"doubao-seedance-2-0-fast-260128"}) {
+	if got := ids(OfferedVideomakers(p)); !slices.Equal(got, []string{"video-1-fast"}) {
 		t.Fatalf("offered %v", got)
 	}
-	if got := ids(Videomakers(p)); !slices.Contains(got, "doubao-seedance-2-0-260128") {
+	if got := ids(Videomakers(p)); !slices.Contains(got, "video-1") {
 		t.Fatalf("videomakers lost the hidden one: %v", got)
 	}
-	if got := ids(OfferedDrawers(p)); !slices.Equal(got, []string{"doubao-seedream-5-0-pro-260628"}) {
+	if got := ids(OfferedDrawers(p)); !slices.Equal(got, []string{"image-1"}) {
 		t.Fatalf("a hidden video model changed the image models: %v", got)
 	}
 	var listed []string
 	for _, o := range videomakerObjects(httptest.NewRequest(http.MethodGet, "/v1/models", nil)) {
 		listed = append(listed, o["id"].(string))
 	}
-	if !slices.Equal(listed, []string{"ark/doubao-seedance-2-0-fast-260128"}) {
+	if !slices.Equal(listed, []string{"vendor/video-1-fast"}) {
 		t.Fatalf("video objects %v", listed)
 	}
-	if a := AutoVideomaker(); a != "ark/doubao-seedance-2-0-fast-260128" {
+	if a := AutoVideomaker(); a != "vendor/video-1-fast" {
 		t.Fatalf("automatic %q", a)
 	}
-	if all, def := mediaModels(true); !slices.Equal(all, []string{"ark/doubao-seedance-2-0-fast-260128"}) || def != all[0] {
+	if all, def := mediaModels(true); !slices.Equal(all, []string{"vendor/video-1-fast"}) || def != all[0] {
 		t.Fatalf("generate_video's list %v %q", all, def)
 	}
-	// named, it still makes its video, at Ark's tasks
-	if q, id, ok := bareVideomaker("doubao-seedance-2-0-260128"); !ok || q.ID != "ark" || id != "doubao-seedance-2-0-260128" {
+	// named, it still makes its video, at the vendor's videos API
+	if q, id, ok := bareVideomaker("video-1"); !ok || q.ID != "vendor" || id != "video-1" {
 		t.Fatalf("bare hidden: %v %q %v", q.ID, id, ok)
 	}
-	if !arkFilms(p, "doubao-seedance-2-0-260128") {
-		t.Fatal("a hidden Seedance isn't made at Ark's tasks")
+	if !filmsCustom(p, "video-1") {
+		t.Fatal("a hidden video model isn't made at the vendor's videos API")
 	}
 
-	p = set([]string{"doubao-seedance-2-0-260128", "doubao-seedance-2-0-fast-260128"})
+	p = set([]string{"video-1", "video-1-fast"})
 	if a := AutoVideomaker(); a != "" {
 		t.Fatalf("automatic with every model hidden: %q", a)
 	}

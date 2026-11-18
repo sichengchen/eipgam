@@ -11,24 +11,6 @@ import (
 	"github.com/yetone/magpie/internal/provider"
 )
 
-// deepseekToolPatterns normalizes the ECMAScript null escape \0 in tool schemas
-// to the Unicode escape \u0000. DeepSeek's schema validator rejects \0 with:
-// "Invalid schema for function ... is not a 'regex'".
-//
-// To avoid re-encoding the entire payload or tool array (which reorders keys,
-// escapes <, > and &, and breaks prompt caching), it finds only the offending
-// "pattern" fields in tool schemas using gjson and splices the normalized string
-// literals in place from the end of the body backwards.
-func deepseekToolPatterns(p provider.Provider, to provider.Protocol, body []byte) []byte {
-	if p.VendorPreset() != "deepseek" && provider.HostOf(p.Base(to)) != "api.deepseek.com" && p.VendorHost() != "api.deepseek.com" {
-		return body
-	}
-	if !bodyHas(body, `\\0`) {
-		return body
-	}
-	return toolPatterns(body, unicodeNullEscape)
-}
-
 // toolPatterns is body with fix applied to every "pattern" of its tools'
 // schemas, each spliced in place so the rest of the body stays byte for
 // byte as it came.
@@ -145,27 +127,6 @@ func encodeJSONStringNoHTMLEscape(s string) string {
 	return b.String()
 }
 
-func unicodeNullEscape(pattern string) string {
-	var out strings.Builder
-	for i := 0; i < len(pattern); i++ {
-		if pattern[i] != '\\' || i+1 == len(pattern) {
-			out.WriteByte(pattern[i])
-			continue
-		}
-		next := pattern[i+1]
-		// A pair of backslashes is literal; an octal escape has its own
-		// meaning and must not be shortened to a null character.
-		if next == '0' && (i+2 == len(pattern) || pattern[i+2] < '0' || pattern[i+2] > '9') {
-			out.WriteString(`\u0000`)
-		} else {
-			out.WriteByte('\\')
-			out.WriteByte(next)
-		}
-		i++
-	}
-	return out.String()
-}
-
 // deepseekModel is whether id, the model as the body going upstream names
 // it, is one of DeepSeek's, under whatever prefix a relay or router gives
 // it (deepseek/deepseek-v4.1, openrouter's deepseek/…). DeepSeek's quirks
@@ -190,7 +151,7 @@ func deepseekModel(id string) bool {
 // vendor's chat API is left alone: OpenAI's and Azure's want
 // max_completion_tokens.
 func deepseekTokenField(p provider.Provider, to provider.Protocol, body []byte) []byte {
-	if to != provider.Chat || p.VendorPreset() != "deepseek" && provider.HostOf(p.Base(to)) != "api.deepseek.com" && p.VendorHost() != "api.deepseek.com" && !deepseekModel(gjson.GetBytes(body, "model").String()) {
+	if to != provider.Chat || !deepseekModel(gjson.GetBytes(body, "model").String()) {
 		return body
 	}
 	if !bodyHas(body, `"max_completion_tokens"`) || gjson.GetBytes(body, "max_tokens").Exists() {

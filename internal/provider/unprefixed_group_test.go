@@ -137,7 +137,7 @@ func TestFoundGroupOfUnprefixedIDsAloneIsTheModels(t *testing.T) {
 
 // The same with Kimi Code as magpie adds it, from its preset.
 func TestFoundGroupTakesKimiCodesPreset(t *testing.T) {
-	for _, preset := range []string{"kimi-code", "kimi-code-cn"} {
+	for _, preset := range []string{"kimi-code"} {
 		t.Run(preset, func(t *testing.T) {
 			kc, err := FromPreset(preset)
 			if err != nil {

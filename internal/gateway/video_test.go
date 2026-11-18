@@ -8,13 +8,11 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"slices"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
 	"github.com/yetone/magpie/internal/provider"
 	"github.com/yetone/magpie/internal/settings"
 )
@@ -121,138 +119,15 @@ func errorOf(obj map[string]any) string {
 	return ""
 }
 
-func TestVolcengineAgentPlanVideos(t *testing.T) {
-	p, err := provider.FromPreset("volcengine")
-	if err != nil {
-		t.Fatal(err)
-	}
-	pr := provider.Preset("volcengine")
-	p.Chat, p.Responses, p.Anthropic = pr.Regions[1].Chat, pr.Regions[1].Responses, pr.Regions[1].Anthropic
-	ms, want := Videomakers(p), p.PlanVideos()
-	if len(ms) == 0 || !slices.EqualFunc(ms, want, func(a, b catalog.Model) bool { return a.ID == b.ID }) {
-		t.Fatalf("Agent Plan videos: %+v, want preset plan's %+v", ms, want)
-	}
-	p.Chat, p.Responses, p.Anthropic = pr.Regions[0].Chat, pr.Regions[0].Responses, pr.Regions[0].Anthropic
-	if ms := Videomakers(p); len(ms) != 0 {
-		t.Fatalf("Coding Plan videos: %+v", ms)
-	}
-}
-
-func TestVolcengineVideoBody(t *testing.T) {
-	f := filming{Prompt: "a magpie", Seconds: "6", Size: "1280x720", Start: &picture{Mime: "image/png", Data: []byte("png")}, References: []picture{{URL: "https://example.test/ref.png"}}}
-	var got map[string]any
-	if err := json.Unmarshal(volcengineVideoBody("doubao-seedance-2.5", f), &got); err != nil {
-		t.Fatal(err)
-	}
-	if got["model"] != "doubao-seedance-2.5" || got["duration"] != float64(6) || got["resolution"] != "720p" || got["ratio"] != "16:9" {
-		t.Fatalf("body: %+v", got)
-	}
-	content, _ := got["content"].([]any)
-	if len(content) != 3 {
-		t.Fatalf("content: %+v", got["content"])
-	}
-	first, _ := content[1].(map[string]any)
-	reference, _ := content[2].(map[string]any)
-	if first["role"] != "first_frame" || reference["role"] != "reference_image" {
-		t.Fatalf("image roles: %+v", content)
-	}
-}
-
-func TestVolcengineVideoIsStartedPolledAndFetched(t *testing.T) {
-	fresh(t)
-	var mu sync.Mutex
-	var paths, bodies []string
-	asked := map[string]int{}
-	var up *httptest.Server
-	up = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := io.ReadAll(r.Body)
-		mu.Lock()
-		defer mu.Unlock()
-		paths = append(paths, r.Method+" "+r.URL.Path)
-		bodies = append(bodies, string(body))
-		if r.URL.Path != "/ark/video.mp4" && r.Header.Get("Authorization") != "Bearer key" {
-			w.WriteHeader(401)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.Method == http.MethodPost && r.URL.Path == "/api/plan/v3/contents/generations/tasks" && strings.Contains(string(body), "FAILING"):
-			io.WriteString(w, volcengineVideoFailedCreateResponse)
-		case r.Method == http.MethodPost && r.URL.Path == "/api/plan/v3/contents/generations/tasks":
-			io.WriteString(w, volcengineVideoCreateResponse)
-		case r.Method == http.MethodGet && r.URL.Path == "/api/plan/v3/contents/generations/tasks/cgt-20261008165954-4sc9n":
-			asked["success"]++
-			if asked["success"] == 1 {
-				io.WriteString(w, volcengineVideoRunningResponse)
-			} else {
-				io.WriteString(w, strings.Replace(volcengineVideoSucceededResponse, "VIDEO_URL", up.URL+"/ark/video.mp4", 1))
-			}
-		case r.Method == http.MethodGet && r.URL.Path == "/api/plan/v3/contents/generations/tasks/cgt-20261008165955-bgckq":
-			io.WriteString(w, volcengineVideoFailedResponse)
-		case r.Method == http.MethodGet && r.URL.Path == "/ark/video.mp4":
-			w.Header().Set("Content-Type", "video/mp4")
-			io.WriteString(w, "ark-video-bytes")
-		default:
-			w.WriteHeader(404)
-			io.WriteString(w, `{"error":{"code":"not_found","message":"unexpected path"}}`)
-		}
-	}))
-	t.Cleanup(up.Close)
-
-	p, err := provider.FromPreset("volcengine")
-	if err != nil {
-		t.Fatal(err)
-	}
-	p.ID, p.Key = "ark-agent", "key"
-	p.Chat, p.Responses = up.URL+"/api/plan/v3", up.URL+"/api/plan/v3"
-	p.Anthropic = up.URL + "/api/plan"
-	if err := provider.Save(p); err != nil {
-		t.Fatal(err)
-	}
-
-	s := New()
-	code, obj, raw, _ := request(t, s, http.MethodPost, "/v1/videos", "application/json", `{"model":"ark-agent/doubao-seedance-2.0-mini","prompt":"a magpie","seconds":5,"size":"854x480"}`)
-	if code != 200 || obj["status"] != "queued" || obj["model"] != "ark-agent/doubao-seedance-2.0-mini" {
-		t.Fatalf("create: %d %s", code, raw)
-	}
-	id, _ := obj["id"].(string)
-	code, obj, raw, _ = request(t, s, http.MethodGet, "/v1/videos/"+id, "", "")
-	if code != 200 || obj["status"] != "in_progress" {
-		t.Fatalf("running: %d %s", code, raw)
-	}
-	code, obj, raw, _ = request(t, s, http.MethodGet, "/v1/videos/"+id, "", "")
-	if code != 200 || obj["status"] != "completed" || obj["seconds"] != "5" {
-		t.Fatalf("succeeded: %d %s", code, raw)
-	}
-	code, _, raw, head := request(t, s, http.MethodGet, "/v1/videos/"+id+"/content", "", "")
-	if code != 200 || string(raw) != "ark-video-bytes" || head.Get("Content-Type") != "video/mp4" {
-		t.Fatalf("content: %d %q %v", code, raw, head)
-	}
-
-	code, failed, raw, _ := request(t, s, http.MethodPost, "/v1/videos", "application/json", `{"model":"ark-agent/doubao-seedance-2.0-mini","prompt":"FAILING"}`)
-	if code != 200 {
-		t.Fatalf("create failing: %d %s", code, raw)
-	}
-	code, failed, raw, _ = request(t, s, http.MethodGet, "/v1/videos/"+failed["id"].(string), "", "")
-	errObj, _ := failed["error"].(map[string]any)
-	if code != 200 || failed["status"] != "failed" || errObj["code"] != "OutputVideoSensitiveContentDetected.PolicyViolation" || !strings.Contains(errObj["message"].(string), "copyright restrictions") {
-		t.Fatalf("failed: %d %s", code, raw)
-	}
-
-	mu.Lock()
-	defer mu.Unlock()
-	if len(paths) < 7 || paths[0] != "POST /api/plan/v3/contents/generations/tasks" || !strings.Contains(bodies[0], `"content":[`) || !strings.Contains(bodies[0], `"duration":5`) || !slices.Contains(paths, "GET /ark/video.mp4") {
-		t.Fatalf("upstream paths %v, create body %s", paths, bodies[0])
-	}
-}
-
-func TestVolcengineVideoState(t *testing.T) {
+// A task's status, as a vendor's task API says it, is OpenAI's video
+// status.
+func TestVideoStateStatus(t *testing.T) {
 	var st videoState
-	if err := json.Unmarshal([]byte(`{"status":"succeeded","model":"doubao-seedance-2.5","content":{"video_url":"https://example.test/video.mp4"},"duration":5}`), &st); err != nil {
+	if err := json.Unmarshal([]byte(`{"status":"succeeded","model":"wan3.0-video","duration":5}`), &st); err != nil {
 		t.Fatal(err)
 	}
-	obj := videoObject("video_volcengine.task.1.0", "volcengine/"+st.Model, time.Unix(1, 0), st, filming{})
-	if obj["status"] != "completed" || obj["progress"] != 100 || obj["seconds"] != "5" || st.Content.VideoURL != "https://example.test/video.mp4" {
+	obj := videoObject("video_qwen.task.1.0", "qwen/"+st.Model, time.Unix(1, 0), st, filming{})
+	if obj["status"] != "completed" || obj["progress"] != 100 || obj["seconds"] != "5" {
 		t.Fatalf("completed state: %+v, object: %+v", st, obj)
 	}
 	for status, want := range map[string]string{"queued": "queued", "running": "in_progress", "cancelled": "failed"} {
@@ -658,5 +533,26 @@ func TestVideoContentAtPrivateAddressNotFetched(t *testing.T) {
 	code, _, raw, _ = request(t, s, "GET", "/v1/videos/"+id+"/content", "", "")
 	if code != 200 || string(raw) != "secret-bytes" || hits.Load() != 1 {
 		t.Fatalf("named in fetchPrivate: %d %s", code, raw)
+	}
+}
+
+// A MOV is served as one.
+func TestVideoType(t *testing.T) {
+	mov := []byte("\x00\x00\x00\x14ftypqt  ")
+	mp4 := []byte("\x00\x00\x00\x18ftypisom")
+	for _, c := range []struct {
+		head []byte
+		said string
+		want string
+	}{
+		{mov, "video/mp4", "video/quicktime"},
+		{mp4, "video/mp4", "video/mp4"},
+		{mp4, "application/octet-stream", "video/mp4"},
+		{nil, "video/webm", "video/webm"},
+		{nil, "", "video/mp4"},
+	} {
+		if got := videoType(c.head, c.said); got != c.want {
+			t.Errorf("%q %q: %s, want %s", c.head, c.said, got, c.want)
+		}
 	}
 }

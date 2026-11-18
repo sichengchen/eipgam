@@ -70,19 +70,17 @@ id, is listed every kind.
 
 **A vendor's own fields.** `/v1/images/generations` and `/v1/videos`
 take OpenAI's fields and pass the others on to a vendor that takes them:
-Volcengine Ark's `content` (reference video and audio, `draft_task`),
-`ratio`, `resolution`, `duration: -1`, `tools`, `watermark`,
-`sequential_image_generation` and the rest. A video's answer carries
-Ark's own fields too (`content.last_frame_url`, `usage`, `resolution`).
+MiniMax's `prompt_optimizer`, `style` and `aigc_watermark` on an image,
+its `resolution` and `ratio` on a video, DashScope's `watermark`,
+`audio`, `prompt_extend` and `seed` on a video, and the rest.
 For the rest of a vendor's API use
 `/v1/magpie/native/<provider>/<path>`: GET, POST, PUT, PATCH or DELETE,
 with `<path>` joined to the provider's host (not its base URL), sent and
 answered in the vendor's own shape on the user's key for that provider,
-a stream as it comes. So Ark's task list is `GET
-/v1/magpie/native/ark/api/v3/contents/generations/tasks`. It serves a
-provider added with an API key, not a subscription or sign-in. Ark's
-short paths (`images/generations`, `contents/generations/tasks[/<id>]`)
-still work under the key's base. It takes the same gateway key as every
+a stream as it comes. So DashScope's task status is `GET
+/v1/magpie/native/qwen/api/v1/tasks/<task_id>`. It serves a
+provider added with an API key, not a subscription or sign-in. It takes
+the same gateway key as every
 route, and a key held to models, accounts or a budget is refused it.
 
 **Optional.** Send `X-Magpie-Session: <id>` with a conversation's requests

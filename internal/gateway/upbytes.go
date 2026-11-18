@@ -21,12 +21,6 @@ type upBytes struct {
 	// as a body is read, which can be on another goroutine than the
 	// request's (a stream's pump), so atomic
 	down atomic.Int64
-	// saved is what DeepSeek's image files kept out of the tries' bodies,
-	// less what uploading them cost this request (withDeepSeekFiles)
-	saved int
-	// images is how many inline images went by file instead, the most of
-	// any one try: a retry sends the same ones again
-	images int
 	// last is what sentUp last counted, the try's body as HTTP sends it;
 	// socket says that try went over the Responses WebSocket instead
 	// (overSocket), which counted what it was sent in its place
@@ -179,10 +173,10 @@ func (u *upBytes) downOf() int { return int(u.down.Load()) }
 // parts of the body the prompt was read from, each scaled to what went on
 // the wire, so a compressed or retried request's parts sum to its bytes
 // as its whole does. None when the body wasn't read (p nil), nothing
-// went, the last try went over a kept socket (its bytes a delta, not the
-// body) or images went by file (the bytes no longer the body's).
+// went, or the last try went over a kept socket (its bytes a delta, not
+// the body).
 func upParts(p *Prompt, u *upBytes) *usage.UpParts {
-	if p == nil || u == nil || u.wire <= 0 || u.socket || u.images > 0 || p.sent.all <= 0 {
+	if p == nil || u == nil || u.wire <= 0 || u.socket || p.sent.all <= 0 {
 		return nil
 	}
 	of := func(n int) int { return int(int64(n) * int64(u.wire) / int64(p.sent.all)) }

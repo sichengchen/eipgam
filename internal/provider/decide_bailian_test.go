@@ -6,70 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
-	"slices"
 	"strings"
 	"testing"
 )
-
-// Bailian's decision model (#647): a preset at the host of the key's
-// workspace or the Token Plan's, asked as decision-model-preview.
-func TestBailianDecisionPreset(t *testing.T) {
-	h := t.TempDir()
-	t.Setenv("HOME", h)
-	t.Setenv("USERPROFILE", h)
-	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
-	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
-	p, err := FromPreset("bailian-decision")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !p.DecideOnly() || !strings.Contains(p.Decide, WorkspaceID) {
-		t.Fatalf("preset: %+v", p)
-	}
-	p.Key = "sk-test"
-	if _, err := Add(p); err == nil || !strings.Contains(err.Error(), "workspace ID") {
-		t.Fatalf("added with no workspace: %v", err)
-	}
-	pr := Preset("bailian-decision")
-	var plans []string
-	for _, r := range pr.Regions {
-		plans = append(plans, r.ID+" "+r.Decide)
-	}
-	want := []string{
-		"cn-beijing https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
-		"ap-southeast-1 https://{WorkspaceId}.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1",
-		"token-plan https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
-	}
-	if !slices.Equal(plans, want) {
-		t.Fatalf("plans: %q", plans)
-	}
-	p.Decide = strings.ReplaceAll(p.Decide, WorkspaceID, "ws-1")
-	id, err := Add(p)
-	if err != nil {
-		t.Fatal(err)
-	}
-	saved, err := Find(id)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if saved.DecideVia() != ViaSystemOne || saved.Jev() != BailianDecision {
-		t.Fatalf("asked as %s via %s", saved.Jev(), saved.DecideVia())
-	}
-	if ds := Deciders(); len(ds) != 1 || ds[0].ID != id+"/"+BailianDecision {
-		t.Fatalf("classifiers: %+v", ds)
-	}
-	for _, e := range providerEntries() {
-		if e.Provider.ID == id {
-			t.Fatalf("an agent is offered %s", e.ID)
-		}
-	}
-	if got, m, err := RouteDecider(id); err != nil || got.ID != id || m != BailianDecision {
-		t.Fatalf("route %s: %s %s %v", id, got.ID, m, err)
-	}
-	if got, m, err := RouteDecider(BailianDecision); err != nil || got.ID != id || m != BailianDecision {
-		t.Fatalf("route %s: %s %s %v", BailianDecision, got.ID, m, err)
-	}
-}
 
 // a System One API of a vendor's own: its model is named anything, its
 // list (none here) needn't name it, and it is asked at POST …/systemone

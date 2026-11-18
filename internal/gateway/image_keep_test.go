@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"io"
+	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -24,22 +27,70 @@ func dsBigPNG(n int, tag string) string {
 	return base64.StdEncoding.EncodeToString(raw)
 }
 
-// A conversation of pictures sent to DeepSeek by file id (#5407) grows
-// past what the views keep of a body; its pictures and text still show
-// in the Routing card, from memory and from the archive, and its turns
-// on the Sessions page (matrix0487 on Discord).
-func TestFileIDConversationStillShows(t *testing.T) {
+// picturesUp is a vendor that takes any size of body on Chat, Responses
+// and Anthropic messages, and keeps the last one each path was sent.
+type picturesUp struct {
+	mu   sync.Mutex
+	last map[string]string
+}
+
+func (u *picturesUp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	b, _ := io.ReadAll(r.Body)
+	u.mu.Lock()
+	u.last[r.URL.Path] = string(b)
+	u.mu.Unlock()
+	w.Header().Set("Content-Type", "application/json")
+	switch {
+	case strings.HasSuffix(r.URL.Path, "/chat/completions"):
+		io.WriteString(w, chatWholeOK)
+	case strings.HasSuffix(r.URL.Path, "/responses"):
+		io.WriteString(w, `{"id":"resp_1","object":"response","status":"completed","model":"m1","output":[{"type":"message","id":"msg_1","role":"assistant","status":"completed","content":[{"type":"output_text","text":"ok","annotations":[]}]}],"usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}`)
+	default:
+		io.WriteString(w, anthropicWholeOK)
+	}
+}
+
+func (u *picturesUp) sent(path string) string {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	return u.last[path]
+}
+
+// picturesBody is a request with one picture on each API, the path it is
+// asked at and the path its vendor is sent it at.
+func picturesBody(api, model, img string) (path, upPath, body string) {
+	switch api {
+	case "chat":
+		return "/v1/chat/completions", "/v1/chat/completions", `{"model":"` + model + `","stream":false,"messages":[{"role":"user","content":[{"type":"text","text":"what is it"},{"type":"image_url","image_url":{"url":"data:image/png;base64,` + img + `"}}]}]}`
+	case "responses":
+		return "/v1/responses", "/v1/responses", `{"model":"` + model + `","stream":false,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"what is it"},{"type":"input_image","image_url":"data:image/png;base64,` + img + `","detail":"auto"}]}]}`
+	}
+	return "/v1/messages", "/anthropic/v1/messages", `{"model":"` + model + `","max_tokens":100,"stream":false,"messages":[{"role":"user","content":[{"type":"text","text":"what is it"},{"type":"image","source":{"type":"base64","media_type":"image/png","data":"` + img + `"},"cache_control":{"type":"ephemeral"}}]}]}`
+}
+
+// A conversation of pictures grows past what the views keep of a body;
+// its pictures and text still show in the Routing card, from memory and
+// from the archive, and its turns on the Sessions page (matrix0487 on
+// Discord).
+func TestPictureConversationStillShows(t *testing.T) {
 	for _, api := range []string{"chat", "responses", "anthropic"} {
 		t.Run(api, func(t *testing.T) {
-			s, u := dsSetup(t)
+			fresh(t)
+			u := &picturesUp{last: map[string]string{}}
+			up := httptest.NewServer(u)
+			t.Cleanup(up.Close)
+			if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k1", Models: []string{"m1"},
+				Chat: up.URL + "/v1", Responses: up.URL + "/v1", Anthropic: up.URL + "/anthropic"}); err != nil {
+				t.Fatal(err)
+			}
+			s := New()
 			if err := sessions.SetGatewayRecording(true, false); err != nil {
 				t.Fatal(err)
 			}
-			// three pictures, the body over promptBodyMax: within what
-			// DeepSeek takes by file id, not inline
+			// three pictures, the body over promptBodyMax
 			imgs := []string{dsBigPNG(12<<20, "a"), dsBigPNG(12<<20, "b"), dsBigPNG(12<<20, "c")}
-			path, upPath, body := dsBody(api, "deepseek/deepseek-flash", imgs[0])
-			_, _, one := dsBody(api, "deepseek/deepseek-flash", "IMG")
+			path, upPath, body := picturesBody(api, "relay/m1", imgs[0])
+			_, _, one := picturesBody(api, "relay/m1", "IMG")
 			for _, im := range imgs[1:] {
 				// the same turn with the next picture too
 				body = strings.Replace(body, `"what is it"}`, `"what is it"}`+between(one, im), 1)
@@ -55,8 +106,8 @@ func TestFileIDConversationStillShows(t *testing.T) {
 			if rec.Code != 200 {
 				t.Fatalf("%d %s", rec.Code, rec.Body)
 			}
-			if got := u.last(upPath); strings.Contains(got, imgs[1][:64]) || !strings.Contains(got, "file") {
-				t.Fatalf("not sent by file id: %.300s", got)
+			if got := u.sent(upPath); !strings.Contains(got, imgs[2][:64]) {
+				t.Fatalf("the vendor wasn't sent the pictures: %.300s", got)
 			}
 			rs := s.Trace(context.Background(), 0, 0).Routes
 			if len(rs) == 0 {

@@ -215,7 +215,7 @@ func TestTextWrittenCallWholeTranslated(t *testing.T) {
 	f := &fake{t: t, refuse: dashScopeRefuse, reply: sse(append(up, `data: [DONE]`)...)}
 	srv := setup(t, provider.Chat, f)
 	if err := provider.Save(provider.Provider{ID: "fake", Name: "Qwen Token Plan", Key: "k", Models: []string{"m1"},
-		Preset: "qwen-token-plan", Chat: srv.URL + "/compatible-mode/v1"}); err != nil {
+		Preset: "alibaba-token-plan", Chat: srv.URL + "/compatible-mode/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	code, body := postTo(t, New(), "/v1/chat/completions", `{"model":"m1","stream":false,"messages":[{"role":"user","content":"ls /tmp"}],`+issueTools+`}`)

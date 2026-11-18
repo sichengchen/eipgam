@@ -37,7 +37,6 @@ func TestLiteSubagentLeavesLite(t *testing.T) {
 	writeCatalog(t, liteSubagentCatalog)
 	for _, p := range []provider.Provider{
 		{ID: "opencode-go", Name: "OpenCode Go", Preset: "opencode-go", Key: "k", Chat: "https://opencode.ai/zen/go/v1", Responses: "https://opencode.ai/zen/go/v1", Anthropic: "https://opencode.ai/zen/go", Catalog: "opencode-go"},
-		{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Chat: "https://api.deepseek.com/v1", Responses: "https://api.deepseek.com/v1", Anthropic: "https://api.deepseek.com/anthropic", Catalog: "deepseek"},
 		{ID: "relay", Name: "Relay", Key: "k", Responses: "https://relay.example/v1", Models: []string{"m1"}},
 	} {
 		if err := provider.Save(p); err != nil {
@@ -67,7 +66,7 @@ func TestLiteSubagentLeavesLite(t *testing.T) {
 				`data: {"type":"response.output_item.done","output_index":0,"item":{"type":"message","id":"m1","role":"assistant","content":[{"type":"output_text","text":"done"}]}}`,
 				`data: {"type":"response.completed","response":{"id":"r1","status":"completed","output":[],"usage":{"input_tokens":5,"output_tokens":2}}}`)))}, nil
 	})}
-	for _, model := range []string{"opencode-go/deepseek-v4.1-flash", "deepseek/deepseek-flash", "relay/m1"} {
+	for _, model := range []string{"opencode-go/deepseek-v4.1-flash", "relay/m1"} {
 		t.Run(model, func(t *testing.T) {
 			// the subagent's turn as Codex sends it under a Lite lead
 			body := strings.Replace(codeModeRequest, `"model":"fake/m1"`, `"model":"`+model+`","store":false,"include":["reasoning.encrypted_content"]`, 1)

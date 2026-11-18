@@ -86,6 +86,26 @@ func saveVendor(t *testing.T, p provider.Provider) {
 	}
 }
 
+// nativeMux is the native route alone, without the guards before it, so
+// a test can name the caller's identity itself (nativeAskAs).
+func nativeMux(s *Server) *http.ServeMux {
+	mux := http.NewServeMux()
+	for _, m := range nativeMethods {
+		mux.HandleFunc(m+" "+NativePath+"{provider}/{path...}", s.native)
+	}
+	return mux
+}
+
+// nativeAskAs asks h as the gateway key who.
+func nativeAskAs(t *testing.T, h http.Handler, who access.Identity, method, path, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequest(method, path, strings.NewReader(body))
+	req = req.WithContext(access.WithIdentity(req.Context(), who))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
 // Every method reaches the vendor at its host, at the path the caller
 // wrote (not under the base's /v1), with the query and body as they
 // came, signed with the provider's key the way it takes one; the
@@ -202,7 +222,7 @@ func TestNativeAnyRefusals(t *testing.T) {
 	saveVendor(t, provider.Provider{ID: "vendor", Name: "Vendor", Chat: up.URL + "/v1", Key: "vk", Models: []string{"m"}})
 	saveVendor(t, provider.Provider{ID: "keyless", Name: "Keyless", Chat: up.URL + "/v1", Models: []string{"m"}})
 	saveVendor(t, provider.Provider{ID: "vendor-off", Name: "Off", Chat: up.URL + "/v1", Key: "vk", Models: []string{"m"}, Off: true})
-	mux := arkNativeMux(New())
+	mux := nativeMux(New())
 	free := access.Identity{KeyID: "desk", KeyName: "Desk"}
 	for _, c := range []struct {
 		who          access.Identity
@@ -218,7 +238,7 @@ func TestNativeAnyRefusals(t *testing.T) {
 		{access.Identity{KeyName: "issued", Issuer: &access.Identity{KeyName: "boss", Models: []string{"vendor/m"}}}, "PATCH", NativePath + "vendor/v1/x", 403},
 	} {
 		before := len(up.asked())
-		rec := arkNativeAsk(t, mux, c.who, c.method, c.path, `{"model":"m"}`)
+		rec := nativeAskAs(t, mux, c.who, c.method, c.path, `{"model":"m"}`)
 		if rec.Code != c.code || len(up.asked()) > before {
 			t.Errorf("%s %s as %+v: %d (asked: %v) %s", c.method, c.path, c.who, rec.Code, len(up.asked()) > before, rec.Body)
 		}
@@ -405,35 +425,5 @@ func TestNativeAnyStreamsAsItComes(t *testing.T) {
 		release <- struct{}{}
 		res.Body.Close()
 		cancel()
-	}
-}
-
-// Ark keeps its first routes (its short paths under /api/v3, as before,
-// in ark_native_test.go) and reaches the rest of its API at its host.
-func TestNativeAnyArkHost(t *testing.T) {
-	fresh(t)
-	up := newVendorAPI(t)
-	was := isArk
-	isArk = func(p provider.Provider) bool { return p.ID == "ark" }
-	t.Cleanup(func() { isArk = was })
-	saveVendor(t, provider.Provider{ID: "ark", Name: "Volcengine Ark", Chat: up.URL + "/api/v3", Key: "key", Models: []string{"doubao"}})
-	h := arkNativeMux(New())
-	free := access.Identity{KeyID: "desk", KeyName: "Desk"}
-	if rec := arkNativeAsk(t, h, free, "POST", NativePath+"ark/images/generations", `{"model":"doubao","prompt":"x"}`); rec.Code != 201 {
-		t.Fatalf("short path: %d %s", rec.Code, rec.Body)
-	}
-	if rec := arkNativeAsk(t, h, free, "POST", NativePath+"ark/api/v3/chat/completions", `{"model":"doubao"}`); rec.Code != 201 {
-		t.Fatalf("host path: %d %s", rec.Code, rec.Body)
-	}
-	if rec := arkNativeAsk(t, h, free, "GET", NativePath+"ark/api/v3/contents/generations/tasks/a/b", ``); rec.Code != 201 {
-		t.Fatalf("host GET: %d %s", rec.Code, rec.Body)
-	}
-	var uris []string
-	for _, s := range up.asked() {
-		uris = append(uris, s.method+" "+s.uri)
-	}
-	want := "POST /api/v3/images/generations\nPOST /api/v3/chat/completions\nGET /api/v3/contents/generations/tasks/a/b"
-	if strings.Join(uris, "\n") != want {
-		t.Fatalf("Ark was asked\n%s\nwant\n%s", strings.Join(uris, "\n"), want)
 	}
 }

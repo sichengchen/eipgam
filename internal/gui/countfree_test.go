@@ -11,7 +11,7 @@ import (
 )
 
 // jiabubu on Discord: the editor's "Count its models as free" is saved on
-// a preset (ModelScope, whose free daily quota is the case) and on a
+// a preset (Kimi, whose free daily quota is the case) and on a
 // provider the user typed in, given back by /api/providers for the editor
 // to open with, and turned off by a save that says so.
 func TestProviderSaveKeepsCountFree(t *testing.T) {
@@ -30,15 +30,15 @@ func TestProviderSaveKeepsCountFree(t *testing.T) {
 		}
 		return w.Body.String()
 	}
-	do("POST", "/api/provider/save", `{"id":"modelscope","name":"ModelScope","preset":"modelscope","key":"ms-k","countFree":true,"new":true}`)
-	if p, err := provider.Find("modelscope"); err != nil || !p.CountFree || !p.FreeModel("any-model-of-it") {
+	do("POST", "/api/provider/save", `{"id":"moonshot","name":"Kimi","preset":"moonshot","key":"sk-k","countFree":true,"new":true}`)
+	if p, err := provider.Find("moonshot"); err != nil || !p.CountFree || !p.FreeModel("any-model-of-it") {
 		t.Fatalf("the preset's mark wasn't kept: %+v %v", p, err)
 	}
 	if !strings.Contains(do("GET", "/api/providers", ""), `"countFree":true`) {
 		t.Fatal("/api/providers doesn't give the mark back")
 	}
-	do("POST", "/api/provider/save", `{"id":"modelscope","from":"modelscope","name":"ModelScope","preset":"modelscope","key":"","countFree":false}`)
-	if p, err := provider.Find("modelscope"); err != nil || p.CountFree {
+	do("POST", "/api/provider/save", `{"id":"moonshot","from":"moonshot","name":"Kimi","preset":"moonshot","key":"","countFree":false}`)
+	if p, err := provider.Find("moonshot"); err != nil || p.CountFree {
 		t.Fatalf("turned off, it stayed: %+v %v", p, err)
 	}
 

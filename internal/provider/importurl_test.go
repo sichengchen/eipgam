@@ -9,14 +9,14 @@ import (
 )
 
 func TestParseImportPreset(t *testing.T) {
-	p, err := ParseImport("magpie://import?preset=deepseek&key=sk-abc123&models=deepseek-v4-pro,%20deepseek-v4-flash")
+	p, err := ParseImport("magpie://import?preset=moonshot&key=sk-abc123&models=kimi-k3,%20kimi-k2.6")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p.ID != "deepseek" || p.Preset != "deepseek" || p.Key != "sk-abc123" || p.Chat == "" {
+	if p.ID != "moonshot" || p.Preset != "moonshot" || p.Key != "sk-abc123" || p.Chat == "" {
 		t.Fatalf("got %+v", p)
 	}
-	if !slices.Equal(p.Models, []string{"deepseek-v4-pro", "deepseek-v4-flash"}) {
+	if !slices.Equal(p.Models, []string{"kimi-k3", "kimi-k2.6"}) {
 		t.Fatalf("models %q", p.Models)
 	}
 }
@@ -24,41 +24,12 @@ func TestParseImportPreset(t *testing.T) {
 // A region with a key page of its own (Qianfan's pay as you go, on the
 // IAM page) names it in the parsed provider, before it is ever saved.
 func TestParseImportRegionKeys(t *testing.T) {
-	p, err := ParseImport("magpie://import?preset=baidu-qianfan&region=api")
+	p, err := ParseImport("magpie://import?preset=tencent-cloud&region=enterprise-intl")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p.Chat != "https://qianfan.baidubce.com/v2" || p.KeysURL != "https://console.bce.baidu.com/iam/#/iam/apikey/list" {
+	if p.Chat != "https://tokenhub-intl.tencentmaas.com/plan/v3" || p.KeysURL != "https://console.tencentcloud.com/tokenhub/tokenplan" {
 		t.Fatalf("got %q %q", p.Chat, p.KeysURL)
-	}
-}
-
-// SiliconFlow's international site is another account: its endpoint, key
-// page and console, while the preset's default stays the China site.
-func TestSiliconFlowInternational(t *testing.T) {
-	p, err := ParseImport("magpie://import?preset=siliconflow&region=intl")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if p.Chat != "https://api.siliconflow.com/v1" || p.KeysURL != "https://cloud.siliconflow.com/account/ak" || p.Website != "https://cloud.siliconflow.com" {
-		t.Fatalf("intl: got %q %q %q", p.Chat, p.KeysURL, p.Website)
-	}
-	if src, ok := balanceSourceOf(p); !ok || !strings.Contains(src.url, "api.siliconflow.com") {
-		t.Fatalf("intl balance: %+v %v", src, ok)
-	}
-	d, err := FromPreset("siliconflow")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if d.Chat != "https://api.siliconflow.cn/v1" || d.KeysURL != "https://cloud.siliconflow.cn/account/ak" {
-		t.Fatalf("default: got %q %q", d.Chat, d.KeysURL)
-	}
-	pr := Preset("siliconflow")
-	if r := d.regionOf(pr); r == nil || r.ID != "cn" {
-		t.Fatalf("a China provider saved before the regions sits at %+v", r)
-	}
-	if r := p.regionOf(pr); r == nil || r.ID != "intl" {
-		t.Fatalf("the international one sits at %+v", r)
 	}
 }
 
@@ -105,40 +76,6 @@ func TestParseImportRegion(t *testing.T) {
 	}
 	if _, err := ParseImport("magpie://import?preset=" + pr.ID + "&region=nowhere"); err == nil {
 		t.Fatal("unknown region accepted")
-	}
-}
-
-// Bailian's decision regions are different hosts. The CLI's region= and
-// plan= put the provider on that host; an import link that names the same
-// region kept the preset's Beijing workspace host, while the key page
-// followed the region.
-func TestParseImportBailianDecisionRegion(t *testing.T) {
-	sg, err := ParseImport("magpie://import?preset=bailian-decision&region=ap-southeast-1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if sg.Decide != "https://{WorkspaceId}.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1" {
-		t.Fatalf("Singapore decide = %q", sg.Decide)
-	}
-	if sg.KeysURL != "https://modelstudio.console.alibabacloud.com/?tab=playground#/api-key" {
-		t.Fatalf("Singapore keys = %q", sg.KeysURL)
-	}
-	plan, err := ParseImport("magpie://import?preset=bailian-decision&region=token-plan")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if plan.Decide != "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1" {
-		t.Fatalf("Token Plan decide = %q", plan.Decide)
-	}
-	if plan.KeysURL != "https://bailian.console.aliyun.com/cn-beijing/subscription/token-plan/personal" {
-		t.Fatalf("Token Plan keys = %q", plan.KeysURL)
-	}
-	bj, err := ParseImport("magpie://import?preset=bailian-decision&region=cn-beijing")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if bj.Decide != "https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/compatible-mode/v1" {
-		t.Fatalf("Beijing decide = %q", bj.Decide)
 	}
 }
 
@@ -242,7 +179,7 @@ func TestParseImportLocalHTTP(t *testing.T) {
 }
 
 func TestParseImportForms(t *testing.T) {
-	for _, link := range []string{"magpie:import?preset=deepseek", "magpie:///import?preset=deepseek", "MAGPIE://import/?preset=deepseek"} {
+	for _, link := range []string{"magpie:import?preset=moonshot", "magpie:///import?preset=moonshot", "MAGPIE://import/?preset=moonshot"} {
 		if _, err := ParseImport(link); err != nil {
 			t.Errorf("%s: %v", link, err)
 		}
@@ -284,7 +221,7 @@ func TestParseImportBalance(t *testing.T) {
 		t.Fatalf("balance %q %q %q", p.BalanceURL, p.BalancePath, p.BalanceMethod)
 	}
 	// a preset's endpoint host counts as the link's own
-	q = url.Values{"preset": {"deepseek"}, "balance": {"https://api.deepseek.com/user/balance"}, "balance_method": {"GET"}}
+	q = url.Values{"preset": {"moonshot"}, "balance": {"https://api.moonshot.ai/v1/users/me/balance"}, "balance_method": {"GET"}}
 	if p, err = ParseImport("magpie://import?" + q.Encode()); err != nil || p.BalanceURL == "" || p.BalanceMethod != "" {
 		t.Fatalf("preset: %+v %v", p.BalanceURL, err)
 	}

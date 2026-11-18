@@ -33,7 +33,7 @@ func TestDashScopeWholeAskedStreamed(t *testing.T) {
 		`data: [DONE]`)}
 	up := setup(t, provider.Chat, f)
 	if err := provider.Save(provider.Provider{ID: "fake", Name: "Qwen Token Plan", Key: "k", Models: []string{"m1"},
-		Preset: "qwen-token-plan", Chat: up.URL + "/compatible-mode/v1"}); err != nil {
+		Preset: "alibaba-token-plan", Chat: up.URL + "/compatible-mode/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	srv := New()
@@ -68,10 +68,8 @@ func TestDashScopeWholeAskedStreamed(t *testing.T) {
 // Bailian's, by preset or by host, and the Qwen AI platform's own host.
 func TestDashScopeHosts(t *testing.T) {
 	for _, p := range []provider.Provider{
-		{Preset: "qwen-token-plan"}, {Preset: "bailian-token-plan"},
-		{Chat: "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"},
-		{Chat: "https://token-plan.maas.qianwenaiapi.com/compatible-mode/v1"},
-		{Chat: "https://maas.qianwenaiapi.com/compatible-mode/v1"},
+		{Preset: "alibaba-token-plan"},
+		{Chat: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"},
 		{Chat: "https://dashscope.aliyuncs.com/compatible-mode/v1"},
 		// Qwen Cloud's (judi0713): its presets, its plan's host, a region's
 		// and the regionless Singapore one

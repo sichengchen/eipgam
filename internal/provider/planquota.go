@@ -883,16 +883,10 @@ func PlanQuotas(ctx context.Context) []SubscriptionQuota {
 	}
 	stepfun := make(chan []SubscriptionQuota, 1)
 	go func() { stepfun <- stepPlanQuotas(ctx) }()
-	volc := make(chan []SubscriptionQuota, 1)
-	go func() { volc <- volcPlanQuotas(ctx) }()
 	tencent := make(chan []SubscriptionQuota, 1)
 	go func() { tencent <- tencentPlanQuotas(ctx) }()
 	ali := make(chan []SubscriptionQuota, 1)
 	go func() { ali <- aliPlanQuotas(ctx) }()
-	qianwen := make(chan []SubscriptionQuota, 1)
-	go func() { qianwen <- qianwenPlanQuotas(ctx) }()
-	qianfan := make(chan []SubscriptionQuota, 1)
-	go func() { qianfan <- qianfanPlanQuotas(ctx) }()
 	wg.Wait()
 	out := []SubscriptionQuota{}
 	for i, q := range got {
@@ -902,9 +896,8 @@ func PlanQuotas(ctx context.Context) []SubscriptionQuota {
 			out = append(out, *q)
 		}
 	}
-	// StepFun's, Volcengine's, Tencent's, Alibaba's, the Qwen AI
-	// platform's and Baidu Qianfan's, read just now too
-	for _, qs := range [][]SubscriptionQuota{<-stepfun, <-volc, <-tencent, <-ali, <-qianwen, <-qianfan} {
+	// StepFun's, Tencent's and Alibaba's, read just now too
+	for _, qs := range [][]SubscriptionQuota{<-stepfun, <-tencent, <-ali} {
 		for _, q := range qs {
 			out = append(out, readNow(q))
 		}

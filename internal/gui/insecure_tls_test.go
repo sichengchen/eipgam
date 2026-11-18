@@ -62,7 +62,7 @@ func TestProviderSaveInsecureTLS(t *testing.T) {
 		t.Fatal("unticked, still unchecked")
 	}
 
-	ds, err := provider.FromPreset("deepseek")
+	ds, err := provider.FromPreset("moonshot")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,13 +70,13 @@ func TestProviderSaveInsecureTLS(t *testing.T) {
 	if err := provider.Save(ds); err != nil {
 		t.Fatal(err)
 	}
-	if code, _ := post(`{"id":"deepseek","from":"deepseek","name":"DeepSeek","preset":"deepseek","key":"","chat":"` + ds.Chat + `","models":[],"headers":{},"insecureTLS":true}`); code == 200 {
+	if code, _ := post(`{"id":"moonshot","from":"moonshot","name":"Kimi","preset":"moonshot","key":"","chat":"` + ds.Chat + `","models":[],"headers":{},"insecureTLS":true}`); code == 200 {
 		t.Error("a preset's provider saved unchecked")
 	}
-	if unchecked("deepseek") {
+	if unchecked("moonshot") {
 		t.Error("a preset's provider unchecked")
 	}
-	d, _ := provider.Find("deepseek")
+	d, _ := provider.Find("moonshot")
 	if providerInfo(*d, nil).TakesInsecureTLS {
 		t.Error("a preset's provider shown as taking it")
 	}

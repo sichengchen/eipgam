@@ -69,7 +69,6 @@ func (g *glmKeys) took() []string {
 // with neither is told what to change.
 func TestGLMCodingPlanKeyAtPayAsYouGo(t *testing.T) {
 	for _, tc := range []struct{ preset, host string }{
-		{"zhipu", "open.bigmodel.cn"},
 		{"zai", "api.z.ai"},
 	} {
 		t.Run(tc.preset, func(t *testing.T) {

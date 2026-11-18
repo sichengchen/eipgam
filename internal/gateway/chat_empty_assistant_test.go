@@ -306,11 +306,11 @@ func TestChatResumeEmptyPrefillKept(t *testing.T) {
 	var q struct {
 		Messages []map[string]any `json:"messages"`
 	}
-	if err := json.Unmarshal(buildChat(r, "deepseek-chat", "api.deepseek.com", false), &q); err != nil {
+	if err := json.Unmarshal(buildChat(r, "kimi-k2.6", "api.moonshot.ai", false), &q); err != nil {
 		t.Fatal(err)
 	}
 	last := q.Messages[len(q.Messages)-1]
-	if last["role"] != "assistant" || last["prefix"] != true || last["reasoning_content"] != "half" {
-		t.Fatalf("prefill = %v, want it kept with its prefix and reasoning", last)
+	if last["role"] != "assistant" || last["partial"] != true || last["reasoning_content"] != "half" {
+		t.Fatalf("prefill = %v, want it kept with its partial mark and reasoning", last)
 	}
 }

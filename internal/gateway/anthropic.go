@@ -396,17 +396,17 @@ func thinkingOffUnlessAsked(body []byte) []byte {
 
 // anthropicReplaysThinking is whether model, served by host's Messages
 // API, wants a thinking block on every assistant turn that calls a tool:
-// DeepSeek's Anthropic endpoint, thinking (its default, and when asked),
-// refuses a tool_use turn with none, "The `content[].thinking` in the
-// thinking mode must be passed back to the API", and turns
-// redacted_thinking away as a block it doesn't know (422), checked against
-// api.deepseek.com/anthropic on 2026-10-11 (#1611). It takes Claude's
-// signed thinking, its own, one with no signature and a space.
+// DeepSeek's models, thinking (their default, and when asked), refuse a
+// tool_use turn with none, "The `content[].thinking` in the thinking mode
+// must be passed back to the API", and turn redacted_thinking away as a
+// block they don't know (422), checked against DeepSeek's Anthropic
+// endpoint on 2026-10-11 (#1611). They take Claude's signed thinking,
+// their own, one with no signature and a space.
 func anthropicReplaysThinking(host, model string) bool {
 	if host == "api.anthropic.com" || anthropicModel.MatchString(model) {
 		return false
 	}
-	return strings.Contains(host, "deepseek") || strings.Contains(strings.ToLower(model), "deepseek")
+	return strings.Contains(strings.ToLower(model), "deepseek")
 }
 
 // withThinkingOnToolTurns gives each assistant message of a Messages
@@ -897,36 +897,10 @@ func AdaptiveThinking(model string) bool { return adaptiveOnly(model) }
 // its default, medium (zxz8009195489 on Discord, 2026-11-04).
 var effortInOutputConfig = lazyre.New(`(?i)glm-5\.[23](?:$|[-.:/\[])|minimax-m3\.1-flash(?:$|[-.:/\[])|(?:^|[^a-z0-9])gpt-\d`)
 
-// deepseekHost is DeepSeek's own API, whose Anthropic endpoint
-// (api.deepseek.com/anthropic) takes the effort in output_config.
-const deepseekHost = provider.DeepSeekHost
-
-// isDeepSeekAnthropic is whether the request goes to DeepSeek's own
-// Anthropic endpoint, whose shape is checked against the host, not the
-// preset: a "deepseek" provider pointed at another host is that host's
-// shape, and it learns from that endpoint's refusals as any other does.
-func isDeepSeekAnthropic(p provider.Provider, to provider.Protocol) bool {
-	return provider.HostOf(p.Base(to)) == deepseekHost
-}
-
-// deepseekEfforts are the levels DeepSeek's models think at: its thinking
-// guide maps minimal to low, medium and xhigh to high, and ultra to max.
-// A budget a client sent is fitted to them when the model's own list is
-// unknown, so 32000 (max, as budgetOf gives it) asks max, not xhigh,
-// which DeepSeek would read as high.
-var deepseekEfforts = []string{"low", "high", "max"}
-
-// outputEffortAt is effortInOutputConfig for a model at host: those
-// models anywhere, and every model on DeepSeek's own endpoint. DeepSeek's
-// Anthropic API docs (api-docs.deepseek.com/guides/anthropic_api, read
-// 2026-10-23) list thinking as "Supported (budget_tokens is ignored)" and
-// output_config as "Only effort is supported", and its thinking guide
-// (guides/thinking_mode) names output_config.effort as the Anthropic
-// format's effort control: a budget alone left DSH's low and max at
-// DeepSeek's default, high (#3298). Another host serving a DeepSeek model
-// is not covered by those docs and goes as it did.
-func outputEffortAt(host, model string) bool {
-	return host == deepseekHost || effortInOutputConfig.MatchString(model)
+// outputEffortAt is whether model is asked its effort in output_config
+// (effortInOutputConfig).
+func outputEffortAt(model string) bool {
+	return effortInOutputConfig.MatchString(model)
 }
 
 // AdaptiveWithEffort is, for agents told how to ask a model, one of
@@ -1009,14 +983,13 @@ const interruptedTool = "[The result of this tool call is unavailable: the turn 
 
 // buildAnthropic renders a request for an Anthropic-style upstream.
 func buildAnthropic(r *Request, model string) []byte {
-	return anthropicBody(r, model, "", false)
+	return anthropicBody(r, model, false)
 }
 
 // anthropicBody is buildAnthropic; with replay, for an upstream that wants
 // a turn's thinking back (anthropicReplaysThinking), thinking with no
-// signature goes as its text instead of being left out. host is the
-// upstream's (outputEffortAt).
-func anthropicBody(r *Request, model, host string, replay bool) []byte {
+// signature goes as its text instead of being left out.
+func anthropicBody(r *Request, model string, replay bool) []byte {
 	r = responseInstructions(r)
 	if r.Format != nil && r.Format.schema() == nil {
 		// output_config.format takes a schema only: any JSON object is
@@ -1184,7 +1157,7 @@ func anthropicBody(r *Request, model, host string, replay bool) []byte {
 			maxTokens = budget + 4096
 		}
 		out["thinking"] = map[string]any{"type": "enabled", "budget_tokens": budget}
-		if r.Effort != "" && outputEffortAt(host, model) {
+		if r.Effort != "" && outputEffortAt(model) {
 			out["output_config"] = map[string]any{"effort": r.Effort}
 		}
 	} else if r.Temp != nil {

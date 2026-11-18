@@ -83,7 +83,7 @@ func emptyObjectAt(body []byte, at int) bool {
 // Kimi Code membership's.
 func isKimi(p provider.Provider, to provider.Protocol) bool {
 	switch provider.HostOf(p.Base(to)) {
-	case "api.moonshot.ai", "api.moonshot.cn", "api.kimi.com", "api.kimi.ai":
+	case "api.moonshot.ai", "api.kimi.ai":
 		return true
 	}
 	return strings.HasPrefix(p.VendorPreset(), "moonshot") || strings.HasPrefix(p.VendorPreset(), "kimi")
@@ -207,11 +207,8 @@ func valuesType(vals []gjson.Result) string {
 
 // kimiLockedSampling is body without temperature and top_p when the model's
 // server locks them to one value: since kimi-k2.5 every kimi-kX.Y on both
-// Kimi platforms (Moonshot's API and a Kimi Code membership's), Kimi
-// Code's own kimi-for-coding and k3*, and the same models on Volcengine
-// Ark, whose coding plan serves kimi-kX.Y behind hosts the preset's plans
-// and a provider added by hand both reach (#4495: 400 "Volcengine Ark:
-// `temperature` only 1 is allowed for this model"). A client that sends
+// Kimi platforms (Moonshot's API and a Kimi Code membership's), and Kimi
+// Code's own kimi-for-coding and k3*. A client that sends
 // its own defaults — VS Code Copilot's chat sends temperature 0.1 and
 // top_p 1 — is refused 400 "invalid temperature: only 1 is allowed for
 // this model" before any token is read (a K2.5/K2.6 with thinking off
@@ -219,9 +216,9 @@ func valuesType(vals []gjson.Result) string {
 // fills in the value the model and mode want, so no number is written
 // here. Models that take a range — moonshot-v1-*, kimi-k2-0905-preview,
 // kimi-k2-thinking, kimi-latest — keep what the user set, as does anyone
-// not served by Moonshot or Ark.
+// not served by Moonshot.
 func kimiLockedSampling(p provider.Provider, to provider.Protocol, body []byte) []byte {
-	if !isKimi(p, to) && !isArk(p) {
+	if !isKimi(p, to) {
 		return body
 	}
 	if !kimiLockedSamplingModel(gjson.GetBytes(body, "model").String()) {

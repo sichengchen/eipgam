@@ -48,12 +48,10 @@ func qwenDecision(t *testing.T, up http.Handler) {
 	t.Helper()
 	srv := httptest.NewServer(up)
 	t.Cleanup(srv.Close)
-	p, err := provider.FromPreset("qwen-decision")
-	if err != nil {
-		t.Fatal(err)
-	}
-	// the stand-in host isn't Bailian's, so the model is the one picked
-	p.Key, p.Decide, p.Models = "sk-qwen", srv.URL+"/compatible-mode/v1", []string{"decision-model-preview"}
+	// a decision provider of the user's own: the stand-in host isn't
+	// Bailian's, so the model is the one picked
+	p := provider.Provider{ID: "qwen-decision", Name: "Qwen Decision Model", Key: "sk-qwen",
+		Decide: srv.URL + "/compatible-mode/v1", Models: []string{"decision-model-preview"}}
 	if id, err := provider.Add(p); err != nil || id != "qwen-decision" {
 		t.Fatalf("saved as %q: %v", id, err)
 	}

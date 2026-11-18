@@ -71,13 +71,10 @@ func readsKeyWindows(p Provider) bool {
 }
 
 // accountPlanOf is which plan p's key is on whose windows the key's
-// account tells, not the key: Volcengine Ark's Coding and Agent Plans and
-// Tencent Cloud's Token Plan Enterprise and Alibaba Cloud's Token Plan, read
-// with the account's access key (volcengine_usage.go, tencent_usage.go,
-// alibaba_usage.go), and StepFun's Step Plan and the Qwen AI platform's
-// Token Plan and Baidu Qianfan's Token Plan Personal, read with magpie's
-// sign-in to the platform (stepfun_plan.go, qianwen_plan.go,
-// qianfan_plan.go). The
+// account tells, not the key: Tencent Cloud's Token Plan Enterprise and
+// Alibaba Cloud's Token Plan, read with the account's access key
+// (tencent_usage.go, alibaba_usage.go), and StepFun's Step Plan, read with
+// magpie's sign-in to the platform (stepfun_plan.go). The
 // Usage page had their windows while routing had none, and the Routing
 // page said "one key" of a plan with them (chen on Discord). "" for any
 // other key, or one whose access key magpie isn't given; said without
@@ -87,9 +84,6 @@ func accountPlanOf(p Provider) string {
 		return ""
 	}
 	keyed := p.AccessKeyID != "" && p.SecretAccessKey != ""
-	if _, _, _, ok := volcPlanOf(p); ok && keyed {
-		return "volc"
-	}
 	if _, ok := tencentPlanRegion(p); ok && keyed {
 		return "tencent"
 	}
@@ -98,12 +92,6 @@ func accountPlanOf(p Provider) string {
 	}
 	if StepFunSite(p) != "" {
 		return "stepfun"
-	}
-	if QianwenPlan(p) {
-		return "qianwen"
-	}
-	if QianfanPlan(p) {
-		return "qianfan"
 	}
 	return ""
 }
@@ -114,9 +102,6 @@ func accountPlanOf(p Provider) string {
 func accountPlanWindows(ctx context.Context, q Provider) (keyReading, error) {
 	var c SubscriptionQuota
 	switch accountPlanOf(q) {
-	case "volc":
-		action, plan, region, _ := volcPlanOf(q)
-		c = volcPlanQuota(q.Via(ctx), q, action, plan, region)
 	case "tencent":
 		region, _ := tencentPlanRegion(q)
 		cs := tencentPlanCards(ctx, q, region, time.Now)
@@ -132,16 +117,6 @@ func accountPlanWindows(ctx context.Context, q Provider) (keyReading, error) {
 			return keyReading{}, nil
 		}
 		c = stepPlanQuota(q.Via(ctx), q)
-	case "qianwen":
-		if !QianwenSignedIn(q.ID) {
-			return keyReading{}, nil
-		}
-		c = qianwenPlanQuota(q.Via(ctx), q)
-	case "qianfan":
-		if !QianfanSignedIn(q.ID) {
-			return keyReading{}, nil
-		}
-		c = qianfanPlanQuota(q.Via(ctx), q)
 	}
 	if c.Error != "" {
 		return keyReading{}, errors.New(c.Error)
@@ -296,12 +271,9 @@ func keyWindows(ctx context.Context, p Provider) (keyReading, error) {
 func keyCardTag(p Provider) string {
 	if _, ok := planQuotaSourceOf(p); !ok && !sub2APIKeyLimits(p) {
 		// an account's plan is its own card, never a key's
-		// (withKeyReadings): Volcengine's the access key's plan's
-		// (volcPlanQuotas), named for the first provider on it
+		// (withKeyReadings): Tencent's and Alibaba's the access key's
+		// plan's, named for the first provider on it
 		switch accountPlanOf(p) {
-		case "volc":
-			action, _, _, _ := volcPlanOf(p)
-			return keyTag("volc "+action, p.AccessKeyID)
 		case "tencent":
 			return keyTag("tencent", p.AccessKeyID)
 		case "alibaba":
@@ -309,10 +281,6 @@ func keyCardTag(p Provider) string {
 			return keyTag("alibaba "+site.region, p.AccessKeyID)
 		case "stepfun":
 			return keyTag("stepfun", p.ID)
-		case "qianwen":
-			return keyTag("qianwen", p.ID)
-		case "qianfan":
-			return keyTag("qianfan", p.ID)
 		}
 	}
 	if _, ok := planQuotaSourceOf(p); ok && !sub2APIKeyLimits(p) {

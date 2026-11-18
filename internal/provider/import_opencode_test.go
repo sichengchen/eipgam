@@ -25,9 +25,9 @@ const openCodeAuth = `{
     "type": "api",
     "key": "sk-go-9a8b7c"
   },
-  "deepseek": {
+  "moonshotai": {
     "type": "api",
-    "key": "sk-ds-oc",
+    "key": "sk-kimi-oc",
     "metadata": {
       "source": "login"
     }
@@ -116,8 +116,8 @@ func TestImportOpenCodeAuth(t *testing.T) {
 	if p := zen.Provider; zen.Skip != "" || p.Preset != "opencode-zen" || p.ID != "opencode-zen" || p.Key != "sk-zen-1f2e3d" || p.Chat != Preset("opencode-zen").Chat || p.Name != "OpenCode Zen" {
 		t.Fatalf("OpenCode Zen: %+v", zen)
 	}
-	if ds := items["deepseek"]; ds.Skip != "" || ds.Provider.Preset != "deepseek" || ds.Provider.Key != "sk-ds-oc" {
-		t.Fatalf("DeepSeek: %+v", ds)
+	if kimi := items["moonshotai"]; kimi.Skip != "" || kimi.Provider.Preset != "moonshot" || kimi.Provider.Key != "sk-kimi-oc" || kimi.Provider.Chat != Preset("moonshot").Chat {
+		t.Fatalf("Kimi: %+v", kimi)
 	}
 	if it := items["my-relay"]; it.Skip != "it has no base URL" || it.Provider.Key != "" {
 		t.Fatalf("a provider with no preset: %+v", it)
@@ -210,30 +210,29 @@ func TestImportOpenCodeAuthUnknown(t *testing.T) {
 // A vendor's key whose OpenCode id is a provider magpie has a preset for
 // comes in on that preset: the id's host in models.dev's catalog is the
 // preset's own address. Each entry here is api, so a key lands on the
-// preset with no skip, the way openai's or deepseek's does.
+// preset with no skip, the way openai's or moonshotai's does.
 func TestImportOpenCodeVendorPresets(t *testing.T) {
 	home := openCodeHome(t)
 	data := filepath.Join(home, "data")
 	t.Setenv("XDG_DATA_HOME", data)
 	want := map[string]string{
-		"zhipuai":                "zhipu",
-		"zai":                    "zai",
-		"alibaba":                "qwen",
-		"alibaba-cn":             "qwen-cn",
-		"minimax":                "minimax",
-		"modelscope":             "modelscope",
-		"kilo":                   "kilo",
-		"cline-pass":             "clinepass",
-		"kimi-code-plan-cn":      "kimi-code-cn",
-		"kimi-code-plan-global":  "kimi-code",
-		"stepfun-step-plan":      "stepfun-cn",
-		"stepfun-ai-step-plan":   "stepfun",
-		"volcengine-coding-plan": "volcengine",
-		"alibaba-token-plan-cn":  "bailian-token-plan",
-		"tencent-token-plan":     "tencent-cloud",
+		"zai":                   "zai",
+		"alibaba":               "qwen",
+		"minimax":               "minimax",
+		"kilo":                  "kilo",
+		"cline-pass":            "clinepass",
+		"kimi-code-plan-global": "kimi-code",
+		"stepfun-ai-step-plan":  "stepfun",
+		"alibaba-token-plan":    "alibaba-token-plan",
+		"siliconflow":           "siliconflow",
 	}
+	// ids whose models.dev host is not the preset's own come in on no
+	// preset: SiliconFlow's China site (the preset is api.siliconflow.com)
+	// and Tencent's China plan at api.lkeap.cloud.tencent.com (the preset
+	// is Singapore's TokenHub)
+	elsewhere := []string{"siliconflow-cn", "tencent-token-plan"}
 	entries := ""
-	for id := range want {
+	for _, id := range append(slices.Collect(maps.Keys(want)), elsewhere...) {
 		entries += fmt.Sprintf(",\n  %q: {\"type\": \"api\", \"key\": \"sk-oc-%s\"}", id, id)
 	}
 	p := filepath.Join(data, "opencode", "auth.json")
@@ -244,8 +243,13 @@ func TestImportOpenCodeVendorPresets(t *testing.T) {
 		t.Fatal(err)
 	}
 	items := itemsOf(t, "opencode")
-	if len(items) != len(want) {
-		t.Fatalf("items: %d, want %d", len(items), len(want))
+	if len(items) != len(want)+len(elsewhere) {
+		t.Fatalf("items: %d, want %d", len(items), len(want)+len(elsewhere))
+	}
+	for _, id := range elsewhere {
+		if it := items[id]; it.Skip != "it has no base URL" || it.Provider.Key != "" || it.Provider.Chat != "" || it.Provider.Preset != "" {
+			t.Errorf("%s: came in at %q on %q (skip %q), not the preset's host", id, it.Provider.Chat, it.Provider.Preset, it.Skip)
+		}
 	}
 	for _, id := range slices.Sorted(maps.Keys(want)) {
 		it := items[id]

@@ -155,7 +155,7 @@ func TestIdlessReasoningKeptForDeepSeek(t *testing.T) {
 	up := &deepseekResponses{}
 	srv := httptest.NewServer(up)
 	defer srv.Close()
-	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Models: []string{"deepseek-flash"}, Responses: srv.URL + "/v1"}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k", Models: []string{"deepseek-flash"}, Responses: srv.URL + "/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	code, b := post(t, "/v1/responses", `{"model":"deepseek/deepseek-flash","stream":true,"store":false,"input":[

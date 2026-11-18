@@ -30,26 +30,27 @@ func openCodeAuthPath() string {
 
 // openCodePresets are OpenCode's provider ids by the magpie preset at the
 // same address. An id at a host the preset doesn't serve (SiliconFlow's
-// .com beside the preset's .cn) is left out: its key would be sent there.
+// siliconflow-cn, at .cn beside the preset's .com; tencent-token-plan, at
+// China's api.lkeap.cloud.tencent.com beside the preset's Singapore
+// TokenHub) is left out: its key would be sent there.
 // The ids' hosts are models.dev's api for each, what OpenCode itself sends
 // to, and it is the preset's own address, not one of its regions. Where a
-// region would be the right target — Zhipu's, Z.ai's, StepFun's and
-// Volcengine's pay-as-you-go ids beside plan-first defaults, MiniMax's and
-// Tencent's coding plans — auth.json says nothing to pick a region by, so
-// those ids stay out and are skipped with a reason that says why.
+// region would be the right target — Z.ai's and StepFun's pay-as-you-go
+// ids beside plan-first defaults, MiniMax's coding plan — auth.json says
+// nothing to pick a region by, so those ids stay out and are skipped with
+// a reason that says why.
 var openCodePresets = map[string]string{
 	"opencode": "opencode-zen", "opencode-go": "opencode-go",
-	"openai": "openai", "anthropic": "anthropic", "google": "google", "deepseek": "deepseek",
-	"xai": "xai", "moonshotai": "moonshot", "moonshotai-cn": "moonshot-cn", "mistral": "mistral",
+	"openai": "openai", "anthropic": "anthropic", "google": "google",
+	"xai": "xai", "moonshotai": "moonshot", "mistral": "mistral",
 	"groq": "groq", "openrouter": "openrouter", "togetherai": "together", "fireworks-ai": "fireworks",
-	"siliconflow-cn": "siliconflow", "nvidia": "nvidia", "aihubmix": "aihubmix", "302ai": "302ai",
+	"siliconflow": "siliconflow", "nvidia": "nvidia",
 	"ollama-cloud": "ollama-cloud", "vercel": "vercel",
-	"zhipuai": "zhipu", "zai": "zai", "alibaba": "qwen", "alibaba-cn": "qwen-cn",
-	"minimax": "minimax", "modelscope": "modelscope", "kilo": "kilo", "cline-pass": "clinepass",
-	"kimi-code-plan-cn": "kimi-code-cn", "kimi-code-plan-global": "kimi-code",
-	"stepfun-step-plan": "stepfun-cn", "stepfun-ai-step-plan": "stepfun", "longcat": "longcat",
-	"volcengine-coding-plan": "volcengine",
-	"alibaba-token-plan-cn":  "bailian-token-plan", "alibaba-token-plan": "alibaba-token-plan", "tencent-token-plan": "tencent-cloud",
+	"zai": "zai", "alibaba": "qwen",
+	"minimax": "minimax", "kilo": "kilo", "cline-pass": "clinepass",
+	"kimi-code-plan-global": "kimi-code",
+	"stepfun-ai-step-plan":  "stepfun",
+	"alibaba-token-plan":    "alibaba-token-plan",
 }
 
 func readOpenCodeAuth(path string) ([]AppImport, error) {

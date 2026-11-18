@@ -1,10 +1,8 @@
 package gateway
 
 import (
-	"context"
 	"encoding/json"
 	"io"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -168,7 +166,7 @@ func TestDeferredToolBlocksRefusedOnceLeftOut(t *testing.T) {
 	takes := &deferredVendor{deepseek: true}
 	tkSrv := httptest.NewServer(takes)
 	t.Cleanup(tkSrv.Close)
-	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Anthropic: dsSrv.URL,
+	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k", Anthropic: dsSrv.URL,
 		Models: []string{"deepseek-chat"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -365,61 +363,5 @@ func TestNestedToolResultDefinitionBecomesReference(t *testing.T) {
 	out = string(withoutDeferredTools([]byte(unreadable)))
 	if !strings.Contains(out, `"content":{"type":"tool_definition"`) {
 		t.Fatalf("the unreadable result was reworked: %s", out)
-	}
-}
-
-// isDeepSeekAnthropic is DeepSeek's own Anthropic endpoint alone, however
-// the provider is built (#5404): a preset pointed elsewhere keeps the
-// blocks until that endpoint refuses them.
-func TestDeepSeekAnthropicRecognized(t *testing.T) {
-	ds := provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k",
-		Anthropic: "https://api.deepseek.com/anthropic", Models: []string{"deepseek-chat"}}
-	if !isDeepSeekAnthropic(ds, provider.Anthropic) {
-		t.Fatal("DeepSeek's own endpoint was not recognized")
-	}
-	relay := provider.Provider{ID: "relay", Name: "Relay", Preset: "deepseek", Key: "k",
-		Anthropic: "https://relay.example.invalid/anthropic", Models: []string{"deepseek-chat"}}
-	if isDeepSeekAnthropic(relay, provider.Anthropic) {
-		t.Fatal("another host was taken for DeepSeek's endpoint")
-	}
-}
-
-// #5404: DeepSeek's own endpoint takes a tool_addition at no position
-// now, so a body to it goes without the deferred-tool blocks on the first
-// ask, its ToolSearch answer's definition on the tools list and the
-// answer as the reference, instead of a 422 to learn from first.
-func TestDeepSeekAnthropicIsStrippedUpFront(t *testing.T) {
-	fresh(t)
-	up := &resultDefVendor{}
-	srv := httptest.NewServer(up)
-	t.Cleanup(srv.Close)
-	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k", Anthropic: "http://api.deepseek.com/anthropic",
-		Models: []string{"deepseek-chat"}}); err != nil {
-		t.Fatal(err)
-	}
-	s := New()
-	addr := strings.TrimPrefix(srv.URL, "http://")
-	s.client = &http.Client{Transport: &http.Transport{DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
-		return (&net.Dialer{}).DialContext(ctx, network, addr)
-	}}}
-	body := strings.Replace(nestedDefBody, `"relay/deepseek-chat"`, `"deepseek/deepseek-chat"`, 1)
-	body = strings.Replace(body, `{"role":"user","content":"go"}`,
-		`{"role":"system","content":[{"type":"text","text":"t"},`+ccAddDef+`]},{"role":"user","content":"go"}`, 1)
-	rec := httptest.NewRecorder()
-	s.Handler().ServeHTTP(rec, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body)))
-	if rec.Code != 200 {
-		t.Fatalf("status %d: %s", rec.Code, rec.Body)
-	}
-	sent := up.sent()
-	if len(sent) != 1 {
-		t.Fatalf("DeepSeek was asked %d times, want once: %q", len(sent), sent)
-	}
-	for _, b := range []string{`"tool_addition"`, `"tool_definition"`} {
-		if strings.Contains(sent[0], b) {
-			t.Errorf("DeepSeek was sent %s: %s", b, sent[0])
-		}
-	}
-	if !strings.Contains(sent[0], `"tool_name":"Read"`) || !strings.Contains(sent[0], `"name":"Read","description":"read a file"`) {
-		t.Errorf("the ToolSearch answer did not go as a declared reference: %s", sent[0])
 	}
 }

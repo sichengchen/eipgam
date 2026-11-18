@@ -127,9 +127,6 @@ func TestSearchCountReachesEveryAPI(t *testing.T) {
 		{"brave", "count=12"},
 		{"exa", `"numResults":12`},
 		{"firecrawl", `"limit":12`},
-		{"deepseek", `"count":12`},
-		{"volcengine", `"Count":12`},
-		{"wsa", `"Cnt":20`},
 		{"you", `"count":12`},
 	} {
 		s.askSearchAPI(ctx, provider.SearchAPI{Vendor: c.vendor, Key: "k", URL: f.URL}, "latest go")
@@ -139,15 +136,9 @@ func TestSearchCountReachesEveryAPI(t *testing.T) {
 		}
 		mu.Unlock()
 	}
-	s.askSearchAPI(withSearchCount(context.Background(), 3), provider.SearchAPI{Vendor: "wsa", Key: "k", URL: f.URL}, "q")
-	mu.Lock()
-	if !strings.Contains(last, `"Cnt":10`) {
-		t.Errorf("Yuanbao Search for 3 was asked %q, not its fewest, 10", last)
-	}
-	mu.Unlock()
 
 	kimi := newKimiPlan(t)
-	plan := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi",
+	plan := provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi",
 		Chat: kimi.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}
 	for _, n := range []int{0, 12} {
 		ctx := context.Background()

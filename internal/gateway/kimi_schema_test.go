@@ -26,7 +26,7 @@ import (
 func TestKimiToolEnumTypes(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	kimi, err := provider.FromPreset("kimi-code-cn")
+	kimi, err := provider.FromPreset("kimi-code")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestKimiToolEnumTypes(t *testing.T) {
 		`"mode":{ "enum"`, `"mode":{"type":"string", "enum"`,
 		`"maybe":{"enum"`, `"maybe":{"type":["string","null"],"enum"`,
 	).Replace(tools)
-	b := got["api.kimi.com"]
+	b := got["api.kimi.ai"]
 	if !strings.Contains(b, want) {
 		t.Errorf("Kimi was sent:\n%s\nwant its tools:\n%s", b, want)
 	}
@@ -86,7 +86,7 @@ func TestKimiToolEnumTypes(t *testing.T) {
 // (d71362af; yetone, #3867). A $ref's target is typed the same way. An
 // enum with no items or properties is still typed from its values.
 func TestKimiToolEnumTypesItemsBeforeEnum(t *testing.T) {
-	kimi, err := provider.FromPreset("kimi-code-cn")
+	kimi, err := provider.FromPreset("kimi-code")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +140,7 @@ func TestKimiToolEnumTypesItemsBeforeEnum(t *testing.T) {
 func TestKimiToolRefTypes(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	kimi, err := provider.FromPreset("kimi-code-cn")
+	kimi, err := provider.FromPreset("kimi-code")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,9 +177,9 @@ func TestKimiToolRefTypes(t *testing.T) {
 		`"D":{`, `"D":{"type":`+anything+`,`,
 	).Replace(schema)
 	routes := []struct{ path, tools, upstream, otherUp string }{
-		{"/v1/chat/completions", `"tools":[{"type":"function","function":{"name":"automation_update","parameters":%s}}]`, "api.kimi.com/coding/v1/chat/completions", "other.test/v1/chat/completions"},
-		{"/v1/messages", `"tools":[{"name":"automation_update","input_schema":%s}]`, "api.kimi.com/coding/v1/messages", "other.test/v1/messages"},
-		{"/v1/responses", `"tools":[{"type":"function","name":"automation_update","parameters":%s}]`, "api.kimi.com/coding/v1/chat/completions", "other.test/v1/chat/completions"},
+		{"/v1/chat/completions", `"tools":[{"type":"function","function":{"name":"automation_update","parameters":%s}}]`, "api.kimi.ai/coding/v1/chat/completions", "other.test/v1/chat/completions"},
+		{"/v1/messages", `"tools":[{"name":"automation_update","input_schema":%s}]`, "api.kimi.ai/coding/v1/messages", "other.test/v1/messages"},
+		{"/v1/responses", `"tools":[{"type":"function","name":"automation_update","parameters":%s}]`, "api.kimi.ai/coding/v1/chat/completions", "other.test/v1/chat/completions"},
 	}
 	for _, r := range routes {
 		for _, id := range []string{"kimi", "other"} {
@@ -230,7 +230,7 @@ func TestKimiToolRefTypes(t *testing.T) {
 func TestKimiToolRefTypesRefChain(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	kimi, err := provider.FromPreset("kimi-code-cn")
+	kimi, err := provider.FromPreset("kimi-code")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -257,7 +257,7 @@ func TestKimiToolRefTypesRefChain(t *testing.T) {
 	if rec.Code != 200 {
 		t.Fatalf("%d %s", rec.Code, rec.Body)
 	}
-	b := got["api.kimi.com/coding/v1/chat/completions"]
+	b := got["api.kimi.ai/coding/v1/chat/completions"]
 	if b == "" {
 		t.Fatal("nothing was sent to Kimi")
 	}
@@ -307,25 +307,19 @@ func TestKimiToolRefTypesRefChain(t *testing.T) {
 func TestKimiLockedSampling(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	kimi, err := provider.FromPreset("kimi-code-cn")
+	kimi, err := provider.FromPreset("kimi-code")
 	if err != nil {
 		t.Fatal(err)
 	}
 	kimi.ID, kimi.Key, kimi.Models = "kimi", "k", []string{"kimi-for-coding", "k3"}
-	moonshot, err := provider.FromPreset("moonshot-cn")
+	moonshot, err := provider.FromPreset("moonshot")
 	if err != nil {
 		t.Fatal(err)
 	}
 	moonshot.ID, moonshot.Key = "moonshot", "k"
 	moonshot.Models = []string{"moonshot-v1-8k", "kimi-k2.5", "kimi-k2.6", "kimi-k2-0905-preview", "kimi-k2-thinking", "moonshotai/kimi-k2.6"}
-	volc, err := provider.FromPreset("volcengine")
-	if err != nil {
-		t.Fatal(err)
-	}
-	volc.ID, volc.Key, volc.Models = "volc", "k", []string{"kimi-k3.1-pro", "kimi-k2.8-preview", "doubao-seed-2.1-pro"}
-	arkpay := provider.Provider{ID: "arkpay", Name: "Ark pay", Key: "k", Chat: "https://ark.ap-southeast.volces.com/api/v3", Models: []string{"kimi-k3"}}
 	other := provider.Provider{ID: "other", Name: "Other", Key: "k", Chat: "https://other.test/v1", Models: []string{"m"}}
-	for _, p := range []provider.Provider{kimi, moonshot, volc, arkpay, other} {
+	for _, p := range []provider.Provider{kimi, moonshot, other} {
 		if err := provider.Save(p); err != nil {
 			t.Fatal(err)
 		}
@@ -376,7 +370,7 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("kimi code's k3 drops the fields", func(t *testing.T) {
 		got := post(t, "/v1/chat/completions", `{"model":"kimi/k3","messages":[{"role":"user","content":"hi"}],"temperature":0.1,"top_p":1}`)
-		if got.host != "api.kimi.com" {
+		if got.host != "api.kimi.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
@@ -385,7 +379,7 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("anthropic endpoint", func(t *testing.T) {
 		got := post(t, "/v1/messages", `{"model":"kimi/kimi-for-coding","messages":[{"role":"user","content":"hi"}],"temperature":0.1,"top_p":1,"max_tokens":5}`)
-		if got.host != "api.kimi.com" {
+		if got.host != "api.kimi.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
@@ -394,7 +388,7 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("moonshot pay-as-you-go kimi-k2.6 drops the fields", func(t *testing.T) {
 		got := post(t, "/v1/chat/completions", `{"model":"moonshot/kimi-k2.6","messages":[{"role":"user","content":"hi"}],"temperature":0.1,"top_p":1}`)
-		if got.host != "api.moonshot.cn" {
+		if got.host != "api.moonshot.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
@@ -403,7 +397,7 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("moonshot kimi-k2.5, the first locked version, drops the fields", func(t *testing.T) {
 		got := post(t, "/v1/chat/completions", `{"model":"moonshot/kimi-k2.5","messages":[{"role":"user","content":"hi"}],"temperature":0.1,"top_p":1}`)
-		if got.host != "api.moonshot.cn" {
+		if got.host != "api.moonshot.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
@@ -412,7 +406,7 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("a relay's vendor-prefixed name still names the locked model", func(t *testing.T) {
 		got := post(t, "/v1/chat/completions", `{"model":"moonshot/moonshotai/kimi-k2.6","messages":[{"role":"user","content":"hi"}],"temperature":0.1,"top_p":1}`)
-		if got.host != "api.moonshot.cn" {
+		if got.host != "api.moonshot.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
@@ -421,7 +415,7 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("moonshot pay-as-you-go keeps the user's temperature", func(t *testing.T) {
 		got := post(t, "/v1/chat/completions", `{"model":"moonshot/moonshot-v1-8k","messages":[{"role":"user","content":"hi"}],"temperature":0.1,"top_p":1}`)
-		if got.host != "api.moonshot.cn" {
+		if got.host != "api.moonshot.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if v := gjson.Get(got.body, "temperature"); !v.Exists() || v.Raw != "0.1" {
@@ -430,7 +424,7 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("moonshot kimi-k2-0905-preview keeps the user's temperature", func(t *testing.T) {
 		got := post(t, "/v1/chat/completions", `{"model":"moonshot/kimi-k2-0905-preview","messages":[{"role":"user","content":"hi"}],"temperature":0.1}`)
-		if got.host != "api.moonshot.cn" {
+		if got.host != "api.moonshot.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if v := gjson.Get(got.body, "temperature"); !v.Exists() || v.Raw != "0.1" {
@@ -439,48 +433,11 @@ func TestKimiLockedSampling(t *testing.T) {
 	})
 	t.Run("moonshot kimi-k2-thinking keeps the user's temperature", func(t *testing.T) {
 		got := post(t, "/v1/chat/completions", `{"model":"moonshot/kimi-k2-thinking","messages":[{"role":"user","content":"hi"}],"temperature":0.1}`)
-		if got.host != "api.moonshot.cn" {
+		if got.host != "api.moonshot.ai" {
 			t.Fatalf("the request went to %s", got.host)
 		}
 		if v := gjson.Get(got.body, "temperature"); !v.Exists() || v.Raw != "0.1" {
 			t.Errorf("kimi-k2-thinking's temperature was not kept: %s", got.body)
-		}
-	})
-	// #4495: Volcengine Ark locks the same models' sampling the same way
-	// ("Volcengine Ark: `temperature` only 1 is allowed for this model"),
-	// at its coding plan and — an Ark host being an Ark host — wherever
-	// else its Kimi models are served.
-	t.Run("volcengine's coding plan drops the fields", func(t *testing.T) {
-		got := post(t, "/v1/chat/completions", `{"model":"volc/kimi-k3.1-pro","messages":[{"role":"user","content":"hi"}],"temperature":0.6,"top_p":0.95}`)
-		if got.host != "ark.cn-beijing.volces.com" {
-			t.Fatalf("the request went to %s", got.host)
-		}
-		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
-			t.Errorf("Ark was sent the sampling fields: %s", got.body)
-		}
-	})
-	t.Run("volcengine's anthropic endpoint drops the fields", func(t *testing.T) {
-		got := post(t, "/v1/messages", `{"model":"volc/kimi-k3.1-pro","messages":[{"role":"user","content":"hi"}],"temperature":0.6,"top_p":0.95,"max_tokens":5}`)
-		if got.host != "ark.cn-beijing.volces.com" {
-			t.Fatalf("the request went to %s", got.host)
-		}
-		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
-			t.Errorf("Ark was sent the sampling fields: %s", got.body)
-		}
-	})
-	t.Run("volcengine keeps the fields for a model its server doesn't lock", func(t *testing.T) {
-		got := post(t, "/v1/chat/completions", `{"model":"volc/doubao-seed-2.1-pro","messages":[{"role":"user","content":"hi"}],"temperature":0.6,"top_p":0.95}`)
-		if !strings.Contains(got.body, `"temperature":0.6`) {
-			t.Errorf("doubao was not sent its temperature: %s", got.body)
-		}
-	})
-	t.Run("a provider added by hand on an Ark host drops the fields", func(t *testing.T) {
-		got := post(t, "/v1/chat/completions", `{"model":"arkpay/kimi-k3","messages":[{"role":"user","content":"hi"}],"temperature":0.6,"top_p":0.95}`)
-		if got.host != "ark.ap-southeast.volces.com" {
-			t.Fatalf("the request went to %s", got.host)
-		}
-		if gjson.Get(got.body, "temperature").Exists() || gjson.Get(got.body, "top_p").Exists() {
-			t.Errorf("Ark was sent the sampling fields: %s", got.body)
 		}
 	})
 	t.Run("another provider is sent the body as it was", func(t *testing.T) {

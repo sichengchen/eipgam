@@ -7,14 +7,9 @@ package provider
 // 2026-03-22, signed TC3-HMAC-SHA256 with the account's API key, a
 // SecretId and SecretKey (AccessKeyID, SecretAccessKey), never with the
 // plan's own sk- key. The plan a provider is on is its endpoint's: /plan
-// on tokenhub.tencentmaas.com is a Token Plan in Guangzhou, on
-// tokenhub-intl.tencentmaas.com 企业版 in Singapore. Guangzhou's is 个人版
-// too, at the same endpoints since Tencent moved it there from
-// api.lkeap.cloud.tencent.com (ysm119, 11-02), and the key alone tells
-// which: 个人版 has no API for its usage, only the console. So a provider
-// there is asked for the access key, but given none it has no card
-// saying so, which a personal plan would show for nothing; in Singapore,
-// where 企业版 alone is sold, it has. TokenHub's pay as you go has no
+// on tokenhub-intl.tencentmaas.com is 企业版 in Singapore, the one region
+// magpie lists (TokenHub's China host is left out). A provider there given
+// no access key has a card that says so. TokenHub's pay as you go has no
 // plan and no card.
 //
 // The request is signed as Tencent's signing doc (api/213/30654) says:
@@ -46,10 +41,7 @@ const (
 	tcAPIService  = "tokenhub"
 	tcContentType = "application/json; charset=utf-8"
 	tcPlanName    = "Token Plan Enterprise"
-	// tcSharedRegion is the cloud API region whose /plan endpoints serve
-	// Token Plan 个人版 as well as 企业版
-	tcSharedRegion = "ap-guangzhou"
-	tcKeyHint      = "check the SecretId and SecretKey in the provider's editor (Tencent Cloud console → Access management → API keys), and that the key may read TokenHub (CAM)"
+	tcKeyHint     = "check the SecretId and SecretKey in the provider's editor (Tencent Cloud console → Access management → API keys), and that the key may read TokenHub (CAM)"
 )
 
 // TakesTencentAccessKey says p is on Tencent Cloud's Token Plan 企业版 (at
@@ -61,12 +53,10 @@ func TakesTencentAccessKey(p Provider) bool {
 }
 
 // AccessKeyVendor is whose account access key p's plan is read with:
-// "volcengine" (Ark's Coding and Agent Plans), "tencent" (Token Plan
-// 企业版), "alibaba" (Token Plan on aliyuncs.com), or "" for none.
+// "tencent" (Token Plan 企业版), "alibaba" (Token Plan on aliyuncs.com),
+// or "" for none.
 func AccessKeyVendor(p Provider) string {
 	switch {
-	case TakesVolcAccessKey(p):
-		return "volcengine"
 	case TakesTencentAccessKey(p):
 		return "tencent"
 	case TakesAlibabaAccessKey(p):
@@ -89,15 +79,15 @@ func AsksAccessKey(p Provider) string {
 }
 
 // tencentPlanRegion is the cloud API region of the enterprise plan p's
-// endpoint is on: ap-guangzhou for tokenhub.tencentmaas.com/plan (which
-// is 个人版's too), ap-singapore for tokenhub-intl.tencentmaas.com/plan;
-// ok false for TokenHub's pay as you go or another vendor.
+// endpoint is on: ap-singapore for tokenhub-intl.tencentmaas.com/plan;
+// ok false for TokenHub's pay as you go, its China host or another
+// vendor.
 func tencentPlanRegion(p Provider) (string, bool) {
 	if p.Account != nil {
 		return "", false
 	}
 	for _, base := range []string{p.Chat, p.Responses, p.Anthropic} {
-		// both hosts below hold it: every other base, asked for each
+		// the host below holds it: every other base, asked for each
 		// provider on each Providers page, isn't parsed (ToLower makes
 		// no copy of a base already lower-case)
 		if !strings.Contains(strings.ToLower(base), "tencentmaas.com") {
@@ -107,10 +97,7 @@ func tencentPlanRegion(p Provider) (string, bool) {
 		if err != nil || !strings.HasPrefix(strings.TrimSuffix(u.Path, "/")+"/", "/plan/") {
 			continue
 		}
-		switch strings.ToLower(u.Hostname()) {
-		case "tokenhub.tencentmaas.com":
-			return "ap-guangzhou", true
-		case "tokenhub-intl.tencentmaas.com":
+		if strings.EqualFold(u.Hostname(), "tokenhub-intl.tencentmaas.com") {
 			return "ap-singapore", true
 		}
 	}
@@ -173,7 +160,7 @@ func tencentPlanQuotas(ctx context.Context) []SubscriptionQuota {
 		out = append(out, qs...)
 	}
 	for _, j := range keyless {
-		if keyed[j.region] || seen["none "+j.region] || j.region == tcSharedRegion || !wantsCard(ctx, j.p.ID, "") {
+		if keyed[j.region] || seen["none "+j.region] || !wantsCard(ctx, j.p.ID, "") {
 			continue
 		}
 		seen["none "+j.region] = true
@@ -318,11 +305,11 @@ func (t tencentPlan) window(now time.Time) (QuotaWindow, bool) {
 	if pk == nil {
 		return QuotaWindow{}, false
 	}
-	limit, ok := volcNum(pk.CycleQuota)
+	limit, ok := jsonNumber(pk.CycleQuota)
 	if !ok || limit <= 0 {
-		limit, ok = volcNum(pk.TotalQuota)
+		limit, ok = jsonNumber(pk.TotalQuota)
 	}
-	used, uok := volcNum(pk.TotalUsed)
+	used, uok := jsonNumber(pk.TotalUsed)
 	if !ok || !uok || limit <= 0 {
 		return QuotaWindow{}, false
 	}
@@ -343,7 +330,7 @@ func (t tencentPlan) window(now time.Time) (QuotaWindow, bool) {
 		// the package's start and the cycle it is in: the cycle ends that
 		// many months on, and never after the package does
 		start, err := time.Parse(time.RFC3339, strings.TrimSpace(pk.StartTime))
-		n, _ := volcNum(pk.CurrentCycle)
+		n, _ := jsonNumber(pk.CurrentCycle)
 		if err == nil && (pk.CycleUnit == "" || strings.EqualFold(pk.CycleUnit, "month")) {
 			end := start.AddDate(0, max(int(n), 1), 0)
 			for !end.After(now) && n < 1200 {
@@ -373,14 +360,14 @@ func tc3Sign(secretID, secretKey, service, host, action string, payload []byte, 
 			"host:" + host + "\n" +
 			"x-tc-action:" + strings.ToLower(action) + "\n",
 		signed,
-		volcHex(payload),
+		sha256Hex(payload),
 	}, "\n")
 	scope := date + "/" + service + "/tc3_request"
-	toSign := strings.Join([]string{"TC3-HMAC-SHA256", strconv.FormatInt(ts.Unix(), 10), scope, volcHex([]byte(canonical))}, "\n")
-	key := volcMAC([]byte("TC3"+secretKey), date)
-	key = volcMAC(key, service)
-	key = volcMAC(key, "tc3_request")
-	sig := hex.EncodeToString(volcMAC(key, toSign))
+	toSign := strings.Join([]string{"TC3-HMAC-SHA256", strconv.FormatInt(ts.Unix(), 10), scope, sha256Hex([]byte(canonical))}, "\n")
+	key := hmacSHA256([]byte("TC3"+secretKey), date)
+	key = hmacSHA256(key, service)
+	key = hmacSHA256(key, "tc3_request")
+	sig := hex.EncodeToString(hmacSHA256(key, toSign))
 	return "TC3-HMAC-SHA256 Credential=" + secretID + "/" + scope + ", SignedHeaders=" + signed + ", Signature=" + sig
 }
 
@@ -429,7 +416,7 @@ func tencentAPICall(ctx context.Context, secretID, secretKey, region, action str
 	case res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden:
 		return nil, fmt.Errorf("Tencent Cloud %s: %s; %s", action, res.Status, tcKeyHint)
 	case res.StatusCode >= 300:
-		return nil, fmt.Errorf("Tencent Cloud %s: %s: %s", action, res.Status, volcHead(raw))
+		return nil, fmt.Errorf("Tencent Cloud %s: %s: %s", action, res.Status, replyHead(raw))
 	}
 	return raw, nil
 }

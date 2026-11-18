@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -409,24 +408,6 @@ func (s *Server) askSearchAPI(ctx context.Context, a provider.SearchAPI, query s
 			"contents": map[string]any{"text": map[string]any{"maxCharacters": pageText}}})
 	case "firecrawl":
 		post("/v2/search", map[string]any{"query": query, "limit": n})
-	case "deepseek":
-		// DeepSeek's Search API takes a query of 1 to 128 characters
-		// (api-docs.deepseek.com/guides/search); its page text is its
-		// summary, so need_content is left false
-		post("/v1/tools/search", map[string]any{"query": firstRunes(query, deepseekQueryMax), "count": n})
-	case "volcengine":
-		// Doubao Search Custom (volcengine.com/docs/87772/2272953): a
-		// query of 1 to 100 characters, web pages only, and only those
-		// with a URL (NeedUrl leaves out its 火山如意 cards, which have none)
-		post("/search_api/web_search", map[string]any{"Query": firstRunes(query, volcQueryMax), "SearchType": "web",
-			"Count": n, "Filter": map[string]any{"NeedUrl": true}})
-	case "wsa":
-		// Tencent Cloud's Yuanbao Search by its service API key
-		// (cloud.tencent.com/document/product/1806/130615): Cnt is one of
-		// 10/20/30/40/50 (cloud.tencent.com/document/api/1806/121811), and
-		// a smaller one is turned away, so the fewest that covers n, cut
-		// to n below
-		post("/SearchPro", map[string]any{"Query": query, "Cnt": wsaCntFor(n)})
 	case "tinyfish":
 		// TinyFish's Search API (docs.tinyfish.ai/search-api/reference): a
 		// GET at its root with the query; it takes no count, answers a
@@ -495,21 +476,8 @@ func (s *Server) askSearchAPI(ctx context.Context, a provider.SearchAPI, query s
 		return nil, fmt.Errorf("%s: it sends the search on to %s, which isn't given its key; set that address instead", res.Status, res.Header.Get("Location"))
 	}
 	status := res.StatusCode
-	var volcMsg string
-	switch a.Vendor {
-	case "volcengine":
-		// its error is in ResponseMetadata.Error, a code beside the
-		// status, and may come with a 200
-		status, volcMsg = volcSearchError(b, status)
-	case "wsa":
-		// Tencent Cloud's is in Response.Error, its HTTP status 200
-		status, volcMsg = wsaSearchError(b, status)
-	}
 	if status >= 300 {
 		msg := provider.APIError(b, res.Status)
-		if volcMsg != "" {
-			msg = volcMsg
-		}
 		if a.Vendor == "you" {
 			// You.com's error is a code ("payment_required"), its message
 			// beside it the words
@@ -599,10 +567,6 @@ func readSearchAPI(vendor string, b []byte) ([]foundPage, error) {
 	switch vendor {
 	case "you":
 		return readYouSearch(b)
-	case "volcengine":
-		return readVolcSearch(b)
-	case "wsa":
-		return readWSASearch(b)
 	}
 	type result struct {
 		Title       string `json:"title"`
@@ -611,12 +575,11 @@ func readSearchAPI(vendor string, b []byte) ([]foundPage, error) {
 		Description string `json:"description"`
 		Text        string `json:"text"`
 		Markdown    string `json:"markdown"`
-		Summary     string `json:"summary"` // deepseek: its longer text for a model
-		Snippet     string `json:"snippet"` // deepseek: its short one; tinyfish's only text
-		Date        string `json:"date"`    // deepseek: RFC 3339, or null; tinyfish: news and some web pages
+		Snippet     string `json:"snippet"` // tinyfish's only text
+		Date        string `json:"date"`    // tinyfish: news and some web pages
 	}
 	var out struct {
-		Results []result `json:"results"` // tavily, exa, searxng, deepseek, tinyfish
+		Results []result `json:"results"` // tavily, exa, searxng, tinyfish
 		Web     struct {
 			Results []result `json:"results"`
 		} `json:"web"` // brave
@@ -645,7 +608,7 @@ func readSearchAPI(vendor string, b []byte) ([]foundPage, error) {
 			continue
 		}
 		text := r.Content
-		for _, t := range []string{r.Summary, r.Text, r.Description, r.Markdown, r.Snippet} {
+		for _, t := range []string{r.Text, r.Description, r.Markdown, r.Snippet} {
 			if text == "" {
 				text = t
 			}
@@ -655,175 +618,6 @@ func readSearchAPI(vendor string, b []byte) ([]foundPage, error) {
 			title = r.URL
 		}
 		pages = append(pages, foundPage{Title: title, URL: r.URL, Text: clipText(searchPlain(text), pageText), Age: r.Date})
-	}
-	return pages, nil
-}
-
-// deepseekQueryMax is the most characters DeepSeek's Search API takes in a
-// query; a longer one is turned away with 400.
-const deepseekQueryMax = 128
-
-// volcQueryMax is the most characters Doubao Search takes in a query.
-const volcQueryMax = 100
-
-// volcSearchError is the status a Doubao Search reply stands for, and its
-// error's words: its ResponseMetadata.Error, read by its code, as a key
-// turned away (403), out of credit (402) or rate limited (429), or as
-// the status it came with; a reply with no error is its own status.
-func volcSearchError(b []byte, status int) (int, string) {
-	var out struct {
-		ResponseMetadata struct {
-			Error *struct {
-				CodeN   int
-				Code    string
-				Message string
-			}
-		}
-	}
-	if json.Unmarshal(b, &out) != nil || out.ResponseMetadata.Error == nil {
-		return status, ""
-	}
-	e := out.ResponseMetadata.Error
-	code := e.CodeN
-	if code == 0 {
-		code, _ = strconv.Atoi(e.Code)
-	}
-	msg := strings.TrimSpace(fmt.Sprintf("%d %s", code, e.Message))
-	switch code {
-	case 10401, 10403, 10409:
-		// a key it doesn't know, a service not opened for it, a plan's
-		// key that can't search the web this way
-		return 403, msg
-	case 10406, 10408, 10410, 10412:
-		// the free searches spent and none paid for, no plan, a plan
-		// spent
-		return 402, msg
-	case 700429:
-		return 429, msg
-	}
-	if status < 300 {
-		status = 502
-	}
-	return status, msg
-}
-
-// readVolcSearch reads Doubao Search's reply: its pages under
-// Result.WebResults, each with a Summary (what its docs give a model:
-// the page's text about the query) and a short Snippet.
-func readVolcSearch(b []byte) ([]foundPage, error) {
-	type hit struct {
-		Title, Url, Summary, Snippet, PublishTime string
-	}
-	var out struct {
-		Result *struct {
-			WebResults []hit
-		}
-	}
-	if err := json.Unmarshal(b, &out); err != nil {
-		return nil, err
-	}
-	if out.Result == nil {
-		return nil, errors.New("no Result in it")
-	}
-	var pages []foundPage
-	for _, h := range out.Result.WebResults {
-		if h.Url == "" {
-			continue
-		}
-		text := h.Summary
-		if strings.TrimSpace(text) == "" {
-			text = h.Snippet
-		}
-		title := searchPlain(h.Title)
-		if title == "" {
-			title = h.Url
-		}
-		age := h.PublishTime
-		if strings.HasPrefix(age, "1970-01-01") {
-			// its time for a page it has none for
-			age = ""
-		}
-		pages = append(pages, foundPage{Title: title, URL: h.Url, Text: clipText(searchPlain(text), pageText), Age: age})
-	}
-	return pages, nil
-}
-
-// wsaCntFor is the Cnt Yuanbao Search is asked for to find n pages: the
-// fewest of the 10/20/30/40/50 it takes that covers n.
-func wsaCntFor(n int) int { return min(max((n+9)/10*10, 10), 50) }
-
-// wsaSearchError is the status a Yuanbao Search (Tencent Cloud) reply
-// stands for, and its error's words. Tencent Cloud answers 200 whenever
-// the request was handled (cloud.tencent.com/document/api/1806/121818),
-// its error in Response.Error {Code, Message}, so the code decides: one
-// about the key or the service not opened for it is a key turned away
-// (403), one about an account in arrears (ResourceUnavailable, "请检查账号
-// 是否欠费") or a spent quota out of credit (402), a frequency limit
-// rate limited (429). Any other code is a plain error.
-func wsaSearchError(b []byte, status int) (int, string) {
-	var out struct {
-		Response struct {
-			Error *struct{ Code, Message string }
-		}
-	}
-	if json.Unmarshal(b, &out) != nil || out.Response.Error == nil || out.Response.Error.Code == "" {
-		return status, ""
-	}
-	e := out.Response.Error
-	msg := strings.TrimSpace(e.Code + " " + e.Message)
-	code, _, _ := strings.Cut(e.Code, ".")
-	switch code {
-	case "AuthFailure", "UnauthorizedOperation", "ResourceNotFound":
-		// a key it doesn't take ("请检查服务密钥 API KEY 是否正确"), or
-		// the service not opened ("用户资源未开通")
-		return 403, msg
-	case "ResourceUnavailable", "LimitExceeded", "ResourceInsufficient":
-		return 402, msg
-	case "RequestLimitExceeded":
-		return 429, msg
-	}
-	if status < 300 {
-		status = 502
-	}
-	return status, msg
-}
-
-// readWSASearch reads Yuanbao Search's reply: Response.Pages, each page
-// a JSON object in a string, with its title, url, date, passage (its
-// standard summary, in every edition) and content (a summary for the
-// query, not in its 极速版).
-func readWSASearch(b []byte) ([]foundPage, error) {
-	var out struct {
-		Response *struct {
-			Pages []string
-		}
-	}
-	if err := json.Unmarshal(b, &out); err != nil {
-		return nil, err
-	}
-	if out.Response == nil || out.Response.Pages == nil {
-		return nil, errors.New("no Response.Pages in it")
-	}
-	var pages []foundPage
-	for _, s := range out.Response.Pages {
-		var h struct {
-			Title, URL, Date, Passage, Content string
-		}
-		if json.Unmarshal([]byte(s), &h) != nil || h.URL == "" {
-			continue
-		}
-		text := h.Passage
-		if strings.TrimSpace(searchPlain(text)) == "" || searchPlain(text) == searchPlain(h.Title) {
-			// a passage that is only its title says less than its content
-			if c := searchPlain(h.Content); c != "" {
-				text = h.Content
-			}
-		}
-		title := searchPlain(h.Title)
-		if title == "" {
-			title = h.URL
-		}
-		pages = append(pages, foundPage{Title: title, URL: h.URL, Text: clipText(searchPlain(text), pageText), Age: h.Date})
 	}
 	return pages, nil
 }

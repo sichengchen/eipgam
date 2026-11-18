@@ -14,7 +14,7 @@ func TestOtherVendorsBasesAreNotParsed(t *testing.T) {
 		t.Errorf("openCodeGateway of another vendor's base allocated %v times a call", n)
 	}
 	// and still what they are about, whatever its case
-	if r, ok := tencentPlanRegion(Provider{Chat: "https://TokenHub.TencentMaaS.com/plan/v3"}); !ok || r != "ap-guangzhou" {
+	if r, ok := tencentPlanRegion(Provider{Chat: "https://TokenHub-Intl.TencentMaaS.com/plan/v3"}); !ok || r != "ap-singapore" {
 		t.Errorf("Tencent's plan base: %q %v", r, ok)
 	}
 	if g := openCodeGateway("https://OpenCode.ai/zen/go/v1"); g != "go" {

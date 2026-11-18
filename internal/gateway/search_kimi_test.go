@@ -24,7 +24,7 @@ func TestKimiCodeSearchAddress(t *testing.T) {
 	}{
 		{provider.Provider{Key: "k", Chat: "https://api.kimi.com/coding/v1"}, "https://api.kimi.com/coding/v1/search"},
 		{provider.Provider{Key: "k", Anthropic: "https://api.kimi.ai/coding"}, "https://api.kimi.ai/coding/v1/search"},
-		{provider.Provider{Key: "k", Preset: "kimi-code-cn", Chat: "http://127.0.0.1:9/coding/v1"}, "http://127.0.0.1:9/coding/v1/search"},
+		{provider.Provider{Key: "k", Preset: "kimi-code", Chat: "http://127.0.0.1:9/coding/v1"}, "http://127.0.0.1:9/coding/v1/search"},
 		{provider.Provider{Chat: "https://api.kimi.com/coding/v1"}, ""}, // no key
 		{provider.Provider{Key: "k", Chat: "https://api.moonshot.cn/v1"}, ""},
 		{provider.Provider{Key: "k", Chat: "https://api.kimi.com/v1"}, ""},
@@ -120,7 +120,7 @@ func TestKimiCodePlanSearchesForItsModels(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	setHome(t, t.TempDir()) // no signed-in agent searches
 	kimi := newKimiPlan(t)
-	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi",
+	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi",
 		Chat: kimi.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +207,7 @@ func TestKimiCodePlanNamedToSearch(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	setHome(t, t.TempDir())
 	kimi := newKimiPlan(t)
-	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code-cn", Key: "sk-kimi",
+	if err := provider.Save(provider.Provider{ID: "kimi", Name: "Kimi Code", Preset: "kimi-code", Key: "sk-kimi",
 		Chat: kimi.URL + "/coding/v1", Models: []string{"kimi-for-coding"}}); err != nil {
 		t.Fatal(err)
 	}

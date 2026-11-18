@@ -656,8 +656,7 @@ type drawing struct {
 	Markup *picture
 	// Extra are the request's fields magpie doesn't read, which a
 	// vendor's own images API that takes them is sent as they came
-	// (Ark's sequential_image_generation, optimize_prompt_options,
-	// watermark…; drawingRead). Form: they came in a multipart form, as
+	// (MiniMax's; drawingRead). Form: they came in a multipart form, as
 	// text.
 	Extra map[string]any
 	Form  bool
@@ -1077,9 +1076,7 @@ func readDrawing(r *http.Request) (drawing, error) {
 		return d, errors.New("give a mask or a markup layer, not both: an edit takes one")
 	}
 	d.Model = strings.TrimSpace(d.Model)
-	// Ark's layer_decomposition splits the image it is given into layers,
-	// and takes no prompt
-	if strings.TrimSpace(d.Prompt) == "" && (d.Extra["layer_decomposition"] == nil || len(d.Images) == 0) {
+	if strings.TrimSpace(d.Prompt) == "" {
 		return d, errors.New("say what to draw in prompt")
 	}
 	if d.N <= 0 {
@@ -1641,12 +1638,6 @@ func errorSaid(b []byte) string {
 func (s *Server) drawImages(ctx context.Context, p provider.Provider, model string, d drawing) (drawn, int, error) {
 	if isOpenRouter(p) {
 		return s.drawOpenRouterImages(ctx, p, model, d)
-	}
-	if isModelScope(p) {
-		return s.drawModelScope(ctx, p, model, d)
-	}
-	if isArk(p) {
-		return s.drawArk(ctx, p, model, d)
 	}
 	if dashScopeDraws(p, model) {
 		return s.drawDashScope(ctx, p, model, d)

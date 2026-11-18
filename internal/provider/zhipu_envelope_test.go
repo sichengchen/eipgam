@@ -72,16 +72,16 @@ func (z *zhipuRefuses) RoundTrip(r *http.Request) (*http.Response, error) {
 // zhipuCodingPlan is the zhipu preset on its Coding Plan endpoints.
 func zhipuCodingPlan(t *testing.T, key string) Provider {
 	t.Helper()
-	p, err := FromPreset("zhipu")
+	p, err := FromPreset("zai")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, r := range Preset("zhipu").Regions {
+	for _, r := range Preset("zai").Regions {
 		if r.ID == "coding" {
 			p.Chat, p.Responses, p.Anthropic = r.Chat, r.Responses, r.Anthropic
 		}
 	}
-	if p.Responses != "https://open.bigmodel.cn/api/v1" {
+	if p.Responses != "https://api.z.ai/api/v1" {
 		t.Fatalf("coding plan's Responses: %q", p.Responses)
 	}
 	p.ID, p.Name, p.Key, p.Models = "glm", "GLM", key, []string{"glm-5.1"}
@@ -191,7 +191,7 @@ func TestZhipuRefusedKeyCard(t *testing.T) {
 		t.Fatalf("coding plan's quota source: %+v %v", src, ok)
 	}
 	_, _, _, err := planKeyWindows(context.Background(), Provider{ID: "glm"}, src, "expired")
-	if err == nil || !strings.HasPrefix(err.Error(), "Zhipu didn't take this key (身份验证失败。)") || !strings.Contains(err.Error(), "open.bigmodel.cn/usercenter/proj-mgmt/apikeys") {
+	if err == nil || !strings.HasPrefix(err.Error(), "Z.ai didn't take this key (身份验证失败。)") || !strings.Contains(err.Error(), "z.ai/manage-apikey/apikey-list") {
 		t.Errorf("refused key's card: %v", err)
 	}
 	if len(fake.asked) != 1 {

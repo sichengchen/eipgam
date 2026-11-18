@@ -1594,7 +1594,7 @@ func buildResponses(r *Request, model, host string, rejectTemp bool) []byte {
 	var include []string
 	for _, v := range r.Include {
 		if v == "" || slices.Contains(include, v) || (v == "reasoning.encrypted_content" && out["reasoning"] == nil) ||
-			v == outputReplay && host != "chatgpt.com" && host != "api.openai.com" || !includeTaken(host, v) {
+			v == outputReplay && host != "chatgpt.com" && host != "api.openai.com" {
 			continue
 		}
 		include = append(include, v)
@@ -1610,9 +1610,8 @@ func buildResponses(r *Request, model, host string, rejectTemp bool) []byte {
 		if r.WebSearch {
 			tools = append(tools, map[string]any{"type": "web_search"})
 			// the pages it found, which a client of another protocol is
-			// told of (OpenAI's option; xAI's API isn't known to take it,
-			// and Ark's refuses it, arkIncludes)
-			if host != "api.x.ai" && includeTaken(host, "web_search_call.action.sources") && !slices.Contains(include, "web_search_call.action.sources") {
+			// told of (OpenAI's option; xAI's API isn't known to take it)
+			if host != "api.x.ai" && !slices.Contains(include, "web_search_call.action.sources") {
 				include = append(include, "web_search_call.action.sources")
 			}
 		}

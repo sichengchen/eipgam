@@ -47,13 +47,4 @@ func TestProviderSystemOne(t *testing.T) {
 	if p, err := provider.Find("decider"); err != nil || !p.DecideOnly() || p.Jev() != "my-decider" {
 		t.Fatalf("saved: %+v %v", p, err)
 	}
-	if w := post("save", `{"preset":"bailian-decision","key":"sk-2","new":true}`); w.Code == 200 {
-		t.Fatalf("Bailian saved with no workspace: %s", w.Body)
-	}
-	if w := post("save", `{"preset":"bailian-decision","key":"sk-2","decide":"https://ws-9.cn-beijing.maas.aliyuncs.com/compatible-mode/v1","new":true}`); w.Code != 200 {
-		t.Fatalf("Bailian: %d %s", w.Code, w.Body)
-	}
-	if p, err := provider.Find("bailian-decision"); err != nil || p.Decide != "https://ws-9.cn-beijing.maas.aliyuncs.com/compatible-mode/v1" || p.Jev() != provider.BailianDecision {
-		t.Fatalf("Bailian saved: %+v %v", p, err)
-	}
 }

@@ -69,10 +69,10 @@ func TestXiaomiListPrice(t *testing.T) {
 	useXiaomiCatalog(t)
 	oldDefault := "xiaomi-token-plan-cn, xiaomi"
 	for _, c := range []struct{ region, cat string }{
-		{"api", oldDefault}, {"api", "xiaomi"},
-		{"plan-cn", oldDefault}, {"plan-sgp", oldDefault}, {"plan-ams", oldDefault},
+		{"plan-sgp", "xiaomi"},
+		{"plan-sgp", oldDefault}, {"plan-ams", oldDefault},
 		// a catalog the user named: the plan's alone, or the plan's first
-		{"api", "xiaomi-token-plan-sgp"}, {"plan-ams", "openrouter, xiaomi-token-plan-ams, xiaomi"},
+		{"plan-sgp", "xiaomi-token-plan-sgp"}, {"plan-ams", "openrouter, xiaomi-token-plan-ams, xiaomi"},
 	} {
 		p := xiaomiAt(t, c.region, c.cat)
 		for model, want := range map[string]catalog.Price{"mimo-v2.6-flash": mimoFlash, "mimo-v2.6-pro": mimoPro} {
@@ -92,12 +92,12 @@ func TestXiaomiListPrice(t *testing.T) {
 		t.Errorf("relay mimo-v2.6-flash: %+v %v, want its own $0", pr, ok)
 	}
 	// a Xiaomi provider isn't a Kimi Code one: its ids aren't Kimi's
-	if xiaomiAt(t, "plan-cn", oldDefault).kimiCodeMember() {
+	if xiaomiAt(t, "plan-sgp", oldDefault).kimiCodeMember() {
 		t.Error("a Xiaomi Token Plan provider counts as a Kimi Code membership")
 	}
 
 	// what `magpie model price` and the Usage page read: the saved provider's
-	p := xiaomiAt(t, "api", oldDefault)
+	p := xiaomiAt(t, "plan-sgp", oldDefault)
 	if err := Save(p); err != nil {
 		t.Fatal(err)
 	}
@@ -113,10 +113,8 @@ func TestXiaomiListPrice(t *testing.T) {
 func TestXiaomiRegionCatalogs(t *testing.T) {
 	useXiaomiCatalog(t)
 	want := map[string][]string{
-		"plan-cn":  {"xiaomi-token-plan-cn", "xiaomi"},
 		"plan-sgp": {"xiaomi-token-plan-sgp", "xiaomi"},
 		"plan-ams": {"xiaomi-token-plan-ams", "xiaomi"},
-		"api":      {"xiaomi"},
 	}
 	pr := Preset("xiaomi")
 	if len(pr.Regions) != len(want) {
@@ -125,7 +123,7 @@ func TestXiaomiRegionCatalogs(t *testing.T) {
 	for region, cats := range want {
 		// a new provider, the old default saved before this, and one
 		// moved from another region in the editor
-		for _, from := range []string{pr.Catalog, "xiaomi", "xiaomi-token-plan-sgp, xiaomi"} {
+		for _, from := range []string{pr.Catalog, "xiaomi-token-plan-sgp, xiaomi", "xiaomi-token-plan-ams, xiaomi"} {
 			if got := xiaomiAt(t, region, from).Catalogs(); !slices.Equal(got, cats) {
 				t.Errorf("%s saved with %q: catalogs %v, want %v", region, from, got, cats)
 			}
@@ -139,12 +137,12 @@ func TestXiaomiRegionCatalogs(t *testing.T) {
 			t.Errorf("import at %s: catalogs %v, want %v", region, got, cats)
 		}
 	}
-	// the preset's own endpoints are plan-cn's, and so is its catalog
-	if p, _ := FromPreset("xiaomi"); !slices.Equal(p.Catalogs(), want["plan-cn"]) {
+	// the preset's own endpoints are plan-sgp's, and so is its catalog
+	if p, _ := FromPreset("xiaomi"); !slices.Equal(p.Catalogs(), want["plan-sgp"]) {
 		t.Errorf("FromPreset(xiaomi) catalogs %v", p.Catalogs())
 	}
 	// a catalog the user named is theirs, at any region
-	for _, region := range []string{"api", "plan-sgp"} {
+	for _, region := range []string{"plan-ams", "plan-sgp"} {
 		if got := xiaomiAt(t, region, "openrouter, xiaomi").Catalog; got != "openrouter, xiaomi" {
 			t.Errorf("%s: the user's catalog became %q", region, got)
 		}

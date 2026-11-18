@@ -130,7 +130,7 @@ func TestSystemMessageBetweenCallAndResult(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			fresh(t)
 			srv, sent := strictDeepSeek(t)
-			if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Preset: "deepseek", Key: "k", Anthropic: srv.URL, Models: []string{"deepseek-flash"}}); err != nil {
+			if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k", Anthropic: srv.URL, Models: []string{"deepseek-flash"}}); err != nil {
 				t.Fatal(err)
 			}
 			body := `{"model":"deepseek/deepseek-flash","max_tokens":32,"thinking":{"type":"adaptive"},"output_config":{"effort":"max"},"messages":[{"role":"user","content":"list the files"},` +

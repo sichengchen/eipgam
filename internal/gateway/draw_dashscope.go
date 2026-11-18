@@ -1,7 +1,7 @@
 package gateway
 
-// DashScope (Alibaba Cloud Model Studio, Bailian, the Qwen AI platform and
-// Qwen Cloud, pay as you go and Token Plan alike) draws its Qwen-Image and
+// DashScope (Alibaba Cloud Model Studio and Qwen Cloud, pay as you go and
+// Token Plan alike) draws its Qwen-Image and
 // Wan 2.7 image models on its own API, not the OpenAI images API: a POST to
 // <host>/api/v1/services/aigc/multimodal-generation/generation, Bearer the
 // same key, of

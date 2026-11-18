@@ -413,7 +413,7 @@ var failedAsText = map[string]bool{"devin": true, "qoder": true, "qoder-cn": tru
 // /alpha/generate, and Qoder's, which sends it on as Qoder's own client
 // does (uk.jent on Discord; plugin 0.2.42).
 func chatReplaysReasoning(host, model string) bool {
-	return strings.Contains(host, "deepseek") || strings.Contains(strings.ToLower(model), "deepseek") || host == provider.CommandCodePlanID || host == "qoder" || host == "qoder-cn"
+	return strings.Contains(strings.ToLower(model), "deepseek") || host == provider.CommandCodePlanID || host == "qoder" || host == "qoder-cn"
 }
 
 // joinTexts joins text parts once, at their joined size: a long turn
@@ -447,8 +447,7 @@ func buildChat(r *Request, model, host string, rejectTemp bool) []byte {
 	// interleaved thinking): the decoder takes it out as thinking (#1267),
 	// so it goes back in where it came from. A relay serving MiniMax's
 	// models may give the thinking apart and take it back otherwise.
-	// api.minimax.cn is MiniMax China's host beside api.minimaxi.com.
-	inlineThink := strings.HasSuffix(host, "minimax.io") || strings.HasSuffix(host, "minimaxi.com") || strings.HasSuffix(host, "minimax.cn")
+	inlineThink := strings.HasSuffix(host, "minimax.io")
 	// Gemini wants each step's thought signature back on its first call
 	// (#687), and one it can't check for a step it didn't sign
 	gemini := geminiCompat(host, model)
@@ -529,17 +528,14 @@ func buildChat(r *Request, model, host string, rejectTemp bool) []byte {
 				am["tool_calls"] = calls
 			}
 			// a reply cut short and sent back to go on from (Resume) is marked
-			// with the upstream's own prefill mode — DeepSeek's prefix, Kimi's
-			// partial (continuation.go; an upstream without one is never asked
-			// to go on) — and its reasoning goes with it where the upstream
-			// reads reasoning_content back, so the going on picks the thought
-			// up where it was cut
+			// with the upstream's own prefill mode — Kimi's partial
+			// (continuation.go; an upstream without one is never asked to go
+			// on) — and its reasoning goes with it where the upstream reads
+			// reasoning_content back, so the going on picks the thought up
+			// where it was cut
 			if r.Resume && i == len(turns)-1 {
 				mode := chatPrefill(host, model)
-				switch mode {
-				case "prefix":
-					am["prefix"] = true
-				case "partial":
+				if mode == "partial" {
 					am["partial"] = true
 				}
 				if think != "" && mode != "" {

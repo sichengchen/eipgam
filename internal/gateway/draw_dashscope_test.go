@@ -110,7 +110,7 @@ func imageURLs(t *testing.T, raw string) []string {
 // went on to answer with no image magpie reads. It is asked on DashScope's
 // own API, and its image read from output.choices[].message.content[].image.
 func TestDashScopeDrawsOnItsOwnAPI(t *testing.T) {
-	s, d := dashScoped(t, provider.Provider{ID: "qwen", Name: "Qwen Token Plan", Preset: "qwen-token-plan", Models: []string{"qwen3.8-max", "qwen-image-3.0-pro"}})
+	s, d := dashScoped(t, provider.Provider{ID: "qwen", Name: "Qwen Token Plan", Preset: "alibaba-token-plan", Models: []string{"qwen3.8-max", "qwen-image-3.0-pro"}})
 	code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"qwen/qwen-image-3.0-pro","prompt":"一只喜鹊","size":"1024x1024"}`)
 	if code != 200 {
 		t.Fatalf("%d %s (asked %v)", code, raw, d.paths)
@@ -201,7 +201,7 @@ func TestDashScopeEdits(t *testing.T) {
 // DashScope's refusal, and an answer with no image, say DashScope's own
 // words; a ratio is turned away with what to send.
 func TestDashScopeSaysWhy(t *testing.T) {
-	s, d := dashScoped(t, provider.Provider{ID: "qwen", Name: "Qwen Token Plan", Preset: "qwen-token-plan", Models: []string{"qwen3.8-max", "qwen-image-3.0-pro"}})
+	s, d := dashScoped(t, provider.Provider{ID: "qwen", Name: "Qwen Token Plan", Preset: "alibaba-token-plan", Models: []string{"qwen3.8-max", "qwen-image-3.0-pro"}})
 	d.answer, d.status = `{"request_id":"1","code":"InvalidParameter","message":"The size is not match the allowed size"}`, 400
 	code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"qwen/qwen-image-3.0-pro","prompt":"a","size":"9000x9000"}`)
 	if code != 400 || !strings.Contains(raw, "The size is not match the allowed size (InvalidParameter)") {
@@ -222,7 +222,7 @@ func TestDashScopeSaysWhy(t *testing.T) {
 // image models: a relay serving qwen-image, or another Wan model on
 // DashScope, is asked on the images API as before.
 func TestDashScopeDrawsScoped(t *testing.T) {
-	ds := provider.Provider{Preset: "qwen-token-plan", Chat: "https://token-plan.maas.qianwenaiapi.com/compatible-mode/v1"}
+	ds := provider.Provider{Preset: "alibaba-token-plan", Chat: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"}
 	for _, m := range []string{"qwen-image-3.0-pro", "qwen-image-edit-plus", "wan2.7-image", "wan2.7-image-pro"} {
 		if !dashScopeDraws(ds, m) {
 			t.Errorf("%s isn't drawn natively", m)
@@ -235,9 +235,9 @@ func TestDashScopeDrawsScoped(t *testing.T) {
 		t.Error("a relay is drawn on DashScope's API")
 	}
 	for base, want := range map[string]string{
-		"https://token-plan.maas.qianwenaiapi.com/compatible-mode/v1": "https://token-plan.maas.qianwenaiapi.com",
-		"https://dashscope-intl.aliyuncs.com/api/v1":                  "https://dashscope-intl.aliyuncs.com",
-		"https://dashscope.aliyuncs.com":                              "https://dashscope.aliyuncs.com",
+		"https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1": "https://token-plan.ap-southeast-1.maas.aliyuncs.com",
+		"https://dashscope-intl.aliyuncs.com/api/v1":                             "https://dashscope-intl.aliyuncs.com",
+		"https://dashscope.aliyuncs.com":                                         "https://dashscope.aliyuncs.com",
 	} {
 		if got := dashScopeRoot(provider.Provider{Chat: base}); got != want {
 			t.Errorf("root of %s: %s, want %s", base, got, want)

@@ -528,7 +528,7 @@ func TestReadKimiCodeMonthEveryWay(t *testing.T) {
 }
 
 // Every way a Kimi Code key is added shows the month Kimi tells: the
-// China and global presets, a provider of its own at the Anthropic base
+// preset, a provider of its own at the Anthropic base
 // alone, and a key imported from OpenCode's auth.json. Each card is read
 // from /usages on its own host with its own key.
 func TestPlanQuotasKimiCodeMonthEveryRoute(t *testing.T) {
@@ -547,10 +547,9 @@ func TestPlanQuotasKimiCodeMonthEveryRoute(t *testing.T) {
 		"usages":{"limit_5h":{"used_ratio":0.11,"reset_time":"2026-10-29T11:25:00Z"},"limit_month_code":{"used_ratio":0.3,"reset_time":"2026-11-17T00:00:00Z"}}}`
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Header.Get("X-Host") + r.URL.Path + " " + r.Header.Get("Authorization") {
-		case "api.kimi.com/coding/v1/usages Bearer sk-kimi-cn",
-			"api.kimi.ai/coding/v1/usages Bearer sk-kimi-global",
-			"api.kimi.com/coding/v1/usages Bearer sk-kimi-own",
-			"api.kimi.com/coding/v1/usages Bearer sk-kimi-oc":
+		case "api.kimi.ai/coding/v1/usages Bearer sk-kimi-global",
+			"api.kimi.ai/coding/v1/usages Bearer sk-kimi-own",
+			"api.kimi.ai/coding/v1/usages Bearer sk-kimi-oc":
 			w.Write([]byte(month))
 		default:
 			t.Errorf("asked %s%s with %q", r.Header.Get("X-Host"), r.URL.Path, r.Header.Get("Authorization"))
@@ -563,7 +562,7 @@ func TestPlanQuotasKimiCodeMonthEveryRoute(t *testing.T) {
 	t.Cleanup(func() { http.DefaultClient.Transport = old })
 
 	auth := filepath.Join(h, "auth.json")
-	if err := os.WriteFile(auth, []byte(`{"kimi-code-plan-cn":{"type":"api","key":"sk-kimi-oc"}}`), 0o600); err != nil {
+	if err := os.WriteFile(auth, []byte(`{"kimi-code-plan-global":{"type":"api","key":"sk-kimi-oc"}}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	items, err := readOpenCodeAuth(auth)
@@ -573,9 +572,8 @@ func TestPlanQuotasKimiCodeMonthEveryRoute(t *testing.T) {
 	oc := items[0].Provider
 	oc.ID = "kimi-oc"
 	for _, p := range []Provider{
-		FromPresetKey(t, "kimi-code-cn", "sk-kimi-cn"),
 		FromPresetKey(t, "kimi-code", "sk-kimi-global"),
-		{ID: "kimi-own", Name: "My Kimi", Anthropic: "https://api.kimi.com/coding/", Key: "sk-kimi-own"},
+		{ID: "kimi-own", Name: "My Kimi", Anthropic: "https://api.kimi.ai/coding/", Key: "sk-kimi-own"},
 		oc,
 	} {
 		if err := Save(p); err != nil {
@@ -586,7 +584,7 @@ func TestPlanQuotasKimiCodeMonthEveryRoute(t *testing.T) {
 	for _, q := range PlanQuotas(context.Background()) {
 		got[q.Provider] = q
 	}
-	for _, id := range []string{"kimi-code-cn", "kimi-code", "kimi-own", "kimi-oc"} {
+	for _, id := range []string{"kimi-code", "kimi-own", "kimi-oc"} {
 		q := got[id]
 		if len(q.Windows) != 2 || q.Windows[0].Name != "5 hours" || q.Windows[1].Name != "Month" ||
 			math.Abs(q.Windows[1].Used-30) > 1e-9 || q.Windows[1].ResetsAt == nil {

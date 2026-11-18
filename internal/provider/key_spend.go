@@ -18,12 +18,13 @@ package provider
 
 import (
 	"fmt"
-	"github.com/yetone/magpie/internal/dayzone"
-	"github.com/yetone/magpie/internal/settings"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/yetone/magpie/internal/dayzone"
+	"github.com/yetone/magpie/internal/settings"
 )
 
 // SpendCap is a key's spend cap: USD over Period, which is SpendDay,
