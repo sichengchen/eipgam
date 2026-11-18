@@ -164,8 +164,6 @@ var zh = map[string]string{
 	"vendor":                            "厂商",
 	"relay":                             "中转",
 	"local":                             "本地",
-	"partner":                           "合作伙伴",
-	"partner (sponsor)":                 "合作伙伴（赞助商）",
 	"your own · %s API, at its address": "自定义 · %s API，在它的地址上",
 	"a vendor magpie knows, or custom for your own API": "magpie 认识的厂商，或自定义你自己的 API",
 	"custom":                "自定义",

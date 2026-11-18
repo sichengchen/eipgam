@@ -146,7 +146,7 @@
 
     <div class="table-wrap"><table>
       <tr><th>What</th><th>Where to</th><th>Off by default?</th><th>How to stop it</th></tr>
-      <tr><td><a href="#site">Update checks</a>, release notes, the partner list, icons</td><td><code>usemagpie.ai</code></td><td>On</td><td><code>noAutoUpdate</code> for update checks; the rest are needed by the app</td></tr>
+      <tr><td><a href="#site">Update checks</a>, release notes, icons</td><td><code>usemagpie.ai</code></td><td>On</td><td><code>noAutoUpdate</code> for update checks; the rest are needed by the app</td></tr>
       <tr><td><a href="#lists">Model catalog and exchange rate</a></td><td><code>models.dev</code>, <code>open.er-api.com</code></td><td>On</td><td>Not switchable; nothing of yours is sent</td></tr>
       <tr><td><a href="#otel">OTLP export</a></td><td>A collector you name</td><td>Off</td><td>Leave it off</td></tr>
     </table></div>
@@ -161,8 +161,6 @@
     <ul>
       <li><code>/api/latest</code>: the update feed, every 6 hours by default, with <code>?lang=</code> for the notes in your language, and <code>?channel=stable</code> or <code>?channel=daily</code> when <span class="ui">Settings</span> → <span class="ui">About</span> → <span class="ui">Update channel</span> is Stable or Daily; a fresh install asks <code>?channel=stable</code> once too, to stay on Stable when it is Stable’s version. Neither says who you are. <code>/api/notes</code> gives What’s new after an update. <span class="ui">Settings</span> → <span class="ui">About</span> → <span class="ui">Automatic updates</span> off, or <code>"noAutoUpdate": true</code> in <code>settings.json</code>, stops magpie asking by itself; it then asks only when you check, in Settings or with <code>magpie update</code>.</li>
       <li><code>/files/&lt;version&gt;/&lt;file&gt;</code>: the release files an update and the installer download, served from Cloudflare R2. A file the site doesn’t hold is sent on to github.com. Nothing is counted.</li>
-      <li><code>/api/partners</code>: the add sheet’s partner list, every hour. While a partner is listed, the site counts one fetch in ten as a <code>magpie partners fetch</code> event, with the country Cloudflare gives.</li>
-      <li><code>/go/&lt;partner&gt;/site</code> and <code>/go/&lt;partner&gt;/keys</code>: a partner’s website and key-page links, opened in your browser, are counted (the partner, which link, a region, a country) as <code>magpie partner go</code> before you are sent on. Neither event carries an id from the app, your address or an account.</li>
       <li><code>/api/plugins/stats</code>: Discover’s counts of how many use and like each plugin, and the Library market’s of how many use each MCP server, at most once an hour. It carries no id. The counts come from other magpies; this one sends no report and no likes. The code is <a href="https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go">internal/stats/plugins.go</a>.</li>
       <li><code>/api/icon?url=…</code>: icons named by a plugin, an import link or the library are fetched through it, so their hosts see Cloudflare’s address, not yours. The worker passes the picture on and counts and keeps nothing.</li>
     </ul>

@@ -272,7 +272,7 @@ The app (its window, the menu bar or tray icon and the panel, however it was ope
 
 ### What does magpie send about me?
 
-Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in the path. magpie sends no telemetry: no count of its users, no id, and nothing about which agents, providers, models or plugins you use. It asks usemagpie.ai for updates (every 6 hours by default, unless automatic updates are off), release notes and the add sheet’s partner list, and Discover reads its public plugin counts there; none of these requests carries an id or an account. A partner's website and key-page links go through `usemagpie.ai/go/…`, which counts the click (the partner, which link, and a country) before sending you on, and usemagpie.ai counts how many times the partner list is fetched, as any website counts its visits; no id, address or account is kept with them. Icons named by a plugin, an import link or the library are fetched through `usemagpie.ai/api/icon`, so their hosts see Cloudflare's address, not yours; the server only passes the picture on, and counts and keeps nothing. The [Privacy page](https://usemagpie.ai/docs/privacy) lists everything magpie sends by itself, the files it keeps and every switch.
+Your prompts, replies, keys and accounts go only to the providers you use; magpie has no server of its own in the path. magpie sends no telemetry: no count of its users, no id, and nothing about which agents, providers, models or plugins you use. It asks usemagpie.ai for updates (every 6 hours by default, unless automatic updates are off), and release notes, and Discover reads its public plugin counts there; none of these requests carries an id or an account. magpie lists no sponsors or partners, and a vendor's website and key-page links go straight to the vendor, with no referral code. Icons named by a plugin, an import link or the library are fetched through `usemagpie.ai/api/icon`, so their hosts see Cloudflare's address, not yours; the server only passes the picture on, and counts and keeps nothing. The [Privacy page](https://usemagpie.ai/docs/privacy) lists everything magpie sends by itself, the files it keeps and every switch.
 
 ### The agent gets 502 or can’t connect, and nothing shows in magpie’s Routing tab?
 
@@ -12114,7 +12114,7 @@ magpie sends no telemetry. It counts no users, makes no install id, and sends no
 
 | What | Where to | Off by default? | How to stop it |
 | --- | --- | --- | --- |
-| Update checks, release notes, the partner list, icons | `usemagpie.ai` | On | `noAutoUpdate` for update checks; the rest are needed by the app |
+| Update checks, release notes, icons | `usemagpie.ai` | On | `noAutoUpdate` for update checks; the rest are needed by the app |
 | Model catalog and exchange rate | `models.dev`, `open.er-api.com` | On | Not switchable; nothing of yours is sent |
 | OTLP export | A collector you name | Off | Leave it off |
 
@@ -12132,8 +12132,6 @@ magpie asks its own site for a few things, as any app asks its update server. No
 
 - `/api/latest`: the update feed, every 6 hours by default, with `?lang=` for the notes in your language, and `?channel=stable` or `?channel=daily` when Settings → About → Update channel is Stable or Daily; a fresh install asks `?channel=stable` once too, to stay on Stable when it is Stable’s version. Neither says who you are. `/api/notes` gives What’s new after an update. Settings → About → Automatic updates off, or `"noAutoUpdate": true` in `settings.json`, stops magpie asking by itself; it then asks only when you check, in Settings or with `magpie update`.
 - `/files/<version>/<file>`: the release files an update and the installer download, served from Cloudflare R2. A file the site doesn’t hold is sent on to github.com. Nothing is counted.
-- `/api/partners`: the add sheet’s partner list, every hour. While a partner is listed, the site counts one fetch in ten as a `magpie partners fetch` event, with the country Cloudflare gives.
-- `/go/<partner>/site` and `/go/<partner>/keys`: a partner’s website and key-page links, opened in your browser, are counted (the partner, which link, a region, a country) as `magpie partner go` before you are sent on. Neither event carries an id from the app, your address or an account.
 - `/api/plugins/stats`: Discover’s counts of how many use and like each plugin, and the Library market’s of how many use each MCP server, at most once an hour. It carries no id. The counts come from other magpies; this one sends no report and no likes. The code is [internal/stats/plugins.go](https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go).
 - `/api/icon?url=…`: icons named by a plugin, an import link or the library are fetched through it, so their hosts see Cloudflare’s address, not yours. The worker passes the picture on and counts and keeps nothing.
 

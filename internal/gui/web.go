@@ -50,8 +50,8 @@ func (webHost) ChooseFolder(string) (string, error) {
 	return "", errors.New("in the browser magpie can't show a folder picker: type the folder's path")
 }
 
-// openOnHost opens a link that isn't a web page's (the sponsor mailto:,
-// System Settings' Login Items) on this computer, the one magpie runs on.
+// openOnHost opens a link that isn't a web page's (System Settings' Login
+// Items) on this computer, the one magpie runs on.
 // A web page's own https links stay the page's to open. Tests stand in for
 // the system.
 var openOnHost = func(u string) error {

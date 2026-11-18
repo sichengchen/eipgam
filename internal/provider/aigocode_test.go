@@ -16,8 +16,8 @@ func TestAIGoCodePresetTakesAKey(t *testing.T) {
 	if pr == nil {
 		t.Fatal("no aigocode preset")
 	}
-	if pr.Kind != KindRelay || pr.NoKey || pr.Sponsored {
-		t.Errorf("kind %s, noKey %v, sponsored %v: want a relay taking a key, listed as any other", pr.Kind, pr.NoKey, pr.Sponsored)
+	if pr.Kind != KindRelay || pr.NoKey {
+		t.Errorf("kind %s, noKey %v: want a relay taking a key", pr.Kind, pr.NoKey)
 	}
 	if pr.Chat != "https://api.aigocode.dev/v1" || pr.Responses != "https://api.aigocode.dev/v1" || pr.Anthropic != "https://api.aigocode.dev" {
 		t.Errorf("endpoints %q %q %q", pr.Chat, pr.Responses, pr.Anthropic)

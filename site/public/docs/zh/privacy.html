@@ -146,7 +146,7 @@
 
     <div class="table-wrap"><table>
       <tr><th>内容</th><th>发往</th><th>默认</th><th>怎么关</th></tr>
-      <tr><td><a href="#site">更新检查</a>、更新说明、合作伙伴列表、图标</td><td><code>usemagpie.ai</code></td><td>开启</td><td>更新检查用 <code>noAutoUpdate</code>；其余是应用运行所需</td></tr>
+      <tr><td><a href="#site">更新检查</a>、更新说明、图标</td><td><code>usemagpie.ai</code></td><td>开启</td><td>更新检查用 <code>noAutoUpdate</code>；其余是应用运行所需</td></tr>
       <tr><td><a href="#lists">模型目录和汇率</a></td><td><code>models.dev</code>、<code>open.er-api.com</code></td><td>开启</td><td>不可关；不发送任何你的信息</td></tr>
       <tr><td><a href="#otel">OTLP 导出</a></td><td>你指定的收集器</td><td>关闭</td><td>保持关闭即可</td></tr>
     </table></div>
@@ -161,8 +161,6 @@
     <ul>
       <li><code>/api/latest</code>：更新信息，默认每 6 小时一次，带 <code>?lang=</code> 取对应语言的说明；<span class="ui">设置</span> → <span class="ui">关于</span> → <span class="ui">更新渠道</span>选了稳定版或每日版时还带 <code>?channel=stable</code> 或 <code>?channel=daily</code>；新安装的 magpie 也会请求一次 <code>?channel=stable</code>，若自己就是稳定版，便留在稳定版。两者都不含你是谁。<code>/api/notes</code> 在更新后给出“新功能”。关掉 <span class="ui">设置</span> → <span class="ui">关于</span> → <span class="ui">自动更新</span>，或在 <code>settings.json</code> 里写 <code>"noAutoUpdate": true</code>，magpie 就不再自己询问，只在你在设置里检查或运行 <code>magpie update</code> 时才问。</li>
       <li><code>/files/&lt;版本&gt;/&lt;文件&gt;</code>：更新和安装脚本下载的发布文件，由 Cloudflare R2 提供；站点上没有的文件会转到 github.com。不做任何统计。</li>
-      <li><code>/api/partners</code>：添加供应商页的合作伙伴列表，每小时一次。在有合作伙伴上架时，网站把每十次拉取中的一次记为 <code>magpie partners fetch</code> 事件，附 Cloudflare 给出的国家。</li>
-      <li><code>/go/&lt;合作伙伴&gt;/site</code> 和 <code>/go/&lt;合作伙伴&gt;/keys</code>：在浏览器里打开合作伙伴的官网和 Key 页面链接时，先记一次 <code>magpie partner go</code>（哪个合作伙伴、哪个链接、地区、国家），再跳转。这两种事件都不带应用给的 ID，也不带你的 IP 或账号。</li>
       <li><code>/api/plugins/stats</code>：Discover 里每个插件的在用人数和点赞数，以及资源库市场里每个 MCP 服务器的在用人数，最多每小时取一次，不带 ID。这些数字来自别的 magpie；这一个不上报，也不发送点赞。代码见 <a href="https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go">internal/stats/plugins.go</a>。</li>
       <li><code>/api/icon?url=…</code>：插件、导入链接和库里的图标经它获取，图标所在的服务器只看到 Cloudflare 的地址，看不到你的。它只转发图片，不计数也不记录。</li>
     </ul>

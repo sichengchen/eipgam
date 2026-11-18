@@ -521,8 +521,7 @@ type providerJSON struct {
 	// ListError is why a plugin's account has only the plugin's defaults
 	// (provider.ListError): the editor says so under its models
 	ListError string             `json:"listError,omitempty"`
-	Agents    []providerAgent    `json:"agents"` // detected agents, current ones flagged
-	Sponsored bool               `json:"sponsored"`
+	Agents    []providerAgent    `json:"agents"`            // detected agents, current ones flagged
 	KeyList   []provider.KeyInfo `json:"keyList"`           // its keys, in the order requests try them
 	Account   *accountJSON       `json:"account,omitempty"` // a signed-in agent, see provider.Account
 	// Move is where a built-in subscription stands with the community
@@ -716,12 +715,6 @@ type presetJSON struct {
 	// OwnClient: its requests go as a client of the vendor's own
 	// (provider.OwnClient), whatever User-Agent the agent gave
 	OwnClient bool `json:"ownClient,omitempty"`
-	// a partner's tagline by language, and the languages it is listed in
-	Notes map[string]string `json:"notes,omitempty"`
-	Langs []string          `json:"langs,omitempty"`
-	// New: a partner listed since the add sheet last showed the partners,
-	// and not added; the add button marks it
-	New bool `json:"new,omitempty"`
 }
 
 type gatewayJSON struct {
@@ -1029,7 +1022,6 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 		out.Chosen = []string{}
 	}
 	if pr := provider.Preset(p.Preset); pr != nil {
-		out.Sponsored = pr.Sponsored
 		out.Key.Optional = pr.NoKey
 	}
 	out.BalanceToken.Takes, out.BalanceToken.Set = provider.TakesBalanceToken(p), p.BalanceToken != ""
@@ -1539,8 +1531,8 @@ func providersState() providersJSON {
 	// both lists made once at their size: each grown by append was 6 MB of
 	// what forty polls of the Providers page allocated with real accounts
 	s.Providers = make([]providerJSON, 0, len(all))
-	partners, presets := provider.Partners(), provider.Presets()
-	s.Presets = make([]presetJSON, 0, len(partners)+len(presets))
+	presets := provider.Presets()
+	s.Presets = make([]presetJSON, 0, len(presets))
 	for _, p := range all {
 		// a preset is added once any provider is its, whatever its id
 		have[p.ID], have[p.Preset] = true, true
@@ -1559,10 +1551,6 @@ func providersState() providersJSON {
 			info.RemoteUpdate = remoteUpdateNote(p.ID, time.Now())
 		}
 		s.Providers = append(s.Providers, info)
-	}
-	// partners first, as the add sheet lists them
-	for _, pa := range partners {
-		s.Presets = append(s.Presets, presetJSON{PresetDef: pa.PresetDef, Added: have[pa.ID], Notes: pa.Notes, Langs: pa.Langs, New: !have[pa.ID] && !provider.PartnerNoticed(pa.ID), OwnClient: presetOwnClient(pa.PresetDef)})
 	}
 	for _, pr := range presets {
 		bases := provider.Provider{Chat: pr.Chat, Responses: pr.Responses, Anthropic: pr.Anthropic}
@@ -1660,11 +1648,6 @@ var (
 func moveContext(r *http.Request) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.WithoutCancel(r.Context()), 10*time.Minute)
 }
-
-// sponsorMail is where the Add sheet's "Become a sponsor" writes to, the
-// same address and subject as usemagpie.ai's; /api/open opens this one
-// mailto: link and no other
-const sponsorMail = "mailto:yetoneful@gmail.com?subject=Sponsoring%20magpie"
 
 func providerRoutes(mux *http.ServeMux, w Windows) {
 	importAppsRoutes(mux)
@@ -3820,26 +3803,13 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		}
 		rw.WriteHeader(http.StatusNoContent)
 	})
-	// the add sheet says which partners it showed: those are no longer
-	// new (provider.NoticePartners). Nothing is counted or sent.
-	mux.HandleFunc("POST /api/partner", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct {
-			What string
-			IDs  []string
-		}
-		_ = json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&in)
-		if len(in.IDs) <= provider.MaxPartners && in.What == provider.PartnerShown {
-			provider.NoticePartners(in.IDs...)
-		}
-		rw.WriteHeader(http.StatusNoContent)
-	})
 	mux.HandleFunc("POST /api/open", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ URL string }
 		_ = json.NewDecoder(r.Body).Decode(&in)
-		// and System Settings' Login Items, where Open at login is allowed
-		// again: that one pane, not System Settings' scheme at large; and
-		// the Add sheet's "Become a sponsor", that one address, not mailto:
-		if in.URL == sponsorMail || strings.HasPrefix(in.URL, "https://") || strings.HasPrefix(in.URL, "http://") || in.URL == autostart.LoginItemsURL {
+		// a web page, or System Settings' Login Items, where Open at login
+		// is allowed again: that one pane, not System Settings' scheme at
+		// large; no mailto: or any other scheme
+		if strings.HasPrefix(in.URL, "https://") || strings.HasPrefix(in.URL, "http://") || in.URL == autostart.LoginItemsURL {
 			// Open again on a sign-in says why it didn't open (#2043)
 			if err := w.OpenURL(in.URL); err != nil {
 				fail(rw, err)

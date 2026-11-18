@@ -156,7 +156,7 @@ func relayPreset(id string) bool {
 	}
 	for _, d := range presets {
 		if d.ID == id {
-			return d.Kind == KindRelay || d.Kind == KindPartner
+			return d.Kind == KindRelay
 		}
 	}
 	return false

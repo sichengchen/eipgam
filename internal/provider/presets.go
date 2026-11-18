@@ -32,20 +32,14 @@ type PresetDef struct {
 	Decide    string   `json:"decide,omitempty"` // a decision API: the provider only routes (see decide.go)
 	Catalog   string   `json:"catalog,omitempty"`
 	Website   string   `json:"website,omitempty"`
-	SiteHost  string   `json:"siteHost,omitempty"` // a partner's: the host its usemagpie.ai/go Website sends the browser to, which the editor's link reads
 	KeysURL   string   `json:"keysUrl,omitempty"`
-	NoKey     bool     `json:"noKey,omitempty"`     // local servers: a key is optional
-	KeyHint   string   `json:"keyHint,omitempty"`   // the key field's placeholder, when it says more than NoKey's
-	Sponsored bool     `json:"sponsored,omitempty"` // shown first, with a tag
-	Note      string   `json:"note,omitempty"`      // one line under the name
-	Short     string   `json:"short,omitempty"`     // the add sheet's name for it, when Name is long
-	Regions   []Region `json:"regions,omitempty"`   // base-URL choices (a relay's regional endpoints, a vendor's plans)
+	NoKey     bool     `json:"noKey,omitempty"`   // local servers: a key is optional
+	KeyHint   string   `json:"keyHint,omitempty"` // the key field's placeholder, when it says more than NoKey's
+	Note      string   `json:"note,omitempty"`    // one line under the name
+	Short     string   `json:"short,omitempty"`   // the add sheet's name for it, when Name is long
+	Regions   []Region `json:"regions,omitempty"` // base-URL choices (a relay's regional endpoints, a vendor's plans)
 	// RegionLabel names what the Regions choose between, "Region" if unset.
 	RegionLabel string `json:"regionLabel,omitempty"`
-	// SplitAccounts is set on a partner whose regions are China's and
-	// Global's, whose accounts don't work at each other's endpoints (Kimi
-	// Code): its region picker says to pick by the account.
-	SplitAccounts bool `json:"splitAccounts,omitempty"`
 	// KeyPlans: each key may be on a Region of its own (KeyAccount.Plan),
 	// a vendor whose plans and pay as you go are sold on keys of their own
 	// that only their own endpoints take (Volcengine's Coding and Agent
@@ -107,8 +101,7 @@ type Region struct {
 	KeysURL string `json:"keysUrl,omitempty"`
 	// Website, when the region's docs are another page than the preset's,
 	// is where the editor's link goes.
-	Website  string `json:"website,omitempty"`
-	SiteHost string `json:"siteHost,omitempty"` // as PresetDef's
+	Website string `json:"website,omitempty"`
 	// Catalog, for a region whose models another models.dev entry names
 	// than the preset's (Tencent Cloud's pay as you go, beside its plan's
 	// none), is that entry's id.
@@ -237,24 +230,22 @@ var presets = []PresetDef{
 	{ID: "xai", Name: "xAI", Icon: "xai", Kind: KindVendor, Catalog: "xai",
 		Chat: "https://api.x.ai/v1", Responses: "https://api.x.ai/v1", Anthropic: "https://api.x.ai",
 		Website: "https://console.x.ai", KeysURL: "https://console.x.ai"},
-	// Kimi's key pages and sites carry its referral (aff=magpie), as its
-	// partner card's do: Kimi sponsors magpie
 	{ID: "moonshot", Name: "Kimi", Icon: "kimi", Kind: KindVendor, Catalog: "moonshotai",
 		Chat: "https://api.moonshot.ai/v1", Anthropic: "https://api.moonshot.ai/anthropic",
-		Website: "https://platform.kimi.ai?aff=magpie", KeysURL: "https://platform.kimi.ai/console/api-keys?aff=magpie"},
+		Website: "https://platform.kimi.ai", KeysURL: "https://platform.kimi.ai/console/api-keys"},
 	{ID: "moonshot-cn", Name: "Kimi (China)", Icon: "kimi", Kind: KindVendor, Catalog: "moonshotai",
 		Chat: "https://api.moonshot.cn/v1", Anthropic: "https://api.moonshot.cn/anthropic",
-		Website: "https://platform.kimi.com?aff=magpie", KeysURL: "https://platform.kimi.com/console/api-keys?aff=magpie"},
+		Website: "https://platform.kimi.com", KeysURL: "https://platform.kimi.com/console/api-keys"},
 	// a Kimi Code membership's own endpoints (k3, kimi-for-coding …): Kimi
 	// lets members use them from third-party tools, keyed at its console
 	{ID: "kimi-code", Name: "Kimi Code", Icon: "kimi", Kind: KindVendor, Catalog: "kimi-code-plan-global",
 		Chat: "https://api.kimi.ai/coding/v1", Anthropic: "https://api.kimi.ai/coding",
 		Note:    "Membership",
-		Website: "https://www.kimi.ai/code?aff=magpie", KeysURL: "https://www.kimi.ai/code/console?aff=magpie"},
+		Website: "https://www.kimi.ai/code", KeysURL: "https://www.kimi.ai/code/console"},
 	{ID: "kimi-code-cn", Name: "Kimi Code (China)", Icon: "kimi", Kind: KindVendor, Catalog: "kimi-code-plan-cn",
 		Chat: "https://api.kimi.com/coding/v1", Anthropic: "https://api.kimi.com/coding",
 		Note:    "Membership",
-		Website: "https://www.kimi.com/code?aff=magpie", KeysURL: "https://www.kimi.com/code/console?aff=magpie"},
+		Website: "https://www.kimi.com/code", KeysURL: "https://www.kimi.com/code/console"},
 	{ID: "zhipu", Name: "Zhipu GLM", Icon: "zhipu-color", Kind: KindVendor, Catalog: "zhipuai",
 		Chat: "https://open.bigmodel.cn/api/paas/v4", Anthropic: "https://open.bigmodel.cn/api/anthropic",
 		Website: "https://open.bigmodel.cn", KeysURL: "https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys",
@@ -715,11 +706,10 @@ var presets = []PresetDef{
 	// protocol, as its docs/api page gives it, Chat and Responses at /v1
 	// and Messages at the root; a key serves its group's models alone,
 	// which /v1/models lists, and its balance is sub2api's /v1/usage
-	// (balance_probe.go). Its site carries the invite AIGoCode sponsors
-	// magpie with, as Kimi's do.
+	// (balance_probe.go).
 	{ID: "aigocode", Name: "AIGoCode", Icon: "aigocode", Kind: KindRelay,
 		Chat: "https://api.aigocode.dev/v1", Responses: "https://api.aigocode.dev/v1", Anthropic: "https://api.aigocode.dev",
-		Website: "https://www.aigocode.net/invite/MAGPIE?utm_source=magpie&utm_medium=app", KeysURL: "https://www.aigocode.net/dashboard/keys"},
+		Website: "https://www.aigocode.net", KeysURL: "https://www.aigocode.net/dashboard/keys"},
 
 	// Jev answers no conversation: it decides which of a routing group's
 	// models takes a turn, and how hard it thinks
@@ -866,20 +856,9 @@ func mantleRegions(ids ...string) []Region {
 	return out
 }
 
-// Presets lists every preset, sponsored ones first within their kind.
+// Presets lists every preset, in the add sheet's order.
 func Presets() []PresetDef {
-	out := make([]PresetDef, 0, len(presets))
-	for _, p := range presets {
-		if p.Sponsored {
-			out = append(out, p)
-		}
-	}
-	for _, p := range presets {
-		if !p.Sponsored {
-			out = append(out, p)
-		}
-	}
-	return out
+	return slices.Clone(presets)
 }
 
 // presetAliases are ids presets carried before, each the preset since and
@@ -959,16 +938,12 @@ func (p *Provider) moveEndpoints() {
 }
 
 // Preset finds a preset by id, or by an id it carried before
-// (presetAliases), or a partner listed now or before (partners.go).
+// (presetAliases).
 func Preset(id string) *PresetDef {
-	if pr := builtinPreset(id); pr != nil {
-		return pr
-	}
-	return partnerPreset(id)
+	return builtinPreset(id)
 }
 
-// builtinPreset is the preset of that id built into magpie, partners'
-// aside.
+// builtinPreset is the preset of that id built into magpie.
 func builtinPreset(id string) *PresetDef {
 	if a, ok := presetAliases[id]; ok {
 		id = a.preset

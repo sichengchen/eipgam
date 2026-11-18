@@ -2912,8 +2912,8 @@ profile at a time, so a second `magpie cpu` while one records is refused
 callers as `/v1/magpie/heap`, and refuses the same ones 403.
 
 `magpie goroutines [<file>]` is for a report of magpie stuck at something
-while it goes on running, such as an app that kept an old partner list for
-days (#3362): killing it to look would end what was stuck. It asks the same
+while it goes on running, such as an app that kept an old list for days
+(#3362): killing it to look would end what was stuck. It asks the same
 running magpie for `GET /v1/magpie/goroutines`, every goroutine's stack as
 text (`runtime/pprof`'s `goroutine` profile at debug 2, the form a crash
 prints): each goroutine's state and how long it has waited
@@ -4606,7 +4606,7 @@ servers it is used with. What it does ask for by itself is on the
 [Privacy page](https://usemagpie.ai/docs/privacy): updates from
 usemagpie.ai (`/api/latest`, every 6 hours by default and never by
 itself with `noAutoUpdate` set; `/api/notes` after an update; `/files/…`
-for a download), the partner list, icons, the
+for a download), icons, the
 [models.dev](https://models.dev) catalog and the exchange rate. None of
 these requests carries an id or an account.
 
@@ -4616,21 +4616,10 @@ market's of who uses each MCP server, are read from usemagpie.ai
 from other magpies; this one reports nothing and sends no likes. The code
 is [internal/stats/plugins.go](../internal/stats/plugins.go).
 
-The add sheet (and the TUI's, and `magpie providers presets`) tells the
-app which partners it showed, through `POST /api/partner` in the window,
-only so that a partner it showed is no longer new and the add button's
-dot goes (`NoticePartners`). Nothing is counted or sent.
-
-usemagpie.ai counts partners where it sees them, as any website counts
-its visits. The partner list (`/api/partners`) gives each partner's
-website and key page as a
-`https://usemagpie.ai/go/<id>/site|keys[/<region>]` link, which sends a
-`magpie partner go` event (the partner, which link, the region, and the
-country Cloudflare gives) before sending the browser on; and one in ten
-fetches of the list sends a `magpie partners fetch` event with weight 10
-and the country, while a partner is listed. Each event has a random id
-of its own: the app sends no id, and no address or account goes with
-it. The code is [site/worker.js](../site/worker.js).
+magpie lists no sponsors or partners: the add sheet, the TUI's and
+`magpie providers presets` list the built-in presets alone, and no list
+of them is fetched. A preset's website and key-page links go straight to
+the vendor, with no referral code.
 
 A plugin's, an import link's and the library's icons sit on hosts their
 authors picked. magpie fetches each through

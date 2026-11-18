@@ -146,7 +146,7 @@
 
     <div class="table-wrap"><table>
       <tr><th>内容</th><th>送り先</th><th>既定</th><th>止め方</th></tr>
-      <tr><td><a href="#site">更新確認</a>、リリースノート、パートナー一覧、アイコン</td><td><code>usemagpie.ai</code></td><td>オン</td><td>更新確認は <code>noAutoUpdate</code>。ほかはアプリの動作に必要</td></tr>
+      <tr><td><a href="#site">更新確認</a>、リリースノート、アイコン</td><td><code>usemagpie.ai</code></td><td>オン</td><td>更新確認は <code>noAutoUpdate</code>。ほかはアプリの動作に必要</td></tr>
       <tr><td><a href="#lists">モデルカタログと為替レート</a></td><td><code>models.dev</code>、<code>open.er-api.com</code></td><td>オン</td><td>切り替え不可。あなたの情報は送らない</td></tr>
       <tr><td><a href="#otel">OTLP エクスポート</a></td><td>あなたが指定したコレクター</td><td>オフ</td><td>オフのままにする</td></tr>
     </table></div>
@@ -161,8 +161,6 @@
     <ul>
       <li><code>/api/latest</code>：更新情報。既定では 6 時間ごと。<code>?lang=</code> であなたの言語のノートを取ります。<span class="ui">設定</span> → <span class="ui">情報</span> → <span class="ui">アップデートチャネル</span>が安定版かデイリーなら <code>?channel=stable</code> か <code>?channel=daily</code> も付けます。新しくインストールした magpie も一度 <code>?channel=stable</code> を尋ね、自分が安定版なら安定版にとどまります。どちらもあなたが誰かは含みません。<code>/api/notes</code> は更新後の「新機能」です。<span class="ui">設定</span> → <span class="ui">情報</span> → <span class="ui">自動アップデート</span> をオフにするか、<code>settings.json</code> に <code>"noAutoUpdate": true</code> と書くと、magpie は自分からは尋ねず、設定で確認したときか <code>magpie update</code> を実行したときだけ尋ねます。</li>
       <li><code>/files/&lt;バージョン&gt;/&lt;ファイル&gt;</code>：更新とインストーラがダウンロードするリリースファイルで、Cloudflare R2 から配信されます。サイトにないファイルは github.com へ転送されます。何も計測しません。</li>
-      <li><code>/api/partners</code>：プロバイダー追加シートのパートナー一覧。1 時間ごと。パートナーが載っている間、サイトは 10 回に 1 回の取得を Cloudflare が示す国とともに <code>magpie partners fetch</code> として数えます。</li>
-      <li><code>/go/&lt;パートナー&gt;/site</code> と <code>/go/&lt;パートナー&gt;/keys</code>：パートナーの公式サイトとキーのページへのリンクをブラウザーで開くと、移動の前に <code>magpie partner go</code>（どのパートナーか、どのリンクか、地域、国）として数えます。どちらのイベントにも、アプリからの ID、IP アドレス、アカウントは付きません。</li>
       <li><code>/api/plugins/stats</code>：Discover の各プラグインの利用者数といいねの数と、ライブラリのマーケットの各 MCP サーバーの利用者数。多くて 1 時間に 1 回で、ID は含みません。この数はほかの magpie から集まったもので、この magpie は報告もいいねも送りません。コードは <a href="https://github.com/yetone/magpie/blob/main/internal/stats/plugins.go">internal/stats/plugins.go</a> です。</li>
       <li><code>/api/icon?url=…</code>：プラグイン、インポートリンク、ライブラリが示すアイコンはここを経由して取得するので、アイコンのあるホストに見えるのはあなたではなく Cloudflare のアドレスです。画像を中継するだけで、数えることも記録することもしません。</li>
     </ul>

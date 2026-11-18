@@ -453,8 +453,6 @@ func kindNote(k provider.Kind) string {
 		return tr("relay")
 	case provider.KindLocal:
 		return tr("local")
-	case provider.KindPartner:
-		return tr("partner")
 	}
 	return string(k)
 }
@@ -463,12 +461,6 @@ func kindNote(k provider.Kind) string {
 // Google Vertex AI the project it takes in place of one.
 func (m *model) openPresets() {
 	var items []agent.Option
-	var shown []string
-	for _, d := range provider.Partners() {
-		items = append(items, agent.Option{Value: d.ID, Note: d.Name + " · " + tr("partner (sponsor)")})
-		shown = append(shown, d.ID)
-	}
-	go provider.NoticePartners(shown...)
 	for _, d := range provider.Presets() {
 		items = append(items, agent.Option{Value: d.ID, Note: d.Name + " · " + kindNote(d.Kind)})
 	}
