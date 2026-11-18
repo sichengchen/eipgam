@@ -9,12 +9,10 @@ import (
 
 // `magpie opencode a/m` wires OpenCode to magpie; `magpie opencode default`
 // puts back the model OpenCode was on before (#1900), as the Agents page's
-// Disconnect does. DevEco Code, OpenCode's fork with its own folder, the
-// same.
+// Disconnect does.
 func TestAgentOpenCodeDefaultPutsBackTheModel(t *testing.T) {
 	for _, c := range []struct{ id, file string }{
 		{"opencode", "opencode/opencode.json"},
-		{"deveco", "deveco/deveco.json"},
 	} {
 		t.Run(c.id, func(t *testing.T) {
 			groupsHome(t)

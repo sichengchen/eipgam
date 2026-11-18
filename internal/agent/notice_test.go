@@ -73,7 +73,8 @@ func TestEveryNoticeIsTranslated(t *testing.T) {
 		t.Fatalf("read %d language tables from i18n.js", len(tables))
 	}
 	ns := Notices()
-	if len(ns) < 60 {
+	// 59 with the agents magpie keeps
+	if len(ns) < 50 {
 		t.Fatalf("only %d notices listed", len(ns))
 	}
 	slots := regexp.MustCompile(`\{\w+\}`)
@@ -156,7 +157,8 @@ func TestNoticesAreTemplates(t *testing.T) {
 			return true
 		})
 	}
-	if checked < 40 {
+	// 25 with the agents magpie keeps
+	if checked < 20 {
 		t.Fatalf("checked only %d notices", checked)
 	}
 }

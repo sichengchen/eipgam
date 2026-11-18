@@ -32,9 +32,4 @@ func Rescan() {
 	// rather than in ten minutes
 	wsl.probed, wsl.failed = map[string]bool{}, map[string]time.Time{}
 	wsl.Unlock()
-
-	almaRead.Lock()
-	almaRead.at, almaRead.body = nil, nil
-	almaRead.gen++
-	almaRead.Unlock()
 }

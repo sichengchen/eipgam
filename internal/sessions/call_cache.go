@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"hash/crc32"
@@ -123,16 +122,6 @@ func resetCalls() {
 	callSwept = time.Time{}
 	callGeneration++
 	resetOCCalls()
-	// ZCode's listing and WorkBuddy's gateway ids name another HOME's files
-	// and models.json: a read after a Reset() would otherwise hand back
-	// sources that are not here. Both are stamped, so the stale stamp alone
-	// would miss; clearing them makes a new HOME read its own
-	zcCallList.Lock()
-	zcCallList.stamp, zcCallList.files = "", nil
-	zcCallList.Unlock()
-	wbGateway.Lock()
-	wbGateway.byPath = nil
-	wbGateway.Unlock()
 }
 
 func pruneCalls(files []file) {
@@ -266,17 +255,9 @@ func keepCalls(path string, st *callFile) {
 // in callFiles needs an entry here, in lineCallReaders or in
 // resumeCallReaders, or its calls are never read.
 var wholeCallReaders = map[string]func(file) (*callFile, bool){
-	"opencode":     readOpenCodeCalls,
-	"zcode":        readZCodeCalls,
-	"workbuddy":    readWorkBuddyCalls,
-	"workbuddy-ai": readWorkBuddyCalls,
-	"codebuddy":    readWorkBuddyCalls, // #1779
-	// #1605
-	"minimax-code": readMiniMaxCalls,
-	"agy":          readAgyCalls,         // #2097
-	"antigravity":  readAntigravityCalls, // #2190
-	"devin":        readDevinCalls,       // aohan0905 on X
-	"droid":        readDroidCalls,       // _meouwu on X
+	"opencode": readOpenCodeCalls,
+	"agy":      readAgyCalls,   // #2097
+	"devin":    readDevinCalls, // aohan0905 on X
 }
 
 // resumeCallReaders read an agent's calls from a file only appended to that
@@ -286,9 +267,7 @@ var wholeCallReaders = map[string]func(file) (*callFile, bool){
 // calls it hands back were in old, kept as they were (0 when it read
 // whole, or what it had counted no longer stands), so only the rest are
 // appended to the disk shard.
-var resumeCallReaders = map[string]func(f file, old *callFile) (st *callFile, kept int, ok bool){
-	"dsh": readDshCalls,
-}
+var resumeCallReaders = map[string]func(f file, old *callFile) (st *callFile, kept int, ok bool){}
 
 // lineCallReader reads an agent's calls a line at a time, as Claude Code's
 // and Codex's are: a file that only grew is read on from where the last read
@@ -596,9 +575,7 @@ type callDiskState struct {
 	At, End, AsstEnd   int64
 	Session, Requested string
 	LastUser, LastAsst time.Time
-	// dsh's carry (dshCarry), as JSON: nil when there is none
-	Dsh []byte
-	// Pi's and omp's carry (piCarry), flat: PiOn when there is one
+	// Pi's carry (piCarry), flat: PiOn when there is one
 	PiOn, PiHeader      bool
 	PiCwd               string
 	PiSince             time.Time
@@ -614,9 +591,6 @@ func diskCallState(s *callFile) callDiskState {
 	d := callDiskState{ContentHash: s.ContentHash.String(), Size: s.Size, Mod: s.Mod, Off: s.Off, Head: s.Head.String(), HeadSize: s.HeadSize,
 		Path: s.Path, Agent: s.Agent, Parser: callParseVersions[s.Agent], At: s.At, End: s.End, AsstEnd: s.AsstEnd, Session: s.Session, Requested: s.Requested,
 		LastUser: s.LastUser, LastAsst: s.LastAsst}
-	if s.Dsh != nil {
-		d.Dsh, _ = json.Marshal(s.Dsh)
-	}
 	if p := s.Pi; p != nil {
 		d.PiOn, d.PiHeader, d.PiCwd, d.PiSince, d.PiProvider, d.PiModel = true, p.Header, p.Cwd, p.Since, p.Provider, p.Model
 	}
@@ -629,12 +603,6 @@ func (s callDiskState) restore() *callFile {
 	st := &callFile{ContentHash: parseDigest(s.ContentHash), Size: s.Size, Mod: s.Mod, Off: s.Off,
 		Head: parseDigest(s.Head), HeadSize: s.HeadSize, Path: s.Path, Agent: s.Agent, At: s.At, End: s.End,
 		AsstEnd: s.AsstEnd, Session: s.Session, Requested: s.Requested, LastUser: s.LastUser, LastAsst: s.LastAsst}
-	if len(s.Dsh) > 0 {
-		var c dshCarry
-		if json.Unmarshal(s.Dsh, &c) == nil {
-			st.Dsh = &c
-		}
-	}
 	if s.PiOn {
 		st.Pi = &piCarry{s.PiHeader, s.PiCwd, s.PiSince, s.PiProvider, s.PiModel}
 	}

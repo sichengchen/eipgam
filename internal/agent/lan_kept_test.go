@@ -9,100 +9,6 @@ import (
 	"github.com/yetone/magpie/internal/provider"
 )
 
-// An agent the user pointed at magpie on another machine (coeo91 on
-// Discord: the LAN address, which went back to 127.0.0.1 after an update or
-// a restart) keeps that address and the key it had there through the sync
-// every start of magpie runs (SyncCatalog), for every agent magpie writes
-// its models into; the sync still brings the models up to date.
-func TestSyncKeepsAnAddressOnAnotherMachine(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "")
-	home, _ := codexHome(t, "", "")
-	managed := claudeManaged
-	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
-	t.Cleanup(func() { claudeManaged = managed })
-	os.MkdirAll(filepath.Join(home, ".hanako", "agents", "hana"), 0o755)
-	os.WriteFile(filepath.Join(home, ".hanako", "agents", "hana", "config.yaml"), []byte("agent:\n  name: Hana\n"), 0o644)
-	// Craft Agents, once it has run and saved its config
-	craftFixture(t, home)
-	t.Setenv("ASTRBOT_ROOT", "")
-	writeFile(t, filepath.Join(home, ".astrbot", "data", "cmd_config.json"), astrbotConfig)
-	// QwenPaw, once it has written its agents' settings
-	qwenpawFixture(t, home)
-	setPort(t, 3591)
-	for _, a := range All() {
-		// Alma and Shelley are told through their running apps, and Cursor's local
-		// gateway is started by launchctl: neither is in the sandbox
-		if a.Check == nil || a.Launch != nil || a.WSL != "" || a.Native != nil || a.ID == "alma" || a.ID == "shelley" || a.ID == "cursorlocal" {
-			continue
-		}
-		var key, want string
-		for _, g := range a.Fields {
-			for _, o := range g.Options(a.Values()) {
-				if want == "" && (o.Ref == "fake/m1" || o.Value == magpieID) {
-					key, want = g.Key, o.Value
-				}
-			}
-		}
-		if want == "" {
-			t.Fatalf("%s: no field takes magpie's models", a.ID)
-		}
-		if err := a.Apply(key, want); err != nil {
-			t.Fatalf("%s: %v", a.ID, err)
-		}
-	}
-	// the user points each file at the NAS's magpie, with its key
-	moved := filesWith(home, "127.0.0.1:3591")
-	if len(moved) < 20 {
-		t.Fatalf("only %d files have the gateway's address: %v", len(moved), moved)
-	}
-	keys := map[string]int{}
-	for _, p := range moved {
-		b, _ := os.ReadFile(p)
-		b = []byte(strings.ReplaceAll(string(b), "127.0.0.1:3591", "192.168.50.10:3591"))
-		kvs := keyValues(b)
-		for i := len(kvs) - 1; i >= 0; i-- {
-			if kv := kvs[i]; keeping().ours(kv.value) {
-				v := "nas-key"
-				if strings.HasPrefix(kv.value, "Bearer ") {
-					v = "Bearer nas-key"
-				}
-				b = append(b[:kv.start:kv.start], append([]byte(v), b[kv.end:]...)...)
-			}
-		}
-		keys[p] = strings.Count(string(b), "nas-key")
-		os.WriteFile(p, b, 0o644)
-	}
-	if err := provider.Save(provider.Provider{ID: "fake2", Name: "Fake2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
-		t.Fatal(err)
-	}
-	SyncCatalog()
-	synced := 0
-	for _, p := range moved {
-		b, _ := os.ReadFile(p)
-		s, name := string(b), strings.TrimPrefix(p, home)
-		if strings.Contains(s, "m2") {
-			synced++
-		}
-		if strings.Contains(s, "127.0.0.1:3591") {
-			t.Errorf("%s is back on this machine's gateway", name)
-		}
-		if !strings.Contains(s, "192.168.50.10:3591") {
-			t.Errorf("%s lost the NAS's address", name)
-		}
-		if n := strings.Count(s, "nas-key"); n < keys[p] {
-			t.Errorf("%s has the NAS's key %d times, not %d", name, n, keys[p])
-		}
-		for _, kv := range keyValues(b) {
-			if keeping().ours(kv.value) {
-				t.Errorf("%s has magpie's own key back: %q", name, kv.value)
-			}
-		}
-	}
-	if synced < len(moved)/2 {
-		t.Errorf("the sync wrote the new model into %d of %d files", synced, len(moved))
-	}
-}
-
 // What the sync writes is left as it is where the file says nothing sure of
 // another machine: the gateway's address on this machine (another port, or
 // localhost) follows the gateway, as does one a WSL distro reached Windows
@@ -172,5 +78,92 @@ func TestKeyValuesFormats(t *testing.T) {
 	want := []string{"magpie-qoder", "magpie", "magpie", "magpie", "Bearer magpie", "magpie"}
 	if strings.Join(got, "|") != strings.Join(want, "|") {
 		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+// An agent the user pointed at magpie on another machine (coeo91 on
+// Discord: the LAN address, which went back to 127.0.0.1 after an update or
+// a restart) keeps that address and the key it had there through the sync
+// every start of magpie runs (SyncCatalog), for every agent magpie writes
+// its models into; the sync still brings the models up to date.
+func TestSyncKeepsAnAddressOnAnotherMachine(t *testing.T) {
+	t.Setenv("MAGPIE_ADDR", "")
+	home, _ := codexHome(t, "", "")
+	managed := claudeManaged
+	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
+	t.Cleanup(func() { claudeManaged = managed })
+	setPort(t, 3591)
+	for _, a := range All() {
+		// Cursor's local gateway is started by launchctl: it isn't in the
+		// sandbox
+		if a.Check == nil || a.Launch != nil || a.WSL != "" || a.Native != nil || a.ID == "cursorlocal" {
+			continue
+		}
+		var key, want string
+		for _, g := range a.Fields {
+			for _, o := range g.Options(a.Values()) {
+				if want == "" && (o.Ref == "fake/m1" || o.Value == magpieID) {
+					key, want = g.Key, o.Value
+				}
+			}
+		}
+		if want == "" {
+			t.Fatalf("%s: no field takes magpie's models", a.ID)
+		}
+		if err := a.Apply(key, want); err != nil {
+			t.Fatalf("%s: %v", a.ID, err)
+		}
+	}
+	// the user points each file at the NAS's magpie, with its key
+	moved := filesWith(home, "127.0.0.1:3591")
+	// 17 with every agent magpie keeps connected here
+	if len(moved) < 15 {
+		t.Fatalf("only %d files have the gateway's address: %v", len(moved), moved)
+	}
+	keys := map[string]int{}
+	for _, p := range moved {
+		b, _ := os.ReadFile(p)
+		b = []byte(strings.ReplaceAll(string(b), "127.0.0.1:3591", "192.168.50.10:3591"))
+		kvs := keyValues(b)
+		for i := len(kvs) - 1; i >= 0; i-- {
+			if kv := kvs[i]; keeping().ours(kv.value) {
+				v := "nas-key"
+				if strings.HasPrefix(kv.value, "Bearer ") {
+					v = "Bearer nas-key"
+				}
+				b = append(b[:kv.start:kv.start], append([]byte(v), b[kv.end:]...)...)
+			}
+		}
+		keys[p] = strings.Count(string(b), "nas-key")
+		os.WriteFile(p, b, 0o644)
+	}
+	if err := provider.Save(provider.Provider{ID: "fake2", Name: "Fake2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
+		t.Fatal(err)
+	}
+	SyncCatalog()
+	synced := 0
+	for _, p := range moved {
+		b, _ := os.ReadFile(p)
+		s, name := string(b), strings.TrimPrefix(p, home)
+		if strings.Contains(s, "m2") {
+			synced++
+		}
+		if strings.Contains(s, "127.0.0.1:3591") {
+			t.Errorf("%s is back on this machine's gateway", name)
+		}
+		if !strings.Contains(s, "192.168.50.10:3591") {
+			t.Errorf("%s lost the NAS's address", name)
+		}
+		if n := strings.Count(s, "nas-key"); n < keys[p] {
+			t.Errorf("%s has the NAS's key %d times, not %d", name, n, keys[p])
+		}
+		for _, kv := range keyValues(b) {
+			if keeping().ours(kv.value) {
+				t.Errorf("%s has magpie's own key back: %q", name, kv.value)
+			}
+		}
+	}
+	if synced < len(moved)/2 {
+		t.Errorf("the sync wrote the new model into %d of %d files", synced, len(moved))
 	}
 }

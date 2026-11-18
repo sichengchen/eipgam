@@ -80,16 +80,9 @@ func GatewayKeys(s Session) []string {
 }
 
 // requestIDs are the ids a request through the gateway can name the
-// session id by, id itself first: ZCode's database gives an id a prefix
-// (sess_…, a subagent's sess_subagent_agent_…) its requests leave out
-// (zcodeBareID). GatewayKeys and NativeIDs both read it, so the Sessions
+// session id by. GatewayKeys and NativeIDs both read it, so the Sessions
 // list, its spend and the management page agree on which gateway record
 // is a session here (#5754).
 func requestIDs(agent, id string) []string {
-	if agent == "zcode" {
-		if bare := zcodeBareID(id); bare != id {
-			return []string{id, bare}
-		}
-	}
 	return []string{id}
 }

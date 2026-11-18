@@ -110,22 +110,6 @@ func TestDisconnectPreviewOfAPluginAgentsModel(t *testing.T) {
 	}
 }
 
-// A built-in keyed by its file's path is the same: Droid's stash holds the
-// model the user started on, which its preview puts back.
-func TestDisconnectPreviewOfDroidPutsItsModelBack(t *testing.T) {
-	_, path := droidHome(t)
-	os.WriteFile(path, []byte(droidUser), 0o644)
-	a := droid(os.Getenv("HOME"))
-	setUpInMagpie(a.ID)
-	if err := a.Apply("model", "magpie/anth/claude-sonnet-5"); err != nil {
-		t.Fatal(err)
-	}
-	changes := previewOf(t, a)
-	if !previewSays(changes, "~", `"model": "claude-opus-4-7"`) {
-		t.Fatalf("the preview doesn't put Droid's model back: %+v", changes)
-	}
-}
-
 // A key names a path under home the way the system does: Windows' without
 // case, and only where a separator follows home.
 func TestMovedKey(t *testing.T) {

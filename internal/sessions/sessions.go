@@ -303,19 +303,12 @@ type StateMore struct {
 	// Grok Build: where its updates were read to, and what the read
 	// carries on with
 	Grok *grokCarry `json:"grok,omitempty"`
-	// Droid: where its transcript was read to, and what the read carries
-	// on with
-	Droid *droidCarry `json:"droid,omitempty"`
 	// Kimi Code: where its wire file was read to, and what the read
 	// carries on with
 	Kimi *kimiCarry `json:"kimi,omitempty"`
 	// agy: where its transcript was read to, and what the read carries on
 	// with
 	Agy *agyCarry `json:"agy,omitempty"`
-	// dsh: where its file was read to, and its header
-	Dsh *dshCarry `json:"dsh,omitempty"`
-	// Cline: the messages file its counts were read from
-	Cline *clineCarry `json:"cline,omitempty"`
 }
 
 // noMore is what more gives for a state with none: read, never written.
@@ -352,7 +345,7 @@ func (m *StateMore) zero() bool {
 		len(m.CodexAgentConflicts) == 0 && m.Named == "" && m.Custom == "" && m.First == "" &&
 		len(m.Convs) == 0 && len(m.ResponseIDs) == 0 && len(m.SeedConvs) == 0 && len(m.TurnConvs) == 0 &&
 		m.Root == "" && m.Leaf == "" && len(m.Compacts) == 0 && m.Since.IsZero() &&
-		m.Grok == nil && m.Droid == nil && m.Kimi == nil && m.Agy == nil && m.Dsh == nil && m.Cline == nil
+		m.Grok == nil && m.Kimi == nil && m.Agy == nil
 }
 
 // day is one local date's share of a file: tokens by model, and the time
@@ -572,16 +565,9 @@ type fileMore struct {
 	sid    string
 	parent string
 	oc     ocStore
-	// Cline: the session's manifest, beside its messages; Grok Build: its
-	// summary.json, beside its updates; Droid: its settings, beside its
-	// transcript
+	// Grok Build: its summary.json, beside its updates
 	manifest string
-	hermes   *hermesDB
-	// Alma: its database, and what tells the chat's rows changed
-	alma *almaStore
-	// OpenMausBot: its database, bots and usage rows
-	omb *ombStore
-	rev string
+	rev      string
 	// agy: what conversation_summaries.db says of the conversation
 	agy    *agySummary
 	editor *cursorEditorMeta
@@ -991,22 +977,18 @@ var ccScratch sync.Map // lister key → []file
 // files.
 var filesHook func()
 
-func allFiles() []file { return allFilesWith(&allKept[0], zcodeFiles) }
+func allFiles() []file { return allFilesWith(&allKept[0]) }
 
-// allFilesForTitles is allFiles with ZCode's sessions listed from their own
-// rows alone: a name poll needs titles, not every message counted
-// (zcodeFiles joins them for a session's size and last activity).
-func allFilesForTitles() []file { return allFilesWith(&allKept[1], zcodeTitleFiles) }
+// allFilesForTitles is allFiles for a name poll, kept apart from it.
+func allFilesForTitles() []file { return allFilesWith(&allKept[1]) }
 
-func allFilesWith(kept *filesKept, zcode func() []file) []file {
+func allFilesWith(kept *filesKept) []file {
 	if filesHook != nil {
 		filesHook()
 	}
 	lists := callFileLists(codexFiles())
-	lists = append(lists, openCodeFiles(), piFiles(), raftFiles(), cindyFiles(), wslFiles("pi", "raft", "omp", "kimi", "antigravity", "agy"), zcode())
-	lists = append(lists, dshFiles(), clineFiles(), ccFiles("qoder", QoderDir("qoder")), ccFiles("qoder-cn", QoderDir("qoder-cn")),
-		grokFiles(), workbuddyFiles(), workbuddyAIFiles(), codebuddyFiles(), droidFiles(), ompFiles(), cursorFiles(), hermesFiles(), almaFiles(), openmausbotFiles(), liveagentFiles(), kimiFiles(), agyFiles(),
-		antigravityFiles()) // #2190
+	lists = append(lists, openCodeFiles(), piFiles(), raftFiles(), wslFiles("pi", "raft", "kimi", "agy"))
+	lists = append(lists, grokFiles(), cursorFiles(), kimiFiles(), agyFiles())
 	// each lister asked Reads already; a file listed under another
 	// agent's name is held to that agent too
 	return allowed(kept.distinct(lists...))
@@ -1104,27 +1086,11 @@ func Dirs() []string {
 		{OpenCodeDir(), OpenCodeDir()},
 		{PiDir(), PiDir()},
 		{SlockDir(), filepath.Join(SlockDir(), "agents")},
-		{ZCodeDir(), zcodeDB()},
-		{DshDir(), filepath.Join(DshDir(), "sessions")},
-		{ClineSessionDir(), ClineSessionDir()},
-		{QoderDir("qoder"), filepath.Join(QoderDir("qoder"), "projects")},
-		{QoderDir("qoder-cn"), filepath.Join(QoderDir("qoder-cn"), "projects")},
 		{GrokDir(), filepath.Join(GrokDir(), "sessions")},
-		{WorkBuddyDir(), filepath.Join(WorkBuddyDir(), "projects")},
-		{WorkBuddyAIDir(), filepath.Join(WorkBuddyAIDir(), "projects")},
-		{CodeBuddyDir(), filepath.Join(CodeBuddyDir(), "projects")},
-		{OmpDir(), filepath.Join(OmpDir(), "sessions")},
-		{FactoryDir(), filepath.Join(FactoryDir(), "sessions")},
 		{CursorDir(), filepath.Join(CursorDir(), "chats")},
 		{cursorDataDir(), filepath.Join(cursorDataDir(), "projects")},
 		{filepath.Dir(cursorEditorDB()), cursorEditorDB()},
-		{AlmaDir(), almaDB()},
-		{OpenMausBotDir(), ombDB()},
-		{LiveAgentDir(), liveagentSessions()},
-		{MiniMaxDir(), minimaxSessions()},
 		{KimiCodeDir(), kimiSessions()},
-		{AntigravityAppDir(), antigravityConversations()},
-		{AntigravityInsidersDir(), filepath.Join(AntigravityInsidersDir(), "conversations")},
 		{AgyDir(), filepath.Join(AgyDir(), "brain")},
 	} {
 		if _, err := os.Stat(d.sessions); err != nil {
@@ -1140,14 +1106,6 @@ func Dirs() []string {
 		}
 		out = append(out, d.dir)
 	}
-	// Cindy's Pi sessions, by their own folder: Cindy's is the app's
-	// whole data
-	for _, d := range cindySessionDirs() {
-		if _, err := os.Stat(d); err == nil {
-			out = append(out, d)
-		}
-	}
-	out = append(out, HermesDirs()...)
 	out = append(out, wslDirs()...)
 	return out
 }
@@ -1706,7 +1664,7 @@ func refresh(want, all []file) {
 		if f.cold {
 			continue // in a stopped WSL distro: what was read of it stands
 		}
-		if s := parsed(f.path); s == nil || s.Size != f.size || s.Mod != f.mod.UnixNano() || ccStale(f, s) || (f.agent == "hermes" && (f.m().hermes == nil || f.m().rev == "" || s.more().DBRevision != f.m().rev)) || ((f.agent == "alma" || f.agent == "openmausbot" || f.agent == "cursor" || f.agent == "agy" || f.agent == "antigravity") && s.more().DBRevision != f.m().rev) {
+		if s := parsed(f.path); s == nil || s.Size != f.size || s.Mod != f.mod.UnixNano() || ccStale(f, s) || ((f.agent == "cursor" || f.agent == "agy") && s.more().DBRevision != f.m().rev) {
 			if parsing[f.path] != nil {
 				// a refresh is reading it, another or this one (a path
 				// listed twice): its last parse stands until that one is
@@ -2008,10 +1966,8 @@ func Reset() {
 	directoryCache.entries = map[string]directoryEntry{}
 	directoryCache.Unlock()
 	resetCalls()
-	droidCallers.reset()
 	grokKinds.reset()
 	wslReset()
-	forgetHermesPrints()
 	forgetAgySummaries()
 	forgetBehind()
 	mu.Lock()
@@ -2231,9 +2187,6 @@ func assembleListed(fs []file, price func(string) *catalog.Price, codexTitle fun
 			s.ResponseIDs = append(s.ResponseIDs, st.more().ResponseIDs...)
 			s.SeedConvs = append(s.SeedConvs, st.more().SeedConvs...)
 			s.TurnConvs = append(s.TurnConvs, st.more().TurnConvs...)
-			if d := st.more().Dsh; d != nil && d.Head.IsSeeded && d.Head.DelegationDepth == 0 {
-				s.ForkOf = d.Head.ParentSession
-			}
 		}
 		if s.Agent == "codex" && st.more().CodexNickname != "" {
 			s.Nickname = st.more().CodexNickname
@@ -2307,38 +2260,20 @@ type sessionParser struct {
 
 func parserFor(agent string) sessionParser {
 	switch agent {
-	case "hermes":
-		return sessionParser{whole: parseHermes}
-	case "alma":
-		return sessionParser{whole: parseAlma}
-	case "openmausbot":
-		return sessionParser{whole: parseOpenMausBot}
-	case "liveagent":
-		return sessionParser{whole: parseLiveAgent}
-	case "opencode", "zcode":
+	case "opencode":
 		return sessionParser{whole: parseOpenCode}
-	case "dsh":
-		return sessionParser{grow: parseDsh}
-	case "cline":
-		return sessionParser{grow: parseCline}
 	case "grok":
 		return sessionParser{grow: parseGrok}
 	case "kimi":
 		return sessionParser{grow: parseKimi}
-	case "droid":
-		return sessionParser{grow: parseDroid}
 	case "agy":
 		return sessionParser{grow: parseAgy}
-	case "antigravity":
-		return sessionParser{whole: parseAntigravity} // #2190
 	case "cursor":
 		return sessionParser{whole: parseCursor}
 	case "codex":
 		return sessionParser{line: codexBody}
-	case "pi", "raft", "cindy", "omp":
+	case "pi", "raft":
 		return sessionParser{line: piParse}
-	case "workbuddy", "workbuddy-ai", "codebuddy":
-		return sessionParser{line: workbuddyLine}
 	default:
 		return sessionParser{line: claudeLine, claude: true}
 	}
@@ -2425,9 +2360,6 @@ func parseRead(f file, old *state, calls *callsRide) *state {
 	}
 	if calls != nil {
 		calls.finish(off, err)
-	}
-	if isBuddy(f.agent) && s.Cwd == "" {
-		workbuddyMeta(s, f.path)
 	}
 	return s
 }
@@ -3030,28 +2962,8 @@ func resumeCommand(distro, agent, id, cwd, path string) string {
 		run = "opencode --session " + id
 	case "pi":
 		run = "pi --session " + id
-	case "cline":
-		run = "cline --id " + id
-	case "qoder":
-		run = "qodercli --resume " + id
-	case "qoder-cn":
-		run = "qoderclicn --resume " + id
 	case "grok":
 		run = "grok --resume " + id
-	case "codebuddy":
-		// its CLI's -r, --resume [sessionId], one bin of the package's
-		// three (codebuddy, cbc, codebuddy-code)
-		run = "codebuddy --resume " + id
-	case "omp":
-		run = "omp --resume " + id
-		if profile := ompProfile(path); profile != "" {
-			if !safeOmpProfile.MatchString(profile) {
-				return ""
-			}
-			run = "omp --profile " + profile + " --resume " + id
-		}
-	case "droid":
-		run = "droid --resume " + id
 	case "kimi":
 		run = "kimi --session " + id
 	case "agy":
@@ -3120,39 +3032,15 @@ func findListed(agent, id string) (Session, bool) {
 // agent's own title, else its first prompt. A key with no files, or a
 // session with no title, is left out. Desktop's local metadata can name a
 // session without its CLI transcript. The Routing page uses this too (#1293).
-// A ZCode request names its session without the sess_ prefix its database
-// gives it, so that id names the session too.
 func Titles(keys []string) map[string]string {
 	out := map[string]string{}
 	if len(keys) == 0 {
 		return out
 	}
-	// A ZCode session the CLI database has no row for (the app keeps its
-	// tasks in an index of its own) is still named as the app names it.
-	defer func() {
-		for _, k := range keys {
-			if out[k] != "" {
-				continue
-			}
-			if agent, id, ok := strings.Cut(k, ":"); ok && agent == "zcode" {
-				if t, ok := zcodeTaskOf("sess_" + zcodeBareID(id)); ok && title(t.title) != "" && !ocDefaultTitle(title(t.title)) {
-					out[k] = t.title
-				}
-			}
-		}
-	}()
 	want := make(map[string]bool, len(keys))
-	// alias maps the key a file is grouped under back to the key asked for:
-	// ZCode's request id, without the prefix its database gives it.
-	alias := map[string]string{}
 	var desktopIDs, piDesktopIDs []string
 	for _, k := range keys {
 		want[k] = true
-		if agent, id, ok := strings.Cut(k, ":"); ok && agent == "zcode" && !strings.HasPrefix(id, "sess_") {
-			full := agent + ":sess_" + id
-			want[full] = true
-			alias[full] = k
-		}
 		if id, ok := strings.CutPrefix(k, "claude-desktop:"); ok {
 			desktopIDs = append(desktopIDs, id)
 			continue
@@ -3182,34 +3070,6 @@ func Titles(keys []string) map[string]string {
 	loadCache()
 	defer useDBs()()
 	files := allFilesForTitles()
-	// ZCode files a subagent as sess_subagent_agent_<id> and a fork as
-	// sess_<id> with the parent's id in parent_id; ocRoots files both under
-	// the parent session's key. A request names either by its own id, so its
-	// title is read from its own file when no group carries the key asked
-	// for.
-	// A top-level session is named by its own group, so only child
-	// sessions are indexed.
-	subFiles := map[string]*file{} // a ZCode child session's own id → its file
-	for i := range files {
-		f := &files[i]
-		if f.agent != "zcode" || f.m().sid == "" || f.m().parent == "" {
-			continue
-		}
-		subFiles[f.m().sid] = f
-		subFiles[zcodeBareID(f.m().sid)] = f
-	}
-	subAsked := map[string]string{} // the key asked for → the child's file
-	for _, k := range keys {
-		agent, id, ok := strings.Cut(k, ":")
-		if !ok || agent != "zcode" {
-			continue
-		}
-		if f := subFiles[zcodeBareID(id)]; f != nil {
-			want[f.key] = true
-			subAsked[k] = f.path
-		}
-	}
-	files = zcodeTitleStamps(files, want)
 	groups := byKey(files, func(f *file) bool { return want[f.key] })
 	var fs []file
 	for _, f := range files {
@@ -3237,32 +3097,9 @@ func Titles(keys []string) map[string]string {
 				continue
 			}
 			out[k] = s.Title
-			if asked := alias[k]; asked != "" {
-				out[asked] = s.Title
-			}
-		}
-	}
-	for k, path := range subAsked {
-		if out[k] != "" {
-			continue
-		}
-		if st := cache[path]; st != nil {
-			if name := cmp.Or(st.more().Named, st.Title, st.more().First); name != "" {
-				out[k] = name
-			}
 		}
 	}
 	return out
-}
-
-// zcodeBareID is a ZCode session id without the prefix its database gives
-// it: a subagent's sess_subagent_agent_, any other session's sess_. A
-// request names a session by the bare id.
-func zcodeBareID(id string) string {
-	if bare, ok := strings.CutPrefix(id, "sess_subagent_agent_"); ok {
-		return bare
-	}
-	return strings.TrimPrefix(id, "sess_")
 }
 
 // Get is the session whose files are grouped under key (a Summary's Key),

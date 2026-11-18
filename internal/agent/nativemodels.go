@@ -152,28 +152,6 @@ func piRegistry(bin string) func(p string) []catalog.Model {
 	}
 }
 
-// ompRegistry is the models omp's installed catalog has for provider p:
-// @oh-my-pi/pi-catalog's src/models.json, models by id under each provider.
-func ompRegistry(p string) []catalog.Model {
-	for _, modules := range nodeModulesOf("omp", []string{"@oh-my-pi/pi-coding-agent"}) {
-		file := filepath.Join(modules, "@oh-my-pi", "pi-catalog", "src", "models.json")
-		all, err := filememo.Read("omp models", file, func(b []byte) (map[string][]catalog.Model, error) {
-			out := map[string][]catalog.Model{}
-			err := orderedObject(b, func(provider string, v json.RawMessage) error {
-				out[provider] = modelsIn(v, provider)
-				return nil
-			})
-			return out, err
-		})
-		if err == nil {
-			if ms := all[p]; len(ms) > 0 {
-				return ms
-			}
-		}
-	}
-	return nil
-}
-
 // codexServed is, for openai-codex when the agent's registry isn't found,
 // the models Codex CLI last listed for a ChatGPT account: the same backend.
 func codexServed(p string) []catalog.Model {

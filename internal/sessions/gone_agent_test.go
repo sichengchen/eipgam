@@ -40,8 +40,8 @@ func TestWSLAgentsGoneListingDrops(t *testing.T) {
 		home, _ := wslDistro(t)
 		WSLListed = func() bool { return answered }
 		t.Cleanup(func() { WSLListed = nil })
-		if n := len(List(0)); n != 7 {
-			t.Fatalf("answered=%v: want 7 sessions, got %d", answered, n)
+		if n := len(List(0)); n != 4 {
+			t.Fatalf("answered=%v: want 4 sessions, got %d", answered, n)
 		}
 		wslSettle()
 		os.RemoveAll(home)
@@ -52,7 +52,7 @@ func TestWSLAgentsGoneListingDrops(t *testing.T) {
 		List(0)
 		wslSettle()
 		n := len(List(0))
-		if answered && n != 0 || !answered && n != 7 {
+		if answered && n != 0 || !answered && n != 4 {
 			t.Errorf("answered=%v: %d sessions listed after the agents were taken away", answered, n)
 		}
 	}

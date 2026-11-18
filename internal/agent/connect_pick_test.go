@@ -285,37 +285,6 @@ func TestReconnectKeepsTheLastPick(t *testing.T) {
 	}
 }
 
-// Goose's own provider and model come back when it is disconnected: its
-// field's empty value takes both keys out, and it was on anthropic before.
-func TestGooseRoundTripKeepsItsOwnModel(t *testing.T) {
-	home := syncHome(t)
-	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
-	if err := provider.Save(provider.Provider{ID: "oa", Name: "OA", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"gpt-5.5"}}); err != nil {
-		t.Fatal(err)
-	}
-	a := goose(home, filepath.Join(home, ".config"))
-	writeFile(t, a.Path, "GOOSE_PROVIDER: anthropic\nGOOSE_MODEL: claude-opus-5-5\nGOOSE_MODE: auto\n")
-	for i := 0; i < 2; i++ { // and again, through its last pick
-		if err := a.Connect(); err != nil {
-			t.Fatal(err)
-		}
-		if !a.Wired() {
-			t.Fatalf("not connected:\n%s", readFile(a.Path))
-		}
-		if err := a.Disconnect(); err != nil {
-			t.Fatal(err)
-		}
-	}
-	for k, want := range map[string]string{"GOOSE_PROVIDER": "anthropic", "GOOSE_MODEL": "claude-opus-5-5", "GOOSE_MODE": "auto"} {
-		if v, _ := edit.GetYAMLTop(a.Path, k); v != want {
-			t.Fatalf("%s = %q after the round trip:\n%s", k, v, readFile(a.Path))
-		}
-	}
-	if _, err := os.Stat(gooseProviderPath(a.Path)); err == nil {
-		t.Fatal("magpie's custom provider left")
-	}
-}
-
 // magpie's max rides in Claude Code's env, over the effortLevel the user
 // had: disconnecting takes the env's level away and leaves theirs, and
 // switching on again puts magpie's back over it (found on the omarchy VM:
@@ -353,45 +322,6 @@ func TestClaudeDisconnectKeepsTheUsersEffort(t *testing.T) {
 	}
 	if v := c.Values(); v["model"] != "aaa/second" || v["effort"] != "max" || get("effortLevel") != "xhigh" {
 		t.Fatalf("connected again on %v:\n%s", v, readFile(path))
-	}
-}
-
-// A model of magpie's picked on the Agents page for an agent not connected
-// connects it first, as its switch does (the owner: the switch, and one
-// click in magpie, both): Goose starts on the model picked, and
-// disconnecting it brings back its own provider and model.
-func TestPickConnectsFirst(t *testing.T) {
-	home := syncHome(t)
-	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
-	if err := provider.Save(provider.Provider{ID: "oa", Name: "OA", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"gpt-5.5", "gpt-5.4"}}); err != nil {
-		t.Fatal(err)
-	}
-	a := goose(home, filepath.Join(home, ".config"))
-	writeFile(t, a.Path, "GOOSE_PROVIDER: anthropic\nGOOSE_MODEL: claude-opus-5-5\n")
-	var key, pick string
-	for _, f := range a.Fields {
-		for _, o := range f.Options(a.Values()) {
-			if o.Ref == "oa/gpt-5.4" {
-				key, pick = f.Key, o.Value
-			}
-		}
-	}
-	if pick == "" {
-		t.Fatal("no oa/gpt-5.4 to pick")
-	}
-	if err := a.Pick(key, pick); err != nil {
-		t.Fatal(err)
-	}
-	if !a.Wired() || a.Values()[key] != pick {
-		t.Fatalf("picked %q: %v\n%s", pick, a.Values(), readFile(a.Path))
-	}
-	if err := a.Disconnect(); err != nil {
-		t.Fatal(err)
-	}
-	for k, want := range map[string]string{"GOOSE_PROVIDER": "anthropic", "GOOSE_MODEL": "claude-opus-5-5"} {
-		if v, _ := edit.GetYAMLTop(a.Path, k); v != want {
-			t.Fatalf("%s = %q after disconnecting:\n%s", k, v, readFile(a.Path))
-		}
 	}
 }
 
@@ -474,5 +404,43 @@ func TestCodexOwnProviderOffAndOnIsNotConnectedByItsHelpers(t *testing.T) {
 	}
 	if !cx.Routed() || !isMagpie(cx.Values()["model"]) {
 		t.Fatalf("connected (%+v) on %q, routed %v:\n%s", how, cx.Values()["model"], cx.Routed(), read())
+	}
+}
+
+// A model of magpie's picked on the Agents page for an agent not connected
+// connects it first, as its switch does (the owner: the switch, and one
+// click in magpie, both): Kimi Code starts on the model picked, and
+// disconnecting it brings back its own model.
+func TestPickConnectsFirst(t *testing.T) {
+	home := syncHome(t)
+	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
+	if err := provider.Save(provider.Provider{ID: "oa", Name: "OA", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"gpt-5.5", "gpt-5.4"}}); err != nil {
+		t.Fatal(err)
+	}
+	a := kimi(home)
+	const own = "default_model = \"mine\"\n\n[models.mine]\nprovider = \"theirs\"\nmodel = \"k3\"\n\n[providers.theirs]\ntype = \"kimi\"\nbase_url = \"https://api.example/v1\"\napi_key = \"sk-theirs\"\n"
+	writeFile(t, a.Path, own)
+	var key, pick string
+	for _, f := range a.Fields {
+		for _, o := range f.Options(a.Values()) {
+			if o.Ref == "oa/gpt-5.4" {
+				key, pick = f.Key, o.Value
+			}
+		}
+	}
+	if pick == "" {
+		t.Fatal("no oa/gpt-5.4 to pick")
+	}
+	if err := a.Pick(key, pick); err != nil {
+		t.Fatal(err)
+	}
+	if !a.Wired() || a.Values()[key] != pick {
+		t.Fatalf("picked %q: %v\n%s", pick, a.Values(), readFile(a.Path))
+	}
+	if err := a.Disconnect(); err != nil {
+		t.Fatal(err)
+	}
+	if got := readFile(a.Path); got != own {
+		t.Fatalf("after disconnecting:\n%s", got)
 	}
 }

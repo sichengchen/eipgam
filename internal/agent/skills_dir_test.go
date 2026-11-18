@@ -6,18 +6,24 @@ import (
 	"testing"
 )
 
+// ownAppData puts APPDATA and LOCALAPPDATA in home, where agents keep
+// their folders on Windows (Hermes in %LOCALAPPDATA%\hermes): left at the
+// package's home, another test's files there are taken for the agent.
+func ownAppData(t *testing.T, home string) {
+	t.Helper()
+	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(home, "AppData", "Local"))
+}
+
 // Skill installers (npx skills and the like) make <folder>/skills for
 // every agent they know. A folder holding only that is no sign the agent is
-// here; anything the agent writes beside it is (qtwaiter on X: Goose, Crush,
-// Command Code, fx, Devin, Hermes and Droid listed, none installed).
+// here; anything the agent writes beside it is (qtwaiter on X: Devin and
+// others listed, none installed).
 func TestSkillsOnlyFolderIsNotInstalled(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 	for _, mk := range []func(home, cfg string) *Agent{
-		goose, crush, devin,
-		func(h, _ string) *Agent { return commandCode(h) },
-		func(h, _ string) *Agent { return fx(h) },
-		func(h, _ string) *Agent { return hermes(h) },
-		func(h, _ string) *Agent { return droid(h) },
+		devin,
+		func(h, _ string) *Agent { return kimi(h) },
 	} {
 		home := t.TempDir()
 		ownAppData(t, home)
@@ -46,7 +52,7 @@ func TestSkillsOnlyFolderIsNotInstalled(t *testing.T) {
 }
 
 // An uninstalled agent leaves the folders it writes as it runs: v5tech's
-// ~/.codebuddy held only logs/ and diagnostics/, ~/.qwen a debug/ (#1495).
+// agent folders held only logs/ and diagnostics/, or a debug/ (#1495).
 // A folder holding only those is no sign the agent is here; its own
 // settings beside them are, and so is a file that only shares the name.
 func TestLeftoverFoldersAreNotInstalled(t *testing.T) {
@@ -55,9 +61,8 @@ func TestLeftoverFoldersAreNotInstalled(t *testing.T) {
 		mk   func(home string) *Agent
 		left []string
 	}{
-		{func(h string) *Agent { return codebuddy(h) }, []string{"logs", "diagnostics"}},
-		{func(h string) *Agent { return qwen(h) }, []string{"debug"}},
-		{func(h string) *Agent { return hermes(h) }, []string{"cache", "log", "skills"}},
+		{func(h string) *Agent { return kimi(h) }, []string{"logs", "diagnostics"}},
+		{func(h string) *Agent { return devin(h, filepath.Join(h, ".config")) }, []string{"cache", "log", "skills"}},
 	} {
 		home := t.TempDir()
 		ownAppData(t, home)
@@ -81,21 +86,13 @@ func TestLeftoverFoldersAreNotInstalled(t *testing.T) {
 		})
 	}
 	home := t.TempDir()
-	a := codebuddy(home)
+	ownAppData(t, home)
+	a := kimi(home)
 	os.MkdirAll(a.Dir, 0o755)
 	if err := os.WriteFile(filepath.Join(a.Dir, "logs"), nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if !codebuddy(home).Detected() {
+	if !kimi(home).Detected() {
 		t.Error("a file named logs, not a folder, is no longer taken for the agent's own")
 	}
-}
-
-// ownAppData puts APPDATA and LOCALAPPDATA in home, where agents keep
-// their folders on Windows (Hermes in %LOCALAPPDATA%\hermes): left at the
-// package's home, another test's files there are taken for the agent.
-func ownAppData(t *testing.T, home string) {
-	t.Helper()
-	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
-	t.Setenv("LOCALAPPDATA", filepath.Join(home, "AppData", "Local"))
 }

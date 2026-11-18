@@ -12,8 +12,6 @@ var projectAgentFiles = map[string]string{
 	"codex":    ".codex/agents/reviewer.toml",
 	"opencode": ".opencode/agents/reviewer.md",
 	"gemini":   ".gemini/agents/reviewer.md",
-	"qwen":     ".qwen/agents/reviewer.md",
-	"droid":    ".factory/droids/reviewer.md",
 	"cursor":   ".cursor/agents/reviewer.md",
 	"copilot":  ".github/agents/reviewer.agent.md",
 }
@@ -60,7 +58,7 @@ func TestProjectSubagentsEachAgentsFolder(t *testing.T) {
 			t.Errorf("another project got %s", rel)
 		}
 	}
-	for _, d := range []string{".claude/agents", ".codex/agents", ".gemini/agents", ".cursor/agents", ".copilot/agents", ".factory/droids", ".config/opencode/agents", ".qwen/agents"} {
+	for _, d := range []string{".claude/agents", ".codex/agents", ".gemini/agents", ".cursor/agents", ".copilot/agents", ".config/opencode/agents"} {
 		if _, err := os.Stat(filepath.Join(h, d)); err == nil {
 			t.Errorf("the user-wide %s was made", d)
 		}

@@ -9,41 +9,18 @@ import (
 // one of its own providers named as one of magpie's (its own relay, and
 // magpie's relay) is its own model, not magpie's. The row isn't connected
 // on it, and Disconnect from magpie puts it back and is done, rather than
-// leaving the row connected on the model it went back to (#835, OpenHanako's
+// leaving the row connected on the model it went back to (#835, an agent's
 // own deepseek/deepseek-v4-pro).
 func TestOwnProviderNamedAsMagpies(t *testing.T) {
-	ids := []string{"agy", "opencode", "openchamber", "mimocode", "deveco", "pi", "aside", "omo", "prime-agent", "mu", "goose", "zed", "vscode",
-		"crush", "dsh", "ds-bot", "commandcode", "fx", "omp", "hermes", "morph", "kimi", "empryo", "nanobot", "miniq", "paimon", "craft-agents", "minimax-code", "droid",
-		"qoder", "qoder-cn", "grok", "atomcode", "cline", "snow", "qwenpaw", "open-code-review"}
+	ids := []string{"agy", "opencode", "pi", "zed", "vscode", "kimi", "grok"}
 	for _, id := range ids {
 		t.Run(id, func(t *testing.T) {
-			if id == "aside" {
-				asideHome(t)
-			} else if home := syncHome(t); id == "qwenpaw" {
-				qwenpawFixture(t, home)
-			}
+			syncHome(t)
 			a, err := Find(id)
 			if err != nil {
 				t.Fatal(err)
 			}
 			f := &a.Fields[0]
-			if id == "miniq" {
-				// a provider of the user's own, for its own model to be on
-				hanakoWrite(t, a.Path, `{"provider":{"baseUrl":"https://relay.example/v1","apiKey":"sk-own","model":"glm-4.5","apiProtocol":"auto"}}`, 0o600)
-			}
-			if id == "craft-agents" {
-				// Craft's own config, with a connection of the user's
-				hanakoWrite(t, a.Path, craftUser, 0o644)
-			}
-			if id == "open-code-review" {
-				// a custom provider of the user's own, for its own model
-				// to be on
-				hanakoWrite(t, a.Path, `{"custom_providers":{"relay":{"protocol":"openai","url":"https://relay.example/v1","api_key":"sk-own"}}}`, 0o600)
-			}
-			if id == "cline" {
-				// a model of OpenRouter's, the provider Cline is on
-				hanakoWrite(t, a.Path, `{"version":1,"modes":{},"providers":{},"lastUsedProvider":"openrouter"}`, 0o600)
-			}
 			if err := f.Set("relay/glm-4.6"); err != nil {
 				t.Fatal(err)
 			}
@@ -82,7 +59,7 @@ func TestOpenCodeGatewayProviderIsMagpies(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	hanakoWrite(t, a.Path, `{"provider":{"relay":{"options":{"baseURL":"`+gatewayV1()+`"},"models":{"relay/glm-4.6":{}}}},"model":"relay/relay/glm-4.6"}`, 0o644)
+	writeMode(t, a.Path, `{"provider":{"relay":{"options":{"baseURL":"`+gatewayV1()+`"},"models":{"relay/glm-4.6":{}}}},"model":"relay/relay/glm-4.6"}`, 0o644)
 	if a.Wired() {
 		t.Fatalf("its own provider at the gateway, written by hand, reads as connected: %v", a.Values())
 	}
@@ -93,7 +70,7 @@ func TestOpenCodeGatewayProviderIsMagpies(t *testing.T) {
 	if !a.Wired() {
 		t.Fatalf("a model through its own provider at the gateway isn't magpie's: %v (%s)", a.Values(), filepath.Base(a.Path))
 	}
-	hanakoWrite(t, a.Path, `{"provider":{"relay":{"options":{"baseURL":"https://x/v1"},"models":{"glm-4.6":{}}}},"model":"relay/glm-4.6"}`, 0o644)
+	writeMode(t, a.Path, `{"provider":{"relay":{"options":{"baseURL":"https://x/v1"},"models":{"glm-4.6":{}}}},"model":"relay/glm-4.6"}`, 0o644)
 	if a.Wired() {
 		t.Fatalf("its own relay elsewhere reads as magpie's: %v", a.Values())
 	}

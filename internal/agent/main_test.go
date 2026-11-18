@@ -2,7 +2,6 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"os"
 	"testing"
@@ -52,17 +51,6 @@ func TestMain(m *testing.M) {
 	// nor where this Mac's Spotlight has an app (DeepSeek Harness.app
 	// outside /Applications, #2325)
 	spotlightApps = func(string) []string { return nil }
-	// whether OpenMausBot is open is never this machine's: one open there
-	// refused every test that turns magpie on for each agent; the tests
-	// about it say their own
-	ombRunning = func() bool { return false }
-	// nor is an Avibe this machine runs reached: each home's Avibe runs
-	// in the test (runningAvibe), and the tests about Avibe serve their own
-	// (avibe_test.go)
-	avibeLive = runningAvibe
-	// nor a Kun runtime this machine runs: each home's Kun runs in the
-	// test (runningKun)
-	kunLive = runningKun
 	// nor which OpenCode this machine has: an OpenCode 2 on PATH turned
 	// every OpenCode test's file into OpenCode 2's words; the tests about
 	// it say their own (opencode_v2_test.go)
@@ -76,13 +64,6 @@ func TestMain(m *testing.M) {
 	winClose = func([]int) error { return errors.New("no app is closed in a test") }
 	winEnd = func(int) error { return errors.New("no app is ended in a test") }
 	winLaunch = func(winProc) error { return errors.New("no app is opened in a test") }
-	// Aside's default is changed through the aside binary, which answers for
-	// the account the developer is actually running: a test that picks a
-	// model would change the real Aside's default, and the running one would
-	// keep the old one, so the test would read back a file nothing had
-	// applied. The Aside tests stand in for it themselves.
-	asideSet = func(string, string) error { return errors.New("aside: no Aside in a test") }
-	asideRead = func(string) (map[string]json.RawMessage, error) { return nil, errors.New("aside: no Aside in a test") }
 	// an address an agent is pointed at is tried over the network (Drift,
 	// #1013); never from a test, whose reach tests stand in for it
 	reachProbe = func(string) bool { return true }

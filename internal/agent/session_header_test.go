@@ -36,22 +36,3 @@ func TestPiNamesItsSessionToTheGateway(t *testing.T) {
 		t.Fatalf("the user's own compat was written over:\n%s", readFile(piModels))
 	}
 }
-
-func TestOmpNamesItsSessionToTheGateway(t *testing.T) {
-	syncHome(t)
-	for _, c := range []struct {
-		version string
-		want    string
-	}{
-		{"18.6.1", "x-session-affinity"},
-		{"16.0.6", "x-session-affinity"},
-		// before 16.0.6 omp had no promptCacheSessionHeader; an omp whose
-		// version isn't known is taken for an older one
-		{"16.0.5", ""},
-		{"", ""},
-	} {
-		if got := ompProviderAt("http://127.0.0.1:3425", c.version).Compat["promptCacheSessionHeader"]; got != c.want {
-			t.Errorf("omp %q: promptCacheSessionHeader %q, want %q", c.version, got, c.want)
-		}
-	}
-}

@@ -43,14 +43,9 @@ const hubOnDemandOver = 10
 
 // hubSearchesItself are the agents that load MCP tools only when searched
 // for, by their id without a WSL distro (claude@wsl:Ubuntu is claude).
-// Droid (0.231) defers every MCP tool but GitHub's and agent-browser's to
-// its ToolSearch, which matches the names and descriptions it is given, and
-// omp (18.9) mounts every MCP tool as an xd:// device, its schema read only
-// when asked for: given find_tools in their place, neither showed its
-// model which tools were behind it (tao5010 on Discord, 11-04).
 // The Library's Tools on demand row names them from HubFindsItself, so its
-// words can't leave one out again (they named four of the six, 11-18).
-var hubSearchers = []string{"claude", "claude-desktop", "codex", "pi", "droid", "omp"}
+// words can't leave one out again.
+var hubSearchers = []string{"claude", "claude-desktop", "codex", "pi"}
 
 var hubSearchesItself = func() map[string]bool {
 	m := map[string]bool{}

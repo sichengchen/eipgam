@@ -45,13 +45,4 @@ func TestThinkingWithoutLevelsReachesTheExports(t *testing.T) {
 	if got := piClamp("high", piOffered("pi", "magpie/"+id)); got != "high" {
 		t.Fatalf("magpie pi effort high runs at %q", got)
 	}
-
-	ms := ccProviderJSONAt("http://127.0.0.1:1/v1").(map[string]any)["models"].(map[string]any)
-	cc, _ := ms[id].(map[string]any)
-	if cc["reasoning"] != true {
-		t.Fatalf("Command Code's entry: %v", cc)
-	}
-	if _, set := cc["reasoningEfforts"]; set {
-		t.Fatalf("Command Code was told levels magpie doesn't know: %v", cc)
-	}
 }

@@ -14,15 +14,11 @@ import (
 // sandbox, and says where each keeps one called name.
 func commandAgents(t *testing.T, h, name string) map[string]string {
 	t.Helper()
-	write(t, filepath.Join(h, ".qwen/settings.json"), "{}\n")
-	write(t, filepath.Join(h, ".factory/settings.json"), "")
 	return map[string]string{
 		"claude":   filepath.Join(h, ".claude/commands", name+".md"),
 		"opencode": filepath.Join(h, ".config/opencode/commands", name+".md"),
 		"pi":       filepath.Join(h, ".pi/agent/prompts", name+".md"),
 		"gemini":   filepath.Join(h, ".gemini/commands", name+".toml"),
-		"qwen":     filepath.Join(h, ".qwen/commands", name+".md"),
-		"droid":    filepath.Join(h, ".factory/commands", name+".md"),
 	}
 }
 
@@ -56,8 +52,6 @@ func TestCommandsEachAgentsFile(t *testing.T) {
 		"claude":   md("Review $ARGUMENTS.\n\nBugs only.\n"),
 		"opencode": md("Review $ARGUMENTS.\n\nBugs only.\n"),
 		"pi":       md("Review $ARGUMENTS.\n\nBugs only.\n"),
-		"qwen":     md("Review {{args}}.\n\nBugs only.\n"),
-		"droid":    md("Review $ARGUMENTS.\n\nBugs only.\n"),
 	}
 	for id, f := range files {
 		got := read(t, f)
@@ -97,7 +91,7 @@ func TestCommandsEachAgentsFile(t *testing.T) {
 		}
 	}
 	slices.Sort(listed)
-	if !slices.Equal(listed, []string{"claude", "codex", "droid", "gemini", "opencode", "pi", "qwen"}) {
+	if !slices.Equal(listed, []string{"claude", "codex", "gemini", "opencode", "pi"}) {
 		t.Errorf("agents listed: %v", listed)
 	}
 
@@ -139,7 +133,7 @@ func TestCommandsEachAgentsFile(t *testing.T) {
 func TestCommandsWordsByPlace(t *testing.T) {
 	h := sandbox(t)
 	files := commandAgents(t, h, "fix")
-	c := Command{Name: "fix", Prompt: "Fix issue #$1 with $2, costs $0 ($ARGUMENTS).", Agents: []string{"claude", "opencode", "pi", "gemini", "qwen", "droid"}}
+	c := Command{Name: "fix", Prompt: "Fix issue #$1 with $2, costs $0 ($ARGUMENTS).", Agents: []string{"claude", "opencode", "pi", "gemini"}}
 	res, err := SaveCommand("", c)
 	if err != nil {
 		t.Fatal(err)
@@ -153,15 +147,13 @@ func TestCommandsWordsByPlace(t *testing.T) {
 		}
 	}
 	p := commandProblems(res)
-	for _, id := range []string{"gemini", "qwen", "droid"} {
-		if _, err := os.Stat(files[id]); !os.IsNotExist(err) {
-			t.Errorf("%s was given a command it can't read: %v", id, err)
-		}
-		if !strings.Contains(p[id], "$1") {
-			t.Errorf("%s's problem: %q", id, p[id])
-		}
+	if _, err := os.Stat(files["gemini"]); !os.IsNotExist(err) {
+		t.Errorf("gemini was given a command it can't read: %v", err)
 	}
-	if len(p) != 3 {
+	if !strings.Contains(p["gemini"], "$1") {
+		t.Errorf("gemini's problem: %q", p["gemini"])
+	}
+	if len(p) != 1 {
 		t.Errorf("problems: %+v", p)
 	}
 	// the page says so before a sync, too
@@ -169,10 +161,8 @@ func TestCommandsWordsByPlace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"gemini", "qwen", "droid"} {
-		if !strings.Contains(v.Commands[0].Problems[id], "$1") {
-			t.Errorf("view's %s problem: %+v", id, v.Commands[0].Problems)
-		}
+	if !strings.Contains(v.Commands[0].Problems["gemini"], "$1") {
+		t.Errorf("view's gemini problem: %+v", v.Commands[0].Problems)
 	}
 
 	// no $1 any more: written for them all, and the problems are gone
@@ -184,8 +174,9 @@ func TestCommandsWordsByPlace(t *testing.T) {
 	if p := commandProblems(res); len(p) != 0 {
 		t.Errorf("problems: %+v", p)
 	}
-	if got := read(t, files["qwen"]); got != "Fix {{args}}.\n" {
-		t.Errorf("qwen: %q", got)
+	var cmd map[string]any
+	if err := toml.Unmarshal([]byte(read(t, files["gemini"])), &cmd); err != nil || cmd["prompt"] != "Fix {{args}}.\n" {
+		t.Errorf("gemini: %#v %v", cmd, err)
 	}
 	// $1 again: magpie's Gemini file goes, for it would say the wrong thing
 	c.Prompt = "Fix $1."
@@ -208,7 +199,7 @@ func TestCommandsLeaveTheUsersFiles(t *testing.T) {
 	write(t, files["claude"], mine)
 	same := "Review $ARGUMENTS.\n"
 	write(t, files["pi"], same)
-	c := Command{Name: "review", Prompt: "Review $ARGUMENTS.", Agents: []string{"claude", "opencode", "pi", "droid"}}
+	c := Command{Name: "review", Prompt: "Review $ARGUMENTS.", Agents: []string{"claude", "opencode", "pi"}}
 	res, err := SaveCommand("", c)
 	if err != nil {
 		t.Fatal(err)
@@ -220,33 +211,31 @@ func TestCommandsLeaveTheUsersFiles(t *testing.T) {
 		t.Fatalf("the user's own file was written over:\n%s", read(t, files["claude"]))
 	}
 
-	// the user edits magpie's Droid file, then the command changes: the
+	// the user edits magpie's OpenCode file, then the command changes: the
 	// edit stays, and the page is told why
-	edited := read(t, files["droid"]) + "And style.\n"
-	write(t, files["droid"], edited)
+	edited := read(t, files["opencode"]) + "And style.\n"
+	write(t, files["opencode"], edited)
 	c.Prompt = "Review $ARGUMENTS, twice."
 	res, err = SaveCommand("review", c)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if read(t, files["droid"]) != edited {
-		t.Errorf("the user's edit was written over:\n%s", read(t, files["droid"]))
+	if read(t, files["opencode"]) != edited {
+		t.Errorf("the user's edit was written over:\n%s", read(t, files["opencode"]))
 	}
-	if !strings.Contains(commandProblems(res)["droid"], "of its own") {
+	if !strings.Contains(commandProblems(res)["opencode"], "of its own") {
 		t.Errorf("problems: %+v", res.Problems)
 	}
-	if read(t, files["opencode"]) != "Review $ARGUMENTS, twice.\n" || read(t, files["pi"]) != "Review $ARGUMENTS, twice.\n" {
-		t.Errorf("magpie's files weren't updated: %q %q", read(t, files["opencode"]), read(t, files["pi"]))
+	if read(t, files["pi"]) != "Review $ARGUMENTS, twice.\n" {
+		t.Errorf("magpie's file wasn't updated: %q", read(t, files["pi"]))
 	}
 
 	// removed: magpie's own files go, the user's stay
 	ok(t)(RemoveCommands([]string{"review"}))
-	for _, id := range []string{"opencode", "pi"} {
-		if _, err := os.Stat(files[id]); !os.IsNotExist(err) {
-			t.Errorf("magpie's %s file stayed: %v", id, err)
-		}
+	if _, err := os.Stat(files["pi"]); !os.IsNotExist(err) {
+		t.Errorf("magpie's pi file stayed: %v", err)
 	}
-	if read(t, files["droid"]) != edited || read(t, files["claude"]) != mine {
+	if read(t, files["opencode"]) != edited || read(t, files["claude"]) != mine {
 		t.Error("removing took the user's files")
 	}
 	l, _ := load()

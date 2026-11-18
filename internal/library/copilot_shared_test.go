@@ -11,11 +11,10 @@ import (
 )
 
 // GitHub Copilot reads ~/.copilot/copilot-instructions.md as the user's own
-// instructions in all three of its surfaces: Copilot CLI, VS Code (its
-// promptsServiceImpl reads the Copilot harness's user folder) and the
-// JetBrains plugin (getCopilotCliHomePath()). The Library's Instructions
-// had a row for it only with Copilot CLI installed, named Copilot CLI
-// (@codealc on X: 资源库 › 指令 has no GitHub Copilot).
+// instructions in Copilot CLI and VS Code (its promptsServiceImpl reads the
+// Copilot harness's user folder). The Library's Instructions had a row for
+// it only with Copilot CLI installed, named Copilot CLI (@codealc on X:
+// 资源库 › 指令 has no GitHub Copilot).
 
 // noCopilotCLI takes Copilot CLI away: no settings.json, no command.
 func noCopilotCLI(t *testing.T, h string) {
@@ -38,24 +37,6 @@ func vscodeUser(t *testing.T, h string) {
 		d = filepath.Join(h, ".config", "Code", "User")
 	}
 	if err := os.MkdirAll(d, 0o755); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// jetBrainsCopilot installs GitHub Copilot's JetBrains plugin in an IDE.
-func jetBrainsCopilot(t *testing.T, h string) {
-	t.Helper()
-	t.Setenv("XDG_DATA_HOME", "")
-	var d string
-	switch runtime.GOOS {
-	case "darwin":
-		d = filepath.Join(h, "Library", "Application Support", "JetBrains", "IntelliJIdea2026.2", "plugins")
-	case "windows":
-		d = filepath.Join(h, "AppData", "Roaming", "JetBrains", "IntelliJIdea2026.2", "plugins")
-	default:
-		d = filepath.Join(h, ".local", "share", "JetBrains", "IntelliJIdea2026.2")
-	}
-	if err := os.MkdirAll(filepath.Join(d, "github-copilot-intellij"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -118,13 +99,6 @@ func TestCopilotVSCodeAloneGetsInstructions(t *testing.T) {
 	if a.Detected() {
 		t.Error("the instructions magpie wrote in ~/.copilot made Copilot CLI detected")
 	}
-}
-
-func TestCopilotJetBrainsAloneGetsInstructions(t *testing.T) {
-	h := sandbox(t)
-	noCopilotCLI(t, h)
-	jetBrainsCopilot(t, h)
-	copilotRow(t, h)
 }
 
 // The user's own copilot-instructions.md is kept, with magpie's block

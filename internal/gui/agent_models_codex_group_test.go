@@ -245,7 +245,7 @@ func TestGroupAloneKeepsSubscriptionModelsOutOfEveryAgentsList(t *testing.T) {
 			t.Errorf("the group alone: %s's picker offers a member: %v", a.ID, p)
 		}
 	}
-	for _, id := range []string{"hermes", "workbuddy", "claude"} {
+	for _, id := range []string{"vscode", "raycast", "claude"} {
 		a, err := agent.Find(id)
 		if err != nil {
 			t.Fatal(err)
@@ -274,7 +274,7 @@ func TestGroupAloneKeepsSubscriptionModelsOutOfEveryAgentsList(t *testing.T) {
 	if err := provider.SaveGroup(g); err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"hermes", "workbuddy", "claude", "codex"} {
+	for _, id := range []string{"vscode", "raycast", "claude", "codex"} {
 		a, _ := agent.Find(id)
 		got := listed(a)
 		for _, ref := range refs {

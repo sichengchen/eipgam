@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
 	"github.com/yetone/magpie/internal/testenv"
 )
 
@@ -81,8 +80,8 @@ func TestRTK(t *testing.T) {
 	set("cursor", false)
 	want(true, false, false)
 
-	if _, err := SetRTK("goose", true); err == nil {
-		t.Fatal("goose has no rtk hook, yet it was switched on")
+	if _, err := SetRTK("devin", true); err == nil {
+		t.Fatal("devin has no rtk hook, yet it was switched on")
 	}
 	t.Setenv("PATH", "")
 	if v := ReadRTK(); v.Path != "" {
@@ -443,22 +442,6 @@ func TestRTKOpenCode2(t *testing.T) {
 	}
 }
 
-func TestDropHermesPlugin(t *testing.T) {
-	p := filepath.Join(t.TempDir(), "config.yaml")
-	for in, want := range map[string]string{
-		"model: x\nplugins:\n  enabled:\n    - rtk-rewrite\n":          "model: x\n",
-		"model: x\nplugins:\n  enabled:\n    - a\n    - rtk-rewrite\n": "model: x\nplugins:\n  enabled:\n    - a\n",
-	} {
-		write(t, p, in)
-		if err := dropHermesPlugin(p); err != nil {
-			t.Fatal(err)
-		}
-		if got := read(t, p); got != want {
-			t.Errorf("%q → %q, want %q", in, got, want)
-		}
-	}
-}
-
 // TestRTKCodexOld: rtk has a hook for Codex from 0.50 on; an older one's
 // rtk init --codex only puts @RTK.md in AGENTS.md, so it isn't run for
 // Codex, and the Library says to update it. A newer one is.
@@ -577,117 +560,29 @@ func TestCodexSandbox(t *testing.T) {
 }
 
 // TestRTKNoHookListed (Discord, lc: rtk 没有识别 deepseek harness): an
-// agent RTK has no hook for, DeepSeek Harness, is listed all the same with
-// why, not left out as if magpie hadn't seen it, and it can't be switched on.
+// agent RTK has no hook for, Kimi Code, is listed all the same with why,
+// not left out as if magpie hadn't seen it, and it can't be switched on.
 func TestRTKNoHookListed(t *testing.T) {
 	h := sandbox(t)
-	bin := filepath.Join(h, "bin")
-	testenv.Program(t, filepath.Join(bin, "dsh"), "#!/bin/sh\n")
-	write(t, filepath.Join(bin, "dsh.exe"), "")
-	var dsh *RTKAgent
+	holdCLI(t, h, "kimi")
+	var kimi *RTKAgent
 	for _, a := range ReadRTK().Agents {
-		if a.ID == "dsh" {
-			dsh = &a
+		if a.ID == "kimi" {
+			kimi = &a
 		}
 	}
-	if dsh == nil {
-		t.Fatal("DeepSeek Harness isn't listed")
+	if kimi == nil {
+		t.Fatal("Kimi Code isn't listed")
 	}
 	// what the page reads: noHook, and Blocked saying why
-	if b, _ := json.Marshal(dsh); dsh.On || !strings.Contains(string(b), `"noHook":true`) || !strings.Contains(dsh.Blocked, "rewriting the shell command") {
+	if b, _ := json.Marshal(kimi); kimi.On || !strings.Contains(string(b), `"noHook":true`) || !strings.Contains(kimi.Blocked, "only allow or deny a command") {
 		t.Fatalf("listed as %s", b)
 	}
-	if _, err := SetRTK("dsh", true); err == nil || !strings.Contains(err.Error(), "DeepSeek Harness") {
+	if _, err := SetRTK("kimi", true); err == nil || !strings.Contains(err.Error(), "Kimi Code") {
 		t.Fatalf("switched on: %v", err)
 	}
-	if _, err := RTKTakes("dsh"); err == nil || !strings.Contains(err.Error(), "rewriting the shell command") {
-		t.Fatalf("magpie library rtk on dsh: %v", err)
-	}
-}
-
-// fakeRTKHermes acts as rtk 0.51's rtk init -g --agent hermes does
-// (src/hooks/init/hermes.rs): its plugin and config go into $HERMES_HOME,
-// else ~/.hermes, whatever the OS. It notes the HERMES_HOME it was given.
-const fakeRTKHermes = `#!/bin/sh
-case "$1" in
---version) echo "rtk 0.51.0"; exit 0 ;;
-gain) echo '{"summary":{}}'; exit 0 ;;
-esac
-shift 2
-[ "$*" = "--agent hermes --auto-patch" ] || { echo "unknown: $*" >&2; exit 2; }
-h="${HERMES_HOME:-$HOME/.hermes}"
-echo "$HERMES_HOME" > "$HOME/given"
-/bin/mkdir -p "$h/plugins/rtk-rewrite"
-echo "name: rtk-rewrite" > "$h/plugins/rtk-rewrite/plugin.yaml"
-echo "x" > "$h/plugins/rtk-rewrite/__init__.py"
-printf 'plugins:\n  enabled:\n    - rtk-rewrite\n' >> "$h/config.yaml"
-echo "Config: $h/config.yaml"
-echo "Hermes will now rewrite terminal commands through rtk. Restart Hermes."
-echo "Test with: git status"
-`
-
-// TestRTKHermesHome (新v学员 on Discord, native Windows): Hermes's folder is
-// %LOCALAPPDATA%\hermes there, and rtk's installer wrote its plugin into it,
-// while magpie looked for the plugin in ~/.hermes: "rtk's installer didn't
-// add its hook to Hermes Agent". The plugin is looked for, and taken out,
-// in Hermes's own folder (appdir.HermesHome), and the installer is told
-// that folder, since rtk itself knows only $HERMES_HOME and ~/.hermes.
-func TestRTKHermesHome(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("the fake rtk is a shell script")
-	}
-	h := sandbox(t)
-	bin := filepath.Join(h, "bin")
-	testenv.Program(t, filepath.Join(bin, "rtk"), fakeRTKHermes)
-	holdCLI(t, h, "hermes") // the config alone is gone (#2254)
-	t.Setenv("PATH", bin)
-	for _, c := range []struct{ name, env string }{
-		// the reporter's layout: Hermes's folder isn't ~/.hermes
-		{"elsewhere", filepath.Join(h, "AppData", "Local", "hermes")},
-		// Hermes's default here: rtk is still told it, which on Windows
-		// is the one way it writes where Hermes reads
-		{"default", ""},
-	} {
-		t.Run(c.name, func(t *testing.T) {
-			t.Setenv("HERMES_HOME", c.env)
-			dir := appdir.HermesHome()
-			if c.env != "" && dir != c.env {
-				t.Fatalf("Hermes's folder is %s, want %s", dir, c.env)
-			}
-			cfg := filepath.Join(dir, "config.yaml")
-			write(t, cfg, "model:\n  default: x\n")
-			if _, err := SetRTK("hermes", true); err != nil {
-				t.Fatal(err)
-			}
-			if got := strings.TrimSpace(read(t, filepath.Join(h, "given"))); got != dir {
-				t.Errorf("rtk was given HERMES_HOME=%q, want %q", got, dir)
-			}
-			if !exists(filepath.Join(dir, "plugins", "rtk-rewrite", "plugin.yaml")) {
-				t.Fatalf("no plugin in %s", dir)
-			}
-			if c.env != "" && exists(filepath.Join(h, ".hermes")) {
-				t.Error("~/.hermes was made beside Hermes's own folder")
-			}
-			on := false
-			for _, a := range ReadRTK().Agents {
-				if a.ID == "hermes" {
-					on = a.On
-				}
-			}
-			if !on {
-				t.Fatal("Hermes isn't seen with rtk on")
-			}
-			if _, err := SetRTK("hermes", false); err != nil {
-				t.Fatal(err)
-			}
-			if exists(filepath.Join(dir, "plugins", "rtk-rewrite")) {
-				t.Error("rtk's plugin is still in Hermes's folder")
-			}
-			if got := read(t, cfg); got != "model:\n  default: x\n" {
-				t.Errorf("config.yaml = %q", got)
-			}
-			os.RemoveAll(dir)
-		})
+	if _, err := RTKTakes("kimi"); err == nil || !strings.Contains(err.Error(), "only allow or deny a command") {
+		t.Fatalf("magpie library rtk on kimi: %v", err)
 	}
 }
 

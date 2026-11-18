@@ -1,8 +1,6 @@
 package agent
 
 import (
-	"encoding/json"
-	"os"
 	"path/filepath"
 	"slices"
 	"testing"
@@ -49,9 +47,6 @@ func TestEveryPickerOfMagpiesModelsCanBeNarrowed(t *testing.T) {
 		// Claude Desktop's tier pickers list the catalog once it is
 		// connected (desktopTierFields), and the sandbox has no Desktop
 		case refs, a.ID == "claude-desktop":
-		// Kiro Crew's models are its harness's: the agent it runs (Codex,
-		// Claude Code…), whose own row narrows them
-		case a.ID == "kirocrew":
 		case a.ListsModels:
 			menus = append(menus, a.ID)
 		case magpie:
@@ -61,108 +56,9 @@ func TestEveryPickerOfMagpiesModelsCanBeNarrowed(t *testing.T) {
 	if len(bare) > 0 {
 		t.Errorf("magpie's models are put in these agents' pickers with no way to pick which: %v", bare)
 	}
-	for _, id := range []string{"zcode", "pencil", "openpencil", "openbot", "newmax", "liveagent", "t3code", "openmausbot", "avibe", "workbuddy", "workbuddy-ai", copilotJBID, CursorLocalID} {
+	for _, id := range []string{"t3code", CursorLocalID} {
 		if !slices.Contains(menus, id) {
 			t.Errorf("%s's row has no model list to pick in (ListsModels): %v", id, menus)
 		}
-	}
-}
-
-// The models taken out of ZCode's list on the Agents page are out of both
-// files it reads, config.json and provider_config.json, and come back when
-// they are put back; what the user set by hand stays: their own providers,
-// rules and keys, and their manual rule for a model of magpie's (#1508).
-func TestZCodeListsOnlyThePicked(t *testing.T) {
-	home, _ := listsSandbox(t)
-	dir := filepath.Join(home, ".zcode", "v2")
-	path, rules := filepath.Join(dir, "config.json"), filepath.Join(dir, "provider_config.json")
-	os.MkdirAll(dir, 0o755)
-	os.WriteFile(path, []byte(`{"provider":{"builtin:bigmodel":{"name":"Bigmodel","kind":"anthropic","enabled":true},"mine":{"name":"Mine","kind":"openai","models":{"m1":{"name":"M1"}}}},"theme":"dark"}`), 0o644)
-	os.WriteFile(rules, []byte(`{"schemaVersion":1,"config":{"providerConfigRules":{"providerRules":[{"providerId":"mine","enabled":true,"config":{"personalModelIds":["m1"]}}]},"modelConfigRules":{"providerModelRules":[{"providerId":"mine","modelId":"m1","config":{"properties":{"contextWindow":1000}}}],"manualProviderModelRules":[{"providerId":"magpie","modelId":"deepseek/pro","config":{"enabled":true,"properties":{"contextWindow":4242}}}]}},"ui":{"lang":"zh"}}`), 0o600)
-	a := zcode(home)
-	if err := a.Field("provider").Set("magpie"); err != nil {
-		t.Fatal(err)
-	}
-	type configDoc struct {
-		Theme    string                    `json:"theme"`
-		Provider map[string]map[string]any `json:"provider"`
-	}
-	readConfig := func() configDoc {
-		var c configDoc
-		b, _ := os.ReadFile(path)
-		if err := json.Unmarshal(b, &c); err != nil {
-			t.Fatalf("%v\n%s", err, b)
-		}
-		if c.Theme != "dark" || c.Provider["builtin:bigmodel"] == nil || c.Provider["mine"]["models"].(map[string]any)["m1"] == nil {
-			t.Fatalf("the user's own config went: %s", b)
-		}
-		return c
-	}
-	type rulesDoc struct {
-		UI     map[string]any `json:"ui"`
-		Config struct {
-			ProviderConfigRules struct {
-				ProviderRules []map[string]any `json:"providerRules"`
-			} `json:"providerConfigRules"`
-			ModelConfigRules struct {
-				ProviderModelRules       []map[string]any `json:"providerModelRules"`
-				ManualProviderModelRules []map[string]any `json:"manualProviderModelRules"`
-			} `json:"modelConfigRules"`
-		} `json:"config"`
-	}
-	readRules := func() rulesDoc {
-		var d rulesDoc
-		b, _ := os.ReadFile(rules)
-		if err := json.Unmarshal(b, &d); err != nil {
-			t.Fatalf("%v\n%s", err, b)
-		}
-		pr, mr := d.Config.ProviderConfigRules.ProviderRules, d.Config.ModelConfigRules
-		if d.UI["lang"] != "zh" || len(pr) != 2 || pr[0]["providerId"] != "mine" ||
-			!slices.ContainsFunc(mr.ProviderModelRules, func(r map[string]any) bool { return r["providerId"] == "mine" && r["modelId"] == "m1" }) ||
-			len(mr.ManualProviderModelRules) != 1 || mr.ManualProviderModelRules[0]["modelId"] != "deepseek/pro" {
-			t.Fatalf("the user's own rules went: %s", b)
-		}
-		return d
-	}
-	listed := func() (config, personal, ruled []string) {
-		for id := range readConfig().Provider["magpie"]["models"].(map[string]any) {
-			config = append(config, id)
-		}
-		d := readRules()
-		for _, id := range d.Config.ProviderConfigRules.ProviderRules[1]["config"].(map[string]any)["personalModelIds"].([]any) {
-			personal = append(personal, id.(string))
-		}
-		for _, r := range d.Config.ModelConfigRules.ProviderModelRules {
-			if r["providerId"] == magpieID {
-				ruled = append(ruled, r["modelId"].(string))
-			}
-		}
-		slices.Sort(config)
-		slices.Sort(personal)
-		return config, personal, ruled
-	}
-	both := []string{"deepseek/flash", "deepseek/pro"}
-	if c, p, _ := listed(); !slices.Equal(c, both) || !slices.Equal(p, both) {
-		t.Fatalf("connected: config.json %v, provider_config.json %v", c, p)
-	}
-	// taken out on the Agents page: gone from both, at the next sync
-	if err := provider.SetHiddenModels("zcode", []string{"deepseek/flash"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := a.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	if c, p, r := listed(); !slices.Equal(c, []string{"deepseek/pro"}) || !slices.Equal(p, []string{"deepseek/pro"}) || len(r) != 0 {
-		t.Fatalf("hidden: config.json %v, provider_config.json %v, rules %v", c, p, r)
-	}
-	// and back
-	if err := provider.SetHiddenModels("zcode", nil); err != nil {
-		t.Fatal(err)
-	}
-	if err := a.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	if c, p, r := listed(); !slices.Equal(c, both) || !slices.Equal(p, both) || !slices.Equal(r, []string{"deepseek/flash"}) {
-		t.Fatalf("shown again: config.json %v, provider_config.json %v, rules %v", c, p, r)
 	}
 }

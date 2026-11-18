@@ -51,16 +51,13 @@ func offIn(t *testing.T, tg *Target, name string) ([]string, map[string]any) {
 
 // nf1qaz2w on Discord: each of a server's tools has a switch, and a tool
 // turned off is written into each agent that has its own list of them in
-// a server's entry — Codex's disabled_tools, Gemini CLI's excludeTools,
-// Crush's disabled_tools, Hermes' tools.exclude — beside the names the
-// user put there themselves, which stay when the tool is turned on again.
+// a server's entry — Codex's disabled_tools, Gemini CLI's excludeTools —
+// beside the names the user put there themselves, which stay when the tool
+// is turned on again.
 func TestToolsOffInTheEntry(t *testing.T) {
-	h := sandbox(t)
-	t.Setenv("HERMES_HOME", filepath.Join(h, "hermes-home"))
-	write(t, filepath.Join(h, "hermes-home", "config.yaml"), "model:\n  default: x\n")
-	holdCLI(t, h, "hermes") // the config alone is gone (#2173, #2177)
-	agents := []string{"codex", "crush", "gemini", "hermes"}
-	keys := map[string]string{"codex": "disabled_tools", "crush": "disabled_tools", "gemini": "excludeTools", "hermes": "exclude"}
+	sandbox(t)
+	agents := []string{"codex", "gemini"}
+	keys := map[string]string{"codex": "disabled_tools", "gemini": "excludeTools"}
 	ok(t)(SaveServer("", Server{Name: "fs", Transport: "stdio", Command: "npx", Args: []string{"-y", "@mcp/fs"}, Agents: agents}))
 	for _, id := range agents {
 		tg := targetByID(id)
@@ -73,14 +70,9 @@ func TestToolsOffInTheEntry(t *testing.T) {
 		if strings.Contains(read(t, tg.MCP.Path), keys[id]) {
 			t.Errorf("%s: %s written with none turned off:\n%s", id, keys[id], read(t, tg.MCP.Path))
 		}
-		// the user's own: one they turned off, one magpie will too, and
-		// for Hermes a setting of its own beside exclude
+		// the user's own: one they turned off, one magpie will too
 		user := []any{"mine", "write_file"}
-		if id == "hermes" {
-			handEdit(t, tg, "fs", map[string]any{"tools": map[string]any{"exclude": user, "prompts": false}})
-		} else {
-			handEdit(t, tg, "fs", map[string]any{keys[id]: user})
-		}
+		handEdit(t, tg, "fs", map[string]any{keys[id]: user})
 	}
 
 	ok(t)(ServerTools("fs", []string{"write_file", " read_file ", "delete", "read_file"}))
@@ -113,37 +105,23 @@ func TestToolsOffInTheEntry(t *testing.T) {
 	ok(t)(ServerTools("fs", nil))
 	for _, id := range agents {
 		tg := targetByID(id)
-		got, e := offIn(t, tg, "fs")
+		got, _ := offIn(t, tg, "fs")
 		if want := []string{"mine", "write_file"}; !slices.Equal(got, want) {
 			t.Errorf("%s: on again: %v, want %v", id, got, want)
-		}
-		if id == "hermes" {
-			if tools, _ := e["tools"].(map[string]any); tools["prompts"] != false {
-				t.Errorf("hermes: lost the user's tools.prompts: %v", e)
-			}
 		}
 	}
 
 	// with the user's taken out too, the key goes, and a turned off tool
 	// once more comes back alone
 	for _, id := range agents {
-		tg := targetByID(id)
-		if id == "hermes" {
-			handEdit(t, tg, "fs", map[string]any{"tools": map[string]any{"prompts": false}})
-		} else {
-			handEdit(t, tg, "fs", map[string]any{keys[id]: []any{}})
-		}
+		handEdit(t, targetByID(id), "fs", map[string]any{keys[id]: []any{}})
 	}
 	ok(t)(ServerTools("fs", []string{"x"}))
 	ok(t)(ServerTools("fs", nil))
 	for _, id := range agents {
 		tg := targetByID(id)
 		_, e := offIn(t, tg, "fs")
-		if id == "hermes" {
-			if tools, _ := e["tools"].(map[string]any); tools["exclude"] != nil || tools["prompts"] != false {
-				t.Errorf("hermes: %v", e)
-			}
-		} else if v, has := e[keys[id]]; has && len(v.([]any)) != 0 {
+		if v, has := e[keys[id]]; has && len(v.([]any)) != 0 {
 			t.Errorf("%s: %v", id, e)
 		}
 	}
@@ -327,10 +305,10 @@ func TestToolsOffNotPretended(t *testing.T) {
 	for _, a := range v.Agents {
 		can[a.ID] = a.ToolsOff
 	}
-	if !can["codex"] || !can["claude"] || !can["gemini"] || !can["opencode"] || !can["crush"] {
+	if !can["codex"] || !can["claude"] || !can["gemini"] || !can["opencode"] {
 		t.Errorf("not told these can: %v", can)
 	}
-	for _, id := range []string{"cursor", "copilot", "goose", "pi", "mimocode"} {
+	for _, id := range []string{"cursor", "copilot", "pi"} {
 		if _, listed := can[id]; listed && can[id] {
 			t.Errorf("%s said to leave out single tools", id)
 		}

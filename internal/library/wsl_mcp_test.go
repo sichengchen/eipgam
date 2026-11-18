@@ -87,37 +87,30 @@ func TestWSLPiMCP(t *testing.T) {
 
 // Every other agent this machine's MCP servers reach that magpie finds in a
 // WSL distro is given them there too, in its own file under the distro's
-// home and never a Windows program: Gemini CLI, Antigravity CLI, Crush,
-// Cline, CodeBuddy Code, Kimi Code and Goose (each was set up in WSL but
-// left out of the library).
+// home and never a Windows program: Gemini CLI, Antigravity CLI and Kimi
+// Code (each was set up in WSL but left out of the library).
 func TestWSLMCPSiblings(t *testing.T) {
 	sandbox(t)
 	root := t.TempDir()
 	h := filepath.Join(root, "home", "me")
 	for _, f := range []string{
-		".gemini/settings.json", ".gemini/antigravity-cli/settings.json", ".config/crush/crush.json",
-		".cline/data/settings/providers.json", ".codebuddy/models.json", ".kimi-code/config.toml", ".config/goose/config.yaml",
+		".gemini/settings.json", ".gemini/antigravity-cli/settings.json", ".kimi-code/config.toml",
 	} {
 		content := "{}\n"
-		if strings.HasSuffix(f, ".toml") || strings.HasSuffix(f, ".yaml") {
+		if strings.HasSuffix(f, ".toml") {
 			content = ""
 		}
 		write(t, filepath.Join(h, f), content)
 	}
 	t.Cleanup(agent.FakeWSL(map[string]string{
 		"Ubuntu": "home:/home/me\nbin:gemini /usr/bin/gemini\ndir:.gemini/antigravity-cli\nbin:agy /usr/bin/agy\n" +
-			"dir:.config/crush\nbin:crush /usr/bin/crush\ndir:.cline\nbin:cline /usr/bin/cline\n" +
-			"dir:.codebuddy\nbin:codebuddy /usr/bin/codebuddy\ndir:.kimi-code\nbin:kimi /usr/bin/kimi\ndir:.config/goose\n",
+			"dir:.kimi-code\nbin:kimi /usr/bin/kimi\n",
 	}, map[string]string{"Ubuntu": root}))
 
 	want := map[string]string{
-		"gemini@wsl:Ubuntu":    ".gemini/settings.json",
-		"agy@wsl:Ubuntu":       ".gemini/config/mcp_config.json",
-		"crush@wsl:Ubuntu":     ".config/crush/crush.json",
-		"cline@wsl:Ubuntu":     ".cline/data/settings/cline_mcp_settings.json",
-		"codebuddy@wsl:Ubuntu": ".codebuddy/.mcp.json",
-		"kimi@wsl:Ubuntu":      ".kimi-code/mcp.json",
-		"goose@wsl:Ubuntu":     ".config/goose/config.yaml",
+		"gemini@wsl:Ubuntu": ".gemini/settings.json",
+		"agy@wsl:Ubuntu":    ".gemini/config/mcp_config.json",
+		"kimi@wsl:Ubuntu":   ".kimi-code/mcp.json",
 	}
 	var all []string
 	for id, f := range want {
@@ -136,9 +129,6 @@ func TestWSLMCPSiblings(t *testing.T) {
 				t.Errorf("%s: %s isn't in the distro", id, p)
 			}
 		}
-	}
-	if tg := targetByID("crush@wsl:Ubuntu"); tg != nil && (len(tg.SkillsAlso) != 1 || tg.SkillsAlso[0] != "claude@wsl:Ubuntu") {
-		t.Errorf("crush@wsl reads skills of %v", tg.SkillsAlso)
 	}
 
 	ok(t)(SaveServer("", Server{Name: "fetch", Transport: "stdio", Command: "uvx", Args: []string{"mcp-server-fetch"}, Agents: all}))

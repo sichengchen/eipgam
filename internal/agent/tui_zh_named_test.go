@@ -48,7 +48,8 @@ func TestEveryFieldLabelHasTUIZh(t *testing.T) {
 			}
 		}
 	}
-	if n < 30 {
+	// 24 with the agents magpie keeps
+	if n < 20 {
 		t.Fatalf("read %d labels", n)
 	}
 }

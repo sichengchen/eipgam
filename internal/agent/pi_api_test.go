@@ -119,29 +119,4 @@ func TestPiModelsAskedOnTheirNativeAPI(t *testing.T) {
 			t.Errorf("Pi: %s baseUrl: %v", id, e)
 		}
 	}
-	if err := omo(home).Field("model").Set("magpie/resp/grok-5"); err != nil {
-		t.Fatal(err)
-	}
-	var omoFile map[string]any
-	if err := json.Unmarshal([]byte(readFile(filepath.Join(home, ".omo", "agent", "models.json"))), &omoFile); err != nil {
-		t.Fatal(err)
-	}
-	omoAPIs := map[string]map[string]any{}
-	for _, raw := range omoFile["providers"].(map[string]any)["magpie"].(map[string]any)["models"].([]any) {
-		m := raw.(map[string]any)
-		omoAPIs[m["id"].(string)] = m
-	}
-	for id, want := range map[string]any{"gem/gemini-3-flash": "google-generative-ai", "hybrid/gemini-3-flash": "google-generative-ai", "hybrid/gemini-2.5-pro": nil, "group/geminis": nil} {
-		e, ok := omoAPIs[id]
-		if !ok {
-			t.Errorf("OmO: %s not listed", id)
-			continue
-		}
-		if e["api"] != want {
-			t.Errorf("OmO: %s: api %v, want %v", id, e["api"], want)
-		}
-		if want != nil && e["baseUrl"] != gateway.URL()+"/v1beta" {
-			t.Errorf("OmO: %s baseUrl: %v", id, e)
-		}
-	}
 }

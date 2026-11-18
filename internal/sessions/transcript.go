@@ -156,18 +156,12 @@ func readTranscriptOf(s Session, keep func([]byte) bool, add func(bool, Part) bo
 		return cursorTranscript(s.Path, add)
 	case "codex":
 		return codexContentOf(whole, keep, add)
-	case "pi", "raft", "cindy", "omp":
+	case "pi", "raft":
 		return piTranscript(s.Path, add)
 	case "kimi":
 		return kimiTranscript(s.Path, keep, add)
 	case "agy":
 		return agyTranscript(s.Path, keep, add)
-	case "antigravity":
-		return antigravityTranscriptOf(s.Path, keep, add)
-	case "openmausbot":
-		return ombTranscript(s, add)
-	case "liveagent":
-		return liveagentTranscript(s.Path, add)
 	default:
 		if s.BranchOf != "" && keep == nil {
 			return branchTranscript(s, add)

@@ -8,11 +8,10 @@ import (
 	"github.com/yetone/magpie/internal/settings"
 )
 
-// taotao7 on Discord: omp on a group/* model counted every call at 0. omp's
-// custom provider prices a call by the cost in its models.yml alone, and
-// magpie wrote none, for any model; a group whose members cost differently
-// had no price in magpie's list at all, so Pi, OpenCode and Crush got none
-// either. A group is now priced at the member it sends to first, and that
+// taotao7 on Discord: an agent on a group/* model counted every call at 0.
+// A custom provider prices a call by the cost in its own file alone, and a
+// group whose members cost differently had no price in magpie's list at
+// all, so Pi and OpenCode got none. A group is now priced at the member it sends to first, and that
 // price follows the group's members.
 func TestGroupModelsCarryTheirFirstMembersPrice(t *testing.T) {
 	syncHome(t)
@@ -38,15 +37,6 @@ func TestGroupModelsCarryTheirFirstMembersPrice(t *testing.T) {
 		}
 		provider.Changed()
 	}
-	ompCostOf := func(id string) *ompCost {
-		for _, m := range ompProviderAt("http://127.0.0.1:3425", "18.9.1").Models {
-			if m.ID == id {
-				return m.Cost
-			}
-		}
-		t.Fatalf("omp has no %s", id)
-		return nil
-	}
 	modelsOf := func(shape, id string) map[string]any {
 		switch v := magpieProviderJSONAt(shape, shape, "http://127.0.0.1:3425").(map[string]any)["models"].(type) {
 		case map[string]any:
@@ -68,11 +58,9 @@ func TestGroupModelsCarryTheirFirstMembersPrice(t *testing.T) {
 	}
 
 	save(provider.Group{ID: "mix", Name: "Mix", Members: []string{"a/cheap", "b/dear"}})
-	if c := ompCostOf("a/cheap"); c == nil || c.Input != 1 || c.Output != 2 || c.CacheRead != 0.1 || c.CacheWrite != 1.25 {
-		t.Fatalf("omp's a/cheap cost %+v", c)
-	}
-	if c := ompCostOf("group/mix"); c == nil || c.Input != 1 || c.Output != 2 {
-		t.Fatalf("omp's group/mix cost %+v, want a/cheap's", c)
+	piCost := func(id string) map[string]any { c, _ := modelsOf("pi", id)["cost"].(map[string]any); return c }
+	if c := piCost("a/cheap"); c["input"] != 1.0 || c["output"] != 2.0 {
+		t.Fatalf("Pi's a/cheap cost %v", c)
 	}
 	if c, _ := modelsOf("pi", "group/mix")["cost"].(map[string]any); c["input"] != 1.0 || c["output"] != 2.0 {
 		t.Fatalf("Pi's group/mix cost %v", c)
@@ -80,22 +68,19 @@ func TestGroupModelsCarryTheirFirstMembersPrice(t *testing.T) {
 	if c, _ := modelsOf("opencode", "group/mix")["cost"].(map[string]any); c["input"] != 1.0 || c["cache_read"] != 0.1 || c["cache_write"] != 1.25 {
 		t.Fatalf("OpenCode's group/mix cost %v", c)
 	}
-	if m := modelsOf("crush", "group/mix"); m["cost_per_1m_in"] != 1.0 || m["cost_per_1m_out"] != 2.0 || m["cost_per_1m_in_cached"] != 1.25 || m["cost_per_1m_out_cached"] != 0.1 {
-		t.Fatalf("Crush's group/mix %v", m)
-	}
 
 	// the members reordered, the price follows the new first
 	save(provider.Group{ID: "mix", Name: "Mix", Members: []string{"b/dear", "a/cheap"}})
-	if c := ompCostOf("group/mix"); c == nil || c.Input != 10 || c.Output != 20 {
-		t.Fatalf("after the reorder omp's group/mix cost %+v, want b/dear's", c)
+	if c := piCost("group/mix"); c["input"] != 10.0 || c["output"] != 20.0 {
+		t.Fatalf("after the reorder Pi's group/mix cost %v, want b/dear's", c)
 	}
 	// a manual group is priced at its pick; the first switched off, at the next
 	save(provider.Group{ID: "mix", Name: "Mix", Members: []string{"b/dear", "a/cheap"}, Routing: provider.Manual, Pick: "a/cheap"})
-	if c := ompCostOf("group/mix"); c == nil || c.Input != 1 {
-		t.Fatalf("manual pick a/cheap: omp's cost %+v", c)
+	if c := piCost("group/mix"); c["input"] != 1.0 {
+		t.Fatalf("manual pick a/cheap: Pi's cost %v", c)
 	}
 	save(provider.Group{ID: "mix", Name: "Mix", Members: []string{"b/dear", "a/cheap"}, Off: []string{"b/dear"}})
-	if c := ompCostOf("group/mix"); c == nil || c.Input != 1 {
-		t.Fatalf("b/dear off: omp's cost %+v", c)
+	if c := piCost("group/mix"); c["input"] != 1.0 {
+		t.Fatalf("b/dear off: Pi's cost %v", c)
 	}
 }

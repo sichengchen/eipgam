@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 	"testing"
 )
@@ -106,29 +105,6 @@ func TestTranscriptPiBranch(t *testing.T) {
 	}
 }
 
-// An omp session, as listed: its title line first, a compaction's summary.
-func TestTranscriptOmp(t *testing.T) {
-	setupAgents(t)
-	s, ok := Find("omp", ompMain)
-	if !ok {
-		t.Fatal("no omp session")
-	}
-	tr, err := TranscriptOf(s)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := []string{
-		"user/text: Port the parser",
-		"assistant/text: ok",
-		"tool/tool_result/task: done",
-		"assistant/text: ok",
-		"user/context: Ported.",
-	}
-	if got := kinds(tr.Parts); !reflect.DeepEqual(got, want) {
-		t.Fatalf("parts\n%s\nwant\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
-	}
-}
-
 // An agent whose sessions aren't lines of a file says so.
 func TestTranscriptUnsupported(t *testing.T) {
 	if _, err := TranscriptOf(Session{Agent: "opencode", ID: "x", Path: "/x"}); err != ErrNoTranscript {
@@ -151,40 +127,5 @@ func TestTranscriptCut(t *testing.T) {
 	}
 	if !tr.Cut || len(tr.Parts) >= len(lines) {
 		t.Fatalf("cut %v, %d of %d parts", tr.Cut, len(tr.Parts), len(lines))
-	}
-}
-
-// A Pi session can be carried on in oh-my-pi, which forks it from its file
-// as it is; an omp session can't be carried into Pi (Pi wants its header
-// first), and nothing is offered when omp isn't installed.
-func TestCarryPiToOmp(t *testing.T) {
-	setupMore(t)
-	there := true
-	old := ompThere
-	ompThere = func() bool { return there }
-	t.Cleanup(func() { ompThere = old })
-	p := find(t, List(0), "pi", piFirst)
-	want := []Carry{{Agent: "omp", Command: "cd '/work/pi' && omp --fork " + shellQuote(p.Path)}}
-	if runtime.GOOS == "windows" {
-		want[0].Command = "Set-Location -LiteralPath '/work/pi'; omp --fork '" + p.Path + "'"
-	}
-	if !reflect.DeepEqual(p.Carry, want) {
-		t.Fatalf("pi carry %+v, want %+v", p.Carry, want)
-	}
-	if m, ok := findManaged(ListAgent("pi"), piFirst); !ok || !reflect.DeepEqual(m.Carry, want) {
-		t.Fatalf("managed pi carry %+v", m.Carry)
-	}
-	if c := carries(Session{Agent: "omp", ID: "o", Cwd: "/w", Path: "/w/o.jsonl"}); c != nil {
-		t.Fatalf("omp carried: %+v", c)
-	}
-	oldThere := agentThere
-	agentThere = func(string) bool { return false }
-	t.Cleanup(func() { agentThere = oldThere })
-	if c := carries(Session{Agent: "claude", ID: "c", Cwd: "/w", Path: "/w/c.jsonl"}); c != nil {
-		t.Fatalf("claude carried with no codex: %+v", c)
-	}
-	there = false
-	if c := carries(p); c != nil {
-		t.Fatalf("carried with no omp: %+v", c)
 	}
 }

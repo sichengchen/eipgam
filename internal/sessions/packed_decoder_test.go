@@ -155,30 +155,6 @@ func TestPackedScanKeepsItsDecoder(t *testing.T) {
 	}
 }
 
-// A dsh session's frames are decoded by a decoder kept between reads, and
-// a read on from the last frame allocates about that frame, not a decoder.
-func TestDshFramesKeepTheirDecoder(t *testing.T) {
-	if raceOn {
-		t.Skip("-race lets a pool's decoders go")
-	}
-	p, last := dshPacked(t, t.TempDir(), 6<<20)
-	read := func(off int64) (lines int) {
-		_, _, _, err := scanFrames(p, off, 0, func([]byte) bool { lines++; return true })
-		if err != nil {
-			t.Fatal(err)
-		}
-		return lines
-	}
-	if n := read(last); n != 8 {
-		t.Fatalf("the last frame holds %d lines, want 8", n)
-	}
-	got := allocated(20, func() { read(last) })
-	t.Logf("a read on from the last frame: %d bytes", got)
-	if got > 128<<10 {
-		t.Fatalf("a read on from the last frame allocated %d bytes: its decoder is made anew", got)
-	}
-}
-
 // What a packed file's lines are, read through a decoder kept between
 // reads, is what a decoder made for it alone reads: a file read after
 // another, larger one, and one cut short, come out the same.
@@ -266,24 +242,6 @@ func BenchmarkPackedScan(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		scanPacked(b, p)
-	}
-}
-
-func BenchmarkDshFramesWhole(b *testing.B) {
-	p, _ := dshPacked(b, b.TempDir(), 6<<20)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		scanFrames(p, 0, 0, func([]byte) bool { return true })
-	}
-}
-
-func BenchmarkDshFramesOn(b *testing.B) {
-	p, last := dshPacked(b, b.TempDir(), 6<<20)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		scanFrames(p, last, 0, func([]byte) bool { return true })
 	}
 }
 

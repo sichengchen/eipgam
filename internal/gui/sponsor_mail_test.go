@@ -48,3 +48,10 @@ func TestSponsorMailOpensThatAddressOnly(t *testing.T) {
 		t.Errorf("usemagpie.ai's sponsor link is no longer %s", sponsorMail)
 	}
 }
+
+type importWindows struct {
+	Windows
+	opened string
+}
+
+func (w *importWindows) OpenURL(u string) error { w.opened = u; return nil }

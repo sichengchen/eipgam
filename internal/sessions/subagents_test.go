@@ -75,28 +75,6 @@ func TestClaudeSubagents(t *testing.T) {
 	}
 }
 
-// Qoder keeps Claude Code's layout, and its subagents show the same way;
-// with no meta file, a subagent is titled by what it was first asked.
-func TestQoderSubagents(t *testing.T) {
-	inZone(t, 0)
-	home := setupAgents(t)
-	subs := filepath.Join(home, ".qoder", "projects", "-work-q", qoderID, "subagents")
-	writeFile(t, filepath.Join(subs, "agent-b2.jsonl"),
-		`{"parentUuid":null,"isSidechain":true,"agentId":"b2","type":"user","message":{"role":"user","content":"List the tests"},"uuid":"q1","timestamp":"2026-09-27T09:00:30.000Z","cwd":"/work/q","sessionId":"`+qoderID+`"}`+"\n")
-	s := find(t, List(0), "qoder", qoderID)
-	var got []string
-	for _, sa := range s.Subagents {
-		got = append(got, sa.ID+"|"+sa.Title)
-	}
-	if strings.Join(got, ",") != "a1|,b2|List the tests" {
-		t.Fatalf("qoder subagents %q", got)
-	}
-	tr, err := SubagentTranscript(s, "b2")
-	if err != nil || !strings.Contains(transcriptText(t, tr), "List the tests") {
-		t.Fatalf("qoder subagent transcript %+v %v", tr, err)
-	}
-}
-
 // An OpenCode session its task tool started is a subagent of the one that
 // started it, not a session of its own; OpenCode 1.x titled it
 // "<description> (@<agent> subagent)", 2.x the description alone (task

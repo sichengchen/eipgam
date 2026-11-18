@@ -182,7 +182,11 @@ func TestRemoveFoundServerOwn(t *testing.T) {
 // found, and removed from each file it is in, in that agent's own format;
 // the user's other server there, and a key of theirs in it, stay.
 func TestRemoveFoundServerEveryAgent(t *testing.T) {
-	sandbox(t)
+	h := sandbox(t)
+	// the agents found by their config alone, beside the sandbox's
+	for _, f := range []string{".kimi/config.toml", ".config/devin/config.json", ".grok/config.toml"} {
+		write(t, filepath.Join(h, f), "")
+	}
 	gone := &Server{Name: "gone", Transport: "stdio", Command: "gone-mcp", Args: []string{"--x"}}
 	mine := &Server{Name: "mine", Transport: "stdio", Command: "my-mcp"}
 	var with []string
@@ -223,7 +227,7 @@ func TestRemoveFoundServerEveryAgent(t *testing.T) {
 			t.Errorf("%s lost the user's other server", tg.Agent.ID)
 		}
 		es, _ := tg.MCP.entries()
-		if e := es["mine"]; tg.MCP.Format != fmtDsh && (e == nil || e["note"] != "the user's") {
+		if e := es["mine"]; e == nil || e["note"] != "the user's" {
 			t.Errorf("%s: the user's key in their server: %v", tg.Agent.ID, e)
 		}
 	}
@@ -239,7 +243,7 @@ func TestRemoveFoundEntryEveryFormat(t *testing.T) {
 	mine := &Server{Name: "mine", Transport: "stdio", Command: "my-mcp"}
 	for fm := fmtClaude; fm <= fmtZed; fm++ {
 		if fm == fmtDsh {
-			continue // its profiles' files: TestRemoveFoundServerEveryAgent
+			continue // DeepSeek Harness's profiles' patch lists, which no agent here has
 		}
 		ext := ".json"
 		switch fm {

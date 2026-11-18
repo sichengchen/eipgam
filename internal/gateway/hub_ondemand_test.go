@@ -126,9 +126,7 @@ func TestHubMCPToolsOnDemand(t *testing.T) {
 	}
 }
 
-// An agent that searches its tools itself (a WSL one's id too: Droid,
-// which defers every MCP tool to its ToolSearch, and omp, which names them
-// in a catalog, are such agents; tao5010 on Discord), the
+// An agent that searches its tools itself (a WSL one's id too), the
 // address for any other app, an agent given a few tools, and every agent
 // once the user turns on every tool whole, are given every tool.
 func TestHubMCPToolsWhole(t *testing.T) {
@@ -136,12 +134,11 @@ func TestHubMCPToolsWhole(t *testing.T) {
 	many := manyHubTools(hubOnDemandOver + 2)
 	f := &fakeHub{on: true, tools: map[string][]HubTool{
 		"claude": many, "claude@wsl:Ubuntu": many, "claude-desktop": many, "codex": many, "pi": many, "": many,
-		"droid": many, "droid@wsl:Ubuntu": many, "omp": many,
 		"gemini": manyHubTools(hubOnDemandOver), "opencode": many,
 	}}
 	withHub(t, f)
 	h := lanGuard(New().Handler())
-	for _, a := range []string{"claude", "claude@wsl:Ubuntu", "claude-desktop", "codex", "pi", "droid", "droid@wsl:Ubuntu", "omp", "gemini"} {
+	for _, a := range []string{"claude", "claude@wsl:Ubuntu", "claude-desktop", "codex", "pi", "gemini"} {
 		if got := listedNames(t, readMCP(t, hubPost(h, a, here, toolsList))); len(got) != len(f.tools[a]) {
 			t.Fatalf("%s listed %v", a, got)
 		}

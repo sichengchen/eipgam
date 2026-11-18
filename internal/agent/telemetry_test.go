@@ -167,37 +167,6 @@ func TestCodexTelemetryLeavesTheUsers(t *testing.T) {
 	}
 }
 
-// A config that doesn't parse is unknown: no state is made up for it and
-// nothing is written into it.
-func TestTelemetryUnreadableConfig(t *testing.T) {
-	for _, c := range []struct {
-		name, file, body string
-		of               func(string) *Agent
-	}{
-		{"codex", ".codex/config.toml", "[analytics\nenabled = ", codex},
-		{"claude", ".claude/settings.json", `{"env": {`, claude},
-		{"gemini", ".gemini/settings.json", `{"privacy": [`, gemini},
-		{"qwen", ".qwen/settings.json", `{"privacy": `, qwen},
-	} {
-		t.Run(c.name, func(t *testing.T) {
-			home, path := telemetryHome(t, c.file, c.body)
-			a := c.of(home)
-			if a.Telemetry == nil {
-				t.Fatal("no telemetry switch")
-			}
-			if _, err := a.Telemetry.Get(); err == nil {
-				t.Fatal("an unreadable config read as a state")
-			}
-			if err := a.SetTelemetry(true); err == nil {
-				t.Fatal("off written into an unreadable config")
-			}
-			if readFile(path) != c.body {
-				t.Fatalf("written:\n%s", readFile(path))
-			}
-		})
-	}
-}
-
 // Claude Code's telemetry and error reports go off in settings.json's env
 // beside the user's variables; on takes out only magpie's, and a variable
 // the user set keeps its value.
@@ -257,7 +226,37 @@ func TestClaudeTelemetryChangedSince(t *testing.T) {
 	}
 }
 
-// Gemini CLI's and Qwen Code's usage statistics go off in settings.json's
+// A config that doesn't parse is unknown: no state is made up for it and
+// nothing is written into it.
+func TestTelemetryUnreadableConfig(t *testing.T) {
+	for _, c := range []struct {
+		name, file, body string
+		of               func(string) *Agent
+	}{
+		{"codex", ".codex/config.toml", "[analytics\nenabled = ", codex},
+		{"claude", ".claude/settings.json", `{"env": {`, claude},
+		{"gemini", ".gemini/settings.json", `{"privacy": [`, gemini},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			home, path := telemetryHome(t, c.file, c.body)
+			a := c.of(home)
+			if a.Telemetry == nil {
+				t.Fatal("no telemetry switch")
+			}
+			if _, err := a.Telemetry.Get(); err == nil {
+				t.Fatal("an unreadable config read as a state")
+			}
+			if err := a.SetTelemetry(true); err == nil {
+				t.Fatal("off written into an unreadable config")
+			}
+			if readFile(path) != c.body {
+				t.Fatalf("written:\n%s", readFile(path))
+			}
+		})
+	}
+}
+
+// Gemini CLI's usage statistics go off in settings.json's
 // privacy, beside what is there; their own true is never written over.
 func TestUsageStatsTelemetrySwitch(t *testing.T) {
 	for _, c := range []struct {
@@ -265,7 +264,6 @@ func TestUsageStatsTelemetrySwitch(t *testing.T) {
 		of         func(string) *Agent
 	}{
 		{"gemini", ".gemini/settings.json", gemini},
-		{"qwen", ".qwen/settings.json", qwen},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			home, path := telemetryHome(t, c.file, `{"privacy": {"other": 1}, "ui": {"theme": "x"}}`)
@@ -311,7 +309,7 @@ func TestUsageStatsTelemetrySwitch(t *testing.T) {
 func TestTelemetryOnlyHere(t *testing.T) {
 	home, _ := telemetryHome(t, ".codex/config.toml", "")
 	at := place{home: home, spell: func(p string) string { return p }}
-	for _, a := range []*Agent{codexIn(at), claudeIn(at), geminiIn(at), qwenIn(at)} {
+	for _, a := range []*Agent{codexIn(at), claudeIn(at), geminiIn(at), kimiIn(at)} {
 		if a.Telemetry != nil {
 			t.Errorf("%s in a distro has a telemetry switch", a.ID)
 		}

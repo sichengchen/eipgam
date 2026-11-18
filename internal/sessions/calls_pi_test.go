@@ -25,7 +25,6 @@ func TestPiCalls(t *testing.T) {
 	claude, _ := setup(t)
 	dir := filepath.Dir(claude)
 	copyTree(t, "testdata/pi-calls", filepath.Join(dir, "pi"))
-	copyTree(t, "testdata/omp-calls/agent", filepath.Join(dir, "home", ".omp", "agent"))
 	const parent, fork = "01a1343b-2288-73d4-b1b4-6fb13abf0069", "01a1343b-9a0f-7603-b371-4124126b8b05"
 	by := map[string][]Call{}
 	for _, c := range Calls(time.Time{}) {
@@ -65,11 +64,6 @@ func TestPiCalls(t *testing.T) {
 				t.Errorf("the fork's own calls: %+v", st.Calls)
 			}
 		}
-	}
-	o := by["omp"]
-	if len(o) != 1 || o[0].Session != "01a1343c-ec54-759d-9aba-563bba5be0cf" || o[0].Upstream != "relay" ||
-		o[0].Tokens != (Tokens{Input: 204, Output: 30, CacheRead: 1000}) || o[0].Millis != 21 || o[0].TTFT != 20 {
-		t.Fatalf("omp: %+v", o)
 	}
 	// and a call holds what the session's summary holds for it: the
 	// Sessions page and the Usage page tell the same tokens

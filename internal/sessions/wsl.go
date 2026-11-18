@@ -107,20 +107,8 @@ func wslScan(h WSLHome) []file {
 			out = append(out, piFilesIn(dir, "")...)
 		case "raft":
 			out = append(out, raftFilesIn(dir)...)
-		case "omp":
-			out = append(out, ompFilesIn(dir)...)
 		case "kimi":
 			out = append(out, kimiFilesIn(filepath.Join(dir, "sessions"))...)
-		case "antigravity":
-			// the rows name the distro's own folders (file:///home/…)
-			conv := filepath.Join(dir, "conversations")
-			if filepath.Base(a.dir) == "antigravity-insiders" {
-				if !sameDir(dir, AntigravityInsidersDir()) {
-					out = append(out, antigravityInsiders(conv, "linux")...)
-				}
-			} else if !sameDir(dir, AntigravityAppDir()) {
-				out = append(out, antigravityFilesIn(conv, "linux")...)
-			}
 		case "agy":
 			if !sameDir(dir, AgyDir()) {
 				out = append(out, agyFilesIn(dir, "linux")...)

@@ -153,19 +153,13 @@ func TestCommandImportArgs(t *testing.T) {
 	write(t, filepath.Join(h, ".claude/commands/fix.md"), "---\ndescription: Fix it\nallowed-tools: Bash\n---\nFix issue $ARGUMENTS[0] in $1, not \\$0 or \\$2.\n")
 	write(t, filepath.Join(h, ".claude/commands/all.md"), "Do $ARGUMENTS and $0.\r\n")
 	write(t, filepath.Join(h, ".gemini/commands/gem.toml"), "description = \"Gem\"\nprompt = \"\"\"\nRun {{args}} now.\n\"\"\"\n")
-	write(t, filepath.Join(h, ".qwen/commands/qw.toml"), "prompt = \"Q {{args}}\"\n")
-	write(t, filepath.Join(h, ".qwen/commands/qm.md"), "---\ndescription: QM\n---\nQ {{args}} md\n")
 	write(t, filepath.Join(h, ".config/opencode/command/oc.md"), "---\ndescription: OC\nagent: build\n---\nOC $ARGUMENTS\n")
-	write(t, filepath.Join(h, ".factory/commands/dr.md"), "Droid $ARGUMENTS\n")
 	write(t, filepath.Join(h, ".pi/agent/prompts/sub.md"), "Pi ${@:2} and $1\n")
 	want := map[string]string{
 		"fix": "Fix issue $1 in $2, not $0 or \\$2.",
 		"all": "Do $ARGUMENTS and $1.",
 		"gem": "Run $ARGUMENTS now.",
-		"qw":  "Q $ARGUMENTS",
-		"qm":  "Q $ARGUMENTS md",
 		"oc":  "OC $ARGUMENTS",
-		"dr":  "Droid $ARGUMENTS",
 		"sub": "Pi ${@:2} and $1",
 	}
 	p := probeCommands(t)
@@ -210,7 +204,7 @@ func TestCommandImportByName(t *testing.T) {
 	files := commandAgents(t, h, "rv")
 	write(t, files["claude"], "---\ndescription: Review\n---\nReview $ARGUMENTS.\n")
 	write(t, files["pi"], "---\ndescription: Review\n---\n\nReview $@.\n")
-	write(t, files["droid"], "Something else.\n")
+	write(t, files["opencode"], "Something else.\n")
 	write(t, filepath.Join(h, ".claude/commands/lib.md"), "Library's\n")
 	write(t, filepath.Join(h, ".claude/commands/own.md"), "Not the library's\n")
 	write(t, filepath.Join(h, ".claude/commands/Bad.md"), "x\n")
@@ -221,7 +215,7 @@ func TestCommandImportByName(t *testing.T) {
 	p := probeCommands(t)
 	rv := candidate(p, "rv")
 	if len(rv) != 2 || !slices.Equal(rv[0].Agents, []string{"claude", "pi"}) || rv[0].Files["pi"] != files["pi"] ||
-		!slices.Equal(rv[1].Agents, []string{"droid"}) || !rv[0].Clash || !rv[1].Clash {
+		!slices.Equal(rv[1].Agents, []string{"opencode"}) || !rv[0].Clash || !rv[1].Clash {
 		t.Fatalf("rv: %+v", rv)
 	}
 	if c := candidate(p, "lib"); len(c) != 1 || c[0].State != "same" {
@@ -254,7 +248,7 @@ func TestCommandImportByName(t *testing.T) {
 	if c := l.command("lib"); c == nil || !slices.Equal(c.Agents, []string{"claude", "opencode"}) {
 		t.Errorf("lib: %+v", c)
 	}
-	if read(t, files["droid"]) != "Something else.\n" || read(t, filepath.Join(h, ".claude/commands/own.md")) != "Not the library's\n" {
+	if read(t, files["opencode"]) != "Something else.\n" || read(t, filepath.Join(h, ".claude/commands/own.md")) != "Not the library's\n" {
 		t.Error("a file not imported was written over")
 	}
 	if read(t, files["pi"]) != "---\ndescription: Review\n---\n\nReview $@.\n" || read(t, filepath.Join(h, ".claude/commands/lib.md")) != "Library's\n" {

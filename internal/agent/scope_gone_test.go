@@ -3,7 +3,6 @@ package agent
 import (
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"testing"
 
@@ -31,6 +30,70 @@ func piList(t *testing.T, settings string) string {
 	return strings.Join(strings.Fields(raw), "")
 }
 
+// A list with nothing left is removed, not written empty, and comes back
+// when its model does, with the model picked meanwhile. A list the user
+// removed themselves stays removed; one on other providers alone, or a
+// sync that can't read what magpie gives, leaves the file byte for byte.
+func TestPiEnabledModelsEmptiedAndBack(t *testing.T) {
+	home := syncHome(t)
+	wevnalSave(t, wevnalAll...)
+	settings := filepath.Join(home, ".pi", "agent", "settings.json")
+	os.MkdirAll(filepath.Dir(settings), 0o755)
+	os.WriteFile(settings, []byte(`{"enabledModels": ["magpie/wevnal/space-bunny-free"]}`+"\n"), 0o644)
+	a := pi(home)
+	if err := a.Apply("model", "magpie/wevnal/space-bunny-free"); err != nil {
+		t.Fatal(err)
+	}
+	wevnalSave(t, "glm-5.2", "kimi-k3")
+	if err := a.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if got := piList(t, settings); got != "(none)" {
+		t.Fatalf("emptied: %s", got)
+	}
+	if err := a.Apply("model", "magpie/wevnal/kimi-k3"); err != nil {
+		t.Fatal(err)
+	}
+	wevnalSave(t, "glm-5.2", "kimi-k3", "space-bunny-free")
+	if err := a.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := piList(t, settings), `["magpie/wevnal/space-bunny-free","magpie/wevnal/kimi-k3"]`; got != want {
+		t.Fatalf("back: %s, want %s", got, want)
+	}
+
+	// removed by the user, then the model goes and comes back: no list made
+	if err := edit.DelJSON(settings, "enabledModels"); err != nil {
+		t.Fatal(err)
+	}
+	wevnalSave(t, "glm-5.2", "kimi-k3")
+	a.Sync()
+	wevnalSave(t, wevnalAll...)
+	a.Sync()
+	if got := piList(t, settings); got != "(none)" {
+		t.Fatalf("user's removal undone: %s", got)
+	}
+
+	const theirs = `{"enabledModels": ["xai/grok-4.6", "magpie/*/*"], "defaultProvider": "magpie", "defaultModel": "wevnal/kimi-k3"}` + "\n"
+	os.WriteFile(settings, []byte(theirs), 0o644)
+	wevnalSave(t, "kimi-k3")
+	if err := a.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if got := readFile(settings); got != theirs {
+		t.Fatalf("other providers' and globs rewritten: %s", got)
+	}
+
+	// models.json unreadable: unknown, so nothing goes
+	const one = `{"enabledModels": ["magpie/wevnal/kimi-k3"]}` + "\n"
+	os.WriteFile(settings, []byte(one), 0o644)
+	os.WriteFile(filepath.Join(home, ".pi", "agent", "models.json"), []byte(`{"providers": {"magpie": {"models": "not a list"`), 0o644)
+	a.Sync()
+	if got := readFile(settings); got != one {
+		t.Fatalf("unreadable models.json pruned: %s", got)
+	}
+}
+
 // #2055 (misaka9981): models deselected in a provider's editor leave
 // magpie's provider in Pi's models.json, and the entries naming them in
 // enabledModels go too, in Pi and the forks that keep its settings.json:
@@ -46,9 +109,6 @@ func TestPiEnabledModelsLoseDeselected(t *testing.T) {
 		a   func(string) *Agent
 	}{
 		{"pi", []string{".pi", "agent"}, pi},
-		{"omo", []string{".omo", "agent"}, omo},
-		{"prime-agent", []string{".prime", "agent"}, primeAgent},
-		{"mu", []string{".mu", "agent"}, mu},
 	} {
 		t.Run(c.id, func(t *testing.T) {
 			home := syncHome(t)
@@ -128,142 +188,4 @@ func TestPiEnabledModelsLoseDeselected(t *testing.T) {
 			}
 		})
 	}
-}
-
-// A list with nothing left is removed, not written empty, and comes back
-// when its model does, with the model picked meanwhile. A list the user
-// removed themselves stays removed; one on other providers alone, or a
-// sync that can't read what magpie gives, leaves the file byte for byte.
-func TestPiEnabledModelsEmptiedAndBack(t *testing.T) {
-	home := syncHome(t)
-	wevnalSave(t, wevnalAll...)
-	settings := filepath.Join(home, ".pi", "agent", "settings.json")
-	os.MkdirAll(filepath.Dir(settings), 0o755)
-	os.WriteFile(settings, []byte(`{"enabledModels": ["magpie/wevnal/space-bunny-free"]}`+"\n"), 0o644)
-	a := pi(home)
-	if err := a.Apply("model", "magpie/wevnal/space-bunny-free"); err != nil {
-		t.Fatal(err)
-	}
-	wevnalSave(t, "glm-5.2", "kimi-k3")
-	if err := a.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	if got := piList(t, settings); got != "(none)" {
-		t.Fatalf("emptied: %s", got)
-	}
-	if err := a.Apply("model", "magpie/wevnal/kimi-k3"); err != nil {
-		t.Fatal(err)
-	}
-	wevnalSave(t, "glm-5.2", "kimi-k3", "space-bunny-free")
-	if err := a.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	if got, want := piList(t, settings), `["magpie/wevnal/space-bunny-free","magpie/wevnal/kimi-k3"]`; got != want {
-		t.Fatalf("back: %s, want %s", got, want)
-	}
-
-	// removed by the user, then the model goes and comes back: no list made
-	if err := edit.DelJSON(settings, "enabledModels"); err != nil {
-		t.Fatal(err)
-	}
-	wevnalSave(t, "glm-5.2", "kimi-k3")
-	a.Sync()
-	wevnalSave(t, wevnalAll...)
-	a.Sync()
-	if got := piList(t, settings); got != "(none)" {
-		t.Fatalf("user's removal undone: %s", got)
-	}
-
-	const theirs = `{"enabledModels": ["xai/grok-4.6", "magpie/*/*"], "defaultProvider": "magpie", "defaultModel": "wevnal/kimi-k3"}` + "\n"
-	os.WriteFile(settings, []byte(theirs), 0o644)
-	wevnalSave(t, "kimi-k3")
-	if err := a.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	if got := readFile(settings); got != theirs {
-		t.Fatalf("other providers' and globs rewritten: %s", got)
-	}
-
-	// models.json unreadable: unknown, so nothing goes
-	const one = `{"enabledModels": ["magpie/wevnal/kimi-k3"]}` + "\n"
-	os.WriteFile(settings, []byte(one), 0o644)
-	os.WriteFile(filepath.Join(home, ".pi", "agent", "models.json"), []byte(`{"providers": {"magpie": {"models": "not a list"`), 0o644)
-	a.Sync()
-	if got := readFile(settings); got != one {
-		t.Fatalf("unreadable models.json pruned: %s", got)
-	}
-}
-
-// StepCode's enabledModels (config.toml) and omp's (config.yml) are the
-// same kind of list.
-func TestStepCodeAndOmpEnabledModelsLoseDeselected(t *testing.T) {
-	t.Run("stepcode", func(t *testing.T) {
-		home, _ := museHome(t)
-		wevnalSave(t, wevnalAll...)
-		configPath := filepath.Join(home, ".stepcode", "config.toml")
-		stepcodeWriteTestFile(t, configPath, "# mine\nenabledModels = [\"anthropic/*\", \"magpie/wevnal/space-bunny-free:high\", \"magpie/wevnal/kimi-k3\"]\n")
-		stepcodeWriteTestFile(t, filepath.Join(home, ".stepcode", "models.json"), "{}\n")
-		a := stepcode(home)
-		// Connect adds the model it picks (magpie/deepseek/pro) to the list
-		if err := a.Connect(); err != nil {
-			t.Fatal(err)
-		}
-		if err := a.Apply("model", "magpie/wevnal/kimi-k3"); err != nil {
-			t.Fatal(err)
-		}
-		wevnalSave(t, "kimi-k3")
-		if err := a.Sync(); err != nil {
-			t.Fatal(err)
-		}
-		cfg, err := readStepcodeTOML(configPath)
-		if err != nil || cfg.Scope == nil || !slices.Equal(*cfg.Scope, []string{"anthropic/*", "magpie/wevnal/kimi-k3", "magpie/deepseek/pro"}) {
-			t.Fatalf("enabledModels: %v %v", cfg.Scope, err)
-		}
-		if !strings.Contains(readFile(configPath), "# mine") {
-			t.Fatalf("comment lost: %s", readFile(configPath))
-		}
-		wevnalSave(t, "kimi-k3", "space-bunny-free")
-		if err := a.Sync(); err != nil {
-			t.Fatal(err)
-		}
-		cfg, _ = readStepcodeTOML(configPath)
-		if cfg.Scope == nil || !slices.Equal(*cfg.Scope, []string{"anthropic/*", "magpie/wevnal/kimi-k3", "magpie/deepseek/pro", "magpie/wevnal/space-bunny-free:high"}) {
-			t.Fatalf("back: %v", cfg.Scope)
-		}
-		// a disconnect still puts the user's own list back
-		if err := a.Disconnect(); err != nil {
-			t.Fatal(err)
-		}
-		cfg, _ = readStepcodeTOML(configPath)
-		if cfg.Scope == nil || !slices.Equal(*cfg.Scope, []string{"anthropic/*", "magpie/wevnal/space-bunny-free:high", "magpie/wevnal/kimi-k3"}) {
-			t.Fatalf("after disconnect: %v", cfg.Scope)
-		}
-	})
-	t.Run("omp", func(t *testing.T) {
-		home, configPath, _ := ompScopeHome(t)
-		wevnalSave(t, wevnalAll...)
-		os.WriteFile(configPath, []byte("# mine\nenabledModels:\n  - provider-a/model-a # first\n  - magpie/wevnal/space-bunny-free:high\n  - magpie/wevnal/kimi-k3\n  - path: /work\n    models: [magpie/wevnal/mimo-v2.6-flash-free]\n"), 0o644)
-		a := omp(home)
-		if err := a.Field("model").Set("magpie/wevnal/kimi-k3"); err != nil {
-			t.Fatal(err)
-		}
-		wevnalSave(t, "kimi-k3")
-		if err := a.Sync(); err != nil {
-			t.Fatal(err)
-		}
-		if got := edit.GetYAMLList(configPath, "enabledModels"); !slices.Equal(got, []string{"provider-a/model-a", "magpie/wevnal/kimi-k3"}) {
-			t.Fatalf("enabledModels: %q", got)
-		}
-		_, raw := ompScopeRead(t, configPath)
-		if !strings.Contains(raw, "# first") || !strings.Contains(raw, "path: /work") {
-			t.Fatalf("comment or folder entry lost:\n%s", raw)
-		}
-		wevnalSave(t, "kimi-k3", "space-bunny-free")
-		if err := a.Sync(); err != nil {
-			t.Fatal(err)
-		}
-		if got := edit.GetYAMLList(configPath, "enabledModels"); !slices.Equal(got, []string{"provider-a/model-a", "magpie/wevnal/kimi-k3", "magpie/wevnal/space-bunny-free:high"}) {
-			t.Fatalf("back: %q", got)
-		}
-	})
 }

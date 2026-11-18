@@ -19,32 +19,9 @@ var wslMore = []struct {
 	id, file, suffix string
 }{
 	{"opencode", ".config/opencode/opencode.json", "/v1"},
-	{"mimocode", ".config/mimocode/mimocode.json", "/v1"},
 	{"kimi", ".kimi-code/config.toml", "/v1"},
-	{"omp", ".omp/agent/models.yml", "/v1"},
-	{"crush", ".config/crush/crush.json", "/v1"},
-	{"hermes", ".hermes/config.yaml", "/v1"},
-	{"morph", ".morph/config.yaml", "/v1"},
 	{"grok", ".grok/config.toml", "/v1"},
-	{"droid", ".factory/settings.json", "/v1"},
-	{"fx", ".fx/settings.json", "/v1"},
-	{"commandcode", ".commandcode/providers.json", "/v1"},
-	{"minimax-code", ".minimax/config.yaml", ""},
-	{"dsh", ".dsh/profiles/web/cordis.patch.yml", "/v1"}, // liby233: no dsh reads config.yaml
 	{"muse", ".config/muse/settings.json", "/v1"},
-	{"qoder", ".qoder/settings.json", "/v1"},
-	{"qoder-cn", ".qoder-cn/settings.json", "/v1"},
-	// lgtm on Discord: a CodeBuddy Code in WSL wasn't found, nor were the
-	// other CLIs magpie set up only on this machine
-	{"codebuddy", ".codebuddy/models.json", "/v1/chat/completions"},
-	{"cline", ".cline/data/settings/providers.json", "/v1"},
-	{"atomcode", ".atomcode/config.toml", "/v1"},
-	{"open-code-review", ".opencodereview/config.json", "/v1"},
-	{"snow", ".snow/profiles/magpie.json", "/v1"},
-	{"goose", ".config/goose/custom_providers/magpie.json", "/v1"},
-	{"mothx", ".mothx/settings.json", "/v1"},
-	{"penguin", ".penguin/data/default_project/.project_config.toml", "/v1"},
-	{"reasonix", ".reasonix/config.toml", "/v1"},
 }
 
 // wslFinds is what a probe of a distro with the agent of kind k prints,
@@ -69,17 +46,14 @@ func wslFinds(k wslKind) (probe string, has map[string]bool, versions map[string
 func moveHostDirs(t *testing.T) string {
 	t.Helper()
 	moved := t.TempDir()
-	for _, v := range []string{"OPENCODE_CONFIG_DIR", "MIMOCODE_HOME", "DEVECO_CONFIG_DIR", "KIMI_CODE_HOME", "KIMI_SHARE_DIR", "PI_CODING_AGENT_DIR",
-		"HERMES_HOME", "GROK_HOME", "FACTORY_HOME_OVERRIDE", "MINIMAX_DATA_DIR", "QODER_CONFIG_DIR", "QODERCN_CONFIG_DIR", "DSH_HOME", "MISTER_MORPH_CONFIG",
-		"CODEBUDDY_CONFIG_DIR", "CLINE_DIR", "CLINE_DATA_DIR", "ATOMCODE_HOME", "REASONIX_HOME", "SNOW_CONFIG_DIR", "MOTHX_DIR", "PENGUIN_HOME", "APPDATA"} {
+	for _, v := range []string{"OPENCODE_CONFIG_DIR", "KIMI_CODE_HOME", "KIMI_SHARE_DIR", "PI_CODING_AGENT_DIR", "GROK_HOME", "APPDATA"} {
 		t.Setenv(v, filepath.Join(moved, v))
 	}
 	return moved
 }
 
-// The probe asks after each of them by its folder and, but for grok and
-// fx, whose names other tools have too, its command; and finds each by
-// either.
+// The probe asks after each of them by its folder and, but for grok,
+// whose name other tools have too, its command; and finds each by either.
 func TestWSLProbeFindsMoreAgents(t *testing.T) {
 	for _, c := range wslMore {
 		k := wslKindOf(c.id)
@@ -103,7 +77,7 @@ func TestWSLProbeFindsMoreAgents(t *testing.T) {
 			}
 		}
 	}
-	for _, bin := range []string{"fx", "grok", "goose"} {
+	for _, bin := range []string{"grok"} {
 		if strings.Contains(wslProbeScript(), `wslcmd `+bin+`)`) {
 			t.Errorf("probe takes any %s command for the agent", bin)
 		}
@@ -317,52 +291,6 @@ func TestWSLStoppedPickFindsItsFiles(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dhome, ".kimi-code")); !os.IsNotExist(err) {
 		t.Fatal("a ~/.kimi-code the old kimi-cli never reads")
-	}
-}
-
-// lgtm on Discord: wsl中安装的dsh，目前magpie还是扫描不到. A dsh of today's
-// in a distro keeps its profiles' patch lists in the distro's ~/.dsh: a pick
-// puts magpie's route in them naming the gateway as the distro reaches it,
-// and neither a sync nor this machine's 30-second round puts it back at
-// this machine's address.
-func TestWSLDshProfiles(t *testing.T) {
-	home := syncHome(t)
-	moved := moveHostDirs(t)
-	root := t.TempDir()
-	web := filepath.Join(root, "home", "me", ".dsh", "profiles", "web", "cordis.patch.yml")
-	os.MkdirAll(filepath.Dir(web), 0o755)
-	os.WriteFile(web, []byte("# Your patch layer for this dsh profile.\n[]\n"), 0o644)
-	d := distro{Name: "Ubuntu", Root: root, Home: "/home/me", Has: map[string]bool{"bin:dsh": true},
-		Gateway: "172.20.0.1", Running: true}
-	a := wslAgent(wslKindOf("dsh"), d)
-	if a.ID != "dsh@wsl:Ubuntu" || a.Path != web {
-		t.Fatalf("%+v", a)
-	}
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
-		t.Fatal(err)
-	}
-	gw := "http://172.20.0.1:" + gateway.Port() + "/v1"
-	body := readFile(web)
-	if !strings.Contains(body, "baseURL: "+gw) || !strings.Contains(body, `model: "relay/glm-4.6"`) || strings.Contains(body, "127.0.0.1") {
-		t.Fatalf("lacks %s:\n%s", gw, body)
-	}
-	if v := a.Field("model").Get(); v != "magpie/relay/glm-4.6" {
-		t.Fatalf("model %q", v)
-	}
-	if msg := a.Check(); msg != "" {
-		t.Fatal(msg)
-	}
-	if err := a.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	dshWiredOnce()
-	if got := readFile(web); got != body {
-		t.Fatalf("written again:\n%s", got)
-	}
-	for _, dir := range []string{filepath.Join(home, ".dsh"), moved} {
-		if es, _ := os.ReadDir(dir); len(es) > 0 {
-			t.Fatalf("this machine's %s was touched", dir)
-		}
 	}
 }
 

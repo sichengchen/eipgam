@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -97,18 +98,19 @@ func TestSessionReadsRoutes(t *testing.T) {
 
 // An agent installed after "allow selected" (baysonfox on X: Antigravity
 // 2.0's sessions showed only while it was connected to magpie, agy CLI's
-// always). The choice read agy only, and nothing asked about the app found
-// later. /api/sessions/reads marks it new; the page's Show their sessions names it on and
-// its sessions are listed, and Keep off names it off and it isn't new again.
-// The app's folder is a real Antigravity 2.30 one (testdata/antigravity-2.30,
-// written by its language server on Windows), agy's a real agy CLI's.
+// always). The choice read agy only, and nothing asked about the agent
+// found later. /api/sessions/reads marks it new; the page's Show their
+// sessions names it on and its sessions are listed, and Keep off names it
+// off and it isn't new again. The one found later is Claude Code
+// (sessions' testdata/claude), agy's folder a real agy CLI's.
 func TestSessionReadsNewAgent(t *testing.T) {
 	for _, allow := range []bool{true, false} {
 		t.Run(map[bool]string{true: "allow", false: "keep off"}[allow], func(t *testing.T) {
 			h := sandboxHome(t)
 			copyTree(t, "../sessions/testdata/agy-sessions", filepath.Join(h, ".gemini", "antigravity-cli"))
-			copyTree(t, "../sessions/testdata/antigravity-2.30", filepath.Join(h, ".gemini", "antigravity"))
-			// the choice made before the app was installed: agy only
+			copyTree(t, "../sessions/testdata/claude", filepath.Join(h, ".claude"))
+			t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(h, ".claude"))
+			// the choice made before Claude Code was installed: agy only
 			if err := settings.SetSessionReads(func(*settings.SessionReads) *settings.SessionReads {
 				return &settings.SessionReads{Asked: true, Agents: map[string]bool{"agy": true}}
 			}); err != nil {
@@ -145,11 +147,11 @@ func TestSessionReadsNewAgent(t *testing.T) {
 						Agent string `json:"agent"`
 					} `json:"sessions"`
 				}
-				json.Unmarshal(call("GET", "/api/sessions/manage?agent=antigravity", ""), &m)
+				json.Unmarshal(call("GET", "/api/sessions/manage?agent=claude", ""), &m)
 				// with none of its own the page is on another agent's (agy's)
 				var ids []string
 				for _, s := range m.Sessions {
-					if s.Agent == "antigravity" {
+					if s.Agent == "claude" {
 						ids = append(ids, s.ID)
 					}
 				}
@@ -157,35 +159,38 @@ func TestSessionReadsNewAgent(t *testing.T) {
 			}
 			var r readsJSON
 			json.Unmarshal(call("GET", "/api/sessions/reads", ""), &r)
-			if a := of(r, "antigravity"); a.On || !a.New {
-				t.Fatalf("antigravity found after allow selected = %+v, want off and new", a)
+			if a := of(r, "claude"); a.On || !a.New {
+				t.Fatalf("claude found after allow selected = %+v, want off and new", a)
 			}
 			if a := of(r, "agy"); !a.On || a.New {
 				t.Fatalf("agy, named on = %+v", a)
 			}
 			if ids := listed(); len(ids) != 0 {
-				t.Fatalf("antigravity listed before it was allowed: %v", ids)
+				t.Fatalf("claude listed before it was allowed: %v", ids)
 			}
-			body := `{"agents":{"antigravity":false}}`
+			body := `{"agents":{"claude":false}}`
 			if allow {
-				body = `{"agents":{"antigravity":true}}`
+				body = `{"agents":{"claude":true}}`
 			}
 			// a fresh value: new is left out when false
 			r = readsJSON{}
 			json.Unmarshal(call("POST", "/api/sessions/reads", body), &r)
-			a := of(r, "antigravity")
+			a := of(r, "claude")
 			if a.New || a.On != allow {
 				t.Fatalf("after the answer: %+v", a)
 			}
 			if s := settings.Shared().SessionReads; s == nil || s.All || !s.Agents["agy"] {
 				t.Fatalf("the answer changed the rest of the choice: %+v", s)
 			}
+			// both of the fixture's files: the page lists the empty one to
+			// trash too (sessions' manage tests count claude's as 2)
 			ids := listed()
-			if allow && (len(ids) != 1 || ids[0] != "d96c88af-9e92-463f-a81c-9bb0f7007818") {
-				t.Fatalf("antigravity allowed: listed %v", ids)
+			slices.Sort(ids)
+			if allow && !slices.Equal(ids, []string{"11111111-2222-3333-4444-555555555555", "22222222-2222-3333-4444-555555555555"}) {
+				t.Fatalf("claude allowed: listed %v", ids)
 			}
 			if !allow && len(ids) != 0 {
-				t.Fatalf("antigravity kept off: listed %v", ids)
+				t.Fatalf("claude kept off: listed %v", ids)
 			}
 		})
 	}
@@ -201,11 +206,16 @@ func TestSessionReadsNewOnlyWhenNamed(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			h := sandboxHome(t)
-			copyTree(t, "../sessions/testdata/antigravity-2.30", filepath.Join(h, ".gemini", "antigravity"))
+			copyTree(t, "../sessions/testdata/claude", filepath.Join(h, ".claude"))
+			t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(h, ".claude"))
 			if err := settings.SetSessionReads(func(*settings.SessionReads) *settings.SessionReads { return r }); err != nil {
 				t.Fatal(err)
 			}
-			for _, f := range readsNow().Found {
+			found := readsNow().Found
+			if !slices.ContainsFunc(found, func(f readAgentJSON) bool { return f.Agent == "claude" }) {
+				t.Fatalf("claude not found: %+v", found)
+			}
+			for _, f := range found {
 				if f.New {
 					t.Fatalf("%s new under %+v", f.Agent, r)
 				}

@@ -369,22 +369,6 @@ func TestClaudeDeleteTakesCopiesAlong(t *testing.T) {
 	}
 }
 
-// Qoder writes Claude Code's files, and its copies are one row too.
-func TestQoderForkCopiesAreOneRow(t *testing.T) {
-	for _, agent := range []string{"qoder", "qoder-cn"} {
-		t.Run(agent, func(t *testing.T) {
-			setup(t)
-			ccForkFixture(t, QoderDir(agent),
-				[2]string{"original.jsonl", ccOriginal},
-				[2]string{"original.jsonl", ccCopyIDs[0]},
-				[2]string{"fork-on.jsonl", ccForkOn})
-			if got := ccRows(agent); !slices.Equal(got, []string{ccForkOn}) {
-				t.Fatalf("rows = %v, want [%s]", got, ccForkOn)
-			}
-		})
-	}
-}
-
 func agentCount(agent string) int {
 	for _, a := range Agents() {
 		if a.Agent == agent {

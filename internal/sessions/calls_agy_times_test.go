@@ -15,6 +15,38 @@ import (
 // agyTimesConv is the conversation of testdata/agy-times.
 const agyTimesConv = "85a28ef2-6195-4538-be65-666a8fa5f289"
 
+// A step whose call hasn't finished, or whose times are out of order, has
+// none.
+func TestStepTimesUnknown(t *testing.T) {
+	ts := func(field uint64, sec int64) []byte {
+		in := appendVarintField(nil, 1, uint64(sec))
+		return appendBytesField(nil, field, in)
+	}
+	for name, b := range map[string][]byte{
+		"no end":           append(ts(1, 100), ts(6, 101)...),
+		"end before start": append(append(ts(1, 100), ts(6, 101)...), ts(7, 99)...),
+		"no start":         append(ts(6, 101), ts(7, 102)...),
+	} {
+		if got := stepTimesOf(b); got != (stepTimes{}) {
+			t.Errorf("%s: %+v, want none", name, got)
+		}
+	}
+	// a first content after the end is not known; the duration is
+	b := append(append(ts(1, 100), ts(6, 103)...), ts(7, 102)...)
+	if got := stepTimesOf(b); got != (stepTimes{millis: 2000}) {
+		t.Errorf("first after end: %+v, want 2000ms and no ttft", got)
+	}
+}
+
+func appendVarintField(b []byte, field, v uint64) []byte {
+	return binary.AppendUvarint(binary.AppendUvarint(b, field<<3), v)
+}
+
+func appendBytesField(b []byte, field uint64, d []byte) []byte {
+	b = binary.AppendUvarint(b, field<<3|2)
+	return append(binary.AppendUvarint(b, uint64(len(d))), d...)
+}
+
 // putAgyTimes writes testdata/agy-times into agy's data folder under a
 // sandbox HOME: the transcript and the steps rows agy 1.5.9 wrote on this
 // Mac for `agy -p "say hi"` against a fake Gemini endpoint that answered
@@ -76,36 +108,4 @@ func TestAgyCallsCarryTheirTimes(t *testing.T) {
 	if c := got[0]; c.TTFT != 2014 || c.Millis != 4032 || c.Tokens != (Tokens{Input: 1200, Output: 30}) {
 		t.Errorf("ttft %dms, %dms, %+v; want 2014ms, 4032ms, 1200 in 30 out", c.TTFT, c.Millis, c.Tokens)
 	}
-}
-
-// A step whose call hasn't finished, or whose times are out of order, has
-// none.
-func TestStepTimesUnknown(t *testing.T) {
-	ts := func(field uint64, sec int64) []byte {
-		in := appendVarintField(nil, 1, uint64(sec))
-		return appendBytesField(nil, field, in)
-	}
-	for name, b := range map[string][]byte{
-		"no end":           append(ts(1, 100), ts(6, 101)...),
-		"end before start": append(append(ts(1, 100), ts(6, 101)...), ts(7, 99)...),
-		"no start":         append(ts(6, 101), ts(7, 102)...),
-	} {
-		if got := stepTimesOf(b); got != (stepTimes{}) {
-			t.Errorf("%s: %+v, want none", name, got)
-		}
-	}
-	// a first content after the end is not known; the duration is
-	b := append(append(ts(1, 100), ts(6, 103)...), ts(7, 102)...)
-	if got := stepTimesOf(b); got != (stepTimes{millis: 2000}) {
-		t.Errorf("first after end: %+v, want 2000ms and no ttft", got)
-	}
-}
-
-func appendVarintField(b []byte, field, v uint64) []byte {
-	return binary.AppendUvarint(binary.AppendUvarint(b, field<<3), v)
-}
-
-func appendBytesField(b []byte, field uint64, d []byte) []byte {
-	b = binary.AppendUvarint(b, field<<3|2)
-	return append(binary.AppendUvarint(b, uint64(len(d))), d...)
 }

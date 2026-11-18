@@ -1,13 +1,9 @@
 package sessions
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
-
-	"github.com/klauspost/compress/zstd"
 )
 
 const (
@@ -82,79 +78,6 @@ func count(ss []Session, agent string) int {
 	return n
 }
 
-// CodeBuddy Code's own sessions are listed as its own agent's, read from
-// ~/.codebuddy/projects as WorkBuddy's are from ~/.workbuddy/projects
-// (#1779): the two `codebuddy -p` runs in testdata/codebuddy, one on a model
-// of the user's own, one on a model magpie wired.
-func TestCodeBuddy(t *testing.T) {
-	inZone(t, 0)
-	setupAgents(t)
-	ss := List(0)
-	if n := count(ss, "codebuddy"); n != 2 {
-		t.Fatalf("want 2 CodeBuddy Code sessions, got %d", n)
-	}
-	for _, w := range []struct {
-		id  string
-		cwd string
-	}{{"01a12fea-4cae-78ac-8b2b-a1c0f9da9b1c", "/Users/me/work"}, {"01a12fed-6117-7b70-934b-2d2c05250180", "/Users/me/wired"}} {
-		s := find(t, ss, "codebuddy", w.id)
-		// the only line that names a folder is the session's own
-		if s.Cwd != w.cwd || s.Title != "Read /etc/hosts and tell me what it names" {
-			t.Fatalf("%s: %+v", w.id, s)
-		}
-		// a run's two lines — the tool call's and the text after it — carry
-		// the same cumulative usage: 27017 in, of them 26496 read from the cache,
-		// and 115 out. Each is counted once, as WorkBuddy's summary does
-		want := Tokens{Input: 2 * (27017 - 26496), Output: 2 * 115, CacheRead: 2 * 26496}
-		if m := model(s, "fake-m1"); m.Tokens != want {
-			t.Fatalf("%s, fake-m1: %+v", w.id, m)
-		}
-		// picked up again by its CLI in its folder, as Claude Code's are
-		run := "codebuddy --resume " + w.id
-		wantResume := "cd '" + w.cwd + "' && " + run
-		if runtime.GOOS == "windows" {
-			wantResume = "Set-Location -LiteralPath '" + w.cwd + "'; " + run
-		}
-		if s.Resume != wantResume {
-			t.Fatalf("%s: resume %q, want %q", w.id, s.Resume, wantResume)
-		}
-	}
-	// its files are its own, so the Sessions page can move them to the trash
-	if !Deletable("codebuddy") {
-		t.Fatal("CodeBuddy Code's sessions are not deletable")
-	}
-}
-
-func TestZCode(t *testing.T) {
-	inZone(t, 0)
-	setupAgents(t)
-	ss := List(0)
-	if n := count(ss, "zcode"); n != 2 {
-		t.Fatalf("want 2 ZCode sessions (the subagent in its parent), got %d", n)
-	}
-	z := find(t, ss, "zcode", "ses_zcA")
-	if z.Cwd != "/work/zc" || z.Title != "Port the parser to Go" || z.Resume != "" {
-		t.Fatalf("zcode: %+v", z)
-	}
-	// input without the cache, output with its reasoning already
-	if m := model(z, "glm-5.1"); m.Tokens != (Tokens{300, 40, 1000, 200, 0}) {
-		t.Fatalf("glm-5.1: %+v", m)
-	}
-	if m := model(z, "glm-5.1-air"); m.Tokens != (Tokens{50, 5, 0, 0, 0}) {
-		t.Fatalf("the subagent's: %+v", m)
-	}
-	if !z.Start.Equal(at("2026-09-27T08:00:00Z")) || !z.Last.Equal(at("2026-09-27T08:00:30Z")) {
-		t.Fatalf("zcode times %s %s", z.Start, z.Last)
-	}
-	// a default title is no title
-	if c := find(t, ss, "zcode", "ses_zcC"); c.Title != "" {
-		t.Fatalf("default title kept: %q", c.Title)
-	}
-	if len(dbs) != 0 {
-		t.Fatalf("databases left open: %v", dbs)
-	}
-}
-
 func checkDsh(t *testing.T, ss []Session) {
 	t.Helper()
 	if n := count(ss, "dsh"); n != 4 {
@@ -191,137 +114,10 @@ func checkDsh(t *testing.T, ss []Session) {
 	}
 }
 
-func TestDsh(t *testing.T) {
-	inZone(t, 0)
-	home := setupAgents(t)
-	checkDsh(t, List(0))
-
-	// a reply more: the session is read again
-	p := filepath.Join(home, ".dsh", "sessions", "work-dsh-3f2a", "dsh-a", "session.v3.jsonl")
-	more := []byte(`{"type":"assistant/message","seq":6,"time":1790503290000,"data":{"message":{"source":{"model":"deepseek-v4-flash"}},"usage":{"inputTokens":1,"outputTokens":1,"cacheReadTokens":0}}}` + "\n")
-	b, _ := os.ReadFile(p)
-	os.WriteFile(p, append(b, more...), 0o644)
-	a := find(t, List(0), "dsh", "dsh-a")
-	if m := model(a, "deepseek-v4-flash"); m.Tokens != (Tokens{18, 9, 200, 0, 0}) || !a.Last.Equal(at("2026-09-27T10:01:30Z")) {
-		t.Fatalf("after a new reply: %+v %s", m, a.Last)
-	}
-	os.WriteFile(p, b, 0o644)
-
-	// compressed, in frames appended a batch at a time
-	for _, id := range []string{"dsh-a", "dsh-b", "dsh-c"} {
-		p := filepath.Join(home, ".dsh", "sessions", "work-dsh-3f2a", id, "session.v3.jsonl")
-		b, _ := os.ReadFile(p)
-		enc, _ := zstd.NewWriter(nil)
-		half := bytes.IndexByte(b[len(b)/2:], '\n') + len(b)/2 + 1
-		z := enc.EncodeAll(b[half:], enc.EncodeAll(b[:half], nil))
-		enc.Close()
-		os.Remove(p)
-		os.WriteFile(p+".zstd", z, 0o644)
-	}
-	Reset()
-	checkDsh(t, List(0))
-
-	// $DSH_HOME, elsewhere
-	other := filepath.Join(filepath.Dir(home), "dsh-home")
-	if err := os.Rename(filepath.Join(home, ".dsh"), other); err != nil {
-		t.Fatal(err)
-	}
-	Reset()
-	if n := count(List(0), "dsh"); n != 0 {
-		t.Fatalf("%d dsh sessions with no ~/.dsh", n)
-	}
-	t.Setenv("DSH_HOME", other)
-	Reset()
-	checkDsh(t, List(0))
-}
-
-func TestCline(t *testing.T) {
-	inZone(t, 0)
-	home := setupAgents(t)
-	ss := List(0)
-	if n := count(ss, "cline"); n != 2 {
-		t.Fatalf("want 2 Cline sessions (the subagent in its session), got %d", n)
-	}
-	c := find(t, ss, "cline", clineMain)
-	// the prompt typed, out of Cline's tags, before its title
-	if c.Cwd != "/work/cline" || c.Title != "Importer speed-up" {
-		t.Fatalf("cline: %+v", c)
-	}
-	if m := model(c, "claude-opus-5-5"); m.Tokens != (Tokens{100, 50, 1000, 500, 0}) || !m.Priced {
-		t.Fatalf("opus: %+v", m)
-	}
-	if m := model(c, "claude-haiku-4-5"); m.Tokens != (Tokens{130, 30, 100, 0, 0}) {
-		t.Fatalf("haiku, the subagent's in: %+v", m)
-	}
-	if !c.Start.Equal(at("2026-09-27T10:00:00Z")) || !c.Last.Equal(at("2026-09-27T10:02:00Z")) {
-		t.Fatalf("cline times %s %s", c.Start, c.Last)
-	}
-	want := "cd '/work/cline' && cline --id " + clineMain
-	if runtime.GOOS == "windows" {
-		want = "Set-Location -LiteralPath '/work/cline'; cline --id " + clineMain
-	}
-	if c.Resume != want {
-		t.Fatalf("resume %q", c.Resume)
-	}
-	// the fork: what it copied counted in the session it came from
-	f := find(t, ss, "cline", clineFork)
-	if f.Tokens != (Tokens{100, 30, 300, 0, 0}) || f.Title != "Speed up the importer" {
-		t.Fatalf("fork: %+v", f)
-	}
-	if !f.Start.Equal(at("2026-09-27T12:00:00Z")) || !f.Last.Equal(at("2026-09-27T12:01:00Z")) {
-		t.Fatalf("fork times %s %s", f.Start, f.Last)
-	}
-
-	// the sessions folder of $CLINE_DIR, and of $CLINE_SESSION_DATA_DIR
-	moved := filepath.Join(filepath.Dir(home), "cline-dir")
-	if err := os.Rename(filepath.Join(home, ".cline"), moved); err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("CLINE_DIR", moved)
-	Reset()
-	find(t, List(0), "cline", clineMain)
-	t.Setenv("CLINE_SESSION_DATA_DIR", filepath.Join(moved, "none"))
-	Reset()
-	if n := count(List(0), "cline"); n != 0 {
-		t.Fatalf("$CLINE_SESSION_DATA_DIR comes first: %d", n)
-	}
-}
-
-func TestQoder(t *testing.T) {
-	inZone(t, 0)
-	home := setupAgents(t)
-	ss := List(0)
-	for _, c := range []struct{ agent, id, model, run string }{
-		{"qoder", qoderID, "qwen3-coder-plus", "qodercli"},
-		{"qoder-cn", qoderCNID, "glm-5", "qoderclicn"},
-	} {
-		q := find(t, ss, c.agent, c.id)
-		if q.Cwd != "/work/q" || q.Title != "Explain the cache" {
-			t.Fatalf("%s: %+v", c.agent, q)
-		}
-		if m := model(q, c.model); m.Tokens != (Tokens{45, 30, 300, 0, 0}) {
-			t.Fatalf("%s, the subagent's in: %+v", c.agent, m)
-		}
-		want := "cd '/work/q' && " + c.run + " --resume " + c.id
-		if runtime.GOOS == "windows" {
-			want = "Set-Location -LiteralPath '/work/q'; " + c.run + " --resume " + c.id
-		}
-		if q.Resume != want {
-			t.Fatalf("resume %q", q.Resume)
-		}
-	}
-	moved := filepath.Join(filepath.Dir(home), "qcn")
-	os.Rename(filepath.Join(home, ".qoder-cn"), moved)
-	t.Setenv("QODERCN_CONFIG_DIR", moved)
-	Reset()
-	find(t, List(0), "qoder-cn", qoderCNID)
-}
-
 func TestDirsMore(t *testing.T) {
 	home := setupAgents(t)
 	d := Dirs()
-	want := []string{filepath.Join(home, ".zcode"), filepath.Join(home, ".dsh"), filepath.Join(home, ".cline", "data", "sessions"), filepath.Join(home, ".qoder"), filepath.Join(home, ".qoder-cn"),
-		filepath.Join(home, ".grok"), filepath.Join(home, ".workbuddy"), filepath.Join(home, ".codebuddy"), filepath.Join(home, ".omp", "agent")}
+	want := []string{filepath.Join(home, ".grok")}
 	if len(d) != 2+len(want) {
 		t.Fatalf("dirs %v", d)
 	}

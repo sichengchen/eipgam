@@ -41,120 +41,6 @@ func fakeMagpieAt(t *testing.T, answers map[string]bool) func() []string {
 	return func() []string { mu.Lock(); defer mu.Unlock(); return append([]string(nil), asked...) }
 }
 
-// davisjiahao (#1985): every agent connected to magpie, then pointed by the
-// user at a proxy that forwards to the gateway, magpie's key and model
-// kept: a company's nginx (https://ai.corp.example/magpie), or the
-// reporter's own, a compliance proxy on this machine every request must go
-// through (http://127.0.0.1:8788/claude-code-anthropic/<route>). That is
-// still magpie: no agent's Check calls it changed, and the sync every
-// start runs keeps the proxy's address, its path included. The same
-// address where something else answers (a relay CC Switch put there) is
-// still told, for every agent but Codex, which keeps an address with
-// magpie's key in its provider table as it did for #816 and tries it
-// (unreachable).
-func TestReverseProxyIsStillMagpie(t *testing.T) {
-	// named so the test's folders, which carry the name, hold no address
-	t.Run("nginx", func(t *testing.T) { reverseProxyIsStillMagpie(t, corpProxy) })
-	t.Run("local", func(t *testing.T) { reverseProxyIsStillMagpie(t, localProxy) })
-}
-
-func reverseProxyIsStillMagpie(t *testing.T, proxy string) {
-	t.Setenv("MAGPIE_ADDR", "")
-	host := strings.SplitN(strings.SplitN(proxy, "://", 2)[1], "/", 2)[0]
-	home, _ := codexHome(t, "", "")
-	managed := claudeManaged
-	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
-	t.Cleanup(func() { claudeManaged = managed })
-	os.MkdirAll(filepath.Join(home, ".hanako", "agents", "hana"), 0o755)
-	os.WriteFile(filepath.Join(home, ".hanako", "agents", "hana", "config.yaml"), []byte("agent:\n  name: Hana\n"), 0o644)
-	// Craft Agents, once it has run and saved its config
-	craftFixture(t, home)
-	t.Setenv("ASTRBOT_ROOT", "")
-	writeFile(t, filepath.Join(home, ".astrbot", "data", "cmd_config.json"), astrbotConfig)
-	// QwenPaw, once it has written its agents' settings
-	qwenpawFixture(t, home)
-	setPort(t, 3591)
-	var agents []*Agent
-	for _, a := range All() {
-		// Alma and Shelley are told through their running apps, and Cursor's local
-		// gateway is started by launchctl: neither is in the sandbox
-		if a.Check == nil || a.Launch != nil || a.WSL != "" || a.Native != nil || a.ID == "alma" || a.ID == "shelley" || a.ID == "cursorlocal" {
-			continue
-		}
-		var key, want string
-		for _, g := range a.Fields {
-			for _, o := range g.Options(a.Values()) {
-				if want == "" && (o.Ref == "fake/m1" || o.Value == magpieID) {
-					key, want = g.Key, o.Value
-				}
-			}
-		}
-		if want == "" {
-			t.Fatalf("%s: no field takes magpie's models", a.ID)
-		}
-		if err := a.Apply(key, want); err != nil {
-			t.Fatalf("%s: %v", a.ID, err)
-		}
-		if c := a.Check(); c != "" {
-			t.Fatalf("%s connected, yet: %s", a.ID, c)
-		}
-		agents = append(agents, a)
-	}
-	moved := filesWith(home, "127.0.0.1:3591")
-	if len(moved) < 20 {
-		t.Fatalf("only %d files have the gateway's address: %v", len(moved), moved)
-	}
-	for _, p := range moved {
-		b, _ := os.ReadFile(p)
-		os.WriteFile(p, []byte(strings.ReplaceAll(string(b), "http://127.0.0.1:3591", proxy)), 0o644)
-	}
-
-	asked := fakeMagpieAt(t, map[string]bool{proxy: true})
-	for _, a := range agents {
-		if c := a.Check(); c != "" {
-			t.Errorf("%s behind the proxy: %s", a.ID, c)
-		}
-		if d := a.Drift(); d != nil && d.Kind == "unwired" {
-			t.Errorf("%s behind the proxy drifted: %+v", a.ID, d)
-		}
-	}
-	for _, b := range asked() {
-		if b != proxy {
-			t.Errorf("asked %s, not the proxy's own address", b)
-		}
-	}
-
-	// a relay at that address, not magpie: told
-	fakeMagpieAt(t, map[string]bool{})
-	for _, a := range agents {
-		if c := a.Check(); (c == "") != (a.ID == "codex") {
-			t.Errorf("%s at a relay: %q", a.ID, c)
-		}
-	}
-
-	// the sync keeps the proxy, its /magpie too
-	fakeMagpieAt(t, map[string]bool{proxy: true})
-	if err := provider.Save(provider.Provider{ID: "fake2", Name: "Fake2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
-		t.Fatal(err)
-	}
-	SyncCatalog()
-	for _, p := range moved {
-		b, _ := os.ReadFile(p)
-		s, name := string(b), strings.TrimPrefix(p, home)
-		if strings.Contains(s, "127.0.0.1:3591") {
-			t.Errorf("%s is back on this machine's gateway", name)
-		}
-		if !strings.Contains(s, proxy) || strings.Count(s, host) != strings.Count(s, proxy) {
-			t.Errorf("%s lost the proxy's path:\n%s", name, s)
-		}
-	}
-	for _, a := range agents {
-		if c := a.Check(); c != "" {
-			t.Errorf("%s after a sync: %s", a.ID, c)
-		}
-	}
-}
-
 // Claude Code's managed settings pointing it at the company's proxy to
 // magpie win over the user's, and still reach magpie: not drift.
 func TestClaudeManagedProxyIsStillMagpie(t *testing.T) {
@@ -692,4 +578,111 @@ func coldMagpie(t *testing.T, answers map[string]bool) func() []string {
 	reachForget()
 	t.Cleanup(func() { magpieProbe, magpieAt, reachAge = was, wasAt, age; reachForget() })
 	return func() []string { mu.Lock(); defer mu.Unlock(); return append([]string(nil), probed...) }
+}
+
+// davisjiahao (#1985): every agent connected to magpie, then pointed by the
+// user at a proxy that forwards to the gateway, magpie's key and model
+// kept: a company's nginx (https://ai.corp.example/magpie), or the
+// reporter's own, a compliance proxy on this machine every request must go
+// through (http://127.0.0.1:8788/claude-code-anthropic/<route>). That is
+// still magpie: no agent's Check calls it changed, and the sync every
+// start runs keeps the proxy's address, its path included. The same
+// address where something else answers (a relay CC Switch put there) is
+// still told, for every agent but Codex, which keeps an address with
+// magpie's key in its provider table as it did for #816 and tries it
+// (unreachable).
+func TestReverseProxyIsStillMagpie(t *testing.T) {
+	// named so the test's folders, which carry the name, hold no address
+	t.Run("nginx", func(t *testing.T) { reverseProxyIsStillMagpie(t, corpProxy) })
+	t.Run("local", func(t *testing.T) { reverseProxyIsStillMagpie(t, localProxy) })
+}
+
+func reverseProxyIsStillMagpie(t *testing.T, proxy string) {
+	t.Setenv("MAGPIE_ADDR", "")
+	host := strings.SplitN(strings.SplitN(proxy, "://", 2)[1], "/", 2)[0]
+	home, _ := codexHome(t, "", "")
+	managed := claudeManaged
+	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
+	t.Cleanup(func() { claudeManaged = managed })
+	setPort(t, 3591)
+	var agents []*Agent
+	for _, a := range All() {
+		// Cursor's local gateway is started by launchctl: it isn't in the
+		// sandbox
+		if a.Check == nil || a.Launch != nil || a.WSL != "" || a.Native != nil || a.ID == "cursorlocal" {
+			continue
+		}
+		var key, want string
+		for _, g := range a.Fields {
+			for _, o := range g.Options(a.Values()) {
+				if want == "" && (o.Ref == "fake/m1" || o.Value == magpieID) {
+					key, want = g.Key, o.Value
+				}
+			}
+		}
+		if want == "" {
+			t.Fatalf("%s: no field takes magpie's models", a.ID)
+		}
+		if err := a.Apply(key, want); err != nil {
+			t.Fatalf("%s: %v", a.ID, err)
+		}
+		if c := a.Check(); c != "" {
+			t.Fatalf("%s connected, yet: %s", a.ID, c)
+		}
+		agents = append(agents, a)
+	}
+	moved := filesWith(home, "127.0.0.1:3591")
+	// 17 with every agent magpie keeps connected here
+	if len(moved) < 15 {
+		t.Fatalf("only %d files have the gateway's address: %v", len(moved), moved)
+	}
+	for _, p := range moved {
+		b, _ := os.ReadFile(p)
+		os.WriteFile(p, []byte(strings.ReplaceAll(string(b), "http://127.0.0.1:3591", proxy)), 0o644)
+	}
+
+	asked := fakeMagpieAt(t, map[string]bool{proxy: true})
+	for _, a := range agents {
+		if c := a.Check(); c != "" {
+			t.Errorf("%s behind the proxy: %s", a.ID, c)
+		}
+		if d := a.Drift(); d != nil && d.Kind == "unwired" {
+			t.Errorf("%s behind the proxy drifted: %+v", a.ID, d)
+		}
+	}
+	for _, b := range asked() {
+		if b != proxy {
+			t.Errorf("asked %s, not the proxy's own address", b)
+		}
+	}
+
+	// a relay at that address, not magpie: told
+	fakeMagpieAt(t, map[string]bool{})
+	for _, a := range agents {
+		if c := a.Check(); (c == "") != (a.ID == "codex") {
+			t.Errorf("%s at a relay: %q", a.ID, c)
+		}
+	}
+
+	// the sync keeps the proxy, its /magpie too
+	fakeMagpieAt(t, map[string]bool{proxy: true})
+	if err := provider.Save(provider.Provider{ID: "fake2", Name: "Fake2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
+		t.Fatal(err)
+	}
+	SyncCatalog()
+	for _, p := range moved {
+		b, _ := os.ReadFile(p)
+		s, name := string(b), strings.TrimPrefix(p, home)
+		if strings.Contains(s, "127.0.0.1:3591") {
+			t.Errorf("%s is back on this machine's gateway", name)
+		}
+		if !strings.Contains(s, proxy) || strings.Count(s, host) != strings.Count(s, proxy) {
+			t.Errorf("%s lost the proxy's path:\n%s", name, s)
+		}
+	}
+	for _, a := range agents {
+		if c := a.Check(); c != "" {
+			t.Errorf("%s after a sync: %s", a.ID, c)
+		}
+	}
 }

@@ -205,38 +205,6 @@ func TestOpenCodeProvidersKeptCurrent(t *testing.T) {
 	}
 }
 
-// OpenChamber, magpie's agent for the OpenCode it runs, writes magpie's
-// provider into the same config: its sync, model and step off reach the
-// block under providers as well.
-func TestOpenChamberProvidersKeptCurrent(t *testing.T) {
-	home, _ := codexHome(t, "", "")
-	thinkCatalog(t)
-	writeFile(t, filepath.Join(home, ".config", "openchamber", "settings.json"), `{"defaultModel":"anthropic/claude-sonnet-5"}`)
-	ch := openChamber(home, filepath.Join(home, ".config"))
-	if err := ch.Apply("model", "magpie/think/deep"); err != nil {
-		t.Fatal(err)
-	}
-	path := opencode(home, filepath.Join(home, ".config")).Path
-	openChamberSaved(t, path)
-	if err := ch.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	providersCurrent(t, path)
-	openChamberSaved(t, path)
-	if err := ch.Apply("model", "magpie/think/new"); err != nil {
-		t.Fatal(err)
-	}
-	providersCurrent(t, path)
-	if err := ch.Apply("model", ""); err != nil {
-		t.Fatal(err)
-	}
-	for _, k := range []string{"provider." + magpieID, openCodeNativeKey} {
-		if v, ok := edit.GetJSON(path, k); ok {
-			t.Fatalf("%s left: %s", k, v)
-		}
-	}
-}
-
 // What says whether OpenCode reaches magpie reads the block under
 // providers too, which OpenCode 2 sends by: one at another address is off
 // until a sync brings it back.

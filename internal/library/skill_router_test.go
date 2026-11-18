@@ -279,42 +279,6 @@ func TestSkillRouterSlash(t *testing.T) {
 	}
 }
 
-// Alma reads Codex's folder too and neither flag, so with Alma here
-// Codex's folder gets no stub: it would put each skill's description in
-// Alma's prompt, which the router is there to keep out.
-func TestSkillRouterSlashNotWhereAlmaReads(t *testing.T) {
-	h := sandbox(t)
-	// Alma is there once it has its data folder (%APPDATA% on Windows,
-	// which sandbox clears)
-	t.Setenv("APPDATA", filepath.Join(h, "AppData", "Roaming"))
-	cfg, err := os.UserConfigDir()
-	if err != nil {
-		t.Fatal(err)
-	}
-	almaDir := filepath.Join(cfg, "alma")
-	os.MkdirAll(almaDir, 0o755)
-	if tg := targetByID("alma"); tg == nil || !slices.Contains(tg.SkillsAlso, "codex") {
-		t.Fatalf("alma: %+v", tg)
-	}
-	src := filepath.Join(h, "src")
-	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
-	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"codex"}))
-	ok(t)(SetSkillRouter(true))
-	dir := filepath.Join(h, ".codex", "skills")
-	if !routerOurs(filepath.Join(dir, RouterSkill)) {
-		t.Fatal("codex isn't given the router")
-	}
-	if _, err := os.Lstat(filepath.Join(dir, "pdf")); err == nil {
-		t.Fatal("with Alma reading Codex's folder, codex has a stub of pdf")
-	}
-	// Alma gone: the stub
-	os.RemoveAll(almaDir)
-	ok(t)(Sync())
-	if !stubOf(filepath.Join(dir, "pdf")) {
-		t.Fatal("no Alma: codex has no stub of pdf")
-	}
-}
-
 // Unticked from every skill the router listed, the agent's entry goes.
 func TestSkillRouterLastSkillUnticked(t *testing.T) {
 	h := sandbox(t)

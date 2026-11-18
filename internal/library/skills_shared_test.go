@@ -6,16 +6,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
-
-	"github.com/yetone/magpie/internal/agent"
 )
-
-func setOmpVersion(t *testing.T, v string) {
-	t.Helper()
-	was := ompVersion
-	ompVersion = func(*agent.Agent) string { return v }
-	t.Cleanup(func() { ompVersion = was })
-}
 
 func alwaysOf(t *testing.T, name string) []string {
 	t.Helper()
@@ -33,54 +24,35 @@ func alwaysOf(t *testing.T, name string) []string {
 }
 
 // usrname1833: Pi reads ~/.agents/skills itself, from 0.54.0 (its
-// CHANGELOG, package-manager.js userAgentsSkillsDir), omp from 11.0.0
-// (discovery/agents.ts) and OmO's senpi in every version on npm. A skill
-// kept there is theirs whatever is ticked (the lock), and no second link
-// is made in their own folders; an older or unknown one is as before.
+// CHANGELOG, package-manager.js userAgentsSkillsDir). A skill kept there
+// is its whatever is ticked (the lock), and no second link is made in its
+// own folder; an older or unknown one is as before.
 func TestPiReadsSharedSkillsFromItsVersion(t *testing.T) {
 	h := sandbox(t)
-	os.RemoveAll(filepath.Join(h, ".config/goose"))
-	os.Remove(filepath.Join(h, "bin/goose"))
-	os.Remove(filepath.Join(h, "bin/goose.exe"))
-	write(t, filepath.Join(h, ".omp/agent/mcp.json"), "{}")
-	holdCLI(t, h, "omp")
-	write(t, filepath.Join(h, ".omo/agent/settings.json"), "{}")
-	holdCLI(t, h, "omo")
 	shared := filepath.Join(h, ".agents/skills")
 	skill(t, filepath.Join(shared, "orch"), "orch", "Orchestrate")
 	own := map[string]string{
-		"pi":  filepath.Join(h, ".pi/agent/skills/orch"),
-		"omp": filepath.Join(h, ".omp/agent/skills/orch"),
-		"omo": filepath.Join(h, ".omo/agent/skills/orch"),
+		"pi": filepath.Join(h, ".pi/agent/skills/orch"),
 	}
 
 	setPiVersion(t, "0.53.0")
-	setOmpVersion(t, "10.6.2")
 	ok(t)(ImportSkill("orch"))
-	ok(t)(SkillAgents("orch", []string{"claude", "pi", "omp", "omo"}))
-	for _, id := range []string{"pi", "omp"} {
-		if !ours(own[id], "orch") {
-			t.Errorf("%s before it read ~/.agents/skills hasn't its own link", id)
-		}
-	}
-	if _, err := os.Lstat(own["omo"]); !os.IsNotExist(err) {
-		t.Errorf("omo reads ~/.agents/skills, yet got a second link: %v", err)
+	ok(t)(SkillAgents("orch", []string{"claude", "pi"}))
+	if !ours(own["pi"], "orch") {
+		t.Error("pi before it read ~/.agents/skills hasn't its own link")
 	}
 	a := alwaysOf(t, "orch")
-	if slices.Contains(a, "pi") || slices.Contains(a, "omp") || !slices.Contains(a, "omo") || !slices.Contains(a, "codex") {
+	if slices.Contains(a, "pi") || !slices.Contains(a, "codex") {
 		t.Errorf("always before: %v", a)
 	}
 
 	setPiVersion(t, "0.54.0")
-	setOmpVersion(t, "11.0.0")
 	ok(t)(Sync())
-	for _, id := range []string{"pi", "omp"} {
-		if _, err := os.Lstat(own[id]); !os.IsNotExist(err) {
-			t.Errorf("%s reads ~/.agents/skills now, yet keeps a second link: %v", id, err)
-		}
+	if _, err := os.Lstat(own["pi"]); !os.IsNotExist(err) {
+		t.Errorf("pi reads ~/.agents/skills now, yet keeps a second link: %v", err)
 	}
 	a = alwaysOf(t, "orch")
-	for _, id := range []string{"pi", "omp", "omo", "codex"} {
+	for _, id := range []string{"pi", "codex"} {
 		if !slices.Contains(a, id) {
 			t.Errorf("%s isn't said to have it always: %v", id, a)
 		}
@@ -103,9 +75,6 @@ func TestPiReadsSharedSkillsFromItsVersion(t *testing.T) {
 // turning it off takes out magpie's links there and nothing else.
 func TestSkillsWhereShared(t *testing.T) {
 	h := sandbox(t)
-	os.RemoveAll(filepath.Join(h, ".config/goose"))
-	os.Remove(filepath.Join(h, "bin/goose"))
-	os.Remove(filepath.Join(h, "bin/goose.exe"))
 	setPiVersion(t, "0.70.0")
 	src := filepath.Join(h, "src/skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")

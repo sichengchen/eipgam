@@ -47,9 +47,9 @@ func TestEnvRefsPerAgent(t *testing.T) {
 			web: []string{`"Authorization":"Bearer ${MY_TOKEN}"`, `"env_keys":["MY_TOKEN"]`}, fs: []string{`"envs":{"PLAIN":"x"}`, `"env_keys":["MY_TOKEN"]`}},
 		{name: "pi-mcp-adapter", f: mcpFile{Format: fmtPi}, file: "pa.json",
 			web: []string{`"Authorization":"Bearer ${MY_TOKEN}"`}, fs: []string{`"MY_TOKEN":"${MY_TOKEN}"`}},
-		{name: "pi, omo", f: mcpFile{Format: fmtPiNative}, file: "pn.json",
+		{name: "pi", f: mcpFile{Format: fmtPiNative}, file: "pn.json",
 			web: []string{`"Authorization":"Bearer ${MY_TOKEN}"`}, fs: []string{`"MY_TOKEN":"${MY_TOKEN}"`}},
-		{name: "omp, qoder, atomcode", f: mcpFile{Format: fmtOmp}, file: "om.json",
+		{name: "omp", f: mcpFile{Format: fmtOmp}, file: "om.json",
 			web: []string{`"Authorization":"Bearer ${MY_TOKEN}"`}, fs: []string{`"MY_TOKEN":"${MY_TOKEN}"`}},
 		{name: "hermes", f: mcpFile{Format: fmtHermes}, file: "h.yaml",
 			web: []string{`"Authorization":"Bearer ${MY_TOKEN}"`}, fs: []string{`"MY_TOKEN":"${MY_TOKEN}"`}},
@@ -272,97 +272,6 @@ func TestEnvRefsExpand(t *testing.T) {
 	}
 	if _, h := remoteHeaders(t.Context(), &Server{Name: "x", Transport: "http", URL: "http://127.0.0.1:9/", Headers: map[string]string{"Authorization": "Bearer ${MAGPIE_T_UNSET}"}}); h == nil || h.Why != "novar" {
 		t.Errorf("remote: %+v", h)
-	}
-}
-
-// #1435: DeepSeek Harness is given a reference as the !!js expression it
-// evaluates, beside the user's own rows and comments; the entry reads back
-// as the library has it, so a sync leaves it, and none of the text around
-// a reference is ever written as code.
-func TestEnvRefsDsh(t *testing.T) {
-	h := sandbox(t)
-	d := filepath.Join(h, "dsh-home")
-	t.Setenv("DSH_HOME", d)
-	p := filepath.Join(d, "profiles/web/cordis.patch.yml")
-	// the header dsh 0.2.0-rc.2 writes a new profile, and a row as
-	// dsh-mcp-client's README gives one
-	head := "# Your patch layer for this dsh profile, applied after every bundle layer:\n# a top-level YAML array of loader patch entries (id-targeted config\n# overrides, disables, and insert lists; `!!js` expressions allowed).\n"
-	user := head + "- id: llm-deepseek\n  config:\n    thinking: enabled\n" +
-		"- insert:\n    - id: mcp-github\n      name: '@deepseek-ai/dsh-mcp-client'\n      config:\n        serverName: github\n        transport: stdio\n        command: npx\n        args: ['-y', '@modelcontextprotocol/server-github']\n        env:\n          GITHUB_TOKEN: !!js process.env.GITHUB_TOKEN\n        cwd: !!js process.cwd()\n"
-	write(t, p, user)
-
-	odd := "a\"b`c` ${ \\ ${1} $${X_1}\n '); process.exit(1); ('"
-	web := Server{Name: "web", Transport: "http", URL: "https://example.com/mcp", Agents: []string{"dsh"},
-		Headers: map[string]string{"Authorization": "Bearer ${MY_TOKEN}", "X-Static": "literal", "X-Odd": odd, "X-Two": "${A_1}${B_2}"}}
-	fs := Server{Name: "fs", Transport: "stdio", Command: "npx", Args: []string{"-y", "fs"}, Agents: []string{"dsh"},
-		Env: map[string]string{"MY_TOKEN": "${MY_TOKEN}", "PLAIN": "x", "MIX": "pre-${MY_TOKEN}-post"}}
-	for _, s := range []Server{web, fs} {
-		if r, err := SaveServer("", s); err != nil || len(r.Problems) != 0 {
-			t.Fatalf("%s: %+v %v", s.Name, r, err)
-		}
-	}
-	got := read(t, p)
-	for _, w := range []string{
-		"MY_TOKEN: !!js process.env.MY_TOKEN\n",
-		`Authorization: !!js "\"Bearer \" + (process.env.MY_TOKEN ?? \"\")"`,
-		`MIX: !!js "\"pre-\" + (process.env.MY_TOKEN ?? \"\") + \"-post\""`,
-		`X-Two: !!js "(process.env.A_1 ?? \"\") + (process.env.B_2 ?? \"\")"`,
-		`PLAIN: "x"`, `X-Static: "literal"`,
-		"- id: llm-deepseek\n  config:\n    thinking: enabled\n",
-		"GITHUB_TOKEN: !!js process.env.GITHUB_TOKEN\n        cwd: !!js process.cwd()\n",
-	} {
-		if !strings.Contains(got, w) {
-			t.Errorf("no %s in:\n%s", w, got)
-		}
-	}
-	if !strings.HasPrefix(got, head) || strings.Contains(got, "${MY_TOKEN}") {
-		t.Errorf("patch list:\n%s", got)
-	}
-
-	f := targetByID("dsh").MCP
-	es, err := f.entries()
-	if err != nil {
-		t.Fatal(err)
-	}
-	// each expression is JSON strings and variables, nothing else, and
-	// stands for the library's value
-	hs, _ := es["web"]["headers"].(map[string]any)
-	for k, v := range hs {
-		e, ok := v.(dshJS)
-		if !ok {
-			continue
-		}
-		if back, ok := dshUnref(e); !ok || back != web.Headers[k] {
-			t.Errorf("%s: %s reads back as %q", k, e, back)
-		}
-	}
-	back, err := f.read()
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, s := range []Server{web, fs} {
-		if b := back[s.Name]; b == nil || !b.same(&s) {
-			t.Errorf("%s read back as %+v", s.Name, b)
-		}
-	}
-	// the user's row is the library's ${NAME} too
-	if g := back["github"]; g == nil || g.Env["GITHUB_TOKEN"] != "${GITHUB_TOKEN}" {
-		t.Errorf("github read as %+v", g)
-	}
-	v, err := Read(nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, a := range v.Agents {
-		if a.ID == "dsh" && a.NoEnvRefs {
-			t.Error("dsh: noEnvRefs")
-		}
-	}
-	if r, err := Sync(); err != nil || len(r.Problems) != 0 || len(r.Changed) != 0 {
-		t.Errorf("sync: %+v %v", r, err)
-	}
-	if after := read(t, p); after != got {
-		t.Errorf("a sync rewrote it:\n%s", after)
 	}
 }
 

@@ -71,23 +71,20 @@ func TestAgentConnectAPI(t *testing.T) {
 	}
 }
 
-// An omp profile's id is omp#<name>, and the Agents page asks for it with
-// the # encoded: left raw, a browser reads #work as the fragment and the
-// request reaches the default omp row, whose config.yml then changes
-// (#1187). Connecting and disconnecting the encoded id touches the
-// profile's files alone.
-func TestOmpProfileConnectURL(t *testing.T) {
-	home := t.TempDir()
-	t.Setenv("HOME", home)
-	t.Setenv("USERPROFILE", home)
-	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	def := filepath.Join(home, ".omp", "agent", "config.yml")
+// A Claude Code config folder beside ~/.claude is a row of its own,
+// claude#<name> (as omp's profiles were omp#<name>), and the Agents page asks
+// for it with the # encoded: left raw, a browser reads #work as the
+// fragment and the request reaches the claude row, whose settings.json then
+// changes (#1187). Connecting and disconnecting the encoded id touches
+// that folder's files alone.
+func TestClaudeDirConnectURL(t *testing.T) {
+	home := sandboxHome(t)
+	def := filepath.Join(home, ".claude", "settings.json")
 	os.MkdirAll(filepath.Dir(def), 0o755)
-	os.WriteFile(def, []byte("modelRoles:\n  default: own/model-a\n"), 0o600)
-	work := filepath.Join(home, ".omp", "profiles", "work", "agent")
-	os.MkdirAll(work, 0o755)
-	os.WriteFile(filepath.Join(work, "config.yml"), []byte("modelRoles:\n  default: own/model-b\n"), 0o600)
+	os.WriteFile(def, []byte(`{"model":"opus"}`), 0o600)
+	work := filepath.Join(home, ".claude-work", "settings.json")
+	os.MkdirAll(filepath.Dir(work), 0o755)
+	os.WriteFile(work, []byte(`{"model":"sonnet"}`), 0o600)
 	if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m1"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -116,27 +113,24 @@ func TestOmpProfileConnectURL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	a := row(call("/api/agents/connect/omp%23work"), "omp#work")
+	a := row(call("/api/agents/connect/claude%23work"), "claude#work")
 	if !a.Wired {
-		t.Fatal("omp#work isn't connected")
+		t.Fatal("claude#work isn't connected")
 	}
 	got, err := os.ReadFile(def)
 	if err != nil || string(got) != string(before) {
-		t.Fatalf("connecting the profile wrote the default omp config:\n%s", got)
+		t.Fatalf("connecting the folder's row wrote the claude row's settings.json:\n%s", got)
 	}
-	if _, err := os.Stat(filepath.Join(home, ".omp", "agent", "models.yml")); !os.IsNotExist(err) {
-		t.Fatalf("connecting the profile wrote the default row's models.yml: %v", err)
+	folder, err := os.ReadFile(work)
+	if err != nil || !strings.Contains(string(folder), "relay/m1") {
+		t.Fatalf("the folder's settings.json wasn't connected:\n%s", folder)
 	}
-	profile, err := os.ReadFile(filepath.Join(work, "config.yml"))
-	if err != nil || !strings.Contains(string(profile), "magpie/relay/m1") {
-		t.Fatal("the profile's config wasn't connected")
-	}
-	s := call("/api/agents/disconnect/omp%23work")
-	if row(s, "omp#work").Wired || row(s, "omp").Wired {
+	s := call("/api/agents/disconnect/claude%23work")
+	if row(s, "claude#work").Wired || row(s, "claude").Wired {
 		t.Fatal("a row stayed connected")
 	}
 	if got, err = os.ReadFile(def); err != nil || string(got) != string(before) {
-		t.Fatalf("disconnecting the profile wrote the default omp config:\n%s", got)
+		t.Fatalf("disconnecting the folder's row wrote the claude row's settings.json:\n%s", got)
 	}
 }
 

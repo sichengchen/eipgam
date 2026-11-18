@@ -250,31 +250,14 @@ func Found() []string {
 	add("opencode", OpenCodeDir())
 	add("pi", PiDir())
 	add("raft", filepath.Join(SlockDir(), "agents"))
-	add("cindy", cindySessionDirs()...)
-	add("zcode", zcodeDB())
-	add("dsh", filepath.Join(DshDir(), "sessions"))
-	add("cline", ClineSessionDir())
-	add("qoder", filepath.Join(QoderDir("qoder"), "projects"))
-	add("qoder-cn", filepath.Join(QoderDir("qoder-cn"), "projects"))
 	add("grok", filepath.Join(GrokDir(), "sessions"))
-	add("workbuddy", filepath.Join(WorkBuddyDir(), "projects"))
-	add("workbuddy-ai", filepath.Join(WorkBuddyAIDir(), "projects"))
-	add("codebuddy", filepath.Join(CodeBuddyDir(), "projects"))
-	add("omp", filepath.Join(OmpDir(), "sessions"))
-	add("droid", filepath.Join(FactoryDir(), "sessions"))
 	add("cursor", filepath.Join(CursorDir(), "chats"), filepath.Join(cursorDataDir(), "projects"), cursorEditorDB())
-	add("hermes", HermesDirs()...)
-	add("alma", almaDB())
-	add("openmausbot", ombDB())
-	add("liveagent", liveagentSessions())
-	add("minimax-code", minimaxSessions())
 	kimi := []string{kimiSessions()}
 	for _, sh := range kimiWorkShares() {
 		kimi = append(kimi, filepath.Join(kimiWorkRuntime(sh), "home", "sessions"))
 	}
 	add("kimi", kimi...)
 	add("agy", filepath.Join(AgyDir(), "brain"))
-	add("antigravity", antigravityConversations(), filepath.Join(AntigravityInsidersDir(), "conversations"))
 	add("gemini", geminiTmpDir())
 	var devin []string
 	for _, d := range DevinCLIDirs() {

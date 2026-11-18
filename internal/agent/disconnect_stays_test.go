@@ -35,61 +35,6 @@ func agentFiles(t *testing.T, home string) map[string]string {
 	return files
 }
 
-// A disconnect the user chose stays through magpie's start-up sync, which
-// runs at every start and after every update (SyncCatalog): no agent is
-// wired again, and none of its files changes (paynezhuang on Discord: Codex
-// had magpie's base URL back after each update). So does it through what a
-// running gateway keeps up (dsh's routes).
-func TestDisconnectStaysThroughSync(t *testing.T) {
-	home, _ := codexHome(t, "", "")
-	managed := claudeManaged
-	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
-	t.Cleanup(func() { claudeManaged = managed })
-	startAlma(t)    // Alma keeps its providers in the app
-	startShelley(t) // so does Shelley its models
-	os.MkdirAll(filepath.Join(home, ".hanako", "agents", "hana"), 0o755)
-	os.WriteFile(filepath.Join(home, ".hanako", "agents", "hana", "config.yaml"), []byte("agent:\n  name: Hana\n"), 0o644)
-	for _, a := range All() {
-		if a.Launch != nil || a.Native != nil || a.WSL != "" || len(a.Fields) == 0 {
-			continue
-		}
-		t.Run(a.ID, func(t *testing.T) {
-			if _, err := a.ConnectHow(); err != nil {
-				t.Skip("can't be connected here:", err)
-			}
-			if !a.Wired() {
-				t.Skip("not wired by Connect here")
-			}
-			if err := a.Disconnect(); err != nil {
-				t.Fatal(err)
-			}
-			if a.Wired() {
-				t.Fatal("still wired after Disconnect")
-			}
-			before := agentFiles(t, home)
-			for i := 0; i < 2; i++ {
-				SyncCatalog()
-				// and what a running gateway keeps up (KeepDshWired)
-				dshWiredOnce()
-				if a.Wired() || a.FailingOver != nil && a.FailingOver() {
-					t.Fatalf("sync %d wired it again", i)
-				}
-			}
-			after := agentFiles(t, home)
-			for p, b := range before {
-				if after[p] != b {
-					t.Errorf("sync changed %s:\n--- after Disconnect\n%s\n--- after sync\n%s", p, b, after[p])
-				}
-			}
-			for p := range after {
-				if _, ok := before[p]; !ok {
-					t.Errorf("sync wrote %s", p)
-				}
-			}
-		})
-	}
-}
-
 // codexChatGPTAuth is a Codex auth.json signed in to ChatGPT as email.
 func codexChatGPTAuth(email, acct string) map[string]any {
 	claims := func(m map[string]any) string {
@@ -209,5 +154,53 @@ func TestCodexAPIDisconnectStays(t *testing.T) {
 	SyncCatalog()
 	if cfg := read(); !cx.Wired() || !strings.Contains(cfg, `model_provider = "magpie"`) {
 		t.Fatalf("connected again:\n%s", cfg)
+	}
+}
+
+// A disconnect the user chose stays through magpie's start-up sync, which
+// runs at every start and after every update (SyncCatalog): no agent is
+// wired again, and none of its files changes (paynezhuang on Discord: Codex
+// had magpie's base URL back after each update).
+func TestDisconnectStaysThroughSync(t *testing.T) {
+	home, _ := codexHome(t, "", "")
+	managed := claudeManaged
+	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
+	t.Cleanup(func() { claudeManaged = managed })
+	for _, a := range All() {
+		if a.Launch != nil || a.Native != nil || a.WSL != "" || len(a.Fields) == 0 {
+			continue
+		}
+		t.Run(a.ID, func(t *testing.T) {
+			if _, err := a.ConnectHow(); err != nil {
+				t.Skip("can't be connected here:", err)
+			}
+			if !a.Wired() {
+				t.Skip("not wired by Connect here")
+			}
+			if err := a.Disconnect(); err != nil {
+				t.Fatal(err)
+			}
+			if a.Wired() {
+				t.Fatal("still wired after Disconnect")
+			}
+			before := agentFiles(t, home)
+			for i := 0; i < 2; i++ {
+				SyncCatalog()
+				if a.Wired() || a.FailingOver != nil && a.FailingOver() {
+					t.Fatalf("sync %d wired it again", i)
+				}
+			}
+			after := agentFiles(t, home)
+			for p, b := range before {
+				if after[p] != b {
+					t.Errorf("sync changed %s:\n--- after Disconnect\n%s\n--- after sync\n%s", p, b, after[p])
+				}
+			}
+			for p := range after {
+				if _, ok := before[p]; !ok {
+					t.Errorf("sync wrote %s", p)
+				}
+			}
+		})
 	}
 }

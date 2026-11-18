@@ -142,8 +142,7 @@ func mustGet(t *testing.T, path, key string) string {
 }
 
 // A provider renamed moves the magpie/<id>/ entries in Pi's enabledModels
-// onto the new id, in Pi and in its forks that keep the same settings.json
-// (OmO, Prime Agent): the model it is on, kept at its place and not listed
+// onto the new id, in Pi: the model it is on, kept at its place and not listed
 // twice, another of that provider's with a thinking level, and a glob. The
 // user's own entries stay, and so does a name that only shares a prefix
 // (#1919, #1828).
@@ -154,9 +153,6 @@ func TestPiEnabledModelsFollowRename(t *testing.T) {
 		a   func(string) *Agent
 	}{
 		{"pi", []string{".pi", "agent"}, pi},
-		{"omo", []string{".omo", "agent"}, omo},
-		{"prime-agent", []string{".prime", "agent"}, primeAgent},
-		{"mu", []string{".mu", "agent"}, mu},
 	} {
 		t.Run(c.id, func(t *testing.T) {
 			home := syncHome(t)

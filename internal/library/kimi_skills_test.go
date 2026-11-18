@@ -6,6 +6,25 @@ import (
 	"testing"
 )
 
+// sharedHolderSrc is an agent a plugin adds whose own skills folder is
+// ~/.agents/skills, as Goose's was: what the library gives it goes there.
+const sharedHolderSrc = `
+export const agent = {
+  id: "pal", name: "Pal", dir: "~/.pal", config: "~/.pal/config.json", model: "model",
+  library: { skills: "~/.agents/skills" },
+};
+`
+
+// plugSharedHolder makes that agent there, in the sandbox h.
+func plugSharedHolder(t *testing.T, h string) {
+	t.Helper()
+	plugAgents(t, h, sharedHolderSrc)
+	write(t, filepath.Join(h, ".pal", "config.json"), "{}")
+	if tg := targetByID("pal"); tg == nil || realDir(tg.Skills) != realDir(sharedSkillsDir()) {
+		t.Fatalf("the plugin's agent doesn't keep its skills in ~/.agents/skills: %+v", tg)
+	}
+}
+
 // A skill given to the new Kimi Code (2.x) goes into its own folder
 // ($KIMI_CODE_HOME/skills, else ~/.kimi-code/skills — its docs,
 // MoonshotAI/kimi-code, docs/en/customization/skills.md "Skill
@@ -16,6 +35,7 @@ import (
 func TestKimiCodeSkillsOwnFolder(t *testing.T) {
 	h := sandbox(t)
 	write(t, filepath.Join(h, ".kimi-code/config.toml"), "")
+	plugSharedHolder(t, h)
 	src := filepath.Join(h, "src/skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	shared := filepath.Join(h, ".agents/skills/pdf")
@@ -29,26 +49,28 @@ func TestKimiCodeSkillsOwnFolder(t *testing.T) {
 		t.Error("the skill sits in ~/.agents/skills, which every reader reads")
 	}
 
-	// a skill Goose has too stays one entry in the shared folder, which
-	// Kimi Code reads where it is: no second link of it in Kimi Code's own
+	// a skill an agent whose folder ~/.agents/skills is has too stays one
+	// entry there, which Kimi Code reads where it is: no second link of it
+	// in Kimi Code's own
 	skill(t, filepath.Join(src, "orca"), "orca", "Orca")
-	ok(t)(InstallSkills(src, []string{"orca"}, []string{"goose", "kimi"}))
+	ok(t)(InstallSkills(src, []string{"orca"}, []string{"pal", "kimi"}))
 	if !ours(filepath.Join(h, ".agents/skills/orca"), "orca") {
-		t.Error("goose hasn't its skill in ~/.agents/skills")
+		t.Error("pal hasn't its skill in ~/.agents/skills")
 	}
 	if _, err := os.Lstat(filepath.Join(h, ".kimi-code/skills/orca")); !os.IsNotExist(err) {
-		t.Error("Kimi Code has a second link to Goose's skill")
+		t.Error("Kimi Code has a second link to pal's skill")
 	}
 }
 
 // A skill an older magpie put in ~/.agents/skills for Kimi Code is taken
 // out of there once it is Kimi Code's alone: the link left behind would go
 // on reaching every reader of the folder, whatever the library ticks
-// (#4379). One an agent whose folder the shared one is (Goose) still gives
-// stays.
+// (#4379). One an agent whose folder the shared one is (Goose, then;
+// a plugin's agent here) still gives stays.
 func TestKimiOldSharedEntrySwept(t *testing.T) {
 	h := sandbox(t)
 	write(t, filepath.Join(h, ".kimi-code/config.toml"), "")
+	plugSharedHolder(t, h)
 	src := filepath.Join(h, "src/skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	shared := filepath.Join(h, ".agents/skills/pdf")
@@ -67,9 +89,9 @@ func TestKimiOldSharedEntrySwept(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Goose's skill is delivered in the shared folder and stays there
+	// pal's skill is delivered in the shared folder and stays there
 	skill(t, filepath.Join(src, "orca"), "orca", "Orca")
-	ok(t)(InstallSkills(src, []string{"orca"}, []string{"goose"}))
+	ok(t)(InstallSkills(src, []string{"orca"}, []string{"pal"}))
 	ok(t)(Sync())
 
 	if _, err := os.Lstat(shared); !os.IsNotExist(err) {
@@ -79,7 +101,7 @@ func TestKimiOldSharedEntrySwept(t *testing.T) {
 		t.Error("Kimi Code hasn't the skill in its own folder")
 	}
 	if !ours(filepath.Join(h, ".agents/skills/orca"), "orca") {
-		t.Error("goose's skill went from ~/.agents/skills")
+		t.Error("pal's skill went from ~/.agents/skills")
 	}
 }
 

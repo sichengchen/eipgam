@@ -515,16 +515,9 @@ func run(args []string) error {
 	gateway.WhileServing = append(gateway.WhileServing, davsync.Run)
 	// and the setup backed up into a folder here by itself (jwaitq)
 	gateway.WhileServing = append(gateway.WhileServing, backup.RunAuto)
-	// and dsh's patch lists, which dsh reads live: a route left behind by
-	// something else writing the file fails every session there until
-	// magpie writes its own list again
-	gateway.WhileServing = append(gateway.WhileServing, agent.KeepDshWired)
 	// and Cursor Private Inference's variables, which the Mac's launchd
 	// forgets at a restart, for the gateway's address now
 	gateway.WhileServing = append(gateway.WhileServing, agent.KeepCursorLocalEnv)
-	// and magpie's models in OpenMausBot's engine, which OpenMausBot
-	// writes back as it held them when an engine is changed in it
-	gateway.WhileServing = append(gateway.WhileServing, agent.KeepOpenMausBotListed)
 	// and Claude Science's daemon, which a restart of the computer ends,
 	// started on the gateway again while it is connected
 	gateway.WhileServing = append(gateway.WhileServing, agent.KeepClaudeScience)
@@ -697,33 +690,9 @@ func run(args []string) error {
 		return err
 	}
 	// no agent form takes a flag: one is never set as a model or a value
-	// (`magpie snow --verbose` would take magpie out of Snow, #1457)
+	// (`magpie <agent> --verbose` took magpie out of the agent, #1457)
 	if f := flagArg(args[1:]); f != "" {
 		return fmt.Errorf("unknown flag %s: nothing was changed\n\n%s", f, strings.TrimRight(agentHelp(a), "\n"))
-	}
-	if len(a.Fields) == 0 && a.Import != nil {
-		// `magpie cindy`: it takes magpie through its own link, confirmed there
-		if len(args) > 1 {
-			link := a.Import()
-			if link == "" {
-				// Lody takes only a gateway on this computer's loopback
-				return fmt.Errorf("%s takes magpie only at a loopback address, and the gateway is at %s: nothing was opened", a.Name, gateway.URL())
-			}
-			// handed over only when something here opens it, or nothing
-			// opens and nothing says so (sungt, 10-29)
-			openApp := func(u string) error { return appLink(u, func(u string) error { openInBrowser(u); return nil }) }
-			handOver := openApp
-			if a.ID == "lody" {
-				// Lody on Linux is run with the link (agent.OpenLody)
-				handOver = func(u string) error { return agent.OpenLody(u, openApp) }
-			}
-			if err := handOver(link); err != nil {
-				return fmt.Errorf("%w. Open %s once or install it again, then run this again", err, a.Name)
-			}
-			fmt.Println(green.Render("✓"), bold.Render(a.Name), muted.Render("opened to add magpie — confirm it there"))
-			fmt.Println(muted.Render("  " + link))
-			return nil
-		}
 	}
 	switch len(args) {
 	case 1:

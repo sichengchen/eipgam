@@ -47,9 +47,6 @@ func Rewire(as []*Agent) (moved []string, err error) {
 	}
 	moved, errs := setAgain(off)
 	KeepCursorLocalEnv(context.Background())
-	if trouble := dshWiredOnce(); trouble != "" {
-		errs = append(errs, fmt.Errorf("%s", trouble))
-	}
 	return moved, joinErrs(errs)
 }
 

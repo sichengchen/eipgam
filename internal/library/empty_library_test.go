@@ -57,34 +57,34 @@ func TestEmptyLibraryApplyLeavesAgentsFilesAlone(t *testing.T) {
 	own := "House rules of my own."
 	write(t, filepath.Join(h, ".codex/AGENTS.md"), own)
 	shared := "Be brief."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "dsh"}}))
-	cx, dx := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".dsh/AGENTS.md")
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "gemini"}}))
+	cx, gm := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".gemini/GEMINI.md")
 	cxBefore, err := os.ReadFile(cx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dxBefore, err := os.ReadFile(dx)
+	gmBefore, err := os.ReadFile(gm)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(dxBefore), blockBegin) {
-		t.Fatalf("dsh got no part:\n%s", dxBefore)
+	if !strings.Contains(string(gmBefore), blockBegin) {
+		t.Fatalf("gemini got no part:\n%s", gmBefore)
 	}
 	// the upgrade's reset: agents unticked and the text gone, the files
 	// the agents hold untouched — then the start-up apply runs
 	lostLibrary(t, nil, nil)
 	ok(t)(Sync())
 	applyWiped(t, cxBefore, cx)
-	applyWiped(t, dxBefore, dx)
+	applyWiped(t, gmBefore, gm)
 
 	// recovery: with the library given text again, both get it
 	again := "Back again."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &again, Agents: []string{"codex", "dsh"}}))
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &again, Agents: []string{"codex", "gemini"}}))
 	if s := read(t, cx); !strings.Contains(s, again) || !strings.Contains(s, own) {
 		t.Errorf("codex after recovery:\n%s", s)
 	}
-	if s := read(t, dx); !strings.Contains(s, again) {
-		t.Errorf("dsh after recovery:\n%s", s)
+	if s := read(t, gm); !strings.Contains(s, again) {
+		t.Errorf("gemini after recovery:\n%s", s)
 	}
 }
 
@@ -93,20 +93,20 @@ func TestEmptyLibraryApplyLeavesAgentsFilesAlone(t *testing.T) {
 func TestEmptyTextApplyLeavesTickedFilesAlone(t *testing.T) {
 	h := sandbox(t)
 	shared := "Be brief."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "dsh"}}))
-	cx, dx := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".dsh/AGENTS.md")
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "gemini"}}))
+	cx, gm := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".gemini/GEMINI.md")
 	cxBefore, err := os.ReadFile(cx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dxBefore, err := os.ReadFile(dx)
+	gmBefore, err := os.ReadFile(gm)
 	if err != nil {
 		t.Fatal(err)
 	}
-	lostLibrary(t, []string{"codex", "dsh"}, nil)
+	lostLibrary(t, []string{"codex", "gemini"}, nil)
 	ok(t)(Sync())
 	applyWiped(t, cxBefore, cx)
-	applyWiped(t, dxBefore, dx)
+	applyWiped(t, gmBefore, gm)
 }
 
 // A library whose record says the last it wrote an agent was empty while
@@ -116,19 +116,19 @@ func TestEmptyTextApplyLeavesTickedFilesAlone(t *testing.T) {
 func TestApplySaysWhyItLeftAPartAlone(t *testing.T) {
 	h := sandbox(t)
 	shared := "Be brief."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "dsh"}}))
-	cx, dx := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".dsh/AGENTS.md")
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "gemini"}}))
+	cx, gm := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".gemini/GEMINI.md")
 	cxBefore, err := os.ReadFile(cx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dxBefore, err := os.ReadFile(dx)
+	gmBefore, err := os.ReadFile(gm)
 	if err != nil {
 		t.Fatal(err)
 	}
 	lostLibrary(t, nil, map[string]*Applied{
-		"codex": {Instructions: true, InstrHash: hash("")},
-		"dsh":   {Instructions: true, InstrHash: hash("")},
+		"codex":  {Instructions: true, InstrHash: hash("")},
+		"gemini": {Instructions: true, InstrHash: hash("")},
 	})
 	out := &bytes.Buffer{}
 	flags, w := log.Flags(), log.Writer()
@@ -137,7 +137,7 @@ func TestApplySaysWhyItLeftAPartAlone(t *testing.T) {
 	t.Cleanup(func() { log.SetFlags(flags); log.SetOutput(w) })
 	ok(t)(Sync())
 	applyWiped(t, cxBefore, cx)
-	applyWiped(t, dxBefore, dx)
+	applyWiped(t, gmBefore, gm)
 	if s := out.String(); !strings.Contains(s, "codex") || !strings.Contains(s, cx) {
 		t.Errorf("the apply said nothing of leaving codex alone:\n%s", s)
 	}
@@ -149,13 +149,13 @@ func TestApplySaysWhyItLeftAPartAlone(t *testing.T) {
 func TestUntickedLibraryApplyLeavesFilesAlone(t *testing.T) {
 	h := sandbox(t)
 	shared := "Be brief."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "dsh"}}))
-	cx, dx := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".dsh/AGENTS.md")
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "gemini"}}))
+	cx, gm := filepath.Join(h, ".codex/AGENTS.md"), filepath.Join(h, ".gemini/GEMINI.md")
 	cxBefore, err := os.ReadFile(cx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dxBefore, err := os.ReadFile(dx)
+	gmBefore, err := os.ReadFile(gm)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,10 +167,10 @@ func TestUntickedLibraryApplyLeavesFilesAlone(t *testing.T) {
 	write(t, path(), string(b))
 	ok(t)(Sync())
 	applyWiped(t, cxBefore, cx)
-	applyWiped(t, dxBefore, dx)
+	applyWiped(t, gmBefore, gm)
 
 	// the page's own take-back is the user's word, and goes out
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "dsh"}}))
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "gemini"}}))
 	ok(t)(SaveInstructions(InstructionsChange{Agents: []string{}}))
 	if s := readText(cx); strings.Contains(s, blockBegin) {
 		t.Errorf("unticking codex on the page left its part:\n%s", s)
@@ -185,7 +185,7 @@ func TestUnreadableTextLeavesFilesAlone(t *testing.T) {
 	}
 	h := sandbox(t)
 	shared := "Be brief."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "dsh"}}))
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"codex", "gemini"}}))
 	cx := filepath.Join(h, ".codex/AGENTS.md")
 	cxBefore, err := os.ReadFile(cx)
 	if err != nil {

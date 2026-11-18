@@ -347,19 +347,18 @@ func TestTraceDiscoveryIncludesClaudeChildren(t *testing.T) {
 	t.Setenv("GEMINI_CLI_HOME", filepath.Join(home, "gemini-home"))
 	files := map[string]string{
 		"claude": filepath.Join(home, "claude", "projects", "p", "s.jsonl"),
-		"omp":    filepath.Join(home, ".omp", "agent", "sessions", "p", "now_s.jsonl"),
 		"gemini": filepath.Join(home, "gemini-home", ".gemini", "tmp", "p", "chats", "session-s.jsonl"),
 	}
 	for _, path := range files {
 		os.MkdirAll(filepath.Dir(path), 0700)
 		os.WriteFile(path, []byte("{}\n"), 0600)
 	}
-	for _, path := range []string{filepath.Join(home, "claude", "projects", "p", "s", "subagents", "agent-a.jsonl"), filepath.Join(home, ".omp", "agent", "sessions", "p", "now_s", "agent-a.jsonl")} {
+	for _, path := range []string{filepath.Join(home, "claude", "projects", "p", "s", "subagents", "agent-a.jsonl")} {
 		os.MkdirAll(filepath.Dir(path), 0700)
 		os.WriteFile(path, []byte("{}\n"), 0600)
 	}
 	got := traceLineFiles()
-	if len(got) != 4 {
+	if len(got) != 3 {
 		t.Fatalf("discovery %+v", got)
 	}
 	for _, f := range got {

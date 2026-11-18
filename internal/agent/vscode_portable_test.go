@@ -259,67 +259,6 @@ func TestVSCodeMacPortableLinkChain(t *testing.T) {
 	}
 }
 
-// The reporter's case end to end: connecting, a profile's sync and
-// disconnecting all write the portable build's files, Application
-// Support's are left as they were, Zoo Code reads the same User folder
-// and extensions, and no preview runs a process that would find the
-// build's own files through the launcher on PATH.
-func TestVSCodeMacPortableWiring(t *testing.T) {
-	home := syncHome(t)
-	_, data := macPortableVSCode(t, vscodeStable, `{"applicationName":"code"}`, "code-portable-data")
-	dir := filepath.Join(data, "user-data", "User")
-	settings := filepath.Join(dir, "settings.json")
-	writeFile(t, settings, `{"chat.defaultModel":"auto","editor.fontSize":17}`)
-	profile := filepath.Join(dir, "profiles", "work")
-	writeFile(t, filepath.Join(profile, "settings.json"), `{"chat.defaultModel":"auto"}`)
-	writeFile(t, filepath.Join(dir, "globalStorage", "storage.json"), `{"userDataProfiles":[{"location":"work"}]}`)
-	standard := filepath.Join(home, "Library", "Application Support", "Code", "User", "settings.json")
-	writeFile(t, standard, `{"editor.fontSize":99}`)
-	a := vscode(home, "unused")
-	if a.Path != settings || !a.Detected() {
-		t.Fatalf("VS Code at %q, detected %v", a.Path, a.Detected())
-	}
-	if err := a.Connect(); err != nil {
-		t.Fatal(err)
-	}
-	if err := a.Sync(); err != nil {
-		t.Fatal(err)
-	}
-	for _, at := range []string{dir, profile} {
-		if _, ok := edit.GetJSONItem(filepath.Join(at, "chatLanguageModels.json"), vscodeGroup); !ok {
-			t.Errorf("no magpie group in %s", at)
-		}
-	}
-	if _, err := DisconnectPreview(a, "no-such-magpie"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
-		t.Fatalf("a preview of the portable build: %v", err)
-	}
-	if err := a.Disconnect(); err != nil {
-		t.Fatal(err)
-	}
-	for _, at := range []string{dir, profile} {
-		if v, _ := edit.GetJSON(filepath.Join(at, "settings.json"), vscodeDefault); v != "auto" {
-			t.Errorf("%s's default model %q, want auto back", at, v)
-		}
-		if _, ok := edit.GetJSONItem(filepath.Join(at, "chatLanguageModels.json"), vscodeGroup); ok {
-			t.Errorf("magpie's group kept in %s", at)
-		}
-	}
-	if got := readFile(standard); got != `{"editor.fontSize":99}` {
-		t.Fatalf("Application Support's settings changed: %s", got)
-	}
-	if _, err := os.Stat(filepath.Join(filepath.Dir(standard), "chatLanguageModels.json")); !os.IsNotExist(err) {
-		t.Fatalf("Application Support got a chatLanguageModels.json: %v", err)
-	}
-	writeFile(t, filepath.Join(data, "extensions", zooExtension+"-3.90.0", "package.json"), `{"name":"zoo-code","version":"3.90.0"}`)
-	zoo := zooCode(home, "unused")
-	if zoo.Path != settings || !zoo.Detected() {
-		t.Fatalf("Zoo Code at %q, detected %v", zoo.Path, zoo.Detected())
-	}
-	if _, err := DisconnectPreview(zoo, "no-such-magpie"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
-		t.Fatalf("a preview of Zoo Code in the portable build: %v", err)
-	}
-}
-
 // With no launcher on PATH, the Mac's app folders say: a portable bundle
 // one folder down (/Applications/Code) is found, and when another
 // install is there too, which the user runs is unknown, so nothing moves.
@@ -379,9 +318,61 @@ func TestVSCodeMacPortableForkLauncher(t *testing.T) {
 	}
 }
 
+// The reporter's case end to end: connecting, a profile's sync and
+// disconnecting all write the portable build's files, Application
+// Support's are left as they were, Zoo Code reads the same User folder
+// and extensions, and no preview runs a process that would find the
+// build's own files through the launcher on PATH.
+func TestVSCodeMacPortableWiring(t *testing.T) {
+	home := syncHome(t)
+	_, data := macPortableVSCode(t, vscodeStable, `{"applicationName":"code"}`, "code-portable-data")
+	dir := filepath.Join(data, "user-data", "User")
+	settings := filepath.Join(dir, "settings.json")
+	writeFile(t, settings, `{"chat.defaultModel":"auto","editor.fontSize":17}`)
+	profile := filepath.Join(dir, "profiles", "work")
+	writeFile(t, filepath.Join(profile, "settings.json"), `{"chat.defaultModel":"auto"}`)
+	writeFile(t, filepath.Join(dir, "globalStorage", "storage.json"), `{"userDataProfiles":[{"location":"work"}]}`)
+	standard := filepath.Join(home, "Library", "Application Support", "Code", "User", "settings.json")
+	writeFile(t, standard, `{"editor.fontSize":99}`)
+	a := vscode(home, "unused")
+	if a.Path != settings || !a.Detected() {
+		t.Fatalf("VS Code at %q, detected %v", a.Path, a.Detected())
+	}
+	if err := a.Connect(); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	for _, at := range []string{dir, profile} {
+		if _, ok := edit.GetJSONItem(filepath.Join(at, "chatLanguageModels.json"), vscodeGroup); !ok {
+			t.Errorf("no magpie group in %s", at)
+		}
+	}
+	if _, err := DisconnectPreview(a, "no-such-magpie"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
+		t.Fatalf("a preview of the portable build: %v", err)
+	}
+	if err := a.Disconnect(); err != nil {
+		t.Fatal(err)
+	}
+	for _, at := range []string{dir, profile} {
+		if v, _ := edit.GetJSON(filepath.Join(at, "settings.json"), vscodeDefault); v != "auto" {
+			t.Errorf("%s's default model %q, want auto back", at, v)
+		}
+		if _, ok := edit.GetJSONItem(filepath.Join(at, "chatLanguageModels.json"), vscodeGroup); ok {
+			t.Errorf("magpie's group kept in %s", at)
+		}
+	}
+	if got := readFile(standard); got != `{"editor.fontSize":99}` {
+		t.Fatalf("Application Support's settings changed: %s", got)
+	}
+	if _, err := os.Stat(filepath.Join(filepath.Dir(standard), "chatLanguageModels.json")); !os.IsNotExist(err) {
+		t.Fatalf("Application Support got a chatLanguageModels.json: %v", err)
+	}
+}
+
 // Windows and Linux follow the same rule: an installer's build (target in
-// its product.json) is never portable, nor is a fork whose bin has a code,
-// and a portable build's extensions (Zoo Code's) are in its data folder.
+// its product.json) is never portable, nor is a fork whose bin has a code.
 func TestVSCodePortableProduct(t *testing.T) {
 	home, cfg := syncHome(t), os.Getenv("XDG_CONFIG_HOME")
 	if resolved, err := filepath.EvalSymlinks(home); err == nil {
@@ -389,7 +380,6 @@ func TestVSCodePortableProduct(t *testing.T) {
 	}
 	user := portableVSCode(t, home, true, false)
 	app := filepath.Join(home, "Editor With Spaces")
-	data := filepath.Join(app, "data")
 	product := filepath.Join(app, "resources", "app", "product.json")
 	for _, tt := range []struct{ product, want string }{
 		{`{"applicationName":"code"}`, user},
@@ -418,11 +408,6 @@ func TestVSCodePortableProduct(t *testing.T) {
 		}
 	}
 	writeAt(t, product, `{"applicationName":"code"}`)
-	writeFile(t, filepath.Join(data, "extensions", zooExtension+"-3.90.0", "package.json"), `{"name":"zoo-code","version":"3.90.0"}`)
-	zoo := zooCode(home, cfg)
-	if zoo.Path != filepath.Join(user, "settings.json") || !zoo.Detected() {
-		t.Fatalf("Zoo Code at %q, detected %v", zoo.Path, zoo.Detected())
-	}
 	// Scoop's data folder is under home, which a preview copies; the
 	// process it starts would still find the real one through PATH
 	if _, err := DisconnectPreview(vscode(home, cfg), "no-such-magpie"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {

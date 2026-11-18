@@ -1,7 +1,6 @@
 package library
 
 import (
-	"os"
 	"path/filepath"
 	"runtime"
 	"slices"
@@ -19,23 +18,18 @@ func onWindowsLinks(t *testing.T) {
 	t.Cleanup(func() { linkOS = old })
 }
 
-// #6610, #5107: on Windows, Antigravity and Crush skip a junction in their
-// skills folder, so they get marked copies, made again when the library's
+// #6610, #5107: on Windows, Antigravity skips a junction in its skills
+// folder, so it gets marked copies, made again when the library's
 // changes; an edit made in one goes to the library and to the agents
-// given links. Elsewhere they get links.
+// given links. Elsewhere it gets links.
 func TestJunctionBlindAgentsGetCopies(t *testing.T) {
 	h, cfg := antigravity(t)
-	write(t, filepath.Join(h, ".config/crush/crush.json"), "{}")
-	for _, id := range []string{"agy", "crush"} {
-		if tg := targetByID(id); tg == nil || tg.Copy != (runtime.GOOS == "windows") {
-			t.Fatalf("%s here: %+v", id, tg)
-		}
+	if tg := targetByID("agy"); tg == nil || tg.Copy != (runtime.GOOS == "windows") {
+		t.Fatalf("agy here: %+v", tg)
 	}
 	onWindowsLinks(t)
-	for _, id := range []string{"agy", "crush"} {
-		if tg := targetByID(id); tg == nil || !tg.Copy {
-			t.Fatalf("%s on Windows: %+v", id, tg)
-		}
+	if tg := targetByID("agy"); tg == nil || !tg.Copy {
+		t.Fatalf("agy on Windows: %+v", tg)
 	}
 	if tg := targetByID("claude"); tg == nil || tg.Copy {
 		t.Fatalf("claude on Windows: %+v", tg)
@@ -43,12 +37,10 @@ func TestJunctionBlindAgentsGetCopies(t *testing.T) {
 
 	src := filepath.Join(h, "src/skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
-	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"agy", "crush", "claude"}))
-	ag, cr, cl := filepath.Join(cfg, "skills/pdf"), filepath.Join(h, ".config/crush/skills/pdf"), filepath.Join(h, ".claude/skills/pdf")
-	for _, p := range []string{ag, cr} {
-		if isLink(t, p) || !ours(p, "pdf") {
-			t.Fatalf("%s isn't magpie's copy", p)
-		}
+	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"agy", "claude"}))
+	ag, cl := filepath.Join(cfg, "skills/pdf"), filepath.Join(h, ".claude/skills/pdf")
+	if isLink(t, ag) || !ours(ag, "pdf") {
+		t.Fatalf("%s isn't magpie's copy", ag)
 	}
 	if runtime.GOOS != "windows" && !isLink(t, cl) {
 		t.Fatal("Claude Code's isn't a link")
@@ -58,7 +50,7 @@ func TestJunctionBlindAgentsGetCopies(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, a := range v.Agents {
-		if (a.ID == "agy" || a.ID == "crush") && (!a.MustCopy || a.How != HowCopy) {
+		if a.ID == "agy" && (!a.MustCopy || a.How != HowCopy) {
 			t.Errorf("%s: must copy %v, how %q", a.ID, a.MustCopy, a.How)
 		}
 	}
@@ -68,7 +60,7 @@ func TestJunctionBlindAgentsGetCopies(t *testing.T) {
 	write(t, filepath.Join(ag, "SKILL.md"), "---\nname: pdf\ndescription: Edited in Antigravity\n---\n")
 	for range 2 {
 		ok(t)(Sync())
-		for _, p := range []string{ag, cr, cl, filepath.Join(src, "pdf")} {
+		for _, p := range []string{ag, cl, filepath.Join(src, "pdf")} {
 			if s := read(t, filepath.Join(p, "SKILL.md")); !strings.Contains(s, "Edited in Antigravity") {
 				t.Fatalf("%s after a sync:\n%s", p, s)
 			}
@@ -78,43 +70,16 @@ func TestJunctionBlindAgentsGetCopies(t *testing.T) {
 		}
 	}
 
-	// the library's changes: the copies are behind till a sync
+	// the library's changes: the copy is behind till a sync
 	time.Sleep(20 * time.Millisecond)
 	write(t, filepath.Join(src, "pdf/SKILL.md"), "---\nname: pdf\ndescription: Changed\n---\n")
 	v, _ = Read(nil)
-	if b := v.Skills[0].Behind; !slices.Equal(b, []string{"agy", "crush"}) {
+	if b := v.Skills[0].Behind; !slices.Equal(b, []string{"agy"}) {
 		t.Fatalf("behind: %v", b)
 	}
 	ok(t)(Sync())
-	for _, p := range []string{ag, cr} {
-		if s := read(t, filepath.Join(p, "SKILL.md")); !strings.Contains(s, "Changed") {
-			t.Errorf("%s wasn't copied again:\n%s", p, s)
-		}
-	}
-}
-
-// Crush reads ~/.agents/skills besides its own folder; magpie's link
-// there is no skill to it on Windows, so it gets its own copy.
-func TestJunctionBlindAgentSkipsSharedLink(t *testing.T) {
-	h := sandbox(t)
-	write(t, filepath.Join(h, ".config/crush/crush.json"), "{}")
-	src := filepath.Join(h, "src/skills")
-	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
-	ok(t)(SetSkillsWhere(SkillsInShared))
-	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"crush"}))
-	shared, cr := filepath.Join(sharedSkillsDir(), "pdf"), filepath.Join(h, ".config/crush/skills/pdf")
-	if !isLink(t, shared) {
-		t.Fatal("no link in ~/.agents/skills")
-	}
-	if runtime.GOOS != "windows" {
-		if _, err := os.Lstat(cr); !os.IsNotExist(err) {
-			t.Fatalf("Crush got a second one beside ~/.agents/skills: %v", err)
-		}
-	}
-	onWindowsLinks(t)
-	ok(t)(Sync())
-	if isLink(t, cr) || !ours(cr, "pdf") {
-		t.Fatal("Crush has no copy of its own on Windows")
+	if s := read(t, filepath.Join(ag, "SKILL.md")); !strings.Contains(s, "Changed") {
+		t.Errorf("%s wasn't copied again:\n%s", ag, s)
 	}
 }
 

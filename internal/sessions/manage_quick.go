@@ -211,9 +211,6 @@ func glance(f file) *state {
 	if p.claude && f.main {
 		claudeTail(s, f)
 	}
-	if isBuddy(f.agent) && s.Cwd == "" {
-		workbuddyMeta(s, f.path)
-	}
 	g := &state{Size: f.size, Mod: f.mod.UnixNano(), ID: s.ID, Cwd: s.Cwd, Title: s.Title,
 		Start: s.Start, Last: f.mod.Time(), CodexIdentity: s.CodexIdentity, Provider: s.Provider,
 		StateMore: moreOf(StateMore{Named: s.more().Named, Custom: s.more().Custom, First: s.more().First,

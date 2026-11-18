@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -12,8 +11,8 @@ import (
 )
 
 // The longest context (settings.ContextCap) is told to every agent that is
-// written a context window (ul3140773077392 on X, #6259: dsh followed it,
-// another harness kept 200K). Each agent is connected to a provider whose
+// written a context window (ul3140773077392 on X, #6259: one agent followed it,
+// another kept 200K). Each agent is connected to a provider whose
 // model has a 987654-token window under a cap of 99999; no file the agent
 // reads may hold the longer one.
 func TestEveryAgentFollowsContextCap(t *testing.T) {
@@ -22,10 +21,6 @@ func TestEveryAgentFollowsContextCap(t *testing.T) {
 	managed := claudeManaged
 	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
 	t.Cleanup(func() { claudeManaged = managed })
-	startAlma(t)
-	startShelley(t)
-	os.MkdirAll(filepath.Join(home, ".hanako", "agents", "hana"), 0o755)
-	os.WriteFile(filepath.Join(home, ".hanako", "agents", "hana", "config.yaml"), []byte("agent:\n  name: Hana\n"), 0o644)
 	if err := provider.Save(provider.Provider{ID: "v", Name: "V", Chat: "https://example.test/v1", Key: "k",
 		Models: []string{"big", "plain-model-of-no-window"}}); err != nil {
 		t.Fatal(err)

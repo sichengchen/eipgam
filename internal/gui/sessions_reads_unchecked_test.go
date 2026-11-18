@@ -19,14 +19,15 @@ import (
 // nowhere while agy's were. An agent left off in that first choice is asked
 // about once more, on both pages; Show/Count reads it and its calls come
 // into Usage › Requests; an agent turned off on its own (Keep off,
-// Settings › Privacy) is kept off and not asked again. The app's folder is
-// a real Antigravity 2.30 conversation (testdata/antigravity-2.30-tools).
+// Settings › Privacy) is kept off and not asked again. The one left off is
+// Claude Code, its calls those of sessions' testdata/claude.
 func TestSessionReadsUncheckedAgentAskedAgain(t *testing.T) {
 	for _, allow := range []bool{true, false} {
 		t.Run(map[bool]string{true: "count", false: "keep off"}[allow], func(t *testing.T) {
 			h := sandboxHome(t)
 			copyTree(t, "../sessions/testdata/agy-sessions", filepath.Join(h, ".gemini", "antigravity-cli"))
-			copyTree(t, "../sessions/testdata/antigravity-2.30-tools", filepath.Join(h, ".gemini", "antigravity"))
+			copyTree(t, "../sessions/testdata/claude", filepath.Join(h, ".claude"))
+			t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(h, ".claude"))
 			if err := settings.SetSessionReads(func(*settings.SessionReads) *settings.SessionReads { return &settings.SessionReads{} }); err != nil {
 				t.Fatal(err)
 			}
@@ -47,11 +48,11 @@ func TestSessionReadsUncheckedAgentAskedAgain(t *testing.T) {
 			app := func(r readsJSON) readAgentJSON {
 				t.Helper()
 				for _, f := range r.Found {
-					if f.Agent == "antigravity" {
+					if f.Agent == "claude" {
 						return f
 					}
 				}
-				t.Fatalf("antigravity not found: %+v", r.Found)
+				t.Fatalf("claude not found: %+v", r.Found)
 				return readAgentJSON{}
 			}
 			appRows := func() int {
@@ -62,25 +63,25 @@ func TestSessionReadsUncheckedAgentAskedAgain(t *testing.T) {
 				}
 				n := 0
 				for _, row := range page.Rows {
-					if row.Agent == "antigravity" {
+					if row.Agent == "claude" {
 						n++
 					}
 				}
 				return n
 			}
 			// the first choice, as the Sessions page's consent posts allow
-			// selected: every agent found named, the app left off
+			// selected: every agent found named, Claude Code left off
 			var r readsJSON
-			json.Unmarshal(call("POST", "/api/sessions/reads", `{"all":false,"agents":{"agy":true,"antigravity":false}}`), &r)
+			json.Unmarshal(call("POST", "/api/sessions/reads", `{"all":false,"agents":{"agy":true,"claude":false}}`), &r)
 			if a := app(r); a.On || !a.New {
-				t.Fatalf("the app left off in the first choice = %+v, want off and asked about again", a)
+				t.Fatalf("claude left off in the first choice = %+v, want off and asked about again", a)
 			}
 			if n := appRows(); n != 0 {
-				t.Fatalf("%d of the app's calls counted before it was allowed", n)
+				t.Fatalf("%d of claude's calls counted before it was allowed", n)
 			}
-			body := `{"agents":{"antigravity":false}}`
+			body := `{"agents":{"claude":false}}`
 			if allow {
-				body = `{"agents":{"antigravity":true}}`
+				body = `{"agents":{"claude":true}}`
 			}
 			r = readsJSON{}
 			json.Unmarshal(call("POST", "/api/sessions/reads", body), &r)
@@ -90,9 +91,9 @@ func TestSessionReadsUncheckedAgentAskedAgain(t *testing.T) {
 			if s := settings.Shared().SessionReads; s == nil || s.All || !s.Agents["agy"] {
 				t.Fatalf("the answer changed the rest of the choice: %+v", s)
 			}
-			// the conversation's model calls, read from its database
+			// the session's model calls, read from its file
 			if n := appRows(); allow && n == 0 || !allow && n != 0 {
-				t.Fatalf("allowed %v: %d of the app's calls in Usage › Requests", allow, n)
+				t.Fatalf("allowed %v: %d of claude's calls in Usage › Requests", allow, n)
 			}
 			// asked once: a later read still says the same
 			r = readsJSON{}
@@ -109,21 +110,30 @@ func TestSessionReadsUncheckedAgentAskedAgain(t *testing.T) {
 func TestSessionReadsTurnedOffNotAskedAgain(t *testing.T) {
 	for _, all := range []bool{true, false} {
 		h := sandboxHome(t)
-		copyTree(t, "../sessions/testdata/antigravity-2.30", filepath.Join(h, ".gemini", "antigravity"))
+		copyTree(t, "../sessions/testdata/claude", filepath.Join(h, ".claude"))
+		t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(h, ".claude"))
 		if err := settings.SetSessionReads(func(*settings.SessionReads) *settings.SessionReads { return &settings.SessionReads{} }); err != nil {
 			t.Fatal(err)
 		}
 		on := true
-		if err := sessions.SetReads(&all, map[string]bool{"antigravity": on}); err != nil {
+		if err := sessions.SetReads(&all, map[string]bool{"claude": on}); err != nil {
 			t.Fatal(err)
 		}
-		if err := sessions.SetReads(nil, map[string]bool{"antigravity": false}); err != nil {
+		if err := sessions.SetReads(nil, map[string]bool{"claude": false}); err != nil {
 			t.Fatal(err)
 		}
+		found := false
 		for _, f := range readsNow().Found {
-			if f.Agent == "antigravity" && (f.On || f.New) {
+			if f.Agent != "claude" {
+				continue
+			}
+			found = true
+			if f.On || f.New {
 				t.Fatalf("all %v, turned off in Settings: %+v", all, f)
 			}
+		}
+		if !found {
+			t.Fatalf("all %v: claude not found", all)
 		}
 	}
 }

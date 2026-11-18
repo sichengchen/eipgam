@@ -19,18 +19,10 @@ var moreTelemetry = []struct {
 	// own already turns it off
 	own string
 }{
-	{"crush", ".config/crush/crush.json", `{"options": {"context_paths": ["x"]}}`, `"disable_metrics": true`,
-		func(h string) *Agent { return crush(h, filepath.Join(h, ".config")) }, []string{"options.disable_metrics"},
-		`{"options": {"disable_metrics": false}}`, `{"options": {"disable_metrics": true}}`},
 	{"kimi", ".kimi-code/config.toml", "default_model = \"a\"\n\n[providers.x]\nbase_url = \"u\"\n", "telemetry = false",
 		kimi, []string{"telemetry"}, "telemetry = true\n", "telemetry = false\n"},
-	{"goose", ".config/goose/config.yaml", "GOOSE_MODE: auto\n", "GOOSE_TELEMETRY_ENABLED: false",
-		func(h string) *Agent { return goose(h, filepath.Join(h, ".config")) }, []string{"GOOSE_TELEMETRY_ENABLED"},
-		"GOOSE_TELEMETRY_ENABLED: true\n", "GOOSE_TELEMETRY_ENABLED: false\n"},
 	{"pi", ".pi/agent/settings.json", `{"theme": "dark"}`, `"enableInstallTelemetry": false`,
 		pi, []string{"enableInstallTelemetry"}, `{"enableInstallTelemetry": true}`, `{"enableInstallTelemetry": false}`},
-	{"cline", ".cline/data/settings/global-settings.json", `{"autoUpdateEnabled": true}`, `"telemetryOptOut": true`,
-		cline, []string{"telemetryOptOut"}, `{"telemetryOptOut": false}`, `{"telemetryOptOut": true}`},
 }
 
 // has: the file says off, however it spaces it
@@ -102,7 +94,7 @@ func TestMoreAgentsTelemetryLeavesTheUsers(t *testing.T) {
 
 // A config that doesn't parse is unknown: nothing is written.
 func TestMoreAgentsTelemetryUnreadable(t *testing.T) {
-	bad := map[string]string{"crush": `{"options": `, "kimi": "[providers\ntelemetry = ", "goose": "a: [\n  b: {", "pi": `{"x": [`, "cline": `{`}
+	bad := map[string]string{"kimi": "[providers\ntelemetry = ", "pi": `{"x": [`}
 	for _, c := range moreTelemetry {
 		t.Run(c.name, func(t *testing.T) {
 			home, path := telemetryHome(t, c.file, bad[c.name])
@@ -135,12 +127,10 @@ func TestPiForksHaveNoTelemetry(t *testing.T) {
 
 // Settings › Privacy reaches them too.
 func TestTelemetryAllReachesMoreAgents(t *testing.T) {
-	home, _ := telemetryHome(t, ".config/crush/crush.json", `{}`)
-	onPath(t, "crush", "kimi", "goose", "pi", "cline")
-	for _, c := range moreTelemetry {
-		if c.name != "crush" {
-			writeAt(t, filepath.Join(home, c.file), c.before)
-		}
+	home, _ := telemetryHome(t, ".kimi-code/config.toml", moreTelemetry[0].before)
+	onPath(t, "kimi", "pi")
+	for _, c := range moreTelemetry[1:] {
+		writeAt(t, filepath.Join(home, c.file), c.before)
 	}
 	if err := SetTelemetryAll(true); err != nil {
 		t.Fatal(err)

@@ -12,7 +12,6 @@ import (
 	"github.com/yetone/magpie/internal/edit"
 	"github.com/yetone/magpie/internal/filememo"
 	"github.com/yetone/magpie/internal/provider"
-	"gopkg.in/yaml.v3"
 )
 
 // Most agents can't ask the gateway which models it has: magpie writes the
@@ -236,98 +235,4 @@ func sameJSON(raw string, v any) bool {
 		return false
 	}
 	return reflect.DeepEqual(x, y)
-}
-
-// yamlKept is value laid over the mapping at key in a YAML file, as
-// theirsKept does for JSON: a key magpie doesn't write stays as the user, or
-// the app itself, left it, and mappings in both are merged alike. The keys
-// named in own are magpie's: its value, or none when it writes none (#2030's
-// siblings: Hermes writes default_model into magpie's entry itself, and a
-// whole rewrite dropped it).
-func yamlKept(path, key string, value any, own ...string) any {
-	raw, err := edit.Read(path)
-	if err != nil || raw == nil {
-		return value
-	}
-	var doc any
-	if yaml.Unmarshal(raw, &doc) != nil {
-		return value
-	}
-	for _, k := range strings.Split(key, ".") {
-		m, _ := doc.(map[string]any)
-		if doc = m[k]; doc == nil {
-			return value
-		}
-	}
-	have, ok := doc.(map[string]any)
-	if !ok {
-		return value
-	}
-	var want map[string]any
-	b, err := yaml.Marshal(value)
-	if err != nil || yaml.Unmarshal(b, &want) != nil || want == nil {
-		return value
-	}
-	return mergeKept(have, want, own)
-}
-
-// mergeKept is want with each key of have that want lacks, mappings in both
-// merged alike; a key named in own is want's, or gone. have and want are
-// decoded JSON or YAML.
-func mergeKept(have, want map[string]any, own []string) map[string]any {
-	out := make(map[string]any, len(have)+len(want))
-	for k, w := range want {
-		out[k] = w
-	}
-	for k, h := range have {
-		if slices.Contains(own, k) {
-			// magpie's key for the gateway, where the user put a key of
-			// the gateway's own instead: theirs stays (keyHolds)
-			if hs, ok := h.(string); ok {
-				if ws, ok := want[k].(string); ok && hs != ws && keyHolds(hs, ws) {
-					out[k] = hs
-				}
-			}
-			continue
-		}
-		w, ok := want[k]
-		if !ok {
-			out[k] = h
-			continue
-		}
-		hm, hok := h.(map[string]any)
-		wm, wok := w.(map[string]any)
-		if hok && wok {
-			out[k] = mergeKept(hm, wm, nil)
-		}
-	}
-	return out
-}
-
-// syncYAML is syncJSON for a YAML file.
-func syncYAML(path, key string, value func() any) error {
-	raw, err := edit.Read(path)
-	if err != nil || raw == nil {
-		return nil
-	}
-	var doc any
-	if yaml.Unmarshal(raw, &doc) != nil {
-		return nil
-	}
-	for _, k := range strings.Split(key, ".") {
-		m, _ := doc.(map[string]any)
-		if doc = m[k]; doc == nil {
-			return nil
-		}
-	}
-	v := value()
-	b, err := yaml.Marshal(v)
-	if err != nil {
-		return err
-	}
-	var want any
-	if yaml.Unmarshal(b, &want) == nil && reflect.DeepEqual(doc, want) {
-		return nil
-	}
-	return edit.SetYAML(path, edit.KV{Path: key, Value: v})
 }

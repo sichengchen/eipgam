@@ -45,17 +45,12 @@ var projectMCPFiles = map[string]struct {
 	rel    string
 	format mcpFormat
 }{
-	"claude":    {".mcp.json", fmtClaude},
-	"codex":     {".codex/config.toml", fmtCodex},
-	"gemini":    {".gemini/settings.json", fmtGemini},
-	"cursor":    {".cursor/mcp.json", fmtCursor},
-	"opencode":  {"opencode.json", fmtOpenCode},
-	"zcode":     {".zcode/config.json", fmtZCode},
-	"pi":        {".pi/mcp.json", fmtPiNative},
-	"qoder":     {".qoder/settings.json", fmtOmp},
-	"qoder-cn":  {".qoder/settings.json", fmtOmp},
-	"codebuddy": {".mcp.json", fmtClaude},
-	"droid":     {".factory/mcp.json", fmtClaude},
+	"claude":   {".mcp.json", fmtClaude},
+	"codex":    {".codex/config.toml", fmtCodex},
+	"gemini":   {".gemini/settings.json", fmtGemini},
+	"cursor":   {".cursor/mcp.json", fmtCursor},
+	"opencode": {"opencode.json", fmtOpenCode},
+	"pi":       {".pi/mcp.json", fmtPiNative},
 }
 
 // ProjectMCPFile is the file, in a project, an agent reads the project's
@@ -79,9 +74,6 @@ func (p *Project) mcpRel(agent string) (string, mcpFormat) {
 	}
 	if f.format == fmtOpenCode && !exists(filepath.Join(p.Dir, "opencode.json")) && exists(filepath.Join(p.Dir, "opencode.jsonc")) {
 		return "opencode.jsonc", f.format
-	}
-	if agent == "codebuddy" && !exists(filepath.Join(p.Dir, ".mcp.json")) && exists(filepath.Join(p.Dir, "mcp.json")) {
-		return "mcp.json", f.format
 	}
 	return f.rel, f.format
 }
@@ -168,7 +160,7 @@ func (l *Library) syncProjectMCP(p *Project, hubs map[string]*Server, fail func(
 			continue
 		}
 		abs := filepath.Join(p.Dir, filepath.FromSlash(rel))
-		f := &mcpFile{Path: abs, Format: format, NoCmdRefs: rel == projectMCPFiles["droid"].rel}
+		f := &mcpFile{Path: abs, Format: format}
 		had := p.Wrote[rel]
 		was := p.Startup[rel]
 		now := map[string]float64{}

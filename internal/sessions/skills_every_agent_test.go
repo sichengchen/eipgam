@@ -26,34 +26,17 @@ var skillsCounted = map[string]struct {
 }{
 	"claude":         {test: "TestStatsToolsAndSkills"},
 	"claude-desktop": {parser: "claude"},
-	"qoder":          {parser: "claude"},
-	"qoder-cn":       {parser: "claude"},
 	"codex":          {test: "TestCodexSkillReads"},
 	"pi":             {test: "TestPiSkillRead"},
 	"raft":           {parser: "pi"},
-	"cindy":          {parser: "pi"},
-	"omp":            {parser: "pi"},
 	"grok":           {test: "TestGrokToolsAndSkills"},
-	"alma":           {test: "TestAlmaSessions"},
-	"droid":          {test: "TestDroidToolsAndSkills"},
-	"liveagent":      {test: "TestLiveAgentSessions"},
 
-	"opencode":     {test: "TestOpenCodeToolsAndSkills"},
-	"cline":        {test: "TestClineToolsAndSkills"},
-	"dsh":          {test: "TestDshToolsAndSkills"},
-	"zcode":        {none: "its sessions are OpenCode 1's tables, whose tool parts are not read; no real ZCode session with a skill to build a fixture from"},
-	"kimi":         {none: "Kimi Code's wire tool.call is counted by name, but how it brings in a skill was not seen in a real session (only the retired Python kimi-cli 1.52 was run)"},
-	"workbuddy":    {none: "its Skill function_call lines are not read; no real session with tool lines"},
-	"codebuddy":    {none: "reads with WorkBuddy's parser, which counts no skills"},
-	"workbuddy-ai": {none: "reads with WorkBuddy's parser, which counts no skills"},
-	"hermes":       {none: "its skill_view tool is not read; hermes is not run in a sandbox (it rewrites the live launcher)"},
-	"openmausbot":  {none: "a bot finds a skill with skills_list and reads its SKILL.md with its file tools, no tool of its own; the real sample has no such turn"},
-	"cursor":       {none: "selected skills live in selectedContext; needs a signed-in Cursor for a real session"},
-	"agy":          {none: "skill_lookup's keys are not known from a real session"},
-	"antigravity":  {none: "its steps' payloads are encrypted at rest; only the usage in steps.metadata is read"},
-	"minimax-code": {none: "calls only: no Sessions summaries"},
-	"devin":        {none: "calls only (Usage): no Sessions summaries"},
-	"gemini":       {none: "calls only: no Sessions summaries"},
+	"opencode": {test: "TestOpenCodeToolsAndSkills"},
+	"kimi":     {none: "Kimi Code's wire tool.call is counted by name, but how it brings in a skill was not seen in a real session (only the retired Python kimi-cli 1.52 was run)"},
+	"cursor":   {none: "selected skills live in selectedContext; needs a signed-in Cursor for a real session"},
+	"agy":      {none: "skill_lookup's keys are not known from a real session"},
+	"devin":    {none: "calls only (Usage): no Sessions summaries"},
+	"gemini":   {none: "calls only: no Sessions summaries"},
 }
 
 // foundAgents reads the agent names Found() adds, from access.go's source,
@@ -85,7 +68,9 @@ func foundAgents(t *testing.T) []string {
 			return true
 		})
 	}
-	if len(out) < 20 {
+	// 12 with the kept agents (claude, claude-desktop, codex, opencode,
+	// pi, raft, grok, cursor, kimi, agy, gemini, devin)
+	if len(out) < 10 {
 		t.Fatalf("read only %d agents from Found(): %v", len(out), out)
 	}
 	return out

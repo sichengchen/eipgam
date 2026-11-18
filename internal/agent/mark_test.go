@@ -40,6 +40,36 @@ func modTimes(home string) map[string]time.Time {
 	return m
 }
 
+// Codex's own keys that name magpie get a note on how to undo them by
+// hand, not only the base URL.
+func TestCodexMarkedLines(t *testing.T) {
+	codexHome(t, "", "model = \"gpt-5.5\"\n")
+	edit.Mark = lineNote
+	t.Cleanup(func() { edit.Mark = nil })
+	a, _ := Find("codex")
+	if _, err := a.ConnectHow(); err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(a.Path)
+	got := string(b)
+	for _, want := range []string{
+		"# magpie: Codex on magpie's local gateway; Disconnect in magpie or `magpie uninstall` undoes it, or delete this line and the model line\nmodel_provider = \"magpie\"\n",
+		"# magpie: magpie's model list for Codex; " + undo + ", or delete this line\nmodel_catalog_json = ",
+		"# magpie: for Codex threads started on magpie; unused while model_provider doesn't name magpie\nbase_url = \"" + gateway.URL() + "/v1\"\n",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in:\n%s", want, got)
+		}
+	}
+	if err := a.Disconnect(); err != nil {
+		t.Fatal(err)
+	}
+	b, _ = os.ReadFile(a.Path)
+	if !strings.HasPrefix(string(b), "model = \"gpt-5.5\"\n") {
+		t.Fatalf("after Disconnect:\n%s", b)
+	}
+}
+
 // Every agent magpie writes into a TOML, YAML or dotenv config gets a
 // comment line over each line that points at the gateway, saying magpie
 // wrote it and how to undo it: Jevik_AI on X deleted magpie's folders by hand and
@@ -52,8 +82,6 @@ func TestMarkedLinesEveryAgent(t *testing.T) {
 	managed := claudeManaged
 	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
 	t.Cleanup(func() { claudeManaged = managed })
-	startAlma(t)
-	startShelley(t)
 	host := strings.TrimPrefix(gateway.URL(), "http://")
 	var marked []string
 	for _, a := range All() {
@@ -69,12 +97,10 @@ func TestMarkedLinesEveryAgent(t *testing.T) {
 			}
 			// a note is read back as written: a sync doesn't write the
 			// file again and again, as one that compared a line with the
-			// one it would write did (dsh's routes)
+			// one it would write did
 			SyncCatalog()
-			dshWiredOnce()
 			synced, when := agentFiles(t, home), modTimes(home)
 			SyncCatalog()
-			dshWiredOnce()
 			later := modTimes(home)
 			for p, b := range agentFiles(t, home) {
 				if synced[p] != b {
@@ -120,35 +146,5 @@ func TestMarkedLinesEveryAgent(t *testing.T) {
 	}
 	if !slices.Contains(marked, "codex") {
 		t.Fatal("Codex's config.toml got no note")
-	}
-}
-
-// Codex's own keys that name magpie get a note on how to undo them by
-// hand, not only the base URL.
-func TestCodexMarkedLines(t *testing.T) {
-	codexHome(t, "", "model = \"gpt-5.5\"\n")
-	edit.Mark = lineNote
-	t.Cleanup(func() { edit.Mark = nil })
-	a, _ := Find("codex")
-	if _, err := a.ConnectHow(); err != nil {
-		t.Fatal(err)
-	}
-	b, _ := os.ReadFile(a.Path)
-	got := string(b)
-	for _, want := range []string{
-		"# magpie: Codex on magpie's local gateway; Disconnect in magpie or `magpie uninstall` undoes it, or delete this line and the model line\nmodel_provider = \"magpie\"\n",
-		"# magpie: magpie's model list for Codex; " + undo + ", or delete this line\nmodel_catalog_json = ",
-		"# magpie: for Codex threads started on magpie; unused while model_provider doesn't name magpie\nbase_url = \"" + gateway.URL() + "/v1\"\n",
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("missing %q in:\n%s", want, got)
-		}
-	}
-	if err := a.Disconnect(); err != nil {
-		t.Fatal(err)
-	}
-	b, _ = os.ReadFile(a.Path)
-	if !strings.HasPrefix(string(b), "model = \"gpt-5.5\"\n") {
-		t.Fatalf("after Disconnect:\n%s", b)
 	}
 }

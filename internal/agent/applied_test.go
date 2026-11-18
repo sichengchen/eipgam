@@ -190,97 +190,6 @@ func TestCodexDriftProfile(t *testing.T) {
 	}
 }
 
-// Every agent magpie wires through the gateway says when its wiring was
-// taken out behind magpie's back — the gateway's URL swapped for another —
-// and setting it again puts it back.
-func TestDriftUnwiredEveryAgent(t *testing.T) {
-	home, _ := codexHome(t, "", "")
-	managed := claudeManaged
-	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
-	t.Cleanup(func() { claudeManaged = managed })
-	almaApp := startAlma(t)       // Alma keeps its providers in the app
-	shelleyApp := startShelley(t) // so does Shelley its models
-	// OpenHanako gives the model to an agent of its own
-	os.MkdirAll(filepath.Join(home, ".hanako", "agents", "hana"), 0o755)
-	os.WriteFile(filepath.Join(home, ".hanako", "agents", "hana", "config.yaml"), []byte("agent:\n  name: Hana\n"), 0o644)
-	// Craft Agents, once it has run and saved its config
-	craftFixture(t, home)
-	// AstrBot is connected once it has written its settings
-	os.MkdirAll(filepath.Join(home, ".astrbot", "data"), 0o755)
-	os.WriteFile(filepath.Join(home, ".astrbot", "data", "cmd_config.json"), []byte(astrbotConfig), 0o644)
-	// QwenPaw, once it has written its agents' settings
-	qwenpawFixture(t, home)
-	for _, a := range All() {
-		// agy's gateway is in the command that starts it, in no file (its
-		// Check is TestAgy's)
-		if a.Check == nil || a.Launch != nil || a.Native != nil {
-			continue
-		}
-		// a WSL agent's files live in the distro, beyond the sandbox home:
-		// picking a model here writes the user's real configs
-		if a.WSL != "" {
-			continue
-		}
-		t.Run(a.ID, func(t *testing.T) {
-			// the field that takes one of magpie's models
-			var f Field
-			want := ""
-			for _, g := range a.Fields {
-				for _, o := range g.Options(a.Values()) {
-					if o.Ref == "fake/m1" && want == "" {
-						f, want = g, o.Value
-					}
-				}
-			}
-			// or the one that puts it on magpie as a whole (Claude Desktop)
-			for _, g := range a.Fields {
-				for _, o := range g.Options(a.Values()) {
-					if o.Value == magpieID && want == "" {
-						f, want = g, o.Value
-					}
-				}
-			}
-			if want == "" {
-				t.Fatal("no field takes magpie's models")
-			}
-			if err := a.Apply(f.Key, want); err != nil {
-				t.Fatal(err)
-			}
-			if d := a.Drift(); d != nil {
-				t.Fatalf("drift right after a set: %+v", d)
-			}
-			// something else points the agent at another server
-			n := 0
-			filepath.WalkDir(home, func(p string, e os.DirEntry, err error) error {
-				if err != nil || e.IsDir() {
-					return nil
-				}
-				b, _ := os.ReadFile(p)
-				if s := strings.ReplaceAll(string(b), gateway.URL(), "http://127.0.0.1:9"); s != string(b) {
-					os.WriteFile(p, []byte(s), 0o644)
-					n++
-				}
-				return nil
-			})
-			n += almaApp.repoint(gateway.URL(), "http://127.0.0.1:9")
-			n += shelleyApp.repoint(gateway.URL(), "http://127.0.0.1:9")
-			if n == 0 {
-				t.Fatal("no file holds the gateway's URL")
-			}
-			d := a.Drift()
-			if d == nil || d.Kind != "unwired" {
-				t.Fatalf("unwired: %+v", d)
-			}
-			if err := a.Reapply(); err != nil {
-				t.Fatal(err)
-			}
-			if d := a.Drift(); d != nil {
-				t.Fatalf("still drifted after Apply again: %+v", d)
-			}
-		})
-	}
-}
-
 // Claude Code's managed settings win over the user's: a base URL there is
 // drift magpie can only point out.
 func TestClaudeDriftManaged(t *testing.T) {
@@ -389,5 +298,82 @@ func TestInstalledWiringReadsNoCopy(t *testing.T) {
 	runtime.ReadMemStats(&m1)
 	if n := m1.TotalAlloc - m0.TotalAlloc; n > 1<<20 {
 		t.Fatalf("10 looks at an unchanged config allocated %d bytes", n)
+	}
+}
+
+// Every agent magpie wires through the gateway says when its wiring was
+// taken out behind magpie's back — the gateway's URL swapped for another —
+// and setting it again puts it back.
+func TestDriftUnwiredEveryAgent(t *testing.T) {
+	home, _ := codexHome(t, "", "")
+	managed := claudeManaged
+	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
+	t.Cleanup(func() { claudeManaged = managed })
+	for _, a := range All() {
+		// agy's gateway is in the command that starts it, in no file (its
+		// Check is TestAgy's)
+		if a.Check == nil || a.Launch != nil || a.Native != nil {
+			continue
+		}
+		// a WSL agent's files live in the distro, beyond the sandbox home:
+		// picking a model here writes the user's real configs
+		if a.WSL != "" {
+			continue
+		}
+		t.Run(a.ID, func(t *testing.T) {
+			// the field that takes one of magpie's models
+			var f Field
+			want := ""
+			for _, g := range a.Fields {
+				for _, o := range g.Options(a.Values()) {
+					if o.Ref == "fake/m1" && want == "" {
+						f, want = g, o.Value
+					}
+				}
+			}
+			// or the one that puts it on magpie as a whole (Claude Desktop)
+			for _, g := range a.Fields {
+				for _, o := range g.Options(a.Values()) {
+					if o.Value == magpieID && want == "" {
+						f, want = g, o.Value
+					}
+				}
+			}
+			if want == "" {
+				t.Fatal("no field takes magpie's models")
+			}
+			if err := a.Apply(f.Key, want); err != nil {
+				t.Fatal(err)
+			}
+			if d := a.Drift(); d != nil {
+				t.Fatalf("drift right after a set: %+v", d)
+			}
+			// something else points the agent at another server
+			n := 0
+			filepath.WalkDir(home, func(p string, e os.DirEntry, err error) error {
+				if err != nil || e.IsDir() {
+					return nil
+				}
+				b, _ := os.ReadFile(p)
+				if s := strings.ReplaceAll(string(b), gateway.URL(), "http://127.0.0.1:9"); s != string(b) {
+					os.WriteFile(p, []byte(s), 0o644)
+					n++
+				}
+				return nil
+			})
+			if n == 0 {
+				t.Fatal("no file holds the gateway's URL")
+			}
+			d := a.Drift()
+			if d == nil || d.Kind != "unwired" {
+				t.Fatalf("unwired: %+v", d)
+			}
+			if err := a.Reapply(); err != nil {
+				t.Fatal(err)
+			}
+			if d := a.Drift(); d != nil {
+				t.Fatalf("still drifted after Apply again: %+v", d)
+			}
+		})
 	}
 }

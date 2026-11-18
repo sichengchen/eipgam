@@ -1666,10 +1666,6 @@ func moveContext(r *http.Request) (context.Context, context.CancelFunc) {
 // mailto: link and no other
 const sponsorMail = "mailto:yetoneful@gmail.com?subject=Sponsoring%20magpie"
 
-// appLink hands an app's import link over once something here opens it
-// (agent.OpenAppLink); tests stand in for the system's answer.
-var appLink = agent.OpenAppLink
-
 func providerRoutes(mux *http.ServeMux, w Windows) {
 	importAppsRoutes(mux)
 	pluginRoutes(mux, w)
@@ -3843,22 +3839,9 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		// and System Settings' Login Items, where Open at login is allowed
 		// again: that one pane, not System Settings' scheme at large; and
 		// the Add sheet's "Become a sponsor", that one address, not mailto:
-		if in.URL == sponsorMail || strings.HasPrefix(in.URL, "https://") || strings.HasPrefix(in.URL, "http://") || strings.HasPrefix(in.URL, agent.CindyScheme) || strings.HasPrefix(in.URL, agent.LodyScheme) || strings.HasPrefix(in.URL, agent.AionUiScheme) || strings.HasPrefix(in.URL, agent.CherryStudioScheme) || in.URL == autostart.LoginItemsURL {
-			open := w.OpenURL
-			// an app's import link is handed over only when something
-			// here opens it: the system says nothing when nothing does,
-			// and Add magpie did nothing at all (sungt, 10-29)
-			app := func(u string) error { return appLink(u, w.OpenURL) }
-			switch {
-			case strings.HasPrefix(in.URL, agent.LodyScheme):
-				// Lody on Linux is run with the link, which xdg-open
-				// turned away (agent.OpenLody)
-				open = func(u string) error { return agent.OpenLody(u, app) }
-			case strings.HasPrefix(in.URL, agent.CindyScheme), strings.HasPrefix(in.URL, agent.AionUiScheme), strings.HasPrefix(in.URL, agent.CherryStudioScheme):
-				open = app
-			}
+		if in.URL == sponsorMail || strings.HasPrefix(in.URL, "https://") || strings.HasPrefix(in.URL, "http://") || in.URL == autostart.LoginItemsURL {
 			// Open again on a sign-in says why it didn't open (#2043)
-			if err := open(in.URL); err != nil {
+			if err := w.OpenURL(in.URL); err != nil {
 				fail(rw, err)
 				return
 			}

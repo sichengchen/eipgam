@@ -35,24 +35,15 @@ import (
 //
 // A file several picked agents read is written once.
 var projectInstrNames = map[string][]string{
-	"claude":      {"CLAUDE.md", ".claude/CLAUDE.md"},
-	"codex":       {"AGENTS.md", "AGENTS.override.md"},
-	"pi":          {"AGENTS.md", "AGENTS.override.md", "AGENTS.MD", "CLAUDE.md", "CLAUDE.MD"},
-	"opencode":    {"AGENTS.md", "CLAUDE.md"},
-	"gemini":      {"GEMINI.md"},
-	"qwen":        {"QWEN.md"},
-	"qoder":       {"AGENTS.md"},
-	"qoder-cn":    {"AGENTS.md"},
-	"codebuddy":   {"CODEBUDDY.md"},
-	"cursor":      {"AGENTS.md"},
-	"copilot":     {"AGENTS.md"},
-	"kimi":        {"AGENTS.md"},
-	"droid":       {"AGENTS.md"},
-	"crush":       {"AGENTS.md"},
-	"grok":        {"AGENTS.md"},
-	"cline":       {"AGENTS.md"},
-	"commandcode": {"AGENTS.md"},
-	"goose":       {"AGENTS.md"},
+	"claude":   {"CLAUDE.md", ".claude/CLAUDE.md"},
+	"codex":    {"AGENTS.md", "AGENTS.override.md"},
+	"pi":       {"AGENTS.md", "AGENTS.override.md", "AGENTS.MD", "CLAUDE.md", "CLAUDE.MD"},
+	"opencode": {"AGENTS.md", "CLAUDE.md"},
+	"gemini":   {"GEMINI.md"},
+	"cursor":   {"AGENTS.md"},
+	"copilot":  {"AGENTS.md"},
+	"kimi":     {"AGENTS.md"},
+	"grok":     {"AGENTS.md"},
 }
 
 // the order an agent looks for its names in, where that isn't the order
@@ -103,7 +94,7 @@ func projectInstrRel(dir, id, renamed string) string {
 func projectInstrRenames(agents []string) map[string]string {
 	out := map[string]string{}
 	if !slices.ContainsFunc(agents, func(id string) bool {
-		return id == "gemini" || id == "qwen" || id == "qoder" || id == "qoder-cn"
+		return id == "gemini"
 	}) {
 		return out
 	}

@@ -18,8 +18,8 @@ import (
 // said so. Each of an agent's own models now says who it asks (Direct), as
 // Claude Code's and Codex's do, so the picker tags it "direct, not via
 // magpie" and asks before a pick takes the agent off magpie. Every agent
-// whose own models come from ownOptions shares this, so OpenCode, Crush
-// and omp are held to it too; magpie's own models stay unmarked.
+// whose own models come from ownOptions shares this, so OpenCode is held
+// to it too; magpie's own models stay unmarked.
 func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 	home := syncHome(t)
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
@@ -37,10 +37,8 @@ func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 	writeFile(t, filepath.Join(piDir, "settings.json"), `{"defaultProvider": "magpie", "defaultModel": "deepseek/deepseek-v4.1-flash"}`)
 	writeFile(t, filepath.Join(home, ".local", "share", "opencode", "auth.json"), auth)
 	cfg := filepath.Join(home, ".config")
-	writeFile(t, filepath.Join(cfg, "crush", "crush.json"), `{"providers": {"opencode-go": {"api_key": "test-key"}}}`)
-	writeFile(t, filepath.Join(home, ".omp", "agent", "models.yml"), "providers:\n  opencode-go:\n    models:\n      - id: glm-5.1\n        name: GLM-5.1\n")
 
-	for _, a := range []*Agent{pi(home), opencode(home, cfg), crush(home, cfg), omp(home)} {
+	for _, a := range []*Agent{pi(home), opencode(home, cfg)} {
 		f := a.Field("model")
 		if f == nil {
 			t.Fatalf("%s has no model field", a.ID)

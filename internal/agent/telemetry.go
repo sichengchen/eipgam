@@ -61,7 +61,6 @@ import (
 
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/jsonc"
-	"gopkg.in/yaml.v3"
 
 	"github.com/yetone/magpie/internal/edit"
 	"github.com/yetone/magpie/internal/filememo"
@@ -116,7 +115,6 @@ type telemetryFile struct {
 }
 
 func isFalse(v any) bool { return v == false }
-func isTrue(v any) bool  { return v == true }
 
 // anyValue: an environment variable that is set, to anything but empty
 func anyValue(v any) bool {
@@ -328,16 +326,6 @@ func tomlTopTelemetryFile(path string) telemetryFile {
 		func(path, name string) error { return edit.DelTOMLTop(path, name) })
 }
 
-// yamlTopTelemetryFile is a YAML config's top-level keys.
-func yamlTopTelemetryFile(path string) telemetryFile {
-	return topTelemetryFile(path, "telemetry yaml",
-		func(b []byte, m *map[string]any) error { return yaml.Unmarshal(b, m) },
-		func(path string, k telemetryKey) error {
-			return edit.SetYAMLTop(path, edit.KV{Path: k.name, Value: k.value})
-		},
-		func(path, name string) error { return edit.DelYAMLTop(path, name) })
-}
-
 // codexTelemetry is Codex's: [analytics] enabled = false in config.toml.
 func codexTelemetry(at place, path string) *Telemetry {
 	f := telemetryFile{
@@ -399,34 +387,16 @@ func usageStatsTelemetry(at place, path, id string) *Telemetry {
 		telemetryKey{name: "privacy.usageStatisticsEnabled", value: false, off: isFalse})
 }
 
-// crushTelemetry is Crush's: options.disable_metrics in crush.json.
-func crushTelemetry(at place, path string) *Telemetry {
-	return telemetrySwitch(at, jsonTelemetryFile(path), at.key("crush.telemetry"),
-		telemetryKey{name: "options.disable_metrics", value: true, off: isTrue})
-}
-
 // kimiTelemetry is Kimi Code's: telemetry in config.toml.
 func kimiTelemetry(at place, path string) *Telemetry {
 	return telemetrySwitch(at, tomlTopTelemetryFile(path), at.key("kimi.telemetry"),
 		telemetryKey{name: "telemetry", value: false, off: isFalse})
 }
 
-// gooseTelemetry is Goose's: GOOSE_TELEMETRY_ENABLED in config.yaml.
-func gooseTelemetry(at place, path string) *Telemetry {
-	return telemetrySwitch(at, yamlTopTelemetryFile(path), at.key("goose.telemetry"),
-		telemetryKey{name: "GOOSE_TELEMETRY_ENABLED", value: false, off: isFalse})
-}
-
 // piTelemetry is Pi's: its install and update reporting in settings.json.
 func piTelemetry(at place, path string) *Telemetry {
 	return telemetrySwitch(at, jsonTelemetryFile(path), at.key("pi.telemetry"),
 		telemetryKey{name: "enableInstallTelemetry", value: false, off: isFalse})
-}
-
-// clineTelemetry is Cline CLI's: telemetryOptOut in its global settings.
-func clineTelemetry(at place, path string) *Telemetry {
-	return telemetrySwitch(at, jsonTelemetryFile(path), at.key("cline.telemetry"),
-		telemetryKey{name: "telemetryOptOut", value: true, off: isTrue})
 }
 
 // ErrNoTelemetry: the agent has no telemetry switch magpie knows.

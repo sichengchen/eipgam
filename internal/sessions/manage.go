@@ -636,21 +636,6 @@ func sessionPaths(agent, id string, fs []file) []string {
 		add(filepath.Join(dir, "annotations", id+".pbtxt"))
 		return out
 	}
-	if agent == "dsh" {
-		// each session's own folder (the parent's and its subagents'), and
-		// the row dsh caches of it for its listing; none at all when one
-		// isn't in a folder of its own, rather than half the session
-		for _, f := range fs {
-			if dshSessionDir(f) == "" {
-				return nil
-			}
-		}
-		for _, f := range fs {
-			add(dshSessionDir(f))
-			add(dshCacheRecord(f.m().sid))
-		}
-		return out
-	}
 	for _, f := range fs {
 		if f.main {
 			add(f.path)

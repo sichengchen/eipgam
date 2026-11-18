@@ -936,8 +936,6 @@ func (a *Agent) Disconnect() (err error) {
 	// by itself (a start's Sync, Codex's account failover) puts magpie back
 	// in, this Disconnect's own writes included (paynezhuang on Discord)
 	stash(map[string]string{a.ID + disconnectedKey: "1"})
-	// the user's own say over a harness Kiro Crew's connect put on
-	kiroCrewUserLeft(a.ID)
 	before, rec := a.Values(), appliedOf(a.ID)
 	if a.Unwire != nil {
 		if err := a.Unwire(); err != nil {

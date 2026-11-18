@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -139,6 +140,105 @@ func TestOpenCodeBeforePluginsKeepsTheList(t *testing.T) {
 	}
 }
 
+// A file at the plugin's path magpie didn't write is the user's: never
+// written over, and never removed.
+func TestOpenCodeUsersOwnPluginStays(t *testing.T) {
+	home, _ := codexHome(t, "", "")
+	reasonCatalog(t)
+	openCodeAt(t, "1.19.6")
+	oc := opencode(home, filepath.Join(home, ".config"))
+	path := openCodePluginPath(oc.Path)
+	os.MkdirAll(filepath.Dir(path), 0o755)
+	const own = "export default {}\n"
+	if err := os.WriteFile(path, []byte(own), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+		t.Fatal(err)
+	}
+	if got := pluginOf(oc.Path); got != own {
+		t.Fatalf("the user's file written over: %q", got)
+	}
+	if err := oc.Apply("model", ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := pluginOf(oc.Path); got != own {
+		t.Fatalf("the user's file removed: %q", got)
+	}
+}
+
+// The plugin as OpenCode runs it (opencode_models.js, under node): for
+// OpenCode 1 its config hook fills magpie's provider from the gateway,
+// the user's fields over magpie's and a model of theirs kept; for OpenCode
+// 2 its transform does, every model with variants; with the gateway down,
+// both fall back on the list in the file.
+func TestOpenCodePluginRuns(t *testing.T) {
+	node, err := exec.LookPath("node")
+	if err != nil {
+		t.Skip("no node to run the plugin")
+	}
+	home, _ := codexHome(t, "", "")
+	reasonCatalog(t)
+	src := openCodePluginFor(magpieProviderJSONAt("opencode", "opencode", "http://127.0.0.1:1"))
+	plugin := filepath.Join(home, "magpie-models.mjs")
+	if err := os.WriteFile(plugin, []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	served, _ := json.Marshal(map[string]any{"opencode": map[string]any{"models": []any{
+		map[string]any{"id": "live/one", "entry": map[string]any{"name": "One", "limit": map[string]any{"context": 1000, "output": 100}, "variants": map[string]any{"high": map[string]any{"reasoningEffort": "high"}}}},
+	}}, "opencode2": map[string]any{"models": []any{
+		map[string]any{"id": "live/one", "entry": map[string]any{"name": "One", "limit": map[string]any{"context": 1000, "output": 100}, "variants": []any{}}},
+	}}})
+	run := func(mode string) map[string]any {
+		t.Helper()
+		abs, _ := filepath.Abs(filepath.Join("testdata", "opencode", "drive-plugin.mjs"))
+		cmd := exec.Command(node, abs, plugin, mode)
+		cmd.Env = append(os.Environ(), "MAGPIE_SERVED="+string(served))
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("%s: %v\n%s", mode, err, out)
+		}
+		var r map[string]any
+		if err := json.Unmarshal(out, &r); err != nil {
+			t.Fatalf("%s: %v\n%s", mode, err, out)
+		}
+		return r
+	}
+	get := func(v any, path ...string) any {
+		for _, k := range path {
+			m, _ := v.(map[string]any)
+			v = m[k]
+		}
+		return v
+	}
+	// OpenCode 1, gateway up
+	r := run("v1-up")
+	if get(r, "live/one", "name") != "One" || get(r, "live/one", "limit", "output") != float64(4321) ||
+		get(r, "live/one", "limit", "context") != float64(1000) || get(r, "live/one", "variants", "high", "reasoningEffort") != "high" ||
+		get(r, "live/one", "variants", "mine", "temperature") != 0.5 || get(r, "local/own", "name") != "own" || r["think/deep"] != nil {
+		t.Fatalf("OpenCode 1, magpie up: %v", r)
+	}
+	// down: the list the file has
+	r = run("v1-down")
+	if get(r, "think/deep", "name") == nil || get(r, "rsn/plan", "name") == nil || get(r, "local/own", "name") != "own" || get(r, "live/one", "name") != nil {
+		t.Fatalf("OpenCode 1, magpie down: %v", r)
+	}
+	r = run("v2-up")
+	if get(r, "live/one", "name") != "One" || get(r, "live/one", "limit", "context") != float64(1000) || r["think/deep"] != nil {
+		t.Fatalf("OpenCode 2, magpie up: %v", r)
+	}
+	if vs, ok := get(r, "live/one", "variants").([]any); !ok || len(vs) != 0 {
+		t.Fatalf("OpenCode 2's variants: %v", r)
+	}
+	r = run("v2-down")
+	if get(r, "think/deep", "name") == nil || get(r, "rsn/plan", "name") == nil {
+		t.Fatalf("OpenCode 2, magpie down: %v", r)
+	}
+	if vs, ok := get(r, "think/deep", "variants").([]any); !ok || len(vs) == 0 {
+		t.Fatalf("OpenCode 2's think/deep has no variants: %v", r)
+	}
+}
+
 // A config magpie wrote the list into moves: magpie's models go, and of
 // them only what the user said stays (a variant of theirs, a reply limit
 // they typed, with the rest of that limit), with a model magpie no
@@ -238,101 +338,11 @@ func TestOpenCodeListMovesToThePlugin(t *testing.T) {
 	}
 }
 
-// A file at the plugin's path magpie didn't write is the user's: never
-// written over, and never removed.
-func TestOpenCodeUsersOwnPluginStays(t *testing.T) {
-	home, _ := codexHome(t, "", "")
-	reasonCatalog(t)
-	openCodeAt(t, "1.19.6")
-	oc := opencode(home, filepath.Join(home, ".config"))
-	path := openCodePluginPath(oc.Path)
-	os.MkdirAll(filepath.Dir(path), 0o755)
-	const own = "export default {}\n"
-	if err := os.WriteFile(path, []byte(own), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := oc.Apply("model", "magpie/think/deep"); err != nil {
-		t.Fatal(err)
-	}
-	if got := pluginOf(oc.Path); got != own {
-		t.Fatalf("the user's file written over: %q", got)
-	}
-	if err := oc.Apply("model", ""); err != nil {
-		t.Fatal(err)
-	}
-	if got := pluginOf(oc.Path); got != own {
-		t.Fatalf("the user's file removed: %q", got)
-	}
-}
-
-// The plugin as OpenCode runs it (opencode_models.js, under node): for
-// OpenCode 1 its config hook fills magpie's provider from the gateway,
-// the user's fields over magpie's and a model of theirs kept; for OpenCode
-// 2 its transform does, every model with variants; with the gateway down,
-// both fall back on the list in the file.
-func TestOpenCodePluginRuns(t *testing.T) {
-	node, err := exec.LookPath("node")
-	if err != nil {
-		t.Skip("no node to run the plugin")
-	}
-	home, _ := codexHome(t, "", "")
-	reasonCatalog(t)
-	src := openCodePluginFor(magpieProviderJSONAt("opencode", "opencode", "http://127.0.0.1:1"))
-	plugin := filepath.Join(home, "magpie-models.mjs")
-	if err := os.WriteFile(plugin, []byte(src), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	served, _ := json.Marshal(map[string]any{"opencode": map[string]any{"models": []any{
-		map[string]any{"id": "live/one", "entry": map[string]any{"name": "One", "limit": map[string]any{"context": 1000, "output": 100}, "variants": map[string]any{"high": map[string]any{"reasoningEffort": "high"}}}},
-	}}, "opencode2": map[string]any{"models": []any{
-		map[string]any{"id": "live/one", "entry": map[string]any{"name": "One", "limit": map[string]any{"context": 1000, "output": 100}, "variants": []any{}}},
-	}}})
-	run := func(mode string) map[string]any {
-		t.Helper()
-		abs, _ := filepath.Abs(filepath.Join("testdata", "opencode", "drive-plugin.mjs"))
-		cmd := exec.Command(node, abs, plugin, mode)
-		cmd.Env = append(os.Environ(), "MAGPIE_SERVED="+string(served))
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			t.Fatalf("%s: %v\n%s", mode, err, out)
-		}
-		var r map[string]any
-		if err := json.Unmarshal(out, &r); err != nil {
-			t.Fatalf("%s: %v\n%s", mode, err, out)
-		}
-		return r
-	}
-	get := func(v any, path ...string) any {
-		for _, k := range path {
-			m, _ := v.(map[string]any)
-			v = m[k]
-		}
-		return v
-	}
-	// OpenCode 1, gateway up
-	r := run("v1-up")
-	if get(r, "live/one", "name") != "One" || get(r, "live/one", "limit", "output") != float64(4321) ||
-		get(r, "live/one", "limit", "context") != float64(1000) || get(r, "live/one", "variants", "high", "reasoningEffort") != "high" ||
-		get(r, "live/one", "variants", "mine", "temperature") != 0.5 || get(r, "local/own", "name") != "own" || r["think/deep"] != nil {
-		t.Fatalf("OpenCode 1, magpie up: %v", r)
-	}
-	// down: the list the file has
-	r = run("v1-down")
-	if get(r, "think/deep", "name") == nil || get(r, "rsn/plan", "name") == nil || get(r, "local/own", "name") != "own" || get(r, "live/one", "name") != nil {
-		t.Fatalf("OpenCode 1, magpie down: %v", r)
-	}
-	r = run("v2-up")
-	if get(r, "live/one", "name") != "One" || get(r, "live/one", "limit", "context") != float64(1000) || r["think/deep"] != nil {
-		t.Fatalf("OpenCode 2, magpie up: %v", r)
-	}
-	if vs, ok := get(r, "live/one", "variants").([]any); !ok || len(vs) != 0 {
-		t.Fatalf("OpenCode 2's variants: %v", r)
-	}
-	r = run("v2-down")
-	if get(r, "think/deep", "name") == nil || get(r, "rsn/plan", "name") == nil {
-		t.Fatalf("OpenCode 2, magpie down: %v", r)
-	}
-	if vs, ok := get(r, "think/deep", "variants").([]any); !ok || len(vs) == 0 {
-		t.Fatalf("OpenCode 2's think/deep has no variants: %v", r)
-	}
+// sameJSONValue reports whether a and b read the same as JSON: a value
+// read back from a file (float64, []any) against one the test made (int,
+// []string).
+func sameJSONValue(a, b any) bool {
+	x, err1 := json.Marshal(a)
+	y, err2 := json.Marshal(b)
+	return err1 == nil && err2 == nil && bytes.Equal(x, y)
 }

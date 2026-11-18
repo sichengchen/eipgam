@@ -12,16 +12,12 @@ import (
 // subagentAgents puts every agent that takes subagents in the sandbox.
 func subagentAgents(t *testing.T, h string) map[string]string {
 	t.Helper()
-	write(t, filepath.Join(h, ".qwen/settings.json"), "{}\n")
-	write(t, filepath.Join(h, ".factory/settings.json"), "")
 	write(t, filepath.Join(h, ".grok/config.toml"), "")
 	return map[string]string{
 		"claude":   filepath.Join(h, ".claude/agents/reviewer.md"),
 		"codex":    filepath.Join(h, ".codex/agents/reviewer.toml"),
 		"opencode": filepath.Join(h, ".config/opencode/agents/reviewer.md"),
 		"gemini":   filepath.Join(h, ".gemini/agents/reviewer.md"),
-		"qwen":     filepath.Join(h, ".qwen/agents/reviewer.md"),
-		"droid":    filepath.Join(h, ".factory/droids/reviewer.md"),
 		"grok":     filepath.Join(h, ".grok/agents/reviewer.md"),
 		"cursor":   filepath.Join(h, ".cursor/agents/reviewer.md"),
 		"copilot":  filepath.Join(h, ".copilot/agents/reviewer.agent.md"),
@@ -42,7 +38,7 @@ var reviewer = Subagent{
 func TestSubagentsEachAgentsFile(t *testing.T) {
 	h := sandbox(t)
 	files := subagentAgents(t, h)
-	ok(t)(SaveServer("", Server{Name: "github", Transport: "stdio", Command: "npx", Agents: []string{"claude", "droid"}}))
+	ok(t)(SaveServer("", Server{Name: "github", Transport: "stdio", Command: "npx", Agents: []string{"claude"}}))
 	ok(t)(change(func(l *Library) error {
 		l.Skills = append(l.Skills, &Skill{Name: "tdd", Agents: []string{}})
 		return nil
@@ -58,9 +54,8 @@ func TestSubagentsEachAgentsFile(t *testing.T) {
 	want := map[string]string{
 		"claude":   "---\nname: \"reviewer\"\ndescription: " + desc + "\nskills: [\"tdd\"]\nmcpServers: [\"github\"]\n" + body,
 		"opencode": "---\ndescription: " + desc + "\nmode: subagent\n" + body,
-		"droid":    "---\nname: \"reviewer\"\ndescription: " + desc + "\nmcpServers: [\"github\"]\n" + body,
 	}
-	for _, id := range []string{"gemini", "qwen", "grok", "cursor", "copilot"} {
+	for _, id := range []string{"gemini", "grok", "cursor", "copilot"} {
 		want[id] = "---\nname: \"reviewer\"\ndescription: " + desc + "\n" + body
 	}
 	for id, f := range files {
@@ -88,7 +83,7 @@ func TestSubagentsEachAgentsFile(t *testing.T) {
 		t.Errorf("view: %+v", v.Subagents)
 	}
 	for _, av := range v.SubagentAgents {
-		if (av.Skills != (av.ID == "claude")) || (av.MCP != (av.ID == "claude" || av.ID == "droid")) || av.No != "" {
+		if (av.Skills != (av.ID == "claude")) || (av.MCP != (av.ID == "claude")) || av.No != "" {
 			t.Errorf("agent view %+v", av)
 		}
 	}
@@ -196,7 +191,7 @@ func TestSubagentCheck(t *testing.T) {
 		{Name: "default", Description: "d", Prompt: "p"},
 		{Name: "rev", Description: " ", Prompt: "p"},
 		{Name: "rev", Description: "d", Prompt: " \n"},
-		{Name: "rev", Description: "d", Prompt: "p", Agents: []string{"crush"}},
+		{Name: "rev", Description: "d", Prompt: "p", Agents: []string{"pi"}},
 	} {
 		if _, err := SaveSubagent("", s); err == nil {
 			t.Errorf("%+v saved", s)

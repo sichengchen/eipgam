@@ -7,8 +7,10 @@ import (
 	"testing"
 )
 
-// noGoose takes Goose, whose own folder is ~/.agents/skills, out of the
-// sandbox, so the shared folder holds only what a test puts there.
+// noGoose takes Goose, whose own folder was ~/.agents/skills, out of the
+// sandbox, so the shared folder holds only what a test puts there. Goose
+// is no built-in agent now and sandbox makes none, so there is nothing to
+// take out; it stays for the tests that still call it.
 func noGoose(t *testing.T, h string) {
 	t.Helper()
 	os.RemoveAll(filepath.Join(h, ".config/goose"))
@@ -28,7 +30,6 @@ func realFolder(p string) bool {
 // and keep it, and each can then be turned off, here alone too.
 func TestHandOverSharedFolder(t *testing.T) {
 	h := sandbox(t)
-	noGoose(t, h)
 	shared := filepath.Join(h, ".agents/skills")
 	skill(t, filepath.Join(shared, "orchestration"), "orchestration", "Orchestrate")
 	symlink(t, filepath.Join(shared, "orchestration"), filepath.Join(h, ".pi/agent/skills/orchestration"))
@@ -110,7 +111,6 @@ func TestHandOverSharedFolder(t *testing.T) {
 // link goes, the folder stays, and the library links to the folder.
 func TestHandOverSharedLink(t *testing.T) {
 	h := sandbox(t)
-	noGoose(t, h)
 	shared := filepath.Join(h, ".agents/skills")
 	ext := filepath.Join(h, "aimer-skills/grilling")
 	skill(t, ext, "grilling", "Grill")
@@ -144,7 +144,6 @@ func TestHandOverSharedLink(t *testing.T) {
 // handed over all the same.
 func TestHandOverFound(t *testing.T) {
 	h := sandbox(t)
-	noGoose(t, h)
 	shared := filepath.Join(h, ".agents/skills")
 	skill(t, filepath.Join(shared, "orca-cli"), "orca-cli", "Orca")
 	// a user's own link to it in Claude Code's folder
@@ -181,7 +180,6 @@ func TestHandOverFound(t *testing.T) {
 // fails (another disk), and the copy fails too.
 func TestHandOverFailureKeepsOriginal(t *testing.T) {
 	h := sandbox(t)
-	noGoose(t, h)
 	shared := filepath.Join(h, ".agents/skills")
 	skill(t, filepath.Join(shared, "orchestration"), "orchestration", "Orchestrate")
 	ok(t)(ImportSkill("orchestration"))
@@ -213,10 +211,12 @@ func TestHandOverFailureKeepsOriginal(t *testing.T) {
 	}
 }
 
-// Goose reads ~/.agents/skills as its own folder: handed over, the
-// library gives it a link there, and the skill's folder is the library's.
-func TestHandOverWithGoose(t *testing.T) {
+// kimi-cli (the old Kimi Code, ~/.kimi) reads ~/.agents/skills as its own
+// folder: handed over, the library gives it a link there, and the skill's
+// folder is the library's.
+func TestHandOverWithKimiCLI(t *testing.T) {
 	h := sandbox(t)
+	write(t, filepath.Join(h, ".kimi/config.toml"), "")
 	shared := filepath.Join(h, ".agents/skills")
 	skill(t, filepath.Join(shared, "orchestration"), "orchestration", "Orchestrate")
 	ok(t)(ImportSkill("orchestration"))
@@ -226,26 +226,27 @@ func TestHandOverWithGoose(t *testing.T) {
 		t.Fatal("not in the library's folder")
 	}
 	if !ours(filepath.Join(shared, "orchestration"), "orchestration") {
-		t.Fatal("goose's isn't the library's")
+		t.Fatal("kimi's isn't the library's")
 	}
-	if v := offView(t, "orchestration"); !slices.Contains(v.Agents, "goose") || v.Shared != "" {
+	if v := offView(t, "orchestration"); !slices.Contains(v.Agents, "kimi") || v.Shared != "" {
 		t.Errorf("after: %+v", v)
 	}
 }
 
 // A skill kept in ~/.agents/skills under another folder's name is still
-// the shared folder's: Goose, whose folder that is, isn't given a second
+// the shared folder's: kimi-cli, whose folder that is, isn't given a second
 // one beside it, and handed over, the folder moves in by the skill's name.
 func TestSharedUnderAnotherName(t *testing.T) {
 	h := sandbox(t)
+	write(t, filepath.Join(h, ".kimi/config.toml"), "")
 	shared := filepath.Join(h, ".agents/skills")
 	skill(t, filepath.Join(shared, "orchestration-v2"), "orchestration", "Orchestrate")
 	// linked into the library's folder by hand, and brought in from there
 	symlink(t, filepath.Join(shared, "orchestration-v2"), skillDir("orchestration"))
 	ok(t)(ImportSkill("orchestration"))
-	ok(t)(SkillAgents("orchestration", []string{"claude", "goose"}))
+	ok(t)(SkillAgents("orchestration", []string{"claude", "kimi"}))
 	if _, err := os.Lstat(filepath.Join(shared, "orchestration")); !os.IsNotExist(err) {
-		t.Fatalf("goose was given it twice: %v", err)
+		t.Fatalf("kimi was given it twice: %v", err)
 	}
 	v := offView(t, "orchestration")
 	if v.Shared != filepath.Join(shared, "orchestration-v2") || !slices.Contains(v.Always, "codex") {
@@ -259,7 +260,7 @@ func TestSharedUnderAnotherName(t *testing.T) {
 		t.Fatal("not in the library's folder")
 	}
 	if !ours(filepath.Join(shared, "orchestration"), "orchestration") {
-		t.Error("goose isn't given the library's")
+		t.Error("kimi isn't given the library's")
 	}
 }
 
@@ -269,7 +270,6 @@ func TestSharedUnderAnotherName(t *testing.T) {
 // entries stay.
 func TestHandOverWithSharedSetting(t *testing.T) {
 	h := sandbox(t)
-	noGoose(t, h)
 	shared := filepath.Join(h, ".agents/skills")
 	ext := filepath.Join(h, "aimer-skills/grilling")
 	skill(t, ext, "grilling", "Grill")

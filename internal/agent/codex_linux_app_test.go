@@ -87,6 +87,39 @@ func TestCodexLinuxAppVersion(t *testing.T) {
 	}
 }
 
+const codexLinuxAppServerCmd = "/usr/lib/chatgpt/resources/codex -c features.code_mode_host=true app-server --analytics-default-enabled"
+
+// The Linux app's codex reads Codex's config as the CLI does: it is one
+// of the readers whose version decides what magpie writes there, read
+// from its --version (codex-cli 0.166.0-alpha.5.1 in chatgpt 26.1027).
+func TestCodexLinuxAppReadsTheConfig(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("the Linux package is read on Linux only")
+	}
+	t.Setenv("PATH", t.TempDir()) // no codex CLI
+	home := t.TempDir()
+	if got := codexReaders(place{home: home}); slices.ContainsFunc(got, func(r CodexReader) bool { return r.Kind == "app" }) {
+		t.Fatalf("no app installed: %+v", got)
+	}
+	dir := installLinuxCodexApp(t)
+	bin := filepath.Join(dir, "resources", "codex")
+	if err := os.WriteFile(bin, []byte("#!/bin/sh\necho codex-cli 0.166.0-alpha.5.1\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	wasRun := runVersion
+	runVersion = func(b string) string {
+		if b != bin {
+			t.Errorf("version read from %s, want %s", b, bin)
+		}
+		return "codex-cli 0.166.0-alpha.5.1"
+	}
+	t.Cleanup(func() { runVersion = wasRun })
+	got := codexReaders(place{home: home})
+	if !slices.Contains(got, CodexReader{Kind: "app", Version: "0.166.0-alpha.5.1"}) {
+		t.Fatalf("the Linux app's codex not read: %+v", got)
+	}
+}
+
 // After a switch magpie restarts the app's app-server, and when the app
 // starts none it says to quit and open it again, unless the app was quit
 // meanwhile: whether it is open is known on Linux too, from any process of
@@ -123,38 +156,5 @@ func TestCodexLinuxAppOpen(t *testing.T) {
 		if open, known := codexAppOpen(context.Background()); open != tc.open || !known {
 			t.Errorf("%q: open %v, known %v; want %v", tc.cmds, open, known, tc.open)
 		}
-	}
-}
-
-const codexLinuxAppServerCmd = "/usr/lib/chatgpt/resources/codex -c features.code_mode_host=true app-server --analytics-default-enabled"
-
-// The Linux app's codex reads Codex's config as the CLI does: it is one
-// of the readers whose version decides what magpie writes there, read
-// from its --version (codex-cli 0.166.0-alpha.5.1 in chatgpt 26.1027).
-func TestCodexLinuxAppReadsTheConfig(t *testing.T) {
-	if runtime.GOOS != "linux" {
-		t.Skip("the Linux package is read on Linux only")
-	}
-	t.Setenv("PATH", t.TempDir()) // no codex CLI
-	home := t.TempDir()
-	if got := codexReaders(place{home: home}); slices.ContainsFunc(got, func(r CodexReader) bool { return r.Kind == "app" }) {
-		t.Fatalf("no app installed: %+v", got)
-	}
-	dir := installLinuxCodexApp(t)
-	bin := filepath.Join(dir, "resources", "codex")
-	if err := os.WriteFile(bin, []byte("#!/bin/sh\necho codex-cli 0.166.0-alpha.5.1\n"), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	wasRun := runVersion
-	runVersion = func(b string) string {
-		if b != bin {
-			t.Errorf("version read from %s, want %s", b, bin)
-		}
-		return "codex-cli 0.166.0-alpha.5.1"
-	}
-	t.Cleanup(func() { runVersion = wasRun })
-	got := codexReaders(place{home: home})
-	if !slices.Contains(got, CodexReader{Kind: "app", Version: "0.166.0-alpha.5.1"}) {
-		t.Fatalf("the Linux app's codex not read: %+v", got)
 	}
 }

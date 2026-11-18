@@ -92,7 +92,7 @@ const (
 
 // SubagentAgents are the agents a subagent can be given, in the order the
 // page lists them.
-var SubagentAgents = []string{"claude", "codex", "opencode", "gemini", "qwen", "droid", "grok", "cursor", "copilot"}
+var SubagentAgents = []string{"claude", "codex", "opencode", "gemini", "grok", "cursor", "copilot"}
 
 // subagentSpec is where an agent keeps its subagents and how it reads one.
 type subagentSpec struct {
@@ -148,18 +148,6 @@ func subagentSpecOf(t *Target) (*subagentSpec, string) {
 		}), ""
 	case "gemini":
 		return md(filepath.Join(h, ".gemini", "agents"), plain), ""
-	case "qwen":
-		return md(filepath.Join(a.Dir, "agents"), plain), ""
-	case "droid":
-		sp := md(filepath.Join(a.Dir, "droids"), func(s *Subagent, _, mcp []string) [][2]string {
-			kv := plain(s, nil, nil)
-			if len(mcp) > 0 {
-				kv = append(kv, [2]string{"mcpServers", yamlList(mcp)})
-			}
-			return kv
-		})
-		sp.mcp = true
-		return sp, ""
 	case "grok":
 		return md(filepath.Join(a.Dir, "agents"), plain), ""
 	case "cursor":

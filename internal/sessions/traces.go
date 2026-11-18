@@ -101,24 +101,6 @@ func traceLineFiles() []file {
 			claude("claude-desktop", home)
 		}
 	}
-	seen := map[string]bool{}
-	var ompRoots []string
-	if Reads("omp") {
-		ompRoots = ompSessionRoots()
-	}
-	for _, root := range ompRoots {
-		paths, _ := SessionGlob(filepath.Join(root, "*", "*.jsonl"))
-		for _, path := range paths {
-			if seen[path] {
-				continue
-			}
-			seen[path] = true
-			f := file{agent: "omp", path: path, main: true}
-			if stat(&f) {
-				files = append(files, f)
-			}
-		}
-	}
 	return allowed(append(files, geminiTraceFiles()...))
 }
 

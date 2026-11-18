@@ -2340,9 +2340,6 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 		if from == provider.Responses || from == provider.Chat {
 			body = fastTier(body)
 		}
-		// Qoder 1.1.82 and later name no session: the one of its own
-		// session files the request holds the prompts of (qoder_session.go)
-		r = qoderSession(r, from, body)
 		// a Claude Code Message Thread magpie keeps no history for: sent
 		// again whole, without it (message_threads.go, #2480)
 		if from == provider.Anthropic && namesThread(body) {

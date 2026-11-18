@@ -105,10 +105,8 @@ type callFile struct {
 	CompactMs int64
 	// Codex
 	CX *cxRun
-	// Pi and omp
+	// Pi
 	Pi *piCarry
-	// dsh
-	Dsh *dshCarry
 	// Grok Build
 	Grok *grokCallCarry
 }
@@ -349,16 +347,12 @@ func callSourcesWith(codex []file) []file { return callSourcesInto(nil, codex) }
 
 // callSourcesInto is callSourcesWith appended to out.
 func callSourcesInto(out []file, codex []file) []file {
-	lists := append(callFileLists(codex), openCodeCallFiles(), zcodeCallFiles(), dshCallFiles(),
-		minimaxCallFiles(), kimiCallFiles(), wslFiles("kimi"), piCallFiles(), codebuddyCallFiles(), workbuddyAIFiles(),
-		agyCallFiles(),                               // #2097
-		antigravityCallFiles(),                       // #2190
-		wslFiles("antigravity"), wslCallFiles("agy"), // @guyng35955 on X
-		devinCallFiles(),                      // aohan0905 on X
-		droidFiles(),                          // _meouwu on X: its settings' totals (calls_droid.go)
-		workbuddyCallFiles(), grokCallFiles(), // #4423
-		// Claude Code's lines, read by claudeCallLine (eating_dream on X)
-		ccFiles("qoder", QoderDir("qoder")), ccFiles("qoder-cn", QoderDir("qoder-cn")))
+	lists := append(callFileLists(codex), openCodeCallFiles(),
+		kimiCallFiles(), wslFiles("kimi"), piCallFiles(),
+		agyCallFiles(),      // #2097
+		wslCallFiles("agy"), // @guyng35955 on X
+		devinCallFiles(),    // aohan0905 on X
+		grokCallFiles())     // #4423
 	if out == nil {
 		return allowed(distinctOf(lists...))
 	}
@@ -472,14 +466,6 @@ func (st *callFile) cloneState() *callFile {
 	if st.Pi != nil {
 		p := *st.Pi
 		c.Pi = &p
-	}
-	if st.Dsh != nil {
-		d := *st.Dsh
-		if d.Tail != nil {
-			t := *d.Tail
-			d.Tail = &t
-		}
-		c.Dsh = &d
 	}
 	if st.Grok != nil {
 		g := *st.Grok

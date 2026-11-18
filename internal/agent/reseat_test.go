@@ -6,12 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
 	"github.com/yetone/magpie/internal/provider"
 )
 
 // reseatHome is a sandbox HOME with two providers, one of them "cop" in the
-// place of Copilot, and Claude Code and Hermes Agent there.
+// place of Copilot, and Claude Code and Pi there.
 func reseatHome(t *testing.T) string {
 	t.Helper()
 	home := effortHome(t)
@@ -25,7 +24,7 @@ func reseatHome(t *testing.T) string {
 		}
 	}
 	os.MkdirAll(filepath.Join(home, ".claude"), 0o755)
-	os.MkdirAll(appdir.HermesHomeIn(home), 0o755)
+	os.MkdirAll(filepath.Join(home, ".pi", "agent"), 0o755)
 	return home
 }
 
@@ -90,7 +89,7 @@ func mustApplyAs(t *testing.T, a *Agent, key, v, want string) {
 // request to be refused.
 func TestReseatOff(t *testing.T) {
 	reseatHome(t)
-	c, h := mustFind(t, "claude"), mustFind(t, "hermes")
+	c, h := mustFind(t, "claude"), mustFind(t, "pi")
 	mustApply(t, c, "model", "cop/gpt-5")
 	mustApply(t, c, "opus", "cop/claude-sonnet-4.5")
 	mustApply(t, c, "haiku", "cop/only-here")
@@ -109,17 +108,17 @@ func TestReseatOff(t *testing.T) {
 		}
 	}
 	if got := h.Field("model").Get(); got != "" {
-		t.Errorf("hermes: %q, want its own default", got)
+		t.Errorf("pi: %q, want its own default", got)
 	}
 	got := map[string]Move{}
 	for _, m := range moves {
 		got[m.Agent+" "+m.Field] = m
 	}
 	for k, w := range map[string]Move{
-		"Claude Code model":  {Agent: "Claude Code", Field: "model", From: "cop/gpt-5", To: "ds/gpt-5"},
-		"Claude Code opus":   {Agent: "Claude Code", Field: "opus", From: "cop/claude-sonnet-4.5", To: "ds/claude-sonnet-4-5-20250929"},
-		"Claude Code haiku":  {Agent: "Claude Code", Field: "haiku", From: "cop/only-here"}, // follows the main model
-		"Hermes Agent model": {Agent: "Hermes Agent", Field: "model", From: "cop/only-here"},
+		"Claude Code model": {Agent: "Claude Code", Field: "model", From: "cop/gpt-5", To: "ds/gpt-5"},
+		"Claude Code opus":  {Agent: "Claude Code", Field: "opus", From: "cop/claude-sonnet-4.5", To: "ds/claude-sonnet-4-5-20250929"},
+		"Claude Code haiku": {Agent: "Claude Code", Field: "haiku", From: "cop/only-here"}, // follows the main model
+		"Pi model":          {Agent: "Pi", Field: "model", From: "cop/only-here"},
 	} {
 		if got[k] != w {
 			t.Errorf("%s: %+v, want %+v", k, got[k], w)
@@ -177,10 +176,10 @@ func TestModelKey(t *testing.T) {
 // panel, the provider still listed, and a second Remove said "no provider".
 func TestReseatUnmovable(t *testing.T) {
 	home := reseatHome(t)
-	c, h := mustFind(t, "claude"), mustFind(t, "hermes")
+	c, h := mustFind(t, "claude"), mustFind(t, "pi")
 	mustApply(t, c, "model", "cop/only-here")
 	mustApply(t, h, "model", "magpie/cop/only-here")
-	dir := appdir.HermesHomeIn(home)
+	dir := filepath.Join(home, ".pi", "agent")
 	if err := os.Chmod(dir, 0o555); err != nil {
 		t.Fatal(err)
 	}
@@ -189,7 +188,8 @@ func TestReseatUnmovable(t *testing.T) {
 		f.Close()
 		t.Skip("a read-only folder is writable here (root?)")
 	}
-	os.Chmod(filepath.Join(dir, "config.yaml"), 0o444)
+	os.Chmod(filepath.Join(dir, "settings.json"), 0o444)
+	os.Chmod(filepath.Join(dir, "models.json"), 0o444)
 
 	moves, err := Reseat(func() error { return provider.Delete("cop") })
 	if err != nil {
@@ -203,7 +203,7 @@ func TestReseatUnmovable(t *testing.T) {
 	}
 	var stuck *Move
 	for i, m := range moves {
-		if m.Agent == "Hermes Agent" {
+		if m.Agent == "Pi" {
 			stuck = &moves[i]
 		}
 	}
@@ -220,7 +220,7 @@ func TestReseatUnmovable(t *testing.T) {
 // serving it, however that one spells it, rather than to its own default.
 func TestReseatFoundGroupsOff(t *testing.T) {
 	reseatHome(t)
-	c, h := mustFind(t, "claude"), mustFind(t, "hermes")
+	c, h := mustFind(t, "claude"), mustFind(t, "pi")
 	// picked by the old ids, written as they are listed now. Opus's
 	// auto/claude-sonnet-4.5 is given Claude Code dashed, and with the
 	// group gone reads back as auto/claude-sonnet-4-5: still moved
@@ -237,7 +237,7 @@ func TestReseatFoundGroupsOff(t *testing.T) {
 		}
 	}
 	if got := h.Field("model").Get(); got != "magpie/cop/gpt-5" {
-		t.Errorf("hermes: %q", got)
+		t.Errorf("pi: %q", got)
 	}
 	if len(moves) != 3 || moves[0].From != "auto/gpt-5" || moves[0].To != "cop/gpt-5" {
 		t.Errorf("moves: %+v", moves)
@@ -255,7 +255,7 @@ func TestReseatFoundGroupsOff(t *testing.T) {
 // switched-off provider served still moves.
 func TestReseatKeepsAFoundGroupWithAProviderOff(t *testing.T) {
 	reseatHome(t)
-	c, h := mustFind(t, "claude"), mustFind(t, "hermes")
+	c, h := mustFind(t, "claude"), mustFind(t, "pi")
 	mustApplyAs(t, c, "model", "group/auto-gpt-5", "auto/gpt-5")
 	mustApply(t, c, "haiku", "cop/only-here")
 	mustApplyAs(t, h, "model", "magpie/group/auto-gpt-5", "magpie/auto/gpt-5")
@@ -267,7 +267,7 @@ func TestReseatKeepsAFoundGroupWithAProviderOff(t *testing.T) {
 		t.Errorf("claude model with cop off: %q", got)
 	}
 	if got := h.Field("model").Get(); got != "magpie/auto/gpt-5" {
-		t.Errorf("hermes with cop off: %q", got)
+		t.Errorf("pi with cop off: %q", got)
 	}
 	if len(moves) != 1 || moves[0].Field != "haiku" || moves[0].From != "cop/only-here" {
 		t.Errorf("moves with cop off: %+v", moves)

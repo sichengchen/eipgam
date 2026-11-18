@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/appdir"
 	"github.com/yetone/magpie/internal/testenv"
 )
 
@@ -19,24 +18,24 @@ import (
 // to give skills, MCP servers and instructions to, and sync carried on
 // writing there.
 func TestTargetsLeaveGoneAgentsOut(t *testing.T) {
-	sandbox(t)
-	// Hermes by its config.yaml alone (the reporter's 37 bytes): its
-	// folder is kept by nothing here — no hermes on the sandbox's PATH,
-	// no hermes-agent checkout beside the config. Where Hermes reads it:
-	// ~/.hermes, but %LOCALAPPDATA%\hermes on Windows, where a fixture
-	// in ~/.hermes left hermes undetected and Takes refused nothing
-	// (#2254, ggbdpq; #2275)
-	write(t, filepath.Join(appdir.HermesHome(), "config.yaml"), "custom_providers: []\nmcp_servers: {}\n")
-	if a, err := agent.Find("hermes"); err != nil || !a.Detected() {
-		t.Fatalf("hermes isn't there by its config.yaml: %v", err)
+	h := sandbox(t)
+	// Pi by its settings.json alone (the sandbox's): its CLI taken off the
+	// sandbox's PATH, nothing else keeps its folder
+	for _, f := range []string{"pi", "pi.exe"} {
+		if err := os.Remove(filepath.Join(h, "bin", f)); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if got := ids(Targets()); slices.Contains(got, "hermes") {
-		t.Fatalf("hermes is a target with its CLI gone: %v", got)
+	if a, err := agent.Find("pi"); err != nil || !a.Detected() {
+		t.Fatalf("pi isn't there by its settings.json: %v", err)
 	}
-	// named for one (magpie library mcp add … agents=hermes), it is
-	// refused, not recorded and then given nothing
-	if _, err := Takes("hermes", "mcp"); err == nil || !strings.Contains(err.Error(), "isn't installed") {
-		t.Fatalf("Takes(hermes, mcp) with its CLI gone: %v", err)
+	if got := ids(Targets()); slices.Contains(got, "pi") {
+		t.Fatalf("pi is a target with its CLI gone: %v", got)
+	}
+	// named for one (magpie library mcp add … agents=pi), it is refused,
+	// not recorded and then given nothing
+	if _, err := Takes("pi", "mcp"); err == nil || !strings.Contains(err.Error(), "isn't installed") {
+		t.Fatalf("Takes(pi, mcp) with its CLI gone: %v", err)
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 )
 
 // A sync that changes nothing writes nothing: with every agent connected,
-// a second SyncCatalog (and what a running gateway keeps up) leaves each
+// a second SyncCatalog leaves each
 // file's mtime as it was. A rewrite of the same bytes wakes every watcher
 // of the file and swaps it under an agent reading it (#3870); before, 15
 // files here were written again on each sync.
@@ -29,7 +29,6 @@ func TestSecondSyncWritesNothing(t *testing.T) {
 		}
 	}
 	SyncCatalog()
-	dshWiredOnce()
 	old := time.Now().Add(-time.Hour).Truncate(time.Second)
 	files := 0
 	filepath.WalkDir(home, func(p string, e os.DirEntry, err error) error {
@@ -43,7 +42,6 @@ func TestSecondSyncWritesNothing(t *testing.T) {
 		t.Fatalf("only %d files under home: agents weren't connected", files)
 	}
 	SyncCatalog()
-	dshWiredOnce()
 	filepath.WalkDir(home, func(p string, e os.DirEntry, err error) error {
 		if err != nil || e.IsDir() {
 			return nil

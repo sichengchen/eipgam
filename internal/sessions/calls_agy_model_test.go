@@ -43,6 +43,32 @@ func putAgyModelTranscript(t *testing.T) string {
 	return dir
 }
 
+func agyCallsNow() []Call {
+	var got []Call
+	for _, c := range Calls(time.Time{}) {
+		if c.Agent == "agy" {
+			got = append(got, c)
+		}
+	}
+	slices.SortFunc(got, func(a, b Call) int { return a.Time.Compare(b.Time) })
+	return got
+}
+
+// A database that isn't one (agy_manage_test's stand-in) names no model,
+// and the calls are read as before.
+func TestAgyUnreadableDB(t *testing.T) {
+	dir := putAgyModelTranscript(t)
+	conv := filepath.Join(dir, "conversations")
+	os.MkdirAll(conv, 0o755)
+	if err := os.WriteFile(filepath.Join(conv, agyModelConv+".db"), []byte("SQLite format 3\x00"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got := agyCallsNow()
+	if len(got) != 2 || got[0].Model != "" || got[1].Model != "" {
+		t.Fatalf("%+v", got)
+	}
+}
+
 // putAgyModelDB writes the conversation's database, in WAL mode as agy
 // keeps it, in the layout agy 1.5.7 made on this Mac (the Antigravity
 // app's, antigravitySchema), from testdata/agy-db:
@@ -109,17 +135,6 @@ func putAgyModelDB(t *testing.T, dir string) {
 	}
 }
 
-func agyCallsNow() []Call {
-	var got []Call
-	for _, c := range Calls(time.Time{}) {
-		if c.Agent == "agy" {
-			got = append(got, c)
-		}
-	}
-	slices.SortFunc(got, func(a, b Call) int { return a.Time.Compare(b.Time) })
-	return got
-}
-
 // DvnT662 on X (#3147, #4805): Usage → Requests showed agy's own calls
 // with no model. Each names the model its conversation's database names
 // for its step.
@@ -174,20 +189,5 @@ func TestAgyModelWrittenLater(t *testing.T) {
 	}
 	if m := model(s, "agy"); m.Tokens != (Tokens{}) {
 		t.Fatalf("still counted under agy: %+v", s.Models)
-	}
-}
-
-// A database that isn't one (agy_manage_test's stand-in) names no model,
-// and the calls are read as before.
-func TestAgyUnreadableDB(t *testing.T) {
-	dir := putAgyModelTranscript(t)
-	conv := filepath.Join(dir, "conversations")
-	os.MkdirAll(conv, 0o755)
-	if err := os.WriteFile(filepath.Join(conv, agyModelConv+".db"), []byte("SQLite format 3\x00"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	got := agyCallsNow()
-	if len(got) != 2 || got[0].Model != "" || got[1].Model != "" {
-		t.Fatalf("%+v", got)
 	}
 }

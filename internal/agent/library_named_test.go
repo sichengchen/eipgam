@@ -45,7 +45,8 @@ func TestEveryAgentNamedForTheLibrary(t *testing.T) {
 			t.Errorf("%s (%s) isn't named in internal/library: give it a case in targetOf (targets.go), or a reason in noLibrary (every_agent_test.go)", a.ID, a.Name)
 		}
 	}
-	if n < 50 {
+	// 22 with the agents magpie keeps
+	if n < 20 {
 		t.Fatalf("read %d agents", n)
 	}
 }

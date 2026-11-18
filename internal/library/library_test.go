@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -43,8 +42,7 @@ func sandbox(t *testing.T) string {
 	// a stand-in for an agent no folder here keeps would have it detected
 	// by its binary alone in every test.
 	for _, name := range []string{
-		"claude", "codex", "opencode", "mimo", "deveco", "pi", "goose",
-		"cursor-agent", "copilot", "crush", "dsh",
+		"claude", "codex", "opencode", "pi", "cursor-agent", "copilot",
 	} {
 		testenv.Program(t, filepath.Join(bin, name), "#!/bin/sh\n")
 		write(t, filepath.Join(bin, name+".exe"), "")
@@ -69,8 +67,8 @@ func sandbox(t *testing.T) string {
 	}
 	for _, f := range []string{
 		".claude/settings.json", ".codex/config.toml", ".gemini/settings.json",
-		".config/opencode/opencode.json", ".config/mimocode/mimocode.json", ".config/deveco/deveco.jsonc", ".pi/agent/settings.json", ".config/goose/config.yaml",
-		".cursor/cli-config.json", ".copilot/settings.json", ".config/crush/crush.json", ".dsh/profiles/web/cordis.patch.yml",
+		".config/opencode/opencode.json", ".pi/agent/settings.json",
+		".cursor/cli-config.json", ".copilot/settings.json",
 	} {
 		write(t, filepath.Join(h, f), "")
 	}
@@ -134,146 +132,21 @@ func ids(ts []*Target) []string {
 func TestTargets(t *testing.T) {
 	sandbox(t)
 	got := ids(Targets())
-	for _, id := range []string{"claude", "codex", "gemini", "opencode", "mimocode", "deveco", "pi", "goose", "cursor", "copilot", "crush", "dsh"} {
+	for _, id := range []string{"claude", "codex", "gemini", "opencode", "pi", "cursor", "copilot"} {
 		if !slices.Contains(got, id) {
 			t.Errorf("%s not a target: %v", id, got)
 		}
 	}
 }
 
-// On Windows Crush's crush.json is in %LOCALAPPDATA%\crush, but its CRUSH.md
-// is read from ~/.config/crush, as everywhere else; one beside crush.json is
-// never read.
-func TestCrushInstructionsWhereCrushReadsThem(t *testing.T) {
-	h := sandbox(t)
-	app := filepath.Join(h, "AppData", "Local")
-	t.Setenv("LOCALAPPDATA", app)
-	write(t, filepath.Join(app, "crush", "crush.json"), "")
-	shared := "Use tabs."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"crush"}}))
-	if s := read(t, filepath.Join(h, ".config", "crush", "CRUSH.md")); s != blockBegin+"\nUse tabs.\n"+blockEnd+"\n" {
-		t.Errorf("~/.config/crush/CRUSH.md:\n%q", s)
-	}
-	if _, err := os.Stat(filepath.Join(app, "crush", "CRUSH.md")); !os.IsNotExist(err) {
-		t.Error("a CRUSH.md Crush doesn't read was written beside crush.json")
-	}
-}
-
-// Alma takes skills, in ~/.config/alma/skills (#824), MCP servers, in
-// ~/.config/alma/mcp.json (#1292), and instructions, in
-// ~/.config/alma/USER.md, which its main chat reads into its system
-// prompt (#2315).
-func TestTakesAlma(t *testing.T) {
-	sandbox(t)
-	for _, kind := range []string{"instructions", "skills", "mcp"} {
-		if id, err := Takes("alma", kind); err != nil || id != "alma" {
-			t.Errorf("%s: %q %v", kind, id, err)
-		}
-	}
-}
-
-// almaHere makes Alma's data folder, which is what has it detected, and
-// returns its USER.md.
-func almaHere(t *testing.T, h string) string {
-	t.Helper()
-	t.Setenv("APPDATA", filepath.Join(h, "AppData", "Roaming"))
-	cfg, err := os.UserConfigDir()
-	if err != nil {
-		t.Fatal(err)
-	}
-	os.MkdirAll(filepath.Join(cfg, "alma"), 0o755)
-	return filepath.Join(h, ".config", "alma", "USER.md")
-}
-
-// almaFront is how Alma reads its owner from USER.md (getOwnerInfo in
-// 0.4.164's out/main/index.js): the YAML front matter, from the file's
-// first line, unanchored otherwise.
-var almaFront = regexp.MustCompile(`^---\n([\s\S]*?)\n---`)
-
-// Jie211's USER.md, as Alma's own setup writes one, keeps its front matter
-// first and its profile whole when Alma is given the shared instructions:
-// magpie's part goes after it, and turning Alma off leaves the file as it
-// was (#2315).
-func TestAlmaInstructionsKeepTheProfile(t *testing.T) {
-	h := sandbox(t)
-	user := almaHere(t, h)
-	if tg := targetByID("alma"); tg == nil || tg.Instructions != user || !tg.Profile {
-		t.Fatalf("alma: %+v", tg)
-	}
-	mine := "---\nname: \"Jie\"\ntelegram_id: \"123456789\"\ndiscord_id: \"\"\n---\n# About My Human\n- Name: Jie\n- Language: 中文\n"
-	write(t, user, mine)
-	shared := "交流用中文，代码注释和文档默认用英文。"
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"alma"}}))
-	got := read(t, user)
-	if want := mine + "\n" + blockBegin + "\n" + shared + "\n" + blockEnd + "\n"; got != want {
-		t.Errorf("USER.md:\n%q\nwant\n%q", got, want)
-	}
-	if m := almaFront.FindStringSubmatch(got); m == nil || !strings.Contains(m[1], `telegram_id: "123456789"`) {
-		t.Errorf("Alma no longer reads its owner from USER.md:\n%s", got)
-	}
-	ok(t)(SaveInstructions(InstructionsChange{Agents: []string{}}))
-	if got := read(t, user); got != mine {
-		t.Errorf("USER.md after Alma is off:\n%q", got)
-	}
-}
-
-// Alma with no USER.md gets one with magpie's part alone, taken away again
-// when Alma is turned off.
-func TestAlmaInstructionsWithoutUserMD(t *testing.T) {
-	h := sandbox(t)
-	user := almaHere(t, h)
-	shared := "Reply in English."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"alma"}}))
-	if got := read(t, user); got != blockBegin+"\n"+shared+"\n"+blockEnd+"\n" {
-		t.Errorf("USER.md:\n%q", got)
-	}
-	ok(t)(SaveInstructions(InstructionsChange{Agents: []string{}}))
-	if _, err := os.Stat(user); !os.IsNotExist(err) {
-		t.Errorf("USER.md left behind: %v", err)
-	}
-}
-
-// Moving Alma's own lines into the shared text would take its owner's
-// profile out of USER.md, and the telegram_id Alma knows its owner by,
-// into every agent's file: it is refused and nothing changes (#2315).
-func TestAlmaProfileIsNotImported(t *testing.T) {
-	h := sandbox(t)
-	user := almaHere(t, h)
-	mine := "---\nname: \"Jie\"\ntelegram_id: \"123456789\"\n---\n# About My Human\n- Name: Jie\n"
-	write(t, user, mine)
-	if _, err := ImportInstructions("alma"); err == nil || !strings.Contains(err.Error(), "profile") {
-		t.Errorf("import: %v", err)
-	}
-	if got := read(t, user); got != mine {
-		t.Errorf("USER.md:\n%q", got)
-	}
-	v, err := ReadInstructions()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if v.Shared != "" {
-		t.Errorf("shared text: %q", v.Shared)
-	}
-	i := slices.IndexFunc(v.Agents, func(a AgentInstructions) bool { return a.Agent == "alma" })
-	if i < 0 || !v.Agents[i].Profile || v.Agents[i].On {
-		t.Errorf("alma on the page: %+v", v.Agents)
-	}
-}
-
-// Claude Desktop keeps its instructions in its own settings and OpenChamber
-// reads OpenCode's: the refusal says where they go instead, and lists the
-// agents here that take that kind (MOMO on Discord: "has no user-wide
-// place" said neither).
+// Claude Desktop keeps its instructions in its own settings: the refusal
+// says where they go instead, and lists the agents here that take that kind
+// (MOMO on Discord: "has no user-wide place" said neither).
 func TestTakesSaysWhereInstead(t *testing.T) {
 	sandbox(t)
 	_, err := Takes("claude-desktop", "instructions")
 	if err == nil || !strings.Contains(err.Error(), "give them to claude") || !strings.Contains(err.Error(), "agents here that take instructions: ") || !strings.Contains(err.Error(), "gemini") {
 		t.Errorf("claude-desktop instructions: %v", err)
-	}
-	for _, kind := range []string{"instructions", "mcp", "skills"} {
-		if _, err := Takes("openchamber", kind); err == nil || !strings.Contains(err.Error(), "give them to opencode") {
-			t.Errorf("openchamber %s: %v", kind, err)
-		}
 	}
 }
 
@@ -283,7 +156,6 @@ func TestServerEveryFormat(t *testing.T) {
 	h := sandbox(t)
 	write(t, filepath.Join(h, ".claude.json"), `{"numStartups": 3, "mcpServers": {"mine": {"command": "x"}}}`)
 	write(t, filepath.Join(h, ".codex/config.toml"), "model = \"gpt-5\"\n\n[mcp_servers.mine]\ncommand = \"x\"\n\n[profiles.a]\nmodel = \"o3\"\n")
-	write(t, filepath.Join(h, ".config/goose/config.yaml"), "GOOSE_MODEL: x\nextensions:\n  developer:\n    enabled: true\n    type: builtin\n    name: developer\n")
 	write(t, filepath.Join(h, ".config/opencode/opencode.json"), "{\n  // mine\n  \"theme\": \"x\"\n}\n")
 	before := map[string]string{}
 	for _, tg := range Targets() {
@@ -334,11 +206,8 @@ func TestServerEveryFormat(t *testing.T) {
 			t.Errorf("%s still has them:\n%s", tg.Agent.ID, read(t, tg.MCP.Path))
 		}
 	}
-	for _, id := range []string{"codex", "goose"} {
-		tg := targetByID(id)
-		if a, b := strings.TrimSpace(before[id]), strings.TrimSpace(read(t, tg.MCP.Path)); a != b {
-			t.Errorf("%s isn't as it was:\n%s\n---\n%s", id, a, b)
-		}
+	if a, b := strings.TrimSpace(before["codex"]), strings.TrimSpace(read(t, targetByID("codex").MCP.Path)); a != b {
+		t.Errorf("codex isn't as it was:\n%s\n---\n%s", a, b)
 	}
 }
 
@@ -612,11 +481,10 @@ func TestServerRenameAndAgents(t *testing.T) {
 	}
 }
 
-// Codex and Goose can't reach a server over SSE: they're told so, the
-// others get it.
+// Codex can't reach a server over SSE: it's told so, the others get it.
 func TestServerSSE(t *testing.T) {
 	sandbox(t)
-	r, err := SaveServer("", Server{Name: "s", Transport: "sse", URL: "http://localhost:9/sse", Agents: []string{"claude", "codex", "goose"}})
+	r, err := SaveServer("", Server{Name: "s", Transport: "sse", URL: "http://localhost:9/sse", Agents: []string{"claude", "codex"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -625,7 +493,7 @@ func TestServerSSE(t *testing.T) {
 		who = append(who, p.Agent)
 	}
 	slices.Sort(who)
-	if !slices.Equal(who, []string{"codex", "goose"}) {
+	if !slices.Equal(who, []string{"codex"}) {
 		t.Errorf("problems: %+v", r.Problems)
 	}
 	got, _ := targetByID("claude").MCP.read()
@@ -1292,149 +1160,6 @@ func TestInstructionSets(t *testing.T) {
 	}
 	if _, err := SaveInstructions(InstructionsChange{Remove: "default"}); err == nil {
 		t.Error("the first set was removed")
-	}
-}
-
-// DeepSeek Harness takes instructions in $DSH_HOME/AGENTS.md, skills in
-// $DSH_HOME/skills, and a server as a dsh-mcp-client row an insert of
-// magpie's adds to every profile's patch list; the user's own entries,
-// rows and !!js values stay as they are.
-func TestDsh(t *testing.T) {
-	h := sandbox(t)
-	d := filepath.Join(h, "dsh-home")
-	t.Setenv("DSH_HOME", d)
-	web, desk := filepath.Join(d, "profiles/web/cordis.patch.yml"), filepath.Join(d, "profiles/desktop/cordis.patch.yml")
-	head := "# Your patch layer for this dsh profile\n"
-	user := head + "- id: llm-deepseek\n  config:\n    thinking: enabled\n" +
-		"- insert:\n    - id: mcp-engram\n      name: '@deepseek-ai/dsh-mcp-client'\n      config:\n        serverName: engram\n        transport: stdio\n        command: engram\n        args: [mcp]\n        cwd: !!js process.cwd()\n" +
-		"    - id: mcp-web\n      name: '@deepseek-ai/dsh-mcp-client'\n      config:\n        serverName: web\n        transport: streamable-http\n        url: http://localhost:3000/mcp\n        toolCallTimeoutMs: 5000\n"
-	write(t, web, user)
-	write(t, desk, head+"[]\n")
-	write(t, filepath.Join(d, "AGENTS.md"), "# Mine\n")
-
-	tg := targetByID("dsh")
-	if tg == nil || tg.Instructions != filepath.Join(d, "AGENTS.md") || tg.Skills != filepath.Join(d, "skills") ||
-		tg.MCP == nil || tg.MCP.Path != web || !slices.Equal(tg.MCP.Also, []string{desk}) {
-		t.Fatalf("dsh target: %+v %+v", tg, tg.MCP)
-	}
-	got, err := tg.MCP.read()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if s := got["engram"]; s == nil || s.Command != "engram" || !slices.Equal(s.Args, []string{"mcp"}) {
-		t.Errorf("engram read as %+v", s)
-	}
-	if s := got["web"]; s == nil || s.Transport != "http" || s.URL != "http://localhost:3000/mcp" {
-		t.Errorf("web read as %+v", s)
-	}
-
-	shared := "Use tabs."
-	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"dsh"}}))
-	if s := read(t, filepath.Join(d, "AGENTS.md")); !strings.HasPrefix(s, "# Mine\n\n"+blockBegin+"\nUse tabs.\n"+blockEnd) {
-		t.Errorf("AGENTS.md:\n%s", s)
-	}
-
-	src := filepath.Join(h, "src/skills")
-	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
-	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"dsh"}))
-	if _, err := os.Stat(filepath.Join(d, "skills/pdf/SKILL.md")); err != nil {
-		t.Error(err)
-	}
-
-	fs := Server{Name: "fs", Transport: "stdio", Command: "npx", Args: []string{"-y", "@mcp/fs"}, Env: map[string]string{"TOKEN": "t\"q"}, Agents: []string{"dsh"}}
-	ok(t)(SaveServer("", fs))
-	// the user's web, now magpie's: out of the user's insert, its timeout kept
-	ok(t)(SaveServer("", Server{Name: "web", Transport: "http", URL: "https://example.com/mcp", Headers: map[string]string{"Authorization": "Bearer x"}, Agents: []string{"dsh"}}))
-	// dsh-mcp-client has no SSE
-	if r, err := SaveServer("", Server{Name: "ev", Transport: "sse", URL: "https://example.com/sse", Agents: []string{"dsh"}}); err != nil ||
-		len(r.Problems) != 1 || r.Problems[0].Error != errNoSSE.Error() {
-		t.Errorf("ev: %+v %v", r, err)
-	}
-	ok(t)(RemoveServer("ev"))
-	for _, p := range []string{web, desk} {
-		f := &mcpFile{Path: p, Format: fmtDsh}
-		got, err := f.read()
-		if err != nil {
-			t.Fatalf("%s: %v", p, err)
-		}
-		if s := got["fs"]; s == nil || !s.same(&fs) {
-			t.Errorf("%s: fs read back as %+v\n%s", p, s, read(t, p))
-		}
-		if s := got["web"]; s == nil || s.URL != "https://example.com/mcp" || s.Headers["Authorization"] != "Bearer x" {
-			t.Errorf("%s: web read back as %+v\n%s", p, s, read(t, p))
-		}
-		if got["ev"] != nil {
-			t.Errorf("%s has ev over SSE", p)
-		}
-		if s := read(t, p); !strings.HasPrefix(s, head) {
-			t.Errorf("%s lost its head:\n%s", p, s)
-		}
-	}
-	s := read(t, web)
-	for _, want := range []string{"- id: llm-deepseek\n  config:\n    thinking: enabled\n", "serverName: engram", "cwd: !!js process.cwd()",
-		"toolCallTimeoutMs: 5000", "- insert: # magpie\n    - id: magpie-mcp-fs\n      name: \"@deepseek-ai/dsh-mcp-client\""} {
-		if !strings.Contains(s, want) {
-			t.Errorf("web profile lacks %q:\n%s", want, s)
-		}
-	}
-	if strings.Count(s, "serverName") != 3 {
-		t.Errorf("web profile:\n%s", s)
-	}
-	if es, _ := os.ReadDir(BackupDir()); len(es) == 0 {
-		t.Error("nothing was backed up")
-	}
-
-	// off again: magpie's inserts go, the user's stay
-	ok(t)(RemoveServer("fs"))
-	ok(t)(RemoveServer("web"))
-	ok(t)(SaveInstructions(InstructionsChange{Agents: []string{}}))
-	ok(t)(RemoveSkill("pdf"))
-	if s := read(t, desk); s != head+"[]\n" {
-		t.Errorf("desktop:\n%q", s)
-	}
-	s = read(t, web)
-	if strings.Contains(s, "# magpie") || !strings.Contains(s, "serverName: engram") || !strings.Contains(s, "cwd: !!js process.cwd()") {
-		t.Errorf("web:\n%s", s)
-	}
-	if s := read(t, filepath.Join(d, "AGENTS.md")); s != "# Mine\n" {
-		t.Errorf("AGENTS.md after: %q", s)
-	}
-	if _, err := os.Lstat(filepath.Join(d, "skills/pdf")); !os.IsNotExist(err) {
-		t.Error("dsh still has the skill")
-	}
-}
-
-// A server by a name dsh-mcp-client can't take isn't written.
-func TestDshServerName(t *testing.T) {
-	sandbox(t)
-	r, err := SaveServer("", Server{Name: "a-name-that-is-longer-than-32-characters", Transport: "stdio", Command: "x", Agents: []string{"dsh"}})
-	if err != nil || len(r.Problems) != 1 || r.Problems[0].Agent != "dsh" {
-		t.Fatalf("%+v %v", r, err)
-	}
-}
-
-// A server of the user's the library takes in keeps what dsh works out
-// itself (!!js) when magpie writes it again.
-func TestDshImportKeepsJS(t *testing.T) {
-	h := sandbox(t)
-	p := filepath.Join(h, ".dsh/profiles/web/cordis.patch.yml")
-	write(t, p, "- insert:\n    - id: mcp-engram\n      name: '@deepseek-ai/dsh-mcp-client'\n      config:\n        serverName: engram\n        transport: stdio\n        command: engram\n        cwd: !!js process.cwd()\n        env:\n          HOME: !!js require('os').homedir()\n")
-	v, _ := Read(nil)
-	if len(v.FoundServers) != 0 {
-		t.Errorf("an env dsh works out read as a server: %+v", v.FoundServers)
-	}
-	// a variable read whole is the library's reference (#1435)
-	write(t, p, "- insert:\n    - id: mcp-engram\n      name: '@deepseek-ai/dsh-mcp-client'\n      config:\n        serverName: engram\n        transport: stdio\n        command: engram\n        cwd: !!js process.cwd()\n        env:\n          HOME: !!js process.env.HOME\n")
-	v, _ = Read(nil)
-	if len(v.FoundServers) != 1 || v.FoundServers[0].Server.Env["HOME"] != "${HOME}" {
-		t.Errorf("found: %+v", v.FoundServers)
-	}
-	write(t, p, "- insert:\n    - id: mcp-engram\n      name: '@deepseek-ai/dsh-mcp-client'\n      config:\n        serverName: engram\n        transport: stdio\n        command: engram\n        cwd: !!js process.cwd()\n")
-	ok(t)(ImportServer("engram"))
-	ok(t)(SaveServer("engram", Server{Name: "engram", Transport: "stdio", Command: "engram", Args: []string{"mcp"}, Agents: []string{"dsh"}}))
-	s := read(t, p)
-	if !strings.Contains(s, "- insert: # magpie") || !strings.Contains(s, `cwd: !!js "process.cwd()"`) || strings.Count(s, "serverName") != 1 {
-		t.Errorf("patch list:\n%s", s)
 	}
 }
 

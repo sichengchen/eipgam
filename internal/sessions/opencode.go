@@ -313,9 +313,6 @@ func openCodeDBFiles(agent, path string) []file {
 // session's size what the SQL size makes of its messages m.
 func openCodeDBFilesIn(agent, path string, db *sql.DB, size string) []file {
 	var store ocStore = ocDB{db}
-	if agent == "zcode" {
-		store = zcDB{ocDB{db}}
-	}
 	q := `SELECT s.id, COALESCE(s.parent_id, ''), s.time_updated, ` + size + `, COALESCE(MAX(m.time_updated), 0)
 		FROM %s s LEFT JOIN %s m ON m.session_id = s.id %s GROUP BY s.id`
 	parent := map[string]string{}
@@ -350,11 +347,6 @@ func ocDBRows(db *sql.DB, query, agent, path string, store ocStore, parent map[s
 			continue
 		}
 		parent[id] = par
-		if agent == "zcode" { // a rename in the app is no change to the CLI's rows
-			if t, ok := zcodeTaskOf(id); ok {
-				updated = max(updated, t.updated)
-			}
-		}
 		out = append(out, file{agent: agent, path: path + "#" + id, size: n, mod: modOf(ms(max(updated, last))), more: &fileMore{sid: id, oc: store}})
 	}
 	return out
@@ -600,15 +592,8 @@ func parseOpenCode(f file) *state {
 			if s.Cwd == "" && m.Path != nil {
 				s.Cwd = m.Path.Cwd
 			}
-			if z, ok := f.m().oc.(zcDB); ok && z.copied(m) {
-				continue // the original's session counts it
-			}
 			if t := m.Tokens; t != nil && m.ModelID != "" {
 				u := Tokens{Input: t.Input, Output: t.Output + t.Reasoning, CacheRead: t.Cache.Read, CacheWrite: t.Cache.Write}
-				if f.agent == "zcode" {
-					// the AI SDK's counts: input with the cache, output with the reasoning
-					u.Input, u.Output = max(0, t.Input-t.Cache.Read-t.Cache.Write), t.Output
-				}
 				s.use(dateOf(at), m.ModelID, u)
 			}
 		}

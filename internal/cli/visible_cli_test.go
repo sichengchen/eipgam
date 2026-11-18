@@ -50,31 +50,31 @@ func TestVisibleAllShowsTakenOutModels(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { provider.Delete("relay") })
-	if err := provider.SetOnlyPicked("dsh", true); err != nil {
+	if err := provider.SetOnlyPicked("pi", true); err != nil {
 		t.Fatal(err)
 	}
-	if err := provider.SetPickedModels("dsh", nil); err != nil {
+	if err := provider.SetPickedModels("pi", nil); err != nil {
 		t.Fatal(err)
 	}
-	if shown, _ := provider.CatalogFor("dsh"); len(shown) != 0 {
+	if shown, _ := provider.CatalogFor("pi"); len(shown) != 0 {
 		t.Fatalf("want none picked, shown none; got %d", len(shown))
 	}
-	if err := visibleCmd([]string{"dsh", "--show-new"}); err != nil {
+	if err := visibleCmd([]string{"pi", "--show-new"}); err != nil {
 		t.Fatal(err)
 	}
-	if ids := settings.Load().HiddenModels["dsh"]; len(ids) != 3 {
+	if ids := settings.Load().HiddenModels["pi"]; len(ids) != 3 {
 		t.Fatalf("--show-new keeps what is shown by taking the rest out; hidden: %v", ids)
 	}
-	if shown, _ := provider.CatalogFor("dsh"); len(shown) != 0 {
+	if shown, _ := provider.CatalogFor("pi"); len(shown) != 0 {
 		t.Fatalf("want still none shown after --show-new; got %d", len(shown))
 	}
-	if err := visibleCmd([]string{"dsh", "all"}); err != nil {
+	if err := visibleCmd([]string{"pi", "all"}); err != nil {
 		t.Fatal(err)
 	}
-	if ids := settings.Load().HiddenModels["dsh"]; len(ids) != 0 {
+	if ids := settings.Load().HiddenModels["pi"]; len(ids) != 0 {
 		t.Fatalf("all left %d taken out: %v", len(ids), ids)
 	}
-	if shown, _ := provider.CatalogFor("dsh"); len(shown) != 3 {
+	if shown, _ := provider.CatalogFor("pi"); len(shown) != 3 {
 		t.Fatalf("all shows %d of 3: %v", len(shown), shown)
 	}
 }

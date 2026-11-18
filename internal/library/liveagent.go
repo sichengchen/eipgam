@@ -47,9 +47,6 @@ import (
 	"github.com/yetone/magpie/internal/lazyre"
 )
 
-// liveAgentMCP is the file K-brain keeps its MCP servers in, in its folder.
-const liveAgentMCP = "config.json.live-mcp.json"
-
 // liveAgentPicked is K-brain's file of the skills picked in its folder.
 const liveAgentPicked = "skills-settings.json"
 

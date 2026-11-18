@@ -162,15 +162,3 @@ func TestPiExtensionLeavesTheUsersOwn(t *testing.T) {
 		t.Errorf("the user's file removed or changed: %q", got)
 	}
 }
-
-// OmO keeps Pi's files but may not load Pi's extensions: it gets none.
-func TestPiExtensionPiOnly(t *testing.T) {
-	home := piExtensionHome(t)
-	a := omo(home)
-	if err := a.Field("model").Set(magpieID + "/mixed/deepseek-v4.1-flash"); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := os.Stat(piExtensionPath(a.Dir)); !os.IsNotExist(err) {
-		t.Errorf("OmO got Pi's extension: %v", err)
-	}
-}

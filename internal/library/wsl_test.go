@@ -12,8 +12,8 @@ import (
 )
 
 // wslSandbox is sandbox with a running WSL distro, Ubuntu-24.04, whose /
-// is a temp folder and whose user /home/me has Codex, Claude Code, Pi and
-// OmO; it gives back that user's home as magpie opens it.
+// is a temp folder and whose user /home/me has Codex, Claude Code and Pi;
+// it gives back that user's home as magpie opens it.
 func wslSandbox(t *testing.T) string {
 	t.Helper()
 	sandbox(t)
@@ -22,9 +22,8 @@ func wslSandbox(t *testing.T) string {
 	write(t, filepath.Join(home, ".codex", "config.toml"), "model = \"gpt-5.5\"\n")
 	write(t, filepath.Join(home, ".claude", "settings.json"), "{}\n")
 	write(t, filepath.Join(home, ".pi", "agent", "settings.json"), "{}\n")
-	write(t, filepath.Join(home, ".omo", "agent", "settings.json"), "{}\n")
 	t.Cleanup(agent.FakeWSL(map[string]string{
-		"Ubuntu-24.04": "home:/home/me\ndir:.codex\ndir:.claude\ndir:.pi\ndir:.omo\n",
+		"Ubuntu-24.04": "home:/home/me\ndir:.codex\ndir:.claude\ndir:.pi\n",
 	}, map[string]string{"Ubuntu-24.04": root}))
 	return home
 }
@@ -33,7 +32,6 @@ const (
 	wslCodex  = "codex@wsl:Ubuntu-24.04"
 	wslClaude = "claude@wsl:Ubuntu-24.04"
 	wslPi     = "pi@wsl:Ubuntu-24.04"
-	wslOmO    = "omo@wsl:Ubuntu-24.04"
 )
 
 // The agents magpie found in a WSL distro are the library's to give to
@@ -44,7 +42,6 @@ func TestWSLTargets(t *testing.T) {
 		wslCodex:  {".codex/AGENTS.md", ".codex/config.toml", ".codex/skills"},
 		wslClaude: {".claude/CLAUDE.md", ".claude.json", ".claude/skills"},
 		wslPi:     {".pi/agent/AGENTS.md", ".pi/agent/mcp.json", ".pi/agent/skills"},
-		wslOmO:    {".omo/agent/AGENTS.md", ".omo/agent/mcp.json", ".omo/agent/skills"},
 	}
 	for id, w := range want {
 		tg := targetByID(id)
@@ -146,15 +143,15 @@ func TestWSLSkillsLinked(t *testing.T) {
 func TestWSLServers(t *testing.T) {
 	h := wslSandbox(t)
 	ok(t)(SaveServer("", Server{Name: "fetch", Transport: "stdio", Command: "uvx", Args: []string{"mcp-server-fetch"},
-		Agents: []string{"codex", wslCodex, wslClaude, wslOmO}}))
+		Agents: []string{"codex", wslCodex, wslClaude, wslPi}}))
 	if s := read(t, filepath.Join(h, ".codex/config.toml")); !strings.Contains(s, "[mcp_servers.fetch]") || !strings.Contains(s, `command = "uvx"`) || !strings.Contains(s, `model = "gpt-5.5"`) {
 		t.Errorf("codex@wsl config.toml:\n%s", s)
 	}
 	if s := read(t, filepath.Join(h, ".claude.json")); !strings.Contains(s, `"fetch"`) || !strings.Contains(s, `"uvx"`) {
 		t.Errorf("claude@wsl .claude.json:\n%s", s)
 	}
-	if s := read(t, filepath.Join(h, ".omo/agent/mcp.json")); !strings.Contains(s, `"fetch"`) {
-		t.Errorf("omo@wsl mcp.json:\n%s", s)
+	if s := read(t, filepath.Join(h, ".pi/agent/mcp.json")); !strings.Contains(s, `"fetch"`) {
+		t.Errorf("pi@wsl mcp.json:\n%s", s)
 	}
 	if s := read(t, filepath.Join(home(), ".codex/config.toml")); !strings.Contains(s, "[mcp_servers.fetch]") {
 		t.Errorf("this machine's codex:\n%s", s)
@@ -366,14 +363,14 @@ func TestWSLStoppedListedAndQueued(t *testing.T) {
 		}
 	}
 	// ticked while stopped: kept, and given only what it can take (no SSE
-	// for OmO, as its chip says)
+	// for Pi, whose own mcp.json takes none, as its chip says)
 	ok(t)(ServerAgents("fetch", []string{wslCodex, wslClaude}))
-	ok(t)(EveryServerAgents([]string{wslOmO}, true))
+	ok(t)(EveryServerAgents([]string{wslPi}, true))
 	l, err := load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := l.server("fetch").Agents; !slices.Equal(got, []string{wslClaude, wslCodex, wslOmO}) {
+	if got := l.server("fetch").Agents; !slices.Equal(got, []string{wslClaude, wslCodex, wslPi}) {
 		t.Errorf("fetch's agents: %v", got)
 	}
 	if got := l.server("events").Agents; len(got) != 0 {
@@ -406,8 +403,8 @@ func TestWSLStoppedListedAndQueued(t *testing.T) {
 	if s := read(t, filepath.Join(h, ".claude.json")); !strings.Contains(s, `"fetch"`) {
 		t.Errorf("claude@wsl .claude.json:\n%s", s)
 	}
-	if s := read(t, filepath.Join(h, ".omo", "agent", "mcp.json")); !strings.Contains(s, `"fetch"`) {
-		t.Errorf("omo@wsl mcp.json:\n%s", s)
+	if s := read(t, filepath.Join(h, ".pi", "agent", "mcp.json")); !strings.Contains(s, `"fetch"`) {
+		t.Errorf("pi@wsl mcp.json:\n%s", s)
 	}
 	if res, err := Woken(); res != nil || err != nil {
 		t.Errorf("a second sync with nothing started: %+v %v", res, err)
@@ -608,7 +605,7 @@ func TestWSLStoppedHooks(t *testing.T) {
 	const distro = "Ubuntu-24.04"
 	h := wslSandbox(t)
 	running := wslHookAgents(t)
-	if len(running) != 4 || running[wslCodex].No == "" || !running[wslCodex].WSL {
+	if len(running) != 3 || running[wslCodex].No == "" || !running[wslCodex].WSL {
 		t.Fatalf("the WSL agents on the Hooks page while it runs: %+v", running)
 	}
 	agent.StopFakeWSL(distro)

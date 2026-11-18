@@ -2,7 +2,6 @@ package library
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -14,8 +13,8 @@ import (
 // user-wide MCP file of their own. Each is written as the agent's own
 // `mcp add` writes it (or its loader reads it), read back, found when the
 // user put it there, and taken out again leaving the user's servers and
-// keys: omp's mcp.json (type), Kimi Code's mcp.json old and new
-// (transport), Devin's mcp_config.json (transport on each), Grok Build's
+// keys: Kimi Code's mcp.json old and new (transport), Devin's
+// mcp_config.json (transport on each), Grok Build's and Grok App's
 // config.toml [mcp_servers.<name>] (no SSE).
 func TestAgentMCPFiles(t *testing.T) {
 	type entry = map[string]any
@@ -29,16 +28,7 @@ func TestAgentMCPFiles(t *testing.T) {
 		// what magpie writes for each server, as the agent's add does
 		fs, web, sse entry
 		noSSE        bool
-		// pre makes the agent there, beyond its MCP file
-		pre func(t *testing.T, h string)
 	}{
-		{
-			id: "omp", file: ".omp/agent/mcp.json",
-			user: `{"$schema": "x", "mcpServers": {"mine": {"command": "uvx", "args": ["mine"], "timeout": 30}}}`,
-			fs:   entry{"command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-		},
 		{
 			// the old Python kimi-cli, ~/.kimi
 			id: "kimi", file: ".kimi/mcp.json",
@@ -63,93 +53,6 @@ func TestAgentMCPFiles(t *testing.T) {
 			sse:  entry{"url": "https://example.com/sse", "transport": "sse"},
 		},
 		{
-			id: "droid", file: ".factory/mcp.json",
-			user: `{"mcpServers": {"mine": {"type": "stdio", "command": "uvx", "args": ["mine"], "disabled": true}}}`,
-			fs:   entry{"type": "stdio", "command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-		},
-		{
-			// Qoder's settings.json, which magpie's provider is in too
-			id: "qoder", file: ".qoder/settings.json",
-			user: `{"model": {"name": "auto"}, "mcpServers": {"mine": {"command": "uvx", "args": ["mine"], "trust": true}}}`,
-			fs:   entry{"command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-		},
-		{
-			id: "qoder-cn", file: ".qoder-cn/settings.json",
-			user: `{"mcpServers": {"mine": {"command": "uvx", "args": ["mine"]}}}`,
-			fs:   entry{"command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-		},
-		{
-			// as `cline mcp add` writes them, the user's in the flat shape
-			id: "cline", file: ".cline/data/settings/cline_mcp_settings.json",
-			user: `{"mcpServers": {"mine": {"command": "uvx", "args": ["mine"], "disabled": true, "timeout": 30}}}`,
-			fs:   entry{"transport": entry{"type": "stdio", "command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}}},
-			web:  entry{"transport": entry{"type": "streamableHttp", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}}},
-			sse:  entry{"transport": entry{"type": "sse", "url": "https://example.com/sse"}},
-		},
-		{
-			id: "commandcode", file: ".commandcode/mcp.json",
-			user:  `{"mcpServers": {"mine": {"transport": "stdio", "enabled": false, "command": "uvx", "args": ["mine"]}}}`,
-			fs:    entry{"transport": "stdio", "enabled": true, "command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:   entry{"transport": "http", "enabled": true, "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			noSSE: true,
-		},
-		{
-			// as WorkBuddy's own add writes them (connectCustomMcpServer)
-			id: "workbuddy", file: ".workbuddy/mcp.json",
-			user: `{"mcpServers": {"mine": {"command": "uvx", "args": ["mine"], "disabled": false}}}`,
-			fs:   entry{"type": "stdio", "command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-			// on a Mac WorkBuddy is there by its app, not its folder
-			pre: func(t *testing.T, h string) { holdApp(t, h, "WorkBuddy.app", "com.tencent.workbuddy.mac") },
-		},
-		{
-			// CodeBuddy Code reads the first of .mcp.json, mcp.json and
-			// ~/.codebuddy.json that is there
-			id: "codebuddy", file: ".codebuddy/.mcp.json",
-			user: `{"mcpServers": {"mine": {"type": "stdio", "command": "uvx", "args": ["mine"]}}, "disabledMcpServers": []}`,
-			fs:   entry{"type": "stdio", "command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-		},
-		{
-			id: "codebuddy", file: ".codebuddy/mcp.json",
-			user: `{"mcpServers": {"mine": {"type": "stdio", "command": "uvx", "args": ["mine"], "timeout": 30}}}`,
-			fs:   entry{"type": "stdio", "command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-		},
-		{
-			id: "codebuddy", file: "cb/.codebuddy.json", env: map[string]string{"CODEBUDDY_CONFIG_DIR": "cb"},
-			user: `{"$schema": "x", "mcpServers": {"mine": {"type": "stdio", "command": "uvx", "args": ["mine"]}}}`,
-			fs:   entry{"type": "stdio", "command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"type": "http", "url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"type": "sse", "url": "https://example.com/sse"},
-		},
-		{
-			// as Alma's own add writes them, the server it adds itself kept
-			// (#1292); Alma is there once it has its data folder
-			id: "alma", file: ".config/alma/mcp.json",
-			user: `{"mcpServers": {"mine": {"command": "uvx", "args": ["mine"], "env": {"ELECTRON_RUN_AS_NODE": "1"}}}}`,
-			fs:   entry{"command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
-			web:  entry{"url": "https://example.com/mcp", "headers": entry{"Authorization": "Bearer x"}},
-			sse:  entry{"url": "https://example.com/sse", "transport": "sse"},
-			pre: func(t *testing.T, h string) {
-				t.Setenv("APPDATA", filepath.Join(h, "AppData", "Roaming"))
-				cfg, err := os.UserConfigDir()
-				if err != nil {
-					t.Fatal(err)
-				}
-				os.MkdirAll(filepath.Join(cfg, "alma"), 0o755)
-			},
-		},
-		{
 			id: "grok", file: ".grok/config.toml", toml: true,
 			user:  "# mine\n[models]\ndefault = \"grok-4\"\n\n[mcp_servers.mine]\ncommand = \"uvx\"\nargs = [\"mine\"]\nenabled = true\n\n[mcp_servers.mine.env]\nA = \"b\"\n",
 			fs:    entry{"command": "npx", "args": []any{"-y", "@mcp/fs"}, "env": entry{"K": "V"}},
@@ -172,14 +75,8 @@ func TestAgentMCPFiles(t *testing.T) {
 			for k, v := range c.env {
 				t.Setenv(k, filepath.Join(h, v))
 			}
-			if c.pre != nil {
-				c.pre(t, h)
-			}
 			p := filepath.Join(h, c.file)
 			write(t, p, c.user)
-			// omp, Cline and CodeBuddy have an install command, so with the
-			// MCP file alone each is gone (#2177): its CLI beside the folder
-			holdCLI(t, h, map[string]string{"omp": "omp", "cline": "cline", "codebuddy": "codebuddy"}[c.id])
 			parse := func() map[string]entry {
 				t.Helper()
 				var doc map[string]any
@@ -290,29 +187,5 @@ func TestAgentMCPFiles(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-// With none of its three files there, CodeBuddy Code's servers go where
-// its own `mcp add -s user` puts them, .mcp.json in its folder; one there
-// later than ~/.codebuddy.json is still read first (#1266).
-func TestCodeBuddyMCPFile(t *testing.T) {
-	h := sandbox(t)
-	write(t, filepath.Join(h, ".codebuddy/models.json"), "")
-	holdCLI(t, h, "codebuddy") // the folder alone is gone (#2177)
-	tg := targetByID("codebuddy")
-	if tg == nil || tg.MCP == nil || tg.MCP.Path != filepath.Join(h, ".codebuddy/.mcp.json") {
-		t.Fatalf("with no file: %+v", tg)
-	}
-	write(t, filepath.Join(h, ".codebuddy.json"), `{"mcpServers": {}}`)
-	if p := targetByID("codebuddy").MCP.Path; p != filepath.Join(h, ".codebuddy.json") {
-		t.Errorf("with only ~/.codebuddy.json: %s", p)
-	}
-	write(t, filepath.Join(h, ".codebuddy/.mcp.json"), `{"mcpServers": {}}`)
-	if p := targetByID("codebuddy").MCP.Path; p != filepath.Join(h, ".codebuddy/.mcp.json") {
-		t.Errorf("with both: %s", p)
-	}
-	if s := targetByID("codebuddy").Skills; s != filepath.Join(h, ".codebuddy/skills") {
-		t.Errorf("skills: %s", s)
 	}
 }

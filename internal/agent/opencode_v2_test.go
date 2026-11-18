@@ -255,45 +255,6 @@ func TestOpenCode2LeavesTheirSmallModel(t *testing.T) {
 	}
 }
 
-// OpenChamber writes magpie's provider into the same file: for an
-// OpenCode 2 in OpenCode 2's words too, so its sync and OpenCode's never
-// write the file back and forth.
-func TestOpenChamberAndOpenCode2AgreeOnWords(t *testing.T) {
-	home, _ := codexHome(t, "", "")
-	reasonCatalog(t)
-	openCodeAt(t, "2.0.4") // one that has the list in its file (openCodeDiscovers); the plugin's list says the same words
-	writeFile(t, filepath.Join(home, ".config", "openchamber", "settings.json"), `{}`)
-	ch := openChamber(home, filepath.Join(home, ".config"))
-	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := ch.Apply("model", "magpie/think/deep"); err != nil {
-		t.Fatal(err)
-	}
-	if err := oc.Apply("model", "magpie/rsn/plan"); err != nil {
-		t.Fatal(err)
-	}
-	if v, ok := edit.GetJSON(oc.Path, "provider"); ok {
-		t.Fatalf("provider written for OpenCode 2: %s", v)
-	}
-	nativeOnly(t, oc.Path, "rsn/plan", "think/deep", "think/new")
-	var wrote []string
-	if err := edit.Filtered(func(p string, b []byte) []byte { wrote = append(wrote, p); return b }, func() error {
-		for range 2 {
-			if err := oc.Sync(); err != nil {
-				return err
-			}
-			if err := ch.Sync(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if len(wrote) > 0 {
-		t.Fatalf("syncs wrote %v", wrote)
-	}
-}
-
 // Which OpenCode a file is for: this machine's on PATH, or a distro's as
 // its probe found it; one not known is written for OpenCode 1, which
 // every OpenCode reads.

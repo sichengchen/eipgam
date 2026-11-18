@@ -50,11 +50,10 @@ func (webHost) ChooseFolder(string) (string, error) {
 	return "", errors.New("in the browser magpie can't show a folder picker: type the folder's path")
 }
 
-// openOnHost opens an app's import link (cindy://, lody://, ...) on this
-// computer, the one magpie runs on: the apps' databases it reads for "added"
-// are here, so the link must open here and not in the browser that views the
-// page, which may be another machine's (Jealousy_Du on X). A web page's own
-// https links stay the page's to open. Tests stand in for the system.
+// openOnHost opens a link that isn't a web page's (the sponsor mailto:,
+// System Settings' Login Items) on this computer, the one magpie runs on.
+// A web page's own https links stay the page's to open. Tests stand in for
+// the system.
 var openOnHost = func(u string) error {
 	if strings.HasPrefix(u, "http://") || strings.HasPrefix(u, "https://") {
 		return nil // the page opens links itself
