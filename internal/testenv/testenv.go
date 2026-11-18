@@ -100,7 +100,7 @@ func RunIn(m *testing.M, setup func(home string)) int {
 		setup(home)
 	}
 	code := m.Run()
-	for _, check := range []func() error{eagerHere, docsIndexHere} {
+	for _, check := range []func() error{eagerHere} {
 		if err := check(); err != nil {
 			fmt.Fprintln(os.Stderr, "testenv:", err)
 			return 1

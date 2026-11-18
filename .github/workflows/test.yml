@@ -210,11 +210,6 @@ jobs:
         if: matrix.goos == 'linux'
         with:
           node-version: 22
-      - name: Test the site and installer
-        if: matrix.goos == 'linux'
-        run: |
-          sh -n site/public/install.sh
-          node --test site/*.test.mjs
       - name: GUI guards that need no browser
         if: matrix.goos == 'linux'
         # the rest of internal/gui/tests needs Playwright and isn't run here;

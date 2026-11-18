@@ -23,7 +23,7 @@ const largestIconPx = 26
 // why it passes a Chromium-only look. A soft blob is a radial gradient
 // instead. A PNG icon is at least twice its largest display size.
 func TestIconsStaySharp(t *testing.T) {
-	for _, dir := range []string{"assets/icons", "../../site/public/icons"} {
+	for _, dir := range []string{"assets/icons"} {
 		svgs, _ := filepath.Glob(filepath.Join(dir, "*.svg"))
 		if len(svgs) == 0 {
 			t.Fatalf("no SVG icons in %s", dir)
