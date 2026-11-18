@@ -39,13 +39,6 @@ const zh = {
   "hero.oss": "开源",
   "hero.other": "Windows 与 Linux",
 
-  "sponsor.by": "赞助商",
-  "sponsor.yylx": "Claude 与 GPT 的一站式 API 网关，为 Claude Code 调优。",
-  "sponsor.apinebula": "一个接口，接入Claude、GPT、Gemini等全球模型，最低至0.6折，支持发票/对公/合同。",
-  "sponsor.fastai": "Claude / GPT / Deepseek 一站式接入方案，最低0.6折，支持对公",
-  "sponsor.soleapi": "不拼最低价，拼不掉线：多渠道容灾，逐笔透明计费",
-  "sponsor.aigocode": "订阅制 AI 编程平台，不只按token 算钱。一个账号包月畅用 Claude Code、Codex、Gemini，国内直连、响应快。通过此链接订阅额外送 10% 额度！",
-  "sponsor.become": "成为赞助商",
   "agents.agents": "支持的 Agent",
   "agents.models": "支持的模型",
 
@@ -196,13 +189,6 @@ const ja = {
   "hero.oss": "オープンソース",
   "hero.other": "Windows と Linux",
 
-  "sponsor.by": "スポンサー",
-  "sponsor.yylx": "Claude と GPT をまとめた API ゲートウェイ。Claude Code 向けに調整済み。",
-  "sponsor.apinebula": "Claude、GPT、Gemini など世界のモデルにひとつの API で。定価の 6% から、請求書・法人払い・契約に対応。",
-  "sponsor.fastai": "Claude、GPT、DeepSeek をまとめて利用。定価の 6% から、法人払いにも対応。",
-  "sponsor.soleapi": "最安値ではなく、落ちないことで勝負。複数チャネルで冗長化し、1 件ごとに透明な課金。",
-  "sponsor.aigocode": "トークン課金だけではない、サブスクリプション型の AI コーディングプラットフォーム。ひとつのアカウントの月額プランで Claude Code、Codex、Gemini を使い放題、中国本土から直接接続でき、応答も高速。このリンクから登録すると 10% のボーナスクレジットがもらえます！",
-  "sponsor.become": "スポンサーになる",
   "agents.agents": "対応エージェント",
   "agents.models": "対応モデル",
 
@@ -353,13 +339,6 @@ const de = {
   "hero.oss": "Open Source",
   "hero.other": "Windows &amp; Linux",
 
-  "sponsor.by": "Gesponsert von",
-  "sponsor.yylx": "Ein API-Zugangspunkt für Claude und GPT, abgestimmt auf Claude Code.",
-  "sponsor.apinebula": "Eine API für Claude, GPT, Gemini und weitere Modelle weltweit. Ab 6 % des Listenpreises, mit Rechnung, Firmenzahlung und Vertrag.",
-  "sponsor.fastai": "Claude, GPT und DeepSeek aus einer Hand, ab 6 % des Listenpreises, auch mit Firmenrechnung.",
-  "sponsor.soleapi": "Nicht der niedrigste Preis, sondern keine Ausfälle: Failover über mehrere Kanäle, jede Anfrage transparent abgerechnet.",
-  "sponsor.aigocode": "Eine KI-Programmierplattform im Abo, nicht nur Abrechnung pro Token. Ein Konto, ein Monatsplan für Claude Code, Codex und Gemini, mit Direktverbindung vom chinesischen Festland und schnellen Antworten. Wer über diesen Link abonniert, bekommt 10 % zusätzliches Guthaben!",
-  "sponsor.become": "Sponsor werden",
   "agents.agents": "Jeder Agent",
   "agents.models": "Jedes Modell",
 

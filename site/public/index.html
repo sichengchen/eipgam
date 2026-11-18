@@ -150,7 +150,7 @@ nav .links .in-menu, nav .menu { display: none; }
 .menu .i-close, nav.open .menu .i-open { display: none; }
 nav.open .menu .i-close { display: block; }
 :lang(zh) .hero h1, :lang(zh) h2, :lang(ja) .hero h1, :lang(ja) h2 { letter-spacing: -.01em; }
-:lang(zh) .eyebrow, :lang(zh) .agents p, :lang(zh) .sponsor p, :lang(ja) .eyebrow, :lang(ja) .agents p, :lang(ja) .sponsor p { letter-spacing: .04em; }
+:lang(zh) .eyebrow, :lang(zh) .agents p, :lang(ja) .eyebrow, :lang(ja) .agents p { letter-spacing: .04em; }
 /* Japanese kana and kanji in Japanese faces, not the Chinese ones above */
 :lang(ja) body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", system-ui, sans-serif; }
 .btn { display: inline-flex; align-items: center; gap: 8px; padding: 0 18px; height: 42px; border-radius: 10px; background: var(--btn); color: var(--btn-ink); text-decoration: none; font-weight: 560; font-size: 15px; white-space: nowrap; border: 1px solid var(--btn); transition: transform .12s, opacity .12s; }
@@ -169,20 +169,6 @@ nav.open .menu .i-close { display: block; }
 .meta a { color: var(--ink2); }
 .shot { position: relative; }
 .shot picture img { width: 100%; height: auto; height: auto; max-width: 440px; display: block; margin: 0 auto; border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--line); }
-
-.sponsor { padding: 24px 0 8px; text-align: center; }
-.sponsor p { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); margin: 0 0 14px; }
-.sponsor .cards { display: inline-grid; gap: 12px; max-width: 100%; }
-.sponsor .cards span { flex: 1; }
-.sponsor .card { display: inline-flex; align-items: center; gap: 20px; max-width: 100%; padding: 12px 20px 12px 22px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; text-decoration: none; text-align: left; transition: border-color .2s, box-shadow .2s, transform .2s; }
-.sponsor .card:hover { border-color: color-mix(in srgb, var(--ink) 18%, var(--line)); box-shadow: var(--shadow); transform: translateY(-1px); }
-.sponsor .card img { flex: none; width: 124px; height: auto; opacity: .92; }
-.sponsor .card hr { flex: none; width: 1px; height: 28px; margin: 0; border: 0; background: var(--line); }
-.sponsor .card span { font-size: 14px; line-height: 1.5; color: var(--ink2); }
-.sponsor .card i { flex: none; font-style: normal; color: var(--ink3); transition: color .2s, transform .2s; }
-.sponsor .card:hover i { color: var(--ink); transform: translateX(2px); }
-.sponsor .more { display: inline-block; margin-top: 10px; font-size: 12.5px; color: var(--ink3); text-decoration: none; }
-.sponsor .more:hover { color: var(--ink2); }
 
 .community { text-align: center; padding: 110px 0 0; }
 .community a { display: inline-flex; align-items: center; gap: 16px; max-width: 100%; padding: 16px 22px 16px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; text-decoration: none; text-align: left; transition: border-color .2s, box-shadow .2s, transform .2s; }
@@ -383,8 +369,6 @@ footer a:hover { color: var(--ink); }
 @media (max-width: 560px) {
   .wrap { padding: 0 16px; }
   .grid { grid-template-columns: 1fr; }
-  .sponsor .card { flex-direction: column; gap: 10px; padding: 16px 20px; text-align: center; }
-  .sponsor .card hr, .sponsor .card i { display: none; }
   nav .wrap { gap: 8px; }
   nav .links { padding: 4px 16px 12px; }
   nav .wrap > .gh { display: none; }
@@ -460,47 +444,6 @@ footer a:hover { color: var(--ink); }
         <img loading="lazy" class="pick for-dark" src="/img/picker-dark.png" width="440" height="555" data-i18n-attr="alt:alt.picker" alt="Codex's model picker in magpie, listing DeepSeek, Kimi and GLM models">
     </div>
   </header>
-
-  <aside class="sponsor" aria-label="Sponsor">
-    <p data-i18n="sponsor.by">Sponsored by</p>
-    <div class="cards">
-    <a class="card" href="/go/yylx/home" target="_blank" rel="noopener sponsored">
-      <img class="bird" src="/img/sponsor-yylx.png" width="640" height="184" alt="鱼鱼连线 YYLX.IO AI Router">
-      <hr>
-      <span data-i18n="sponsor.yylx">One API gateway for Claude and GPT, tuned for Claude Code.</span>
-      <i aria-hidden="true">→</i>
-    </a>
-    <a class="card" href="/go/apinebula/home" target="_blank" rel="noopener sponsored">
-      <img class="for-light" src="/img/sponsor-apinebula.svg" width="143" height="37" alt="APINEBULA">
-      <img class="for-dark" src="/img/sponsor-apinebula-dark.svg" width="143" height="37" alt="APINEBULA">
-      <hr>
-      <span data-i18n="sponsor.apinebula">One API for Claude, GPT, Gemini and models worldwide. From 6% of list price, with invoices, company payments and contracts.</span>
-      <i aria-hidden="true">→</i>
-    </a>
-    <a class="card" href="/go/fastai/home" target="_blank" rel="noopener sponsored">
-      <img class="for-light" src="/img/sponsor-fastai.png" width="608" height="81" alt="FastAIToken">
-      <img class="for-dark" src="/img/sponsor-fastai-dark.png" width="608" height="81" alt="FastAIToken">
-      <hr>
-      <span data-i18n="sponsor.fastai">One-stop access to Claude, GPT and DeepSeek, from 6% of list price, with company invoicing and payment.</span>
-      <i aria-hidden="true">→</i>
-    </a>
-    <a class="card" href="/go/soleapi/home" target="_blank" rel="noopener sponsored">
-      <img class="for-light" src="/img/sponsor-soleapi.png" width="640" height="157" alt="SoleAPI">
-      <img class="for-dark" src="/img/sponsor-soleapi-dark.png" width="640" height="157" alt="SoleAPI">
-      <hr>
-      <span data-i18n="sponsor.soleapi">We don't race to the lowest price, we stay online: failover across channels, and every request billed in the open.</span>
-      <i aria-hidden="true">→</i>
-    </a>
-    <a class="card" href="/go/aigocode/home" target="_blank" rel="noopener sponsored">
-      <img class="for-light" src="/img/sponsor-aigocode.png" width="640" height="170" alt="AIGoCode">
-      <img class="for-dark" src="/img/sponsor-aigocode-dark.png" width="640" height="170" alt="AIGoCode">
-      <hr>
-      <span data-i18n="sponsor.aigocode">A subscription-based AI coding platform, not just pay-per-token. One account, one monthly plan for Claude Code, Codex and Gemini, with direct connection on the mainland and fast responses. Subscribe via this link to get an extra 10% credits!</span>
-      <i aria-hidden="true">→</i>
-    </a>
-    </div>
-    <br><a class="more" href="mailto:yetoneful@gmail.com?subject=Sponsoring%20magpie" data-i18n="sponsor.become">Become a sponsor</a>
-  </aside>
 
   <div class="agents">
     <p data-i18n="agents.agents">Every agent</p>

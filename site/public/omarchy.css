@@ -14,7 +14,7 @@ html.omarchy { scrollbar-color: var(--line) var(--bg); }
 html.omarchy h1, html.omarchy h2, html.omarchy h3, html.omarchy h4 { letter-spacing: -.01em !important; font-weight: 700; }
 html.omarchy .hero h1, html.omarchy article h1 { letter-spacing: -.03em !important; }
 html.omarchy .hero h1 span { color: var(--om-accent); }
-html.omarchy .eyebrow, html.omarchy .toc .toc-h, html.omarchy .agents p, html.omarchy .sponsor p, html.omarchy .col h4 { color: var(--om-accent); letter-spacing: .14em; }
+html.omarchy .eyebrow, html.omarchy .toc .toc-h, html.omarchy .agents p, html.omarchy .col h4 { color: var(--om-accent); letter-spacing: .14em; }
 html.omarchy .eyebrow::before { content: "# "; color: var(--ink3); }
 
 /* the bar: Waybar, solid, on a line */
@@ -35,7 +35,7 @@ html.omarchy .theme, html.omarchy .icon-btn, html.omarchy .copy { border-color: 
 html.omarchy .theme:hover, html.omarchy .icon-btn:hover, html.omarchy .copy:hover { color: var(--om-accent); border-color: var(--om-accent); }
 
 /* surfaces: flat, on the line; a hover lights the frame */
-html.omarchy .sponsor .card:hover, html.omarchy .community a:hover, html.omarchy .chip:hover { border-color: var(--om-accent); transform: none; }
+html.omarchy .community a:hover, html.omarchy .chip:hover { border-color: var(--om-accent); transform: none; }
 html.omarchy .hub, html.omarchy .rt-hub { border-color: var(--om-edge); border-width: var(--om-border); }
 html.omarchy .shot picture img, html.omarchy .shot img.pick, html.omarchy .split img, html.omarchy .wide img, html.omarchy .figure img { border: var(--om-border) solid var(--om-edge); }
 html.omarchy .community .glyph { background: var(--om-accent); color: var(--bg); }

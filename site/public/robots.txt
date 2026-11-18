@@ -1,6 +1,5 @@
 User-agent: *
 Disallow: /api/
-Disallow: /go/
 Disallow: /r/
 Disallow: /download
 

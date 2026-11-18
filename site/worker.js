@@ -17,13 +17,6 @@
 //                          Both take ?lang=zh for the notes in Chinese, where a
 //                          release has them (below its <!-- lang:zh --> marker);
 //                          any other lang, or none, is the English alone.
-//   /api/partners          {partners: [...]}: the add sheet's Partners (partners.js),
-//                          their website and key links through /go
-//   /go/<id>/keys[/<region>], /go/<id>/site[/<region>]
-//                          a partner's key page or website, counted
-//   /go/<id>/home, /go/<id>/readme
-//                          a sponsor's link from the home page or the
-//                          READMEs (sponsors.js), counted
 //   /api/icon?url=<https URL>
 //                          a picture a plugin, market or import link names,
 //                          fetched here so its host sees Cloudflare, not the
@@ -58,8 +51,6 @@
 // Everything else is the static site in public/.
 
 import { LANGS } from "./i18n.js";
-import { PARTNERS } from "./partners.js";
-import { SPONSORS } from "./sponsors.js";
 import { serve as serveFile, held, onR2, mirror, githubFile } from "./files.js";
 import { handle as pluginStats, prune as prunePlugins } from "./pluginstats.js";
 
@@ -113,23 +104,6 @@ export default {
       const got = await latest(ctx, env);
       if (!got) return json({ error: "no release yet" }, 503, NO_STORE);
       return json({ ...(await fromR2(ctx, env, got.rel)), notes: inLang(got.rel.notes, lang) }, 200, cacheFor(got));
-    }
-    if (url.pathname === "/api/partners") {
-      const now = Date.now();
-      if (PARTNERS.some((p) => live(p, now)) && Math.random() < 1 / FETCH_SAMPLE)
-        ctx.waitUntil(capture("magpie partners fetch", { weight: FETCH_SAMPLE, country: country(req) }));
-      return json({ partners: served(PARTNERS, now) }, 200, { "Cache-Control": "public, max-age=600" });
-    }
-    if (url.pathname.startsWith("/go/")) {
-      let id, what, region, to, counted;
-      try {
-        [, , id, what, region] = url.pathname.split("/").map(decodeURIComponent);
-        if ((to = goTarget(PARTNERS, id, what, region))) counted = ["magpie partner go", { id, what, region: region || "" }];
-        else if (region === undefined && (to = sponsorTarget(SPONSORS, id, what))) counted = ["magpie sponsor go", { id, where: what }];
-      } catch {}
-      if (!to) return new Response("not found\n", { status: 404 });
-      if (req.method === "GET") ctx.waitUntil(capture(counted[0], { ...counted[1], country: country(req) }));
-      return new Response(null, { status: 302, headers: { Location: to, "Cache-Control": "no-store" } });
     }
     if (url.pathname === "/api/notes") {
       const got = await releases(ctx, env);
@@ -225,73 +199,10 @@ export default {
   },
 };
 
-// A partner's reach and clicks are counted here, not in the app: the app's
-// own counts (provider.CountPartner) go only from users who let the stats
-// go, and these are what the server sees anyway. /api/partners hands out
-// each partner's website and key page as a /go link, which counts the
-// click (event "magpie partner go") and sends the browser on. Each app
-// fetches the list every six hours, so the fetches tell how many apps a
-// partner can be seen in: one in FETCH_SAMPLE is sent, as "magpie partners
-// fetch" with weight FETCH_SAMPLE (sum it), and only while someone is
-// listed. No id, address or account goes: a country, at most.
-const FETCH_SAMPLE = 10;
-const GO = "https://usemagpie.ai/go/";
 const POSTHOG = "https://us.i.posthog.com/i/v0/e/";
 // the Magpie project's PostHog key, as the app's (internal/stats): it can
 // send events and read nothing
 const POSTHOG_KEY = "phc_nyDyYyrUTRGvNq5U7FBesCyM2j4GdKeqGp8ko7DBerTC";
-
-// live reports whether a partner's term includes now.
-function live(p, now) {
-  return (!p.from || Date.parse(p.from) <= now) && (!p.until || now < Date.parse(p.until));
-}
-
-// served is the list the app gets: those whose term hasn't ended (an
-// ended one stays in partners.js, so the /go links of providers added from
-// it keep working), with their website and key page as /go links. A
-// website's own host goes beside it as siteHost, for the editor's link to
-// read (www.kimi.com, not usemagpie.ai).
-export function served(list, now) {
-  const go = (p, what, r) => GO + [p.id, what, r && r.id].filter(Boolean).map(encodeURIComponent).join("/");
-  const host = (u) => { try { return new URL(u).host; } catch { return ""; } };
-  const linked = (o, p, r) => ({ ...o, ...(o.website && { website: go(p, "site", r), siteHost: host(o.website) }), ...(o.keysUrl && { keysUrl: go(p, "keys", r) }) });
-  return list
-    .filter((p) => !p.until || now < Date.parse(p.until))
-    .map((p) => ({ ...linked(p, p), ...(p.regions && { regions: p.regions.map((r) => linked(r, p, r)) }) }));
-}
-
-// goTarget is where a /go link sends the browser: the partner's own key
-// page or website, the region's where it has one. Only partners.js's own
-// addresses, never one the link names. It says it came from magpie, as
-// ref=magpie, unless the address names a ref of its own (a referral code).
-export function goTarget(list, id, what, region) {
-  const p = list.find((x) => x.id === id);
-  const field = what === "keys" ? "keysUrl" : what === "site" ? "website" : "";
-  if (!p || !field) return "";
-  if (!region) return fromMagpie(p[field] || "");
-  const r = (p.regions || []).find((x) => x.id === region);
-  return r ? fromMagpie(r[field] || p[field] || "") : "";
-}
-
-// sponsorTarget is where a sponsor's /go link sends the browser: the link
-// sponsors.js has for that place, as it is (its own ref is how the sponsor
-// counts us).
-export function sponsorTarget(list, id, where) {
-  const s = list.find((x) => x.id === id);
-  if (!s || (where !== "home" && where !== "readme")) return "";
-  return s[where] || "";
-}
-
-function fromMagpie(to) {
-  if (!to) return "";
-  try {
-    const u = new URL(to);
-    if (!u.searchParams.has("ref")) u.searchParams.set("ref", "magpie");
-    return u.toString();
-  } catch {
-    return to;
-  }
-}
 
 // client says whether a browser asked, or a command (curl, wget, a script).
 function client(req) {
