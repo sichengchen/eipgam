@@ -1126,8 +1126,8 @@ body.panel .row.pref.flash { border-radius: 10px; }
 .subscription-head b { font-size: 12.5px; font-weight: 600; }
 .subscription-account { display: flex; align-items: baseline; gap: 7px; margin: 0 0 6px; font-size: 11px; color: var(--fg-2); }
 /* every account after the first has a hairline over it, whatever the one
-   before ends with (normalcoder_ on X: a check-in row or magpie's own
-   requests, which no list of row kinds named, ran two accounts together) */
+   before ends with (normalcoder_ on X: magpie's own requests, which no
+   list of row kinds named, ran two accounts together) */
 .subscription-card.several > :not(.subscription-head, .quota-all) + .subscription-account { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line); }
 /* of several accounts, each a card of its own inside the provider's
    (normalcoder_ on X: a hairline alone didn't tell them apart); a
@@ -1309,24 +1309,6 @@ body.panel .row.pref.flash { border-radius: 10px; }
 .reset-ask .reset-pick { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 2px 0 10px; font-size: 12px; color: var(--muted); }
 .reset-ask .reset-pick .sess-pick { max-width: 100%; }
 .reset-ask .reset-sooner { color: var(--amber); }
-/* a WorkBuddy account's daily check-in on its Usage card (#694) */
-.wb-checkin { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.wb-checkin .ci-say { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-.wb-checkin .ci-say > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* a failed check-in's reason, or why none was offered (plugins#304), wraps under it rather than ending in "…" (#821) */
-.wb-checkin[data-state="bad"], .wb-checkin[data-why] { flex-wrap: wrap; align-items: flex-start; }
-.wb-checkin[data-state="bad"] .ci-say, .wb-checkin[data-why] .ci-say { flex: 1 1 180px; align-items: flex-start; }
-.wb-checkin[data-state="bad"] .ci-say > span, .wb-checkin[data-why] .ci-say > span { white-space: normal; overflow-wrap: anywhere; }
-.wb-checkin[data-state="bad"] .ci-dot, .wb-checkin[data-why] .ci-dot { margin-top: 4px; }
-.wb-checkin .ci-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
-.wb-checkin .ci-dot.ok { background: var(--green); }
-.wb-checkin .ci-dot.bad { background: var(--red); -webkit-mask: var(--x-mark) center / contain no-repeat; mask: var(--x-mark) center / contain no-repeat; border-radius: 0; transform: scale(1.5); }
-.wb-checkin .ci-dot.wait { background: var(--amber); }
-.wb-checkin[data-state="ok"] .ci-say { color: var(--fg-2); }
-.wb-checkin .text { flex: none; font-size: 11px; padding: 2px 7px; }
-.wb-checkin .ci-auto { margin-left: auto; }
-.subscription-card.several > .wb-checkin { margin-bottom: 6px; }
-.wb-checkin .ci-auto.on { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
 .quota-balance { display: flex; align-items: baseline; gap: 6px; font-size: 10.5px; color: var(--muted); }
 .quota-windows + .quota-balance { margin-top: 9px; }
 /* "Every model" at the end of the account's line, above its families */
@@ -1524,12 +1506,6 @@ body.masked :hover > .acct-eye, body.masked .pq-card:hover .acct-eye, body.maske
 .us-folded { display: flex; flex-direction: column; margin-left: 12px; border-top: 1px solid var(--line-2); }
 .us-folded .us-folded-more { align-self: flex-start; margin: 4px 0 0 2px; font-size: 11.5px; }
 @media (prefers-reduced-motion: reduce) { .row.stat.us-other .us-other-chev svg { transition: none; } }
-/* the switched-off providers' check-ins (wxkwxk666 on X) */
-#quotaOff .row.stat .who { flex: 1 1 auto; min-width: 0; }
-#quotaOff .wb-checkin { margin-top: 3px; }
-#quotaOff .ci-acct { flex: none; margin-right: -4px; }
-.quota-head .us-ciall { font-variant-numeric: tabular-nums; }
-.quota-head .us-ciall:disabled { color: var(--muted); }
 .row.stat.hid > :not(.us-unhide) { opacity: .55; }
 .usage-note { padding: 10px 4px 2px; font-size: 11px; color: var(--faint); user-select: text; -webkit-user-select: text; }
 .usage-clear { margin: 0; padding: 2px 0 6px; }
@@ -3480,8 +3456,6 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 .acc-line > .quota-refresh { width: 14px; margin: 0 0 0 -5px; opacity: 1; }
 .acc .aq-w { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .acc .aq-until { white-space: nowrap; }
-/* an account's own Check in now, at its usage line's end (xwoffice_91592) */
-.acc .aq > .ci-acct { flex: none; margin: -2px 0 -2px auto; padding: 1px 7px; font-size: 10.5px; }
 .acc .aq-track { width: 54px; height: 4px; border-radius: 2px; background: var(--pill); overflow: hidden; }
 .acc .aq-track i { display: block; height: 100%; border-radius: inherit; background: var(--fg-2); }
 /* the account's usage cap: a tick across the meter where it stands */
@@ -4416,7 +4390,7 @@ input.words.window-in { width: 96px; font-variant-numeric: tabular-nums; }
    (settingshints.js), and the rows don't move. They stay read by a screen
    reader and by the search, which shows them in place. What isn't an
    explanation stays: an error, a state (.say: the Version row's update,
-   a sync's last sync, the local model's, a check-in's result; the proxy
+   a sync's last sync, the local model's; the proxy
    in use; a pattern's matches), a warning, a disclosure (what tracing
    sends, who the allow list lets in), a line with a button or link in
    it. A touch screen, with no hover, keeps them all. */
@@ -4445,9 +4419,6 @@ input.words.window-in { width: 96px; font-variant-numeric: tabular-nums; }
   /* the line held out of sight stays in its field's box: placed against
      the page, deep in the editor's scroll it would grow the page a scrollbar */
   .editor.roomy .fld, .hint-row > .txt { position: relative; }
-  /* Check in now's result comes under its name and the row grows down,
-     its button held where it was pressed */
-  :is(#view-settings, .prov-prefs) .ci-now-row { align-items: flex-start; }
 }
 /* a field's lead says again, in short, what its hint says: in sight only
    where the hint isn't (above, with a mouse) */
@@ -5568,14 +5539,14 @@ body .row.agent .ag-prefs .row.pref .who { display: block; }
 :is(.ag-prefs, .agent-prefs) .row.pref { flex-wrap: wrap; row-gap: 8px; }
 :is(.ag-prefs, .agent-prefs) .row.pref .who { flex: 1 1 240px; min-width: 0; }
 :is(.ag-prefs, .agent-prefs) .compact-at { flex: 0 1 auto; min-width: 0; flex-wrap: wrap; row-gap: 6px; }
-/* a subscription's warm-ups, check-in and resets (PROV_PREFS): fields of
+/* a subscription's warm-ups and resets (PROV_PREFS): fields of
    its provider's editor under Advanced, drawn as the editor's own rows
    (a name, its line as a hint, the control at the end), not Settings'
    cards */
 .editor .prov-prefs { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding-top: 2px; }
 .editor .prov-prefs .list.prefs { margin: 0; background: none; border: 0; border-radius: 0; overflow: visible; display: flex; flex-direction: column; gap: 10px; }
 /* the name and its control on the first line, its line under both: a line
-   that grows (a check-in's outcome, a longer state) never moves the
+   that grows (a longer state) never moves the
    control just pressed, which the editor can't scroll back as a view does */
 .editor .prov-prefs .row.pref { display: grid; grid-template-columns: minmax(min(40%, 9em), 1fr) auto; align-items: start; min-height: 0; padding: 0; gap: 2px 12px; border: 0; }
 .editor .prov-prefs .row.pref[hidden] { display: none; }

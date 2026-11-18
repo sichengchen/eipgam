@@ -635,25 +635,6 @@ type settingsJSON struct {
 	// larger than Long conversations' threshold: Codex compacts it at 90%
 	// of that window (codexWindowUnder)
 	CodexWindow *codexRunWindow `json:"codexWindow,omitempty"`
-	// whether a WorkBuddy (China) account is signed in, and each one's
-	// last daily check-in
-	WorkBuddy         bool                        `json:"workbuddy"`
-	WorkBuddyCheckins []provider.WorkBuddyCheckin `json:"workbuddyCheckins,omitempty"`
-	// and a Trae CN account (its plugin's), and theirs (#694)
-	Trae         bool                        `json:"trae"`
-	TraeCheckins []provider.WorkBuddyCheckin `json:"traeCheckins,omitempty"`
-	// and a MiniMax Code (China) account (its plugin's), and theirs (#811)
-	MiniMax         bool                        `json:"minimax"`
-	MiniMaxCheckins []provider.WorkBuddyCheckin `json:"minimaxCheckins,omitempty"`
-	// and a Qoder or Qoder CN account (its plugin's), and theirs
-	Qoder         bool                        `json:"qoder"`
-	QoderCheckins []provider.WorkBuddyCheckin `json:"qoderCheckins,omitempty"`
-	// every account each vendor's daily check-in reaches, and whether the
-	// user left it out (#1902)
-	CheckinAccounts []provider.CheckinAccount `json:"checkinAccounts,omitempty"`
-	// and the plugins' providers that check in themselves (auth.checkin),
-	// each with its switch and its accounts' last check-ins
-	CheckinPlugins []provider.PluginCheckin `json:"checkinPlugins,omitempty"`
 	// FX is the dollar-to-yuan rate the cny currency choice shows costs at
 	FX fxJSON `json:"fx"`
 	// NotifyProblem is why a usage alert set wouldn't be seen: "denied"
@@ -936,12 +917,6 @@ func settingsState() settingsJSON {
 	s.ClaudeCache = claudeCacheState()
 	s.ClaudeAttribution = agent.ClaudeAttribution("")
 	s.CodexWindow = codexWindowUnder(s.Settings.ForAgent("codex"), agent.CodexModel(""))
-	s.WorkBuddy, s.WorkBuddyCheckins = provider.HasWorkBuddy(), provider.WorkBuddyCheckins()
-	s.Trae, s.TraeCheckins = provider.HasTrae(), provider.TraeCheckins()
-	s.MiniMax, s.MiniMaxCheckins = provider.HasMiniMax(), provider.MiniMaxCheckins()
-	s.Qoder, s.QoderCheckins = provider.HasQoder(), provider.QoderCheckins()
-	s.CheckinPlugins = provider.PluginCheckins()
-	s.CheckinAccounts = provider.CheckinAccounts()
 	s.VisionAuto, s.VisionModels, s.VisionMissing = gateway.AutoVision(), []modelRef{}, gateway.VisionMissing()
 	s.VisionEfforts, s.VisionEffortNow = gateway.VisionEfforts(), gateway.VisionEffortNow()
 	for _, e := range provider.Served() {
@@ -2505,93 +2480,6 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, settingsState())
 	})
-	// whether WorkBuddy's daily check-in is pressed each day, the Usage
-	// card's toggle (#694), set on its own as Settings' is
-	mux.HandleFunc("POST /api/settings/workbuddy-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ On bool }
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		s := settings.Load()
-		s.WorkBuddyCheckin = in.On
-		if err := settings.Save(s); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeJSON(rw, settingsState())
-	})
-	// and Trae CN's (#694)
-	mux.HandleFunc("POST /api/settings/trae-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ On bool }
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		s := settings.Load()
-		s.TraeCheckin = in.On
-		if err := settings.Save(s); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeJSON(rw, settingsState())
-	})
-	// and MiniMax Code's (#811)
-	mux.HandleFunc("POST /api/settings/minimax-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ On bool }
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		s := settings.Load()
-		s.MiniMaxCheckin = in.On
-		if err := settings.Save(s); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeJSON(rw, settingsState())
-	})
-	// and Qoder's daily credits
-	mux.HandleFunc("POST /api/settings/qoder-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ On bool }
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		s := settings.Load()
-		s.QoderCheckin = in.On
-		if err := settings.Save(s); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeJSON(rw, settingsState())
-	})
-	// and a plugin's own daily check-in, by its provider
-	mux.HandleFunc("POST /api/settings/plugin-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct {
-			Provider string
-			On       bool
-		}
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		if in.Provider == "" {
-			fail(rw, errors.New("no provider"))
-			return
-		}
-		s := settings.Load()
-		s.PluginCheckins = maps.Clone(s.PluginCheckins)
-		if s.PluginCheckins == nil {
-			s.PluginCheckins = map[string]bool{}
-		}
-		s.PluginCheckins[in.Provider] = in.On
-		if err := settings.Save(s); err != nil {
-			fail(rw, err)
-			return
-		}
-		writeJSON(rw, settingsState())
-	})
 	// and a switch a plugin declares for its provider (auth.options, #2038),
 	// by the plugin's own provider id, handed to the running host at once
 	mux.HandleFunc("POST /api/settings/plugin-option", func(rw http.ResponseWriter, r *http.Request) {
@@ -2627,36 +2515,6 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 		_ = plugin.SetProviderOptions(ctx)
 		cancel()
-		writeJSON(rw, settingsState())
-	})
-	// and one account's daily check-in, whichever vendor's (#1902): off
-	// leaves it out while its vendor's is on
-	mux.HandleFunc("POST /api/settings/checkin-account", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct {
-			Key string
-			On  bool
-		}
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-			fail(rw, err)
-			return
-		}
-		if in.Key == "" {
-			fail(rw, errors.New("no account"))
-			return
-		}
-		s := settings.Load()
-		off := slices.DeleteFunc(slices.Clone(s.CheckinOff), func(k string) bool { return k == in.Key })
-		if !in.On {
-			off = append(off, in.Key)
-		}
-		if len(off) == 0 {
-			off = nil
-		}
-		s.CheckinOff = off
-		if err := settings.Save(s); err != nil {
-			fail(rw, err)
-			return
-		}
 		writeJSON(rw, settingsState())
 	})
 	// how large the window and the panel are drawn: Settings' choice and

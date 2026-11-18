@@ -9,8 +9,8 @@
 // is saved once. Pressed, redrawn, let go and redrawn again before its
 // click comes, as a draw that asks for its state draws once more with the
 // answer (Browser access, #3922), the newest On is saved once. Every segs
-// control on every Settings tab, and each subscription's warm-up and
-// check-in in its provider's editor, is pressed the same way and its new
+// control on every Settings tab, and each subscription's warm-up in its
+// provider's editor, is pressed the same way and its new
 // self clicked once. Chromium and WebKit, in English,
 // Chinese, Japanese and German, in a wide and a narrow window, the API faked.
 const assert = require("node:assert/strict");
@@ -21,8 +21,8 @@ const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, settingsDrawn, provPrefsProviders, openProvPrefs, inEditor } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-// the subscriptions signed in, each editor holding its warm-up or check-in
-const SUBS = ["codex", "claude", "workbuddy", "trae-cn", "minimax-code", "qoder", "one", "two"];
+// the subscriptions signed in, each editor holding its warm-up
+const SUBS = ["codex", "claude"];
 const words = { en: { on: "On", off: "Off" }, zh: { on: "开启", off: "关闭" }, ja: { on: "オン", off: "オフ" }, de: { on: "An", off: "Aus" } };
 
 function serve(lang, posted, st) {
@@ -215,12 +215,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       test(`${engine} ${lang} ${width}px: every Settings option pressed through a redraw clicks its new self once`, async (t) => {
         const posted = [];
-        // the warm-up and check-in lists, two Codex accounts' own warm-up
-        // times, a card beside the tray icon and the local network's address
-        // shown, so their controls are drawn. Not here: Gateway mode (a
-        // browser's page only) and the Omarchy bar icon (Omarchy only).
-        const st = { workbuddy: true, trae: true, minimax: true, qoder: true, codexUsers: ["a@example.test", "b@example.test"],
-          checkinPlugins: [{ id: "one", name: "One", on: false }, { id: "two", name: "Two", on: true }],
+        // the warm-up lists, two Codex accounts' own warm-up times, a card
+        // beside the tray icon and the local network's address shown, so
+        // their controls are drawn. Not here: Gateway mode (a browser's page
+        // only) and the Omarchy bar icon (Omarchy only).
+        const st = { codexUsers: ["a@example.test", "b@example.test"],
           trayUsages: ["codex|a@example.test"], lan: true, lanURLs: ["http://192.168.1.2:3999"] };
         const { page, errors } = await open(engine, lang, width, "general", posted, st, t);
         // each click on an option is noted and stopped there, so no pick is
@@ -288,8 +287,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await sweep(id, ".editor .prov-prefs");
         }
         assert.deepEqual(missed, [], "controls the redraw left in place");
-        // Theme, Language, Text size, … each warm-up's and check-in's, Proxy, the local network's, Privacy's, OTel's, Sync's, About's
-        assert(done.size >= 49, `only ${done.size} controls: ${[...done].join(", ")}`);
+        // Theme, Language, Text size, … each warm-up's, Proxy, the local
+        // network's, Privacy's, OTel's, Sync's, About's: 49 less the seven
+        // at most the daily check-ins drew (four vendors' switches, the
+        // plugins' switch and a plugin's time of day), gone with them
+        assert(done.size >= 42, `only ${done.size} controls: ${[...done].join(", ")}`);
         assert.deepEqual(posted, [], "a stopped click saved something");
         assert.deepEqual(errors, []);
       });

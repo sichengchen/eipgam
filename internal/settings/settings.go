@@ -435,45 +435,10 @@ type Settings struct {
 	// account goes on on its credits (jojonas_xyz on X). Not one of
 	// CodexNoCredits nor CodexCreditsLast.
 	CodexCreditsFirst []string `json:"codexCreditsFirst,omitempty"`
-	// WorkBuddyCheckin presses WorkBuddy's daily check-in (签到) for each
-	// signed-in WorkBuddy (China) account once a Beijing day, claiming the
-	// credits it gives while its event runs.
-	WorkBuddyCheckin bool `json:"workbuddyCheckin,omitempty"`
-	// TraeCheckin presses Trae CN's daily check-in (每日签到) for each
-	// signed-in Trae CN account (its plugin's) once a Beijing day, claiming
-	// the credits it gives.
-	TraeCheckin bool `json:"traeCheckin,omitempty"`
-	// MiniMaxCheckin presses MiniMax Code's daily check-in (签到) for each
-	// signed-in MiniMax Code (China) account (its plugin's) once a Beijing
-	// day, claiming the credits it gives (#811).
-	MiniMaxCheckin bool `json:"minimaxCheckin,omitempty"`
-	// QoderCheckin claims Qoder's daily credits for each signed-in Qoder
-	// and Qoder CN account (its plugin's) once a Beijing day (ARNO on
-	// Discord).
-	QoderCheckin bool `json:"qoderCheckin,omitempty"`
-	// PluginCheckins turns a plugin's own daily check-in (auth.checkin)
-	// on or off, by the plugin's provider id; one not set follows its
-	// vendor's switch above, which the plugin took over, else is off.
-	PluginCheckins map[string]bool `json:"pluginCheckins,omitempty"`
 	// PluginOptions are the user's values of the switches plugins declare
 	// for their providers (auth.options, #2038): provider id → the
 	// option's key → on. A key not here takes the plugin's default.
 	PluginOptions map[string]map[string]bool `json:"pluginOptions,omitempty"`
-	// CheckinOff are the accounts left out of their vendor's daily
-	// check-in while it is on (#1902), each by its entry in the vendor's
-	// check-in file: "<site or provider>|<account id>" ("workbuddy|<uid>",
-	// "trae-cn|<uid>", a plugin's "<provider>|<sign-in key>", e.g.
-	// "autoclaw|autoclaw#x1y2z3"; before plugins#254 a plugin's was
-	// "<provider>|<display name>", which provider.adoptLegacyPluginCheckins
-	// carries over).
-	CheckinOff []string `json:"checkinOff,omitempty"`
-	// CheckinAt is the local time of day ("15:04") every daily check-in,
-	// built-in and plugin, waits for before it asks for the vendor's day
-	// (times_ang on X: 可以调整自动签到的时间吗); "" asks as the day turns,
-	// as before. It holds the day's first ask only: the vendor's own turn
-	// (a plugin's until) and the tries after it are kept, so no day is
-	// skipped (provider.checkinGate).
-	CheckinAt string `json:"checkinAt,omitempty"`
 	// ReplyModel is what a reply's model name says when the request went
 	// out under another name than the one asked for (a group's member, a
 	// model's own id, a provider/model id): "" the model the agent asked
@@ -2437,23 +2402,6 @@ func TakeStable() (bool, error) {
 	return true, save(s, false)
 }
 
-// EditCheckinOff changes CheckinOff alone, as edit returns it from what the
-// file holds now, so a save elsewhere from an older snapshot isn't undone.
-// A settings file that can't be read is left as it is, with the error.
-func EditCheckinOff(edit func([]string) []string) error {
-	defer lockFile()()
-	s, err := loadChecked()
-	if err != nil {
-		return err
-	}
-	off := edit(slices.Clone(s.CheckinOff))
-	if len(off) == 0 {
-		off = nil
-	}
-	s.CheckinOff = off
-	return save(s, false)
-}
-
 // SetGroupDefaults sets what every routing group follows when it sets no
 // value of its own (GroupSink, GroupFirstToken, GroupPatience), from what
 // the file holds now, so a save elsewhere from an older snapshot isn't
@@ -2638,9 +2586,6 @@ func saveOwn(s Settings, recording, reads bool) error {
 		if _, _, ok := Clock(at); at != "off" && !ok {
 			return fmt.Errorf("%s's warm-up time of day must look like 06:00 or be off, not %q", user, at)
 		}
-	}
-	if _, _, ok := Clock(s.CheckinAt); s.CheckinAt != "" && !ok {
-		return fmt.Errorf("the check-in's time of day must look like 09:00, not %q", s.CheckinAt)
 	}
 	if !slices.Contains(TrayEvery, s.TrayUsageEvery) {
 		return fmt.Errorf("the menu bar's usage is refreshed every %v minutes, not %d", TrayEvery, s.TrayUsageEvery)
@@ -2997,11 +2942,6 @@ func (s Settings) normal() Settings {
 		if len(*w.ats) > 0 {
 			*w.at = (*w.ats)[0]
 		}
-	}
-	// the check-in's time of day, as 09:00 whichever way it came
-	s.CheckinAt = strings.TrimSpace(s.CheckinAt)
-	if h, m, ok := Clock(s.CheckinAt); ok {
-		s.CheckinAt = fmt.Sprintf("%02d:%02d", h, m)
 	}
 	s.BarkServer, s.BarkKey, s.BarkDaily = normalBark(s.BarkServer, s.BarkKey, s.BarkDaily)
 	// a reply's model name: memberModel, as a magpie before replyModel

@@ -111,7 +111,7 @@ func recordingTools(t *testing.T, names []string) func() string {
 
 // With subscription account discovery off (#1535, MaxHaiCom), no route
 // into the accounts — listing them, their usage, renewing, warming,
-// switching, session identities, check-ins, moves onto plugins — opens an
+// switching, session identities, moves onto plugins — opens an
 // agent's credential file or runs the Keychain's `security`, Linux's
 // secret-tool or an agent's CLI to ask who is signed in.
 func TestAccountDiscoveryOffReadsNoSignIn(t *testing.T) {
@@ -206,11 +206,6 @@ func TestAccountDiscoveryOffReadsNoSignIn(t *testing.T) {
 	MoveCandidates()
 	MoveRetiring(ctx)
 	HandOver(ctx, true)
-	CheckInWorkBuddy(ctx)
-	CheckInMiniMax(ctx)
-	CheckInTrae(ctx)
-	CheckInQoder(ctx)
-	CheckInPlugins(ctx)
 	if _, err := ImportLogins(ctx, "codex", []string{`{"tokens":{"access_token":"a"}}`}); err == nil {
 		t.Error("ImportLogins with discovery off")
 	}

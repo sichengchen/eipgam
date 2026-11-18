@@ -37,7 +37,7 @@ function fixture(lang, { libOn, have = false, gateway = false, unready = "", vis
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
     version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision, imageGen: "", lanURLs: [], visionAuto: "probe/eye",
-    visionModels: [], imageGenModels: [], workbuddyCheckins: [],
+    visionModels: [], imageGenModels: [],
     searcher: "", searchChoices: [],
     searchVendors: [{ id: "tavily", name: "Tavily", keysURL: "https://app.tavily.com/home" }],
     searchAPIs: [{ vendor: "tavily", name: "Tavily", key: "tvly…abcd", ready: true }],

@@ -1,5 +1,5 @@
 // Settings' search finds a provider's own settings (Codex's reset and
-// warm-up, Claude's warm-up, a plugin's check-in) by these rows, each
+// warm-up, Claude's warm-up) by these rows, each
 // opening the provider's editor. They show only while searching, so
 // app.js imports this when a search first wants them, and it weighs
 // nothing on the core. A row goes with its list's plugin (warm-ups), and
@@ -89,11 +89,11 @@ window.provPrefLinksDraw = function () {
   run.agents = ["claude"];
   box.append(run);
   const ids = [...new Set(Object.values(PROV_PREFS).flat())];
-  const by = (list) => list.classList.contains("ci-plugin") ? [list.dataset.provider] : Object.keys(PROV_PREFS).filter((k) => PROV_PREFS[k].includes(list.id));
-  for (const list of [...ids.map((id) => $("#" + id)), ...$("#pluginCheckinList").children]) {
+  const by = (list) => Object.keys(PROV_PREFS).filter((k) => PROV_PREFS[k].includes(list.id));
+  for (const list of ids.map((id) => $("#" + id))) {
     if (!list || list.hidden) continue;
     const agents = by(list);
-    for (const r of list.querySelectorAll(":scope > .row.pref:not(.ci-acct):not(.ci-now-row):not(.warm-now):not([hidden])")) {
+    for (const r of list.querySelectorAll(":scope > .row.pref:not(.warm-now):not([hidden])")) {
       const name = r.querySelector(".who > .name");
       if (!name) continue;
       const sub = r.querySelector(".sub:not(.err)");

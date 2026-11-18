@@ -607,7 +607,7 @@ A card's refresh here has it read that card once more
 remote's own card has it read every card, each saved Claude account's
 `/usage` too, as its Usage page's Refresh does, and is waited for up to 25
 seconds (#5443). Until it has read anything, the remote's one card says so. Their history is shown with
-its own. A check-in is pressed on that computer, not here. A Codex card's
+its own. A Codex card's
 reset can be used from here (#3850): **Use one…** asks first, as for this
 computer's accounts, and that magpie spends it on its account
 (`POST /v1/magpie/quotas/codex-reset`, below). It takes the provider's key
@@ -633,27 +633,6 @@ at a URL on the gateway kept for an hour (the same key reads it), a video at
 (provider/model, one of those the tool's schema lists, for `magpie tool`
 `--model`). Left out, the one in Settings is used. One that isn't listed, or
 that a gateway key may not use, is refused with the models that may be used.
-
-WorkBuddy (China)'s daily check-in (签到) is pressed from the app's Usage card
-(*Check in now*), `magpie accounts checkin`, or `c` on the TUI's Usage page,
-which checks in every account signed in on this computer at once; its
-WorkBuddy lines say how today's went. A shared magpie's accounts are checked
-in on that magpie, from its own app, TUI or CLI.
-
-A vendor with two or more accounts lists each under its Daily check-in in
-**Settings → Usage**, with its own Off/On (#1902). An account turned off is
-left out of the daily check-in and of *Check in now*, the CLI's and the
-TUI's too, while the vendor's other accounts are checked in; its Usage card
-says its auto check-in is off. The choice is kept in `checkinOff` in
-`settings.json`, by the account's entry in the vendor's check-in file
-(`workbuddy|<uid>`), and set with `POST /api/settings/checkin-account
-{key, on}`.
-
-A plugin whose `auth` hook has `checkin` checks its own accounts in the same
-way: once a day while its switch under **Settings → Usage → Plugins** is on,
-with the result on each account's Usage card. A check-in the vendor wants a
-captcha for is shown as such (check in in the vendor's app); magpie never
-solves captchas. See [provider-plugins.md](subsystems/provider-plugins.md#a-plugins-daily-check-in).
 
 A plugin can also declare its own switches for its provider (`auth.options`).
 They are listed under **Plugin options** in the provider's editor, an Off/On

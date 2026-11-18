@@ -115,7 +115,6 @@ const usage = `magpie — one place to pick every agent's model
   magpie accounts switch <agent> <email|name>   sign the agent in to another of them, by its email or the name you gave it
   magpie accounts switch <claude|codex> next   to the next account in order with room, or the one with the most left
   magpie accounts refresh         renew the saved ChatGPT and Claude sign-ins now (the gateway does it every 8 days)
-  magpie accounts checkin         WorkBuddy's daily check-in (签到) for each WorkBuddy account, now (Settings can do it daily)
   magpie accounts project <gemini|antigravity> <email> <project>   the Google Cloud project a Google account's requests go to
   magpie accounts alias <agent> <email> [<name>|--clear]   a name of your own for an account, shown on its card, in the menu bar and in magpie quota
   magpie accounts switch-only codex [on|off]   only switch Codex's own sign-in to an account with room; its requests go straight to OpenAI, never through magpie

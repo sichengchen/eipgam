@@ -10611,7 +10611,7 @@ magpie provider refresh office   # fetch its list again
 
 ## Quotas and usage
 
-The Usage page, the menu bar and `magpie quota` show the shared magpie’s subscription cards, named with it (`Codex · office`, id `office/codex`), as that magpie last read them: only the computer with the sign-ins asks the vendors. A card’s refresh here has it read that card once more, at most once every 30 seconds. A Codex reset or a WorkBuddy check-in is pressed on that computer, from its own app, TUI or CLI. A key that magpie holds to a budget, some models or some accounts is told none of its cards: only that key’s own card shows here, with its limit.
+The Usage page, the menu bar and `magpie quota` show the shared magpie’s subscription cards, named with it (`Codex · office`, id `office/codex`), as that magpie last read them: only the computer with the sign-ins asks the vendors. A card’s refresh here has it read that card once more, at most once every 30 seconds. A Codex reset is pressed on that computer, from its own app, TUI or CLI. A key that magpie holds to a budget, some models or some accounts is told none of its cards: only that key’s own card shows here, with its limit.
 
 The shared magpie counts this computer’s requests under the name of the gateway key it sends, with the account that answered.
 
@@ -11112,7 +11112,7 @@ Source: https://usemagpie.ai/docs/plugins
 
 A plugin signs in to a service and makes its requests. magpie turns it into a provider that every agent can use, with several accounts, failover, usage and the rest. magpie runs [OpenCode’s provider plugins](https://opencode.ai/docs/plugins/), so a plugin written for OpenCode works here unchanged, and it runs [pi](https://github.com/earendil-works/pi)’s packages that register a provider too (see pi packages). This page covers what a plugin author needs: the hooks magpie calls, what it does with their answers, and how to test, publish and list a plugin.
 
-> **In one paragraph.** A plugin is an npm package, a git repository or a folder. Its module exports an async function in OpenCode’s v1 plugin shape. magpie loads every plugin into one [Bun](https://bun.sh) process, the *plugin host*. The function returns hooks: `config` declares the provider and its default models. `auth` gives the sign-in methods, plus a `loader` whose `fetch` makes each request. `provider.models` lists the models one account has. `auth.usage` says how much of the plan is used. It is magpie’s own hook, and OpenCode ignores it. `auth.refresh` renews an account’s token before it runs out, once at a time. It is magpie’s own hook too. `auth.checkin` presses the vendor’s daily check-in for an account. It is magpie’s own hook too. An agent can send in any API. The gateway translates the request into the API the model speaks (chat completions, Responses, Anthropic Messages or Gemini), hands it to the plugin’s `fetch`, and streams the answer back.
+> **In one paragraph.** A plugin is an npm package, a git repository or a folder. Its module exports an async function in OpenCode’s v1 plugin shape. magpie loads every plugin into one [Bun](https://bun.sh) process, the *plugin host*. The function returns hooks: `config` declares the provider and its default models. `auth` gives the sign-in methods, plus a `loader` whose `fetch` makes each request. `provider.models` lists the models one account has. `auth.usage` says how much of the plan is used. It is magpie’s own hook, and OpenCode ignores it. `auth.refresh` renews an account’s token before it runs out, once at a time. It is magpie’s own hook too. An agent can send in any API. The gateway translates the request into the API the model speaks (chat completions, Responses, Anthropic Messages or Gemini), hands it to the plugin’s `fetch`, and streams the answer back.
 
 ## A plugin in five minutes
 
@@ -11379,7 +11379,7 @@ If what failed was the sign-in, throw an error with `signIn: "expired"` on it. T
 
 ## Signing in
 
-The `auth` hook is `{ provider, methods, loader, usage?, refresh?, refreshLead?, checkin?, icon?, maxConcurrency? }`. Each method is a way to sign in that the user can pick. In the app the methods are buttons; in a terminal, `magpie plugin login <id> [<method>]` asks which one.
+The `auth` hook is `{ provider, methods, loader, usage?, refresh?, refreshLead?, icon?, maxConcurrency? }`. Each method is a way to sign in that the user can pick. In the app the methods are buttons; in a terminal, `magpie plugin login <id> [<method>]` asks which one.
 
 ### An API key
 
@@ -11567,35 +11567,6 @@ Times are ISO strings or epoch numbers, in seconds or in milliseconds. Without `
 
 Leave `used` out when the vendor doesn’t tell it, never send 0 for “not known”. Left out with `amount` and `limit`, the share is theirs (370 of 1000 is 37 used). Left out with no count, the window is its `display` alone: routing doesn’t read it, and an account whose windows all say nothing is weighed as one never read, not as the one with the most left. A window with `aside: true` is shown on the account’s card, with its share and count, and in `GET /v1/magpie/quotas`, but routing never reads it: using it up doesn’t stop the account or weigh it against the others, whatever `amount` and `limit` say. Leave `aside` off a window the account really stops at.
 
-## Check-in
-
-A vendor that gives credits for a daily check-in can have the plugin press it with `auth.checkin`, magpie’s own hook (OpenCode ignores it). magpie runs it for each signed-in account once a Beijing day while the user has check-in on for the provider, and shows what came of it on the account’s Usage card and in Settings.
-
-```
-auth: {
-  provider: "acme",
-  async checkin(getAuth, provider) {
-    const auth = await getAuth()
-    const r = await claim(auth.access)
-    if (r.already) return { outcome: "done" }
-    return { outcome: "claimed", credit: r.points, streak: r.days, message: r.text }
-  },
-}
-```
-
-It answers `{ outcome, credit?, streak?, message? }`:
-
-| `outcome` | Meaning |
-| --- | --- |
-| `claimed` | Checked in now. `credit` is what it gave. |
-| `done` | Checked in already today. A vendor that answers 2xx with nothing left to claim is `done`, not `failed`. |
-| `ineligible` | The account can’t take part. |
-| `inactive` | No check-in is running. |
-| `captcha` | The vendor asks for a captcha. Never solve it: the user checks in in the vendor’s own app. |
-| `failed` | It didn’t work. magpie asks again later that day. |
-
-`streak` is the days in a row, and `message` is shown as it is. A hook that throws, or answers no outcome above, is `failed`. It runs in the account’s scope, so a token it renews with `client.auth.set` is saved to that account.
-
 ## Model load
 
 A vendor that queues requests to a busy model can have the plugin say how busy each model is, with `input.magpie.load(provider, loads)`, magpie’s own (OpenCode has none). `loads` maps a model id to a percent from 0 up, or to `null` to say it isn’t known any more. The plugin calls it whenever it likes, from its own timer: magpie doesn’t ask for it.
@@ -11636,7 +11607,7 @@ magpie hands a plugin what OpenCode’s `PluginInput` has, as far as it has mean
 | `serverUrl` | A placeholder; no OpenCode server is behind it. |
 | `magpie.option`, `.options`, `.load` | magpie’s own: the plugin’s options as the user set them, and its models’ load. |
 
-The hooks magpie calls are `config`, `auth` (its methods, `loader`, `usage`, `refresh` and `checkin`), `provider.models` and `chat.headers`. A plugin’s other hooks (`tool`, `event`, `chat.params`, …) are not called. The agent runs its own tools.
+The hooks magpie calls are `config`, `auth` (its methods, `loader`, `usage` and `refresh`), `provider.models` and `chat.headers`. A plugin’s other hooks (`tool`, `event`, `chat.params`, …) are not called. The agent runs its own tools.
 
 ## Provider ids
 

@@ -154,7 +154,7 @@ func TestRemoteCodexResetThroughTheGateway(t *testing.T) {
 			card = &q
 		}
 	}
-	if card == nil || card.Resets == nil || card.Resets.Count != 1 || card.User != "me@example.com" || card.Checkins {
+	if card == nil || card.Resets == nil || card.Resets.Count != 1 || card.User != "me@example.com" {
 		t.Fatalf("office/codex: %+v", card)
 	}
 	out, err := provider.UseRemoteCodexReset(ctx, "office/codex", card.User, "")

@@ -869,9 +869,7 @@ var readQuotas = func(asked bool) ([]provider.SubscriptionQuota, bool) {
 	}
 	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
 	defer cancel()
-	// a WorkBuddy (China) account's line says how its daily check-in went,
-	// as its card in the app does
-	qs := provider.InProviderOrder(provider.WithCheckins(provider.Quotas(ctx)))
+	qs := provider.InProviderOrder(provider.Quotas(ctx))
 	return qs, provider.SubscriptionUsageReading()
 }
 
@@ -909,245 +907,6 @@ func (m *model) gotQuotas(msg quotaMsg) tea.Cmd {
 	return tea.Tick(quotasAgain, func(time.Time) tea.Msg { return quotasCmd(false, gen)() })
 }
 
-// checkinMsg is what came of c, WorkBuddy's daily check-in pressed now.
-type checkinMsg struct {
-	text string
-	ok   bool
-}
-
-// The check-in; vars so tests can stand in for WorkBuddy and Trae CN.
-var (
-	checkinHere  = provider.CheckInWorkBuddy
-	hasWorkBuddy = provider.HasWorkBuddy
-	checkinTrae  = provider.CheckInTrae
-	hasTrae      = provider.HasTrae
-	checkinMM    = provider.CheckInMiniMax
-	hasMiniMax   = provider.HasMiniMax
-	checkinQd    = provider.CheckInQoder
-	hasQoder     = provider.HasQoder
-	checkinPl    = func(ctx context.Context) []provider.WorkBuddyCheckin { return provider.CheckInPlugins(ctx) }
-	hasPlugin    = provider.HasPluginCheckin
-)
-
-// checkinCmd presses WorkBuddy's daily check-in (签到) now for every
-// WorkBuddy (China) account signed in here not in yet today, all at once,
-// as the app's Usage card's "Check in now" and magpie accounts checkin do:
-// the built-in's or the plugin's (akic404 on Discord: the TUI had no way
-// to); and Trae CN's (每日签到) for each Trae CN account (#694), and
-// MiniMax Code's for each MiniMax Code account (#811), and Qoder's daily
-// credits for each Qoder account, and each plugin's own check-in
-// (auth.checkin) for its accounts. It says
-// how each account stands: the credits and streak, in
-// already today, or why not. A shared magpie's accounts are checked in
-// on that magpie, from its own app, TUI or CLI.
-func checkinCmd() tea.Msg {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-	var parts []string
-	failed := 0
-	if hasWorkBuddy() {
-		for _, r := range checkinHere(ctx) {
-			if r.Outcome == provider.CheckinFailed {
-				failed++
-			}
-			parts = append(parts, checkinWords(r))
-		}
-	}
-	if hasTrae() {
-		for _, r := range checkinTrae(ctx) {
-			if r.Outcome == provider.CheckinFailed {
-				failed++
-			}
-			parts = append(parts, checkinWords(r))
-		}
-	}
-	if hasMiniMax() {
-		for _, r := range checkinMM(ctx) {
-			if r.Outcome == provider.CheckinFailed {
-				failed++
-			}
-			parts = append(parts, checkinWords(r))
-		}
-	}
-	if hasQoder() {
-		for _, r := range checkinQd(ctx) {
-			if r.Outcome == provider.CheckinFailed {
-				failed++
-			}
-			parts = append(parts, checkinWords(r))
-		}
-	}
-	if hasPlugin() {
-		for _, r := range checkinPl(ctx) {
-			if r.Outcome == provider.CheckinFailed {
-				failed++
-			}
-			parts = append(parts, checkinWords(r))
-		}
-	}
-	if len(parts) == 0 {
-		return checkinMsg{text: tr("no WorkBuddy (China), Trae CN, MiniMax Code, Qoder or check-in plugin account is signed in · only they have the daily check-in")}
-	}
-	return checkinMsg{text: strings.Join(parts, "; "), ok: failed == 0}
-}
-
-// checkinWords is how an account's check-in stands, in a few words.
-func checkinWords(r provider.WorkBuddyCheckin) string {
-	who := r.User
-	switch {
-	case r.By == "trae" && who == "":
-		who = "Trae CN"
-	case r.By == "trae":
-		who = "Trae CN " + who
-	case r.By == "minimax" && who == "":
-		who = "MiniMax Code"
-	case r.By == "minimax":
-		who = "MiniMax Code " + who
-	case r.By == "qoder" && who == "":
-		who = "Qoder"
-	case r.By == "qoder":
-		who = "Qoder " + who
-	case r.Vendor != "":
-		who = strings.TrimSpace(r.Vendor + " " + who)
-	case who == "":
-		who = "WorkBuddy"
-	}
-	switch r.Outcome {
-	case provider.CheckinDone, provider.CheckinInactive, provider.CheckinIneligible:
-		if r.Again {
-			// maybe the vendor's day before (#3326)
-			return who + ": " + againWords(r) + checkinWhy(r)
-		}
-	}
-	switch r.Outcome {
-	case provider.CheckinClaimed, provider.CheckinDone:
-		s := trf("%s checked in today", who)
-		if r.Credit > 0 {
-			s += fmt.Sprintf(" +%g", r.Credit)
-		}
-		if r.Streak > 0 {
-			s += " · " + trf("a %d-day streak", r.Streak)
-		}
-		if r.Outcome == provider.CheckinDone || !r.Asked {
-			s += " · " + tr("already")
-		}
-		return s
-	case provider.CheckinIneligible:
-		return trf("%s isn't eligible for the check-in", who) + checkinWhy(r)
-	case provider.CheckinInactive:
-		return who + ": " + tr("no check-in event now") + checkinWhy(r)
-	case provider.CheckinCaptcha:
-		return trf("%s asks for a captcha: check in in its own app", who)
-	case provider.CheckinOwnApp:
-		return who + ": " + ownAppWords(r)
-	}
-	msg := r.Msg
-	if msg == "" {
-		msg = tr("no answer")
-	}
-	return trf("%s couldn't check in: %s", who, msg)
-}
-
-// checkinWhy is why an inactive or ineligible check-in had nothing to
-// claim, in the vendor's or plugin's own words, set after its label: a
-// bare "no check-in event now" left the user guessing (plugins#304).
-func checkinWhy(r provider.WorkBuddyCheckin) string {
-	switch r.Outcome {
-	case provider.CheckinInactive, provider.CheckinIneligible:
-		if m := strings.TrimSpace(r.Msg); m != "" {
-			return " · " + m
-		}
-	}
-	return ""
-}
-
-// againWords is a provisional answer (WorkBuddyCheckin.Again) in words:
-// it may be the vendor's day before, so magpie asks again later (#3326).
-func againWords(r provider.WorkBuddyCheckin) string {
-	switch r.Outcome {
-	case provider.CheckinDone:
-		return tr("says already checked in · its day may not have turned, magpie asks again later")
-	case provider.CheckinIneligible:
-		return tr("not eligible now · magpie asks again later")
-	}
-	return tr("no check-in event now · magpie asks again later")
-}
-
-// ownAppName is the vendor whose own app alone gets r's check-in credits.
-func ownAppName(r provider.WorkBuddyCheckin) string {
-	switch {
-	case r.By == "trae":
-		return "Trae CN"
-	case r.Vendor != "":
-		return r.Vendor
-	case r.By == "":
-		return "WorkBuddy"
-	}
-	return tr("the vendor")
-}
-
-// ownAppWords says a check-in the vendor pays only to its own app is to
-// be done in that app. Trae CN's (9074, #808) says what is known: Trae CN
-// refused it; that only its app is paid isn't so (#1920).
-func ownAppWords(r provider.WorkBuddyCheckin) string {
-	if r.By == "trae" {
-		return tr(provider.TraeRefusedWords)
-	}
-	name := ownAppName(r)
-	return trf("%[1]s only gives check-in credits to its own app; check in in the %[1]s app", name)
-}
-
-// whyHint points an inactive or ineligible check-in's line to c when its
-// answer says why: c asks again and says the reason.
-func whyHint(r provider.WorkBuddyCheckin) string {
-	if checkinWhy(r) == "" {
-		return ""
-	}
-	return " · " + tr("c says why")
-}
-
-// checkinCell is a WorkBuddy (China) or Trae CN account's check-in on its
-// line: today's
-// done, with the credits, or not yet; empty for an account without one.
-func checkinCell(q provider.SubscriptionQuota, now time.Time) string {
-	if !q.Checkins {
-		return ""
-	}
-	r := q.Checkin
-	if r == nil || r.Day != provider.CheckinDay(now) {
-		return sMuted.Render(tr("签到 not yet today · c"))
-	}
-	if r.Again && r.Outcome == provider.CheckinDone {
-		// "already in" that may be the vendor's day before (#3326)
-		return sMuted.Render(tr("签到 said already · asked again later · c"))
-	}
-	switch r.Outcome {
-	case provider.CheckinClaimed, provider.CheckinDone:
-		s := sOK.Render("签到 ✓")
-		if r.Credit > 0 {
-			s += sText.Render(fmt.Sprintf(" +%g", r.Credit))
-		}
-		if r.Streak > 0 {
-			s += sFaint.Render(" · " + trf("%d-day streak", r.Streak))
-		}
-		return s
-	// the reason is long (plugins#304): the line points to c, whose
-	// answer says it (checkinWords)
-	case provider.CheckinIneligible:
-		return sMuted.Render(tr("签到 not eligible") + whyHint(*r))
-	case provider.CheckinInactive:
-		return sMuted.Render(tr("签到 no event now") + whyHint(*r))
-	case provider.CheckinCaptcha:
-		return sMuted.Render(tr("签到 needs a captcha · check in in its app"))
-	case provider.CheckinOwnApp:
-		if r.By == "trae" {
-			return sMuted.Render(tr("签到 refused by Trae CN (9074) · check in in its app"))
-		}
-		return sMuted.Render(trf("签到 only in %s's own app · check in there", ownAppName(*r)))
-	}
-	return sBad.Render(tr("签到 failed")) + sMuted.Render(" · "+tr("c tries again"))
-}
-
 func (m model) updateUsage(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	i := slices.Index(periods, m.period)
 	switch msg.String() {
@@ -1161,10 +920,6 @@ func (m model) updateUsage(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.flash, m.flashOK = err.Error(), false
 		}
 		return m, nil
-	case "c":
-		// WorkBuddy's daily check-in, as the app's "Check in now"
-		m.flash, m.flashOK = tr("checking in…"), true
-		return m, checkinCmd
 	case "l", "right":
 		m.period = periods[(i+1)%len(periods)]
 	case "h", "left":
@@ -1427,11 +1182,6 @@ func quotaLines(qs []provider.SubscriptionQuota, asked, left bool, width int, no
 			t = sName.Render(trunc(p, tw))
 		}
 		line := padRight(t, tw)
-		// a WorkBuddy (China) account's check-in, after whatever else
-		ci := checkinCell(q, now)
-		if ci != "" {
-			ci = "   " + ci
-		}
 		switch {
 		case q.Balance != "" && len(q.Windows) == 0:
 			c := sText.Render(q.Balance) + sMuted.Render(" "+tr("left"))
@@ -1439,13 +1189,13 @@ func quotaLines(qs []provider.SubscriptionQuota, asked, left bool, width int, no
 				// what it is made of: DeepSeek's granted credit apart
 				c += sFaint.Render(" (" + provider.SplitWords(q.BalanceSplit) + ")")
 			}
-			out = append(out, line+"  "+c+ci)
+			out = append(out, line+"  "+c)
 			continue
 		case q.Error != "":
-			out = append(out, line+"  "+sMuted.Render(trunc(q.Error, max(20, width-tw-2-lipgloss.Width(ci))))+ci)
+			out = append(out, line+"  "+sMuted.Render(trunc(q.Error, max(20, width-tw-2))))
 			continue
 		case len(q.Windows) == 0:
-			out = append(out, line+"  "+sMuted.Render(tr("no usage reported"))+ci)
+			out = append(out, line+"  "+sMuted.Render(tr("no usage reported")))
 			continue
 		}
 		// the windows follow the name, those that don't fit on lines below
@@ -1461,9 +1211,6 @@ func quotaLines(qs []provider.SubscriptionQuota, asked, left bool, width int, no
 				c += sFaint.Render(" · " + tr("not spent")) // held once a window is used up
 			}
 			cells = append(cells, c)
-		}
-		if ci != "" {
-			cells = append(cells, ci[3:])
 		}
 		if r := q.Resets; r != nil {
 			c := sText.Render("↺ " + r.Words())

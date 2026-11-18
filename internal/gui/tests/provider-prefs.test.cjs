@@ -1,12 +1,11 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The owner, 11-07: "这些配置难道不是应该在对应的Provider那个弹窗里面吗？为什么会散落在Settings里？"
-// A subscription's warm-up, daily check-in and Codex's auto-use resets are
-// in its provider's editor (PROV_PREFS), not in Settings › Allowances:
-// Codex's has its resets and warm-up, Claude's its warm-up and short
-// system prompt, WorkBuddy's its
-// check-in, a plugin's that checks in itself its own row; Settings' search
-// still finds them, each a row that opens the editor. Chromium and WebKit,
-// at 1100 and 420, in every language; the API is faked here.
+// A subscription's warm-up and Codex's auto-use resets are in its
+// provider's editor (PROV_PREFS), not in Settings › Allowances: Codex's
+// has its resets and warm-up, Claude's its warm-up and short system
+// prompt; Settings' search still finds them, each a row that opens the
+// editor. Chromium and WebKit, at 1100 and 420, in every language; the API
+// is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -18,11 +17,8 @@ const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, posted) {
   const settings = { theme: "light", lang, currency: "usd", guideHidden: true,
-    codexUsers: ["ann@example.test"], claudeUsers: ["ann@example.test"], codexWarmup: "week",
-    workbuddy: true, workbuddyCheckin: true,
-    checkinAccounts: [{ key: "workbuddy|u1", by: "", user: "Ann", on: true }],
-    checkinPlugins: [{ id: "fakeco", name: "FakeCo", on: true }] };
-  const providers = provPrefsProviders(["codex", "claude", "workbuddy", "fakeco", "relayco"], { codex: "Codex", claude: "Claude Code", workbuddy: "WorkBuddy", fakeco: "FakeCo", relayco: "RelayCo" });
+    codexUsers: ["ann@example.test"], claudeUsers: ["ann@example.test"], codexWarmup: "week" };
+  const providers = provPrefsProviders(["codex", "claude", "relayco"], { codex: "Codex", claude: "Claude Code", relayco: "RelayCo" });
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });
@@ -51,7 +47,7 @@ const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const width of [1100, 420]) {
     for (const lang of LANGS) {
-      test(`${engine} ${width} ${lang}: each subscription's warm-up, check-in and resets are in its provider's editor`, async (t) => {
+      test(`${engine} ${width} ${lang}: each subscription's warm-up and resets are in its provider's editor`, async (t) => {
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
         const page = await (await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" })).newPage();
@@ -74,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // editor's first fields (the owner, 11-09)
         assert.equal(await page.locator(".editor details.advanced .prov-prefs #codexWarmList, .editor details.advanced .prov-prefs #codexResetList").count(), 2, "under Advanced");
         assert.equal(await page.locator(".editor .prov-prefs").evaluateAll((bs) => bs.length > 0 && bs.every((b) => b.closest("details.advanced"))), true, "every field under Advanced");
-        assert.equal(await box.locator("#claudeWarmList, #wbList, .ci-plugin").count(), 0, "only Codex's own");
+        assert.equal(await box.locator("#claudeWarmList").count(), 0, "only Codex's own");
         const fits = await box.evaluateAll((bs) => bs.filter((b) => b.offsetParent).every((b) => { const r = b.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth; }));
         assert.equal(fits, true, "each field fits the window");
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "no sideways scroll");
@@ -94,13 +90,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(await box.locator("#claudeRunList #claudeExtraRow").isVisible(), "Claude's extra usage");
         assert.equal(await box.locator("#codexWarmList, #codexResetList").count(), 0);
 
-        await openProvPrefs(page, "workbuddy");
-        await box.locator("#wbCheckinSegs .opt").first().waitFor();
-        assert.equal(await box.locator("#wbCheckinSegs .opt").count(), 2, "WorkBuddy's check-in switch");
-
-        await openProvPrefs(page, "fakeco");
-        assert.equal(await box.locator('.ci-plugin[data-provider="fakeco"]').count(), 1, "the plugin's own check-in");
-
         // a subscription with none of them: no box
         await page.goto("http://magpie.test/?view=providers&edit=relayco");
         await page.locator(".editor").first().waitFor();
@@ -110,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await watchSettingsReads(page);
         await page.goto("http://magpie.test/?view=settings&tab=usage");
         await settingsDrawn(page);
-        assert.equal(await page.locator("#setPage-usage #warmSegs, #setPage-usage #codexAutoResetRow, #setPage-usage #wbCheckinSegs").count(), 0, "none left in Settings");
+        assert.equal(await page.locator("#setPage-usage #warmSegs, #setPage-usage #codexAutoResetRow").count(), 0, "none left in Settings");
         assert.equal(await page.locator("#provPrefLinks").isVisible(), false, "the links show only while searching");
         const name = await page.evaluate(() => document.querySelector("#codexWarmList .row .name").textContent);
         await page.locator("#setQ").fill(name);

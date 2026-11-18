@@ -25,7 +25,7 @@ const curve = (lo, hi, best) => {
 const facts = { calls: 900, streams: 20, compacts: 40, peak: 380000, after: 57000, growth: 4000, rework: 4700 };
 
 function serve(lang, posts) {
-  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 0, fullContext: false };
+  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 0, fullContext: false };
   let ours = 0; // the window tune put in, as the gateway's stash keeps it
   // Codex's own Long conversations comes first (settings.ForAgent)
   const window = () => {

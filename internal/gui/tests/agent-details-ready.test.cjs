@@ -49,7 +49,7 @@ async function openPage(t, engine, lang = "en", width = 1180, reducedMotion = "n
       settingsAsked.release();
       await settings.promise;
       if (fail) return route.fulfill({ status: 500, body: "settings unavailable" });
-      return json({ lang, theme: "light", tray: "panel", compactAt: 200000, codexAgentsV1: true, visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [], titleModels: [], redactWords: [] });
+      return json({ lang, theme: "light", tray: "panel", compactAt: 200000, codexAgentsV1: true, visionModels: [], imageGenModels: [], lanURLs: [], titleModels: [], redactWords: [] });
     }
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);

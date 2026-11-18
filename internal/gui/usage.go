@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -280,10 +279,8 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 		}
 		ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
 		defer cancel()
-		// a WorkBuddy (China) account's card says how its daily check-in
-		// went (#694)
-		qs := provider.InProviderOrder(provider.WithCheckins(provider.Quotas(ctx)))
-		// and what each window holds whole, by what magpie routed in it
+		qs := provider.InProviderOrder(provider.Quotas(ctx))
+		// what each window holds whole, by what magpie routed in it
 		qs = usage.WithWindowHolds(qs, usage.Clock())
 		// and when each began, for its Pace number (fflake33)
 		qs = provider.WithWindowStarts(qs, usage.Clock())
@@ -312,92 +309,7 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 		defer cancel()
 		provider.RefreshUsage(ctx, id, r.URL.Query().Get("user"))
-		writeJSON(rw, withTrayKinds(provider.WithHeldWindows(provider.WithWindowStarts(usage.WithWindowHolds(provider.InProviderOrder(provider.WithCheckins(provider.Quotas(ctx))), usage.Clock()), usage.Clock()), usage.Clock())))
-	})
-	// WorkBuddy's daily check-in pressed now, from the Usage card, for
-	// each account not in yet today, as `magpie accounts checkin` does; the
-	// card is read again after
-	mux.HandleFunc("POST /api/usage/workbuddy-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), time.Minute)
-		defer cancel()
-		rs := provider.CheckInWorkBuddy(ctx)
-		if rs == nil {
-			rs = []provider.WorkBuddyCheckin{}
-		}
-		writeJSON(rw, rs)
-	})
-	// and Trae CN's, for each Trae CN account (#694)
-	mux.HandleFunc("POST /api/usage/trae-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), time.Minute)
-		defer cancel()
-		rs := provider.CheckInTrae(ctx)
-		if rs == nil {
-			rs = []provider.WorkBuddyCheckin{}
-		}
-		writeJSON(rw, rs)
-	})
-	// and MiniMax Code's, for each MiniMax Code (China) account (#811)
-	mux.HandleFunc("POST /api/usage/minimax-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), time.Minute)
-		defer cancel()
-		rs := provider.CheckInMiniMax(ctx)
-		if rs == nil {
-			rs = []provider.WorkBuddyCheckin{}
-		}
-		writeJSON(rw, rs)
-	})
-	// and Qoder's daily credits, for each Qoder and Qoder CN account
-	mux.HandleFunc("POST /api/usage/qoder-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), time.Minute)
-		defer cancel()
-		rs := provider.CheckInQoder(ctx)
-		if rs == nil {
-			rs = []provider.WorkBuddyCheckin{}
-		}
-		writeJSON(rw, rs)
-	})
-	// and a plugin's own, for each account of the provider it names
-	mux.HandleFunc("POST /api/usage/plugin-checkin", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ Provider string }
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil || in.Provider == "" {
-			fail(rw, errors.New("no provider"))
-			return
-		}
-		ctx, cancel := context.WithTimeout(r.Context(), time.Minute)
-		defer cancel()
-		rs := provider.CheckInPlugins(ctx, in.Provider)
-		if rs == nil {
-			rs = []provider.WorkBuddyCheckin{}
-		}
-		writeJSON(rw, rs)
-	})
-	// and one account's, from Settings' Check in now (xiaowu_95660), by
-	// its vendor and key as /api/settings lists them: asked once now,
-	// whatever its switch says, which it leaves as it is
-	mux.HandleFunc("POST /api/usage/checkin-account", func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ By, Key string }
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil || in.Key == "" {
-			fail(rw, errors.New("no account"))
-			return
-		}
-		ctx, cancel := context.WithTimeout(r.Context(), time.Minute)
-		defer cancel()
-		rs := provider.CheckInAccount(ctx, in.By, in.Key)
-		if len(rs) == 0 {
-			fail(rw, errors.New("No daily check-in reaches this account"))
-			return
-		}
-		writeJSON(rw, rs[0])
-	})
-	// the accounts a check-in reaches whose provider is switched off, for
-	// the Usage page's folded Switched off group (wxkwxk666 on X): asks
-	// nothing, switches nothing on
-	mux.HandleFunc("GET /api/usage/checkins/off", func(rw http.ResponseWriter, r *http.Request) {
-		qs := provider.OffCheckins()
-		if qs == nil {
-			qs = []provider.SubscriptionQuota{}
-		}
-		writeJSON(rw, qs)
+		writeJSON(rw, withTrayKinds(provider.WithHeldWindows(provider.WithWindowStarts(usage.WithWindowHolds(provider.InProviderOrder(provider.Quotas(ctx)), usage.Clock()), usage.Clock()), usage.Clock())))
 	})
 	// what was left of each window over time, for the quota cards' curves
 	// (#651); ?days= back

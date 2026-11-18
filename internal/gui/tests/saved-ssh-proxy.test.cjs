@@ -17,7 +17,7 @@ function server(lang, posts) {
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100,
     proxy: "", proxyNow: "", proxySource: "off", pluginProxy: "",
     trayUsageEvery: 3, version: "test", dir: "/test", lanURLs: [],
-    visionModels: [], imageGenModels: [], workbuddyCheckins: [],
+    visionModels: [], imageGenModels: [],
     proxies: [{ id: "px2", name: "Home", url: "socks5://192.168.1.2:1080" }],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };

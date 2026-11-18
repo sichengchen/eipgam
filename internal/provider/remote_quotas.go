@@ -349,13 +349,12 @@ func namedRemoteCards(p Provider, cards []SubscriptionQuota) []SubscriptionQuota
 		q.Name += " · " + name
 		q.From = name
 		// what is pressed on a card acts on this computer's accounts:
-		// a check-in is the other magpie's to do. A Codex reset is
-		// spent there when pressed here (UseRemoteCodexReset, #3850);
-		// a GLM team's (byWindow) is spent on the vendor's page
+		// a Codex reset is spent there when pressed here
+		// (UseRemoteCodexReset, #3850); a GLM team's (byWindow) is spent
+		// on the vendor's page
 		if q.Provider != p.ID+"/codex" || q.Resets != nil && q.Resets.ByWindow {
 			q.Resets = nil
 		}
-		q.Checkins, q.CheckinBy, q.Checkin, q.CheckinOff = false, "", nil, false
 		if q.Windows == nil {
 			q.Windows = []QuotaWindow{}
 		}

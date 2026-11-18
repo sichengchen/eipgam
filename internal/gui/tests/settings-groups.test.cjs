@@ -1,14 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The warm-ups and check-in, each in its service's provider editor (they
-// were a tab per service in Settings › Usage, #124 Mrhe525, #471; the owner
-// moved them to the provider on 11-07): Codex's and Claude Code's Warm up on
-// reset and Daily warm-up, WorkBuddy's and Trae CN's Daily check-in, the
-// lines under them short, with how the last warm-up and today's check-in
-// went still on them. Settings' Usage part keeps none of them. WorkBuddy's
-// list is there only with an account signed in; a daily warm-up's time
-// field only while it is on. Every control posts the same setting it did,
-// and a click on a control moves nothing. English and Chinese; no backend,
-// the API is faked here.
+// The warm-ups, each in its service's provider editor (they were a tab per
+// service in Settings › Usage, #124 Mrhe525, #471; the owner moved them to
+// the provider on 11-07): Codex's and Claude Code's Warm up on reset and
+// Daily warm-up, the lines under them short, with how the last warm-up went
+// still on them. Settings' Usage part keeps none of them. A daily warm-up's
+// time field shows only while it is on. Every control posts the same
+// setting it did, and a click on a control moves nothing. English and
+// Chinese; no backend, the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -17,13 +15,12 @@ const { chromium, webkit } = require("playwright");
 const { provPrefsProviders, openProvPrefs, inEditor } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 
 function settingsPayload(over) {
   return {
     theme: "light", lang: "en", tray: "panel", quotaLeft: false, currency: "usd",
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
-    codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
+    codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
     version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
@@ -49,7 +46,7 @@ function server(lang, posts, over) {
       }
       return json(cur);
     }
-    if (url.pathname === "/api/providers") return json(provPrefsProviders(["codex", "claude", "workbuddy", "trae-cn"], { codex: "Codex", claude: "Claude Code", workbuddy: "WorkBuddy", "trae-cn": "Trae CN" }));
+    if (url.pathname === "/api/providers") return json(provPrefsProviders(["codex", "claude"], { codex: "Codex", claude: "Claude Code" }));
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -61,19 +58,17 @@ function server(lang, posts, over) {
 
 const L = {
   en: {
-    lean: "Short Claude system prompt", extra: "Spend extra usage", reset: "Warm up on reset", daily: "Daily warm-up", checkin: "Daily check-in",
-    on: "On", off: "Off", started: "last started", checked: "Ann checked in today +2, 3-day streak",
+    lean: "Short Claude system prompt", extra: "Spend extra usage", reset: "Warm up on reset", daily: "Daily warm-up",
+    on: "On", off: "Off", started: "last started",
   },
   zh: {
-    lean: "精简 Claude 系统提示词", extra: "花费额外用量", reset: "窗口重置时预热", daily: "每日定时预热", checkin: "每日自动签到",
-    on: "开启", off: "关闭", started: "上次启动于", checked: "Ann 今日已签到 +2, 连续 3 天",
+    lean: "精简 Claude 系统提示词", extra: "花费额外用量", reset: "窗口重置时预热", daily: "每日定时预热",
+    on: "开启", off: "关闭", started: "上次启动于",
   },
 };
 
-const LISTS = { codex: "codexWarmList", claude: "claudeWarmList", wb: "wbList", trae: "traeList" };
-const EDIT = { codex: "codex", claude: "claude", wb: "workbuddy", trae: "trae-cn" };
-// scrolls: where every box that scrolls is, so a click that moved one shows
-const scrolls = (page) => page.evaluate(() => [scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop).map((e) => e.scrollTop)].join(","));
+const LISTS = { codex: "codexWarmList", claude: "claudeWarmList" };
+const EDIT = { codex: "codex", claude: "claude" };
 // still: till no box has scrolled for ten frames
 const still = (page) => page.evaluate(() => new Promise((done) => {
   let last = "", same = 0;
@@ -88,7 +83,7 @@ const panes = (page) => page.evaluate((lists) => Object.entries(lists).filter(([
 }).map(([k]) => k), LISTS);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": warm-ups and check-in in each service's provider editor", async (t) => {
+  test(engine + ": warm-ups in each service's provider editor", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const pages = [];
@@ -127,8 +122,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [];
         const { page, errors, edit } = await open(lang, posts, {
           codexWarmed: new Date(Date.now() - 3600e3).toISOString(),
-          workbuddy: true,
-          workbuddyCheckins: [{ user: "Ann", day: today, at: new Date().toISOString(), outcome: "claimed", credit: 2, streak: 3 }],
         });
 
         // Settings' Usage part: its list, its Advanced fold (the menu bar's
@@ -139,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           .map((h) => h.querySelector("#currencySegs") ? "usage" : h.id));
         assert.deepEqual(parts, ["usage", "usageMore", "alertHead", "alertList"]);
         assert.equal(await page.locator("#warmTabs, .warm-panes").count(), 0, "no tabs left");
-        for (const id of ["#warmSegs", "#warmAtSegs", "#claudeWarmSegs", "#claudeWarmAtSegs", "#wbCheckinSegs", "#traeCheckinSegs"]) {
+        for (const id of ["#warmSegs", "#warmAtSegs", "#claudeWarmSegs", "#claudeWarmAtSegs"]) {
           assert.equal(await page.locator("#setPage-usage").locator(id).count(), 0, id + " is out of Settings");
         }
 
@@ -224,16 +217,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await last("claudeWarmAt", "06:00");
         await page.locator(".editor #claudeWarmAtSegs input.at").waitFor();
 
-        await edit("wb");
-        assert.deepEqual(await panes(page), ["wb"]);
-        assert.deepEqual(await visibleRows(), [w.checkin]);
-        const wbSub = await page.locator("#wbCheckinSub").textContent();
-        assert(wbSub.includes(w.checked), `today's check-in is shown: ${wbSub}`);
-        assert.equal(await stripes(), 0, "no left-border accents");
-        await thumbsUnderPicks("wb");
-        await pick("#wbCheckinSegs", w.on);
-        await last("workbuddyCheckin", true);
-
         // back in Codex's editor, its rows as they were left
         await edit("codex");
         assert.equal(await field.inputValue(), "07:30");
@@ -244,43 +227,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(posts.at(-1).codexWarmup, "week");
         assert.equal(posts.at(-1).claudeWarmup, "all");
         assert.equal(posts.at(-1).claudeWarmAt, "06:00");
-        assert.equal(posts.at(-1).workbuddyCheckin, true);
-        assert.deepEqual(errors, []);
-      });
-
-      await t.test(lang + ": no WorkBuddy signed in", async () => {
-        // no account and its check-in off: no WorkBuddy rows anywhere
-        const { page, errors, edit } = await open(lang, [], {});
-        await edit("codex");
-        assert.deepEqual(await panes(page), ["codex"]);
-        assert.equal(await page.locator("#wbList").isVisible(), false, "no WorkBuddy rows");
-        assert.equal(await page.locator("#wbList").evaluate((e) => e.hidden), true, "WorkBuddy's list hidden");
-        await edit("claude");
-        assert.deepEqual(await panes(page), ["claude"]);
-        assert.deepEqual(errors, []);
-      });
-
-      await t.test(lang + ": a Trae CN account signed in (#694)", async () => {
-        // Trae CN's own Daily check-in in its editor, saved as traeCheckin;
-        // WorkBuddy's left alone
-        const posts = [];
-        const { page, errors, edit } = await open(lang, posts, {
-          trae: true,
-          traeCheckins: [{ user: "Ann", by: "trae", day: today, at: new Date().toISOString(), outcome: "claimed", credit: 2, streak: 3 }],
-        });
-        await edit("trae");
-        assert.deepEqual(await panes(page), ["trae"]);
-        assert.deepEqual(await page.locator(".editor .prov-prefs .row.pref:visible .who .name").allTextContents(), [w.checkin]);
-        assert((await page.locator("#traeCheckinSub").textContent()).includes(w.checked), "today's check-in is shown");
-        const on = page.locator(".editor #traeCheckinSegs .opt", { hasText: w.on }).first();
-        await inEditor(page, on);
-        const before = await scrolls(page);
-        await on.click();
-        for (let i = 0; i < 50 && !posts.length; i++) await page.waitForTimeout(40);
-        assert.equal(posts.at(-1)?.traeCheckin, true);
-        assert.equal(posts.at(-1).workbuddyCheckin, false);
-        await still(page);
-        assert.equal(await scrolls(page), before, "the click must not scroll the page");
         assert.deepEqual(errors, []);
       });
     }

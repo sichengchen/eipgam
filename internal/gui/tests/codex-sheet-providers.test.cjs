@@ -35,11 +35,11 @@ const titleModels = [{ id: "mygw/gpt-6-luna", name: "GPT-6 Luna", provider: "myg
 const settings = (lang) => ({
   theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd",
   dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
-  codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
+  codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
   trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
   version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
   proxyNow: "none", proxySource: "none", login: false,
-  visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [], titleModels,
+  visionModels: [], imageGenModels: [], lanURLs: [], titleModels,
   codexPredictions: "mygw/gpt-6-luna", codexAutoReview: "mygw/gpt-6-luna",
   fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
 });

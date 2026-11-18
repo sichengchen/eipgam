@@ -17,7 +17,7 @@ function serve(lang, web, asked) {
   const settings = {
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, version: "0.1.700", dir: "~/.config/magpie",
     gateway: "http://127.0.0.1:3999", proxy: "", proxyNow: "none", proxySource: "none", redactWords: [], visionModels: [], imageGenModels: [],
-    workbuddyCheckins: [], lanURLs: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
+    lanURLs: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());

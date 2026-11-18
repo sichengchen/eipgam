@@ -355,44 +355,6 @@ export const FakePlugin = async ({ client }) => ({
           },
         }
       : {}),
-    // $FAKE_CHECKIN: the plugin presses the daily check-in itself, each
-    // press written as a line of the account's key to that file (a signed-in
-    // account's name/uid, so two of one name tell apart), and the
-    // answer said by the key: ck-claim gives 50 on a 3-day streak, ck-done
-    // is in already, ck-captcha is asked a captcha, ck-throw can't reach
-    // the vendor, ck-odd answers no outcome magpie knows, and ck-until
-    // answers what the test wrote to <FAKE_CHECKIN>.until ({outcome, until})
-    ...(process.env.FAKE_CHECKIN
-      ? {
-          checkin: async (getAuth) => {
-            const a = await getAuth()
-            const fs = await import("node:fs")
-            fs.appendFileSync(process.env.FAKE_CHECKIN, (a.key ?? (a.uid ? a.accountId + "/" + a.uid : a.accountId) ?? "") + "\n")
-            // $FAKE_CHECKIN_URL: the vendor's check-in, asked at
-            // <url>/<key>; a press it doesn't answer 200 failed (#2777)
-            if (process.env.FAKE_CHECKIN_URL) {
-              const r = await fetch(process.env.FAKE_CHECKIN_URL + "/" + a.key)
-              if (!r.ok) throw new Error(`FakeCo's check-in answered ${r.status}`)
-              return { outcome: "claimed", credit: 1 }
-            }
-            switch (a.key) {
-              case "ck-claim":
-                return { outcome: "claimed", credit: 50, streak: 3 }
-              case "ck-done":
-                return { outcome: "done", credit: 50 }
-              case "ck-captcha":
-                return { outcome: "captcha", message: "slide the puzzle" }
-              case "ck-throw":
-                throw new Error("FakeCo's check-in is down")
-              case "ck-odd":
-                return { outcome: "yes", message: "the daily credits were refreshed" }
-              case "ck-until":
-                return JSON.parse(fs.readFileSync(process.env.FAKE_CHECKIN + ".until", "utf8"))
-            }
-            return { outcome: "inactive" }
-          },
-        }
-      : {}),
   },
   // the models an account has: refused for a dead one; a "rot-" sign-in
   // spends its refresh token asking, as a rotating one does

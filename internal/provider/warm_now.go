@@ -1,7 +1,7 @@
 package provider
 
 // Warm up now (a Windows user on Discord): one account's warm-up sent at
-// once from Settings › Warm-up and check-in, whatever the warm-up settings
+// once from Settings › Warm-ups, whatever the warm-up settings
 // say. It is the request the scheduled warm-up sends — warmCodexLogin for
 // a ChatGPT account, Claude Code's own run (WarmClaudeVia) for a Claude
 // one — to that account alone, and what it says back is the result. The

@@ -4,8 +4,8 @@
 // one account ran into the next. Routing's bars are Usage's .quota-track,
 // the same track and fill in light and dark; and in Usage every account
 // after the first has a hairline over it, whatever the one before ends
-// with (here a check-in row, which no list of row kinds named). Every
-// language, wide and narrow; no backend, the API is faked here.
+// with. Every language, wide and narrow; no backend, the API is faked
+// here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -19,10 +19,10 @@ const acct = (provider, name, user, used, extra) => ({ provider, name, kind: "su
 const quotas = [
   acct("codex", "Codex", "a@example.com", 40, { lastServedAt: now, resets: { count: 2 } }),
   acct("codex", "Codex", "b@example.com", 70),
-  // brief accounts that check in: the row under one is a check-in row
-  acct("trae", "Trae", "t1@example.com", 20, { checkins: true, lastServedAt: now }),
-  acct("trae", "Trae", "t2@example.com", 60, { checkins: true }),
-  acct("trae", "Trae", "t3@example.com", 30, { checkins: true }),
+  // brief accounts, one of them served last
+  acct("trae", "Trae", "t1@example.com", 20, { lastServedAt: now }),
+  acct("trae", "Trae", "t2@example.com", 60),
+  acct("trae", "Trae", "t3@example.com", 30),
 ];
 const accts = [
   { id: "acct-1", provider: "codex", name: "Codex", who: "work@example.com", kind: "account", model: "gpt-6", known: true, used: 30, plan: "Plus" },

@@ -20,11 +20,11 @@ function settingsPayload(lang) {
   return {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", textSize: 100,
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
-    codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
+    codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
     version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
-    visionModels: [], workbuddyCheckins: [], lanURLs: [],
+    visionModels: [], lanURLs: [],
     imageGenAuto: "openai/gpt-image-2",
     imageGenModels: [{ id: "openai/gpt-image-2", name: "gpt-image-2", provider: "openai", providerName: "OpenAI", icon: "openai" }],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },

@@ -32,7 +32,7 @@ const PLUGINS = [
   { id: "sessions", name: "Sessions", sub: "Your agents' past conversations: read, search, resume and export them", one: "Recording gateway conversations", many: "Recording gateway conversations" },
   { id: "tools", name: "Plugin tools", sub: "Offer the tools your plugins give to every agent, as an MCP server", one: "1 plugin gives tools", many: "{n} plugins give tools" },
   { id: "usage", name: "Usage", sub: "Your allowances, what was spent and on what, each request, and what filled the context window" },
-  { id: "warmups", name: "Warm-up and check-in", sub: "Start a subscription's usage window at a time you pick, and claim vendors' daily check-in credits", one: "1 warm-up or check-in on", many: "{n} warm-ups and check-ins on" },
+  { id: "warmups", name: "Warm-ups", sub: "Start a subscription's usage window at a time you pick", one: "1 warm-up on", many: "{n} warm-ups on" },
 ];
 // the Essentials preset, picked by the user: all off but the Gateway, Routing
 // and Usage pages, the routing strategies, the gateway middleware, privacy
@@ -70,7 +70,7 @@ function server(lang, posts, broken) {
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "",
     version: "0.1.400", dir: "/config/home/.config/magpie", gateway: "http://127.0.0.1:3425",
-    proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
+    proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     builtins: list(),
   });

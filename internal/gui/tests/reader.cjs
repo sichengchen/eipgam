@@ -225,7 +225,7 @@ async function pickItem(page, locator) {
 
 
 // provPrefsProviders: /api/providers with a signed-in subscription for each
-// id, so its editor holds its warm-ups, check-in and resets (PROV_PREFS);
+// id, so its editor holds its warm-ups and resets (PROV_PREFS);
 // an id with no built-in row comes from a plugin of that name
 const BUILTIN_SUBS = new Set(["codex", "claude", "workbuddy", "qoder", "qoder-cn"]);
 function provPrefsProviders(ids, names = {}) {
@@ -244,7 +244,7 @@ async function openProvPrefs(page, id) {
   await adv.waitFor({ timeout: 60000 });
   if (!(await adv.evaluate((d) => d.open))) await adv.locator(":scope > summary").click();
   await page.locator(".editor .prov-prefs .row").filter({ visible: true }).first().waitFor({ timeout: 60000 });
-  // and the editor at rest: with a warm-up or check-in on, Advanced opens
+  // and the editor at rest: with a warm-up on, Advanced opens
   // on its own, so no click waits out the modal's opening and a row read
   // now is read mid-scale (warm-at-times, WebKit 900px, 0.66px over)
   await page.waitForFunction(() => !document.querySelector("#modal").getAnimations({ subtree: true })

@@ -16,7 +16,7 @@ const { watchSettingsReads, settingsDrawn, wheelTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 
 function server(lang, posted) {
-  let cur = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, fx: { rate: 7.2, at: new Date().toISOString(), stale: false } };
+  let cur = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, fx: { rate: 7.2, at: new Date().toISOString(), stale: false } };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });

@@ -15,7 +15,7 @@ function server(lang, posts) {
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100,
     proxy: "", proxyNow: "", proxySource: "off", pluginProxy: "",
     trayUsageEvery: 3, version: "test", dir: "/test", lanURLs: [],
-    visionModels: [], imageGenModels: [], workbuddyCheckins: [],
+    visionModels: [], imageGenModels: [],
     proxies: [
       { id: "px1", name: "Office", url: "http://10.0.0.1:8080", user: "me", hasPass: true, uses: [{ where: "plugins" }] },
       { id: "px2", name: "Home", url: "socks5://192.168.1.2:1080" },

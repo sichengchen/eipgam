@@ -115,7 +115,7 @@ func remoteQuotaHome(t *testing.T, peer http.Handler) {
 func TestRemoteMagpieCards(t *testing.T) {
 	peer := &fakePeer{cards: []SubscriptionQuota{
 		{Provider: "codex", Name: "Codex", Icon: "codex", User: "a@x.com", Kind: "subscription", Windows: []QuotaWindow{{Name: "5h", Used: 40}},
-			Resets: &ResetCredits{Count: 1}, Checkins: true},
+			Resets: &ResetCredits{Count: 1}},
 		{Provider: "zhipu", Name: "GLM Coding", Kind: "plan", Windows: []QuotaWindow{{Name: "5h", Used: 10}},
 			Resets: &ResetCredits{Count: 2, ByWindow: true}},
 		{Provider: "deepseek", Name: "DeepSeek", Kind: "balance", Balance: "¥12.00"},
@@ -138,9 +138,8 @@ func TestRemoteMagpieCards(t *testing.T) {
 	if c == nil || c.Name != "Codex · Office" || c.From != "Office" || c.User != "a@x.com" || c.Icon != "codex" || len(c.Windows) != 1 || c.Windows[0].Used != 40 {
 		t.Fatalf("subscription card: %+v", c)
 	}
-	// a Codex reset is used there when pressed here (#3850); a check-in
-	// isn't asked of another computer
-	if c.Checkins || c.Resets == nil || c.Resets.Count != 1 {
+	// a Codex reset is used there when pressed here (#3850)
+	if c.Resets == nil || c.Resets.Count != 1 {
 		t.Errorf("a remote Codex card's buttons: %+v", c)
 	}
 	if p := find(plans, "office/zhipu"); p == nil || p.Name != "GLM Coding · Office" || p.Resets != nil {

@@ -920,16 +920,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	// and spends a Codex reset about to run out unused, for the accounts
 	// that let it
 	go provider.KeepResetsFromRunningOut(ctx)
-	// and checks the WorkBuddy accounts in for the day's credits
-	go provider.KeepWorkBuddyCheckedIn(ctx)
-	// and the Trae CN accounts (#694), and the MiniMax Code ones (#811)
-	go provider.KeepTraeCheckedIn(ctx)
-	go provider.KeepMiniMaxCheckedIn(ctx)
-	// and the Qoder ones' daily credits
-	go provider.KeepQoderCheckedIn(ctx)
-	// and the accounts of the plugins that check in themselves
-	go provider.KeepPluginsCheckedIn(ctx)
-	// and counts the calls those plugins' accounts made outside magpie
+	// and counts the calls the plugins' accounts made outside magpie
 	// (Cursor's editor and cursor-agent) on the Usage page
 	go usage.KeepOutsideCallsRead(ctx)
 	// and moves the built-in subscriptions being retired onto their plugins

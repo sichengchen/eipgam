@@ -6205,7 +6205,7 @@ function renderProviders(quiet) {
   const onList = $("#providers"), offList = $("#offProviders");
   onList.replaceChildren();
   offList.replaceChildren();
-  homeProvPrefRows(); // an editor's warm-ups and check-in, back in the page
+  homeProvPrefRows(); // an editor's warm-ups, back in the page
   provPrefMount = null;
   $("#foldOff").title = t(offFolded ? "Show the providers turned off" : "Fold the providers turned off away");
   let dialog = null; // the editor, if one is open
@@ -9619,7 +9619,7 @@ function drawEditor(p, presetID) {
     ed.append(...field(t("Models"), renderModels(p), pluginFilterNote(subOf(a.agent))));
     if (p.drawIds?.length) ed.append(...renderDrawers(p));
     if (p.filmIds?.length) ed.append(...renderVideomakers(p));
-    // the subscription's own warm-up, check-in and resets first
+    // the subscription's own warm-up and resets first
     // and Advanced opened when one is on, as for Routing: the user who set
     // a warm-up finds it where it went (ChrisYagao on X: "我的预热去哪里了")
     if (subOf(a.agent)) advIn.append(...provPrefsField(a.agent, () => !(advanced && advanced.of === of) && provPrefsOn(a.agent) && (adv.open = true)));
@@ -13657,13 +13657,6 @@ function renderAccounts(a, p) {
     const aq = accountQuota(l.lapsed ? { [l.user]: { error: t(l.lapsed) } } : quota, l.user, capFor, p ? (m, w) => windowCapMeter(m, p, l.user, w) : null, a.agent);
     // its plan's end, under its line (danzi002)
     if (l.until) aq.append(Object.assign(planSpan({ until: l.until }), { className: "aq-until" }));
-    // Check in now (xwoffice_91592)
-    const ci = !l.lapsed && quota?.[l.user];
-    if (ci?.checkinKey && checkinDue(ci)) {
-      const s = el("span"), f = () => ciAcctFill(s, ci, a.agent, l.user);
-      aq.append(s);
-      window.ciAcctFill ? f() : import("./checkinnow.js").then(f, () => {});
-    }
     row.append(aq);
     row.classList.add("with-aq"); // not :has(.aq), which Safari 15.0 lacks (#220)
     if (p) row.append(...accountRestLines(p, l.user)); // maxleebeta on Discord
@@ -16301,10 +16294,6 @@ function renderQuotas(lazy) {
       // how many of the period's requests to it magpie made itself (#1839)
       const own = !brief && !history && ownLine(sub);
       if (own) box.append(own);
-      // WorkBuddy's, Trae CN's or MiniMax Code's daily check-in, how this account's went,
-      // and the switch for it, on the card rather than only in Settings
-      // (#694); the switch on the first card of each vendor's
-      if (sub.checkins && !history) box.append(checkinRow(sub, sub === subs.find((x) => x.checkins && (x.checkinBy || "") === (sub.checkinBy || "")), subs));
       // what was left over time, against an even burn (#651)
       const curve = !brief && !sub.error && quotaCurve(sub);
       if (curve) box.append(curve);
@@ -16430,11 +16419,7 @@ const usageAcctsAll = new Set(kept("usageAcctsAll", []));
 function acctsFolded(subs) {
   if (usageAcctsAll.has(subs[0].provider)) return new Set();
   const shown = new Set(subs.slice(0, ACCTS_SHOWN));
-  for (const q of subs) {
-    if (usageAcctOpen(q, subs)) shown.add(q);
-    // the check-in switch is on the first account of each vendor's (checkinRow)
-    if (q.checkins && q === subs.find((x) => x.checkins && (x.checkinBy || "") === (q.checkinBy || ""))) shown.add(q);
-  }
+  for (const q of subs) if (usageAcctOpen(q, subs)) shown.add(q);
   return new Set(subs.filter((q) => !shown.has(q)));
 }
 function acctsMore(provider, n) {
@@ -17168,9 +17153,9 @@ let panelArranging = false, panelPeek = "";
 let panelZeroOpen = kept("panelZeroOpen", false);
 // quotaAtZero: a fresh reading with nothing left: each window used up and
 // any balance 0 or less (runking on Discord); not a failed or old one, a
-// percent, a text or unlimited window, Codex's credits, resets or a check-in
+// percent, a text or unlimited window, Codex's credits or resets
 function quotaAtZero(q) {
-  if (q.error || q.asOf || q.resets?.count || q.checkins || creditsOn(q)) return false;
+  if (q.error || q.asOf || q.resets?.count || creditsOn(q)) return false;
   const ns = (q.balanceParts?.length ? q.balanceParts.map((p) => p.text) : q.balance ? [q.balance] : []).map((s) => String(s || "").match(/^(-?)[^\d-]*(-?)(\d[\d,]*(?:\.\d+)?)[^\d%]*$/));
   const ws = q.windows || [];
   return ws.length + ns.length > 0 && ns.every((m) => m && (m[1] || m[2] || !(+m[3].replace(/,/g, "") > 0)))
@@ -18186,189 +18171,6 @@ function creditsSwitch(q, cls, on, title, body, label, said) {
     }
   };
   return b;
-}
-
-const CHECKINS = {
-  "": {
-    pref: "workbuddyCheckin", api: "workbuddy-checkin",
-    say: "WorkBuddy's daily check-in, the same as checking in from WorkBuddy itself",
-    on: "On: magpie checks each WorkBuddy (China) account in once a day, as its provider's Daily check-in does. Click to turn it off.",
-    off: "Check each WorkBuddy (China) account in once a day, as its provider's Daily check-in does",
-  },
-  trae: {
-    pref: "traeCheckin", api: "trae-checkin",
-    say: "Trae CN's daily check-in, the same as checking in from Trae itself",
-    on: "On: magpie checks each Trae CN account in once a day, as its provider's Daily check-in does. Click to turn it off.",
-    off: "Check each Trae CN account in once a day, as its provider's Daily check-in does",
-  },
-  minimax: {
-    pref: "minimaxCheckin", api: "minimax-checkin",
-    say: "MiniMax Code's daily check-in, the same as checking in from MiniMax Code itself",
-    on: "On: magpie checks each MiniMax Code account in once a day, as its provider's Daily check-in does. Click to turn it off.",
-    off: "Check each MiniMax Code account in once a day, as its provider's Daily check-in does",
-  },
-  qoder: {
-    pref: "qoderCheckin", api: "qoder-checkin",
-    say: "Qoder's daily credits, as claiming them in Qoder does",
-    on: "On: magpie claims each Qoder account's daily credits once a day, as its provider's Daily check-in does. Click to turn it off.",
-    off: "Claim each Qoder account's daily credits once a day, as its provider's Daily check-in does",
-  },
-};
-function pluginCheckin(id, name) {
-  return {
-    plugin: id, api: "plugin-checkin",
-    say: t("{name}'s daily check-in, pressed by its plugin", { name }),
-    on: t("On: magpie has the {name} plugin check each account in once a day, as its provider's Daily check-in does. Click to turn it off.", { name }),
-    off: t("Have the {name} plugin check each account in once a day, as its provider's Daily check-in does", { name }),
-  };
-}
-const PLUGIN_CHECKIN_INHERITS = {
-  workbuddy: "workbuddyCheckin", "trae-cn": "traeCheckin",
-  "minimax-code": "minimaxCheckin", "minimax-code-global": "minimaxCheckin",
-  qoder: "qoderCheckin", "qoder-cn": "qoderCheckin",
-};
-function pluginCheckinOn(id) {
-  // /api/state carries the saved map, without /api/settings's plugin list.
-  // An explicit false must win over the list's inherited vendor default,
-  // and with neither the built-in's own switch is that default (#1912).
-  const prefs = state.settings;
-  const own = prefs?.pluginCheckins?.[id] ?? prefs?.checkinPlugins?.find((p) => p.id === id)?.on;
-  if (own !== undefined) return !!own;
-  const inherits = Object.hasOwn(PLUGIN_CHECKIN_INHERITS, id) ? PLUGIN_CHECKIN_INHERITS[id] : "";
-  return !!(inherits && prefs?.[inherits]);
-}
-function checkinRow(q, first, subs) {
-  const by = q.checkinBy || "";
-  const vendor = by.startsWith("plugin:") ? pluginCheckin(by.slice(7), q.name || by.slice(7)) : CHECKINS[by] || CHECKINS[""];
-  const on = vendor.plugin ? pluginCheckinOn(vendor.plugin) : !!state.settings?.[vendor.pref];
-  const r = q.checkin;
-  const today = wbToday();
-  // a reason an earlier card of the vendor's says is in the tooltip only
-  // (leeoswald368: many Qoder accounts, one long reason each)
-  const msg = r?.msg && subs.find((x) => (x.checkinBy || "") === by && x.checkin?.day === today && x.checkin.msg === r.msg) === q ? " · " + r.msg : "";
-  const row = el("div", "wb-checkin");
-  row.dataset.feature = "warmups";
-  let kind = "", text;
-  const last = r && r.day !== today && (r.outcome === "claimed" || r.outcome === "done") ? t("last checked in {day}", { day: r.day }) : "";
-  if (r && r.day === today) {
-    switch (r.outcome) {
-      case "claimed":
-      case "done":
-        if (r.again) {
-          // "already in" before noon with no claim magpie saw: maybe the
-          // vendor's day before, so not shown as today's (#3326)
-          kind = "wait";
-          text = t("{name} says already checked in; its day may not have turned yet, so magpie asks again later", { name: checkinVendorName(r, q.name) });
-          break;
-        }
-        kind = "ok";
-        text = t("Checked in today") + (r.credit ? " +" + r.credit : "") + (r.streak ? " · " + t("{n}-day streak", { n: r.streak }) : "");
-        break;
-      case "ineligible":
-      case "inactive":
-        text = t(r.outcome === "inactive" ? "No check-in event now" : "Not eligible for the daily check-in") + msg + (r.again ? " · " + t("magpie asks again later") : "");
-        if (r.msg) row.dataset.why = "";
-        break;
-      case "captcha":
-        // the vendor wants a captcha, which magpie never solves
-        text = t("Asks for a captcha; check in in its own app") + msg;
-        break;
-      case "own-app":
-        // to be done in the vendor's own app, not tried again today;
-        // Trae CN's 9074 (#808) says Trae refused it, which is what is
-        // known, not that only its app is paid (#1920)
-        text = r.by === "trae"
-          ? t("Trae CN refused this check-in (9074: too many taking part); check in in the Trae CN app")
-          : t("{name} only gives check-in credits to its own app; check in in the {name} app", { name: checkinVendorName(r, q.name) });
-        break;
-      default:
-        kind = "bad";
-        // why, in the row: a reason only in the tooltip read as no reason (#808)
-        text = t(on ? "Check-in failed; magpie tries again later" : "Check-in failed") + msg;
-    }
-  } else if (q.checkinOff) {
-    // left out on its own in Settings (#1902)
-    text = [t("Auto check-in is off for this account"), last].filter(Boolean).join(" · ");
-  } else {
-    kind = on ? "wait" : "";
-    const at = on && state.settings?.checkinAt ? t("checks in from {at}", { at: state.settings.checkinAt }) : "";
-    text = [t(on ? "Not checked in yet today" : "Auto check-in is off"), at, last].filter(Boolean).join(" · ");
-  }
-  row.dataset.state = kind || "none";
-  const say = el("span", "ci-say");
-  say.append(el("i", "ci-dot" + (kind ? " " + kind : "")), el("span", "", text));
-  say.title = [t(vendor.say), r?.msg].filter(Boolean).join("\n");
-  row.append(say);
-  if (!first) return row;
-  const auto = el("button", "text ci-auto" + (on ? " on" : ""), t("Auto check-in"));
-  auto.type = "button";
-  auto.setAttribute("aria-pressed", String(on));
-  auto.title = t(on ? vendor.on : vendor.off);
-  auto.onclick = async (e) => {
-    e.stopPropagation();
-    auto.disabled = true;
-    try {
-      prefs = await writingPrefs(api("settings/" + vendor.api, vendor.plugin ? { provider: vendor.plugin, on: !on } : { on: !on }));
-      state.settings = prefs;
-      status(t(on ? "Daily check-in turned off" : "Daily check-in turned on; magpie checks in within a few minutes"), "ok");
-      renderQuotas();
-    } catch (err) {
-      auto.disabled = false;
-      statusErr(err);
-    }
-  };
-  row.append(auto);
-  const due = subs.filter((x) => (x.checkinBy || "") === by && checkinDue(x, today));
-  if (due.length) {
-    const now = el("button", "text ci-now", t("Check in now"));
-    now.type = "button";
-    now.title = t("Check in now for the accounts not checked in today");
-    now.onclick = async (e) => {
-      e.stopPropagation();
-      now.disabled = true;
-      now.classList.add("busy");
-      try {
-        const rs = await api("usage/" + vendor.api, vendor.plugin ? { provider: vendor.plugin } : {});
-        const said = checkinPressSaid(rs);
-        status(said.text, said.bad ? "err" : "ok");
-      } catch (err) {
-        statusErr(err);
-      }
-      loadQuotas();
-    };
-    row.append(now);
-  }
-  return row;
-}
-
-function checkinDue(x, today = wbToday()) {
-  const later = /^(plugin:)?qoder(-cn)?$/.test(x.checkinBy || "");
-  return x.checkins && !x.checkinOff && !(x.checkin?.day === today && x.checkin.outcome !== "failed" && !x.checkin.again && !(later && x.checkin.outcome === "inactive"));
-}
-
-// checkinPressSaid: what a press came to, a count per kind (#3326)
-function checkinPressSaid(rs) {
-  const n = {};
-  let cr = 0;
-  for (const r of rs || []) {
-    const o = r.outcome, k = r.again || o === "inactive" || o === "ineligible" ? "Not available yet: {n}"
-      : o === "claimed" && r.asked ? "Claimed: {n}"
-      : o === "claimed" || o === "done" ? "Already checked in today: {n}"
-      : o === "captcha" || o === "own-app" ? "Check in in its own app: {n}" : "Check-in failed for {n} account(s)";
-    n[k] = (n[k] || 0) + 1;
-    if (r.asked && o === "claimed") cr += r.credit || 0;
-  }
-  const bad = n["Check-in failed for {n} account(s)"] || 0;
-  return { bad, text: Object.keys(n).map((k) => t(k === "Claimed: {n}" && cr ? "Claimed: {n} (+{credits} credits)" : k, { n: n[k], credits: Math.round(cr * 100) / 100 })).join(" · ") || t("Check-in status refreshed") };
-}
-
-function checkinVendorName(r, fallback) {
-  return r?.vendor || { trae: "Trae CN", minimax: "MiniMax Code", qoder: "Qoder", "": "WorkBuddy" }[r?.by || ""] || fallback || "";
-}
-
-// wbToday is today as WorkBuddy's check-in counts it, a Beijing day
-function wbToday() {
-  return new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 }
 
 // askReset: a Codex reset's confirmation, in resetask.js, loaded when asked
@@ -19670,33 +19472,22 @@ const prefsSettled = (since) => !prefsBusy && since === prefsWrites;
 const GITHUB_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>';
 const DISCORD_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>';
 
-// PROV_PREFS: a subscription's warm-up, check-in and resets, lists kept
-// in #provPrefRows, shown in its provider's editor (the owner, 11-07)
+// PROV_PREFS: a subscription's warm-up and resets, lists kept in
+// #provPrefRows, shown in its provider's editor (the owner, 11-07)
 const PROV_PREFS = {
   codex: ["codexResetList", "codexWarmList"],
   claude: ["claudeRunList", "claudeWarmList"],
-  workbuddy: ["wbList"],
-  "trae-cn": ["traeList"],
-  "minimax-code": ["minimaxList"], "minimax-code-global": ["minimaxList"],
-  qoder: ["qoderList"], "qoder-cn": ["qoderList"],
 };
-// each list's label in the editor's Advanced, the plugins' check-ins
-// under Check in
+// each list's label in the editor's Advanced
 const PROV_PREF_LABEL = { codexResetList: "Resets", codexWarmList: "Warm up", claudeWarmList: "Warm up" };
 let provPrefListEls = null, provPrefMount = null;
 // homeProvPrefRows: an editor's lists back in the page
 function homeProvPrefRows() {
-  const box = $("#provPrefRows"), plugins = $("#pluginCheckinList");
+  const box = $("#provPrefRows");
   provPrefListEls ||= [...box.children];
   for (const l of provPrefListEls) if (l.parentElement !== box) box.append(l);
-  for (const g of provPrefMount?.own || []) if (g.classList.contains("ci-plugin") && g.parentElement !== plugins) plugins.append(g);
 }
-function provPrefsOf(agent) {
-  const lists = (PROV_PREFS[agent] || []).map((id) => $("#" + id));
-  const g = [...$("#pluginCheckinList").children].find((x) => x.dataset.provider === agent);
-  return g ? [...lists, g] : lists;
-}
-const provPrefKey = (x) => x.classList.contains("ci-plugin") ? "ci-plugin" : x.id;
+const provPrefsOf = (agent) => (PROV_PREFS[agent] || []).map((id) => $("#" + id));
 // mountProvPrefs: the agent's lists into an editor's fields, each beside
 // its label, again after a draw; a field with nothing shown goes
 function mountProvPrefs(slots, agent) {
@@ -19704,7 +19495,7 @@ function mountProvPrefs(slots, agent) {
   const own = provPrefsOf(agent);
   provPrefMount = { slots, agent, own };
   for (const slot of slots) {
-    const mine = own.filter((x) => provPrefKey(x) === slot.dataset.list);
+    const mine = own.filter((x) => x.id === slot.dataset.list);
     slot.replaceChildren(...mine);
     const off = !mine.some((x) => !x.hidden);
     slot.hidden = off;
@@ -19719,21 +19510,18 @@ function remountProvPrefs() {
   homeProvPrefRows();
   provPrefMount = null;
 }
-// provPrefsOn: the agent's warm-up or daily check-in is on
+// provPrefsOn: the agent's warm-up is on
 const provPrefsOn = (a, s = prefs) => !!(a == "codex" ? s.codexWarmup || warmTimes(s.codexWarmAts, s.codexWarmAt).length
-  : a == "claude" ? s.claudeWarmup || warmTimes(s.claudeWarmAts, s.claudeWarmAt).length
-  : s.checkinPlugins?.find((p) => p.id == a)?.on ?? s[PLUGIN_CHECKIN_INHERITS[a]]);
-// provPrefsField: a subscription's warm-up, check-in and resets as the
-// editor's own fields, under Advanced (the owner, 11-09: a block of cards
-// under Routing took most of the editor)
+  : a == "claude" && (s.claudeWarmup || warmTimes(s.claudeWarmAts, s.claudeWarmAt).length));
+// provPrefsField: a subscription's warm-up and resets as the editor's own
+// fields, under Advanced (the owner, 11-09: a block of cards under Routing
+// took most of the editor)
 function provPrefsField(agent, opened) {
-  // a gateway keeps them: they run on its own accounts (#1065)
-  if (!PROV_PREFS[agent] && !(prefs?.checkinPlugins || []).some((x) => x.id === agent) && prefs) return [];
-  const keys = [...(PROV_PREFS[agent] || []), "ci-plugin"];
-  const slots = keys.map((k) => {
+  if (!PROV_PREFS[agent]) return [];
+  const slots = PROV_PREFS[agent].map((k) => {
     const slot = el("div", "prov-prefs");
     slot.dataset.list = k;
-    slot.fieldRow = field(t(k == "claudeRunList" ? "Claude requests" : PROV_PREF_LABEL[k] || "Check in"), slot);
+    slot.fieldRow = field(t(k == "claudeRunList" ? "Claude requests" : PROV_PREF_LABEL[k]), slot);
     for (const n of slot.fieldRow) n.hidden = true;
     slot.hidden = true;
     return slot;
@@ -20059,24 +19847,9 @@ function renderSettings() {
   renderAutoResetOwn(s); // and each account's own warm-up time
   renderWarmNow("codex", s.codexUsers, "#warmNowRow");
   renderWarmNow("claude", s.claudeUsers, "#claudeWarmNowRow");
-  // each built-in vendor's daily check-in, shown while one of its
-  // accounts is signed in (#694, #811): its switch, how each account went,
-  // and under it each account's own (#1902)
-  for (const [id, k, say, as] of [
-    ["wb", "workbuddy", t("Claims each signed-in China account's check-in credits once a day"), t("As checking in from WorkBuddy itself does")],
-    ["trae", "trae", t("Claims each signed-in Trae CN account's check-in credits once a day"), t("As checking in from Trae itself does")],
-    ["minimax", "minimax", t("Claims each signed-in MiniMax Code account's check-in credits once a day"), t("As checking in from MiniMax Code itself does")],
-    ["qoder", "qoder", t("Claims each signed-in Qoder account's daily credits once a day"), t("As claiming the daily credits in Qoder does")]]) {
-    const on = k + "Checkin", sub = $(`#${id}CheckinSub`), list = $(`#${id}List`);
-    list.hidden = !s[k] && !s[on];
-    $(`#${id}CheckinSegs`).replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s[on] ? "on" : "off", (v) => savePrefs({ ...keep, [on]: v === "on" })));
-    sub.textContent = [say, ...ciLines(s[on + "s"])].filter(Boolean).join(" · ");
-    sub.title = as;
-    list.querySelectorAll(".ci-acct, .ci-now-row, .ci-at-row").forEach((x) => x.remove());
-    list.append(...checkinAtRow(s, s[on]), ...checkinAccountRows(s, id === "wb" ? "" : id), ...checkinNowRow(s, id === "wb" ? "" : id));
-  }
-  // and the plugins that check in themselves, a group each
-  renderPluginCheckins(s);
+  // and the lists back in an open provider's editor, which
+  // homeProvPrefRows above took home
+  remountProvPrefs();
   renderTrayUsage(s, keep);
   renderProxy(s, keep);
   window.renderSavedProxies ? renderSavedProxies(s) : import("./proxies.js").then(() => renderSavedProxies(s), () => {});
@@ -22609,117 +22382,6 @@ async function renderUpdate(r, u) {
   if (kept && !pageShown) kept.remove();
 }
 
-// a Daily check-in row per plugin that checks in itself (auth.checkin)
-function renderPluginCheckins(s) {
-  const ps = s.checkinPlugins || [];
-  homeProvPrefRows();
-  $("#pluginCheckinList").replaceChildren(...ps.map((p) => {
-    const row = el("div", "row pref");
-    const who = el("div", "who");
-    const sub = el("div", "sub", [t("Has the {name} plugin check each signed-in account in once a day", { name: p.name || p.id }),
-      ...ciLines(p.checkins)].filter(Boolean).join(" · "));
-    who.append(el("div", "name", (p.name || p.id) + " · " + t("Daily check-in")), sub);
-    const segBox = el("div");
-    segBox.append(segs([["off", t("Off")], ["on", t("On")]], p.on ? "on" : "off", async (v) => {
-      try {
-        prefs = await writingPrefs(api("settings/plugin-checkin", { provider: p.id, on: v === "on" }));
-        state.settings = prefs;
-        renderPluginCheckins(prefs);
-      } catch (err) {
-        statusErr(err);
-      }
-    }));
-    row.append(who, segBox);
-    // a group each, shown in its provider's editor (PROV_PREFS)
-    const g = el("div", "list prefs ci-plugin");
-    g.dataset.provider = p.id;
-    g.dataset.feature = "warmups";
-    g.append(row, ...checkinAtRow(s, p.on), ...checkinAccountRows(s, "plugin:" + p.id), ...checkinNowRow(s, "plugin:" + p.id));
-    return g;
-  }));
-  // the replaced groups stay gone
-  if (provPrefMount) provPrefMount.own = provPrefMount.own.filter((g) => !g.classList.contains("ci-plugin"));
-  remountProvPrefs();
-}
-
-// the time of day every daily check-in asks from (times_ang on X), drawn by checkinnow.js
-function checkinAtRow(s, on) {
-  if (!on) return [];
-  const row = el("div", "row pref ci-at-row");
-  if (window.ciAtFill) ciAtFill(row, s);
-  else { row.hidden = true; import("./checkinnow.js").then(() => ciAtFill(row, s), () => {}); }
-  return [row];
-}
-
-// one account's Check in now (xiaowu_95660), drawn by checkinnow.js
-function checkinNowRow(s, by) {
-  if (!(s.checkinAccounts || []).some((a) => (a.by || "") === by)) return [];
-  const row = el("div", "row pref warm-now ci-now-row");
-  if (window.ciNowFill) ciNowFill(row, s, by);
-  else { row.hidden = true; import("./checkinnow.js").then(() => ciNowFill(row, s, by), () => {}); }
-  return [row];
-}
-
-// checkinAccountRows: an Off/On row per account under vendor by's Daily
-// check-in when it has two or more (#1902, magicLaLa)
-function checkinAccountRows(s, by) {
-  const accts = (s.checkinAccounts || []).filter((a) => (a.by || "") === by);
-  if (accts.length < 2) return [];
-  return accts.map((a) => {
-    const row = el("div", "row pref ci-acct");
-    row.dataset.key = a.key;
-    const who = el("div", "who");
-    who.append(el("div", "name", a.user || a.key), el("div", "sub", t(a.on ? "Checked in once a day while Daily check-in is on" : "Left out of the daily check-in")));
-    const segBox = el("div");
-    segBox.append(segs([["off", t("Off")], ["on", t("On")]], a.on ? "on" : "off", async (v) => {
-      try {
-        prefs = await writingPrefs(api("settings/checkin-account", { key: a.key, on: v === "on" }));
-        state.settings = prefs;
-      } catch (err) {
-        status(t(err.message), "err");
-      }
-      renderSettings();
-    }));
-    row.append(who, segBox);
-    return row;
-  });
-}
-
-// ciLines: wbCheckinLine's, the accounts of one line said once (leeoswald368)
-function ciLines(rs) {
-  const by = new Map();
-  for (const r of rs || []) { const k = wbCheckinLine({ ...r, user: "\0" }); if (k) by.set(k, [...by.get(k) || [], r.user]); }
-  return [...by].map(([k, us]) => k.replace("\0", us.join(t(", "))));
-}
-
-// wbCheckinLine is how an account's last WorkBuddy check-in went: today's
-// (a Beijing day) with the credits and the streak, an earlier one by its day.
-function wbCheckinLine(r) {
-  const today = wbToday();
-  if (r.day !== today) {
-    return r.outcome === "claimed" || r.outcome === "done" ? t("{user} checked in {day}", { user: r.user, day: r.day }) : "";
-  }
-  switch (r.outcome) {
-    case "claimed":
-    case "done":
-      // maybe the vendor's day before (#3326)
-      if (r.again) return t("{user}: {name} says already checked in; magpie asks again later", { user: r.user, name: checkinVendorName(r) });
-      return t("{user} checked in today", { user: r.user }) + (r.credit ? " +" + r.credit : "")
-        + (r.streak ? ", " + t("{n}-day streak", { n: r.streak }) : "");
-    case "ineligible":
-    case "inactive":
-      return t(r.outcome === "inactive" ? "{user}: no check-in event now" : "{user} is not eligible", { user: r.user }) + (r.msg ? " · " + r.msg : "");
-    case "captcha":
-      return t("{user} is asked for a captcha; check in in the app", { user: r.user });
-    case "own-app":
-      return r.by === "trae"
-        ? t("{user}: Trae CN refused this check-in (9074: too many taking part); check in in the Trae CN app", { user: r.user })
-        : t("{user}: {name} only gives check-in credits to its own app; check in in the {name} app", { user: r.user, name: checkinVendorName(r) });
-    default:
-      return t("{user} couldn't check in, tried again later", { user: r.user });
-  }
-}
-
 // dockChoice is Show in Dock's choice in s: With window unless Show or Hide
 // was chosen (inDock in app.go), so the window is in Command-Tab by default.
 function dockChoice(s) {
@@ -22735,7 +22397,7 @@ function prefsKeep(s) {
     trayUsages: s.trayUsages || [],
     redact: !!s.redact, redactPersonal: !!s.redactPersonal, redactKinds: s.redactKinds || {}, redactWords: s.redactWords || [], redactWordsAnyCase: !!s.redactWordsAnyCase, redactWordsWhole: !!s.redactWordsWhole, redactShape: !!s.redactShape, codexWarmup: s.codexWarmup || "",
     claudeWarmup: s.claudeWarmup || "", codexWarmAt: s.codexWarmAt || "", claudeWarmAt: s.claudeWarmAt || "",
-    codexWarmAts: warmTimes(s.codexWarmAts, s.codexWarmAt), claudeWarmAts: warmTimes(s.claudeWarmAts, s.claudeWarmAt), workbuddyCheckin: !!s.workbuddyCheckin, traeCheckin: !!s.traeCheckin, minimaxCheckin: !!s.minimaxCheckin, qoderCheckin: !!s.qoderCheckin, checkinAt: s.checkinAt || "", signInLinkOnly: !!s.signInLinkOnly,
+    codexWarmAts: warmTimes(s.codexWarmAts, s.codexWarmAt), claudeWarmAts: warmTimes(s.claudeWarmAts, s.claudeWarmAt), signInLinkOnly: !!s.signInLinkOnly,
     replyModel: s.replyModel || "", noLoopGuard: !!s.noLoopGuard, claudeLeanPrompt: !!s.claudeLeanPrompt, claudeNoExtraUsage: !!s.claudeNoExtraUsage, claudePrintMode: !!s.claudePrintMode, refusalRetries: s.refusalRetries ?? null, retryAfterCap: s.retryAfterCap ?? null,
     noUpdatePill: !!s.noUpdatePill, noAutoUpdate: !!s.noAutoUpdate, updateEvery: s.updateEvery || 360, autoRestart: !!s.autoRestart, noAutoDownload: !!s.noAutoDownload, updateChannel: s.updateChannel || "",
     trayUsage: s.trayUsage || "", trayUsageEvery: s.trayUsageEvery || 3, trayNoLogos: !!s.trayNoLogos, trayAnthropicMark: !!s.trayAnthropicMark, trayNoBird: !!s.trayNoBird, trayNoNumber: !!s.trayNoNumber, trayPace: !!s.trayPace, trayNoCost: !!s.trayNoCost, trayWindows: s.trayWindows || {}, vision: s.vision || "", visionEffort: s.visionEffort || "", searcherEffort: s.searcherEffort || "", imageGen: s.imageGen || "", videoGen: s.videoGen || "", imageTimeout: s.imageTimeout || 0, classifyTimeout: s.classifyTimeout || 0, searcher: s.searcher || "", searchFirst: s.searchFirst || "", currency: s.currency || "usd", totalCurrency: s.totalCurrency || "", trayCurrency: s.trayCurrency || "",

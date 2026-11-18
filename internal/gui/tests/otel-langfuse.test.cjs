@@ -17,7 +17,7 @@ function server(lang, otel, posts) {
   const fixed = {
     theme: "light", lang, tray: "panel", currency: "usd", redactWords: [], version: "0.1.400", dir: "~/.config/magpie",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [],
-    workbuddyCheckins: [], lanURLs: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, otel,
+    lanURLs: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, otel,
   };
   let cur = fixed;
   return async (route) => {

@@ -16,7 +16,7 @@ function server(lang, posts) {
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100,
     proxy: "direct", proxyNow: "", proxySource: "off", pluginProxy: "",
     trayUsageEvery: 3, version: "test", dir: "/test", lanURLs: [],
-    visionModels: [], imageGenModels: [], workbuddyCheckins: [],
+    visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
   return async (route) => {

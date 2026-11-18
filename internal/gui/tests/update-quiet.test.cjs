@@ -23,7 +23,7 @@ function server(lang, ctl) {
     const settings = {
       theme: "light", lang, tray: "panel", currency: "usd", redactWords: [], trayUsageEvery: 3,
       version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
-      proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
+      proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
       fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     };
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });

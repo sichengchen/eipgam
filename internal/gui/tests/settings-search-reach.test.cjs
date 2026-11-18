@@ -23,7 +23,7 @@ function server(lang, posts) {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", textSize: 100,
     proxy: "", redact: false, redactPersonal: false, redactWords: [], trayUsage: "", trayUsageEvery: 3,
     version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
-    proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
+    proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
     claudeCache: [{ knob: "cache_ttl", value: "1h" }, { knob: "subagent_cache_ttl" }],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };

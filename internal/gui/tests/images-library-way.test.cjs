@@ -34,7 +34,7 @@ function fixture(lang, { libOn, have = false, imageGen = "", gateway = false }) 
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "",
     version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", vision: "", imageGen,
-    visionModels: [], workbuddyCheckins: [], lanURLs: [],
+    visionModels: [], lanURLs: [],
     imageGenModels: [{ id: "codex/gpt-image-2", name: "GPT Image 2", provider: "codex", providerName: "Codex", icon: "openai" }],
     imageGenAuto: "codex/gpt-image-2",
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },

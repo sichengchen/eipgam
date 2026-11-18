@@ -315,13 +315,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case quotaMsg:
 		return m, m.gotQuotas(msg)
-	case checkinMsg:
-		m.flash, m.flashOK = msg.text, msg.ok
-		// the accounts' lines say today's check-in now, with nothing asked
-		if m.quotas != nil {
-			m.quotas = provider.WithCheckins(m.quotas)
-		}
-		return m, nil
 	case sessFilterMsg:
 		m.ssel = 0
 		if msg.folder {
@@ -807,7 +800,7 @@ func (m model) View() string {
 			}
 		case pageUsage:
 			body = m.viewUsage()
-			footer = hints("←→", "period", "t w m A", "today · 7 days · 30 days · all", "u", "used / left", "c", "daily check-in", "r", "reload", "1–6", "pages", "q", "quit")
+			footer = hints("←→", "period", "t w m A", "today · 7 days · 30 days · all", "u", "used / left", "r", "reload", "1–6", "pages", "q", "quit")
 		default:
 			body = m.viewList()
 			footer = hints("↑↓", "agent", "←→", "field", "↵", "change", "s", "save profile", "p", "profiles", "1–6", "pages", "q", "quit")

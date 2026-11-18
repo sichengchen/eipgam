@@ -239,19 +239,6 @@ type SubscriptionQuota struct {
 	// window's, and MoreDaily its other pools', each apart.
 	Daily     *DailyCredits   `json:"daily,omitempty"`
 	MoreDaily []*DailyCredits `json:"moreDaily,omitempty"`
-	// Checkins is set on a WorkBuddy (China) or Trae CN account whose
-	// daily check-in is pressed for, CheckinBy whose ("" WorkBuddy's,
-	// "trae" Trae CN's), and Checkin is how its last one went, nil before
-	// the first; never cached, added as the page asks (WithCheckins).
-	Checkins  bool              `json:"checkins,omitempty"`
-	CheckinBy string            `json:"checkinBy,omitempty"`
-	Checkin   *WorkBuddyCheckin `json:"checkin,omitempty"`
-	// CheckinOff is set on such an account the user left out of its
-	// vendor's check-in (settings.CheckinOff, #1902): it isn't checked in.
-	CheckinOff bool `json:"checkinOff,omitempty"`
-	// CheckinKey is such an account's entry in its vendor's check-in, the
-	// key Check in now presses it by (CheckInAccount).
-	CheckinKey string `json:"checkinKey,omitempty"`
 	// Kind is the card's kind as another magpie is told it (CachedCards):
 	// subscription, plan or balance; "" here.
 	Kind string `json:"kind,omitempty"`

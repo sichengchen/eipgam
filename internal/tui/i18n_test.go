@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // tuiWords is every word the TUI hands tr or trf, read from its source:
@@ -94,7 +93,7 @@ func tuiWords(t *testing.T) (all []string, fmts map[string]bool) {
 		add(api.name)
 	}
 	// sessions' stats tables and chart unit, shown through tr(head) and tr(…[byCost])
-	for _, s := range []string{allModels, allFolders, "models", "folders", "tokens", "cost", ruleHint, provider.TraeRefusedWords} {
+	for _, s := range []string{allModels, allFolders, "models", "folders", "tokens", "cost", ruleHint} {
 		add(s)
 	}
 	for _, a := range agent.All() {

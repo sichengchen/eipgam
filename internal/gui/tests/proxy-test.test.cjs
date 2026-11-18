@@ -30,7 +30,7 @@ function server(lang, st) {
     const cur = () => ({
       theme: "light", lang, tray: "panel", currency: "usd", textSize: 100,
       proxy: st.proxy, proxyNow: st.proxy === "direct" ? "" : st.proxy ? "http://127.0.0.1:7890" : "", proxySource: st.proxy === "direct" ? "off" : st.proxy ? "settings" : "none",
-      trayUsageEvery: 3, version: "test", dir: "/test", lanURLs: [], visionModels: [], imageGenModels: [], workbuddyCheckins: [],
+      trayUsageEvery: 3, version: "test", dir: "/test", lanURLs: [], visionModels: [], imageGenModels: [],
       fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = ${JSON.stringify({ lang, theme: "light" })};` });

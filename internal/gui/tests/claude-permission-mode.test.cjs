@@ -23,7 +23,7 @@ const MODES = [
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 400000,
+    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 400000,
   };
   let mode = "bypassPermissions";
   const claude = () => {

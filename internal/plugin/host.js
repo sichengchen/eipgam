@@ -1126,8 +1126,8 @@ async function writeAuth(all) {
 }
 
 // sleep waits ms without holding the event loop. Nothing in the host waits
-// any other way: Atomics.wait here froze every plugin's requests, model
-// lists and check-ins for as long as one of them spun on the lock (#5112).
+// any other way: Atomics.wait here froze every plugin's requests and model
+// lists for as long as one of them spun on the lock (#5112).
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // Two hosts run at once while one is restarted (the old one finishing its
@@ -2628,7 +2628,6 @@ function rowOf(id, a, keys, stored, p, own) {
     ...cliOf(a.auth),
     icon: iconOf(a),
     usage: typeof a.auth.usage === "function",
-    checkin: typeof a.auth.checkin === "function",
     calls: typeof a.auth.calls === "function",
     // its sign-ins are renewed in the background as they come due, so
     // long before expires (keepSignedIn)
@@ -3366,50 +3365,6 @@ async function usageOf(provider, account, signal) {
   }
 }
 
-// ---- check-in ----------------------------------------------------------------
-
-// checkin presses the vendor's daily check-in (签到) for the account at key,
-// as the plugin's auth.checkin does it (magpie's own hook, which OpenCode
-// ignores; Lemon on Discord: 签到 belongs in the plugins):
-//   auth.checkin(getAuth, provider) → {
-//     outcome: "claimed" (checked in now) | "done" (in already today) |
-//       "ineligible" (the account can't take part) | "inactive" (no
-//       check-in running) | "captcha" (the vendor asks for a captcha: the
-//       user checks in in its own app; never solved) | "failed",
-//     credit? (what it gave), streak? (days in a row), message?,
-//     until? (when the vendor's own day turns: an RFC 3339 time or epoch
-//       milliseconds; Qoder's daily credits open at 10:00 UTC+8)
-//   }
-// magpie asks once a Beijing day per account while the user has it on, and
-// again later that day after a failure, or at until; a hook that throws is
-// a failure.
-// Run in the account's scope, a token it renews is saved to that account.
-async function checkin({ provider, account, proxy }) {
-  return via.run(proxy ?? "", () => checkinOf(provider, account))
-}
-
-const checkinOutcomes = ["claimed", "done", "ineligible", "inactive", "captcha", "failed"]
-
-async function checkinOf(provider, account) {
-  const a = auths().get(provider)?.auth
-  if (typeof a?.checkin !== "function") throw new Error(`${provider}'s plugin doesn't check in`)
-  const key = accountKey(provider, account)
-  if (!readAuth()[key]) throw new Error("not signed in")
-  await fresh(provider, key)
-  const p = await infoOf(provider, key)
-  const r = (await inScope(provider, key, () => a.checkin(async () => authCopy(key), JSON.parse(JSON.stringify(p))))) ?? {}
-  const num = (v) => (typeof v === "number" && isFinite(v) ? Math.max(0, v) : 0)
-  const message = typeof r.message === "string" ? r.message : ""
-  // a time that doesn't read is not told
-  const t = typeof r.until === "number" ? r.until : typeof r.until === "string" ? Date.parse(r.until) : NaN
-  const until = Number.isFinite(t) && t > 0 ? new Date(t).toISOString() : ""
-  if (!checkinOutcomes.includes(r.outcome)) {
-    const said = r.outcome === undefined || r.outcome === null ? "no outcome" : JSON.stringify(r.outcome)
-    return { outcome: "failed", credit: 0, streak: 0, message: message ? `the plugin answered ${said}: ${message}` : `the plugin answered ${said}`, until }
-  }
-  return { outcome: r.outcome, credit: num(r.credit), streak: Math.round(num(r.streak)), message, until }
-}
-
 // ---- calls made outside magpie -------------------------------------------------
 
 // calls are the account's calls made outside magpie (the vendor's own
@@ -3657,7 +3612,6 @@ const handlers = {
   installCli,
   load,
   usage,
-  checkin,
   calls,
   keepSignedIn,
   // setOptions takes the user's option values over, as init did: the

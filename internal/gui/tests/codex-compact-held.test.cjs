@@ -19,7 +19,7 @@ const { watchSettingsReads, agentRow, openAgentSettings, reach } = require("./re
 const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, posts) {
-  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 544000, codexCompactKeys: keys, codexWindow: { model: "relay/gpt-6-A", window: 128000, n: "128K" } };
+  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 544000, codexCompactKeys: keys, codexWindow: { model: "relay/gpt-6-A", window: 128000, n: "128K" } };
   const providers = { providers: [], presets: [], excluded: [], gateway: { running: true, window: true } };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());

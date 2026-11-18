@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A subscription with many accounts (Linx on X: twenty-odd signed in to one
-// plugin made the Usage page a tower) shows the first five on its card, any
-// in full and the one with the check-in switch, the rest behind "Show N more
+// plugin made the Usage page a tower) shows the first five on its card and
+// any in full, the rest behind "Show N more
 // accounts" at the card's foot. The button opens them in place, the page not
 // moving, and folds them again; it is remembered across a reload. Eight
 // accounts aren't folded. At 440px nothing in the card is cut or spills.
@@ -19,11 +19,8 @@ const acct = (provider, name, user, used, extra) => ({ provider, name, kind: "su
 const quotas = () => [
   // 22 accounts: 5 in sight, 17 folded
   ...Array.from({ length: 22 }, (_, i) => acct("workbuddy-ai", "WorkBuddy AI", `wb-${pad(i + 1)}@example.com`, 3 * i)),
-  // 9 accounts, the 8th in full (it answered last) and the 7th checks in
-  ...Array.from({ length: 9 }, (_, i) => acct("trae", "Trae", `t-${i + 1}@example.com`, 5 * i, {
-    ...(i === 7 ? { lastServedAt: now } : {}),
-    ...(i >= 6 ? { checkins: true } : {}),
-  })),
+  // 9 accounts, the 8th in full (it answered last)
+  ...Array.from({ length: 9 }, (_, i) => acct("trae", "Trae", `t-${i + 1}@example.com`, 5 * i, i === 7 ? { lastServedAt: now } : {})),
   // 8 accounts: not folded
   ...Array.from({ length: 8 }, (_, i) => acct("codex", "Codex", `c${i + 1}@example.com`, 10 * i)),
 ];
@@ -49,10 +46,10 @@ function serve(lang) {
 }
 
 const words = {
-  en: { more17: "Show 17 more accounts", more2: "Show 2 more accounts", fewer: "Show fewer accounts" },
-  zh: { more17: "展开其余 17 个账号", more2: "展开其余 2 个账号", fewer: "收起其余账号" },
-  ja: { more17: "さらに 17 個のアカウントを表示", more2: "さらに 2 個のアカウントを表示", fewer: "アカウントの表示を減らす" },
-  de: { more17: "17 weitere Konten anzeigen", more2: "2 weitere Konten anzeigen", fewer: "Weniger Konten anzeigen" },
+  en: { more17: "Show 17 more accounts", more3: "Show 3 more accounts", fewer: "Show fewer accounts" },
+  zh: { more17: "展开其余 17 个账号", more3: "展开其余 3 个账号", fewer: "收起其余账号" },
+  ja: { more17: "さらに 17 個のアカウントを表示", more3: "さらに 3 個のアカウントを表示", fewer: "アカウントの表示を減らす" },
+  de: { more17: "17 weitere Konten anzeigen", more3: "3 weitere Konten anzeigen", fewer: "Weniger Konten anzeigen" },
 };
 
 // each card: the accounts in sight and its foot button
@@ -102,10 +99,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       let got = await cards(page);
       assert.deepEqual(got["workbuddy-ai"].users, range(1, 5));
       assert.equal(got["workbuddy-ai"].more, w.more17);
-      // the one in full and the one with the check-in switch stay in sight
-      assert.deepEqual(got.trae.users, ["t-1@example.com", "t-2@example.com", "t-3@example.com", "t-4@example.com", "t-5@example.com", "t-7@example.com", "t-8@example.com"]);
-      assert.equal(got.trae.more, w.more2);
-      assert.equal(await page.locator('#subscriptionUsage > [data-key="trae"] .ci-auto').count(), 1, "the check-in switch is in sight");
+      // the one in full stays in sight
+      assert.deepEqual(got.trae.users, ["t-1@example.com", "t-2@example.com", "t-3@example.com", "t-4@example.com", "t-5@example.com", "t-8@example.com"]);
+      assert.equal(got.trae.more, w.more3);
       // eight: all in sight, no button
       assert.equal(got.codex.users.length, 8);
       assert.equal(got.codex.more, null);
@@ -134,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(got["workbuddy-ai"].more, w.fewer);
       assert.equal(await more.getAttribute("aria-expanded"), "true");
       assert.ok(got["workbuddy-ai"].height > foldedHeight, "the card grew");
-      assert.equal(got.trae.more, w.more2, "another card stays as it was");
+      assert.equal(got.trae.more, w.more3, "another card stays as it was");
 
       // remembered across a reload
       await page.reload();

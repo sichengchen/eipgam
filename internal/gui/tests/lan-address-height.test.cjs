@@ -18,7 +18,7 @@ function server(lang, lanURLs) {
   const s = {
     theme: "light", lang, tray: "panel", currency: "usd", proxy: "", redactWords: [],
     version: "0.1.400", dir: "/config/magpie", gateway: "http://0.0.0.0:3425", proxyNow: "none", proxySource: "none",
-    visionModels: [], imageGenModels: [], workbuddyCheckins: [],
+    visionModels: [], imageGenModels: [],
     lan: true, lanKey: "sk-magpie-0123456789abcdef", lanURLs, lanPublic: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };

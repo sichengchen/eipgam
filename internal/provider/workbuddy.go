@@ -4,9 +4,8 @@ package provider
 // ("workbuddy-ai") are retired built-in subscriptions served by their
 // plugin, @magpie-community/opencode-workbuddy-auth, moved or not. Their
 // built-in sign-in, models, requests and usage are gone; what is left here
-// reads the built-in accounts for the move (migrate_workbuddy.go), checks
-// the plugin's accounts in (workbuddy_checkin.go), and tells a restricted
-// account's refusal (WBRestricted). A fix belongs in the plugin
+// reads the built-in accounts for the move (migrate_workbuddy.go) and
+// tells a restricted account's refusal (WBRestricted). A fix belongs in the plugin
 // (github.com/magpie-community/plugins, packages/workbuddy), with the
 // movers' min raised in internal/provider/migrate_workbuddy.go.
 
@@ -24,12 +23,7 @@ package provider
 // an account belongs to.
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -48,11 +42,6 @@ var (
 	wbEndpoint = "https://copilot.tencent.com"
 	// wbAIEndpoint is WorkBuddy AI's, the international build's.
 	wbAIEndpoint = "https://www.workbuddy.ai"
-	// wbUAVersion is the WorkBuddy desktop version the User-Agent carries.
-	// copilot.tencent.com's gateway rejects a request whose User-Agent it
-	// doesn't recognise with code 10085 ("请求不合法"), so every call to it —
-	// chat and billing alike — must go out as WorkBuddy/<version>.
-	wbUAVersion = "5.5.6"
 )
 
 // wbSite is one WorkBuddy build: the Chinese one or WorkBuddy AI.
@@ -107,12 +96,6 @@ type wbAccount struct {
 	site  *wbSite
 	creds wbCreds
 	own   bool
-	// via, for an account on the plugin, sends a request as the plugin
-	// does, signed with its sign-in, which magpie never renews itself
-	via func(*http.Request) (*http.Response, error)
-	// card is the provider id its Usage card has, when not the site's:
-	// the plugin's signed in under its own id, "workbuddy-plugin"
-	card string
 }
 
 // ---- WorkBuddy's own account --------------------------------------------------
@@ -308,87 +291,6 @@ var wbTokens = struct {
 	sync.Mutex
 	m map[string]wbCreds
 }{m: map[string]wbCreds{}}
-
-// wbNum is a capacity the billing API sends as a JSON string ("3300",
-// "438.88000002"), though it occasionally comes as a bare number; it parses
-// either, and an empty or unparseable value reads as 0.
-type wbNum float64
-
-func (n *wbNum) UnmarshalJSON(b []byte) error {
-	s := strings.Trim(string(b), `"`)
-	if s == "" || s == "null" {
-		*n = 0
-		return nil
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return err
-	}
-	*n = wbNum(f)
-	return nil
-}
-
-// ---- WorkBuddy's API ----------------------------------------------------------
-
-// wbError is a WorkBuddy business error: its code lets a poll loop tell a
-// "come back" answer (retry) from a real failure.
-type wbError struct {
-	code int
-	msg  string
-}
-
-func (e *wbError) Error() string {
-	if e.msg != "" {
-		return e.msg
-	}
-	return fmt.Sprintf("error %d", e.code)
-}
-
-func wbCallVia(ctx context.Context, do func(*http.Request) (*http.Response, error), method, u string, headers map[string]string, body, dst any) error {
-	var rd io.Reader
-	if body != nil {
-		b, _ := json.Marshal(body)
-		rd = bytes.NewReader(b)
-	}
-	req, err := http.NewRequestWithContext(ctx, method, u, rd)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "WorkBuddy/"+wbUAVersion)
-	for k, v := range headers {
-		req.Header.Set(k, v)
-	}
-	res, err := do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
-	var env struct {
-		Code json.Number     `json:"code"`
-		Msg  string          `json:"msg"`
-		Data json.RawMessage `json:"data"`
-	}
-	_ = json.Unmarshal(b, &env)
-	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		if code, _ := env.Code.Int64(); code != 0 {
-			return &wbError{code: int(code), msg: env.Msg}
-		}
-		if env.Msg != "" {
-			return &wbError{code: res.StatusCode, msg: env.Msg}
-		}
-		return &accountStatusError{status: res.StatusCode}
-	}
-	if code, _ := env.Code.Int64(); code != 0 {
-		return &wbError{code: int(code), msg: env.Msg}
-	}
-	if dst == nil || len(env.Data) == 0 || string(env.Data) == "null" {
-		return nil
-	}
-	return json.Unmarshal(env.Data, dst)
-}
 
 // textOnly marks the models of ms whose images w drops as taking none,
 // whatever WorkBuddy's config says: WorkBuddy AI's GLM models. On

@@ -39,7 +39,7 @@ function serve(lang, theme) {
   const settings = {
     theme, lang, tray: "panel", currency: "usd", textSize: 100, version: "test", dir: "/test", gateway: "http://127.0.0.1:3425",
     proxy: "", proxyNow: "none", proxySource: "none", pluginProxy: "", updateProxy: "", lanURLs: [], visionModels: [], imageGenModels: [],
-    titleModels: [], workbuddyCheckins: [], redactWords: [], trayUsageEvery: 3,
+    titleModels: [], redactWords: [], trayUsageEvery: 3,
     proxies: [{ id: "px1", name: "Office", url: "http://10.0.0.1:8080" }],
   };
   return async (route) => {

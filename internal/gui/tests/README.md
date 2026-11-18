@@ -940,18 +940,16 @@ leaves no `.view-room` and no blank under the page, nor scrolls it beyond
 the browser's own fit (#911). English and Chinese, light and dark;
 ARTIFACT_DIR gets screenshots at 100% and 150%.
 
-`settings-groups.test.cjs` puts the Settings page's warm-ups and check-in
-under a tab per service (#124): Codex, Claude Code and WorkBuddy tabs where a
-heading would be, in the Usage part after its list, Codex's picked to
-begin with and each showing its rows alone, named without the service; the
-last warm-up and today's check-in still on the short lines, no left-border
-stripe; a daily warm-up's time field only while it is on; each control
-posting the setting it did and a tab posting nothing, with the page scrolled
-and left where it was; the arrows, Home and End along the tabs; a tab picked
-at the page's very end (a shorter card, then a taller one) leaving the tabs
-where they were; the tab remembered across a reload, Codex's shown when the
-remembered WorkBuddy one is gone; the WorkBuddy tab only with an account
-signed in; in English and Chinese.
+`settings-groups.test.cjs` puts the Settings page's warm-ups under a tab
+per service (#124): Codex and Claude Code tabs where a heading would be, in
+the Usage part after its list, Codex's picked to begin with and each showing
+its rows alone, named without the service; the last warm-up still on the
+short lines, no left-border stripe; a daily warm-up's time field only while
+it is on; each control posting the setting it did and a tab posting
+nothing, with the page scrolled and left where it was; the arrows, Home and
+End along the tabs; a tab picked at the page's very end (a shorter card,
+then a taller one) leaving the tabs where they were; the tab remembered
+across a reload; in English and Chinese.
 
 `settings-sections.test.cjs` checks the Settings page in parts (#471): a tab
 list at its top — General, Usage, Network and sharing, Models, Privacy,
@@ -978,8 +976,8 @@ nothing is posted, and a plain click is posted once, not twice. Drawn
 again once more after it is let go and before the click that sets off,
 as Browser access is when the answer to its state comes then (#3922),
 On is posted once. It then
-presses every option control on every Settings tab (49 in English, the
-warm-up, check-in, sync and local network ones included) the same way and
+presses every option control on every Settings tab (42 or more in English,
+the warm-up, sync and local network ones included) the same way and
 checks that the control drawn in its place is clicked once on the same
 option. Without the fix no click comes at all. A tap through the redraw is
 posted once, not twice (Chromium only: Playwright can't hold a tap in
@@ -1272,8 +1270,7 @@ WebKit, English and Chinese.
 with many accounts (Linx on X: twenty-odd on one plugin made a very long
 card): of 22 WorkBuddy AI accounts the first five are in sight, the rest
 behind "Show 17 more accounts" at its foot; of nine Trae accounts the one in
-full and the one with the check-in switch stay in sight too; eight aren't
-folded. The button opens them in place without moving the page, is
+full stays in sight too; eight aren't folded. The button opens them in place without moving the page, is
 remembered across a reload and folds them again from the foot (the page
 resting at its end, the button in sight); at 440px nothing is cut, folded or
 open; in Chromium and WebKit, in English, Chinese, Japanese and German.

@@ -17,7 +17,6 @@ const assets = path.resolve(__dirname, "../assets");
 const PAIRS = [
   ["test models", '<span class="mchip">gpt-5 <span class="tdot ok"></span></span>', '<span class="mchip">gpt-5 <span class="tdot bad"></span></span>', ".tdot"],
   ["agent", '<div class="ag-st on"><span class="ag-dot"></span><span class="ag-st-t">Connected</span></div>', '<div class="ag-st bad"><span class="ag-dot"></span><span class="ag-st-t">Not wired</span></div>', ".ag-dot"],
-  ["check-in", '<div class="wb-checkin" data-state="ok"><span class="ci-say"><i class="ci-dot ok"></i><span>Checked in</span></span></div>', '<div class="wb-checkin"><span class="ci-say"><i class="ci-dot bad"></i><span>Failed</span></span></div>', ".ci-dot"],
   ["request ledger", '<table class="led"><tr class="led-row"><td><span class="st"><i class="dot"></i>200</span></td></tr></table>', '<table class="led"><tr class="led-row bad"><td><span class="st"><i class="dot"></i>429</span></td></tr></table>', ".st .dot"],
   ["routing try", '<div class="rt-req"><span class="to"><i></i>200</span></div>', '<div class="rt-req bad"><span class="to"><i></i>429</span></div>', ".to i"],
   ["routing probe", '<div class="rt-probe"><span class="to"><i></i>ok</span></div>', '<div class="rt-probe bad"><span class="to"><i></i>failed</span></div>', ".to i"],

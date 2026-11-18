@@ -36,7 +36,7 @@ function settings(lang) {
 // Plugins › Built-in's rows: a name, what it is, a switch (builtins.test.cjs)
 const builtins = [
   { id: "groups", name: "Routing groups", sub: "Several models agents pick as one: each request goes to the right one, and to the next when one fails", on: true, chosen: true, source: "preset", state: "active", inUse: 0 },
-  { id: "warmups", name: "Warm-up and check-in", sub: "Start a subscription's usage window at a time you pick, and claim vendors' daily check-in credits", on: true, chosen: false, source: "in use", state: "active", inUse: 2, use: "{n} warm-ups and check-ins on" },
+  { id: "warmups", name: "Warm-ups", sub: "Start a subscription's usage window at a time you pick", on: true, chosen: false, source: "in use", state: "active", inUse: 2, use: "{n} warm-ups on" },
 ];
 
 function serve(lang) {

@@ -41,9 +41,8 @@ var Keys = []string{
 	// privacy
 	"redact", "redactPersonal", "redactKinds", "redactWords", "redactWordsAnyCase", "redactWordsWhole", "redactShape",
 	"otel",
-	// warm-ups and check-ins
+	// warm-ups
 	"codexWarmup", "claudeWarmup", "codexWarmAt", "claudeWarmAt", "codexWarmAts", "claudeWarmAts",
-	"workbuddyCheckin", "traeCheckin", "minimaxCheckin", "qoderCheckin", "checkinAt",
 	// models: replies, vision, images, search
 	"replyModel", "noLoopGuard", "claudeLeanPrompt", "claudeNoExtraUsage", "claudePrintMode", "refusalRetries", "retryAfterCap",
 	"vision", "visionEffort", "imageGen", "videoGen", "imageTimeout", "classifyTimeout",
@@ -295,9 +294,7 @@ func Merge(body []byte, cur settings.Settings, web bool) (settings.Settings, err
 	in.FastPicks = cur.FastPicks             // switched in the agents' pickers (#954)
 	in.UltraPicks = cur.UltraPicks           // and sent Ultrafast (#1954)
 	in.AgentEfforts = cur.AgentEfforts       // picked in an agent's row (#1003)
-	in.PluginCheckins = cur.PluginCheckins   // set on its own (plugin-checkin)
 	in.PluginOptions = cur.PluginOptions     // set on its own (plugin-option)
-	in.CheckinOff = cur.CheckinOff           // set on its own (checkin-account)
 	settings.CarryPerModel(&in, &cur)
 	in.Wallpaper = cur.Wallpaper // set on its own (appearance/wallpaper)
 	in.LAN, in.LANKey = cur.LAN, cur.LANKey

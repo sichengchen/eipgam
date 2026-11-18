@@ -229,7 +229,6 @@ var cliForRoute = map[string]string{
 	"GET /api/usage/quotas":                "magpie quota",
 	"GET /api/usage/quotas/history":        "magpie quota history",
 	"GET /api/usage/requests.csv":          "magpie usage --csv",
-	"POST /api/usage/workbuddy-checkin":    "magpie accounts checkin",
 	"GET /api/update":                      "magpie update check",
 	"POST /api/update/check":               "magpie update check",
 	"POST /api/settings/agent-compact":     "magpie model compact",
@@ -290,7 +289,6 @@ var notYet = map[string]string{
 	"POST /api/settings/allowips":                S2, // api.go
 	"POST /api/settings/bare-ids":                S2, // api.go
 	"POST /api/settings/busy-load":               S2, // api.go
-	"POST /api/settings/checkin-account":         S2, // api.go
 	"POST /api/settings/claude-cache":            S2, // tune.go
 	"POST /api/settings/claude-attribution":      S2, // tune.go
 	"POST /api/settings/codex-agents-v1":         S2, // api.go
@@ -320,13 +318,10 @@ var notYet = map[string]string{
 	"POST /api/settings/lan":                     S2, // api.go
 	"POST /api/settings/log/reveal":              W,  // api.go
 	"POST /api/settings/login":                   S2, // api.go
-	"POST /api/settings/minimax-checkin":         S2, // api.go
 	"POST /api/settings/panel-shortcut":          W,  // api.go
 	"POST /api/settings/plain-names":             S2, // api.go
-	"POST /api/settings/plugin-checkin":          S2, // api.go
 	"POST /api/settings/plugin-option":           S2, // api.go
 	"POST /api/settings/port":                    S2, // api.go
-	"POST /api/settings/qoder-checkin":           S2, // api.go
 	"POST /api/settings/quota-left":              S2, // api.go
 	"POST /api/settings/quota-reads":             S2, // api.go
 	"POST /api/settings/redact-actions":          S2, // api.go
@@ -339,9 +334,7 @@ var notYet = map[string]string{
 	"POST /api/settings/search-keys":             S2, // api.go
 	"POST /api/settings/search-quota":            S2, // api.go
 	"POST /api/settings/text-size":               W,  // api.go
-	"POST /api/settings/trae-checkin":            S2, // api.go
 	"POST /api/settings/update-skip":             S2, // api.go
-	"POST /api/settings/workbuddy-checkin":       S2, // api.go
 	"POST /api/usage/arrange":                    W,  // api.go
 	"POST /api/warm-all":                         A,  // api.go: All accounts warms every account in use (5bd41301b)
 	"POST /api/warm-now":                         A,  // api.go
@@ -523,23 +516,17 @@ var notYet = map[string]string{
 	"POST /api/tune/takeover":                    U,  // tune.go
 	"POST /api/tune/undo":                        U,  // tune.go
 	"POST /api/uninstall/finish":                 A,  // uninstall.go
-	"GET /api/usage/checkins/off":                U,  // usage.go: the Usage page's switched-off check-ins; `magpie accounts checkin` does every account
 	"GET /api/usage/deleted/into":                U,  // usage.go
 	"GET /api/usage/heatmap":                     U,  // usage.go
 	"GET /api/usage/quotas/history/holds":        U,  // usage.go
 	"GET /api/usage/requests":                    U,  // usage.go
 	"GET /api/usage/requests/content":            U,  // usage.go
 	"GET /api/usage/traffic":                     U,  // usage.go: the live rate
-	"POST /api/usage/checkin-account":            U,  // usage.go: one account now; `magpie accounts checkin` does every account
 	"POST /api/usage/clear":                      U,  // usage.go
 	"POST /api/usage/codex-reset":                U,  // usage.go
 	"POST /api/usage/deleted":                    U,  // usage.go
-	"POST /api/usage/minimax-checkin":            U,  // usage.go
-	"POST /api/usage/plugin-checkin":             U,  // usage.go
-	"POST /api/usage/qoder-checkin":              U,  // usage.go
 	"POST /api/usage/quotas/refresh":             U,  // usage.go
 	"POST /api/usage/requests/export":            U,  // usage.go
-	"POST /api/usage/trae-checkin":               U,  // usage.go
 	"GET /api/update/notes":                      W,  // update.go
 	"POST /api/update/using":                     W,  // update.go
 	"GET /api/whatsnew":                          W,  // whatsnew.go

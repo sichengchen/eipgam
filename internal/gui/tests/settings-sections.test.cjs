@@ -26,11 +26,11 @@ function settingsPayload(over) {
   return {
     theme: "light", lang: "en", tray: "panel", quotaLeft: false, currency: "usd", textSize: 100,
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
-    codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
+    codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
     version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
-    visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
+    visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     ...over,
   };
@@ -162,7 +162,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the warm-ups left Allowances for their providers' editors (the
         // owner, 11-07): none of their rows, and no tabs for them, in it
         await openPart(page, "usage");
-        assert.equal(await page.locator("#setPage-usage :is(#warmTabs, #warmSegs, #claudeWarmSegs, #wbCheckinSegs)").count(), 0, "no warm-ups under Allowances");
+        assert.equal(await page.locator("#setPage-usage :is(#warmTabs, #warmSegs, #claudeWarmSegs)").count(), 0, "no warm-ups under Allowances");
 
         // a part's control posts what it did
         await openPart(page, "general");

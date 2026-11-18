@@ -2,8 +2,8 @@ package provider
 
 // Keeping the plugins' sign-ins alive while nothing uses them (#5080). A
 // plugin that renews its sign-ins through magpie (auth.refresh) had each
-// renewed only when something used the account: a request, its models,
-// its usage or its check-in, within the plugin's refreshLead of expiry.
+// renewed only when something used the account: a request, its models
+// or its usage, within the plugin's refreshLead of expiry.
 // An account left idle past its token's life lapsed, and for a vendor
 // whose session dies with its token the user had to sign in again:
 // OrcaTerm's WeChat token lives two hours, and its refresh after that

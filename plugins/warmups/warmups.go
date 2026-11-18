@@ -1,6 +1,5 @@
-// Package warmups is warm-up and check-in: start a subscription's usage
-// window at a time the user picks, and claim vendors' daily check-in
-// credits. While one is set, it stays on.
+// Package warmups is warm-up: start a subscription's usage window at a
+// time the user picks. While one is set, it stays on.
 package warmups
 
 import (
@@ -11,20 +10,17 @@ import (
 func init() {
 	pluginrt.Register(pluginrt.Manifest{
 		ID: "warmups", API: "^1", Requires: []string{"window", "settings"},
-		Name: "Warm-up and check-in", Sub: "Start a subscription's usage window at a time you pick, and claim vendors' daily check-in credits",
+		Name: "Warm-ups", Sub: "Start a subscription's usage window at a time you pick",
 		Opens: "providers",
-		One:   "1 warm-up or check-in on", Many: "{n} warm-ups and check-ins on",
+		One:   "1 warm-up on", Many: "{n} warm-ups on",
 		InUse: func() (int, error) {
 			s, err := settings.LoadChecked()
 			if err != nil {
 				return 0, err
 			}
 			n := count(s.CodexWarmup != "", s.ClaudeWarmup != "", s.CodexWarmAt != "" || len(s.CodexWarmAts) > 0,
-				s.ClaudeWarmAt != "" || len(s.ClaudeWarmAts) > 0, s.WorkBuddyCheckin, s.TraeCheckin, s.MiniMaxCheckin, s.QoderCheckin)
+				s.ClaudeWarmAt != "" || len(s.ClaudeWarmAts) > 0)
 			n += len(s.CodexWarmAtOf)
-			for _, on := range s.PluginCheckins {
-				n += count(on)
-			}
 			return n, nil
 		},
 		Parts: []pluginrt.Part{{Slot: "part", Key: "warmups"}},

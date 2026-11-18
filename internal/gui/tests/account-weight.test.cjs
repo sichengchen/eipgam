@@ -140,7 +140,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator(".editor").getByRole("button", { name: await say(page, lang, "Smart"), exact: true }).first().click();
       assert.equal(await chip("max@example.com").isVisible(), false, `${at}: a weight under Smart`);
       // open, the editor scrolls and the dialog around it doesn't: the lines
-      // its check-in and warm-up rows keep out of sight were held against
+      // its warm-up rows keep out of sight were held against
       // the dialog and grew it a second scrollbar, every row 8px narrower
       const dialog = await page.evaluate(() => { const d = document.querySelector(".dialog"); return [d.scrollHeight, d.clientHeight]; });
       assert.ok(dialog[0] <= dialog[1] + 1, `${at}: the dialog scrolls beside the editor (${dialog})`);

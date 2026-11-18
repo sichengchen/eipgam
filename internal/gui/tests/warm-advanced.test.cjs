@@ -1,13 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// "我的预热去哪里了？？" (ChrisYagao on X): a subscription's warm-up and
-// daily check-in moved from Settings into its provider's editor (11-09) and
-// then under the editor's Advanced, folded (11-10), so a user who had one
-// on opened the editor and saw nothing of it. Advanced now opens on its own
-// when the provider's warm-up (on reset or at times of day) or its daily
-// check-in is on, as it does for Routing; with them off it stays folded,
-// and a fold the reader closed by hand stays closed. Codex, Claude Code and
-// a plugin that checks in; en, zh, zh-TW, ja, de; both engines; the API is
-// faked here.
+// "我的预热去哪里了？？" (ChrisYagao on X): a subscription's warm-up moved
+// from Settings into its provider's editor (11-09) and then under the
+// editor's Advanced, folded (11-10), so a user who had one on opened the
+// editor and saw nothing of it. Advanced now opens on its own when the
+// provider's warm-up (on reset or at times of day) is on, as it does for
+// Routing; with it off it stays folded, and a fold the reader closed by
+// hand stays closed. Codex and Claude Code; en, zh, zh-TW, ja, de; both
+// engines; the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -16,11 +15,10 @@ const { chromium, webkit } = require("playwright");
 const { provPrefsProviders } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-const names = { codex: "Codex", claude: "Claude Code", "trae-cn": "Trae CN" };
+const names = { codex: "Codex", claude: "Claude Code" };
 
 function serve(lang, settings) {
-  const s = { theme: "light", lang, currency: "usd", codexWarmup: "", claudeWarmup: "", codexUsers: ["ann@example.test"], claudeUsers: ["ann@example.test"],
-    checkinPlugins: [{ id: "trae-cn", name: "Trae CN", on: false }], ...settings };
+  const s = { theme: "light", lang, currency: "usd", codexWarmup: "", claudeWarmup: "", codexUsers: ["ann@example.test"], claudeUsers: ["ann@example.test"], ...settings };
   return async (route) => {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
@@ -47,13 +45,11 @@ const CASES = [
   ["claude", "warm up on reset", { claudeWarmup: "all" }, true, "#claudeWarmList"],
   ["claude", "daily warm-up", { claudeWarmAts: ["07:30"], claudeWarmAt: "07:30" }, true, "#claudeWarmList"],
   ["claude", "Codex's warm-up only", { codexWarmup: "week" }, false, "#claudeWarmList"],
-  ["trae-cn", "nothing", {}, false, ".ci-plugin"],
-  ["trae-cn", "daily check-in", { checkinPlugins: [{ id: "trae-cn", name: "Trae CN", on: true }] }, true, ".ci-plugin"],
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
-    test(`${engine} ${lang}: a provider's warm-up or check-in that is on opens its editor's Advanced (ChrisYagao)`, async (t) => {
+    test(`${engine} ${lang}: a provider's warm-up that is on opens its editor's Advanced (ChrisYagao)`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       t.after(() => browser.close());
       for (const [id, set, settings, opens, list] of CASES) {

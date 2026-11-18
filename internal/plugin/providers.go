@@ -158,9 +158,6 @@ type Provider struct {
 	Icon string `json:"icon,omitempty"`
 	// Usage says the plugin tells each account's allowance (auth.usage)
 	Usage bool `json:"usage"`
-	// Checkin says the plugin presses its vendor's daily check-in for each
-	// account (auth.checkin)
-	Checkin bool `json:"checkin,omitempty"`
 	// Calls says the plugin lists each account's calls made outside
 	// magpie, for the Usage page (auth.calls)
 	Calls bool `json:"calls,omitempty"`
@@ -1344,27 +1341,6 @@ type UsageWindow struct {
 	// Balance is how much is left in Unit, a prepaid wallet's reading,
 	// with no share to tell (#3950); nil when the plugin didn't say.
 	Balance *float64 `json:"balance"`
-}
-
-// Checkin is what came of an account's daily check-in, as the plugin's
-// auth.checkin said: Outcome is one of claimed, done, ineligible,
-// inactive, captcha and failed. Until (RFC 3339, "" when not told) is when
-// the vendor's own day turns and the answer stops holding: Qoder's daily
-// credits open at 10:00 UTC+8, not at Beijing midnight.
-type Checkin struct {
-	Outcome string  `json:"outcome"`
-	Credit  float64 `json:"credit"`
-	Streak  int     `json:"streak"`
-	Message string  `json:"message"`
-	Until   string  `json:"until"`
-}
-
-// AccountCheckin asks the plugin to check account of provider in for the
-// day.
-func AccountCheckin(ctx context.Context, provider, account string) (Checkin, error) {
-	var c Checkin
-	err := Call(ctx, "checkin", map[string]any{"provider": provider, "account": account, "proxy": proxyOf(ctx)}, &c)
-	return c, err
 }
 
 // OutsideCall is one call an account made outside magpie, as the plugin's

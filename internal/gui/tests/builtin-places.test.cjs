@@ -40,7 +40,7 @@ function fixture(lang, { redact = true, otel = true, masks = true, routing = tru
     redact: st.redact && masks, redactPersonal: false, redactWords: [], redactRules: [], redactKinds: {},
     version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision: "", imageGen: "", lanURLs: [],
-    visionModels: [], imageGenModels: [], workbuddyCheckins: [], searchChoices: [], searchAPIs: [],
+    visionModels: [], imageGenModels: [], searchChoices: [], searchAPIs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     builtins: builtins(),
   });

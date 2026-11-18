@@ -31,7 +31,7 @@ func accountsCmd(args []string) error {
 	if len(args) > 1 && args[1] == "discovery" {
 		return accountsDiscoveryCmd(args[2:])
 	}
-	const usage = "usage: magpie accounts [claude|codex|grok|copilot|gemini|antigravity|zed|factory|mimo|<plugin>] [--json] | magpie accounts add <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> | magpie accounts add copilot [--host <name>.ghe.com] | magpie accounts import <codex|claude|antigravity|factory|<plugin>> <file>... [--yes] | magpie accounts import codex <file>... --access-only [--yes] | magpie accounts access-only codex <email> [on|off] | magpie accounts refresh [--json] | magpie accounts checkin [--json] | magpie accounts switch|forget <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> <email> | magpie accounts switch <claude|codex> next | magpie accounts switch|forget copilot <login>[@<name>.ghe.com] [--host <name>.ghe.com] | magpie accounts project <gemini|antigravity> <email> <gcp-project-id> | magpie accounts alias <agent|<plugin>> <email> [<name>|--clear] | magpie accounts switch-only <codex|claude> [on|off]"
+	const usage = "usage: magpie accounts [claude|codex|grok|copilot|gemini|antigravity|zed|factory|mimo|<plugin>] [--json] | magpie accounts add <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> | magpie accounts add copilot [--host <name>.ghe.com] | magpie accounts import <codex|claude|antigravity|factory|<plugin>> <file>... [--yes] | magpie accounts import codex <file>... --access-only [--yes] | magpie accounts access-only codex <email> [on|off] | magpie accounts refresh [--json] | magpie accounts switch|forget <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> <email> | magpie accounts switch <claude|codex> next | magpie accounts switch|forget copilot <login>[@<name>.ghe.com] [--host <name>.ghe.com] | magpie accounts project <gemini|antigravity> <email> <gcp-project-id> | magpie accounts alias <agent|<plugin>> <email> [<name>|--clear] | magpie accounts switch-only <codex|claude> [on|off]"
 	agentID := func(s string) (string, error) {
 		switch strings.ToLower(s) {
 		case "claude", "cc":
@@ -128,9 +128,6 @@ func accountsCmd(args []string) error {
 	}
 	if len(args) > 1 && args[1] == "refresh" {
 		return refreshAccounts(len(args) > 2 && args[2] == "--json")
-	}
-	if len(args) > 1 && args[1] == "checkin" {
-		return checkinWorkBuddy(len(args) > 2 && args[2] == "--json")
 	}
 	if len(args) > 1 && args[1] == "add" {
 		// a Copilot account by GitHub's device code, on github.com or an
@@ -866,118 +863,6 @@ func refreshAccounts(asJSON bool) error {
 		return fmt.Errorf("%d of %d accounts couldn't be renewed", failed, len(rs))
 	}
 	return nil
-}
-
-// checkinWorkBuddy: `magpie accounts checkin` — WorkBuddy's daily check-in
-// (签到) for each WorkBuddy (China) account not in yet today, and Trae CN's
-// (每日签到) for each Trae CN account, and MiniMax Code's for each MiniMax
-// Code account, and Qoder's daily credits for each Qoder account, and each
-// plugin's own check-in (auth.checkin) for its accounts, now, and how each
-// stands. The
-// settings do it on their own once a day.
-func checkinWorkBuddy(asJSON bool) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-	rs := checkinAll(ctx)
-	if rs == nil {
-		rs = []provider.WorkBuddyCheckin{}
-	}
-	if asJSON {
-		b, _ := json.MarshalIndent(rs, "", "  ")
-		fmt.Println(string(b))
-	}
-	failed := 0
-	for _, r := range rs {
-		if r.Outcome == provider.CheckinFailed {
-			failed++
-		}
-		if asJSON {
-			continue
-		}
-		switch r.By {
-		case "trae":
-			r.User = "Trae CN " + r.User
-		case "minimax":
-			r.User = "MiniMax Code " + r.User
-		case "qoder":
-			r.User = "Qoder " + r.User
-		default:
-			if r.Vendor != "" {
-				r.User = strings.TrimSpace(r.Vendor + " " + r.User)
-			}
-		}
-		// an answer that may be the vendor's day before: asked again
-		// later (#3326)
-		later := ""
-		if r.Again {
-			later = " · magpie asks again later"
-			if r.Outcome == provider.CheckinDone {
-				fmt.Println(muted.Render("·"), r.User, muted.Render("says already checked in · its day may not have turned"+later))
-				continue
-			}
-		}
-		switch r.Outcome {
-		case provider.CheckinClaimed, provider.CheckinDone:
-			line := fmt.Sprint(green.Render("✓"), " ", r.User, " checked in today")
-			if r.Credit > 0 {
-				line += fmt.Sprintf(" +%g", r.Credit)
-			}
-			if r.Streak > 0 {
-				line += muted.Render(fmt.Sprintf(" · a %d-day streak", r.Streak))
-			}
-			if r.Outcome == provider.CheckinDone || !r.Asked {
-				line += muted.Render(" · already")
-			}
-			fmt.Println(line)
-		// why, in the vendor's or plugin's words, beside the label: a bare
-		// "no check-in event now" left the user guessing (plugins#304)
-		case provider.CheckinIneligible:
-			fmt.Println(muted.Render("·"), r.User, muted.Render("not eligible for the check-in"+checkinWhy(r.Msg)+later))
-		case provider.CheckinInactive:
-			fmt.Println(muted.Render("·"), r.User, muted.Render("no check-in event now"+checkinWhy(r.Msg)+later))
-		case provider.CheckinCaptcha:
-			fmt.Println(muted.Render("·"), r.User, muted.Render(strings.TrimSpace("asks for a captcha: check in in its own app "+r.Msg)))
-		case provider.CheckinOwnApp:
-			// Trae CN's 9074 (#808): Trae CN refused the claim (#1920);
-			// WorkBuddy's check-in answered 401 while the sign-in works
-			if r.By == "trae" {
-				fmt.Println(muted.Render("·"), r.User, muted.Render(provider.TraeRefusedWords))
-				break
-			}
-			name := r.Vendor
-			if r.By == "" {
-				name = "WorkBuddy"
-			}
-			fmt.Println(muted.Render("·"), r.User, muted.Render(name+" only gives check-in credits to its own app; check in in the "+name+" app"))
-		default:
-			fmt.Println(muted.Render("✗"), r.User, muted.Render(r.Msg))
-		}
-	}
-	if !asJSON && len(rs) == 0 {
-		fmt.Println(muted.Render("no WorkBuddy (China), Trae CN, MiniMax Code or Qoder account is signed in"))
-	}
-	if failed > 0 {
-		return fmt.Errorf("%d of %d accounts couldn't check in", failed, len(rs))
-	}
-	return nil
-}
-
-// checkinAll checks in every account that has a daily check-in: the
-// built-ins' and each plugin's; a test's seam.
-var checkinAll = func(ctx context.Context) []provider.WorkBuddyCheckin {
-	rs := append(provider.CheckInWorkBuddy(ctx), provider.CheckInTrae(ctx)...)
-	rs = append(rs, provider.CheckInMiniMax(ctx)...)
-	rs = append(rs, provider.CheckInQoder(ctx)...)
-	return append(rs, provider.CheckInPlugins(ctx)...)
-}
-
-// checkinWhy is why a check-in had nothing to claim, in the vendor's or
-// plugin's own words, set after its label (plugins#304); empty without.
-func checkinWhy(msg string) string {
-	if msg = strings.TrimSpace(msg); msg != "" {
-		return " · " + msg
-	}
-	return ""
 }
 
 // accountNamed is the saved account of agent that user names: its name as
