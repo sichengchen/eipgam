@@ -78,6 +78,8 @@ and count an extra attempt at the vendor. `TestStalledBodyRetryWaitsForConnectio
 holds the close to check this ordering; `TestBodyStalledByFlowControlIsGivenUp`
 checks the two attempts against an HTTP/2 server that never reads the body.
 
+- The prompt breakdown counts Pi's project context files as instructions and its `<available_skills>` block as skills (`splitMemory` and `splitSkillsBlock` in [`prompt.go`](../../internal/gateway/prompt.go)).
+
 ## Routing recipes
 
 A routing group's templates (`provider.Templates` in
