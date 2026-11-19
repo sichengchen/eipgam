@@ -18,9 +18,8 @@ import (
 // only when its model asks for it, is given every tool: Claude Code
 // (ENABLE_TOOL_SEARCH, agent/claude.go), Claude Desktop, whose Code tab is
 // Claude Code, Codex (supports_search_tool, codexcat.go), Pi, whose MCP
-// extension lists a server's tools only when they are searched for, Droid,
-// which defers every MCP tool to its ToolSearch, and omp, which mounts
-// them as xd:// devices named in a catalog. Any other agent sends every
+// extension lists a server's tools only when they are searched for, and
+// Antigravity CLI, which reads a tool's schema on demand. Any other agent sends every
 // tool it is given, with its whole inputSchema, on every request, so past
 // hubOnDemandOver tools it is given two in their place: find_tools, which
 // gives the tools that match what the model looks for with their
@@ -45,7 +44,8 @@ const hubOnDemandOver = 10
 // for, by their id without a WSL distro (claude@wsl:Ubuntu is claude).
 // The Library's Tools on demand row names them from HubFindsItself, so its
 // words can't leave one out again.
-var hubSearchers = []string{"claude", "claude-desktop", "codex", "pi"}
+// Antigravity CLI reads the schema of each lazily loaded tool only when called.
+var hubSearchers = []string{"claude", "claude-desktop", "codex", "pi", "agy"}
 
 var hubSearchesItself = func() map[string]bool {
 	m := map[string]bool{}
