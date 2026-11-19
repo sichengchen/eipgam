@@ -398,6 +398,12 @@ the fallback it was a 502, which a Claude Code client (paseo) asked again
 with backoff, so the chat hung (lwjef on X).
 `TestClaudeTUIUntrustedFolderAnswered` holds it.
 
+The interactive helper looks for the trust or bypass prompt and its option
+rows near the bottom of the terminal (`optionDialog` in
+[`tui.go`](../../internal/claudetui/tui.go)). A resumed conversation can
+mention either prompt without interrupting the turn
+(`TestShimIgnoresDialogWordsInHistory`).
+
 Before each such run the bridge decides as Claude Code does whether it
 would ask (`untrustedHere`, `claudeTrusts` in `claude_trusted.go`), from
 the user's own answers in the profile `provider.ClaudeTrustedProjects`
