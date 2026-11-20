@@ -2,8 +2,10 @@
 
 eipgam ships through the [Homebrew tap](https://github.com/sichengchen/homebrew-tap).
 The [Prepare macOS release workflow](../.github/workflows/cut-release-macos.yml)
-builds and tests both architectures, combines them into a universal app, and
-hands the ad hoc signed bundle and its source commit to the shared signing repo.
+runs the macOS test suite and verifies native builds on Apple silicon and Intel.
+It combines the builds into a universal app and hands the ad hoc signed bundle
+and its source commit to the shared signing repo. Windows and Linux checks are
+available through the **Test** workflow's manual `cross_platform` option.
 Apple credentials are managed by the [signing environment](https://github.com/sichengchen/macos-release#configure-once).
 The release GitHub App needs access to eipgam and the tap.
 

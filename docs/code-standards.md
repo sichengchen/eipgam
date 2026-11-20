@@ -58,11 +58,10 @@ listed as not run, never left out.
    `~/.claude`, `~/.claude.json`, `~/.gemini` and the rest) or
    `~/.config/eipgam`. Packages set this up in their `TestMain`, most with `testenv`.
 3. **The build and the suite.** Run `gofmt -l` on the changed files (it
-   prints nothing), `go vet ./...`, `GOOS=linux go vet -tags nogui ./...`,
-   `GOOS=windows go vet ./...`, `go build`,
-   `GOOS=linux go build -tags nogui`, `GOOS=windows go build` and
-   `go test -tags nogui ./...`. A cross-OS build doesn't compile
-   `_test.go` files; vet does. On 10-08 bbf99143's test called
+   prints nothing), `go vet ./...`, `go build`, and `go test -tags nogui ./...`.
+   For changes affecting another platform, also vet and build on that target
+   (`GOOS=linux` with `-tags nogui`, or `GOOS=windows`). A cross-OS build
+   doesn't compile `_test.go` files; vet does. On 10-08 bbf99143's test called
    `syscall.Getsid`, which Linux's syscall package doesn't have, and
    bb8a3e30 and e7de897f shipped unformatted. In a chain of commands, set
    `set -o pipefail`, so that `go test | tail && git push` stops on a

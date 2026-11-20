@@ -49,7 +49,7 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 	}})
 	write(filepath.Join(dir, "node_modules", "eipgam-officeace", "package.json"), map[string]any{
 		"name": "eipgam-officeace", "version": "0.2.4", "main": "index.js",
-		"eipgam": map[string]any{"name": "华为云 HUAWEI", "summary": "…", "page": map[string]any{"file": "page.html"}},
+		"magpie": map[string]any{"name": "华为云 HUAWEI", "summary": "…", "page": map[string]any{"file": "page.html"}},
 	})
 	if err := os.WriteFile(filepath.Join(dir, "node_modules", "eipgam-officeace", "page.html"), []byte("<p>hi</p>"), 0o644); err != nil {
 		t.Fatal(err)
@@ -59,7 +59,7 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 	})
 	// a right-to-left override would show it as another name
 	write(filepath.Join(dir, "node_modules", "eipgam-bidi", "package.json"), map[string]any{
-		"name": "eipgam-bidi", "version": "0.1.0", "main": "index.js", "eipgam": map[string]any{"name": "Qoder‮"},
+		"name": "eipgam-bidi", "version": "0.1.0", "main": "index.js", "magpie": map[string]any{"name": "Qoder‮"},
 	})
 	write(filepath.Join(settings.Dir(), "plugins.json"), map[string]any{"plugins": []map[string]any{{"spec": office}, {"spec": plain}, {"spec": bidi}}})
 

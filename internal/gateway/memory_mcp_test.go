@@ -83,7 +83,7 @@ func TestMemoryMCPSharedAcrossAgents(t *testing.T) {
 	fresh(t)
 	h := lanGuard(New().Handler())
 	d := t.TempDir()
-	clone := gitRepo(t, filepath.Join(d, "eipgam"), "git@github.com:yetone/eipgam.git")
+	clone := gitRepo(t, filepath.Join(d, "eipgam"), "git@github.com:sichengchen/eipgam.git")
 	other := gitRepo(t, filepath.Join(d, "copy"), "https://github.com/sichengchen/eipgam")
 	elsewhere := gitRepo(t, filepath.Join(d, "site"), "https://github.com/yetone/site.git")
 	claude := []string{"User-Agent", "claude-cli/2.1.314 (external, cli)", MemoryCwdHeader, filepath.Join(clone, "internal")}

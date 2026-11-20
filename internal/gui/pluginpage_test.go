@@ -102,7 +102,7 @@ func TestPluginPageServedShutIn(t *testing.T) {
 		t.Fatalf("pages: %s %v", w.Body, err)
 	}
 	p := pages[0]
-	if p.Spec != on || p.Key != "plugin-eipgam-usage-glance" || p.Title != "Usage glance" || len(p.Reads) != 1 || p.Reads[0] != "usage:summary" {
+	if p.Spec != on || p.Key != "plugin-magpie-usage-glance" || p.Title != "Usage glance" || len(p.Reads) != 1 || p.Reads[0] != "usage:summary" {
 		t.Fatalf("page %+v", p)
 	}
 	tok := strings.Split(strings.TrimPrefix(p.URL, pluginPagePrefix), "/")[0]

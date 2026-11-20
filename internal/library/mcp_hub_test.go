@@ -264,7 +264,7 @@ func TestHubEntrySwap(t *testing.T) {
 		t.Errorf("claude's eipgam entry: %v", entries("claude")["eipgam"])
 	}
 	// codex has a eipgam of its own: left as it is, its servers kept
-	if got := names("codex"); !slices.Equal(got, []string{"fs", "eipgam"}) || entries("codex")["eipgam"]["command"] != "their-own" {
+	if got := names("codex"); !slices.Equal(got, []string{"eipgam", "fs"}) || entries("codex")["eipgam"]["command"] != "their-own" {
 		t.Fatalf("codex with the hub on: %v\n%s", got, read(t, codex))
 	}
 	v, err := Read(nil)
@@ -294,7 +294,7 @@ func TestHubEntrySwap(t *testing.T) {
 	if !strings.Contains(read(t, claude), `"numStartups": 3`) {
 		t.Errorf("claude's own keys lost:\n%s", read(t, claude))
 	}
-	if got := names("codex"); !slices.Equal(got, []string{"fs", "eipgam"}) || entries("codex")["eipgam"]["command"] != "their-own" {
+	if got := names("codex"); !slices.Equal(got, []string{"eipgam", "fs"}) || entries("codex")["eipgam"]["command"] != "their-own" {
 		t.Fatalf("codex with the hub off: %v\n%s", got, read(t, codex))
 	}
 }
@@ -564,7 +564,7 @@ func TestHubDirectServer(t *testing.T) {
 	}
 
 	ok(t)(SetMCPHub(true))
-	for id, want := range map[string][]string{"claude": {"index", "eipgam", "mine"}, "codex": {"index", "eipgam"}} {
+	for id, want := range map[string][]string{"claude": {"eipgam", "index", "mine"}, "codex": {"eipgam", "index"}} {
 		if got := names(id); !slices.Equal(got, want) {
 			t.Fatalf("%s with the hub on: %v, want %v\n%s\n%s", id, got, want, read(t, claude), read(t, codex))
 		}

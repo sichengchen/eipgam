@@ -227,9 +227,9 @@ func TestTaggedRepos(t *testing.T) {
 	if x := byRepo["someone/agent-aider"]; x.Kind != "agent" || x.Spec != "github:someone/agent-aider" {
 		t.Fatalf("an agent alone: %+v", x)
 	}
-	// a page alone: no module, eipgam.page's file in the repository; one
+	// a page alone: no module, magpie.page's file in the repository; one
 	// whose file isn't there would show nothing, and isn't listed
-	if x := byRepo["someone/page-glance"]; x.Kind != "page" || x.Spec != "github:someone/page-glance" || x.Package != "eipgam-usage-glance" {
+	if x := byRepo["someone/page-glance"]; x.Kind != "page" || x.Spec != "github:someone/page-glance" || x.Package != "magpie-usage-glance" {
 		t.Fatalf("a page alone: %+v", x)
 	}
 	if x := byRepo["someone/word-guard"]; x.Kind != "middleware" || x.Package != "@magpie-community/middleware-word-guard" || x.License != "MIT" {

@@ -55,7 +55,7 @@ func TestHubKeepsThisComputersOwnServersHere(t *testing.T) {
 	}
 	full := []string{"Authorization", "Bearer " + secrets[0]}
 	narrow := []string{"Authorization", "Bearer " + secrets[1]}
-	if got, want := listed(here), []string{"docs", "home-eipgam", "eipgam-browser", "eipgam-image", "shell"}; !slices.Equal(got, want) {
+	if got, want := listed(here), []string{"docs", "eipgam-browser", "eipgam-image", "home-eipgam", "shell"}; !slices.Equal(got, want) {
 		t.Errorf("this computer is given %v, want %v", got, want)
 	}
 	if got, want := listed(there, full...), []string{"docs", "shell"}; !slices.Equal(got, want) {

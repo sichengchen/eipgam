@@ -145,8 +145,7 @@ func TestOpenCodeGoUnavailableSaysWhere(t *testing.T) {
 
 // withtee on X: a free model Go lists itself, asked from Claude Code, is
 // asked as Claude Code asked it. Nothing of OpenCode's is added: no
-// environment block ("Prefer /tmp/opencode over …", which the model said
-// back) and no stand-in tools. A Zen free model Go doesn't list still
+// environment block and no stand-in tools. A Zen free model Go doesn't list still
 // carries both, as Zen's free tier wants them when it is asked there.
 func TestOpenCodeGoOwnFreeModelGetsNothingOfOpenCodes(t *testing.T) {
 	s, asked := goFreeServer(t, []string{"beam-free", "glm-5-free"}, []string{"beam-free"}, 200, "")
@@ -159,7 +158,7 @@ func TestOpenCodeGoOwnFreeModelGetsNothingOfOpenCodes(t *testing.T) {
 		t.Fatalf("asked %+v", a)
 	}
 	// the body is JSON, which writes < as \u003c
-	for _, not := range []string{"/tmp", "<env>", `\u003cenv\u003e`, provider.OpenCodeStub} {
+	for _, not := range []string{"Working directory:", "<env>", `\u003cenv\u003e`, provider.OpenCodeStub} {
 		if strings.Contains(a[0].body, not) {
 			t.Fatalf("Go's own free model was sent %q: %s", not, a[0].body)
 		}
@@ -168,7 +167,7 @@ func TestOpenCodeGoOwnFreeModelGetsNothingOfOpenCodes(t *testing.T) {
 		t.Fatalf("%d %s", rec.Code, rec.Body)
 	}
 	a = asked()
-	if len(a) != 3 || !strings.Contains(a[2].body, "Prefer /tmp/opencode") || !strings.Contains(a[2].body, provider.OpenCodeStub) {
+	if len(a) != 3 || !strings.Contains(a[2].body, `\u003cenv\u003e`) || !strings.Contains(a[2].body, "Working directory:") || !strings.Contains(a[2].body, provider.OpenCodeStub) {
 		t.Fatalf("Zen's free model at Zen: %+v", a)
 	}
 }

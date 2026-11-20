@@ -14,7 +14,7 @@ func TestReplyHeadersList(t *testing.T) {
 	if want := []string{"X-Oneapi-Request-Id", "X-Trace"}; !slices.Equal(got, want) {
 		t.Errorf("cleaned %q, want %q", got, want)
 	}
-	for _, bad := range [][]string{{"Set-Cookie"}, {"Content-Encoding"}, {"Transfer-Encoding"}, {"Authorization"}, {"Proxy-Authenticate"}, {"X-Magpie-Note"}, {"a b"}, {"a:b"}} {
+	for _, bad := range [][]string{{"Set-Cookie"}, {"Content-Encoding"}, {"Transfer-Encoding"}, {"Authorization"}, {"Proxy-Authenticate"}, {"X-Magpie-Note"}, {"X-Eipgam-Note"}, {"a b"}, {"a:b"}} {
 		if ReplyHeadersOK(bad) == "" {
 			t.Errorf("%q passed as OK", bad)
 		}
@@ -47,7 +47,7 @@ func TestRequestHeadersList(t *testing.T) {
 		t.Errorf("cleaned %q, want %q", got, want)
 	}
 	for _, bad := range [][]string{{"Authorization"}, {"x-api-key"}, {"X-Goog-Api-Key"}, {"api-key"}, {"Cookie"}, {"Host"}, {"Content-Length"},
-		{"Connection"}, {"Transfer-Encoding"}, {"Proxy-Authorization"}, {"Accept-Encoding"}, {"X-Magpie-Session"}, {"a b"}} {
+		{"Connection"}, {"Transfer-Encoding"}, {"Proxy-Authorization"}, {"Accept-Encoding"}, {"X-Magpie-Session"}, {"X-Eipgam-Session"}, {"a b"}} {
 		if RequestHeadersOK(bad) == "" {
 			t.Errorf("%q passed as OK", bad)
 		}

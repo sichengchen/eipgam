@@ -29,7 +29,7 @@ var requestHeadersNever = map[string]bool{
 // Proxy-Authorization and the rest; Sec- fetch metadata; and eipgam's own,
 // which carry who asked and the conversation to a plugin or another
 // eipgam.
-var requestHeadersNeverPrefix = []string{"Content-", "Proxy-", "Sec-", "X-Magpie-"}
+var requestHeadersNeverPrefix = []string{"Content-", "Proxy-", "Sec-", "X-Eipgam-", "X-Magpie-"}
 
 // RequestHeaderPassable says whether a header of the agent's request may be
 // passed on to the vendor at all.

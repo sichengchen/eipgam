@@ -8327,9 +8327,9 @@ function extraBodyText(obj) {
 }
 // headers never passed on: ReplyHeaderPassable's (#4145), RequestHeaderPassable's
 const REPLY_NEVER = ["alt-svc", "api-key", "authentication-info", "authorization", "cache-control", "clear-site-data", "connection", "content-security-policy", "cookie", "date", "host", "keep-alive", "link", "location", "origin", "refresh", "retry-after", "server", "set-cookie", "set-cookie2", "strict-transport-security", "te", "trailer", "transfer-encoding", "upgrade", "vary", "www-authenticate", "x-accel-buffering", "x-api-key"];
-const REPLY_NEVER_PREFIX = ["content-", "proxy-", "access-control-", "sec-", "x-eipgam-"];
+const REPLY_NEVER_PREFIX = ["content-", "proxy-", "access-control-", "sec-", "x-eipgam-", "x-magpie-"];
 const REQUEST_NEVER = ["accept", "accept-encoding", "api-key", "authentication-info", "authorization", "connection", "cookie", "expect", "host", "keep-alive", "origin", "set-cookie", "set-cookie2", "te", "trailer", "transfer-encoding", "upgrade", "www-authenticate", "x-api-key", "x-goog-api-key"];
-const REQUEST_NEVER_PREFIX = ["content-", "proxy-", "sec-", "x-eipgam-"];
+const REQUEST_NEVER_PREFIX = ["content-", "proxy-", "sec-", "x-eipgam-", "x-magpie-"];
 // replyHeadersOf is the list a save sends, or why it can't
 function replyHeadersOf(text, req) {
   const value = (text || "").split(",").map((x) => x.trim()).filter(Boolean);

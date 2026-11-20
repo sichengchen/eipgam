@@ -84,9 +84,9 @@ func TestPluginPanelsServedShutIn(t *testing.T) {
 		t.Fatalf("panels: %s %v", w.Body, err)
 	}
 	want := []struct{ slot, title, key string }{
-		{"provider", "Notes", "plugin-eipgam-provider-notes-0"},
-		{"usage", "Top models today", "plugin-eipgam-provider-notes-1"},
-		{"settings", "Provider notes", "plugin-eipgam-provider-notes-2"},
+		{"provider", "Notes", "plugin-magpie-provider-notes-0"},
+		{"usage", "Top models today", "plugin-magpie-provider-notes-1"},
+		{"settings", "Provider notes", "plugin-magpie-provider-notes-2"},
 	}
 	toks := map[string]bool{}
 	for i, p := range panels {
