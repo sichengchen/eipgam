@@ -1202,6 +1202,39 @@ func TestShimIgnoresDialogWordsInHistory(t *testing.T) {
 	}
 }
 
+// The PTY may deliver history mentioning sign-in in one read and the
+// real prompt in another. With only the first read available, the shim
+// should keep waiting instead of rejecting the run as signed out.
+func TestShimWaitsAfterPartialSignInHistory(t *testing.T) {
+	history := []byte("\r\nThe conversation discusses Select login method and sign-in.\r\n")
+	s := &shim{screen: history, grid: newGrid(screenSize()), exited: make(chan struct{})}
+	s.grid.write(history)
+	close(s.exited)
+	if err := s.ready(); err == nil || !strings.Contains(err.Error(), EndedEarly) {
+		t.Fatalf("partial conversation history ended startup as a dialog: %v", err)
+	}
+}
+
+func TestSignInDialogUsesRenderedRows(t *testing.T) {
+	for _, tc := range []struct {
+		name, screen string
+		want         bool
+	}{
+		{"chooser", "Select login method:\n\n ❯ 1. Claude account with subscription\n   2. Anthropic Console account", true},
+		{"account prompt", "Log in with your Claude account to continue.", true},
+		{"browser handoff", "Open this URL in your browser:\nhttps://claude.ai/oauth/authorize?state=test", true},
+		{"inline history", "The conversation discusses Select login method and sign-in.", false},
+		{"rendered conversation", "Select login method:\n   1. Claude account with subscription\n\n❯\u00a0", false},
+		{"quoted browser link", "We discussed https://claude.ai/oauth/authorize in the previous turn.", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := signInDialog(tc.screen); got != tc.want {
+				t.Errorf("signInDialog = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestPasteable(t *testing.T) {
 	for _, c := range []struct {
 		in   string

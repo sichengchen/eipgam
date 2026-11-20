@@ -591,10 +591,23 @@ func (s *shim) late(d time.Duration) string {
 
 var errUntrusted = errors.New(Untrusted + ", which only its user answers")
 
-// signIn is what Claude Code's interactive mode shows where it is not
-// signed in, as -p may be (CLAUDE_CODE_OAUTH_TOKEN, a container whose
-// ~/.claude.json has no onboarding done): nothing the helper may answer.
-var signIn = lazyre.New(`Select login method|Log in with your Claude account|claude\.ai/oauth/authorize`)
+var (
+	signInRow     = lazyre.New(`(?m)^[ \t]*(?:Select login method:?|Log in with your Claude account\b[^\n]*|https://claude\.ai/oauth/authorize(?:\?[^ \t\n]+)?)[ \t]*$`)
+	idlePromptRow = lazyre.New(`(?m)^[ \t]*❯[ \t\x{a0}]*$`)
+)
+
+// signInDialog looks for a login heading or authorization URL on the
+// rendered screen. History can mention sign-in while Claude Code draws
+// a resumed session. An input prompt below the sign-in text means the
+// terminal is already interactive.
+func signInDialog(screen string) bool {
+	matches := signInRow.FindAllStringIndex(screen, -1)
+	if len(matches) == 0 {
+		return false
+	}
+	below := screen[matches[len(matches)-1][1]:]
+	return utf8.RuneCountInString(strings.TrimSpace(below)) <= dialogBody && !idlePromptRow.MatchString(below)
+}
 
 // The screens Claude Code's interactive mode shows where its onboarding
 // isn't done (a config folder only -p was run in, or one signed in where
@@ -627,6 +640,8 @@ func (s *shim) ready() error {
 	answered := 0
 	prompted := false
 	var yesAt, downAt time.Time
+	var loginFrame string
+	var loginAt time.Time
 	// an onboarding screen is answered once it has stayed drawn
 	// trustSettle: a key sent as it is first drawn can be lost to its
 	// being drawn again, and nothing then draws it once more
@@ -674,13 +689,23 @@ func (s *shim) ready() error {
 			doing = chromeAsking
 		}
 		s.doing.Store(doing)
+		login := signInDialog(now)
+		if !login {
+			loginFrame = ""
+		}
 		switch {
 		case optionDialog(words, trustAsk, trustRow) && os.Getenv(TrustEnv) != "1":
 			return errUntrusted
 		case optionDialog(words, bypassAsk, bypassRow) && os.Getenv(BypassEnv) != "1":
 			return fmt.Errorf("Claude Code's interactive mode runs in Bypass Permissions mode and asks to accept it, which only its user answers: %s", s.lastScreen())
-		case signIn.MatchString(p) && lastMatchNear(signIn, words, dialogBody):
-			return fmt.Errorf("Claude Code's interactive mode asks to sign in: %s", s.lastScreen())
+		case login:
+			// Wait for the rendered screen to settle, as with onboarding.
+			// One PTY read can end before the rest of the history and prompt.
+			if now != loginFrame {
+				loginFrame, loginAt = now, time.Now()
+			} else if time.Since(loginAt) >= trustSettle {
+				return fmt.Errorf("Claude Code's interactive mode asks to sign in: %s", s.lastScreen())
+			}
 		case lastMatchNear(firstRun, words, dialogFoot):
 			if err := onboard("notes", "\r"); err != nil {
 				return err
