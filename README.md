@@ -2,14 +2,11 @@
 
 eipgam wires AI coding agents to the models and subscriptions you have: one local gateway serves them all, and when a quota runs out it moves on to your next account. Pick a provider and model per agent in the menu-bar app, the TUI (`eipgam tui`) or the CLI.
 
-eipgam is based on Magpie. It is versioned from 0.2.0 and has these differences:
+eipgam is based on Magpie. Main differences:
 
 - **No telemetry.** No usage counts, install id, plugin likes or partner counts are sent.
-- **No sponsors, partners or referral links.**
-- **22 agents:** Claude Code, Claude Desktop, Claude Science, Codex, Gemini CLI, Antigravity CLI, OpenCode, Pi, Cursor CLI, Cursor Private Inference, Zed, VS Code Chat, VS Code Insiders, VSCodium Chat, Copilot CLI, Devin, Kimi Code, Muse Code, Grok Build, Grok App, Raycast, T3 Code.
-- **No mainland-China providers or China-only features.** The overseas services of Chinese vendors (Z.ai, Kimi, MiniMax, StepFun, Qwen intl, Alibaba Cloud, Qwen Cloud, SiliconFlow, Tencent Cloud intl, Xiaomi MiMo's Singapore and Europe plans) stay. China mirrors and daily check-ins are gone.
-- **English only.**
-- **No website, Docker images or Windows builds.**
+- **Supports 22 agents:** Claude Code, Claude Desktop, Claude Science, Codex, Gemini CLI, Antigravity CLI, OpenCode, Pi, Cursor CLI, Cursor Private Inference, Zed, VS Code Chat, VS Code Insiders, VSCodium Chat, Copilot CLI, Devin, Kimi Code, Muse Code, Grok Build, Grok App, Raycast, T3 Code.
+- **No mainland-China providers or China-only features.** The overseas services of Chinese vendors (Z.ai, Kimi, MiniMax, StepFun, Qwen intl, Alibaba Cloud, Qwen Cloud, SiliconFlow, Tencent Cloud intl, Xiaomi MiMo's Singapore and Europe plans) stay. China mirrors and daily check-ins are removed.
 
 ## Build and install (macOS)
 
