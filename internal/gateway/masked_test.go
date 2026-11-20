@@ -11,10 +11,10 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/maskrec"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/maskrec"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A masked request is recorded for Settings → Privacy: each value by its

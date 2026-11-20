@@ -2,15 +2,15 @@ package agent
 
 // Grok Build, xAI's grok CLI, keeps its settings in ~/.grok/config.toml (or
 // $GROK_HOME's): the model new sessions start with under [models] default,
-// and models of the user's own as [model."<id>"] tables. magpie adds one
-// such table per catalog model, named "magpie/<provider>/<model>", pointing
-// at the gateway with magpie's own key — a model with no key of its own
+// and models of the user's own as [model."<id>"] tables. eipgam adds one
+// such table per catalog model, named "eipgam/<provider>/<model>", pointing
+// at the gateway with eipgam's own key — a model with no key of its own
 // would be sent the user's xAI sign-in — so the catalog joins Grok's own
 // models in its /model picker.
 //
 // A signed-in Grok also takes remote "campaign" patches from xAI, applied
 // above config.toml, and a launch campaign sets models.default (September
-// 2026's grok-4.7-launch did): a default picked in magpie was ignored and
+// 2026's grok-4.7-launch did): a default picked in eipgam was ignored and
 // every new session started on the campaign's model. So a default picked
 // here turns campaigns off ([features] campaigns = false), and clearing it
 // gives them back.
@@ -29,25 +29,25 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // grokEfforts are the reasoning efforts Grok knows.
 var grokEfforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
-// grokModelTable is the header prefix of every table magpie writes.
+// grokModelTable is the header prefix of every table eipgam writes.
 var grokModelTable = `model."` + magpieID + "/"
 
-// grokModelTables are magpie's model tables, for a Grok that reaches the
+// grokModelTables are eipgam's model tables, for a Grok that reaches the
 // gateway's /v1 at v1, with the context_window and the
-// auto_compact_threshold_percent magpie gives each model (by its catalog
+// auto_compact_threshold_percent eipgam gives each model (by its catalog
 // id), which the caller stashes. A value the user set in a table themselves
 // (grokOwnWindow, grokOwnPercent: had is what the tables hold now, wrote and
-// wrotePct what magpie last gave them) stays as they set it.
+// wrotePct what eipgam last gave them) stays as they set it.
 func grokModelTables(v1 string, had grokHad, wrote, wrotePct map[string]int) ([]edit.Table, map[string]int, map[string]int) {
 	var out []edit.Table
 	st, gave, gavePct := settings.Load().ForAgent("grok"), map[string]int{}, map[string]int{}
@@ -110,7 +110,7 @@ func grokCompactAt(st settings.Settings, m catalog.Model) int {
 // window, sent to the model and shown as such, and it compacts at a
 // percent of it, 85 unless [model.<id>] or [session]
 // auto_compact_threshold_percent says otherwise (grok-build's
-// resolve_auto_compact_threshold_percent). magpie once wrote the
+// resolve_auto_compact_threshold_percent). eipgam once wrote the
 // threshold as the window, so a 1M model told 300K compacted at 255K and
 // never reached 300K (@xiancrong on X). Rounded down, so it never
 // compacts later than tokens.
@@ -121,11 +121,11 @@ func grokPercent(tokens, window int) int {
 	return max(1, tokens*100/window)
 }
 
-// grokOwnWindow is a context_window the user set in magpie's table for m
-// themselves, which a sync keeps: one other than magpie last gave it. With
-// no record of magpie's (wrote nil, a config an older magpie wrote, or a
+// grokOwnWindow is a context_window the user set in eipgam's table for m
+// themselves, which a sync keeps: one other than eipgam last gave it. With
+// no record of eipgam's (wrote nil, a config an older eipgam wrote, or a
 // model new to the record), one other than the model's whole window, which
-// an older magpie wrote, and other than w, which magpie gives it now.
+// an older eipgam wrote, and other than w, which eipgam gives it now.
 func grokOwnWindow(m catalog.Model, w int, had, wrote map[string]int) (int, bool) {
 	n, ok := had[m.ID]
 	if !ok || n <= 0 || n == w {
@@ -138,8 +138,8 @@ func grokOwnWindow(m catalog.Model, w int, had, wrote map[string]int) (int, bool
 }
 
 // grokOwnPercent is an auto_compact_threshold_percent the user set in
-// magpie's table for m themselves: one other than magpie last gave it, or
-// one magpie gave none (a magpie before this one never wrote the key).
+// eipgam's table for m themselves: one other than eipgam last gave it, or
+// one eipgam gave none (a eipgam before this one never wrote the key).
 func grokOwnPercent(m catalog.Model, had, wrote map[string]int) (int, bool) {
 	n, ok := had[m.ID]
 	if !ok || n < 0 || n > 100 {
@@ -151,16 +151,16 @@ func grokOwnPercent(m catalog.Model, had, wrote map[string]int) (int, bool) {
 	return n, true
 }
 
-// grokHad is what the config holds now: each of magpie's model tables'
+// grokHad is what the config holds now: each of eipgam's model tables'
 // context_window and auto_compact_threshold_percent by catalog id, and
 // whether [session] sets auto_compact_threshold_percent, the user's for
-// every model, which magpie's per-model one would win over.
+// every model, which eipgam's per-model one would win over.
 type grokHad struct {
 	windows, percents map[string]int
 	sessionPercent    bool
 }
 
-// grokWindowsIn is the context_window of each of magpie's model tables in
+// grokWindowsIn is the context_window of each of eipgam's model tables in
 // the config at path, by catalog id.
 func grokWindowsIn(path string) (map[string]int, error) {
 	had, err := grokHadIn(path)
@@ -203,7 +203,7 @@ func grokHadIn(path string) (grokHad, error) {
 	return had, nil
 }
 
-// grokBackend is the api_backend a model of magpie's is asked on: the API
+// grokBackend is the api_backend a model of eipgam's is asked on: the API
 // its provider serves it on natively, so the gateway relays what Grok sent
 // as it is instead of translating Chat Completions. Grok Build takes
 // "chat_completions" (its default), "responses" and "messages" (Anthropic
@@ -248,7 +248,7 @@ func grokIn(at place) *Agent {
 		return false, nil
 	}
 	// keyWindows and keyPercents are the context_window and
-	// auto_compact_threshold_percent magpie last gave each of its models, so
+	// auto_compact_threshold_percent eipgam last gave each of its models, so
 	// one the user set by hand since is told from it and kept
 	keyWindows, keyPercents := "grok:"+path+":windows", "grok:"+path+":percents"
 	writeMagpie := func() error {
@@ -297,7 +297,7 @@ func grokIn(at place) *Agent {
 		}
 		return edit.SetTOMLKey(path, "features", "campaigns", false)
 	}
-	// the efforts of a model through magpie, as its catalog entry has them
+	// the efforts of a model through eipgam, as its catalog entry has them
 	efforts := func(model string) []string {
 		ref, ok := strings.CutPrefix(model, magpieID+"/")
 		if !ok {
@@ -348,7 +348,7 @@ func grokIn(at place) *Agent {
 				return err.Error()
 			}
 			if t == nil {
-				return "Grok Build's [model." + strconv.Quote(v) + "] (config.toml) is gone, so it no longer reaches magpie"
+				return "Grok Build's [model." + strconv.Quote(v) + "] (config.toml) is gone, so it no longer reaches eipgam"
 			}
 			return wiringOff("Grok Build", path, func(k string) (string, bool) { v, ok := t[k]; return v, ok },
 				"base_url", at.v1(), "api_key", at.gwKey())
@@ -403,7 +403,7 @@ func grokIn(at place) *Agent {
 					return edit.SetTOMLKey(path, "models", "default", v)
 				},
 				Options: func(cur map[string]string) []Option {
-					// magpie's rows for the account Grok Build is signed in
+					// eipgam's rows for the account Grok Build is signed in
 					// to are its own models a second time: they fold into
 					// one row (Fate on Discord: grokbuild 在登录态下会加载重复的模型)
 					return joinedVia(grokOwnOptions(dir, path, cur["model"]), grokVia(), [2]string{"grok same", dir + "\x00" + path})
@@ -432,13 +432,13 @@ func grokIn(at place) *Agent {
 }
 
 // grokOwnOptions are the models Grok Build offers its signed-in account: as
-// it last listed them itself (models_cache.json in its home), and as magpie
+// it last listed them itself (models_cache.json in its home), and as eipgam
 // last listed them for a Grok subscription; then the models of the user's
 // own config.toml tables, and the current one. Grok asks for them itself,
 // on its sign-in or their own key, so each says so (Direct): a row not
-// connected listed nothing of Grok's own, only magpie's, unless a Grok
-// subscription was signed in in magpie (EZN7L2C3, #834).
-// grokVia is magpie's rows for Grok Build, each marked Same where it is
+// connected listed nothing of Grok's own, only eipgam's, unless a Grok
+// subscription was signed in in eipgam (EZN7L2C3, #834).
+// grokVia is eipgam's rows for Grok Build, each marked Same where it is
 // the account Grok Build is signed in to, kept as viaMagpieShared keeps
 // its list: a copy marked again for every look was most of what the
 // window's state spent on Grok Build. Read only.

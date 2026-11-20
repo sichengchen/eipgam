@@ -8,19 +8,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
-	"github.com/yetone/magpie/internal/usageapi"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usageapi"
 )
 
-// rdsaltbo on X (#6060): GET /v1/magpie/usage/requests?cursor= reads the
+// rdsaltbo on X (#6060): GET /v1/eipgam/usage/requests?cursor= reads the
 // requests as changes. Over HTTP: ids, the vendor's request id apart from
-// magpie's own, a cursor that resumes with exactly the new rows, the
+// eipgam's own, a cursor that resumes with exactly the new rows, the
 // refusals that are not a silent gap, and a held key's own calls alone.
 func TestUsageRequestsFeedOverGateway(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	usage.ResetFeedForTest()
 	t.Cleanup(usage.ResetFeedForTest)
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +55,7 @@ func TestUsageRequestsFeedOverGateway(t *testing.T) {
 	}
 	read := func(q, from string, hdr ...string) (int, usageapi.FeedResult, string) {
 		t.Helper()
-		c, b := do("GET", "/v1/magpie/usage/requests?"+q, from, nil, hdr...)
+		c, b := do("GET", "/v1/eipgam/usage/requests?"+q, from, nil, hdr...)
 		var out usageapi.FeedResult
 		if c == 200 {
 			if err := json.Unmarshal([]byte(b), &out); err != nil {
@@ -96,7 +96,7 @@ func TestUsageRequestsFeedOverGateway(t *testing.T) {
 
 	// the old shape is unchanged without ?cursor=
 	var old usageapi.Ledger
-	if c, b := do("GET", "/v1/magpie/usage/requests?period=all", "127.0.0.1:5000", nil); c != 200 || json.Unmarshal([]byte(b), &old) != nil || old.Total != 3 || strings.Contains(b, "next_cursor") {
+	if c, b := do("GET", "/v1/eipgam/usage/requests?period=all", "127.0.0.1:5000", nil); c != 200 || json.Unmarshal([]byte(b), &old) != nil || old.Total != 3 || strings.Contains(b, "next_cursor") {
 		t.Fatal("offset mode:", c, b)
 	}
 
@@ -109,12 +109,12 @@ func TestUsageRequestsFeedOverGateway(t *testing.T) {
 		{"cursor=nonsense", 400, "cursor_invalid"},
 		{"cursor=" + p3.NextCursor + "&agent=claude", 400, "cursor_filter_changed"},
 	} {
-		if c, b := do("GET", "/v1/magpie/usage/requests?"+tc.q, "127.0.0.1:5000", nil); c != tc.code || !strings.Contains(b, tc.word) {
+		if c, b := do("GET", "/v1/eipgam/usage/requests?"+tc.q, "127.0.0.1:5000", nil); c != tc.code || !strings.Contains(b, tc.word) {
 			t.Fatal(tc.q, c, b)
 		}
 	}
 	// another computer needs a key
-	if c, _ := do("GET", "/v1/magpie/usage/requests?cursor=start", "192.168.1.9:5000", nil); c != http.StatusUnauthorized {
+	if c, _ := do("GET", "/v1/eipgam/usage/requests?cursor=start", "192.168.1.9:5000", nil); c != http.StatusUnauthorized {
 		t.Fatal("no key:", c)
 	}
 
@@ -123,7 +123,7 @@ func TestUsageRequestsFeedOverGateway(t *testing.T) {
 	if c != 200 || len(held.Rows) != 1 || held.Rows[0].CallerKeyID != keys[1].ID {
 		t.Fatal("held key's feed:", c, b)
 	}
-	if c, _ := do("GET", "/v1/magpie/usage/requests?cursor="+p3.NextCursor, "192.168.1.9:5000", nil, "x-api-key", secrets[1]); c != 400 {
+	if c, _ := do("GET", "/v1/eipgam/usage/requests?cursor="+p3.NextCursor, "192.168.1.9:5000", nil, "x-api-key", secrets[1]); c != 400 {
 		t.Fatal("a cursor of the whole ledger must not resume as a held key's:", c)
 	}
 }

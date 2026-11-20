@@ -21,7 +21,7 @@ const agents = [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/
 
 function server(lang, calls) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents,
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [{ name: "order-tools", transport: "stdio", command: "/Users/me/order-mcp", args: ["--config", "mac.yaml"], env: { TOKEN: "${ORDER_TOKEN}" }, agents: ["claude"] },
@@ -70,13 +70,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           if (lang !== "en") for (const s of [OWN, SYNCED, HINT]) assert.ok(I18N[lang][s], `${lang}: ${s}`);
           const calls = [];
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const rowOf = (n) => page.locator("#view-library .lib-server", { has: page.locator(`.lib-health[data-server="${n}"]`) });
           const ed = page.locator("#modal .lib-editor");

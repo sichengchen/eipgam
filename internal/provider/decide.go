@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/probelog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/probelog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // JevLatest is the Jev a decision provider is asked with when the user
@@ -65,7 +65,7 @@ func googleDecides(base string) bool {
 // /decisions answers gemini-decision-1 on the same key (WangYeruo on X:
 // google/gemini-decision-1 was asked at OpenRouter, the google provider
 // having no decision API); "" for any other. A signed-in account, a
-// plugin, a remote magpie and Vertex say their own.
+// plugin, a remote eipgam and Vertex say their own.
 func (p Provider) googleDecisions() string {
 	if p.Account != nil || p.IsRemoteMagpie() || p.IsVertex() {
 		return ""
@@ -249,7 +249,7 @@ func decisionsID(id string) string { return id + ".decisions" }
 
 // DecisionModels are the decision models listed separately from a provider's
 // conversations: OpenRouter's own list, a Bailian Token Plan's decision
-// model, or a remote magpie's or a plugin's marked models.
+// model, or a remote eipgam's or a plugin's marked models.
 func (p Provider) DecisionModels() []catalog.Model {
 	if p.IsPlugin() {
 		if !p.Decides() {
@@ -264,7 +264,7 @@ func (p Provider) DecisionModels() []catalog.Model {
 }
 
 // decideListDue reports whether p's list of decision models at OpenRouter
-// is still to be fetched, or was fetched before magpie kept each model's
+// is still to be fetched, or was fetched before eipgam kept each model's
 // window and input (they show on the Providers page and the Gateway list
 // only once it is fetched again).
 func (p Provider) decideListDue() bool {
@@ -666,7 +666,7 @@ func Deciders() []Entry {
 
 // OfferedDeciders are the Deciders a routing group's pickers and templates
 // offer: of a provider whose decision models are listed beside its chat
-// models (OpenRouter's, a plugin's, a remote magpie's), with picks saved,
+// models (OpenRouter's, a plugin's, a remote eipgam's), with picks saved,
 // those among the picks alone, as its editor shows the
 // rest unpicked (coeo91 on Discord: two OpenRouter models picked, and a
 // new group's picker listed OpenRouter's twenty-odd decision models after
@@ -742,7 +742,7 @@ func RouteDecider(model string) (Provider, string, error) {
 	if pid, rest, ok := strings.Cut(model, "/"); ok && rest != "" {
 		if p, ok := deciderByID(pid); ok {
 			if !p.On() {
-				return Provider{}, "", decideBadRequest("%s is switched off in magpie", p.Name)
+				return Provider{}, "", decideBadRequest("%s is switched off in eipgam", p.Name)
 			}
 			m, ok := resolveDecideModel(p, rest)
 			if !ok {
@@ -753,7 +753,7 @@ func RouteDecider(model string) (Provider, string, error) {
 	}
 	if p, ok := deciderByID(model); ok {
 		if !p.On() {
-			return Provider{}, "", decideBadRequest("%s is switched off in magpie", p.Name)
+			return Provider{}, "", decideBadRequest("%s is switched off in eipgam", p.Name)
 		}
 		if m := p.Jev(); m != "" {
 			return p, m, nil
@@ -791,9 +791,9 @@ func RouteDecider(model string) (Provider, string, error) {
 		return hits[0].p, hits[0].m, nil
 	case 0:
 		if len(on) == 0 {
-			return Provider{}, "", decideNotFound("magpie has no Jev provider")
+			return Provider{}, "", decideNotFound("eipgam has no Jev provider")
 		}
-		return Provider{}, "", decideNotFound("magpie knows no Jev model %q; name the provider before it, like %s/%s", model, on[0].ID, on[0].Jev())
+		return Provider{}, "", decideNotFound("eipgam knows no Jev model %q; name the provider before it, like %s/%s", model, on[0].ID, on[0].Jev())
 	default:
 		ps := make([]Provider, len(hits))
 		for i, h := range hits {
@@ -813,7 +813,7 @@ func decideAmbiguous(model string, ps []Provider) error {
 }
 
 // decideRouteError is a System One routing failure, with the HTTP status
-// magpie answers.
+// eipgam answers.
 type decideRouteError struct {
 	msg    string
 	status int
@@ -830,7 +830,7 @@ func decideNotFound(format string, a ...any) error {
 }
 
 // DecideRouteStatus is the HTTP status a System One request gets for err
-// from RouteDecider: 400 when the model is named badly, 404 when magpie
+// from RouteDecider: 400 when the model is named badly, 404 when eipgam
 // has no such Jev provider.
 func DecideRouteStatus(err error) int {
 	var e *decideRouteError
@@ -1034,7 +1034,7 @@ func (p Provider) AskSystemOne(ctx context.Context, model string) error {
 	// the model's own headers
 	ctx = WithModel(ctx, p.ID, model)
 	if pat, off := ModelDisabled(p.ID, model); off { // never asked (#1867)
-		return fmt.Errorf("model %s/%s is disabled in magpie (it matches %q)", p.ID, model, pat)
+		return fmt.Errorf("model %s/%s is disabled in eipgam (it matches %q)", p.ID, model, pat)
 	}
 	u, err := p.DecideModelURL(ctx, model)
 	if err != nil {

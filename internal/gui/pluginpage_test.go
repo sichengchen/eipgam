@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // pagePlugins writes plugins.json with the example page plugin
@@ -31,7 +31,7 @@ func pagePlugins(t *testing.T) (on, off string) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	t.Setenv("XDG_DATA_HOME", filepath.Join(h, ".local", "share"))
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	t.Setenv("PATH", "")
 	copyDir := func(to string) {
 		t.Helper()
@@ -102,7 +102,7 @@ func TestPluginPageServedShutIn(t *testing.T) {
 		t.Fatalf("pages: %s %v", w.Body, err)
 	}
 	p := pages[0]
-	if p.Spec != on || p.Key != "plugin-magpie-usage-glance" || p.Title != "Usage glance" || len(p.Reads) != 1 || p.Reads[0] != "usage:summary" {
+	if p.Spec != on || p.Key != "plugin-eipgam-usage-glance" || p.Title != "Usage glance" || len(p.Reads) != 1 || p.Reads[0] != "usage:summary" {
 		t.Fatalf("page %+v", p)
 	}
 	tok := strings.Split(strings.TrimPrefix(p.URL, pluginPagePrefix), "/")[0]
@@ -333,12 +333,12 @@ func TestPluginPageNoAPI(t *testing.T) {
 	}
 }
 
-// magpie web's guard lets a page's files through without the cookie a
+// eipgam web's guard lets a page's files through without the cookie a
 // sandboxed frame never sends, and only those: a made-up token is served
 // nothing, and the rest of the page still wants the key.
 func TestPluginPageWebGuard(t *testing.T) {
 	pagePlugins(t)
-	g := webGuard("magpie_web_1", "key", 0, nil, pageMux())
+	g := webGuard("eipgam_web_1", "key", 0, nil, pageMux())
 	var pages []pluginPage
 	_ = json.Unmarshal(do(pageMux(), httptest.NewRequest("GET", "/api/plugin-pages", nil)).Body.Bytes(), &pages)
 	if len(pages) != 1 {
@@ -355,13 +355,13 @@ func TestPluginPageWebGuard(t *testing.T) {
 	}
 }
 
-// A page's actions (magpie.actions) come with it to the window, one that
+// A page's actions (eipgam.actions) come with it to the window, one that
 // names no title by the page's own in each language; a plugin switched
 // off adds no item to any menu.
 func TestPluginPageActions(t *testing.T) {
 	on, off := pagePlugins(t)
 	for _, dir := range []string{on, off} {
-		pkg := `{"name":"magpie-usage-glance","magpie":{"page":{"title":"Usage glance","titles":{"zh":"用量速览"},"file":"page/index.html"},
+		pkg := `{"name":"eipgam-usage-glance","magpie":{"page":{"title":"Usage glance","titles":{"zh":"用量速览"},"file":"page/index.html"},
 			"actions":[{"id":"check","menu":"provider","title":"Check balance","titles":{"ja":"残高を確認"}},{"id":"logs","menu":"agent"}]}}`
 		if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkg), 0o644); err != nil {
 			t.Fatal(err)
@@ -382,7 +382,7 @@ func TestPluginPageActions(t *testing.T) {
 }
 
 // Behind a reverse proxy that doesn't pass the browser's Host on (nginx's
-// default proxy_pass), the Host magpie sees is its own address. The page's
+// default proxy_pass), the Host eipgam sees is its own address. The page's
 // policy then named an address the browser never used, so every script and
 // style was refused and the page drew as bare HTML (xuanwo on X, Day card).
 // The window names the address the browser used in the frame's address.
@@ -400,9 +400,9 @@ func TestPluginPagePolicyBehindProxyHost(t *testing.T) {
 		r.Host = "127.0.0.1:3437"
 		return do(h, r).Header().Get("Content-Security-Policy")
 	}
-	named := "https://proxy.example.com/_magpie/plugin/" + tok + "/"
-	if p := csp("https://proxy.example.com"); !strings.Contains(p, "script-src https://127.0.0.1:3437/_magpie/plugin/"+tok+"/ http://127.0.0.1:3437/_magpie/plugin/"+tok+"/ "+named+";") ||
-		!strings.Contains(p, "style-src https://127.0.0.1:3437/_magpie/plugin/"+tok+"/ http://127.0.0.1:3437/_magpie/plugin/"+tok+"/ "+named+" 'unsafe-inline'") {
+	named := "https://proxy.example.com/_eipgam/plugin/" + tok + "/"
+	if p := csp("https://proxy.example.com"); !strings.Contains(p, "script-src https://127.0.0.1:3437/_eipgam/plugin/"+tok+"/ http://127.0.0.1:3437/_eipgam/plugin/"+tok+"/ "+named+";") ||
+		!strings.Contains(p, "style-src https://127.0.0.1:3437/_eipgam/plugin/"+tok+"/ http://127.0.0.1:3437/_eipgam/plugin/"+tok+"/ "+named+" 'unsafe-inline'") {
 		t.Fatalf("the proxy's address isn't named: %s", p)
 	}
 	// nothing but a plain http(s) host is carried into a policy
@@ -413,14 +413,14 @@ func TestPluginPagePolicyBehindProxyHost(t *testing.T) {
 		}
 	}
 	// the Host's own address is named once
-	if p := csp("http://127.0.0.1:3437"); strings.Count(p, "127.0.0.1:3437/_magpie/plugin/"+tok+"/") != 10 {
+	if p := csp("http://127.0.0.1:3437"); strings.Count(p, "127.0.0.1:3437/_eipgam/plugin/"+tok+"/") != 10 {
 		t.Fatalf("the Host's address twice: %s", p)
 	}
 }
 
 // Behind a proxy that signs readers in by cookie (Cloudflare Access), a
 // page's sandboxed frame sends no cookie for its stylesheet and scripts,
-// and the proxy turns them away. In magpie web the page comes as one
+// and the proxy turns them away. In eipgam web the page comes as one
 // document, its scripts allowed by hash (xuanwo on X, Day card).
 func TestPluginPageWebComesAsOneDocument(t *testing.T) {
 	on, _ := pagePlugins(t)

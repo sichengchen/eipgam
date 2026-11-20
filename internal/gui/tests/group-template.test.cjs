@@ -46,7 +46,7 @@ const KEYS = ["Hard to strong, easy to cheap", "A hard task goes to the stronges
   "Needs a model cheap beside {name}", "Needs a subscription or token plan", "Plan first", "Subscriptions and token plans first, pay-as-you-go keys only after them", "Fastest first", "Whichever provider has answered fastest lately goes first", "Spread evenly", "The strongest model, taken in turn over every provider and account that serves it", "Add a provider first", "Added {name}", "Start from a template: made of your own models, added in a click", "Edit first", "Templates"];
 
 function serve(lang, posts, mine = 0) {
-  // a group magpie found is no group of the user's: the cards still show
+  // a group eipgam found is no group of the user's: the cards still show
   let list = [{ id: "auto-big", name: "Big", members: ["a/big"], ready: true, auto: true, memberInfo: info(["a/big"]) },
     ...Array.from({ length: mine }, (_, i) => ({ id: `mine-${i}`, name: `Mine ${i}`, members: ["a/big", "a/mini"], routing: "order", ready: true, memberInfo: info(["a/big", "a/mini"]) }))];
   const groups = () => ({ models, pools: [], deciders: [], found: true, groups: list, templates });
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // WebKit's notice when a layout outruns its observers, not a fault
       page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const cards = page.locator(".rt-gtpl-card");
       await cards.nth(5).waitFor();
       await page.waitForTimeout(500);
@@ -166,7 +166,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // enough groups of the user's that the editor, last in the list,
       // opens below the window
       await page.route("**/*", serve(lang, posts, 12));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const btn = page.locator(".rt-gtplbtn");
       await btn.waitFor();
       await page.waitForTimeout(500);
@@ -198,7 +198,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // WebKit's notice when a layout outruns its observers, not a fault
       page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", serve(lang, []));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const smart = page.locator(".rt-gtpl-card[data-kind=smart]");
       await smart.waitFor();
       if (process.env.ARTIFACT_DIR) await page.locator(".rt-gtpl").screenshot({ path: path.join(process.env.ARTIFACT_DIR, `${engine}-${lang}-group-template-cards.png`) });

@@ -11,17 +11,17 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const models = [{ value: "magpie/v/glm", label: "GLM", ref: "v/glm" }, { value: "magpie/v/flash", label: "Flash", ref: "v/flash" }];
+const models = [{ value: "eipgam/v/glm", label: "GLM", ref: "v/glm" }, { value: "eipgam/v/flash", label: "Flash", ref: "v/flash" }];
 const hermes = (id, bots) => ({
   id, name: "Hermes", path: "/test/.hermes/config.yaml", icon: "hermes", wired: true,
   fields: [
-    { key: "model", label: "model", value: "magpie/v/glm", options: models },
-    ...bots.map((b) => ({ key: "profile:" + b, label: b, value: b === "coder" ? "kimi-k3.5" : "magpie/v/glm", quiet: true, options: [{ value: "kimi-k3.5" }, ...models] })),
+    { key: "model", label: "model", value: "eipgam/v/glm", options: models },
+    ...bots.map((b) => ({ key: "profile:" + b, label: b, value: b === "coder" ? "kimi-k3.5" : "eipgam/v/glm", quiet: true, options: [{ value: "kimi-k3.5" }, ...models] })),
   ],
 });
 const fresh = () => ({
   agents: [
-    { id: "hermes", name: "Hermes Agent", path: "/test/.hermes/config.yaml", icon: "hermes", wired: true, fields: [{ key: "model", label: "model", value: "magpie/v/glm", options: models }] },
+    { id: "hermes", name: "Hermes Agent", path: "/test/.hermes/config.yaml", icon: "hermes", wired: true, fields: [{ key: "model", label: "model", value: "eipgam/v/glm", options: models }] },
   ],
   profiles: [],
 });
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, sets));
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       const row = '.row.agent[data-id="hermes"]';
       await page.locator(row).waitFor();
       // geekbb on X: one entry for Hermes; its bots (profiles) are not rows

@@ -11,16 +11,16 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// A Remote magpie's list says which magpie listed each model (the last of
-// its magpie_via). One this magpie listed is this magpie: the provider is
+// A Remote eipgam's list says which eipgam listed each model (the last of
+// its eipgam_via). One this eipgam listed is this eipgam: the provider is
 // left out, and the record outlives the run (Self is made up again each
-// one) until a list another magpie gives, or one from before magpie_via,
+// one) until a list another eipgam gives, or one from before eipgam_via,
 // says otherwise. An empty list or a failed fetch changes nothing, and a
-// provider moved to another address is not this magpie there.
+// provider moved to another address is not this eipgam there.
 func TestRemoteSelfRecord(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()
@@ -42,7 +42,7 @@ func TestRemoteSelfRecord(t *testing.T) {
 	list := func(lister string) string {
 		via := ""
 		if lister != "" {
-			via = `,"magpie_via":["` + lister + `"]`
+			via = `,"eipgam_via":["` + lister + `"]`
 		}
 		return `{"object":"list","data":[{"id":"own/m1","object":"model"` + via + `}]}`
 	}
@@ -62,14 +62,14 @@ func TestRemoteSelfRecord(t *testing.T) {
 	}
 	answer.Store(list("another"))
 	if p := fetch(); p.SelfAnswered() || !p.On() {
-		t.Fatalf("another magpie's list: self %v, on %v", p.SelfAnswered(), p.On())
+		t.Fatalf("another eipgam's list: self %v, on %v", p.SelfAnswered(), p.On())
 	}
 	if _, err := os.Stat(filepath.Join(settings.Dir(), "remote-self.json")); err == nil {
-		t.Error("another magpie's list wrote a record")
+		t.Error("another eipgam's list wrote a record")
 	}
 	answer.Store(list(catalog.Self()))
 	if p := fetch(); !p.SelfAnswered() || !p.SelfLeftOut() || p.On() {
-		t.Fatalf("this magpie's list: self %v, left out %v, on %v", p.SelfAnswered(), p.SelfLeftOut(), p.On())
+		t.Fatalf("this eipgam's list: self %v, left out %v, on %v", p.SelfAnswered(), p.SelfLeftOut(), p.On())
 	}
 	if got := ThroughSelf("rem/own/m1"); got != "own/m1" {
 		t.Errorf("ThroughSelf(rem/own/m1) = %q, want own/m1", got)
@@ -101,17 +101,17 @@ func TestRemoteSelfRecord(t *testing.T) {
 		t.Error("a failed fetch took the record away")
 	}
 	down.Store(false)
-	// moved to another address: not this magpie there
+	// moved to another address: not this eipgam there
 	p, _ := Find(id)
 	moved := *p
 	moved.Chat = "http://192.0.2.1:3425/v1"
 	if moved.SelfAnswered() {
-		t.Error("a provider at another address is taken for this magpie")
+		t.Error("a provider at another address is taken for this eipgam")
 	}
-	// a magpie from before magpie_via names none: no longer this one
+	// a eipgam from before eipgam_via names none: no longer this one
 	answer.Store(list(""))
 	if p := fetch(); p.SelfAnswered() || !p.On() {
-		t.Errorf("a list from before magpie_via: self %v, on %v", p.SelfAnswered(), p.On())
+		t.Errorf("a list from before eipgam_via: self %v, on %v", p.SelfAnswered(), p.On())
 	}
 	if got := ThroughSelf("rem/own/m1"); got != "rem/own/m1" {
 		t.Errorf("ThroughSelf after the record went = %q", got)
@@ -119,7 +119,7 @@ func TestRemoteSelfRecord(t *testing.T) {
 }
 
 // Use it anyway is this computer's own: sync brings the provider from the
-// computer it is not this magpie on, and a backup put back here keeps it.
+// computer it is not this eipgam on, and a backup put back here keeps it.
 func TestMirrorKeepsKeepSelf(t *testing.T) {
 	isolate(t)
 	h := t.TempDir()

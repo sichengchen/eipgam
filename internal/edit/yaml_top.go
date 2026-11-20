@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // GetYAMLTop reads a top-level scalar key from a YAML file. Quoted keys and

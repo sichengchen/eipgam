@@ -15,10 +15,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/routes"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // #5242 (Moody-Sin, Tericerice): requests sent at the same moment to a
@@ -139,7 +139,7 @@ func TestABurstSpreadsOverAGroup(t *testing.T) {
 	}
 }
 
-// #5242 through a remote magpie: the sessions each request names go on
+// #5242 through a remote eipgam: the sessions each request names go on
 // to it, and it spreads them over its provider's keys.
 func TestABurstSpreadsBehindARemoteMagpie(t *testing.T) {
 	const n = 6
@@ -190,7 +190,7 @@ func TestABurstSpreadsOverAPluginsAccounts(t *testing.T) {
 	const n = 6
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Setenv("FAKE_ID", "factory")
 	t.Cleanup(plugin.Settle)
 	h := &held{want: n, all: make(chan struct{}), tried: map[string]int{}}
@@ -384,17 +384,17 @@ func TestMagpieSessionIsTheConversation(t *testing.T) {
 	}
 	// an agent's own session header still names it first
 	in := http.Header{}
-	in.Set(SessionHeader, "magpie-s")
+	in.Set(SessionHeader, "eipgam-s")
 	in.Set("session_id", "agent-s")
 	if got := affinityID(in, nil); got != "agent-s" {
 		t.Errorf("conversation %q, want the agent's own agent-s", got)
 	}
 	// what a vendor or plugin is sent as the conversation never is the caller's
 	in.Del("session_id")
-	if got := conversationID(in, nil); got == "magpie-s" {
+	if got := conversationID(in, nil); got == "eipgam-s" {
 		t.Errorf("conversationID %q: X-Magpie-Session would go upstream", got)
 	}
-	if got := affinityID(in, nil); got != "magpie-s" {
-		t.Errorf("affinityID %q, want magpie-s", got)
+	if got := affinityID(in, nil); got != "eipgam-s" {
+		t.Errorf("affinityID %q, want eipgam-s", got)
 	}
 }

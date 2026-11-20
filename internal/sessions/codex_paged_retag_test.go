@@ -26,7 +26,7 @@ func TestRetagPagedCodexThreads(t *testing.T) {
 	}
 	old := time.Now().Add(-90 * 24 * time.Hour).Truncate(time.Second)
 	os.Chtimes(main, old, old)
-	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model = \"gpt-6\"\nmodel_provider = \"magpie\"\n\n[model_providers.magpie]\nname = \"magpie\"\n"), 0o644)
+	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model = \"gpt-6\"\nmodel_provider = \"eipgam\"\n\n[model_providers.eipgam]\nname = \"eipgam\"\n"), 0o644)
 	p := filepath.Join(codex, "state_5.sqlite")
 	db, err := sql.Open("sqlite", p)
 	if err != nil {
@@ -44,14 +44,14 @@ func TestRetagPagedCodexThreads(t *testing.T) {
 		}
 		return s
 	}
-	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "openai" || m.UsesProvider != "magpie" {
+	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "openai" || m.UsesProvider != "eipgam" {
 		t.Fatalf("listed %q, uses %q", m.Provider, m.UsesProvider)
 	}
-	moved, err := RetagPagedCodexThreads(codex, "openai", "magpie")
+	moved, err := RetagPagedCodexThreads(codex, "openai", "eipgam")
 	if err != nil || len(moved) != 1 || moved[0] != mgCX {
 		t.Fatalf("moved %v, %v", moved, err)
 	}
-	if row(mgCX) != "magpie" || row("legacy-one") != "openai" || row("relayed") != "my-relay" {
+	if row(mgCX) != "eipgam" || row("legacy-one") != "openai" || row("relayed") != "my-relay" {
 		t.Fatalf("rows: %s %s %s", row(mgCX), row("legacy-one"), row("relayed"))
 	}
 	if b2, _ := os.ReadFile(main); !bytes.Equal(b, b2) {
@@ -60,24 +60,24 @@ func TestRetagPagedCodexThreads(t *testing.T) {
 	if fi, _ := os.Stat(main); !fi.ModTime().Equal(old) {
 		t.Fatalf("the file's time: %v", fi.ModTime())
 	}
-	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "magpie" {
-		t.Fatalf("listed on %q after the move, want its row's magpie", m.Provider)
+	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "eipgam" {
+		t.Fatalf("listed on %q after the move, want its row's eipgam", m.Provider)
 	}
 	// an id of another length, and back
-	if moved, err := RetagPagedCodexThreads(codex, "my-relay", "magpie"); err != nil || len(moved) != 1 {
+	if moved, err := RetagPagedCodexThreads(codex, "my-relay", "eipgam"); err != nil || len(moved) != 1 {
 		t.Fatalf("moved %v, %v", moved, err)
 	}
-	if moved, err := RetagPagedCodexThreadIDs(codex, "magpie", "my-relay", []string{"relayed"}); err != nil || len(moved) != 1 || row("relayed") != "my-relay" || row(mgCX) != "magpie" {
+	if moved, err := RetagPagedCodexThreadIDs(codex, "eipgam", "my-relay", []string{"relayed"}); err != nil || len(moved) != 1 || row("relayed") != "my-relay" || row(mgCX) != "eipgam" {
 		t.Fatalf("moved %v, %v: %s %s", moved, err, row("relayed"), row(mgCX))
 	}
-	if moved, err := RetagPagedCodexThreads(codex, "magpie", "openai"); err != nil || len(moved) != 1 || row(mgCX) != "openai" {
+	if moved, err := RetagPagedCodexThreads(codex, "eipgam", "openai"); err != nil || len(moved) != 1 || row(mgCX) != "openai" {
 		t.Fatalf("back: %v, %v, %s", moved, err, row(mgCX))
 	}
 	// a Codex from before history_mode: its threads go by their files
 	if _, err := db.Exec(`ALTER TABLE threads DROP COLUMN history_mode`); err != nil {
 		t.Fatal(err)
 	}
-	if moved, err := RetagPagedCodexThreads(codex, "openai", "magpie"); err != nil || len(moved) != 0 {
+	if moved, err := RetagPagedCodexThreads(codex, "openai", "eipgam"); err != nil || len(moved) != 0 {
 		t.Fatalf("moved %v, %v with no history_mode", moved, err)
 	}
 }

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // A Claude Code in WSL whose transcripts Windows can't read (the distro

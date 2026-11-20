@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// agyCLITurn is a turn as Antigravity CLI sends it on one of magpie's custom
+// agyCLITurn is a turn as Antigravity CLI sends it on one of eipgam's custom
 // models: Gemini's API, its key as x-goog-api-key.
 func agyCLITurn(t *testing.T, s *Server, model string) (int, string) {
 	t.Helper()
@@ -22,7 +22,7 @@ func agyCLITurn(t *testing.T, s *Server, model string) (int, string) {
 	return rec.Code, rec.Body.String()
 }
 
-// agy on magpie's Antigravity uses every Antigravity account that is on
+// agy on eipgam's Antigravity uses every Antigravity account that is on
 // (leoooeth on X asked for several accounts in agy): an account whose
 // quota is spent is passed over for the next, and the turn after asks the
 // one with quota first, while agy itself stays on one model.

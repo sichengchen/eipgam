@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-// Codex keeps its session across a magpie restart (#6392, Norethcy on X):
-// the first call magpie sees is a tools/call under a session id it never
-// started, so the server was initialized as "magpie" and Magpie Memory
+// Codex keeps its session across a eipgam restart (#6392, Norethcy on X):
+// the first call eipgam sees is a tools/call under a session id it never
+// started, so the server was initialized as "eipgam" and eipgam Memory
 // couldn't tell which agent saved. The route is Codex's alone, so the
 // server is started as Codex.
 func TestRunSessionFromBeforeARestartIsCodex(t *testing.T) {
 	srv, logf, _ := runFixture(t)
-	call(t, srv, "magpie-before-restart", `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"x"}}`)
+	call(t, srv, "eipgam-before-restart", `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"x"}}`)
 	if got := startNames(logf); len(got) != 1 || got[0] != "codex" {
 		t.Fatalf("started as %v, want codex", got)
 	}

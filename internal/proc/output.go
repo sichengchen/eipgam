@@ -14,12 +14,12 @@ import (
 // started kept a copy of its stdout (a program a plugin started, a daemon
 // it left behind), so the reader never reached EOF after the command
 // ended, the command was never waited for, and it stayed a <defunct>
-// child of magpie until magpie quit (acezan on Discord: 57 magpie-bun
+// child of eipgam until eipgam quit (acezan on Discord: 57 eipgam-bun
 // after 47 hours). Output's command is waited for the moment it ends;
 // its readers then have OutputGrace to read what it wrote last, and the
 // pipes are closed, which ends their reads.
 type Output struct {
-	// Out and Err are the ends magpie reads.
+	// Out and Err are the ends eipgam reads.
 	Out, Err *os.File
 	ws       []*os.File
 	outDone  chan struct{}
@@ -55,7 +55,7 @@ func (o *Output) OutRead() { o.outOnce.Do(func() { close(o.outDone) }) }
 // ErrRead says Err's reader has read to its end.
 func (o *Output) ErrRead() { o.errOnce.Do(func() { close(o.errDone) }) }
 
-// Close closes the ends magpie reads, for an Output whose command
+// Close closes the ends eipgam reads, for an Output whose command
 // isn't started.
 func (o *Output) Close() {
 	for _, f := range append(o.ws, o.Out, o.Err) {
@@ -126,10 +126,10 @@ func (o *Output) start(cmd *exec.Cmd, start, waitFor func() error) (wait func() 
 	}, nil
 }
 
-// StartReaped starts cmd, which magpie leaves running (it outlives magpie
+// StartReaped starts cmd, which eipgam leaves running (it outlives eipgam
 // or ends on its own), and waits for it in the background, so it is
 // reaped whenever it ends. Process.Release doesn't reap on Unix: a child
-// released and ended stays <defunct> until magpie quits.
+// released and ended stays <defunct> until eipgam quits.
 func StartReaped(cmd *exec.Cmd) error {
 	if err := cmd.Start(); err != nil {
 		return err

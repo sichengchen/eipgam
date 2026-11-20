@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // usage:day (a plugin page's day statement) is the day asked for, in the

@@ -62,7 +62,7 @@ func TestNoticesAreTemplates(t *testing.T) {
 			return true
 		})
 	}
-	// 25 with the agents magpie keeps
+	// 25 with the agents eipgam keeps
 	if checked < 20 {
 		t.Fatalf("checked only %d notices", checked)
 	}

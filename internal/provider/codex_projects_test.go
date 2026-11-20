@@ -153,10 +153,10 @@ func codexStateFixture(t *testing.T, home string, a []byte, b []byte) string {
 }
 
 // Michael25651150 on X: "切换账号 codex 添加的项目丢了 发生过好几次了". The
-// Codex app keeps projects per ChatGPT identity, so magpie's switch to
+// Codex app keeps projects per ChatGPT identity, so eipgam's switch to
 // another account showed that account's empty list. With the app closed,
-// magpie gives the accounts with none the projects: the app, launched and
-// switched as magpie switches it, shows them on every account.
+// eipgam gives the accounts with none the projects: the app, launched and
+// switched as eipgam switches it, shows them on every account.
 func TestCodexProjectsFollowASwitch(t *testing.T) {
 	home := t.TempDir()
 	rec := filepath.Join(t.TempDir(), "codex-projects.json")
@@ -173,7 +173,7 @@ func TestCodexProjectsFollowASwitch(t *testing.T) {
 		if got := app.projects(); !slices.Equal(got, []string{"g-p-1", "p-site"}) {
 			t.Fatalf("a's own projects: %v", got)
 		}
-		app.signIn(to) // magpie's switch: auth.json, the app-server's restart
+		app.signIn(to) // eipgam's switch: auth.json, the app-server's restart
 		if got := app.projects(); !slices.Equal(got, []string{"p-site"}) {
 			t.Fatalf("after the switch the app shows %v, want the user's p-site", got)
 		}
@@ -197,14 +197,14 @@ func TestCodexProjectsFollowASwitch(t *testing.T) {
 	if got := anyStrings(app.state["pinned-thread-ids"]); !slices.Equal(got, []string{"t9"}) {
 		t.Fatalf("b's pins %v", got)
 	}
-	// what magpie doesn't know is kept, and the file as it was beside it
+	// what eipgam doesn't know is kept, and the file as it was beside it
 	var top map[string]any
 	raw, _ := os.ReadFile(path)
 	_ = json.Unmarshal(raw, &top)
 	if top["electron-main-window-bounds"] == nil {
 		t.Fatal("an unrelated key was lost")
 	}
-	if _, err := os.Stat(path + ".magpie-before-projects"); err != nil {
+	if _, err := os.Stat(path + ".eipgam-before-projects"); err != nil {
 		t.Fatalf("no backup: %v", err)
 	}
 	// once more: nothing to do
@@ -334,7 +334,7 @@ func TestCodexProjectsRemovalRemembered(t *testing.T) {
 	shows(t, path, b, "p-new", "p-site2")
 }
 
-// What was removed is unknown when magpie's record can't be read: the
+// What was removed is unknown when eipgam's record can't be read: the
 // file isn't written then.
 func TestCodexProjectsRecordUnreadable(t *testing.T) {
 	home := t.TempDir()
@@ -353,7 +353,7 @@ func TestCodexProjectsRecordUnreadable(t *testing.T) {
 	}
 }
 
-// A file magpie can't read as the app's, or one from an app before
+// A file eipgam can't read as the app's, or one from an app before
 // per-identity projects, is never written.
 func TestCodexProjectsUnknownFileLeft(t *testing.T) {
 	a, b := codexTestAuth("user-a", "acct-a"), codexTestAuth("user-b", "acct-b")
@@ -372,7 +372,7 @@ func TestCodexProjectsUnknownFileLeft(t *testing.T) {
 		if got, _ := os.ReadFile(path); n != 0 || string(got) != body {
 			t.Fatalf("%s: carried to %d, file %s", name, n, got)
 		}
-		if _, err := os.Stat(path + ".magpie-before-projects"); err == nil {
+		if _, err := os.Stat(path + ".eipgam-before-projects"); err == nil {
 			t.Fatalf("%s: a backup written", name)
 		}
 	}
@@ -444,7 +444,7 @@ func anyStrings(v any) []string {
 // linsm66 on X: "为什么codex在触发自动更换账号后侧边栏已有的项目文件夹会消失呢".
 // A switch while the Codex app runs loads the new account's list from the
 // app's memory, so a list not shared before (the app never closed since)
-// shows nothing, and a file written under the app is lost. magpie can't
+// shows nothing, and a file written under the app is lost. eipgam can't
 // quit the app unasked; it says so, until the app is closed and shared.
 func TestCodexAppProjectsShortAfterALiveSwitch(t *testing.T) {
 	home := t.TempDir()
@@ -465,7 +465,7 @@ func TestCodexAppProjectsShortAfterALiveSwitch(t *testing.T) {
 	app.save(t, path)
 	codexProjectsLook(home)
 	if !CodexAppProjectsShort() {
-		t.Fatal("the app now shows b's empty list; magpie should say so")
+		t.Fatal("the app now shows b's empty list; eipgam should say so")
 	}
 	DismissCodexAppProjects()
 	if CodexAppProjectsShort() {

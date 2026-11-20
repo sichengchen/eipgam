@@ -1,6 +1,6 @@
 package provider
 
-// ChatGPT (Codex) and Claude accounts taken out of magpie as a file the
+// ChatGPT (Codex) and Claude accounts taken out of eipgam as a file the
 // tools ImportLogins reads can take back: Sub2API's data export
 // ({type: "sub2api-data", accounts: […]}) in one file, or CLIProxyAPI's
 // auth files ({type: "codex"|"claude", …}) one file a account, as it keeps
@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Export formats.
@@ -72,7 +72,7 @@ func ExportLogins(agent, format string, users []string) (ExportResult, error) {
 	loginsMu.Lock()
 	ls := slices.DeleteFunc(readLogins(), func(l savedLogin) bool { return l.Agent != agent })
 	// the account the agent is signed in to is read from its own file: that
-	// is fresher than magpie's copy
+	// is fresher than eipgam's copy
 	if live, ok := liveLogin(agent); ok {
 		at := slices.IndexFunc(ls, func(l savedLogin) bool { return sameLogin(l, live) })
 		if at < 0 {
@@ -137,7 +137,7 @@ func ExportLogins(agent, format string, users []string) (ExportResult, error) {
 		if err != nil {
 			return ExportResult{}, err
 		}
-		res.Files = []ExportFile{{Name: "magpie-sub2api-" + agent + ".json", Data: append(b, '\n')}}
+		res.Files = []ExportFile{{Name: "eipgam-sub2api-" + agent + ".json", Data: append(b, '\n')}}
 	default:
 		used := map[string]bool{}
 		for _, a := range accts {
@@ -230,7 +230,7 @@ func cliproxyAuth(agent string, a exportAccount) map[string]any {
 	}
 	// CLIProxyAPI's own claude file names no organization, so two seats of
 	// one email would come back as one account; the uuids are extra keys it
-	// leaves alone and magpie reads (loginEntry)
+	// leaves alone and eipgam reads (loginEntry)
 	if a.claudeAccount != "" {
 		m["account_uuid"] = a.claudeAccount
 	}

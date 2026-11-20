@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // TestInstallWordsEveryLanguage: each language the dialog speaks has every
@@ -23,7 +23,7 @@ func TestInstallWordsEveryLanguage(t *testing.T) {
 				t.Errorf("%s %s = %q", lang, name, s)
 			}
 		}
-		dir := `D:\Apps\magpie`
+		dir := `D:\Apps\eipgam`
 		for _, c := range []struct {
 			err  error
 			want []string
@@ -53,7 +53,7 @@ func TestInstallWordsEveryLanguage(t *testing.T) {
 // still there"), so the dialog says, in every language, that the file
 // it was opened from can be deleted once installed, naming it.
 func TestInstallDialogSaysTheDownloadCanGo(t *testing.T) {
-	exe := `D:\Tools\magpie-windows-amd64.exe`
+	exe := `D:\Tools\eipgam-windows-amd64.exe`
 	for lang, w := range installText {
 		got := w.footer(exe)
 		if !strings.Contains(got, exe) || strings.Contains(got, "%!") || strings.Count(got, exe) != 1 {

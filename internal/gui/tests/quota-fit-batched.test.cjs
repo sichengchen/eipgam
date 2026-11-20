@@ -8,7 +8,7 @@
 // before any is changed now. This counts the reads of a layout made after
 // a write a render has made (a forced layout), in both engines and every
 // language, and holds the count to the same at 40 accounts as at 160.
-// MAGPIE_FIT_ASSETS points the page at an older asset tree, to watch this
+// EIPGAM_FIT_ASSETS points the page at an older asset tree, to watch this
 // go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -16,7 +16,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, process.env.MAGPIE_FIT_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.EIPGAM_FIT_ASSETS || "../assets");
 const at = (ms) => new Date(Date.now() + ms).toISOString();
 const quotasOf = (n) => Array.from({ length: n }, (_, i) => ({
   provider: "claude", name: "Claude", icon: "claudecode-color", user: `user${i}@example.com`,
@@ -55,8 +55,8 @@ function serve(lang, quotas) {
 // any waiting is one that lays the page out again
 const watch = () => {
   try {
-    localStorage.setItem("magpie.usageOpen", JSON.stringify(["claude"]));
-    localStorage.setItem("magpie.usageAcctsAll", JSON.stringify(["claude"]));
+    localStorage.setItem("eipgam.usageOpen", JSON.stringify(["claude"]));
+    localStorage.setItem("eipgam.usageAcctsAll", JSON.stringify(["claude"]));
   } catch {}
   const w = (window.__fit = { on: false, forced: 0, heights: 0 });
   const mo = new MutationObserver(() => {});
@@ -88,7 +88,7 @@ async function forcedLayouts(browser, lang, n) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.addInitScript(watch);
   await page.route("**/*", serve(lang, quotasOf(n)));
-  await page.goto("http://magpie.test/?view=usage&tab=usage");
+  await page.goto("http://eipgam.test/?view=usage&tab=usage");
   await page.waitForFunction((n) => document.querySelectorAll("#subscriptionUsage .quota-windows:not(.brief)").length >= n, n);
   const seen = await page.evaluate(async () => {
     const w = window.__fit;

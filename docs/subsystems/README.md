@@ -15,10 +15,10 @@ These pages describe current responsibilities, runtime paths, state, and contrac
 | Connecting an agent's config to the gateway, drift, disconnect, WSL twins | [Agent wiring](agent-wiring.md) |
 | Providers, keys, subscription accounts, refresh and allowance | [Providers and accounts](providers-accounts.md) |
 | Instructions, MCP servers, skills and RTK written into agents | [Library](library.md) |
-| One MCP server, magpie, given to every agent in place of the Library's servers | [MCP router](mcp-router.md) |
+| One MCP server, eipgam, given to every agent in place of the Library's servers | [MCP router](mcp-router.md) |
 | Memory shared by every agent: the memory MCP server, the digest in instructions, the Memory tab | [Memory](memory.md) |
-| One skill, magpie-skills, listing the Library's skills in place of each agent's own | [Skill router](skill-router.md) |
-| Tray, panel, window, `magpie web` and the page's JSON API | [GUI app shell](gui-shell.md) |
+| One skill, eipgam-skills, listing the Library's skills in place of each agent's own | [Skill router](skill-router.md) |
+| Tray, panel, window, `eipgam web` and the page's JSON API | [GUI app shell](gui-shell.md) |
 | Encrypted backups and setup synchronization over WebDAV, S3 or GitHub | [Sync and backup](sync-backup.md) |
 
 A subsystem can span several packages or repositories. Its reference describes the behavior those parts provide together; it does not need to list every function.

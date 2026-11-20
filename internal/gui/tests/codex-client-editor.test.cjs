@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The Codex client (which Codex magpie's ChatGPT requests say they come
+// The Codex client (which Codex eipgam's ChatGPT requests say they come
 // from) is set in Agents › Codex, which gateway mode has not, so the Codex
 // provider's editor has it under Advanced too: the same app menu (no
 // native select), posted to settings/codex-client on its own, the button
@@ -80,7 +80,7 @@ for (const engine of engines) {
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, gateway, posted));
         const advanced = async (id) => {
-          await page.goto(`http://magpie.test/?view=providers&edit=${id}`);
+          await page.goto(`http://eipgam.test/?view=providers&edit=${id}`);
           const adv = page.locator(".editor details.advanced");
           await adv.waitFor({ timeout: 60000 });
           if (!(await adv.evaluate((d) => d.open))) await adv.locator(":scope > summary").click();

@@ -48,7 +48,7 @@ func TestModelsListMediaOnlyWhenAsked(t *testing.T) {
 		"claude-desktop": {"User-Agent": "Mozilla/5.0 (Macintosh) Claude/1.2.3 Chrome/130"},
 		"science":        {"X-Anthropic-Surface": "operon", "User-Agent": "Anthropic/JS 0.60.0"},
 		"cursor":         {"User-Agent": "Cursor-CLI/1.0"},
-		"magpie-key":     {"Authorization": "Bearer magpie-acme"},
+		"eipgam-key":     {"Authorization": "Bearer eipgam-acme"},
 		// Cherry Studio's list has them, its text list (a paste) not
 		"cherry-text": {"User-Agent": cherryUA},
 	}
@@ -109,10 +109,10 @@ func TestModelsListMediaOnlyWhenAsked(t *testing.T) {
 // it, as Cherry Studio 2.1.2 sends it.
 const cherryUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) CherryStudio/2.1.2 Chrome/146.0.7680.65 Electron/44.2.0 Safari/537.36"
 
-// pingqipai3 on X: with magpie as a provider in Cherry Studio, its image
+// pingqipai3 on X: with eipgam as a provider in Cherry Studio, its image
 // models weren't there to pick. Cherry can't ask for ?kind=, and reads an
 // image model's kind itself (its model registry, by the id's last
-// segment), so its plain list, by its User-Agent or by the key magpie's
+// segment), so its plain list, by its User-Agent or by the key eipgam's
 // Cherry link gives it, has the image and video models, each with the
 // endpoints a new-api provider of Cherry's reads; its chat models stay.
 func TestModelsListMediaForCherryStudio(t *testing.T) {
@@ -126,7 +126,7 @@ func TestModelsListMediaForCherryStudio(t *testing.T) {
 	for name, header := range map[string]map[string]string{
 		"user-agent": {"User-Agent": cherryUA},
 		"cherry 1.x": {"User-Agent": "CherryStudio/1.5"},
-		"link's key": {"Authorization": "Bearer magpie-cherrystudio"},
+		"link's key": {"Authorization": "Bearer eipgam-cherrystudio"},
 	} {
 		r := httptest.NewRequest("GET", "/v1/models", nil)
 		for k, v := range header {

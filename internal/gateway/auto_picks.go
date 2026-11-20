@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/steady"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/steady"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// What magpie picks by itself for a slot Settings leaves on Automatic —
+// What eipgam picks by itself for a slot Settings leaves on Automatic —
 // Image recognition (AutoVision), Web search (autoSearcher), Image
 // generation (AutoDrawer) and Video generation (AutoVideomaker) — is held
 // to the provider it first picked, in auto-picks.json, while that provider
@@ -66,7 +66,7 @@ func autoPicksPath() string {
 }
 
 // heldPicks is auto-picks.json as last read, read again when the file
-// changed: by another magpie, or a test's new HOME.
+// changed: by another eipgam, or a test's new HOME.
 var heldPicks struct {
 	sync.Mutex
 	from string
@@ -111,7 +111,7 @@ func writeAutoPicks(f autoPicksFile) {
 	if err != nil {
 		return
 	}
-	tmp := target + ".magpie-tmp"
+	tmp := target + ".eipgam-tmp"
 	if os.WriteFile(tmp, b, 0o600) != nil {
 		return
 	}
@@ -136,7 +136,7 @@ func heldPick(slot string) string {
 	return *f.slot(slot)
 }
 
-// settlePick holds slot to pid, magpie's pick, when the slot holds none or
+// settlePick holds slot to pid, eipgam's pick, when the slot holds none or
 // the one it holds can't serve it any more (held, as heldPick said, and
 // heldServes whether it still can). A pick of "" holds nothing.
 func settlePick(slot, held string, heldServes bool, pid string) {
@@ -185,7 +185,7 @@ func pickBefore(rows []string, current string) string {
 // seedAutoPicks begins the holds, once: each Automatic slot is held to
 // what served it before a provider added later took it over, when the
 // ledger shows it (pickBefore) and that provider can still serve it, else
-// to magpie's pick now. Image recognition and Web search are read from the
+// to eipgam's pick now. Image recognition and Web search are read from the
 // ledger's Image description and Web search calls; Image and Video
 // generation, which no call of the ledger names as Automatic's, are held
 // to the pick now.
@@ -238,7 +238,7 @@ func seesFor(pid string) bool {
 }
 
 // searcherFor is whether provider pid could be Web search's Automatic
-// pick: it is on, magpie may search with it, and it has a model to.
+// pick: it is on, eipgam may search with it, and it has a model to.
 func searcherFor(pid string) bool {
 	p, err := provider.Find(pid)
 	if err != nil || !p.On() || searchRank(*p) < 0 {

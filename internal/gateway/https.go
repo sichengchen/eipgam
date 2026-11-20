@@ -15,35 +15,35 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/mtls"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // HTTPS for other computers without a certificate of a server's own
-// (zhangly1 on X: Claude on another computer on the LAN needed magpie at
+// (zhangly1 on X: Claude on another computer on the LAN needed eipgam at
 // https://). With Settings → Network and sharing → HTTPS on (settings
-// HTTPS, `magpie https on`) the listener serves other computers TLS as it
+// HTTPS, `eipgam https on`) the listener serves other computers TLS as it
 // does with --tls-cert or mTLS (tlsListener), with:
 //
-//   - the certificate and key imported in Settings or by `magpie https
+//   - the certificate and key imported in Settings or by `eipgam https
 //     import` (kept in <dir>/https, read again when they change), else
-//   - one magpie's own CA (the mTLS one, made on first use) signs in
+//   - one eipgam's own CA (the mTLS one, made on first use) signs in
 //     memory for this computer's names, its addresses and the name the
 //     client dialled (ownServerCert).
 //
-// --tls-cert comes before both. Another computer trusts magpie's CA once:
+// --tls-cert comes before both. Another computer trusts eipgam's CA once:
 // Settings saves it to Downloads, and the gateway serves it at CAPath to
 // any address it lets in, without a key (a CA's certificate is public;
 // its fingerprint is shown beside it to check the copy by). This computer,
 // and a WSL distro's agent, may still call plain http://.
 
-// HTTPSOn: other computers reach magpie over https:// (the setting).
+// HTTPSOn: other computers reach eipgam over https:// (the setting).
 func HTTPSOn() bool { return settings.Shared().HTTPS }
 
-// CAPath is where the gateway serves magpie's CA, for another computer to
+// CAPath is where the gateway serves eipgam's CA, for another computer to
 // trust: .crt, which Windows opens to install and Debian's
 // update-ca-certificates reads, as PEM, which every system takes.
-const CAPath = "/magpie-ca.crt"
+const CAPath = "/eipgam-ca.crt"
 
 // FromThisComputer: r came from this computer, over loopback or to one of
 // its own addresses, not through a proxy.
@@ -85,8 +85,8 @@ func importedCert() *certFiles {
 }
 
 // settingsCert is the server certificate without --tls-cert: the one
-// imported, else one magpie's CA signs. An imported pair that doesn't
-// load (its files removed by hand, say) gives way to magpie's own rather
+// imported, else one eipgam's CA signs. An imported pair that doesn't
+// load (its files removed by hand, say) gives way to eipgam's own rather
 // than ending every handshake.
 func settingsCert(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	if f := importedCert(); f != nil {
@@ -94,7 +94,7 @@ func settingsCert(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 		if err == nil {
 			return c, nil
 		}
-		log.Printf("TLS: the imported certificate in %s doesn't load (%v): serving one magpie's CA signs", httpsDir(), err)
+		log.Printf("TLS: the imported certificate in %s doesn't load (%v): serving one eipgam's CA signs", httpsDir(), err)
 	}
 	return ownServerCert(hello)
 }
@@ -172,7 +172,7 @@ func ImportCert(files ...[]byte) error {
 	return mtls.WriteFile(filepath.Join(httpsDir(), "cert.pem"), chain, 0o644)
 }
 
-// RemoveImportedCert goes back to the certificate magpie's CA signs.
+// RemoveImportedCert goes back to the certificate eipgam's CA signs.
 func RemoveImportedCert() error {
 	for _, f := range []string{"cert.pem", "key.pem"} {
 		if err := os.Remove(filepath.Join(httpsDir(), f)); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -184,7 +184,7 @@ func RemoveImportedCert() error {
 
 // CertInfo is what the certificate other computers are served says.
 type CertInfo struct {
-	// From: "files" (--tls-cert, File naming it), "imported" or "magpie"
+	// From: "files" (--tls-cert, File naming it), "imported" or "eipgam"
 	// (its CA's)
 	From   string    `json:"from"`
 	File   string    `json:"file,omitempty"`
@@ -207,7 +207,7 @@ func ServedCert() (CertInfo, error) {
 		info.From = "imported"
 		c, err = f.get(nil)
 	} else {
-		info.From = "magpie"
+		info.From = "eipgam"
 		c, err = ownServerCert(nil)
 	}
 	if err != nil {
@@ -231,7 +231,7 @@ func ServedCert() (CertInfo, error) {
 	return info, nil
 }
 
-// CA is magpie's CA certificate as PEM, made on first use, and its
+// CA is eipgam's CA certificate as PEM, made on first use, and its
 // SHA-256 fingerprint (AB:CD:…), which a copy fetched over the network
 // is checked by.
 func CA() (pemBytes []byte, fingerprint string, err error) {
@@ -253,27 +253,27 @@ func Fingerprint(der []byte) string {
 	return strings.Join(parts, ":")
 }
 
-// caFileOpen: r asks for magpie's CA, which is answered without a key.
+// caFileOpen: r asks for eipgam's CA, which is answered without a key.
 func caFileOpen(r *http.Request) bool {
 	return r.URL.Path == CAPath && r.URL.RawPath == "" && (r.Method == http.MethodGet || r.Method == http.MethodHead)
 }
 
-// caFile serves magpie's CA. One isn't made for a request: until HTTPS or
+// caFile serves eipgam's CA. One isn't made for a request: until HTTPS or
 // mTLS made it, there is none to trust.
 func (s *Server) caFile(w http.ResponseWriter, r *http.Request) {
 	st := MTLSStore()
 	if !st.HasCA() {
-		http.Error(w, "this magpie has no CA yet: turn on HTTPS in Settings → Network and sharing (magpie https on)", http.StatusNotFound)
+		http.Error(w, "this eipgam has no CA yet: turn on HTTPS in Settings → Network and sharing (eipgam https on)", http.StatusNotFound)
 		return
 	}
 	b, err := os.ReadFile(st.CAFile())
 	if err != nil {
-		http.Error(w, "magpie's CA can't be read: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "eipgam's CA can't be read: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	h := w.Header()
 	h.Set("Content-Type", "application/x-x509-ca-cert")
-	h.Set("Content-Disposition", `attachment; filename="magpie-ca.crt"`)
+	h.Set("Content-Disposition", `attachment; filename="eipgam-ca.crt"`)
 	h.Set("X-Content-Type-Options", "nosniff")
 	h.Set("Cache-Control", "no-cache")
 	w.Write(b)

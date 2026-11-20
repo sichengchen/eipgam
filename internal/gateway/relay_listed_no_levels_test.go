@@ -7,12 +7,12 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // @czhhcz on X: a relay's /v1/models lists a Claude model with
-// reasoning_levels: [], and `magpie model efforts` offers it the model's
+// reasoning_levels: [], and `eipgam model efforts` offers it the model's
 // own five from models.dev. Those are what a request is fitted to: Claude
 // Code's max and xhigh reach the relay as asked, with nothing for the user
 // to set.

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A plugin that leaves out used says nothing of how much of a window is
@@ -80,13 +80,13 @@ func TestRoutingKnowsNoAccountThatSaidNoShare(t *testing.T) {
 }
 
 // Through the plugin host: a window the plugin sent without used reaches
-// magpie as no share (host.js's usageOf passes it on as null, not 0), so
+// eipgam as no share (host.js's usageOf passes it on as null, not 0), so
 // the card tells its text and routing doesn't know the account, while a
 // window that said used 0 is a reading at 0 (#3650).
 func TestPluginHostPassesAnAbsentUsedOn(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	windows := filepath.Join(t.TempDir(), "windows.json")
 	if err := os.WriteFile(windows, []byte(`{
 		"a@fake": [{"name": "Credits", "display": "0 / 5000"}],

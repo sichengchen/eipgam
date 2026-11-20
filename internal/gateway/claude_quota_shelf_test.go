@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // quotaClaude stands in for Claude Code, keeping its session as it does
@@ -100,7 +100,7 @@ func newQuotaHarness(t *testing.T, mode string, resetsAt int64) *quotaHarness {
 	if mode != "print" {
 		claudeTUIRuns = true
 		t.Cleanup(func() { claudeTUIRuns = false })
-		helper := filepath.Join(t.TempDir(), "magpie")
+		helper := filepath.Join(t.TempDir(), "eipgam")
 		testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift
@@ -186,11 +186,11 @@ func quotaKeepsSession(t *testing.T, mode string) {
 	for try := 1; try <= 2; try++ {
 		before := time.Now()
 		if code, msg := h.try(conv); code != 429 {
-			t.Fatalf("try %d while limited: %d %s\nmagpie log:\n%s", try, code, msg, logs.String())
+			t.Fatalf("try %d while limited: %d %s\neipgam log:\n%s", try, code, msg, logs.String())
 		}
 		s := h.shelved()
 		if s == nil {
-			t.Fatalf("try %d: no session kept for the turn asked again after the reset\nmagpie log:\n%s", try, logs.String())
+			t.Fatalf("try %d: no session kept for the turn asked again after the reset\neipgam log:\n%s", try, logs.String())
 		}
 		// the reset the rate_limit_event said, an hour over
 		if want := reset.Add(quotaShelfMargin); s.until.Before(want.Add(-time.Minute)) || s.until.After(want.Add(time.Minute)) {
@@ -206,7 +206,7 @@ func quotaKeepsSession(t *testing.T, mode string) {
 	}
 	kept := h.shelved().session
 
-	// magpie restarts while the account waits for its reset
+	// eipgam restarts while the account waits for its reset
 	h.s.subscription.abortAll()
 	if b, err := os.ReadFile(shelfPath()); err != nil || !strings.Contains(string(b), kept) || !strings.Contains(string(b), `"until"`) {
 		t.Fatalf("the kept session isn't saved for the next start: %v %s", err, b)
@@ -217,11 +217,11 @@ func quotaKeepsSession(t *testing.T, mode string) {
 	before := h.toldBy()
 	code, answer = h.try(conv)
 	if code != 200 || !strings.Contains(answer, "turn 1") {
-		t.Fatalf("the turn after the reset: %d %s\nmagpie log:\n%s", code, answer, logs.String())
+		t.Fatalf("the turn after the reset: %d %s\neipgam log:\n%s", code, answer, logs.String())
 	}
 	run := h.runSince(before)
 	if !strings.Contains(run, "--resume "+kept) {
-		t.Fatalf("the turn after the reset didn't resume the kept session %s:\n%s\nmagpie log:\n%s", kept, run, logs.String())
+		t.Fatalf("the turn after the reset didn't resume the kept session %s:\n%s\neipgam log:\n%s", kept, run, logs.String())
 	}
 	if strings.Contains(run, "ALPHA") || !strings.Contains(run, "BETA") {
 		t.Fatalf("the turn after the reset was told more than the turn:\n%s", run)

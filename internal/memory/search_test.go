@@ -17,7 +17,7 @@ func TestSearch(t *testing.T) {
 	fresh(t)
 	save(t, "The user prefers tabs over spaces in Go", Preference, Global, "go")
 	save(t, "Run heavy commands on mote, not on this machine", Rule, Global, "infra")
-	save(t, "测试在 mote 上跑", Rule, "project:github.com/yetone/magpie")
+	save(t, "测试在 mote 上跑", Rule, "project:github.com/sichengchen/eipgam")
 	save(t, "Spaces, not tabs, in YAML", Preference, Global)
 
 	ids := func(hs []Hit) []string {
@@ -31,7 +31,7 @@ func TestSearch(t *testing.T) {
 	if err != nil || len(hits) == 0 || hits[0].Text != "The user prefers tabs over spaces in Go" {
 		t.Fatalf("tabs go: %v, %v", ids(hits), err)
 	}
-	if hits, _ := Search(Query{Text: "测试"}); len(hits) != 1 || hits[0].Scope != "project:github.com/yetone/magpie" {
+	if hits, _ := Search(Query{Text: "测试"}); len(hits) != 1 || hits[0].Scope != "project:github.com/sichengchen/eipgam" {
 		t.Fatalf("测试: %v", ids(hits))
 	}
 	if hits, _ := Search(Query{Text: "mote", Scopes: []string{Global}}); len(hits) != 1 || !strings.HasPrefix(hits[0].Text, "Run heavy") {

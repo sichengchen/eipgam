@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // tokenFreeAnyOf400 is a relay's (sub2api, TokenFree) answer passing Google's

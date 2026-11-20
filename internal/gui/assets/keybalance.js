@@ -1,6 +1,6 @@
 // A key's balance typed by hand (tenacious_eagle on Discord): for a key
-// whose vendor tells no balance magpie can read, the user types what the
-// vendor's page says is left, and magpie counts down from it by what its
+// whose vendor tells no balance eipgam can read, the user types what the
+// vendor's page says is left, and eipgam counts down from it by what its
 // own usage prices the calls it sends on the key (provider/
 // key_balance_own.go). Typing it again sets it anew. It may be typed in
 // yuan ("¥100", or picked beside the field, which starts at the balance's
@@ -56,8 +56,8 @@ function keyBalancePill(p, k) {
   // two or more wrap at a grant on a narrow row (a class, not :has(),
   // which Safari before 15.4 drops the rule for)
   pill.classList.toggle("abal-many", pill.querySelectorAll(".abal-exp").length > 1);
-  pill.title = !b ? t("Type what the vendor's page says this key has left, and magpie counts down from it as it sends requests")
-    : [t("An estimate: {set} from {when}, less {spent} magpie counted spent on this key since, at the prices the Usage page shows. Click to change", {
+  pill.title = !b ? t("Type what the vendor's page says this key has left, and eipgam counts down from it as it sends requests")
+    : [t("An estimate: {set} from {when}, less {spent} eipgam counted spent on this key since, at the prices the Usage page shows. Click to change", {
         set: moneyText(b.set, cny), when: new Date(b.from || b.at).toLocaleString(intlLang()),
         spent: moneyText(b.spent || 0, false) + (cny && b.rate ? " (" + moneyText((b.spent || 0) * b.rate, true) + ")" : ""),
       }),

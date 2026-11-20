@@ -1,14 +1,14 @@
 package gateway
 
 import (
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // thinkingNeededRefusal is an upstream turning away a Messages request
 // whose thinking isn't "enabled": thinking left out, or turned off as
-// magpie does for a vendor's model asked without it
+// eipgam does for a vendor's model asked without it
 // (thinkingOffUnlessAsked). A relay in front of such a model answered
 // Claude Desktop's connection check ({"max_tokens":1,"messages":[…"."]},
 // no thinking) with `thinking.type must be "enabled"` (cybercaius on
@@ -52,7 +52,7 @@ func withThinkingEnabled(body []byte) ([]byte, bool) {
 }
 
 // markThinkingNeeded remembers that p takes model only thinking, by the
-// name magpie knows it and the vendor's (wire), which forwardOnce reads
+// name eipgam knows it and the vendor's (wire), which forwardOnce reads
 // off the body: thinking enabled isn't made adaptive for it there, as
 // "enabled" is the one type it said it takes.
 func (s *Server) markThinkingNeeded(p provider.Provider, to provider.Protocol, model, wire string) {

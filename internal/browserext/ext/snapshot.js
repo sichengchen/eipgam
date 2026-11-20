@@ -43,12 +43,12 @@ const CLICKABLE = `(() => {
   return out;
 })()`;
 
-// run in magpie's isolated world: the page's scripts never see the scan
+// run in eipgam's isolated world: the page's scripts never see the scan
 async function clickables(t) {
   const tabId = t.tabId;
   const ids = new Set();
   try {
-    const r = await evaluate(t, CLICKABLE, "magpie-snap");
+    const r = await evaluate(t, CLICKABLE, "eipgam-snap");
     if (!r || !r.objectId) return ids;
     const props = await send(tabId, "Runtime.getProperties", { objectId: r.objectId, ownProperties: true });
     await Promise.all(props.result.filter((p) => /^\d+$/.test(p.name) && p.value && p.value.objectId).map(async (p) => {
@@ -58,7 +58,7 @@ async function clickables(t) {
       } catch {}
     }));
   } catch {} finally {
-    send(tabId, "Runtime.releaseObjectGroup", { objectGroup: "magpie-snap" }).catch(() => {});
+    send(tabId, "Runtime.releaseObjectGroup", { objectGroup: "eipgam-snap" }).catch(() => {});
   }
   return ids;
 }
@@ -235,7 +235,7 @@ export async function take(t, opts = {}) {
   const inFrame = (at, depth) => {
     const f = inner.get(at);
     if (!f) {
-      lines.push("  ".repeat(depth) + "- (a frame this browser doesn't let Magpie Browser read: use a screenshot, or open its address in a tab)");
+      lines.push("  ".repeat(depth) + "- (a frame this browser doesn't let eipgam Browser read: use a screenshot, or open its address in a tab)");
       return;
     }
     const was = [sid, frame];

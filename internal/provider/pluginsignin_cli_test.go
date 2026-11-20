@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A plugin whose vendor CLI isn't on this machine had its sign-in fail
-// with "install it first", which a magpie in a container can't do
+// with "install it first", which a eipgam in a container can't do
 // (niuniu_8964 on X: agy-cli in Docker). A plugin that says how to install
 // it (auth.cli) has its sign-in install it first, "Installing {name}…" as
 // a moved built-in's, then open the page; one whose install fails says
@@ -21,7 +21,7 @@ import (
 func TestPluginSignInInstallsItsCLI(t *testing.T) {
 	bun := testenv.Bun(t)
 	home := claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()

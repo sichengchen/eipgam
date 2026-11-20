@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // ModelTier is the tier the user gave provider pid's model, "" for none. It
@@ -41,7 +41,7 @@ func CleanModelTier(v string) (string, error) {
 
 // SetModelTier sends a provider's model, spelt "provider/model", at tier:
 // "" the usual speed, "priority" or "ultrafast" (see CleanModelTier). Only
-// a model with a fast mode magpie can ask for (CanFast) is switched on.
+// a model with a fast mode eipgam can ask for (CanFast) is switched on.
 func SetModelTier(ref, tier string) error {
 	_, err := setModelTier(ref, tier)
 	return err
@@ -58,7 +58,7 @@ func setModelTier(ref, tier string) (bool, error) {
 	key := p.ID + "/" + model
 	if tier != "" {
 		if !CanFast(*p, model) {
-			return false, fmt.Errorf("%s has no fast mode magpie can ask for", key)
+			return false, fmt.Errorf("%s has no fast mode eipgam can ask for", key)
 		}
 		if tier == "ultrafast" && !CanUltra(*p, model) {
 			return false, fmt.Errorf("no account offers Ultrafast on %s", key)

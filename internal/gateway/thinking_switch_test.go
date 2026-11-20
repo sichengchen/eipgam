@@ -12,7 +12,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // GgbondHi6930 on X: a Smart group of DeepSeek and a Claude API key.

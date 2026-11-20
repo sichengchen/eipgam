@@ -12,11 +12,11 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/oidc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/oidc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func gatewayKeys(args []string) error { return gatewayKeysTo(os.Stdout, args) }
@@ -119,7 +119,7 @@ func gatewayKeysTo(out io.Writer, args []string) error {
 		args = args[:2]
 	}
 	if (action == "list" && len(args) != 1) || (action != "list" && len(args) != 2) {
-		return fmt.Errorf("usage: magpie gateway-key list | add <name> [--key <value> | --key -] [--read-only] | rotate <id> [--key <value> | --key -] | remove <id> | limit <id> [list | off | reset [<n>] | remove <n> | [add] day|week|month|total|<N>d|<N>h|account [--account <provider>/<account> --window <name>] [--tokens N] [--cost USD] [--cache-reads] [--model <provider>/<model>|<provider>/* ...]] | models <id> [all | <provider>/<model>|<provider>/*|re:<regexp> ...] | aliases <id> [none | <name>=<provider>/<model> ...] | accounts <id> [all | <provider>/<account>|<provider>/<key id> ...] | quotas <id> [on | off] | concurrency <id> [<n> | off] | tier <id> [follow | standard | fast | ultrafast] | redact <id> [follow | on | off] | mcp <id> [all | none | <server>|<server>/<tool> ...] | access <id> [read-only | full] | move <id> <place> | issue --ttl <duration> [--name <name>] [--models a,b] [--accounts a,b] [--tokens N] [--cost USD] [--read-only] [--from <id>] | issuer <id> [on | off] | oidc [list | add --key <id> --repo owner/name … | remove <rule id>]")
+		return fmt.Errorf("usage: eipgam gateway-key list | add <name> [--key <value> | --key -] [--read-only] | rotate <id> [--key <value> | --key -] | remove <id> | limit <id> [list | off | reset [<n>] | remove <n> | [add] day|week|month|total|<N>d|<N>h|account [--account <provider>/<account> --window <name>] [--tokens N] [--cost USD] [--cache-reads] [--model <provider>/<model>|<provider>/* ...]] | models <id> [all | <provider>/<model>|<provider>/*|re:<regexp> ...] | aliases <id> [none | <name>=<provider>/<model> ...] | accounts <id> [all | <provider>/<account>|<provider>/<key id> ...] | quotas <id> [on | off] | concurrency <id> [<n> | off] | tier <id> [follow | standard | fast | ultrafast] | redact <id> [follow | on | off] | mcp <id> [all | none | <server>|<server>/<tool> ...] | access <id> [read-only | full] | move <id> <place> | issue --ttl <duration> [--name <name>] [--models a,b] [--accounts a,b] [--tokens N] [--cost USD] [--read-only] [--from <id>] | issuer <id> [on | off] | oidc [list | add --key <id> --repo owner/name … | remove <rule id>]")
 	}
 	switch action {
 	case "list", "add", "rotate", "remove":
@@ -193,21 +193,21 @@ func gatewayKeysTo(out io.Writer, args []string) error {
 
 // gatewayKeyLimit shows or sets a key's limits (#585, several since #2227):
 //
-//	magpie gateway-key limit <id> [list]                what it has used of each limit
-//	magpie gateway-key limit <id> off                   no limit
-//	magpie gateway-key limit <id> day|week|month|total|<N>d|<N>h|account [--account <provider>/<account> --window <name>] [--tokens N] [--cost USD] [--cache-reads]
+//	eipgam gateway-key limit <id> [list]                what it has used of each limit
+//	eipgam gateway-key limit <id> off                   no limit
+//	eipgam gateway-key limit <id> day|week|month|total|<N>d|<N>h|account [--account <provider>/<account> --window <name>] [--tokens N] [--cost USD] [--cache-reads]
 //	                                                    its only limit, or the one of several with that window
-//	magpie gateway-key limit <id> add <window> [--tokens N] [--cost USD] [--cache-reads] [--model openai/*]
+//	eipgam gateway-key limit <id> add <window> [--tokens N] [--cost USD] [--cache-reads] [--model openai/*]
 //	                                                    one more limit; a request passes only while every one has something left
-//	magpie gateway-key limit <id> remove <n>            take off the nth limit
-//	magpie gateway-key limit <id> reset [<n>]           count from 0 again, every limit or the nth; a new N-day or N-hour cycle from now (#1509)
+//	eipgam gateway-key limit <id> remove <n>            take off the nth limit
+//	eipgam gateway-key limit <id> reset [<n>]           count from 0 again, every limit or the nth; a new N-day or N-hour cycle from now (#1509)
 //
 // --model (again, or a comma list) makes a limit count only those models'
 // calls, "<provider>/<model>" or "<provider>/*" (zola_xynb on X): a cap for
 // one model or provider under one key, the key's other models served once
 // it is spent.
 func gatewayKeyLimit(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key limit <id> [off | reset [<n>] | remove <n> | [add] day|week|month|total|<N>d|<N>h|account [--account <provider>/<account> --window <name>] [--tokens N] [--cost USD] [--cache-reads] [--model <provider>/<model>|<provider>/* ...]]")
+	usage := fmt.Errorf("usage: eipgam gateway-key limit <id> [off | reset [<n>] | remove <n> | [add] day|week|month|total|<N>d|<N>h|account [--account <provider>/<account> --window <name>] [--tokens N] [--cost USD] [--cache-reads] [--model <provider>/<model>|<provider>/* ...]]")
 	if len(args) == 0 {
 		return usage
 	}
@@ -229,7 +229,7 @@ func gatewayKeyLimit(out io.Writer, args []string) error {
 				if len(have) == 0 {
 					return nil, fmt.Errorf("%s has no limit", keys[i].Name)
 				}
-				return nil, fmt.Errorf("a limit's number is 1 to %d, as `magpie gateway-key limit %s` lists them: %q", len(have), id, v)
+				return nil, fmt.Errorf("a limit's number is 1 to %d, as `eipgam gateway-key limit %s` lists them: %q", len(have), id, v)
 			}
 			n--
 			return &n, nil
@@ -297,7 +297,7 @@ func gatewayKeyLimit(out io.Writer, args []string) error {
 						strings.EqualFold(l.Account, v.Account) && strings.EqualFold(l.AccountWindow, v.AccountWindow)
 				})
 				if n < 0 {
-					return fmt.Errorf("%s has %d limits and none %s%s: add one with `magpie gateway-key limit %s add %s ...`, or take one off with `remove <n>`", keys[i].Name, len(have), perPhrase(v), onModels(v), id, args[1])
+					return fmt.Errorf("%s has %d limits and none %s%s: add one with `eipgam gateway-key limit %s add %s ...`, or take one off with `remove <n>`", keys[i].Name, len(have), perPhrase(v), onModels(v), id, args[1])
 				}
 				in.Index = &n
 			}
@@ -499,12 +499,12 @@ func parseKeyLimit(window string, rest []string, usage error) (*access.Limit, er
 
 // gatewayKeyModels shows or sets the models a key may use (#882):
 //
-//	magpie gateway-key models <id>                          the models it may use
-//	magpie gateway-key models <id> all                      every model
-//	magpie gateway-key models <id> openai/gpt-5 anthropic/*  only these
+//	eipgam gateway-key models <id>                          the models it may use
+//	eipgam gateway-key models <id> all                      every model
+//	eipgam gateway-key models <id> openai/gpt-5 anthropic/*  only these
 func gatewayKeyModels(out io.Writer, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: magpie gateway-key models <id> [all | <provider>/<model>|<provider>/* ...]")
+		return fmt.Errorf("usage: eipgam gateway-key models <id> [all | <provider>/<model>|<provider>/* ...]")
 	}
 	id := args[0]
 	if len(args) > 1 {
@@ -540,12 +540,12 @@ func gatewayKeyModels(out io.Writer, args []string) error {
 // gatewayKeyAliases shows or sets the names a key gives models
 // (tsingchao on X):
 //
-//	magpie gateway-key aliases <id>                          its names
-//	magpie gateway-key aliases <id> none                     no names
-//	magpie gateway-key aliases <id> fast=openai/gpt-5 ...    only these
+//	eipgam gateway-key aliases <id>                          its names
+//	eipgam gateway-key aliases <id> none                     no names
+//	eipgam gateway-key aliases <id> fast=openai/gpt-5 ...    only these
 func gatewayKeyAliases(out io.Writer, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: magpie gateway-key aliases <id> [none | <name>=<provider>/<model> ...]")
+		return fmt.Errorf("usage: eipgam gateway-key aliases <id> [none | <name>=<provider>/<model> ...]")
 	}
 	id := args[0]
 	if len(args) > 1 {
@@ -554,7 +554,7 @@ func gatewayKeyAliases(out io.Writer, args []string) error {
 			for _, a := range args[1:] {
 				name, target, ok := strings.Cut(a, "=")
 				if !ok {
-					return fmt.Errorf("usage: magpie gateway-key aliases <id> [none | <name>=<provider>/<model> ...]: %q has no =", a)
+					return fmt.Errorf("usage: eipgam gateway-key aliases <id> [none | <name>=<provider>/<model> ...]: %q has no =", a)
 				}
 				as[name] = target
 			}
@@ -587,13 +587,13 @@ func gatewayKeyAliases(out io.Writer, args []string) error {
 // gatewayKeyMCP shows or sets the MCP servers and tools a key may use
 // (wakaka on Discord):
 //
-//	magpie gateway-key mcp <id>                        what it may use
-//	magpie gateway-key mcp <id> all                    every server
-//	magpie gateway-key mcp <id> none                   no server
-//	magpie gateway-key mcp <id> github fs/read_file    only these
+//	eipgam gateway-key mcp <id>                        what it may use
+//	eipgam gateway-key mcp <id> all                    every server
+//	eipgam gateway-key mcp <id> none                   no server
+//	eipgam gateway-key mcp <id> github fs/read_file    only these
 func gatewayKeyMCP(out io.Writer, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: magpie gateway-key mcp <id> [all | none | <server>|<server>/<tool> ...]")
+		return fmt.Errorf("usage: eipgam gateway-key mcp <id> [all | none | <server>|<server>/<tool> ...]")
 	}
 	id := args[0]
 	if len(args) > 1 {
@@ -604,7 +604,7 @@ func gatewayKeyMCP(out io.Writer, args []string) error {
 		case len(l) == 1 && l[0] == "none":
 			l = []string{access.NoMCP}
 		case slices.ContainsFunc(l, func(e string) bool { return strings.HasPrefix(e, "-") }):
-			return fmt.Errorf("usage: magpie gateway-key mcp <id> [all | none | <server>|<server>/<tool> ...]")
+			return fmt.Errorf("usage: eipgam gateway-key mcp <id> [all | none | <server>|<server>/<tool> ...]")
 		}
 		if _, err := access.Update("mcp-key", access.Change{Key: id, MCP: l}); err != nil {
 			return err
@@ -666,7 +666,7 @@ func limitWords(k access.Key, now time.Time) string {
 // key may use every other, those signed in later too.
 func gatewayKeyAccounts(out io.Writer, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: magpie gateway-key accounts <id> [all | <provider>/<account>|<provider>/<key id>|<provider>/!<account>|@<group>|!@<group> ...]")
+		return fmt.Errorf("usage: eipgam gateway-key accounts <id> [all | <provider>/<account>|<provider>/<key id>|<provider>/!<account>|@<group>|!@<group> ...]")
 	}
 	id := args[0]
 	if len(args) > 1 {
@@ -705,13 +705,13 @@ func gatewayKeyAccounts(out io.Writer, args []string) error {
 // may name, "@<group>" or "!@<group>" (LeiWang_2000 on X): a named set of
 // accounts of any providers, read by every key naming it as it is now.
 //
-//	magpie gateway-key groups                          each group
-//	magpie gateway-key groups add <name> <account>...  a new one
-//	magpie gateway-key groups set <group> <account>... its accounts
-//	magpie gateway-key groups rename <group> <name>
-//	magpie gateway-key groups remove <group>           unless a key names it
+//	eipgam gateway-key groups                          each group
+//	eipgam gateway-key groups add <name> <account>...  a new one
+//	eipgam gateway-key groups set <group> <account>... its accounts
+//	eipgam gateway-key groups rename <group> <name>
+//	eipgam gateway-key groups remove <group>           unless a key names it
 func gatewayKeyGroups(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key groups [list | add <name> <provider>/<account>... | set <group> <provider>/<account>... | rename <group> <name> | remove <group>]")
+	usage := fmt.Errorf("usage: eipgam gateway-key groups [list | add <name> <provider>/<account>... | set <group> <provider>/<account>... | rename <group> <name> | remove <group>]")
 	if len(args) == 0 {
 		args = []string{"list"}
 	}
@@ -725,7 +725,7 @@ func gatewayKeyGroups(out io.Writer, args []string) error {
 			return err
 		}
 		if len(gs) == 0 {
-			_, err = fmt.Fprintln(out, "No account groups. Add one: magpie gateway-key groups add <name> <provider>/<account>...")
+			_, err = fmt.Fprintln(out, "No account groups. Add one: eipgam gateway-key groups add <name> <provider>/<account>...")
 			return err
 		}
 		names := provider.AccountNames()
@@ -747,7 +747,7 @@ func gatewayKeyGroups(out io.Writer, args []string) error {
 		if err != nil {
 			return err
 		}
-		_, err = fmt.Fprintf(out, "Added the account group %s (%s). Use it: magpie gateway-key accounts <id> @%s, or !@%s to keep it out\n", g.Name, g.ID, g.ID, g.ID)
+		_, err = fmt.Fprintf(out, "Added the account group %s (%s). Use it: eipgam gateway-key accounts <id> @%s, or !@%s to keep it out\n", g.Name, g.ID, g.ID, g.ID)
 		return err
 	case "set", "rename":
 		if len(args) < 2 || (args[0] == "rename" && len(args) != 3) {
@@ -792,10 +792,10 @@ func gatewayKeyGroups(out io.Writer, args []string) error {
 // or accounts is told the quotas of what it may use (#2216): the cards of
 // the providers whose every model it may use, of its accounts and keys.
 //
-//	magpie gateway-key quotas <id>         whether it is
-//	magpie gateway-key quotas <id> on|off  tell it them, or none (#1981)
+//	eipgam gateway-key quotas <id>         whether it is
+//	eipgam gateway-key quotas <id> on|off  tell it them, or none (#1981)
 func gatewayKeyQuotas(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key quotas <id> [on | off]")
+	usage := fmt.Errorf("usage: eipgam gateway-key quotas <id> [on | off]")
 	if len(args) == 0 || len(args) > 2 {
 		return usage
 	}
@@ -830,10 +830,10 @@ func gatewayKeyQuotas(out io.Writer, args []string) error {
 // be in flight at once (young02036 on Discord); one more waits its turn,
 // as over a provider's concurrency:
 //
-//	magpie gateway-key concurrency <id>           its cap, or none
-//	magpie gateway-key concurrency <id> <n>|off   at most n at once, or no cap
+//	eipgam gateway-key concurrency <id>           its cap, or none
+//	eipgam gateway-key concurrency <id> <n>|off   at most n at once, or no cap
 func gatewayKeyConcurrency(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key concurrency <id> [<n> | off], n a whole number from 1 to %d", access.MaxKeyConcurrency)
+	usage := fmt.Errorf("usage: eipgam gateway-key concurrency <id> [<n> | off], n a whole number from 1 to %d", access.MaxKeyConcurrency)
 	if len(args) == 0 || len(args) > 2 {
 		return usage
 	}
@@ -875,11 +875,11 @@ func gatewayKeyConcurrency(out io.Writer, args []string) error {
 // gatewayKeyTier shows or sets the service tier a key's OpenAI-API requests
 // are sent at whatever the client asked (JackyFill on X):
 //
-//	magpie gateway-key tier <id>                                    its tier
-//	magpie gateway-key tier <id> follow|standard|fast|ultrafast     set it
+//	eipgam gateway-key tier <id>                                    its tier
+//	eipgam gateway-key tier <id> follow|standard|fast|ultrafast     set it
 func gatewayKeyTier(out io.Writer, args []string) error {
 	if len(args) == 0 || len(args) > 2 {
-		return fmt.Errorf("usage: magpie gateway-key tier <id> [follow | standard | fast | ultrafast]")
+		return fmt.Errorf("usage: eipgam gateway-key tier <id> [follow | standard | fast | ultrafast]")
 	}
 	id := args[0]
 	if len(args) == 2 {
@@ -904,11 +904,11 @@ func gatewayKeyTier(out io.Writer, args []string) error {
 // gatewayKeyRedact shows or sets whether Settings › Privacy's masking
 // applies to a key's requests (access.Key.Redact, y0ngb1n on X):
 //
-//	magpie gateway-key redact <id>                      its setting
-//	magpie gateway-key redact <id> follow|on|off        set it
+//	eipgam gateway-key redact <id>                      its setting
+//	eipgam gateway-key redact <id> follow|on|off        set it
 func gatewayKeyRedact(out io.Writer, args []string) error {
 	if len(args) == 0 || len(args) > 2 {
-		return fmt.Errorf("usage: magpie gateway-key redact <id> [follow | on | off]")
+		return fmt.Errorf("usage: eipgam gateway-key redact <id> [follow | on | off]")
 	}
 	id := args[0]
 	if len(args) == 2 {
@@ -930,7 +930,7 @@ func gatewayKeyRedact(out io.Writer, args []string) error {
 	return err
 }
 
-// accessWord is a key's access as the list says it: "browser" (Magpie
+// accessWord is a key's access as the list says it: "browser" (eipgam
 // Browser's, access.Key.Browser), "read-only" or "full".
 func accessWord(k access.Key) string {
 	if k.Browser {
@@ -943,12 +943,12 @@ func accessWord(k access.Key) string {
 }
 
 // gatewayKeyAccess shows or sets whether a key may use models or only
-// read magpie's stats (Steven on Discord: a desk display's key):
+// read eipgam's stats (Steven on Discord: a desk display's key):
 //
-//	magpie gateway-key access <id>                 which it has
-//	magpie gateway-key access <id> read-only|full  quotas and usage alone, or what its other limits let it
+//	eipgam gateway-key access <id>                 which it has
+//	eipgam gateway-key access <id> read-only|full  quotas and usage alone, or what its other limits let it
 func gatewayKeyAccess(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key access <id> [read-only | full]")
+	usage := fmt.Errorf("usage: eipgam gateway-key access <id> [read-only | full]")
 	if len(args) == 0 || len(args) > 2 {
 		return usage
 	}
@@ -971,7 +971,7 @@ func gatewayKeyAccess(out io.Writer, args []string) error {
 	}
 	k := keys[i]
 	if k.Browser {
-		_, err = fmt.Fprintf(out, "%s: Magpie Browser's, it connects the extension and uses no model, MCP server, stats or write\n", k.Name)
+		_, err = fmt.Fprintf(out, "%s: eipgam Browser's, it connects the extension and uses no model, MCP server, stats or write\n", k.Name)
 	} else if k.ReadOnly {
 		_, err = fmt.Fprintf(out, "%s: read-only, it reads quotas and usage and uses no model, MCP server or write\n", k.Name)
 	} else {
@@ -981,14 +981,14 @@ func gatewayKeyAccess(out io.Writer, args []string) error {
 }
 
 // gatewayKeyAdmin shows or sets whether a key may call the management API
-// (/v1/magpie/admin/), which adds, changes and removes providers, accounts
+// (/v1/eipgam/admin/), which adds, changes and removes providers, accounts
 // and gateway keys:
 //
-//	magpie gateway-key admin <id> [off | local | any]
+//	eipgam gateway-key admin <id> [off | local | any]
 //
 // Only here and in the app: the API itself never sets it.
 func gatewayKeyAdmin(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key admin <id> [off | local | any]")
+	usage := fmt.Errorf("usage: eipgam gateway-key admin <id> [off | local | any]")
 	if len(args) == 0 || len(args) > 2 {
 		return usage
 	}
@@ -1012,24 +1012,24 @@ func gatewayKeyAdmin(out io.Writer, args []string) error {
 	k := keys[i]
 	switch k.Admin {
 	case access.AdminLocal:
-		_, err = fmt.Fprintf(out, "%s: may manage magpie (/v1/magpie/admin/) from this computer\n", k.Name)
+		_, err = fmt.Fprintf(out, "%s: may manage eipgam (/v1/eipgam/admin/) from this computer\n", k.Name)
 	case access.AdminAny:
-		_, err = fmt.Fprintf(out, "%s: may manage magpie (/v1/magpie/admin/) from this computer and, while magpie is shared, from other machines\n", k.Name)
+		_, err = fmt.Fprintf(out, "%s: may manage eipgam (/v1/eipgam/admin/) from this computer and, while eipgam is shared, from other machines\n", k.Name)
 	default:
-		_, err = fmt.Fprintf(out, "%s: may not manage magpie\n", k.Name)
+		_, err = fmt.Fprintf(out, "%s: may not manage eipgam\n", k.Name)
 	}
 	return err
 }
 
 // gatewayKeyMove puts a key at a place in the list, counted from 1 as
-// `magpie gateway-key list` shows them, the order the app's Gateway page
+// `eipgam gateway-key list` shows them, the order the app's Gateway page
 // lists them in too, where a key is dragged to its place (alextjy on
 // Discord):
 //
-//	magpie gateway-key move <id> <place>
+//	eipgam gateway-key move <id> <place>
 func gatewayKeyMove(out io.Writer, args []string) error {
 	if len(args) != 2 {
-		return fmt.Errorf("usage: magpie gateway-key move <id> <place>")
+		return fmt.Errorf("usage: eipgam gateway-key move <id> <place>")
 	}
 	keys, err := access.List()
 	if err != nil {
@@ -1037,7 +1037,7 @@ func gatewayKeyMove(out io.Writer, args []string) error {
 	}
 	n, err := strconv.Atoi(args[1])
 	if err != nil || n < 1 || n > len(keys) {
-		return fmt.Errorf("a key's place is 1 to %d, as `magpie gateway-key list` lists them: %q", len(keys), args[1])
+		return fmt.Errorf("a key's place is 1 to %d, as `eipgam gateway-key list` lists them: %q", len(keys), args[1])
 	}
 	n--
 	if _, err := access.Update("move-key", access.Change{Key: args[0], Index: &n}); err != nil {
@@ -1051,13 +1051,13 @@ func gatewayKeyMove(out io.Writer, args []string) error {
 // agent, that stops working by itself), and prints its secret alone so a
 // script can take it:
 //
-//	magpie gateway-key issue --ttl 1h [--name n] [--models a,b] [--accounts a,b]
+//	eipgam gateway-key issue --ttl 1h [--name n] [--models a,b] [--accounts a,b]
 //	                         [--tokens N] [--cost USD] [--read-only] [--from <id>]
 //
 // --from issues it under a key that may issue keys (issuer <id> on), held
-// to that key as POST /v1/magpie/keys with it would be.
+// to that key as POST /v1/eipgam/keys with it would be.
 func gatewayKeyIssue(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key issue --ttl <duration, e.g. 1h> [--name <name>] [--models <provider>/<model>,...] [--accounts <provider>/<account>,...] [--tokens N] [--cost USD] [--read-only] [--from <id>] [--json]")
+	usage := fmt.Errorf("usage: eipgam gateway-key issue --ttl <duration, e.g. 1h> [--name <name>] [--models <provider>/<model>,...] [--accounts <provider>/<account>,...] [--tokens N] [--cost USD] [--read-only] [--from <id>] [--json]")
 	var in access.Issue
 	asJSON := false
 	list := func(v string) []string {
@@ -1131,11 +1131,11 @@ func gatewayKeyIssue(out io.Writer, args []string) error {
 }
 
 // gatewayKeyIssuer shows or sets whether a key may issue short-lived keys
-// under itself (POST /v1/magpie/keys with it), each held to it:
+// under itself (POST /v1/eipgam/keys with it), each held to it:
 //
-//	magpie gateway-key issuer <id> [on | off]
+//	eipgam gateway-key issuer <id> [on | off]
 func gatewayKeyIssuer(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key issuer <id> [on | off]")
+	usage := fmt.Errorf("usage: eipgam gateway-key issuer <id> [on | off]")
 	if len(args) == 0 || len(args) > 2 {
 		return usage
 	}
@@ -1167,11 +1167,11 @@ func gatewayKeyIssuer(out io.Writer, args []string) error {
 // gatewayKeyOIDC writes the rules a CI job's OIDC token is traded for a
 // key by (#4531, package oidc):
 //
-//	magpie gateway-key oidc [list]
-//	magpie gateway-key oidc add --key <id> --repo owner/name [--owner o] [--ref r] [--environment e] [--claim name=value]… [--ttl 1h] [--issuer URL] [--audience aud]
-//	magpie gateway-key oidc remove <rule id>
+//	eipgam gateway-key oidc [list]
+//	eipgam gateway-key oidc add --key <id> --repo owner/name [--owner o] [--ref r] [--environment e] [--claim name=value]… [--ttl 1h] [--issuer URL] [--audience aud]
+//	eipgam gateway-key oidc remove <rule id>
 func gatewayKeyOIDC(out io.Writer, args []string) error {
-	usage := fmt.Errorf("usage: magpie gateway-key oidc [list] | add --key <id> --repo owner/name [--owner <owner>] [--ref refs/heads/main] [--environment <name>] [--claim name=value]… [--ttl 1h] [--issuer URL] [--audience <aud>] | remove <rule id>")
+	usage := fmt.Errorf("usage: eipgam gateway-key oidc [list] | add --key <id> --repo owner/name [--owner <owner>] [--ref refs/heads/main] [--environment <name>] [--claim name=value]… [--ttl 1h] [--issuer URL] [--audience <aud>] | remove <rule id>")
 	if len(args) == 0 || args[0] == "list" {
 		if len(args) > 1 {
 			return usage
@@ -1181,7 +1181,7 @@ func gatewayKeyOIDC(out io.Writer, args []string) error {
 			return err
 		}
 		if len(rules) == 0 {
-			_, err = fmt.Fprintln(out, "No OIDC rules: magpie gateway-key oidc add --key <id> --repo owner/name")
+			_, err = fmt.Fprintln(out, "No OIDC rules: eipgam gateway-key oidc add --key <id> --repo owner/name")
 			return err
 		}
 		w := tabwriter.NewWriter(out, 0, 4, 2, ' ', 0)
@@ -1259,6 +1259,6 @@ func gatewayKeyOIDC(out io.Writer, args []string) error {
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Fprintf(out, "OIDC rule %s: a token from %s with audience %s and %d claim(s) matched gets a key issued under %s, living up to %s.\nPOST it to /v1/magpie/keys/oidc as Authorization: Bearer <token>.\n", r.ID, r.Issuer, r.Audience, len(r.Claims), r.Key, r.Lifetime())
+	_, err = fmt.Fprintf(out, "OIDC rule %s: a token from %s with audience %s and %d claim(s) matched gets a key issued under %s, living up to %s.\nPOST it to /v1/eipgam/keys/oidc as Authorization: Bearer <token>.\n", r.ID, r.Issuer, r.Audience, len(r.Claims), r.Key, r.Lifetime())
 	return err
 }

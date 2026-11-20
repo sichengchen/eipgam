@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 func noHolder(context.Context, int) (proc.Holder, bool) { return proc.Holder{}, false }
@@ -70,7 +70,7 @@ func TestWhoHolds(t *testing.T) {
 }
 
 // A bind that fails because the port is taken says who has it in the error
-// that the log and `magpie serve` print, and an unread holder leaves the
+// that the log and `eipgam serve` print, and an unread holder leaves the
 // error as the system worded it.
 func TestListenErrorNamesTheHolder(t *testing.T) {
 	taken, err := net.Listen("tcp", "127.0.0.1:0")
@@ -78,7 +78,7 @@ func TestListenErrorNamesTheHolder(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer taken.Close()
-	t.Setenv("MAGPIE_ADDR", taken.Addr().String())
+	t.Setenv("EIPGAM_ADDR", taken.Addr().String())
 	_, port, _ := net.SplitHostPort(taken.Addr().String())
 
 	wasHolder, wasServes := readHolder, readServes
@@ -126,12 +126,12 @@ func TestAddrInUseIsOnlyThat(t *testing.T) {
 
 // Norethcy on X: the service of the same install, starting after an update,
 // held the port and the page said another program had it. A holder that is
-// this install's own magpie is marked, one that isn't, not.
+// this install's own eipgam is marked, one that isn't, not.
 func TestWhoHoldsOwnMagpie(t *testing.T) {
 	was := readOwn
 	defer func() { readOwn = was }()
 	svc := func(context.Context, int) (proc.Holder, bool) {
-		return proc.Holder{PID: 47634, Name: "magpie", Path: "/home/u/.local/bin/magpie"}, true
+		return proc.Holder{PID: 47634, Name: "eipgam", Path: "/home/u/.local/bin/eipgam"}, true
 	}
 	readOwn = func(h proc.Holder) bool { return h.PID == 47634 }
 	b, ok := whoHolds(context.Background(), "3425", svc, noServe)
@@ -140,7 +140,7 @@ func TestWhoHoldsOwnMagpie(t *testing.T) {
 	}
 	readOwn = func(proc.Holder) bool { return false }
 	if b, _ := whoHolds(context.Background(), "3425", svc, noServe); b.Own {
-		t.Fatalf("another magpie marked own: %+v", b)
+		t.Fatalf("another eipgam marked own: %+v", b)
 	}
 }
 
@@ -148,11 +148,11 @@ func TestWhoHoldsOwnMagpie(t *testing.T) {
 // binary are one.
 func TestSameProgramFollowsLinks(t *testing.T) {
 	d := t.TempDir()
-	bin := filepath.Join(d, "magpie-real")
+	bin := filepath.Join(d, "eipgam-real")
 	if err := os.WriteFile(bin, []byte("x"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	link := filepath.Join(d, "magpie")
+	link := filepath.Join(d, "eipgam")
 	if err := os.Symlink(bin, link); err != nil {
 		t.Skip("no symlinks here")
 	}

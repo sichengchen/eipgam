@@ -14,10 +14,10 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const HOME = "/Users/mem";
 const library = {
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [{ id: "codex", name: "Codex", icon: "", instructions: `${HOME}/.codex/AGENTS.md` }],
   instructions: { shared: "", sets: [{ id: "default", name: "", active: true, text: "" }], agents: [] },
   foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
@@ -67,13 +67,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of langs) for (const width of [980, 420]) {
       await t.test(`${lang} ${width}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height: 860 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "memory"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "memory"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(8000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         // search by meaning on, one memory of two read, nothing reading it
-        // now (magpie reads new ones once a minute), and a run learning
+        // now (eipgam reads new ones once a minute), and a run learning
         // from conversations under way: both polled every 2s
         const st = {
           mem: memories(),
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           semReads: 0, distReads: 0,
         };
         await page.route("**/*", server(lang, st));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const row = page.locator(`${view} .lib-mems .lib-mem[data-id="a1"]`);
         await row.waitFor();

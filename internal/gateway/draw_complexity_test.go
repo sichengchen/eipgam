@@ -12,14 +12,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // GPT Image 2.6's complexity and 2.5's quality xhigh and max reach an
 // images API that takes OpenAI's fields, from JSON, a form and an edit.
 func TestDrawComplexityAndQualityReachTheVendor(t *testing.T) {
 	s, e := easeled(t)
-	code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"art/gpt-image-1","prompt":"a magpie","quality":"xhigh","complexity":"low"}`)
+	code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"art/gpt-image-1","prompt":"a eipgam","quality":"xhigh","complexity":"low"}`)
 	if code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -33,7 +33,7 @@ func TestDrawComplexityAndQualityReachTheVendor(t *testing.T) {
 		var buf bytes.Buffer
 		mw := multipart.NewWriter(&buf)
 		mw.WriteField("model", "art/gpt-image-1")
-		mw.WriteField("prompt", "a magpie")
+		mw.WriteField("prompt", "a eipgam")
 		mw.WriteField("quality", "max")
 		mw.WriteField("complexity", "medium")
 		if image {
@@ -65,7 +65,7 @@ func TestDrawComplexityAndQualityReachTheVendor(t *testing.T) {
 	}
 
 	// none given, none sent: the vendor's default stands
-	postImages(t, s, "/v1/images/generations", "application/json", `{"model":"art/gpt-image-1","prompt":"a magpie"}`)
+	postImages(t, s, "/v1/images/generations", "application/json", `{"model":"art/gpt-image-1","prompt":"a eipgam"}`)
 	if sent := e.got("/v1/images/generations"); len(sent) != 3 || strings.Contains(sent[2], "complexity") {
 		t.Fatalf("vendor was sent %v", sent)
 	}
@@ -91,7 +91,7 @@ func TestCodexDrawSendsNoComplexity(t *testing.T) {
 	provider.CodexBase = up.URL + "/backend-api/codex"
 	defer func() { provider.CodexBase = was }()
 	s := New()
-	if code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"codex/gpt-image-2","prompt":"a magpie","complexity":"low"}`); code != 200 {
+	if code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"codex/gpt-image-2","prompt":"a eipgam","complexity":"low"}`); code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}
 	img := "data:image/png;base64," + base64.StdEncoding.EncodeToString(pngBytes)

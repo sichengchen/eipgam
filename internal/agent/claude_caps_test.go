@@ -5,18 +5,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // TestClaudeModelCapabilities: Claude Code on a gateway (Claude Desktop's
 // Code tab) takes no model it doesn't know for one with xhigh, so
-// "ultracode": true did nothing on magpie's models (#430). magpie tells it
+// "ultracode": true did nothing on eipgam's models (#430). eipgam tells it
 // in CLAUDE_CODE_MODEL_CAPABILITIES what each of its models (and Desktop's
-// mythos-magpie-<number> for it) can do, only the levels the model has, the
+// mythos-eipgam-<number> for it) can do, only the levels the model has, the
 // model Claude Code is set to first; a value of the user's is left alone,
-// and magpie's goes when Claude Code is taken off magpie. One that reaches
+// and eipgam's goes when Claude Code is taken off eipgam. One that reaches
 // max without xhigh (GLM, DeepSeek) is said to have xhigh too: the gateway
 // runs it at max, and Claude Code's Ultracode needs xhigh_effort
 // (leesunrise2364 on Discord, Ultracode missing on Desktop).
@@ -95,9 +95,9 @@ func TestClaudeModelCapabilities(t *testing.T) {
 		t.Errorf("switched to Deep: %s", caps())
 	}
 
-	// Claude Desktop on magpie: its ids for magpie's models, as Claude Code
+	// Claude Desktop on eipgam: its ids for eipgam's models, as Claude Code
 	// gets them from its Code tab
-	if err := claudeDesktop(home).Field("provider").Set("magpie"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	var deep provider.Entry
@@ -107,7 +107,7 @@ func TestClaudeModelCapabilities(t *testing.T) {
 		}
 	}
 	alias := gateway.DesktopID(deep)
-	if !strings.HasPrefix(alias, "mythos-magpie-") || segs()[alias] != "effort,xhigh_effort,max_effort" {
+	if !strings.HasPrefix(alias, "mythos-eipgam-") || segs()[alias] != "effort,xhigh_effort,max_effort" {
 		t.Errorf("Desktop's %s: %s", alias, caps())
 	}
 	if err := claudeDesktop(home).Field("provider").Set(""); err != nil {
@@ -117,15 +117,15 @@ func TestClaudeModelCapabilities(t *testing.T) {
 		t.Errorf("Desktop off kept its ids: %s", caps())
 	}
 
-	// off magpie, and back to Claude Code as installed: magpie's value goes
+	// off eipgam, and back to Claude Code as installed: eipgam's value goes
 	set("model", "claude-opus-4-8")
 	if caps() != "" {
-		t.Fatalf("Claude's own model kept magpie's capabilities: %q", caps())
+		t.Fatalf("Claude's own model kept eipgam's capabilities: %q", caps())
 	}
 	set("model", "v/mid")
 	set("model", "")
 	if caps() != "" {
-		t.Fatalf("reset kept magpie's capabilities: %q", caps())
+		t.Fatalf("reset kept eipgam's capabilities: %q", caps())
 	}
 
 	// the user's own value is theirs, through a switch and back
@@ -210,7 +210,7 @@ func TestClaudeCapabilitiesDesktopSharedTier(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := claudeDesktop(home)
-	for _, kv := range [][2]string{{"provider", "magpie"}, {"sonnet", "v/Deep"}, {"haiku", "v/Deep"}} {
+	for _, kv := range [][2]string{{"provider", "eipgam"}, {"sonnet", "v/Deep"}, {"haiku", "v/Deep"}} {
 		if err := d.Field(kv[0]).Set(kv[1]); err != nil {
 			t.Fatal(err)
 		}
@@ -226,7 +226,7 @@ func TestClaudeCapabilitiesDesktopSharedTier(t *testing.T) {
 		}
 	}
 	again := gateway.DesktopTierAliases()["v/Deep"]
-	if len(again) != 1 || !strings.HasPrefix(again[0], "mythos-magpie-") {
+	if len(again) != 1 || !strings.HasPrefix(again[0], "mythos-eipgam-") {
 		t.Fatalf("haiku's id for Deep: %v", again)
 	}
 	if segs[again[0]] != "effort,xhigh_effort,max_effort" {

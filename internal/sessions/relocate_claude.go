@@ -363,7 +363,7 @@ func relocateClaudeProject(root, target string, in ClaudeRelocation) (ClaudeRelo
 	}
 	// Stage beside the config's projects directory so publishing and backing
 	// up use same-filesystem renames. Backups are outside the session scanner.
-	backupRoot := filepath.Join(root, "magpie-relocations")
+	backupRoot := filepath.Join(root, "eipgam-relocations")
 	if err := os.MkdirAll(backupRoot, 0o700); err != nil {
 		return out, err
 	}

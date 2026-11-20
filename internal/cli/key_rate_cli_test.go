@@ -3,10 +3,10 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// magpie provider key-rate gives a key a price rate of its own (by its
+// eipgam provider key-rate gives a key a price rate of its own (by its
 // name or id, @tnt12231 on X), and default has it bill at the provider's
 // again. With no rate it lists the keys' rates. A key the provider
 // hasn't, a rate that isn't one and --help as a value are refused, and

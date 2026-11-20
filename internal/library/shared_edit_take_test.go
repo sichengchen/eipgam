@@ -31,7 +31,7 @@ func TestEditInSharedCopyTaken(t *testing.T) {
 		t.Fatal(err)
 	}
 	if linked(pdf) || !ours(pdf, "pdf") {
-		t.Fatal("pdf isn't magpie's marked copy")
+		t.Fatal("pdf isn't eipgam's marked copy")
 	}
 	time.Sleep(20 * time.Millisecond)
 	write(t, filepath.Join(pdf, "notes.md"), "my notes\n")
@@ -40,10 +40,10 @@ func TestEditInSharedCopyTaken(t *testing.T) {
 	if read(t, filepath.Join(lib, "notes.md")) != "my notes\n" {
 		t.Error("the edit in the shared copy wasn't taken into the library")
 	}
-	// the entry is still magpie's, saying the library's skill: taken or
+	// the entry is still eipgam's, saying the library's skill: taken or
 	// relinked, the edit is not only in the backups
 	if !ours(pdf, "pdf") {
-		t.Fatal("the shared entry is no longer magpie's")
+		t.Fatal("the shared entry is no longer eipgam's")
 	}
 	if _, err := os.Stat(filepath.Join(pdf, "notes.md")); err != nil {
 		t.Error("the shared entry lost the edit")

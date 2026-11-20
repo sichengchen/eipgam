@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // coeo91 on Discord: "更新行为不对，他会在点击更新按钮后下载上一次或最近一次获取到的
@@ -44,7 +44,7 @@ func newFreshFeed(t *testing.T) *freshFeed {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	f := &freshFeed{}
 	f.latest.Store("0.1.11")
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	f.srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/asset" {
@@ -65,7 +65,7 @@ func newFreshFeed(t *testing.T) *freshFeed {
 		}})
 	}))
 	t.Cleanup(f.srv.Close)
-	t.Setenv("MAGPIE_UPDATE_FEED", f.srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", f.srv.URL)
 	old := Version
 	Version = "0.1.10"
 	t.Cleanup(func() { Version = old })
@@ -169,7 +169,7 @@ func TestRestartClickTakesTheNewest(t *testing.T) {
 	}
 }
 
-// A restart with nothing downloaded waiting (another magpie put the
+// A restart with nothing downloaded waiting (another eipgam put the
 // update in) asks the feed first; one slower than the restart's wait for
 // it has the route say it is checking, and the answer, once in, is
 // downloaded.
@@ -201,7 +201,7 @@ func TestRestartWaitsForTheFeed(t *testing.T) {
 	}
 }
 
-// A magpie that can't replace itself sends a click to the release page:
+// A eipgam that can't replace itself sends a click to the release page:
 // the newest's, not the one an old check found.
 func TestAvailableOpensTheNewestPage(t *testing.T) {
 	f := newFreshFeed(t)
@@ -314,7 +314,7 @@ func TestRestartTakesTheNewestOut(t *testing.T) {
 
 // elis_pina on X, on Windows: the header's Update downloaded to 100% and
 // then downloaded again, over and over. The pill restarts once a click's
-// download is in; that restart asked the feed, magpie had released again
+// download is in; that restart asked the feed, eipgam had released again
 // while the download came in, so it downloaded the newer one, and the
 // restart after that asked again. Here each restart finds a newer release
 // out: every one goes into the download the click made, and the feed is

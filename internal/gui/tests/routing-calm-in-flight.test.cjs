@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const r = live.pending.shift();
           if (r) r.fulfill({ json: d }); else live.queued.push(d);
         };
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.waitForFunction(() => document.querySelector(".rt-accts li.on em")?.textContent.trim());
         assert.equal(await page.evaluate(() => calm()), true, "motion is reduced");
 

@@ -8,14 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/mcpauth/mcpauthtest"
 )
 
-// A server whose sign-in doesn't let magpie register itself (GitHub's, 新v学员
+// A server whose sign-in doesn't let eipgam register itself (GitHub's, 新v学员
 // on Discord) is signed in to as the user's own OAuth app, given in the
 // library by Claude Code's names. Without one, the sign-in says to give
-// one. The app is magpie's alone: no agent's file is given it, its secret
+// one. The app is eipgam's alone: no agent's file is given it, its secret
 // above all.
 func TestSignInAsTheUsersOwnApp(t *testing.T) {
 	sandbox(t)

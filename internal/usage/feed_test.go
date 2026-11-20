@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
-// rdsaltbo on X (#6060): a plugin keeps its own ledger of magpie's requests
+// rdsaltbo on X (#6060): a plugin keeps its own ledger of eipgam's requests
 // and reads them again and again. The feed has to hand it exactly what is
 // new, mended or gone since the cursor it kept.
 

@@ -26,7 +26,7 @@ static int direntStart(char **paths, int n) {
 		direntStream = NULL;
 	}
 	if (direntQueue == NULL) {
-		direntQueue = dispatch_queue_create("magpie.dirent", DISPATCH_QUEUE_SERIAL);
+		direntQueue = dispatch_queue_create("eipgam.dirent", DISPATCH_QUEUE_SERIAL);
 	}
 	CFMutableArrayRef list = CFArrayCreateMutable(NULL, n, &kCFTypeArrayCallBacks);
 	for (int i = 0; i < n; i++) {

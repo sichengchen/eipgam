@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // openAIRefusal is OpenAI's own 400 for max_tokens on its newer models

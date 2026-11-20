@@ -27,9 +27,9 @@ func setInstr(t *testing.T, dir, text string, agents ...string) *Result {
 func block(text string) string { return blockBegin + "\n" + text + "\n" + blockEnd }
 
 // A project's own instructions (VictorHong1022 on X) go into the file each
-// picked agent reads in the project, between magpie's two lines, the
+// picked agent reads in the project, between eipgam's two lines, the
 // user's own text in it untouched; turned off, the file is as it was, and
-// one magpie made is gone. The agents' user-wide files are not touched.
+// one eipgam made is gone. The agents' user-wide files are not touched.
 func TestProjectInstructionsEachAgentsFile(t *testing.T) {
 	h, dir := instrProject(t)
 	mine := "# Mine\n\nRun make test.\n"
@@ -46,7 +46,7 @@ func TestProjectInstructionsEachAgentsFile(t *testing.T) {
 	for _, f := range []string{".claude/CLAUDE.md", ".codex/AGENTS.md", ".gemini/GEMINI.md"} {
 		gone(t, filepath.Join(h, f))
 	}
-	// what magpie made is kept out of git; the user's CLAUDE.md is git's
+	// what eipgam made is kept out of git; the user's CLAUDE.md is git's
 	g, _ := gitOf(dir)
 	ex := read(t, filepath.Join(g.Common, "info", "exclude"))
 	for _, f := range []string{"/AGENTS.md\n", "/GEMINI.md\n"} {
@@ -98,9 +98,9 @@ func instrView(t *testing.T) *View {
 	return v
 }
 
-// magpie's part edited in the file is the user's until the project's text
+// eipgam's part edited in the file is the user's until the project's text
 // changes; a part, or a file, the user took out is written again; text
-// the user added to a file magpie made keeps the file when turned off.
+// the user added to a file eipgam made keeps the file when turned off.
 func TestProjectInstructionsLeaveTheUsersEdits(t *testing.T) {
 	_, dir := instrProject(t)
 	setInstr(t, dir, "One.", "codex")
@@ -208,7 +208,7 @@ func TestRemoveProjectTakesItsInstructionsOut(t *testing.T) {
 	}
 }
 
-// An agent magpie knows no project file of is refused.
+// An agent eipgam knows no project file of is refused.
 func TestProjectInstructionsUnknownAgent(t *testing.T) {
 	_, dir := instrProject(t)
 	if _, err := ProjectInstructions(dir, ProjectInstr{Agents: &[]string{"dsh"}}); err == nil {

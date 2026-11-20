@@ -4,8 +4,8 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // A text the gateway answers with itself, as the tool loop's notice, is

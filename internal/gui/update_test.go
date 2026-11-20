@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // A version downloaded and waiting for a restart gives way to a newer one
@@ -21,7 +21,7 @@ import (
 // goes into the one waiting (TestRestartPutsInTheClickedDownload).
 func TestUpdateStagedGivesWayToNewer(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	var latest atomic.Value
 	latest.Store("0.1.11")
@@ -37,7 +37,7 @@ func TestUpdateStagedGivesWayToNewer(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()
@@ -59,12 +59,12 @@ func TestUpdateStagedGivesWayToNewer(t *testing.T) {
 		t.Fatalf("%+v, %d downloads", j, downloads.Load())
 	}
 	// the feed down: still ready to restart into what it has
-	t.Setenv("MAGPIE_UPDATE_FEED", "http://127.0.0.1:1/")
+	t.Setenv("EIPGAM_UPDATE_FEED", "http://127.0.0.1:1/")
 	u.check()
 	if j := u.json(); j.State != "ready" || j.Latest != "0.1.11" {
 		t.Fatalf("%+v", j)
 	}
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	// 0.1.13 out: the restart's recheck leaves 0.1.11 with downloads on a
 	// click; with them automatic it takes 0.1.13, as a check asked for does
 	latest.Store("0.1.13")
@@ -89,12 +89,12 @@ func TestUpdateStagedGivesWayToNewer(t *testing.T) {
 
 // The clock's check, with a version downloaded and waiting, downloads a
 // newer one out since in its place: with downloads automatic, a version
-// magpie knows is out is downloaded at once, not when Update is clicked
+// eipgam knows is out is downloaded at once, not when Update is clicked
 // (canlee886 on X). With downloads on a click the clock fetches nothing
 // more (iiiiiimone on X).
 func TestUpdateClockFetchesNewerThanWaiting(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	var latest atomic.Value
 	latest.Store("0.1.11")
@@ -110,7 +110,7 @@ func TestUpdateClockFetchesNewerThanWaiting(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()
@@ -183,7 +183,7 @@ func TestUpdateFetchDue(t *testing.T) {
 // newer version found then is downloaded in its place.
 func TestUpdateCheckDuringDownloadTakesNewer(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	var latest atomic.Value
 	latest.Store("0.1.11")
@@ -208,7 +208,7 @@ func TestUpdateCheckDuringDownloadTakesNewer(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()
@@ -252,7 +252,7 @@ func TestUpdateCheckDuringDownloadTakesNewer(t *testing.T) {
 // waiting with: a check meanwhile doesn't swap it for a download.
 func TestUpdateWaitingRestartKeepsItsDownload(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	var latest atomic.Value
 	latest.Store("0.1.11")
@@ -268,7 +268,7 @@ func TestUpdateWaitingRestartKeepsItsDownload(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()

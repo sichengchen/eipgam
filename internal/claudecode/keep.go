@@ -23,15 +23,15 @@ var keep = struct {
 	latest: Latest,
 }
 
-// KeepCurrent keeps the Claude Code magpie downloaded at Claude Code's
-// newest release while magpie serves: a minute after it starts and every six
-// hours after. Every run magpie starts sets DISABLE_AUTOUPDATER, so nothing
+// KeepCurrent keeps the Claude Code eipgam downloaded at Claude Code's
+// newest release while eipgam serves: a minute after it starts and every six
+// hours after. Every run eipgam starts sets DISABLE_AUTOUPDATER, so nothing
 // else updates it, and a container's download (in /config/cache, on the
 // volume) would otherwise stay at the version first installed, image
 // update after image update (alextjy on Discord). It does nothing when
-// magpie downloaded none, when the machine has a Claude Code of its own
+// eipgam downloaded none, when the machine has a Claude Code of its own
 // (that one is run, and updates itself), or when DISABLE_AUTOUPDATER is set
-// for magpie: Claude Code's own way of holding a version.
+// for eipgam: Claude Code's own way of holding a version.
 func KeepCurrent(ctx context.Context) {
 	t := time.NewTimer(keepFirst)
 	defer t.Stop()
@@ -42,7 +42,7 @@ func KeepCurrent(ctx context.Context) {
 		case <-t.C:
 		}
 		if said, err := keepOnce(ctx); err != nil {
-			log.Printf("Claude Code: keeping magpie's download current: %v", err)
+			log.Printf("Claude Code: keeping eipgam's download current: %v", err)
 		} else if said != "" {
 			log.Print(said)
 		}
@@ -50,7 +50,7 @@ func KeepCurrent(ctx context.Context) {
 	}
 }
 
-// keepOnce updates magpie's download when a newer release is out, and says
+// keepOnce updates eipgam's download when a newer release is out, and says
 // what it did ("" for nothing). The version an earlier look replaced goes
 // first: no run has been started on it since then.
 func keepOnce(ctx context.Context) (string, error) {
@@ -75,5 +75,5 @@ func keepOnce(ctx context.Context) (string, error) {
 	if _, err := install(ctx, r, nil); err != nil {
 		return "", fmt.Errorf("Claude Code %s: %w", r.Version, err)
 	}
-	return fmt.Sprintf("Claude Code: magpie's download updated from %s to %s", v, r.Version), nil
+	return fmt.Sprintf("Claude Code: eipgam's download updated from %s to %s", v, r.Version), nil
 }

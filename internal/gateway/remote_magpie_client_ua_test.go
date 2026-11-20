@@ -12,14 +12,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// Claude Code's and Codex's requests, through this magpie, reach a Remote
-// magpie as magpie's own (linkaww: #179's copy of Claude Code's headers put
-// claude-cli/… over magpie/…, so the remote, which takes X-Magpie-* from a
-// magpie alone, dropped the cache lifetime, the agent, the computer, the
+// Claude Code's and Codex's requests, through this eipgam, reach a Remote
+// eipgam as eipgam's own (linkaww: #179's copy of Claude Code's headers put
+// claude-cli/… over eipgam/…, so the remote, which takes X-eipgam-* from a
+// eipgam alone, dropped the cache lifetime, the agent, the computer, the
 // hops and the agent's User-Agent). The remote takes each of them, and
 // still sends its relay the agent's own client headers (#179) and ?beta=true.
 func TestRemoteMagpieTakesClientsHeaders(t *testing.T) {
@@ -101,12 +101,12 @@ func TestRemoteMagpieTakesClientsHeaders(t *testing.T) {
 				t.Fatalf("asked: remote %v, relay %v", atRemote != nil, atRelay != nil)
 			}
 
-			// the remote magpie was asked as magpie, the agent's named
+			// the remote eipgam was asked as eipgam, the agent's named
 			if ua := atRemote.Header.Get("User-Agent"); ua != magpieUA() {
-				t.Errorf("the remote magpie was sent User-Agent %q, want %q", ua, magpieUA())
+				t.Errorf("the remote eipgam was sent User-Agent %q, want %q", ua, magpieUA())
 			}
 			if got := atRemote.Header.Get(ClientUAHeader); got != tc.ua {
-				t.Errorf("the remote magpie was sent %s %q, want %q", ClientUAHeader, got, tc.ua)
+				t.Errorf("the remote eipgam was sent %s %q, want %q", ClientUAHeader, got, tc.ua)
 			}
 			// and takes what it was told, as withCaller reads it there
 			c := callerFrom(atRemote)
@@ -116,7 +116,7 @@ func TestRemoteMagpieTakesClientsHeaders(t *testing.T) {
 			}
 
 			// the remote's relay is sent the agent's own (#179), never
-			// magpie's headers
+			// eipgam's headers
 			if atRelay.Header.Get("User-Agent") != tc.ua || atRelay.Header.Get("originator") != tc.originator {
 				t.Errorf("the relay was sent User-Agent %q originator %q", atRelay.Header.Get("User-Agent"), atRelay.Header.Get("originator"))
 			}

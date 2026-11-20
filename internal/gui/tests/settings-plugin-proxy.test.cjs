@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posts));
-        await page.goto("http://magpie.test/?view=settings&tab=network");
+        await page.goto("http://eipgam.test/?view=settings&tab=network");
         const row = page.locator("#pluginProxyRow");
         await row.getByText(l.row, { exact: true }).waitFor();
         const box = page.locator("#pluginProxySegs");

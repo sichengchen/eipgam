@@ -7,10 +7,10 @@ import (
 	"path"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
-	"github.com/yetone/magpie/internal/usageapi"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usageapi"
 )
 
 // The usage:day read (plugin.PageReads): a day of usage for a plugin's

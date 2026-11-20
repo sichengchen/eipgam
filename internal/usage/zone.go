@@ -4,12 +4,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/dayzone"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/dayzone"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The Usage page buckets its calls by the reader's days and hours, not the
-// computer's: `magpie web` read from across an ocean showed a call at 9:00
+// computer's: `eipgam web` read from across an ocean showed a call at 9:00
 // in UTC+8 under 1:00 (Outvi V on Discord). The page names its browser's
 // zone, and Zone is that zone here.
 

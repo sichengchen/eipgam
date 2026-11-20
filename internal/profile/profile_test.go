@@ -2,17 +2,17 @@ package profile
 
 import (
 	"encoding/json"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // sandbox is a home with Claude Code and Codex in it and nothing on PATH.
@@ -265,7 +265,7 @@ func TestRename(t *testing.T) {
 	}
 }
 
-// A profile is magpie's routing, not the user's own settings of an agent:
+// A profile is eipgam's routing, not the user's own settings of an agent:
 // Claude Code's permission mode is neither saved in one nor written by one
 // (EricChenChannel on X: bypassPermissions kept coming back as it was).
 func TestProfileLeavesPermissionMode(t *testing.T) {

@@ -7,19 +7,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// linkaww on Discord, a magpie in Docker added as a Remote magpie: its
+// linkaww on Discord, a eipgam in Docker added as a Remote eipgam: its
 // Codex card on the computer reading it told no whole for the week. The
 // whole is reckoned from the calls routed through the account, which only
-// the magpie holding it has; the computer reading the card leaves a card
-// from another magpie alone (holdsBounds). So the cards a remote magpie is
+// the eipgam holding it has; the computer reading the card leaves a card
+// from another eipgam alone (holdsBounds). So the cards a remote eipgam is
 // asked for carry each window's whole as reckoned there, and the reading
 // side keeps them.
 func TestRemoteMagpieCardsCarryTheirWholes(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	provider.ForgetBalances()
 	t.Cleanup(provider.ForgetBalances)
 	was := provider.ReckonHolds
@@ -44,7 +44,7 @@ func TestRemoteMagpieCardsCarryTheirWholes(t *testing.T) {
 	}
 	gw := httptest.NewServer(lanGuard(New().Handler()))
 	defer gw.Close()
-	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-office", Chat: gw.URL}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-office", Chat: gw.URL}); err != nil {
 		t.Fatal(err)
 	}
 	ctx := context.Background()

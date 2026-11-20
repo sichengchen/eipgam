@@ -10,19 +10,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// nnlrl_75403 on Discord: a `magpie serve` that another magpie uses as its
-// Remote magpie is asked to update when that one has. It puts the latest
+// nnlrl_75403 on Discord: a `eipgam serve` that another eipgam uses as its
+// Remote eipgam is asked to update when that one has. It puts the latest
 // in where it runs from, once at a time, and never asks for a password;
 // in the Docker image, a package manager's copy or a folder it can't
 // write, it says so instead.
 func TestServeUpdateAsked(t *testing.T) {
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "magpie")
-	if err := os.WriteFile(exe, []byte("magpie"), 0o755); err != nil {
+	exe := filepath.Join(dir, "eipgam")
+	if err := os.WriteFile(exe, []byte("eipgam"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	wasV, wasX, wasC, wasP, wasPut, wasL := version, updateExecutable, updateInContainer, updatePackagedBy, servePutIn, serveLatest
@@ -65,8 +65,8 @@ func TestServeUpdateAsked(t *testing.T) {
 	if got := serveUpdateAsked(nil)("v0.1.200"); got.State != "unsupported" || got.Why != "not-writable" {
 		t.Fatalf("no program to follow: %+v", got)
 	}
-	updatePackagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "magpie-bin"} }
-	if got := ask("v0.1.200"); got.State != "unsupported" || got.Why != "package" || got.Command != "yay -S magpie-bin" {
+	updatePackagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "eipgam-bin"} }
+	if got := ask("v0.1.200"); got.State != "unsupported" || got.Why != "package" || got.Command != "yay -S eipgam-bin" {
 		t.Fatalf("a package: %+v", got)
 	}
 	updatePackagedBy = func(string) *update.Packaged { return nil }

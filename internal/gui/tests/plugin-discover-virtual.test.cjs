@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 
 // 370 subscriptions and the rest, the most downloaded first: pv-0 … pv-369
 const KINDS = [["pv", 370, null], ["mw", 50, "middleware"], ["ag", 48, "agent"], ["tl", 8, "tools"], ["pg", 27, "page"]];
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const view = page.locator("#view-plugins");
         await view.locator(".pm-kinds .opt").nth(1).waitFor();
         // npm's numbers in, so nothing redraws under the measure

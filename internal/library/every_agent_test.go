@@ -3,7 +3,7 @@ package library
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // noLibrary are the built-in agents the Library gives nothing to, each

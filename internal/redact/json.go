@@ -146,7 +146,7 @@ func toolArgs(t, key, k string) bool {
 // "sequential" or "sequential_cutoff", #3144), and the client's ids that
 // no model reads (client_metadata: Codex's installation, session, thread,
 // turn and window, as a JSON string in x-codex-turn-metadata, which the
-// vendor and magpie's own sessions match a turn by).
+// vendor and eipgam's own sessions match a turn by).
 var defKeys = []string{
 	"tools", "tool_choice", "functions", "function_call", "toolConfig", "tool_config",
 	"response_format", "text", "reasoning", "include", "output_format", "output_config",

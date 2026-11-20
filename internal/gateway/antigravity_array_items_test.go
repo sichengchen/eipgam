@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // arrayItemsAsk is plugins#375's minimal reproduction, as gcq909893267
@@ -117,7 +117,7 @@ func TestGroupFailsOverGoogleSchema400(t *testing.T) {
 		want   bool
 	}{
 		{400, arrayItems400, true},
-		// as magpie passed it on to the agent
+		// as eipgam passed it on to the agent
 		{400, `{"error":{"message":"Antigravity: * GenerateContentRequest.tools[0].function_declarations[26].parameters.properties[batch].items: missing field.\n"}}`, true},
 		// Google's other wording for a schema keyword it doesn't take (#187)
 		{400, `{"error":{"code":400,"message":"Invalid JSON payload received. Unknown name \"exclusiveMinimum\" at 'request.tools[0].function_declarations[3].parameters.properties[0].value': Cannot find field.","status":"INVALID_ARGUMENT"}}`, true},

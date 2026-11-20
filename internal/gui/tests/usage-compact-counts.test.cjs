@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const at = `${lang}${units ? " 万" : ""} ${width}`;
 
             // the Usage page's requests: its row, its totals, the line over the list, the ranking
-            await page.goto("http://magpie.test/?view=usage");
+            await page.goto("http://eipgam.test/?view=usage");
             await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
             await page.locator(".led tbody tr.led-row").first().waitFor({ timeout: 15000 });
             const cells = await page.locator(".led tbody tr.led-row").first().locator("td.n").evaluateAll((ts) => ts.map((c) => [c.textContent, c.title]));
@@ -123,7 +123,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             assert.ok(over <= 1, `${at}: the Usage page is ${over}px past`);
 
             // the Routing page's counts and a day's requests
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://eipgam.test/?view=routing");
             const stat = page.locator(".rt-stats b").first();
             await page.waitForFunction((want) => document.querySelector(".rt-stats b")?.textContent === want, s(CALLS), { timeout: 5000 }).catch(() => {});
             assert.equal(await stat.textContent(), s(CALLS), `${at}: Routing's requests`);

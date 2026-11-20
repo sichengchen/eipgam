@@ -7,19 +7,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // The Agents page shows what disconnecting Claude Code would change by
 // running Disconnect on a copy, in a process whose HOME is a temporary
-// folder (DisconnectPreview). Claude Code's Disconnect builds magpie's
+// folder (DisconnectPreview). Claude Code's Disconnect builds eipgam's
 // providers there, and with them the accounts: the Claude sign-in read
 // from the keychain, its account asked of Claude Code. On a Mac the
 // keychain is found through HOME, and the copy's home has no login
 // keychain: macOS asks "Keychain Not Found — A keychain cannot be found
 // to store …" (Cancel / Reset To Defaults). jasonz3g on X, with two Claude
-// accounts in magpie, cancelled it dozens of times after clicking Claude
+// accounts in eipgam, cancelled it dozens of times after clicking Claude
 // Code. The dry run reads no sign-ins: the files it changes are the
 // agent's, and no account changes them.
 func TestDisconnectPreviewReadsNoSignIns(t *testing.T) {

@@ -1,18 +1,18 @@
-// Command launcher is magpie.com, the console program magpie writes
+// Command launcher is eipgam.com, the console program eipgam writes
 // beside the Windows app (update.EnsureCompanion, #3737).
 //
 // The app is linked with -H windowsgui so that a double click opens no
-// console window, and a shell doesn't wait for such a program: `magpie
+// console window, and a shell doesn't wait for such a program: `eipgam
 // plugin login` in PowerShell or cmd gave the prompt back at once, printed
-// after it, and the shell and magpie read the same keys. A shell looks for
-// `magpie` by PATHEXT, which lists .COM before .EXE, so it runs this
+// after it, and the shell and eipgam read the same keys. A shell looks for
+// `eipgam` by PATHEXT, which lists .COM before .EXE, so it runs this
 // instead: a console program, which the shell waits for. It runs the app
 // with this console's standard handles, waits for it and exits with its
 // code. A command that opens the app's window (none, app, gui, tray,
-// panel, a magpie:// link) is started and left to run, as it was.
+// panel, a eipgam:// link) is started and left to run, as it was.
 //
 // The app it runs is named in this file's last bytes (update.comText),
-// so a download kept as magpie-windows-amd64.exe is run by its own name.
+// so a download kept as eipgam-windows-amd64.exe is run by its own name.
 package main
 
 import (
@@ -66,7 +66,7 @@ func main() {
 	// update.ComEnv: the app keeps these handles and borrows this console
 	p, err := os.StartProcess(target, nil, &os.ProcAttr{
 		Files: files,
-		Env:   append(os.Environ(), "MAGPIE_COM=1"),
+		Env:   append(os.Environ(), "EIPGAM_COM=1"),
 		Sys:   &syscall.SysProcAttr{CmdLine: cmdline},
 	})
 	if err != nil {
@@ -80,6 +80,6 @@ func main() {
 }
 
 func fail(err error) {
-	os.Stderr.WriteString("magpie: " + err.Error() + "\n")
+	os.Stderr.WriteString("eipgam: " + err.Error() + "\n")
 	os.Exit(1)
 }

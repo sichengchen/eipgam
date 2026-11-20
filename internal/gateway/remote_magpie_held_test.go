@@ -9,16 +9,16 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// zaidu259434 on X: a routing group on another computer's magpie ("永不卡住")
+// zaidu259434 on X: a routing group on another computer's eipgam ("永不卡住")
 // had one member, Open Design, out of its Coding Plan quota and wallet. The
 // remote answered 402, its own hold naming when it would ask again
-// (Retry-After), and this magpie rested the remote's group model until then
+// (Retry-After), and this eipgam rested the remote's group model until then
 // and gave the 402 again on every request, never asking the remote. The
 // user moved the group to another vendor there, and Codex here still got
-// Open Design's refusal: the remote magpie routes its own groups and holds
+// Open Design's refusal: the remote eipgam routes its own groups and holds
 // its own rests, and what it serves under a name can change at any moment,
 // so a refusal of its is never given again here without asking it.
 func TestRemoteMagpieQuotaIsAskedNotReplayed(t *testing.T) {
@@ -37,7 +37,7 @@ func TestRemoteMagpieQuotaIsAskedNotReplayed(t *testing.T) {
 		mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
 		if out {
-			// what a remote magpie holding its group's lone member says
+			// what a remote eipgam holding its group's lone member says
 			w.Header().Set("Retry-After", "3600")
 			w.Header().Set(providerHeader, "opendesign")
 			w.WriteHeader(http.StatusPaymentRequired)
@@ -47,7 +47,7 @@ func TestRemoteMagpieQuotaIsAskedNotReplayed(t *testing.T) {
 		io.WriteString(w, `{"id":"x","choices":[{"index":0,"message":{"role":"assistant","content":"from `+req.Model+` on its new member"},"finish_reason":"stop"}]}`)
 	}))
 	t.Cleanup(remote.Close)
-	if err := provider.Save(provider.Provider{ID: "office", Name: "Remote magpie", Preset: provider.RemoteMagpiePreset, Key: "k",
+	if err := provider.Save(provider.Provider{ID: "office", Name: "Remote eipgam", Preset: provider.RemoteMagpiePreset, Key: "k",
 		Chat: remote.URL + "/v1", Models: []string{"group/never-stuck"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestRemoteMagpieQuotaIsAskedNotReplayed(t *testing.T) {
 	}
 }
 
-// The same for a magpie added by hand, as a plain OpenAI-compatible
+// The same for a eipgam added by hand, as a plain OpenAI-compatible
 // provider: its reply names the provider that answered there.
 func TestHandAddedMagpieQuotaIsAskedNotReplayed(t *testing.T) {
 	fresh(t)

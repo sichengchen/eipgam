@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // bigProviders is an answer the size real accounts give the Providers

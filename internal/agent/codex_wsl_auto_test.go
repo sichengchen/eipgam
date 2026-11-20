@@ -32,7 +32,7 @@ func TestConnectCodexTwins(t *testing.T) {
 
 	// Windows' Codex not connected: the distro's is left alone
 	ConnectCodexTwins()
-	if strings.Contains(read(), "magpie") {
+	if strings.Contains(read(), "eipgam") {
 		t.Fatalf("connected before Windows' Codex:\n%s", read())
 	}
 
@@ -40,10 +40,10 @@ func TestConnectCodexTwins(t *testing.T) {
 		t.Fatal(err)
 	}
 	ConnectCodexTwins()
-	if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) || !strings.Contains(cfg, "magpie-models.json") {
+	if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) || !strings.Contains(cfg, "eipgam-models.json") {
 		t.Fatalf("distro's Codex not connected:\n%s", cfg)
 	}
-	if _, err := os.Stat(filepath.Join(filepath.Dir(cfgPath), "magpie-models.json")); err != nil {
+	if _, err := os.Stat(filepath.Join(filepath.Dir(cfgPath), "eipgam-models.json")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -61,7 +61,7 @@ func TestConnectCodexTwins(t *testing.T) {
 		t.Fatal(err)
 	}
 	ConnectCodexTwins()
-	if strings.Contains(read(), `model_provider = "magpie"`) {
+	if strings.Contains(read(), `model_provider = "eipgam"`) {
 		t.Fatalf("connected again after Disconnect:\n%s", read())
 	}
 }

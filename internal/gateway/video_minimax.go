@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // MiniMax makes videos with its H3 models on any MiniMax API key, at its
@@ -71,7 +71,7 @@ func minimaxHost(p provider.Provider) string {
 }
 
 // filmsMiniMax is whether p is a MiniMax API key, which makes videos with
-// the H3 models: not a subscription's account, another magpie or a plugin.
+// the H3 models: not a subscription's account, another eipgam or a plugin.
 func filmsMiniMax(p provider.Provider) bool {
 	return p.Account == nil && !p.IsRemoteMagpie() && !p.IsPlugin() && minimaxHost(p) != ""
 }

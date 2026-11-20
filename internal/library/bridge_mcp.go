@@ -1,16 +1,16 @@
 package library
 
-// A Remote magpie's MCP router is a server in the Library of its own
-// (treeman_26897 on Discord: with another magpie as a provider, its MCP
-// servers took adding that magpie again under Library → MCP). Once the
-// other magpie, its models listed, says its router has a server to give
+// A Remote eipgam's MCP router is a server in the Library of its own
+// (treeman_26897 on Discord: with another eipgam as a provider, its MCP
+// servers took adding that eipgam again under Library → MCP). Once the
+// other eipgam, its models listed, says its router has a server to give
 // (provider/remote_hub.go), the library adds a server named for the
-// provider, at that magpie's gateway.HubMCPAll with the provider's key.
+// provider, at that eipgam's gateway.HubMCPAll with the provider's key.
 // It is then a server as any other: switched on per agent, its tools
 // turned off one by one, behind the MCP hub as <name>__<tool>, or written
 // into an agent as its own entry with the hub off.
 //
-//   - It is the user's call (treeman_26897 again): a Remote magpie's
+//   - It is the user's call (treeman_26897 again): a Remote eipgam's
 //     editor has a switch for it, off when one is added, and only one
 //     switched on (BridgesOn) is asked. Switched off, its server is taken
 //     out; a server added before the switch was there stays, the switch
@@ -19,7 +19,7 @@ package library
 //     One the user switched off for an agent stays off.
 //   - It follows the provider's rename: a server, an offer and a switch
 //     under an id the provider had (its Was) are under its id now.
-//   - A server the user has at that magpie's router already (its host and
+//   - A server the user has at that eipgam's router already (its host and
 //     the router's path) is the one: none is added beside it.
 //   - It goes with the provider: once providers.json no longer has it, the
 //     server is taken out. A provider turned off keeps its server. A
@@ -41,8 +41,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // remoteHubs are provider's, a test's fake in its place.
@@ -52,16 +52,16 @@ func init() {
 	provider.RemoteHubAsk = bridgeWanted
 	provider.RemoteHubFound = func(id string) {
 		if changed, err := adoptBridge(id); err != nil {
-			log.Printf("library: giving a Remote magpie's MCP router a server: %v", err)
+			log.Printf("library: giving a Remote eipgam's MCP router a server: %v", err)
 		} else if changed {
 			if _, err := Sync(); err != nil {
-				log.Printf("library: syncing after a Remote magpie's MCP router: %v", err)
+				log.Printf("library: syncing after a Remote eipgam's MCP router: %v", err)
 			}
 		}
 	}
 }
 
-// bridgeURL is the address of the router of the magpie at root.
+// bridgeURL is the address of the router of the eipgam at root.
 func bridgeURL(root string) string { return strings.TrimRight(root, "/") + gateway.HubMCPAll }
 
 // bridgeHeaders are the headers its router is asked with.
@@ -69,7 +69,7 @@ func bridgeHeaders(key string) map[string]string {
 	return map[string]string{"Authorization": "Bearer " + key}
 }
 
-// routerAt is whether u is a magpie's router at host (scheme and host).
+// routerAt is whether u is a eipgam's router at host (scheme and host).
 func routerAt(u, host string) bool {
 	p, err := url.Parse(u)
 	return err == nil && strings.EqualFold(p.Scheme+"://"+p.Host, host) && strings.HasPrefix(p.Path, gateway.HubMCPAll)
@@ -84,7 +84,7 @@ func originOf(u string) string {
 	return p.Scheme + "://" + p.Host
 }
 
-// bridgeWanted is whether the Remote magpie id would be given a server,
+// bridgeWanted is whether the Remote eipgam id would be given a server,
 // were it to say it serves its router: switched on and not offered one
 // yet.
 func bridgeWanted(id string) bool {
@@ -118,7 +118,7 @@ func RemoteMCPOn() map[string]bool {
 	return on
 }
 
-// SetRemoteMCP turns the switch of the Remote magpie id on or off. On, it
+// SetRemoteMCP turns the switch of the Remote eipgam id on or off. On, it
 // is asked again at its next model list (provider.AskRemoteHub asks at
 // once); off, its server is taken out of the library and the agents.
 func SetRemoteMCP(id string, on bool) (*Result, error) {
@@ -143,7 +143,7 @@ func SetRemoteMCP(id string, on bool) (*Result, error) {
 	})
 }
 
-// adoptBridge gives the router of the Remote magpie id a server, it having
+// adoptBridge gives the router of the Remote eipgam id a server, it having
 // said it serves one, saving the library when it changed. It doesn't
 // sync.
 func adoptBridge(id string) (bool, error) {
@@ -175,10 +175,10 @@ func adoptBridge(id string) (bool, error) {
 	return true, l.save()
 }
 
-// adoptBridges brings the library's Remote magpie servers in line with the
+// adoptBridges brings the library's Remote eipgam servers in line with the
 // providers: what is under an id a provider had is under its id now; one
 // whose provider is gone is taken out, and its offer and switch with it;
-// the others' address and key are the provider's now. It asks no magpie;
+// the others' address and key are the provider's now. It asks no eipgam;
 // true when it changed the library.
 func (l *Library) adoptBridges() bool {
 	if len(l.BridgesOffered) == 0 && len(l.BridgesOn) == 0 && !slices.ContainsFunc(l.MCP, func(s *Server) bool { return s.Bridge != "" }) {
@@ -271,10 +271,10 @@ func (l *Library) bridgeName(h provider.RemoteHub) string {
 		base = slug(h.ID)
 	}
 	if base == "" {
-		base = "remote-magpie"
+		base = "remote-eipgam"
 	}
 	if base == HubEntry {
-		base = "magpie-remote"
+		base = "eipgam-remote"
 	}
 	name := base
 	for i := 2; l.server(name) != nil; i++ {
@@ -305,7 +305,7 @@ func slug(s string) string {
 	return strings.Trim(b.String(), "-_")
 }
 
-// keptBridge is s, edited from old, still the Remote magpie's server: its
+// keptBridge is s, edited from old, still the Remote eipgam's server: its
 // address and key as they were. Edited to others, it is the user's own,
 // and on this computer still, the key being this computer's.
 func keptBridge(old *Server, s *Server) {

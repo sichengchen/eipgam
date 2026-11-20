@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // own is what Own reads of the machine; tests stand in for it.
@@ -29,7 +29,7 @@ var own = struct {
 // more than one: a machine can have an old one first on PATH and a newer
 // one after it, two npm installs in two Node versions, of which `claude
 // update` updated the second while `claude` still ran the first
-// (zi_xiang5806 on X: magpie's sign-in ran 2.1.38, which has no
+// (zi_xiang5806 on X: eipgam's sign-in ran 2.1.38, which has no
 // --claudeai). One is passed over only for one whose version is known and
 // newer: a version that can't be read is unknown, not old, and the first
 // stays when no other is known to be newer. "" when there is none.

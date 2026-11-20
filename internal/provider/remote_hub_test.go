@@ -12,14 +12,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
-// A Remote magpie whose models are listed is asked, with its key, whether
+// A Remote eipgam whose models are listed is asked, with its key, whether
 // its router has a server to give, while the library would give it one
 // (RemoteHubAsk); one that says so is noted (RemoteHubFound). One that
-// doesn't say, a magpie from before it, isn't; nor one the library
-// doesn't ask about, nor one found to be this magpie. RemoteHubs lists the
+// doesn't say, a eipgam from before it, isn't; nor one the library
+// doesn't ask about, nor one found to be this eipgam. RemoteHubs lists the
 // Remote magpies with their address and key, and fails while
 // providers.json can't be read.
 func TestRemoteHubNoted(t *testing.T) {
@@ -30,7 +30,7 @@ func TestRemoteHubNoted(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	var mu sync.Mutex
-	info, lister := `{"name":"magpie","mcp_hub":true}`, "another"
+	info, lister := `{"name":"eipgam","mcp_hub":true}`, "another"
 	var asked []string // the info's requests, by key
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
@@ -41,7 +41,7 @@ func TestRemoteHubNoted(t *testing.T) {
 			io.WriteString(w, info)
 			return
 		}
-		io.WriteString(w, `{"object":"list","data":[{"id":"own/m1","object":"model","magpie_via":["`+lister+`"]}]}`)
+		io.WriteString(w, `{"object":"list","data":[{"id":"own/m1","object":"model","eipgam_via":["`+lister+`"]}]}`)
 	}))
 	t.Cleanup(srv.Close)
 	id, err := Add(Provider{ID: "rem", Name: "Rem", Preset: RemoteMagpiePreset, Key: "k1", Chat: strings.TrimPrefix(srv.URL, "http://")})
@@ -100,23 +100,23 @@ func TestRemoteHubNoted(t *testing.T) {
 	reset()
 	want = true
 	mu.Lock()
-	info = `{"name":"magpie","version":"v0.1.1"}`
+	info = `{"name":"eipgam","version":"v0.1.1"}`
 	mu.Unlock()
 	fetch()
 	if len(found) != 0 || len(asked) != 1 {
-		t.Errorf("a magpie from before: found %v, asked %v", found, asked)
+		t.Errorf("a eipgam from before: found %v, asked %v", found, asked)
 	}
 
-	// this magpie itself
+	// this eipgam itself
 	reset()
 	mu.Lock()
-	info, lister = `{"name":"magpie","mcp_hub":true}`, catalog.Self()
+	info, lister = `{"name":"eipgam","mcp_hub":true}`, catalog.Self()
 	mu.Unlock()
 	fetch()
 	if len(found) != 0 || len(asked) != 0 {
-		t.Errorf("this magpie: found %v, asked %v", found, asked)
+		t.Errorf("this eipgam: found %v, asked %v", found, asked)
 	}
 	if hs, err := RemoteHubs(); err != nil || len(hs) != 0 {
-		t.Errorf("RemoteHubs with this magpie: %+v %v", hs, err)
+		t.Errorf("RemoteHubs with this eipgam: %+v %v", hs, err)
 	}
 }

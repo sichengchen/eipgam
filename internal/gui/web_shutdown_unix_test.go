@@ -14,12 +14,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
-// recih: Web.Wait re-executed magpie without ending its gateway, so an
+// recih: Web.Wait re-executed eipgam without ending its gateway, so an
 // idle Claude session never reached the shelf and the next turn replayed
 // the entire conversation. Exercise Wait, including its real Unix exec,
 // with a local Claude Code stand-in that records what it is told.
@@ -34,7 +34,7 @@ func TestWebShutdownKeepsClaudeSession(t *testing.T) {
 			testenv.SetHome(t, home)
 			t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 			t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-			t.Setenv("MAGPIE_ADDR", "127.0.0.1:0")
+			t.Setenv("EIPGAM_ADDR", "127.0.0.1:0")
 			config := filepath.Join(home, ".claude")
 			t.Setenv("CLAUDE_CONFIG_DIR", config)
 			write := func(path string, value any) {
@@ -119,7 +119,7 @@ func webShutdownChild(t *testing.T, mode, phase, home string) {
 	close(w.quit)
 	webReexec.Store(mode == "restart")
 	// Reexec passes these arguments to this test binary, now as the new
-	// magpie. No production process or installed binary is restarted.
+	// eipgam. No production process or installed binary is restarted.
 	os.Args[len(os.Args)-2] = "after"
 	if err := w.Wait(); err != nil {
 		t.Fatal(err)

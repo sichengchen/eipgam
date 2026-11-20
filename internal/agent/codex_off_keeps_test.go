@@ -79,13 +79,13 @@ func codexOffUserLines() []string {
 
 // darwish4021 on Discord: switching Codex off on the Agents page lost
 // Codex's configuration. Switched on and off again, every line of the
-// user's config.toml is there, an edit made while on magpie too, the file
-// still parses, nothing of magpie's but its provider table (kept for the
+// user's config.toml is there, an edit made while on eipgam too, the file
+// still parses, nothing of eipgam's but its provider table (kept for the
 // threads started on it) is left, and a chat is back on the provider it
 // was started on. The relay cases were red: bringOver had moved the
-// relay's threads onto magpie, so giveTables no longer counted the
+// relay's threads onto eipgam, so giveTables no longer counted the
 // relay's table and forgot its base_url, leaving the user's provider
-// pointed at magpie's gateway.
+// pointed at eipgam's gateway.
 func TestCodexOffKeepsUsersConfig(t *testing.T) {
 	for _, tc := range []struct{ name, auth, extra string }{
 		{"chatgpt", `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, ""},
@@ -142,10 +142,10 @@ func TestCodexOffKeepsUsersConfig(t *testing.T) {
 					t.Errorf("left unloadable: %v", err)
 				}
 				// the provider table stays for the threads started on it;
-				// nothing else of magpie's does
+				// nothing else of eipgam's does
 				for k, v := range parsed {
-					if s, ok := v.(string); ok && strings.Contains(s, "magpie") {
-						t.Errorf("magpie's %s left: %q", k, s)
+					if s, ok := v.(string); ok && strings.Contains(s, "eipgam") {
+						t.Errorf("eipgam's %s left: %q", k, s)
 					}
 				}
 				if d := os.Getenv("CODEX_OFF_DUMP"); d != "" {

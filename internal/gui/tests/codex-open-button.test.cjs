@@ -68,7 +68,7 @@ async function start(engine, t, lang, width, web, codex) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, web, codex, posted));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=agents");
+  await page.goto("http://eipgam.test/?view=agents");
   await page.locator('.row.agent[data-id="codex"]').waitFor();
   return { page, errors, posted };
 }

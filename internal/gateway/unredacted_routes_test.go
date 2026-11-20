@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // CrazyMouse_TT on X: masking turned off for a provider of the user's own
@@ -150,13 +150,13 @@ func TestUnredactedProviderNativeWhole(t *testing.T) {
 	}
 }
 
-// Another magpie set to go unmasked is sent the request as written, told
+// Another eipgam set to go unmasked is sent the request as written, told
 // nothing was masked (no MaskedAsHeader), so it masks by its own settings:
 // its vendor is still sent the word masked, and only once.
 func TestUnredactedRemoteMagpieMasksOnItsOwnSide(t *testing.T) {
 	remote, seen, masked := maskOnceSetup(t)
 	setUnredacted(t, "office", true)
-	// what the other magpie is sent, on its way there
+	// what the other eipgam is sent, on its way there
 	var hopHeader, hopBody string
 	tap := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, _ := io.ReadAll(r.Body)
@@ -186,13 +186,13 @@ func TestUnredactedRemoteMagpieMasksOnItsOwnSide(t *testing.T) {
 		t.Fatalf("%d %s", code, reply)
 	}
 	if !strings.Contains(hopBody, unmaskWord) || hopHeader != "" {
-		t.Fatalf("the other magpie was sent %q with %s %q, want the word as written and no header", hopBody, MaskedAsHeader, hopHeader)
+		t.Fatalf("the other eipgam was sent %q with %s %q, want the word as written and no header", hopBody, MaskedAsHeader, hopHeader)
 	}
 	body, _ := seen()
 	if strings.Contains(body, unmaskWord) {
-		t.Fatalf("the other magpie's vendor was sent the word unmasked: %s", body)
+		t.Fatalf("the other eipgam's vendor was sent the word unmasked: %s", body)
 	}
 	if n := masked.Load(); n != 1 {
-		t.Errorf("masked %d times, want once (on the other magpie)", n)
+		t.Errorf("masked %d times, want once (on the other eipgam)", n)
 	}
 }

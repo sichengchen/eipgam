@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [], asks = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang, asks));
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://eipgam.test/?view=routing");
             const [bad, unknown] = words[lang];
             // the accounts list: the failed read says so, its reason on hover
             const act = page.locator(".rt-act", { hasText: "minhaco" }).first();

@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/probelog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/probelog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // logLines appends n calls from the i-th on to the log, as a gateway that
@@ -103,7 +103,7 @@ func TestStartReadsKeptLogBlocks(t *testing.T) {
 		t.Fatalf("%d probes", n)
 	}
 
-	// the log grows while magpie isn't running
+	// the log grows while eipgam isn't running
 	logLines(t, 2*logBlockRows+300, logBlockRows)
 	restartLog()
 	kept := logRead(t, readLogSnapshot())

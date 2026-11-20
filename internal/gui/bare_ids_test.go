@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Settings › Network and sharing › Model ids without the provider posts
@@ -41,7 +41,7 @@ func TestBareModelIDsSetting(t *testing.T) {
 	}
 }
 
-// Only (qQianye on X: a Docker magpie's client listed every model twice,
+// Only (qQianye on X: a Docker eipgam's client listed every model twice,
 // and a gateway has no Agents page) saves the bare ids on and alone; On
 // after it lists them beside the provider's again, and Off clears both.
 func TestBareModelIDsOnlySetting(t *testing.T) {

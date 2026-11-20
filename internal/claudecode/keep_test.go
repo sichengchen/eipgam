@@ -49,7 +49,7 @@ func keepRelease(t *testing.T, latestV string) (asked, downloads *atomic.Int32) 
 	return asked, downloads
 }
 
-// downloaded puts a Claude Code of version v where magpie keeps its own.
+// downloaded puts a Claude Code of version v where eipgam keeps its own.
 func downloaded(t *testing.T, v string) string {
 	t.Helper()
 	dir := filepath.Join(Root(), v)

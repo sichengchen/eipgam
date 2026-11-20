@@ -118,7 +118,7 @@ func DecideAnswer(via string, b []byte) []byte {
 // parameter is required at input[0]"); its images, data: URLs, are image
 // blocks after it, and any other URL a block at that uri. Its questions
 // are System One's, noul, choice and score, but a choice's option with no
-// description (null, as magpie's "none of these" goes) has an empty one,
+// description (null, as eipgam's "none of these" goes) has an empty one,
 // which Google takes. Everything else goes as it is, for Google to refuse
 // what it has no place for with a 400 naming it.
 func googleAsk(q map[string]any, body []byte) []byte {

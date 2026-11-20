@@ -5,18 +5,18 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Gemini CLI only speaks Google's own API, so "provider" here is how it
 // authenticates: Google sign-in, a Gemini API key, or Vertex AI. The choice
 // lives in settings.json (security.auth.selectedType). A Google provider
-// added in magpie lends its key through ~/.gemini/.env, which the CLI loads.
+// added in eipgam lends its key through ~/.gemini/.env, which the CLI loads.
 //
-// Any catalog model works too: the gateway serves the Gemini API, so magpie
+// Any catalog model works too: the gateway serves the Gemini API, so eipgam
 // points GOOGLE_GEMINI_BASE_URL at it, uses the gateway token as the API
 // key and names the catalog model in model.name.
 
@@ -35,7 +35,7 @@ func geminiIn(at place) *Agent {
 	envKey := func() string { v, _ := edit.GetEnvFile(envPath, "GEMINI_API_KEY"); return v }
 	// routed: the .env names the gateway, or names it at an address it
 	// no longer has (a WSL distro's under NAT changes as WSL restarts) with
-	// magpie's key: either way what is there is magpie's, never stashed as
+	// eipgam's key: either way what is there is eipgam's, never stashed as
 	// the user's own
 	routed := func() bool {
 		b, k := base(), envKey()
@@ -133,11 +133,11 @@ func geminiIn(at place) *Agent {
 			if routed() {
 				return nil
 			}
-			return fmt.Errorf("pick a model via magpie instead; that routes Gemini CLI through the gateway")
+			return fmt.Errorf("pick a model via eipgam instead; that routes Gemini CLI through the gateway")
 		}
-		// an auth it doesn't know is refused before magpie is taken out:
-		// `magpie gemini <a model it has no option for>` comes here, and
-		// unrouted Gemini CLI first, as `magpie snow --help` took magpie
+		// an auth it doesn't know is refused before eipgam is taken out:
+		// `eipgam gemini <a model it has no option for>` comes here, and
+		// unrouted Gemini CLI first, as `eipgam snow --help` took eipgam
 		// out of Snow (#1457)
 		switch id {
 		case "", "custom", "google", "vertex", "api-key":
@@ -186,7 +186,7 @@ func geminiIn(at place) *Agent {
 		UA:  []string{"geminicli", "gemini-cli"},
 		Bin: "gemini", Dir: dir, Path: path,
 		Telemetry: usageStatsTelemetry(at, path, "gemini"),
-		// its model's default forgets what it had before magpie, its
+		// its model's default forgets what it had before eipgam, its
 		// sign-in's default forgets the sign-in: this puts both back
 		Unwire: unroute,
 		// Gemini CLI is its binary. What it leaves in ~/.gemini stays when it
@@ -211,7 +211,7 @@ func geminiIn(at place) *Agent {
 				return d
 			}
 			if a := auth(); a != "gemini-api-key" {
-				return "Gemini CLI signs in with " + orDefault(a) + " rather than magpie's key, so it asks Google directly"
+				return "Gemini CLI signs in with " + orDefault(a) + " rather than eipgam's key, so it asks Google directly"
 			}
 			return ""
 		},
@@ -230,11 +230,11 @@ func geminiIn(at place) *Agent {
 					key := Option{Value: "api-key", Label: "API key", Icon: "gemini-color"}
 					switch {
 					case magpieKey() != "":
-						key.Note = "the Google key from magpie's providers"
+						key.Note = "the Google key from eipgam's providers"
 					case envKey() != "":
 						key.Note = "GEMINI_API_KEY from ~/.gemini/.env"
 					default:
-						key.Note = "needs GEMINI_API_KEY — add Google Gemini in magpie's providers"
+						key.Note = "needs GEMINI_API_KEY — add Google Gemini in eipgam's providers"
 					}
 					out := []Option{
 						{Value: "google", Label: "Google", Icon: "gemini-color", Note: "Google account · OAuth sign-in"},
@@ -245,7 +245,7 @@ func geminiIn(at place) *Agent {
 					case "custom":
 						out = append(out, Option{Value: "custom", Note: hostOf(base()) + " (from .env)"})
 					case magpieID:
-						out = append(out, Option{Value: magpieID, Label: "magpie", Note: "the local gateway · every provider's models"})
+						out = append(out, Option{Value: magpieID, Label: "eipgam", Note: "the local gateway · every provider's models"})
 					}
 					return out
 				},

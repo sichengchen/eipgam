@@ -4,13 +4,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A read-only gateway key (access.Key.ReadOnly) reads this magpie's stats
+// A read-only gateway key (access.Key.ReadOnly) reads this eipgam's stats
 // and uses nothing (Steven on Discord: an ESP32 desk display polling
-// /v1/magpie/quotas and /v1/magpie/usage every 15s, its key kept in the
+// /v1/eipgam/quotas and /v1/eipgam/usage every 15s, its key kept in the
 // device's flash, which had to be a key that could spend every account).
 // It is answered the routes below alone, by the pattern the request is
 // routed to, so a route added later is refused it until it is put here:
@@ -29,15 +29,15 @@ var readOnlyRoutes = map[string]bool{
 	"GET /{$}":                        true,
 	"GET /v1":                         true,
 	"GET /v1/{$}":                     true,
-	"GET /v1/magpie/quotas":           true,
-	"GET /v1/magpie/quotas/history":   true,
+	"GET /v1/eipgam/quotas":           true,
+	"GET /v1/eipgam/quotas/history":   true,
 	"GET " + StatuslinePath:           true,
 	"POST " + StatuslinePath:          true,
 	"GET " + provider.RemoteCardsPath: true,
-	"GET /v1/magpie/usage":            true,
-	"GET /v1/magpie/usage/requests":   true,
-	"GET /v1/magpie/limit":            true,
-	"GET /v1/magpie/concurrency":      true,
+	"GET /v1/eipgam/usage":            true,
+	"GET /v1/eipgam/usage/requests":   true,
+	"GET /v1/eipgam/limit":            true,
+	"GET /v1/eipgam/concurrency":      true,
 	"GET " + routeSnapshotPath:        true,
 	"GET " + routeEventsPath:          true,
 	"GET " + OwnMCPPath:               true,
@@ -50,7 +50,7 @@ var readOnlyRoutes = map[string]bool{
 	"GET " + JoinPagePath: true,
 	"GET " + joinData:     true,
 	"POST " + joinData:    true,
-	// magpie's CA, answered without a key (https.go caFileOpen)
+	// eipgam's CA, answered without a key (https.go caFileOpen)
 	"GET " + CAPath: true,
 	// a proof carries no key, and answers none (remote_prove.go)
 	"POST " + provider.RemoteProvePath: true,
@@ -70,7 +70,7 @@ func (m *routeMux) HandleFunc(pattern string, h func(http.ResponseWriter, *http.
 	m.ServeMux.HandleFunc(pattern, h)
 }
 
-// BrowserKeyCode is the error code the Magpie Browser extension's key
+// BrowserKeyCode is the error code the eipgam Browser extension's key
 // (access.Key.Browser) is refused a route with.
 const BrowserKeyCode = "gateway_key_browser_only"
 
@@ -82,7 +82,7 @@ const BrowserKeyCode = "gateway_key_browser_only"
 const browserKeyRoute = "GET " + BrowserExtensionPath
 
 // readOnlyGuard refuses a read-only key every route of mux but
-// readOnlyRoutes, and the Magpie Browser extension's key every route but
+// readOnlyRoutes, and the eipgam Browser extension's key every route but
 // browserKeyRoute, before anything is read, reserved or sent. Both are
 // judged here, after the key is known (callerGuard, lanGuard's
 // identifyCaller) and by the pattern the request is routed to, so no
@@ -92,9 +92,9 @@ func readOnlyGuard(mux *routeMux, next http.Handler) http.Handler {
 		who := access.Caller(r.Context())
 		if who.Browser {
 			if _, pattern := mux.Handler(r); pattern != browserKeyRoute {
-				log.Printf("refused %s %s: gateway key %q is Magpie Browser's", r.Method, r.URL.Path, who.KeyName)
+				log.Printf("refused %s %s: gateway key %q is eipgam Browser's", r.Method, r.URL.Path, who.KeyName)
 				writeJSON(w, http.StatusForbidden, map[string]any{"error": map[string]any{
-					"message": "this gateway key is the Magpie Browser extension's: it connects the extension and nothing else, no model, MCP server, stats or write. Use another gateway key for those (Gateway → Gateway keys)",
+					"message": "this gateway key is the eipgam Browser extension's: it connects the extension and nothing else, no model, MCP server, stats or write. Use another gateway key for those (Gateway → Gateway keys)",
 					"type":    "permission_error", "code": BrowserKeyCode}})
 				return
 			}
@@ -107,7 +107,7 @@ func readOnlyGuard(mux *routeMux, next http.Handler) http.Handler {
 			if _, pattern := mux.Handler(r); !readOnlyRoutes[pattern] {
 				log.Printf("refused %s %s: gateway key %q is read-only", r.Method, r.URL.Path, who.KeyName)
 				writeJSON(w, http.StatusForbidden, map[string]any{"error": map[string]any{
-					"message": "this gateway key is read-only: it may read magpie's quotas and usage (GET /v1/magpie/quotas, /v1/magpie/quotas/history, /v1/magpie/usage, /v1/magpie/usage/requests, /v1/magpie/limit, /v1/magpie/route-events) and use no model, MCP server or write. Use a key with full access for that (Gateway → Gateway keys, or magpie gateway-key access <id> full)",
+					"message": "this gateway key is read-only: it may read eipgam's quotas and usage (GET /v1/eipgam/quotas, /v1/eipgam/quotas/history, /v1/eipgam/usage, /v1/eipgam/usage/requests, /v1/eipgam/limit, /v1/eipgam/route-events) and use no model, MCP server or write. Use a key with full access for that (Gateway → Gateway keys, or eipgam gateway-key access <id> full)",
 					"type":    "permission_error", "code": ReadOnlyCode}})
 				return
 			}

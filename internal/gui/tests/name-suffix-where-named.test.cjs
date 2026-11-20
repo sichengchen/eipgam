@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine} ${lang}: Model settings says what agents' lists show and opens the setting on Settings`, async (t) => {
       const posts = [];
       const { page, errors } = await launch(t, engine, lang, posts);
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider").click();
       if (!(await page.locator(".mnames:not([hidden])").count())) await page.getByRole("button", { name: w.names, exact: true }).click();
       const sfx = page.locator(".mnames:not([hidden]) .msuffix");
@@ -135,7 +135,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine} ${lang}: "· routing group" is set over the groups, for all of them, and a group's editor says what it shows`, async (t) => {
       const posts = [];
       const { page, errors } = await launch(t, engine, lang, posts);
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const card = page.locator(".rt-group", { hasText: "Fast" });
       await card.waitFor();
       // the setting is under the groups, in the page's Settings (11-06)

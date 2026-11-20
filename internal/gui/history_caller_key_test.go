@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // The Routing stage names a request by the gateway key it came with

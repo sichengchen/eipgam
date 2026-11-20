@@ -30,7 +30,7 @@ function serve(lang, asked) {
   const sessions = [
     { ...base, id: "seen-1", title: "Seen by the gateway", start: at(40), last: at(10), via: VIA },
     { ...base, id: "kept-none", title: "Nothing kept", start: at(50), last: at(45), via: VIA },
-    { ...base, id: "own-only", title: "Never through magpie", start: at(60), last: at(55) },
+    { ...base, id: "own-only", title: "Never through eipgam", start: at(60), last: at(55) },
   ];
   return async (route) => {
     const url = new URL(route.request().url());
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const asked = [];
         await page.route("**/*", serve(lang, asked));
-        await page.goto("http://magpie.test/?view=sessions");
+        await page.goto("http://eipgam.test/?view=sessions");
         const view = page.locator("#view-sessions");
         if (!(await view.isVisible())) {
           const nav = page.locator("#nav").getByRole("button", { name: NAV[lang], exact: true });
@@ -141,7 +141,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await answered;
         await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r())));
         assert.equal(await detail.locator(".sess-line.sess-ctx:not([hidden])").count(), 0);
-        // one never through magpie: not asked, no line
+        // one never through eipgam: not asked, no line
         detail = await open("own-only");
         assert.equal(await detail.locator(".sess-line.sess-ctx").count(), 0);
         assert.equal(asked.filter((q) => q.id === "own-only").length, 0);

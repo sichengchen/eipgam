@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// KoiLx0 on X: a Remote magpie editor's "Connect new agents to this
+// KoiLx0 on X: a Remote eipgam editor's "Connect new agents to this
 // remote" is saved on this computer (agent.SetConnectAgents), shown as
 // saved, kept by a save that leaves it out, and refused another provider.
 func TestProviderSaveConnectAgents(t *testing.T) {
@@ -48,19 +48,19 @@ func TestProviderSaveConnectAgents(t *testing.T) {
 	if shown("office") || agent.ConnectsAgents()["office"] {
 		t.Fatal("on by default")
 	}
-	post(`{"id":"office","from":"office","name":"Office","preset":"remote-magpie","chat":"http://192.168.1.20:3425/v1","models":[],"headers":{},"connectAgents":true}`)
+	post(`{"id":"office","from":"office","name":"Office","preset":"remote-eipgam","chat":"http://192.168.1.20:3425/v1","models":[],"headers":{},"connectAgents":true}`)
 	if !agent.ConnectsAgents()["office"] || !shown("office") {
 		t.Fatal("the switch wasn't saved or isn't shown")
 	}
-	post(`{"id":"office","from":"office","name":"Office","preset":"remote-magpie","chat":"http://192.168.1.20:3425/v1","models":[],"headers":{}}`)
+	post(`{"id":"office","from":"office","name":"Office","preset":"remote-eipgam","chat":"http://192.168.1.20:3425/v1","models":[],"headers":{}}`)
 	if !shown("office") {
 		t.Fatal("a save that left it out turned it off")
 	}
 	post(`{"id":"vllm","from":"vllm","name":"vLLM","chat":"http://192.168.1.21:8000/v1","models":[],"headers":{},"connectAgents":true}`)
 	if agent.ConnectsAgents()["vllm"] {
-		t.Fatal("a provider that isn't a Remote magpie took the switch")
+		t.Fatal("a provider that isn't a Remote eipgam took the switch")
 	}
-	post(`{"id":"office","from":"office","name":"Office","preset":"remote-magpie","chat":"http://192.168.1.20:3425/v1","models":[],"headers":{},"connectAgents":false}`)
+	post(`{"id":"office","from":"office","name":"Office","preset":"remote-eipgam","chat":"http://192.168.1.20:3425/v1","models":[],"headers":{},"connectAgents":false}`)
 	if agent.ConnectsAgents()["office"] || shown("office") {
 		t.Fatal("turning it off didn't")
 	}

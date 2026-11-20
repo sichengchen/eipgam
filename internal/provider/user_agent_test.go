@@ -6,9 +6,9 @@ import (
 )
 
 // A key+URL provider passes the agent's User-Agent on by default (#1851,
-// nb5p on Discord), and goes as magpie only when set to: a signed-in
+// nb5p on Discord), and goes as eipgam only when set to: a signed-in
 // account, a plugin's, and one that goes as a client of its vendor's own
-// (OpenCode, Cline, Kilo, another magpie) keep the identity their signing
+// (OpenCode, Cline, Kilo, another eipgam) keep the identity their signing
 // gives.
 func TestPassesUserAgent(t *testing.T) {
 	for _, tt := range []struct {
@@ -17,13 +17,13 @@ func TestPassesUserAgent(t *testing.T) {
 		want bool
 	}{
 		{"key", Provider{Chat: "https://api.example.com/v1"}, true},
-		{"key, as magpie", Provider{MagpieUserAgent: true, Chat: "https://api.example.com/v1"}, false},
+		{"key, as eipgam", Provider{MagpieUserAgent: true, Chat: "https://api.example.com/v1"}, false},
 		{"an account", Provider{Chat: "https://api.z.ai/api/coding/paas/v4", Account: &Account{Agent: "zcode"}}, false},
 		{"a plugin's", Provider{Chat: "https://x.example/v1", Account: &Account{Agent: "plugin:x"}}, false},
 		{"opencode", Provider{Chat: "https://opencode.ai/zen/v1"}, false},
 		{"cline", Provider{Preset: "clinepass", Chat: "https://api.cline.bot/api/v1"}, false},
 		{"kilo", Provider{Preset: "kilo", Chat: "https://api.kilo.ai/api/gateway"}, false},
-		{"another magpie", Provider{Preset: RemoteMagpiePreset, Chat: "http://10.0.0.2:3425/v1"}, false},
+		{"another eipgam", Provider{Preset: RemoteMagpiePreset, Chat: "http://10.0.0.2:3425/v1"}, false},
 	} {
 		if got := tt.p.PassesUserAgent(); got != tt.want {
 			t.Errorf("%s: %v, want %v", tt.name, got, tt.want)
@@ -31,7 +31,7 @@ func TestPassesUserAgent(t *testing.T) {
 	}
 }
 
-// A copy of a provider set to go as magpie goes as magpie too, the form not
+// A copy of a provider set to go as eipgam goes as eipgam too, the form not
 // carrying it.
 func TestAddCopyMagpieUserAgent(t *testing.T) {
 	isolate(t)

@@ -54,7 +54,7 @@ func TestInstallableKeepsAnAncestorItCantLookAt(t *testing.T) {
 		t.Fatal(err)
 	}
 	denyStat(t, theirs)
-	err := Installable(filepath.Join(theirs, "new", "magpie"))
+	err := Installable(filepath.Join(theirs, "new", "eipgam"))
 	keeps(t, file, "mine")
 	if err == nil || !errors.Is(err, fs.ErrPermission) {
 		t.Fatalf("a folder that can't be looked at: %v", err)
@@ -69,7 +69,7 @@ func TestInstallableKeepsAnAncestorItCantLookAt(t *testing.T) {
 func TestInstallableKeepsTheFolderItCantLookAt(t *testing.T) {
 	newInstallFixture(t)
 	tmp := t.TempDir()
-	dir := filepath.Join(tmp, "magpie")
+	dir := filepath.Join(tmp, "eipgam")
 	file := filepath.Join(dir, "settings.json")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
@@ -94,7 +94,7 @@ func TestInstallableRemovesOnlyWhatItMade(t *testing.T) {
 	if err := os.WriteFile(keep, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := Installable(filepath.Join(tmp, "a", "b", "magpie")); err != nil {
+	if err := Installable(filepath.Join(tmp, "a", "b", "eipgam")); err != nil {
 		t.Fatal(err)
 	}
 	keeps(t, keep, "x")
@@ -108,16 +108,16 @@ func TestInstallableRemovesOnlyWhatItMade(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(b, "user.txt"), []byte("u"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := Installable(filepath.Join(b, "magpie")); err != nil {
+	if err := Installable(filepath.Join(b, "eipgam")); err != nil {
 		t.Fatal(err)
 	}
 	keeps(t, filepath.Join(b, "user.txt"), "u")
-	if _, err := os.Stat(filepath.Join(b, "magpie")); !errors.Is(err, fs.ErrNotExist) {
+	if _, err := os.Stat(filepath.Join(b, "eipgam")); !errors.Is(err, fs.ErrNotExist) {
 		t.Fatalf("the folder made was left: %v", err)
 	}
 }
 
-// An installed magpie.exe that can't be looked at isn't moved over by a
+// An installed eipgam.exe that can't be looked at isn't moved over by a
 // fresh install: settle says it can't tell, and the download runs on.
 func TestSettleLeavesAnExeItCantLookAt(t *testing.T) {
 	f := newInstallFixture(t)

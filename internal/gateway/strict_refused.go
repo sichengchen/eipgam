@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // OpenCode 2 (its @ai-sdk/openai-compatible) puts "strict": false on every

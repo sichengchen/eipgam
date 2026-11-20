@@ -23,7 +23,7 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 type modelCtxKey struct{}
@@ -108,7 +108,7 @@ func setModelHeaders(ref string, h map[string]string) (bool, error) {
 			return false, errors.New(p.Name + " is signed in: its requests carry its sign-in's headers, not a model's own")
 		}
 		if !p.serves(model) {
-			return false, fmt.Errorf("%s has no model %s (magpie provider %s lists them)", p.ID, model, p.ID)
+			return false, fmt.Errorf("%s has no model %s (eipgam provider %s lists them)", p.ID, model, p.ID)
 		}
 		if len(h) > maxModelHeaders {
 			return false, fmt.Errorf("a model has at most %d headers", maxModelHeaders)

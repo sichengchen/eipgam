@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, req("claude", "auto/deepseek-v4.1-flash")));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       await page.locator(".rt-ctx .ctx-route .ctx-what .ic").waitFor();
       const sels = [".ctx-who .ic", ".ctx-who-n", ".ctx-what .ic", ".ctx-model"];
       const with_ = async (s) => {

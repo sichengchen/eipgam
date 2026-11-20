@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A look that only ranges over magpie's models reads the list kept, not a
+// A look that only ranges over eipgam's models reads the list kept, not a
 // copy: a copy per look was 37 MB of what forty window polls allocated
 // with real accounts, most of it Pi's and Claude Code's thinking levels.
 func TestModelReadersShareTheList(t *testing.T) {

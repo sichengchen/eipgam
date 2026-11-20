@@ -11,7 +11,7 @@ import (
 // Text that isn't text, in a JSON body an agent sends (laincatx on X):
 // bytes that aren't UTF-8 (a GBK file, a lone surrogate encoded as UTF-8,
 // \xed\xa0\x80) and an escaped surrogate with no partner ("\ud800").
-// magpie kept such a string's bytes as they came and sent them on, and
+// eipgam kept such a string's bytes as they came and sent them on, and
 // each vendor took them its own way: DeepSeek and OpenAI answered 400,
 // MiniMax 200 with nothing in it, so in a routing group one request
 // worked or failed by which member it reached.

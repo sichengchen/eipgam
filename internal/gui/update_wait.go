@@ -4,8 +4,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A restart to update ends the gateway this process serves, and with it
@@ -24,7 +24,7 @@ var (
 	idleSettle = 10 * time.Second
 	waitMost   = time.Hour
 	waitTick   = time.Second
-	// restartDrain is how long a restart `magpie update` asked for waits
+	// restartDrain is how long a restart `eipgam update` asked for waits
 	// for what is in flight; then it restarts anyway. Without a bound a
 	// long stream kept the old version running for good (ljlwlcz on X, on
 	// Windows, where nothing is handed over).
@@ -32,14 +32,14 @@ var (
 )
 
 // A restart by itself (Settings' AutoRestart) also waits while the user
-// is using one of magpie's own windows (BESTLJP0412 on X: the window
+// is using one of eipgam's own windows (BESTLJP0412 on X: the window
 // closed and came back mid-way through adding a provider). Each page
 // tells the app of the user's input (`POST /api/update/using`, a press, a
 // key, typing or the wheel, at most every 20s), and whether a dialog is
 // open (#modal); the app counts it in use for usingFor after that input,
 // or openFor with a dialog open, which may hold a form half filled in.
-// A restart the user asked for (a click, `magpie update`) doesn't wait
-// for it: they are the one using magpie.
+// A restart the user asked for (a click, `eipgam update`) doesn't wait
+// for it: they are the one using eipgam.
 var (
 	usingFor = 2 * time.Minute
 	openFor  = 15 * time.Minute
@@ -72,7 +72,7 @@ func inUseAt(now time.Time) bool {
 }
 
 // gatewayBusy is what the gateway this process serves has in flight;
-// nothing when another magpie serves it, which a restart here leaves be.
+// nothing when another eipgam serves it, which a restart here leaves be.
 var gatewayBusy = func() gateway.Busy {
 	if gw := served.Load(); gw != nil {
 		return gw.Busy()
@@ -168,7 +168,7 @@ func (u *updater) waitFor(gen int) {
 		}
 		drained := u.drainMost > 0 && time.Since(u.waitFrom) >= u.drainMost
 		if drained {
-			// the bound `magpie update` was told: what is still in
+			// the bound `eipgam update` was told: what is still in
 			// flight is cut now, as a restart does (the gateway's own
 			// shutdown lets a stream end its turn first)
 			restart := u.whenIdle
@@ -196,7 +196,7 @@ func (u *updater) waitFor(gen int) {
 			continue
 		}
 		u.mu.Lock()
-		// another magpie put the update in (restartBeside): that is what
+		// another eipgam put the update in (restartBeside): that is what
 		// the restart goes into, whatever the feed answers now
 		in := u.replaced()
 		u.mu.Unlock()
@@ -204,7 +204,7 @@ func (u *updater) waitFor(gen int) {
 		case in:
 		case st == "ready":
 			// the version downloaded and waiting is gone into as it is;
-			// with none (another magpie put it in), the feed is asked
+			// with none (another eipgam put it in), the feed is asked
 			// (recheck)
 			waitRecheck(u, asked)
 			if u.asking() || u.json().State != "ready" {

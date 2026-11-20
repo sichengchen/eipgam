@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // A plugin's usage says the pool a window is of and the family a model's

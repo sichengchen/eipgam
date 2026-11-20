@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // registry.json can give a listing a picture as its icon (Kilo Code's
@@ -23,7 +23,7 @@ func TestRegistryIconPictureKept(t *testing.T) {
 	t.Setenv("USERPROFILE", h)
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	t.Setenv("PATH", "")
 	const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func TestRegistryIconPictureKept(t *testing.T) {
 		]}`))
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_PLUGIN_MARKET", srv.URL)
+	t.Setenv("EIPGAM_PLUGIN_MARKET", srv.URL)
 	plugin.RefreshMarket()
 	t.Cleanup(plugin.RefreshMarket)
 	plugin.ReloadInfo()
@@ -63,7 +63,7 @@ func TestRegistryIconPictureKept(t *testing.T) {
 		t.Errorf("a bundled name = %q", ic)
 	}
 	if ic := got["@magpie-community/tools-plain"]; ic != "" {
-		t.Errorf("a picture magpie doesn't take = %q", ic)
+		t.Errorf("a picture eipgam doesn't take = %q", ic)
 	}
 	// the whole market at once (pluginMarketState), npm not asked here
 	var asked []pluginListingJSON

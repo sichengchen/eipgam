@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/mcpauth/mcpauthtest"
 )
 
 func accountLabels(name string) []string {

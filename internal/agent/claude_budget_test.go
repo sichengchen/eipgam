@@ -12,34 +12,34 @@ import (
 // largest to that window.
 func TestClaudePlan(t *testing.T) {
 	models := []claudeBudget{
-		{id: "mythos-magpie-1", window: 500000, compact: 272000},
-		{id: "mythos-magpie-2", window: 131000, compact: 272000},
-		{id: "anthropic/magpie-3[1m]", window: 1000000, long: true, compact: 272000},
-		{id: "anthropic/magpie-4", compact: -1},
-		{id: "magpie/v/gpt-6.1-sol", window: 400000, compact: -1},
+		{id: "mythos-eipgam-1", window: 500000, compact: 272000},
+		{id: "mythos-eipgam-2", window: 131000, compact: 272000},
+		{id: "anthropic/eipgam-3[1m]", window: 1000000, long: true, compact: 272000},
+		{id: "anthropic/eipgam-4", compact: -1},
+		{id: "eipgam/v/gpt-6.1-sol", window: 400000, compact: -1},
 	}
 	top, entries := claudePlan(models, 272000, nil)
-	want := map[string]int{"mythos-magpie-2": 131000, "anthropic/magpie-4": 1000000, "magpie/v/gpt-6.1-sol": 400000}
+	want := map[string]int{"mythos-eipgam-2": 131000, "anthropic/eipgam-4": 1000000, "eipgam/v/gpt-6.1-sol": 400000}
 	if top != 1000000 || !reflect.DeepEqual(entries, want) {
-		t.Fatalf("magpie's default: %d %v", top, entries)
+		t.Fatalf("eipgam's default: %d %v", top, entries)
 	}
 	// no top-level window: every model runs at the largest, the [1m] one's 1M
 	top, entries = claudePlan(models, 0, nil)
-	want = map[string]int{"mythos-magpie-1": 272000, "mythos-magpie-2": 131000, "anthropic/magpie-3": 272000, "magpie/v/gpt-6.1-sol": 400000}
+	want = map[string]int{"mythos-eipgam-1": 272000, "mythos-eipgam-2": 131000, "anthropic/eipgam-3": 272000, "eipgam/v/gpt-6.1-sol": 400000}
 	if top != 1000000 || !reflect.DeepEqual(entries, want) {
 		t.Fatalf("no default: %d %v", top, entries)
 	}
 	// the user's own entries are theirs; "auto" on the 131K one holds the
 	// largest to its window
-	top, entries = claudePlan(models, 0, map[string]string{"mythos-magpie-2": "auto", "magpie/v/gpt-6.1-sol": "100000"})
-	want = map[string]int{"anthropic/magpie-3": 272000}
+	top, entries = claudePlan(models, 0, map[string]string{"mythos-eipgam-2": "auto", "eipgam/v/gpt-6.1-sol": "100000"})
+	want = map[string]int{"anthropic/eipgam-3": 272000}
 	if top != 131000 || !reflect.DeepEqual(entries, want) {
 		t.Fatalf("the user's own: %d %v", top, entries)
 	}
 	// one within the model's window is kept as it is, and doesn't hold
 	// the largest
-	top, entries = claudePlan(models, 0, map[string]string{"mythos-magpie-2": "50000"})
-	want = map[string]int{"mythos-magpie-1": 272000, "anthropic/magpie-3": 272000, "magpie/v/gpt-6.1-sol": 400000}
+	top, entries = claudePlan(models, 0, map[string]string{"mythos-eipgam-2": "50000"})
+	want = map[string]int{"mythos-eipgam-1": 272000, "anthropic/eipgam-3": 272000, "eipgam/v/gpt-6.1-sol": 400000}
 	if top != 1000000 || !reflect.DeepEqual(entries, want) {
 		t.Fatalf("the user's 50000: %d %v", top, entries)
 	}
@@ -77,7 +77,7 @@ func TestClaudePlan(t *testing.T) {
 	if top != 1000000 || !reflect.DeepEqual(entries, map[string]int{"b": 1000000, "c": 400000}) {
 		t.Fatalf("behavesAs: %d %v", top, entries)
 	}
-	// an id magpie's editor can't put in a key path gets no entry
+	// an id eipgam's editor can't put in a key path gets no entry
 	if _, entries = claudePlan([]claudeBudget{{id: "a", window: 400000}, {id: "b*", window: 100000}}, 0, nil); len(entries) != 0 {
 		t.Fatalf("b*: %v", entries)
 	}
@@ -86,7 +86,7 @@ func TestClaudePlan(t *testing.T) {
 // TestBudgetPath: a dot in a model's id is part of its key, as Claude Code
 // reads it, and the "[1m]" mark is not.
 func TestBudgetPath(t *testing.T) {
-	if p := budgetPath("magpie/v/gpt-6.1-sol[1m]"); p != `modelSettings.magpie/v/gpt-6\.1-sol.autoCompactWindow` {
+	if p := budgetPath("eipgam/v/gpt-6.1-sol[1m]"); p != `modelSettings.eipgam/v/gpt-6\.1-sol.autoCompactWindow` {
 		t.Fatal(p)
 	}
 	if got := budgetsRead(`{"a.b":{"autoCompactWindow":5},"c":{"autoCompactWindow":"auto"},"d":{"effortLevel":"high"}}`); !reflect.DeepEqual(got, map[string]string{"a.b": "5", "c": "auto"}) {

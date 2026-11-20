@@ -52,7 +52,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const modal = page.locator("#modal");
         const kinds = [
           ["the provider editor", async () => { await page.locator('#providers .row.provider[data-id="relay"]').click(); }],
@@ -105,7 +105,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", fixture("en"));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.evaluate((mac) => { document.body.classList.remove("web"); document.body.classList.add("window"); if (mac) document.body.classList.add("mac"); }, mac);
       await page.locator('#providers .row.provider[data-id="relay"]').click();
       await page.getByRole("dialog").first().waitFor();

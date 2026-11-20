@@ -60,7 +60,7 @@ func Offset(loc *time.Location) time.Duration {
 
 // The changes of a zone are listed this many years either way from now.
 // Past the last one the zone keeps its last offset, as a version 1 zoneinfo
-// file does; the span is long against a run of magpie.
+// file does; the span is long against a run of eipgam.
 const (
 	yearsBack  = 4
 	yearsAhead = 4

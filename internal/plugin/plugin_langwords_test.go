@@ -12,7 +12,7 @@ import (
 // in a Chinese window. A plugin may give its sign-in words by language,
 // beside OpenCode's English ones, as a page gives its titles: a method's
 // labels, a question's messages, a choice's labels and hints. They reach
-// magpie as given, words that aren't a string, empty ones and a list left
+// eipgam as given, words that aren't a string, empty ones and a list left
 // out; a plugin that gives none is read as before.
 func TestPluginSignInWordsByLanguage(t *testing.T) {
 	sandbox(t)

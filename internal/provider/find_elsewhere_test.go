@@ -7,9 +7,9 @@ import (
 	"testing"
 )
 
-// A magpie run in a shell whose XDG_CONFIG_HOME moves its files says so when
+// A eipgam run in a shell whose XDG_CONFIG_HOME moves its files says so when
 // a provider isn't found, naming the folder the app keeps them in (蒙面人 on
-// Discord: `magpie provider refresh antigravity` found no Antigravity, which
+// Discord: `eipgam provider refresh antigravity` found no Antigravity, which
 // the window showed signed in); without the variable it says nothing more.
 func TestFindSaysFilesAreElsewhere(t *testing.T) {
 	t.Cleanup(AntigravityBuiltinForTest()) // the retired built-in route
@@ -17,7 +17,7 @@ func TestFindSaysFilesAreElsewhere(t *testing.T) {
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
-	app := filepath.Join(h, ".config", "magpie")
+	app := filepath.Join(h, ".config", "eipgam")
 	if err := os.MkdirAll(app, 0o700); err != nil {
 		t.Fatal(err)
 	}

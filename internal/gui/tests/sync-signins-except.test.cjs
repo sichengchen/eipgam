@@ -35,7 +35,7 @@ const subs = [
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/eipgam",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const click = async (loc) => { await reach(page, loc); await loc.click(); };
         const exact = (s) => new RegExp("^" + s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$");
 
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator("#prefs").click();
         await openPart(page, "sync");
         const list = page.locator("#syncList");

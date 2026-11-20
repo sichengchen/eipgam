@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Another magpie that has this one as its provider (remote-magpie) waits
-// here for this magpie's model list to change, and fetches it again when
+// Another eipgam that has this one as its provider (remote-eipgam) waits
+// here for this eipgam's model list to change, and fetches it again when
 // it has (KaCli on Discord: a route or group changed on the server reached
 // the computer using it only on its next 10-minute fetch, and its agents'
 // configs after that). It is the list's own route, GET /v1/models, so
@@ -28,11 +28,11 @@ import (
 // compresses the list turns its ETag weak (W/"…") and sends it back so:
 // compared exactly, each wait was answered at once and asked again, once a
 // second (y0ngb1n on X). A list
-// is looked at again on each write magpie makes and on each change
+// is looked at again on each write eipgam makes and on each change
 // another process makes to its files (filememo.Written), not polled.
 // A client asking without the header is answered the list with the same
 // ETag, and 304 with no body when its If-None-Match names it already
-// (listModelsTagged): a script or a magpie polling the list pays a few
+// (listModelsTagged): a script or a eipgam polling the list pays a few
 // bytes while it is unchanged (clyzhicore on Discord). A wait answer says
 // in provider.ListWaitHeader how long it held, which a plain answer
 // doesn't: a proxy that drops the header would turn the wait into a plain
@@ -47,7 +47,7 @@ const listWaitMost = 50 * time.Second
 // (a group saved, then the catalog touched) before the list is looked at.
 var listSettle = 200 * time.Millisecond
 
-// waitsForList reports whether r is another magpie waiting for the list to
+// waitsForList reports whether r is another eipgam waiting for the list to
 // change.
 func waitsForList(r *http.Request) bool {
 	if r.Method != http.MethodGet || r.Header.Get(provider.ListWaitHeader) == "" {
@@ -66,7 +66,7 @@ func listWaitOf(r *http.Request) time.Duration {
 }
 
 // listTag is a list answer's ETag: of the bytes answered, so it moves
-// exactly when what another magpie would fetch does.
+// exactly when what another eipgam would fetch does.
 func listTag(status int, body []byte) string {
 	h := sha256.New()
 	h.Write([]byte(strconv.Itoa(status)))

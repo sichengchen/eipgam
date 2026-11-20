@@ -79,7 +79,7 @@ func NoteCodexLimits(agent, user string, heard []CodexLimit) {
 	// the reply told is the account's, until a reading tells it — when
 	// it tells a budget (the week): kept as not known, the account went
 	// behind every one known for good under Use before expiry and
-	// Smart, while the week magpie's own turns started ran out unspent
+	// Smart, while the week eipgam's own turns started ran out unspent
 	// (peterpark8527 on Discord)
 	a := toldAllowance(heard)
 	if a == nil {

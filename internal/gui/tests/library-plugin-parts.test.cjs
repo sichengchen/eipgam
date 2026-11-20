@@ -16,7 +16,7 @@ const HOME = "/Users/chuan";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const kit = { bundle: "code-kit" };
 const lib = () => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex")],
   instructions: { agents: [] }, foundServers: [], projects: [], foundSkills: [], problems: [],
   skills: [{ name: "code-kit-tdd", description: "Test first", kind: "", agents: ["claude"], ...kit }, { name: "own-skill", description: "Mine", kind: "", agents: ["claude"] }],
@@ -51,7 +51,7 @@ function server(lang) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -70,14 +70,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang} ${width} ${tab}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
         t.after(() => ctx.close());
-        await ctx.addInitScript((tab) => { try { localStorage.setItem("magpie.libTab", tab); } catch {} }, tab);
+        await ctx.addInitScript((tab) => { try { localStorage.setItem("eipgam.libTab", tab); } catch {} }, tab);
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         const row = (name) => v.locator(cls).filter({ has: page.locator(".name", { hasText: name }) }).first();

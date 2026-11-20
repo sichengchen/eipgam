@@ -10,7 +10,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Best in family on the codex provider keeps Codex's own list to the

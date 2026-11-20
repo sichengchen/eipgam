@@ -10,12 +10,12 @@ package provider
 // secret_auth_storage on (the default on Windows), keyring and auto mean
 // Codex's encrypted auth storage instead of the keychain item.
 //
-// magpie reads and writes the keychain item on macOS only, through
+// eipgam reads and writes the keychain item on macOS only, through
 // `security` as it does Claude Code's (readClaudeKeychainItem): the
 // generic password of service "Codex Auth" and account
 // "cli|<first 16 hex of SHA-256 of the canonical CODEX_HOME>", holding
 // auth.json's JSON on one line. Elsewhere, and for the encrypted
-// storage, the store is one magpie doesn't read: keyring reads as
+// storage, the store is one eipgam doesn't read: keyring reads as
 // unknown, auto as auth.json, which is what Codex falls back to.
 
 import (
@@ -36,14 +36,14 @@ import (
 
 	toml "github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 const codexKeychainService = "Codex Auth"
 
-// keychain is the system keychain as magpie reaches an item in it. Find
+// keychain is the system keychain as eipgam reaches an item in it. Find
 // gives fs.ErrNotExist for no item; Remove, nil. Stat gives the item's
 // modification date, or fs.ErrNotExist: it reads only attributes, which
 // macOS gives without asking the user (only the secret is behind the
@@ -59,7 +59,7 @@ type keychain interface {
 
 var (
 	codexKeychain keychain = securityKeychain{}
-	// codexKeychainHere: the keychain item is magpie's to read on this
+	// codexKeychainHere: the keychain item is eipgam's to read on this
 	// system (macOS); a var so tests run the macOS path everywhere
 	codexKeychainHere = runtime.GOOS == "darwin"
 	// secretAuthStorageDefault is Codex's default for [features]
@@ -84,8 +84,8 @@ var (
 	// exit 128) for Cancel (Security.framework's SecBase.h)
 	errKeychainRefused  = errors.New("macOS's keychain prompt was denied or cancelled")
 	errKeychainNoAnswer = errors.New("macOS's keychain prompt got no answer in time")
-	errKeychainWaiting  = errors.New("magpie is waiting for an answer to macOS's keychain prompt")
-	errKeychainUnread   = errors.New("the keychain didn't give it to magpie")
+	errKeychainWaiting  = errors.New("eipgam is waiting for an answer to macOS's keychain prompt")
+	errKeychainUnread   = errors.New("the keychain didn't give it to eipgam")
 )
 
 // securityKeychain is macOS' `security`, as readClaudeKeychainItem and
@@ -226,7 +226,7 @@ func readCodexStoreSetting(home string) (codexStoreSetting, error) {
 	return s, nil
 }
 
-// keychainItem: the store is the keychain item magpie reads.
+// keychainItem: the store is the keychain item eipgam reads.
 func (s codexStoreSetting) keychainItem() bool {
 	return (s.Mode == "keyring" || s.Mode == "auto") && !s.Secrets && codexKeychainHere
 }
@@ -242,12 +242,12 @@ func (s codexStoreSetting) where() string {
 	return "the system keychain"
 }
 
-// codexStoreError: Codex keeps its sign-in where magpie couldn't read it,
+// codexStoreError: Codex keeps its sign-in where eipgam couldn't read it,
 // so whether it is signed in, and to whom, isn't known.
 type codexStoreError struct {
 	Setting codexStoreSetting
 	Config  string
-	Cause   error // nil: a store magpie doesn't read on this system
+	Cause   error // nil: a store eipgam doesn't read on this system
 }
 
 func (e *codexStoreError) Error() string {
@@ -257,7 +257,7 @@ func (e *codexStoreError) Error() string {
 	if e.Cause != nil {
 		return fmt.Sprintf("Codex keeps its sign-in in %s (cli_auth_credentials_store = %q in %s), and %v", e.Setting.where(), e.Setting.Mode, e.Config, e.Cause)
 	}
-	return fmt.Sprintf("Codex keeps its sign-in in %s (cli_auth_credentials_store = %q in %s), which magpie doesn't read", e.Setting.where(), e.Setting.Mode, e.Config)
+	return fmt.Sprintf("Codex keeps its sign-in in %s (cli_auth_credentials_store = %q in %s), which eipgam doesn't read", e.Setting.where(), e.Setting.Mode, e.Config)
 }
 
 // codexStore is where a Codex sign-in was read from, so that a refresh
@@ -421,7 +421,7 @@ func (a *codexKeychainAsk) run(account string, k keychain, gen uint64) {
 		if err == nil {
 			var obj map[string]json.RawMessage
 			if json.Unmarshal(b, &obj) != nil || obj == nil {
-				b, err = nil, errors.New("the keychain item isn't a Codex sign-in magpie can read")
+				b, err = nil, errors.New("the keychain item isn't a Codex sign-in eipgam can read")
 			}
 		}
 	}
@@ -438,7 +438,7 @@ func (a *codexKeychainAsk) run(account string, k keychain, gen uint64) {
 	close(a.done)
 }
 
-// keepCodexKeychain keeps what magpie itself just wrote to the item for
+// keepCodexKeychain keeps what eipgam itself just wrote to the item for
 // home, at the item's date now.
 func keepCodexKeychain(home string, b []byte) {
 	account := codexKeychainAccount(home)
@@ -511,7 +511,7 @@ func codexKeychainUnread(err error) bool {
 
 // readCodexLogin is Codex's sign-in under home as Codex would load it,
 // and where it came from. fs.ErrNotExist (wrapped or not): signed out,
-// as far as magpie can see. *codexStoreError: kept where magpie couldn't
+// as far as eipgam can see. *codexStoreError: kept where eipgam couldn't
 // read it, so not known. A config.toml that doesn't read leaves auth.json
 // read as before there was a setting (Codex itself wouldn't start), and
 // nothing is saved over it (saveCodexLogin).
@@ -552,7 +552,7 @@ func readCodexLogin(home string, fresh bool) ([]byte, codexStore, error) {
 	case s.Mode == "keyring":
 		return nil, st, &codexStoreError{Setting: s, Config: cfg}
 	case s.Mode == "auto":
-		// a store magpie doesn't read: auth.json is there only when Codex
+		// a store eipgam doesn't read: auth.json is there only when Codex
 		// is on its fallback (a save to the store removes it)
 		b, err := readAccountFile(st.file())
 		if errors.Is(err, fs.ErrNotExist) {
@@ -590,7 +590,7 @@ func (s codexStore) write(b []byte) error {
 }
 
 // saveCodexLogin makes b the sign-in Codex goes by (a switch, or the
-// first sign-in in magpie), in the store its config.toml names. The
+// first sign-in in eipgam), in the store its config.toml names. The
 // store's own sign-in is read first, never taken for absent when it
 // couldn't be read: one that wasn't read is never written over. auth.json
 // left beside a keychain item is left to Codex, which removes it at its
@@ -626,7 +626,7 @@ func saveCodexLogin(home string, b []byte) error {
 	case s.Mode == "keyring":
 		return &codexStoreError{Setting: s, Config: cfg}
 	case s.Mode == "auto":
-		// a store magpie doesn't read: only a Codex on its file fallback
+		// a store eipgam doesn't read: only a Codex on its file fallback
 		// goes by auth.json
 		if _, err := os.Stat(st.file()); err != nil {
 			return &codexStoreError{Setting: s, Config: cfg}
@@ -668,7 +668,7 @@ func deleteCodexLogin(home string) error {
 
 // CodexSignIn is the sign-in Codex goes by under its home dir, from
 // wherever its config.toml has it kept (readCodexLogin); ok is false for
-// none, or one magpie couldn't read. Agents' wiring reads it here.
+// none, or one eipgam couldn't read. Agents' wiring reads it here.
 func CodexSignIn(dir string) (b []byte, ok bool) {
 	b, _, err := readCodexLogin(dir, false)
 	return b, err == nil
@@ -676,7 +676,7 @@ func CodexSignIn(dir string) (b []byte, ok bool) {
 
 // CodexSignInKnown is CodexSignIn with whether the read says anything at
 // all. A sign-in that isn't there (no auth.json: codex logout; no keychain
-// item) or is kept where magpie doesn't read is known, ok false. One that
+// item) or is kept where eipgam doesn't read is known, ok false. One that
 // couldn't be read, or doesn't parse, is not: Codex rewrites auth.json in
 // place when it refreshes its tokens (codex-rs FileAuthStorage::save
 // opens it with truncate), so a read in that moment finds it empty or cut

@@ -29,44 +29,44 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/applog"
-	"github.com/yetone/magpie/internal/autostart"
-	"github.com/yetone/magpie/internal/bark"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/desktopiso"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/fonts"
-	"github.com/yetone/magpie/internal/fx"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/ghtoken"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/middleware"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/notices"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/redact"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/settingsapi"
-	"github.com/yetone/magpie/internal/update"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/applog"
+	"github.com/sichengchen/eipgam/internal/autostart"
+	"github.com/sichengchen/eipgam/internal/bark"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/desktopiso"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/fonts"
+	"github.com/sichengchen/eipgam/internal/fx"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/ghtoken"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/middleware"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/notices"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/profile"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/redact"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settingsapi"
+	"github.com/sichengchen/eipgam/internal/update"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// cliBehind is the terminal's magpie command when it's a copied file rather
+// cliBehind is the terminal's eipgam command when it's a copied file rather
 // than the installer's link — a copy can't follow updates (#531's lesson) —
 // told once, and only until the user dismisses it for this version. The
 // check is a bare Lstat: telling a *stale* copy from a current one would
-// mean running the old binary, and `magpie version` isn't read-only — it
+// mean running the old binary, and `eipgam version` isn't read-only — it
 // migrates the user's settings first, with the old build's migrations. Only
-// `magpie update`, which the user started, reads versions (update.StaleCLI).
+// `eipgam update`, which the user started, reads versions (update.StaleCLI).
 // "" when the command is the link or absent, this isn't the Mac, or the
 // advice was dismissed for this version.
 func cliBehind() string {
@@ -117,7 +117,7 @@ func cliBehindRoutes(mux *http.ServeMux) {
 		cliBehindMu.Unlock()
 		rw.WriteHeader(http.StatusNoContent)
 	})
-	// Settings' Command line: what `magpie` runs in each shell, and this
+	// Settings' Command line: what `eipgam` runs in each shell, and this
 	// app's put there when asked (update.AddCLI); shell names the one whose
 	// profile gets ~/.local/bin
 	mux.HandleFunc("GET /api/cli", func(rw http.ResponseWriter, r *http.Request) {
@@ -203,19 +203,19 @@ type agentJSON struct {
 	// Claude Code's permission mode), apart from Fields so no picker on
 	// its row draws them: agentcompact.js folds them under Advanced
 	Own []fieldJSON `json:"own,omitempty"`
-	// Drift: its config no longer does what magpie set, and how to set it again
+	// Drift: its config no longer does what eipgam set, and how to set it again
 	Drift *agent.Drift `json:"drift,omitempty"`
-	// Wired: magpie is in its config, which its menu's Disconnect takes out
+	// Wired: eipgam is in its config, which its menu's Disconnect takes out
 	Wired bool `json:"wired,omitempty"`
-	// Import: an app that takes magpie by its own link (Cindy), and
-	// whether it has magpie already; omitted when the app has no status reader
+	// Import: an app that takes eipgam by its own link (Cindy), and
+	// whether it has eipgam already; omitted when the app has no status reader
 	Import string `json:"import,omitempty"`
 	Added  *bool  `json:"added,omitempty"`
 	// Launch: the command that starts an agent taking the gateway only
-	// from its environment (agy) on magpie, to copy
+	// from its environment (agy) on eipgam, to copy
 	Launch string `json:"launch,omitempty"`
-	// Typed: what starts it on magpie typed in a new terminal, a function
-	// magpie gave the user's shells (agy); the launch is for one open now
+	// Typed: what starts it on eipgam typed in a new terminal, a function
+	// eipgam gave the user's shells (agy); the launch is for one open now
 	Typed string `json:"typed,omitempty"`
 	// Models: how many of the catalog its lists show, for an agent that
 	// picks among it (agent_models.go)
@@ -223,7 +223,7 @@ type agentJSON struct {
 	// Menu: its own model menu is the models picked here, no one model to
 	// start on (agent.ListsModels): ZCode's, Cursor Private Inference's
 	Menu bool `json:"menu,omitempty"`
-	// NoNames: its own list doesn't name magpie's models as Names in agents'
+	// NoNames: its own list doesn't name eipgam's models as Names in agents'
 	// lists says (agent.NoNames), for that setting to say so
 	NoNames bool `json:"noNames,omitempty"`
 	// Source: what an agent not connected runs on now (agent.Source), and
@@ -235,39 +235,39 @@ type agentJSON struct {
 	// started, for the opened row to say which is left to reopen and how
 	StaleCopies []agent.StaleCopy `json:"staleCopies,omitempty"`
 	// AppRestart: its desktop app (Claude Desktop, WorkBuddy) running on
-	// what it read before magpie's last change, for the row's Restart
+	// what it read before eipgam's last change, for the row's Restart
 	// (agent.AppBehind)
 	AppRestart *agent.AppRun `json:"appRestart,omitempty"`
-	// Isolated: Claude Desktop's Claude Magpie app (#5671), only where it
+	// Isolated: Claude Desktop's Claude eipgam app (#5671), only where it
 	// can be (macOS): whether it is on, and the app
 	Isolated *agent.DesktopIsolated `json:"isolated,omitempty"`
-	// TwinCode: this Claude Code folder is Claude Magpie's Code tab's,
-	// which is on magpie through Claude Magpie (agent.DesktopTwinCode)
+	// TwinCode: this Claude Code folder is Claude eipgam's Code tab's,
+	// which is on eipgam through Claude eipgam (agent.DesktopTwinCode)
 	TwinCode bool `json:"twinCode,omitempty"`
-	// Telemetry: the agent's own telemetry to its vendor, where magpie
+	// Telemetry: the agent's own telemetry to its vendor, where eipgam
 	// knows the switch for it (agent/telemetry.go)
 	Telemetry *agent.TelemetryState `json:"telemetry,omitempty"`
 	// Joined: connected with its own models still in its list (Codex
 	// signed in with ChatGPT, agent.Agent.Join)
 	Joined bool `json:"joined,omitempty"`
-	// AppOut: magpie is Codex's provider while the ChatGPT account it is
+	// AppOut: eipgam is Codex's provider while the ChatGPT account it is
 	// signed in to is used up (agent.Agent.AppOut), which turns the Codex
 	// app's ChatGPT side off until the reset
 	AppOut *appOutJSON `json:"appOut,omitempty"`
-	// AppBack: magpie gave Codex back its ChatGPT account at the reset
-	// and left the Codex app on the app-server it started while magpie
+	// AppBack: eipgam gave Codex back its ChatGPT account at the reset
+	// and left the Codex app on the app-server it started while eipgam
 	// was its provider, which shows no account or usage till it restarts
 	// (provider.CodexAppBack), for the row's Restart
 	AppBack bool `json:"appBack,omitempty"`
-	// AppSnag: the Codex app showed its error page after magpie restarted
-	// its app-server and magpie couldn't reopen it (provider.CodexAppSnagged)
+	// AppSnag: the Codex app showed its error page after eipgam restarted
+	// its app-server and eipgam couldn't reopen it (provider.CodexAppSnagged)
 	AppSnag bool `json:"appSnag,omitempty"`
-	// Failover: not connected, yet its requests go through magpie for
+	// Failover: not connected, yet its requests go through eipgam for
 	// account failover alone (agent.Agent.FailingOver, #1385)
 	Failover bool `json:"failover,omitempty"`
 	// CLIMissing: its settings are here, its CLI isn't (#843), which
 	// the row says with none of its settings offered (#2177), and Install
-	// another agent offers it again where magpie knows how
+	// another agent offers it again where eipgam knows how
 	CLIMissing bool               `json:"cliMissing,omitempty"`
 	Native     *agent.NativeState `json:"native,omitempty"`
 	// Command: the line that starts it (agentCommand), which its row menu
@@ -317,14 +317,14 @@ type stateJSON struct {
 	// Connected is how the 「接入」 switch chose the model the agent starts
 	// on, in the answer to agents/connect (agent.Connection)
 	Connected *agent.Connection `json:"connected,omitempty"`
-	// CLIBehind is the terminal's magpie command, told to the user when
+	// CLIBehind is the terminal's eipgam command, told to the user when
 	// it's a copied file rather than the installer's link: a copy can't
 	// follow updates (#531's lesson). "" when it's the link or absent, or
 	// the advice was dismissed for this version.
 	CLIBehind string `json:"cliBehind,omitempty"`
-	// ConfigBlocked is the folder this user can't write that keeps magpie
+	// ConfigBlocked is the folder this user can't write that keeps eipgam
 	// from saving its files (a ~/.config sudo left root's), which the
-	// window offers to make theirs again; "" when magpie can save
+	// window offers to make theirs again; "" when eipgam can save
 	ConfigBlocked string            `json:"configBlocked,omitempty"`
 	Settings      settings.Settings `json:"settings"`
 	// FX is the dollar-to-yuan rate the cny currency choice shows costs at,
@@ -334,21 +334,21 @@ type stateJSON struct {
 	// Unlisted are the models kept for routing groups, which the pickers
 	// don't offer: a filter that finds one of them says why it isn't there
 	Unlisted []unlistedJSON `json:"unlisted,omitempty"`
-	// Recovered are magpie's files a crash left unreadable (all zero,
+	// Recovered are eipgam's files a crash left unreadable (all zero,
 	// #1505) that were read from their last good generation: the page
 	// tells the user once each
 	Recovered []lastgood.Note `json:"recovered,omitempty"`
 	// Last: this is the state kept from the last read (laststate.go), for
 	// the page to draw while the fresh one is read
 	Last bool `json:"last,omitempty"`
-	// Served is how many models magpie serves, groups left out: the Get
+	// Served is how many models eipgam serves, groups left out: the Get
 	// started card's first step ("add a model source") is done once
 	// there is one, agents found or not
 	Served int `json:"served"`
-	// GatewayOther is a magpie of another version serving the gateway in
+	// GatewayOther is a eipgam of another version serving the gateway in
 	// this one's place, which the Agents page says (gateway_older.go)
 	GatewayOther *gatewaySkew `json:"gatewayOther,omitempty"`
-	// GatewayHeld: the program that has the gateway's port when this magpie
+	// GatewayHeld: the program that has the gateway's port when this eipgam
 	// couldn't listen on it, as far as it could be read (gateway.PortHeld)
 	GatewayHeld *gateway.PortHeld `json:"gatewayHeld,omitempty"`
 	// OptionLists are the fields' option lists, each once, that a field's
@@ -428,7 +428,7 @@ func currentFX() fxJSON {
 type settingsJSON struct {
 	settings.Settings
 	Version string `json:"version"`
-	Dir     string `json:"dir"`     // where magpie keeps its files, as shown
+	Dir     string `json:"dir"`     // where eipgam keeps its files, as shown
 	Gateway string `json:"gateway"` // the local endpoint
 	// Builtins are the built-in plugins: each one's switch, whether it
 	// runs and what of it is in use (builtins.go)
@@ -439,8 +439,8 @@ type settingsJSON struct {
 	// JSRoutings are the routings JS gateway plugins serve now
 	// ("<plugin>/<name>"), for the routing pickers
 	JSRoutings []middleware.Routing `json:"jsRoutings"`
-	// PublicURL is MAGPIE_PUBLIC_URL while other machines are let in
-	// (shared, or MAGPIE_ADDR on the network): where they reach the
+	// PublicURL is EIPGAM_PUBLIC_URL while other machines are let in
+	// (shared, or EIPGAM_ADDR on the network): where they reach the
 	// gateway, shown beside the local address agents here are pointed at
 	// (#1551)
 	PublicURL string `json:"publicURL,omitempty"`
@@ -448,19 +448,19 @@ type settingsJSON struct {
 	// network's address), "internet", or "" for a name; the page names
 	// it by that, not as public whatever it is
 	PublicKind string `json:"publicKind,omitempty"`
-	// MAGPIE_ADDR, when it sets the gateway's address over Settings' port
+	// EIPGAM_ADDR, when it sets the gateway's address over Settings' port
 	AddrEnv string `json:"addrEnv,omitempty"`
-	// NameEnv is MAGPIE_NAME: what this magpie is called while Settings'
+	// NameEnv is EIPGAM_NAME: what this eipgam is called while Settings'
 	// Name is empty (settings.InstanceName)
 	NameEnv string `json:"nameEnv,omitempty"`
-	// MAGPIE_ALLOW_IPS, when it sets the allow list over Settings', and
-	// the list it sets; OnNetwork: MAGPIE_ADDR listens on the network, so
+	// EIPGAM_ALLOW_IPS, when it sets the allow list over Settings', and
+	// the list it sets; OnNetwork: EIPGAM_ADDR listens on the network, so
 	// the list is shown even while sharing is off
 	AllowIPsEnv     string   `json:"allowIPsEnv,omitempty"`
 	AllowIPsFromEnv []string `json:"allowIPsFromEnv,omitempty"`
 	OnNetwork       bool     `json:"onNetwork,omitempty"`
 	// the client certificates issued and still good (mtls.go), while
-	// other computers can reach magpie or mTLS is on; MTLSSaved: the
+	// other computers can reach eipgam or mTLS is on; MTLSSaved: the
 	// folder the one just issued was saved to
 	MTLSCerts []mtlsCert `json:"mtlsCerts,omitempty"`
 	MTLSErr   string     `json:"mtlsError,omitempty"`
@@ -468,10 +468,10 @@ type settingsJSON struct {
 	// JoinOn: a password is set to join with (join.go); the password
 	// itself is never sent
 	JoinOn bool `json:"joinOn,omitempty"`
-	// Dir is the data folder beside a portable magpie (#508)
+	// Dir is the data folder beside a portable eipgam (#508)
 	Portable bool `json:"portable,omitempty"`
 	// Log is the log the desktop app writes (applog), as shown; "" for a
-	// magpie writing none (magpie web)
+	// eipgam writing none (eipgam web)
 	Log string `json:"log,omitempty"`
 	// WSL is whether there is WSL to look in for agents (Windows), for
 	// Settings' Detect agents in WSL (#1264)
@@ -481,17 +481,17 @@ type settingsJSON struct {
 	Rekeyed string `json:"rekeyed,omitempty"`
 	// Notice is a Settings row's warning when a setting can't take effect:
 	// the Codex subagents row when Codex's own multi_agent_v2 is on in the
-	// config magpie routes (#141)
+	// config eipgam routes (#141)
 	Notice string `json:"notice,omitempty"`
 	// Mac apps that explicitly handle .command files, for resumed sessions.
 	TerminalApps    []terminalChoice `json:"terminalApps,omitempty"`
 	TerminalDefault string           `json:"terminalDefault,omitempty"`
 	OTelEnv         bool             `json:"otelEnv,omitempty"`
-	// NoAccountsEnv is MAGPIE_NO_ACCOUNTS set, which keeps account
+	// NoAccountsEnv is EIPGAM_NO_ACCOUNTS set, which keeps account
 	// discovery off for this run whatever Settings has (#1535)
 	NoAccountsEnv bool `json:"noAccountsEnv,omitempty"`
 	// whether the page is in gateway mode and why (gatewayMode); Web says
-	// it is served by magpie web, where the mode can be set
+	// it is served by eipgam web, where the mode can be set
 	GatewayOn  bool   `json:"gatewayOn,omitempty"`
 	GatewayWhy string `json:"gatewayWhy,omitempty"`
 	// GatewayPaused: the user paused the gateway (gatewaypause.go)
@@ -503,7 +503,7 @@ type settingsJSON struct {
 	SavedProxies []savedProxyJSON `json:"proxies"`
 	ProxyNow     string           `json:"proxyNow"`
 	ProxySource  string           `json:"proxySource"`
-	// whether magpie opens at login: the system's record, not a setting;
+	// whether eipgam opens at login: the system's record, not a setting;
 	// LoginAllow, the record is there but the user switched it off in
 	// System Settings › Login Items, which is where it's allowed again
 	Login      bool `json:"login"`
@@ -512,7 +512,7 @@ type settingsJSON struct {
 	// that can be named
 	VisionAuto   string     `json:"visionAuto,omitempty"`
 	VisionModels []modelRef `json:"visionModels"`
-	// the Vision the user picked when magpie can't find it any more:
+	// the Vision the user picked when eipgam can't find it any more:
 	// VisionAuto describes in its place, and the row says so
 	VisionMissing string `json:"visionMissing,omitempty"`
 	// VisionNotMarked are the custom providers (AddedByAddress) with a model left
@@ -536,14 +536,14 @@ type settingsJSON struct {
 	UnmaskedProviders []modelRef `json:"unmaskedProviders"`
 	// what each of the disabled models (#1867) turns off now, by pattern
 	DisabledHits map[string][]string `json:"disabledHits,omitempty"`
-	// the model magpie's generate_image tool draws with when ImageGen
+	// the model eipgam's generate_image tool draws with when ImageGen
 	// names none, and those that can be named
 	ImageGenAuto string `json:"imageGenAuto,omitempty"`
-	// the ImageGen the user picked when magpie can't find it any more
+	// the ImageGen the user picked when eipgam can't find it any more
 	ImageGenMissing string `json:"imageGenMissing,omitempty"`
 	// the listed model the ImageGen the user picked stands for, when it
 	// isn't listed itself: a ChatGPT account's gpt-image-2.5, saved when
-	// magpie listed it, is its one GPT Image (gateway.ListedDrawer, #1865)
+	// eipgam listed it, is its one GPT Image (gateway.ListedDrawer, #1865)
 	ImageGenShown  string     `json:"imageGenShown,omitempty"`
 	ImageGenModels []modelRef `json:"imageGenModels"`
 	// the ImageGen the user picked is one unticked in its provider's
@@ -552,7 +552,7 @@ type settingsJSON struct {
 	ImageGenHidden bool `json:"imageGenHidden,omitempty"`
 	// the model a video request that names none is made with when
 	// VideoGen names none (gateway.AutoVideomaker), the VideoGen picked
-	// when magpie can't find it any more, and those that can be picked:
+	// when eipgam can't find it any more, and those that can be picked:
 	// each provider's video models, a custom provider's the user marked
 	// (#1399) among them, less those unticked in its editor
 	VideoGenAuto    string     `json:"videoGenAuto,omitempty"`
@@ -564,7 +564,7 @@ type settingsJSON struct {
 	SearchAPIs     []searchAPIJSON    `json:"searchAPIs"`
 	SearchVendors  []searchVendorJSON `json:"searchVendors"`
 	SearchProvider string             `json:"searchProvider,omitempty"`
-	// the providers Settings' Searcher may name, the one magpie picks when
+	// the providers Settings' Searcher may name, the one eipgam picks when
 	// it names none, why the one it names isn't used (gateway.Searcher*),
 	// and the relays said to search that are never picked automatically (#359)
 	SearchChoices []searchChoiceJSON `json:"searchChoices"`
@@ -596,7 +596,7 @@ type settingsJSON struct {
 	// LANURLs are a container's own addresses, not the host's: the page
 	// offers the one it was opened at instead, or says how to set it
 	LANContainer bool `json:"lanContainer,omitempty"`
-	// where other containers on this host reach the gateway while magpie
+	// where other containers on this host reach the gateway while eipgam
 	// runs in one (gateway.ContainerHostURL)
 	LANContainerHost string `json:"lanContainerHost,omitempty"`
 	// a LazyCat app's domain, which only devices with LazyCat's client
@@ -631,14 +631,14 @@ type settingsJSON struct {
 	// ClaudeAttribution: whether Claude Code adds its Co-Authored-By trailer
 	// ("on", "off", or "custom" for the user's own text)
 	ClaudeAttribution string `json:"claudeAttribution,omitempty"`
-	// the magpie model Codex's config runs, when its own window is no
+	// the eipgam model Codex's config runs, when its own window is no
 	// larger than Long conversations' threshold: Codex compacts it at 90%
 	// of that window (codexWindowUnder)
 	CodexWindow *codexRunWindow `json:"codexWindow,omitempty"`
 	// FX is the dollar-to-yuan rate the cny currency choice shows costs at
 	FX fxJSON `json:"fx"`
 	// NotifyProblem is why a usage alert set wouldn't be seen: "denied"
-	// (notifications turned off for magpie) or "unavailable"
+	// (notifications turned off for eipgam) or "unavailable"
 	NotifyProblem string `json:"notifyProblem,omitempty"`
 }
 
@@ -788,11 +788,11 @@ type searchFailedJSON struct {
 	At           time.Time `json:"at"`
 }
 
-// loginState is whether magpie opens at login, as the system will act on
+// loginState is whether eipgam opens at login, as the system will act on
 // it. A var for the tests: the real one asks the user's own system.
 var loginState = autostart.Enabled
 
-// codexRunWindow is a model and the window magpie tells Codex it has.
+// codexRunWindow is a model and the window eipgam tells Codex it has.
 type codexRunWindow struct {
 	Model  string `json:"model"`
 	Window int    `json:"window"`
@@ -849,7 +849,7 @@ func codexWindowUnder(st settings.Settings, model string) *codexRunWindow {
 
 func settingsState() settingsJSON {
 	s := settingsJSON{Settings: settings.Load(), Version: Version, Dir: tilde(settings.Dir()), Portable: settings.Portable() != "", Gateway: gateway.URL()}
-	s.AddrEnv = os.Getenv("MAGPIE_ADDR")
+	s.AddrEnv = os.Getenv("EIPGAM_ADDR")
 	s.NameEnv = settings.EnvName()
 	s.Log = tilde(applog.Current())
 	s.Builtins = builtinsState()
@@ -897,7 +897,7 @@ func settingsState() settingsJSON {
 	s.ProxyNow, s.ProxySource = netproxy.Describe()
 	s.Settings.Proxies, s.SavedProxies = nil, savedProxies() // passwords stay on disk
 	s.NoAccountsEnv = settings.AccountDiscoveryOff() && !s.NoAccountDiscovery
-	for _, name := range []string{"MAGPIE_OTEL_ENABLED", "MAGPIE_OTEL_ENDPOINT", "MAGPIE_OTEL_HEADERS", "MAGPIE_OTEL_METRICS", "MAGPIE_OTEL_BODIES", "MAGPIE_OTEL_BODIES_WHOLE", "MAGPIE_OTEL_SESSIONS"} {
+	for _, name := range []string{"EIPGAM_OTEL_ENABLED", "EIPGAM_OTEL_ENDPOINT", "EIPGAM_OTEL_HEADERS", "EIPGAM_OTEL_METRICS", "EIPGAM_OTEL_BODIES", "EIPGAM_OTEL_BODIES_WHOLE", "EIPGAM_OTEL_SESSIONS"} {
 		if _, ok := os.LookupEnv(name); ok {
 			s.OTelEnv = true
 		}
@@ -1013,9 +1013,9 @@ func settingsState() settingsJSON {
 			s.VideoGenModels = append(s.VideoGenModels, modelRef{ID: p.ID + "/" + m.ID, Name: cmp.Or(m.Name, m.ID), Provider: p.ID, PName: p.Name, Icon: p.Icon})
 		}
 	}
-	// the Codex subagents row's warning: magpie's multi-agent V1 doesn't reach
-	// Codex where its own multi_agent_v2 is on in the config magpie routes, and
-	// magpie writes nothing there — the setting is the user's to turn off
+	// the Codex subagents row's warning: eipgam's multi-agent V1 doesn't reach
+	// Codex where its own multi_agent_v2 is on in the config eipgam routes, and
+	// eipgam writes nothing there — the setting is the user's to turn off
 	// (#141). Shown on every read, so the row carries it after a reload too.
 	if s.CodexAgentsV1 {
 		s.Notice = agent.CodexSubAgentsV1Warning()
@@ -1051,14 +1051,14 @@ var assetTypes = map[string]string{
 	".txt": "text/plain; charset=utf-8", ".map": "application/json", ".wasm": "application/wasm",
 }
 
-// assetType is the type a file of magpie's own (or a plugin page's) is
+// assetType is the type a file of eipgam's own (or a plugin page's) is
 // served as, from assetTypes: "" for one it doesn't name.
 func assetType(name string) string { return assetTypes[strings.ToLower(path.Ext(name))] }
 
 // servedAs sets name's type on rw before http.ServeContent looks at the name.
 // Asked for a type, the mime package reads and parses the system's whole
 // table (/etc/apache2/mime.types, ~18,000 allocations) and keeps it for
-// good: ~2 MB of an idle tray magpie's live heap, from its first page.
+// good: ~2 MB of an idle tray eipgam's live heap, from its first page.
 // And the system's table (Windows' registry, which another program may
 // have changed) never decides how the page's own files are read.
 func servedAs(rw http.ResponseWriter, name string) {
@@ -1069,7 +1069,7 @@ func servedAs(rw http.ResponseWriter, name string) {
 
 // revalidated serves the page's own files to be asked for again each time,
 // by their content's hash: an embedded file has no date, so they went out
-// with nothing to check them by, and a cache in front of `magpie web` (a
+// with nothing to check them by, and a cache in front of `eipgam web` (a
 // proxy, a CDN, a tunnel's) could keep an older version's app.js under the
 // new index.html after an update: a page without what that version added,
 // such as the request archive switch (Jorben on Discord). An unchanged
@@ -1077,7 +1077,7 @@ func servedAs(rw http.ResponseWriter, name string) {
 //
 // The page itself names each of its scripts and styles with its content's
 // hash (app.js?v=…), so a cache that kept a file from before these headers
-// were sent, and goes on serving it whatever magpie says now, is never asked
+// were sent, and goes on serving it whatever eipgam says now, is never asked
 // for it again: a Docker user behind an HTTPS proxy had v0.1.630's page run
 // v0.1.582's app.js and routing.js (incognito and a hard refresh alike),
 // whose first lines looked for an element the page no longer had, and the
@@ -1098,7 +1098,7 @@ func revalidated(next http.Handler) http.Handler {
 		rw.Header().Set("Cache-Control", "no-cache")
 		// a file asked for by the address the page names it by, its
 		// content's hash, is the same at that address for good: a browser
-		// keeps it and doesn't ask again, which a slow link to `magpie web`
+		// keeps it and doesn't ask again, which a slow link to `eipgam web`
 		// feels at every load (akic404 on Discord). Another version's hash,
 		// or none, is asked for again as before.
 		if v := r.URL.Query().Get("v"); v != "" && v == hex.EncodeToString(sum[:6]) {
@@ -1172,13 +1172,13 @@ func versionedPage(page []byte) []byte {
 }
 
 // Handler serves the embedded UI and the JSON API.
-// gw is the gateway this process serves, or nil when another magpie has it
+// gw is the gateway this process serves, or nil when another eipgam has it
 // (for now: see startBackend).
 func Handler(w Windows, gw *gateway.Server) http.Handler {
 	if gw != nil {
 		served.Store(gw)
 	}
-	// magpie web's own page, not the app's served to a browser, which the
+	// eipgam web's own page, not the app's served to a browser, which the
 	// app's windows share their settings state with
 	if ownWeb(w) {
 		webPage.Store(true)
@@ -1231,7 +1231,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		if s.NoBird {
 			boot["noBird"] = true
 		}
-		// and what this magpie is called (Settings' Name, else MAGPIE_NAME),
+		// and what this eipgam is called (Settings' Name, else EIPGAM_NAME),
 		// which a browser tab's title names from the first paint (starballl
 		// on X: several deployed, one title)
 		if n := settings.InstanceName(s); n != "" {
@@ -1270,11 +1270,11 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		// and where the gateway listens, so the sidebar's line at its foot
 		// is drawn from the start, not held back until providers has come
 		// in (#1519's read waits for the agents); only this process's own,
-		// for one served by another magpie is the providers' read to find
+		// for one served by another eipgam is the providers' read to find
 		if served.Load() != nil {
 			side := map[string]any{"url": gateway.URL(), "running": true, "boot": true}
-			// and MAGPIE_PUBLIC_URL while other machines are let in, which
-			// a page they open (magpie web) shows instead (noahhrreion on
+			// and EIPGAM_PUBLIC_URL while other machines are let in, which
+			// a page they open (eipgam web) shows instead (noahhrreion on
 			// Discord: in Docker the line said the container's loopback)
 			// and, shared, the addresses other machines use, which the
 			// window's line names from the first paint (coeo91 on Discord)
@@ -1311,9 +1311,9 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		out := append(append([]byte("window.bootPrefs = "), b...), ";\n"...)
 		// a browser tab's title says the name from the first paint, set
 		// here so app.js's core carries no code for it (applyPrefs keeps
-		// it current); the app's windows keep "magpie"
+		// it current); the app's windows keep "eipgam"
 		if n, ok := boot["name"].(string); ok && isWeb(w) {
-			t, _ := json.Marshal(n + " · magpie")
+			t, _ := json.Marshal(n + " · eipgam")
 			out = append(append(append(out, "document.title = "...), t...), ";\n"...)
 		}
 		if css := lookCSS(s); css != "" {
@@ -1384,7 +1384,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, s)
 	})
-	// reapply sets again what magpie set on an agent something else
+	// reapply sets again what eipgam set on an agent something else
 	// rewrote; keep takes the agent as it is now
 	// what drifted, per agent: cheap enough to ask while the window is up,
 	// so a config rewritten elsewhere shows without a reload
@@ -1410,7 +1410,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		clis, pending := agent.CLIs(3 * time.Second)
 		writeJSON(rw, map[string]any{"agents": clis, "pending": pending})
 	})
-	// the agents magpie knows that aren't here, with their vendors' install
+	// the agents eipgam knows that aren't here, with their vendors' install
 	// commands to copy (#727)
 	mux.HandleFunc("GET /api/agents/install", func(rw http.ResponseWriter, r *http.Request) {
 		writeJSON(rw, agent.Installs())
@@ -1458,9 +1458,9 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		writeJSON(rw, c)
 	})
 	// quits the agent's desktop app and opens it again, so it reads what
-	// magpie wrote: the row's Restart, after the user said yes to it
-	// Claude Desktop's Claude Magpie app on or off (#5671): the app made or
-	// taken away, and a Desktop on magpie moved into its folder or back
+	// eipgam wrote: the row's Restart, after the user said yes to it
+	// Claude Desktop's Claude eipgam app on or off (#5671): the app made or
+	// taken away, and a Desktop on eipgam moved into its folder or back
 	mux.HandleFunc("POST /api/settings/desktop-isolated", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ On bool }
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -1708,7 +1708,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		writeJSON(rw, settingsState())
 	})
 	mux.HandleFunc("POST /api/settings", func(rw http.ResponseWriter, r *http.Request) {
-		// read, checked and saved as `magpie settings set` saves (#4745)
+		// read, checked and saved as `eipgam settings set` saves (#4745)
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			fail(rw, err)
@@ -1728,7 +1728,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		// the cards the menu bar shows, any of them (TrayUsage is only the first),
 		// how often, with their logos or not (Claude's or Anthropic's), beside the bird or not, as
 		// Windows' icon or not, and
-		// with their Pace numbers or not, with magpie's totals' cost or not,
+		// with their Pace numbers or not, with eipgam's totals' cost or not,
 		// which of each subscription's windows, and the language the tooltip
 		// is in (yi_time), and the currency its totals' cost is in
 		if (!slices.Equal(settings.Load().TrayUsages, cur.TrayUsages) || in.TrayUsageEvery != cur.TrayUsageEvery ||
@@ -1782,7 +1782,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, settingsState())
 	})
-	// when allowances are read: whenever magpie needs them, or only when
+	// when allowances are read: whenever eipgam needs them, or only when
 	// the user asks (#1518)
 	mux.HandleFunc("POST /api/settings/quota-reads", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
@@ -1800,7 +1800,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, settingsState())
 	})
-	// whether magpie searches for a model whose provider searches by itself
+	// whether eipgam searches for a model whose provider searches by itself
 	// too (Settings › Models › Web search)
 	mux.HandleFunc("POST /api/settings/search-all", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
@@ -2214,7 +2214,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		v := strings.TrimSpace(in.Model)
 		if v != "" {
-			// a model or group magpie lists, not any name under a provider
+			// a model or group eipgam lists, not any name under a provider
 			if !slices.ContainsFunc(provider.Served(), func(e provider.Entry) bool { return e.ID == v || e.Group != "" && provider.SameRef(e.ID, v) }) {
 				fail(rw, fmt.Errorf("no model %s for Codex's prompt suggestions", v))
 				return
@@ -2228,7 +2228,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 	})
 	// where Codex's requests for a thread's title go (#705): "" as Codex
 	// sends them, "off", or a model's id
-	// the models turned off for every request through magpie (#1867), each
+	// the models turned off for every request through eipgam (#1867), each
 	// an id or a glob, the list sent whole
 	mux.HandleFunc("POST /api/settings/disabled-models", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Models []string }
@@ -2302,7 +2302,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		v := strings.TrimSpace(in.Model)
 		if v != "" && v != settings.CodexAutoReviewSession {
 			// Resolve intentionally accepts arbitrary names under a known
-			// provider. An approval reviewer must be a model or group magpie
+			// provider. An approval reviewer must be a model or group eipgam
 			// actually lists, including providers kept unlisted for routing.
 			if !slices.ContainsFunc(provider.Served(), func(e provider.Entry) bool { return e.ID == v || e.Group != "" && provider.SameRef(e.ID, v) }) {
 				fail(rw, fmt.Errorf("no model %s for Codex's auto-review", v))
@@ -2329,7 +2329,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, settingsState())
 	})
-	// the Codex client magpie presents to the ChatGPT backend: "" (Codex
+	// the Codex client eipgam presents to the ChatGPT backend: "" (Codex
 	// CLI) or "desktop" (ouhthuo on X)
 	mux.HandleFunc("POST /api/settings/codex-client", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Client string }
@@ -2572,7 +2572,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, settingsState())
 	})
-	// the Agents page's order and what it folds away, in magpie's settings
+	// the Agents page's order and what it folds away, in eipgam's settings
 	mux.HandleFunc("POST /api/agents/arrange", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Order, Hidden, Shown []string }
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -2621,7 +2621,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 	// tab follows, what that tab leaves out, the clients the page's Agents
 	// list leaves out, the allowance cards its Overview leaves out
 	// (CardsHidden), and a client it counts as one of the agents (Count,
-	// #1958; As "" counts it on its own again), in magpie's settings; one
+	// #1958; As "" counts it on its own again), in eipgam's settings; one
 	// not sent stays as it is
 	mux.HandleFunc("POST /api/usage/arrange", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
@@ -2732,9 +2732,9 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		writeJSON(rw, settingsState())
 	})
 	// the allow list (lc on Discord): the addresses other computers may
-	// reach magpie from, as IPs and CIDR ranges; none lets every address in.
-	// One that would shut out the page saving it (magpie web, opened from
-	// another computer) is refused, and so is any while MAGPIE_ALLOW_IPS
+	// reach eipgam from, as IPs and CIDR ranges; none lets every address in.
+	// One that would shut out the page saving it (eipgam web, opened from
+	// another computer) is refused, and so is any while EIPGAM_ALLOW_IPS
 	// sets the list.
 	mux.HandleFunc("POST /api/settings/allowips", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ IPs []string }
@@ -2933,7 +2933,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		writeJSON(rw, map[string]bool{"ok": true})
 	})
 	// the GitHub download mirror updates come through (#893), the same
-	// setting `magpie update mirror` sets: a full https:// prefix, or ""
+	// setting `eipgam update mirror` sets: a full https:// prefix, or ""
 	// for GitHub itself. The feed and its checksums are never the mirror's.
 	mux.HandleFunc("POST /api/settings/update-mirror", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
@@ -3095,7 +3095,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 	mux.HandleFunc("POST /api/settings/log/reveal", func(rw http.ResponseWriter, r *http.Request) {
 		path := applog.Current()
 		if path == "" {
-			fail(rw, errors.New("this magpie writes no log file"))
+			fail(rw, errors.New("this eipgam writes no log file"))
 			return
 		}
 		if err := w.OpenFolder(filepath.Dir(path)); err != nil {
@@ -3149,7 +3149,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		case "quit":
 			// the question's "Don't ask again" (noAsk=1, zhujiu on
 			// Discord) is saved before the quit; a save that fails keeps
-			// magpie open, saying why
+			// eipgam open, saying why
 			if r.URL.Query().Get("noAsk") == "1" {
 				if err := settings.SetQuitNoAsk(true); err != nil {
 					fail(rw, err)
@@ -3192,7 +3192,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 func noFramedAPI(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		if apiFramed(r) {
-			http.Error(rw, "magpie's API answers magpie's own window only", http.StatusForbidden)
+			http.Error(rw, "eipgam's API answers eipgam's own window only", http.StatusForbidden)
 			return
 		}
 		h.ServeHTTP(rw, r)
@@ -3304,9 +3304,9 @@ func state() stateJSON {
 		if a.ID == "claude-desktop" && a.WSL == "" {
 			if iso, ok := agent.DesktopIsolatedHere(); ok {
 				aj.Isolated = &iso
-				// while Claude Magpie is on, the row's switch wires it
+				// while Claude eipgam is on, the row's switch wires it
 				// alone (desktopSets) and the user's own Desktop stays
-				// signed in with Anthropic: the row is Claude Magpie's.
+				// signed in with Anthropic: the row is Claude eipgam's.
 				// Named Claude Desktop, it read as if their own Desktop
 				// had been connected (xMopf7RF on X, 0.1.4111)
 				if iso.On {
@@ -3380,7 +3380,7 @@ func state() stateJSON {
 type signInOpened struct {
 	provider.SignInState
 	OpenError string `json:"openError,omitempty"`
-	// LinkOnly is a sign-in whose page magpie didn't open, as the user
+	// LinkOnly is a sign-in whose page eipgam didn't open, as the user
 	// asked (settings.SignInLinkOnly): the window says to copy its link
 	LinkOnly bool `json:"linkOnly,omitempty"`
 }
@@ -3638,14 +3638,14 @@ func fail(rw http.ResponseWriter, err error) {
 		out["code"] = "runtime_unavailable"
 		out["offline"] = string(unavailable.Offline)
 	}
-	// a save refused because a folder on the way to magpie's own isn't the
+	// a save refused because a folder on the way to eipgam's own isn't the
 	// user's: the window offers to make it theirs again
 	if permissionDenied(err) {
 		if b := configBlocked(); b != "" {
 			out["code"], out["blocked"] = "config_blocked", b
 		}
 	}
-	// a proxy's failure magpie can explain (netproxy.Why), said in the
+	// a proxy's failure eipgam can explain (netproxy.Why), said in the
 	// reader's language, Go's words beside it
 	var why *netproxy.Why
 	if errors.As(err, &why) {
@@ -3659,7 +3659,7 @@ func fail(rw http.ResponseWriter, err error) {
 		out["code"] = "no_models"
 		out["agent"] = noModels.Agent
 	}
-	// magpie has models, and none is left in the agent's lists (#1989)
+	// eipgam has models, and none is left in the agent's lists (#1989)
 	var allHidden *agent.AllHiddenError
 	if errors.As(err, &allHidden) {
 		out["code"] = "all_hidden"
@@ -3700,7 +3700,7 @@ func fail(rw http.ResponseWriter, err error) {
 	// a proxy's web page inside the text: its title, said in the reader's
 	// language, never the markup
 	if what, ok := webPageSaid(out["error"]); ok && out["said"] == "" {
-		out["error"], out["said"], out["what"] = "A proxy in front of magpie answered, not magpie ("+what+")", "A proxy in front of magpie answered, not magpie ({what})", what
+		out["error"], out["said"], out["what"] = "A proxy in front of eipgam answered, not eipgam ("+what+")", "A proxy in front of eipgam answered, not eipgam ({what})", what
 	}
 	_ = json.NewEncoder(rw).Encode(out)
 }
@@ -3750,9 +3750,9 @@ func editRedactRule(rules []redact.Rule, at int, was, to redact.Rule) ([]redact.
 }
 
 // countClient is the user's ClientAgents with client counted as the agent
-// as (#1958), or on its own again when as is "". Only a client magpie
+// as (#1958), or on its own again when as is "". Only a client eipgam
 // doesn't know is counted as another, and only as an agent it knows: an
-// agent counted as another would be lost from its own row, and magpie's
+// agent counted as another would be lost from its own row, and eipgam's
 // own calls are kept apart from the agents' (#1839).
 func countClient(m map[string]string, client, as string) (map[string]string, error) {
 	client, as = strings.TrimSpace(client), strings.TrimSpace(as)
@@ -3767,11 +3767,11 @@ func countClient(m map[string]string, client, as string) (map[string]string, err
 		delete(out, strings.ToLower(client))
 		return out, nil
 	}
-	if usage.IsAgent(client) || client == "other" || usage.AgentOf(client) == "magpie" || strings.HasPrefix(strings.ToLower(client), "magpie") {
+	if usage.IsAgent(client) || client == "other" || usage.AgentOf(client) == "eipgam" || strings.HasPrefix(strings.ToLower(client), "eipgam") {
 		return nil, fmt.Errorf("%s is counted on its own", client)
 	}
-	if !usage.IsAgent(as) || as == "magpie" {
-		return nil, fmt.Errorf("%s is not an agent magpie knows", as)
+	if !usage.IsAgent(as) || as == "eipgam" {
+		return nil, fmt.Errorf("%s is not an agent eipgam knows", as)
 	}
 	out[strings.ToLower(client)] = as
 	return out, nil
@@ -3781,11 +3781,11 @@ func countClient(m map[string]string, client, as string) (map[string]string, err
 // i18n.js key the page's api() puts through t(), kept here so app.js
 // carries one line for it, not both sentences
 var bunSaid = map[string]string{
-	"windows": "Bun, which runs plugins, can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later. Update Windows to use plugins, or set MAGPIE_BUN to a bun that runs here.",
-	"cpu":     "Bun, which runs plugins, can't start on this computer's processor: it needs an x64 processor with SSE4.2 (Intel or AMD from 2008 on; in a virtual machine, a CPU type that passes it through). Run magpie on such a processor to use plugins, or set MAGPIE_BUN to a bun that runs here.",
+	"windows": "Bun, which runs plugins, can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later. Update Windows to use plugins, or set EIPGAM_BUN to a bun that runs here.",
+	"cpu":     "Bun, which runs plugins, can't start on this computer's processor: it needs an x64 processor with SSE4.2 (Intel or AMD from 2008 on; in a virtual machine, a CPU type that passes it through). Run eipgam on such a processor to use plugins, or set EIPGAM_BUN to a bun that runs here.",
 }
 
-// appOutJSON is Codex on magpie while its ChatGPT account is used up: the
+// appOutJSON is Codex on eipgam while its ChatGPT account is used up: the
 // account, when it has room again (zero when the reading doesn't say), and
 // whether a Codex app is left on the account, its app-server not
 // restarted (provider.CodexAppStuck), for the user to reopen it.

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // movedDshCompact is the reason DSH's compaction went on the model set for
@@ -45,7 +45,7 @@ func dshCompactTo(r *http.Request, agent, kind, asked string) string {
 // gateway key's to use; "" when it can.
 func compactRefused(r *http.Request, to string) string {
 	if _, off := idOff(to); off {
-		return "it is disabled in magpie"
+		return "it is disabled in eipgam"
 	}
 	if w := provider.Unserved(to); w != "" {
 		return w
@@ -62,16 +62,16 @@ func compactRefused(r *http.Request, to string) string {
 
 // dshCompactElsewhere is the model a DeepSeek Harness compaction asked on
 // asked goes on instead, "" to leave it: when every account of asked's
-// provider rests out of its limit, the same model (as magpie's found
+// provider rests out of its limit, the same model (as eipgam's found
 // groups merge models, provider.AutoGroupOf) from another provider that
 // isn't resting, the largest window first. DSH compacts on the session's
 // previous model before a switch to one with a smaller window, so a
 // switch away from a provider out of its limit failed on that provider's
 // refusal, and the model switched to was never asked (qtwaiter on X:
 // WorkBuddy's deepseek-v4.1-flash out of its rate, Trae CN's
-// deepseek-v4.1-flash picked, "Cannot switch to magpie/trae-cn/
+// deepseek-v4.1-flash picked, "Cannot switch to eipgam/trae-cn/
 // deepseek-v4.1-flash: context compaction failed: 429 ... WorkBuddy").
-// Without magpie DSH's own DeepSeek routes all have 1M windows and never
+// Without eipgam DSH's own DeepSeek routes all have 1M windows and never
 // compact on a switch. A routing group's request is left: the group
 // already goes past a resting member. The cheap checks come first: only
 // a DSH compaction on a resting model reads the served list.

@@ -1,7 +1,7 @@
 // A model a vendor names its own way (Volcengine Ark's
 // deepseek-v4-1-flash-260910) can be said, in the provider editor's Names &
 // levels, to be the same as another vendor's model, so the routing groups
-// magpie finds merge them (kyzhouxu, #583). It is staged and made with the
+// eipgam finds merge them (kyzhouxu, #583). It is staged and made with the
 // editor's Save, as the rest of Model settings is; Cancel drops it.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -50,7 +50,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       const zh = lang === "zh";
       const L = { names: zh ? "模型设置" : "Model settings", same: zh ? "等同于" : "Same as", unsaved: zh ? "未保存" : "unsaved", save: zh ? "保存" : "Save", cancel: zh ? "取消" : "Cancel", reset: zh ? "恢复默认" : "Restore default" };
       const open = async () => {
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(posts.map((p) => p.path), ["/api/provider/save"]);
       assert.deepEqual(posts[0].body.modelPrefs, { [longModelID]: { same: "deepseek-v4.1-flash" }, "ep-2026-sol": { same: "" } });
       const missing = await page.evaluate(() => ["Same as",
-        "The model other providers serve that {id} is the same as: the routing groups magpie finds put them together, and what no list gives for {id} is that model's: its window, reply limit, reasoning levels, images and list price. Empty: by its own id",
+        "The model other providers serve that {id} is the same as: the routing groups eipgam finds put them together, and what no list gives for {id} is that model's: its window, reply limit, reasoning levels, images and list price. Empty: by its own id",
         "Its own name, every reasoning level it has, whether it sees images, the API it is asked on, the model it is the same as, its own id, its list price, its listed window and reply limit, and no headers or system prompt of its own",
       ].flatMap((k) => ["zh", "zh-TW", "ja", "de"].filter((l) => !I18N[l][k]).map((l) => `${l}: ${k}`)));
       assert.deepEqual(missing, [], "every string has every language");
@@ -124,7 +124,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, []));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const at = `${lang} at ${width}px`;
         const names = await page.evaluate((l) => (l === "en" ? null : I18N[l]["Model settings"]) || "Model settings", lang);
         await page.locator('.row.provider[data-id="relay"]').click();

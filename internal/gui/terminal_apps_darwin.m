@@ -37,7 +37,7 @@ char *magpieTerminalAppsJSON(void) {
         NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
         NSURL *defaultURL;
         NSArray<NSURL *> *appURLs;
-        // magpie needs macOS 12 (LSMinimumSystemVersion); the check only
+        // eipgam needs macOS 12 (LSMinimumSystemVersion); the check only
         // keeps builds aimed at an older default target quiet.
         if (@available(macOS 12.0, *)) {
             defaultURL = [workspace URLForApplicationToOpenContentType:type];

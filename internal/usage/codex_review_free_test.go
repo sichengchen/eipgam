@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // silverzhou on Discord: OpenAI made Codex's Auto-review free for users

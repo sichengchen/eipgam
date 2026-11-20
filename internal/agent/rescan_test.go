@@ -13,7 +13,7 @@ import (
 )
 
 // The refresh asks where updates come from again, too: a version published
-// after magpie started stayed invisible to its own re-detect until a
+// after eipgam started stayed invisible to its own re-detect until a
 // restart, the newest kept for hours and nothing asking anew (#4980). An
 // ask that fails after the refresh keeps the newest known before it.
 func TestRescanAsksLatestAgain(t *testing.T) {
@@ -39,7 +39,7 @@ func TestRescanAsksLatestAgain(t *testing.T) {
 	if got := latestVersion(u); got != "1.4.0" {
 		t.Fatalf("latest %q", got)
 	}
-	newest.Store("1.5.0") // published after magpie asked
+	newest.Store("1.5.0") // published after eipgam asked
 	if got := latestVersion(u); got != "1.4.0" || asks.Load() != 1 {
 		t.Fatalf("latest %q, npm asked %d times for one kept answer", got, asks.Load())
 	}
@@ -55,7 +55,7 @@ func TestRescanAsksLatestAgain(t *testing.T) {
 }
 
 // The Agents page's refresh looks again at once (#844): Cursor Private
-// Inference installed after magpie last looked used to wait out the half
+// Inference installed after eipgam last looked used to wait out the half
 // minute its apps folder was kept for, and a WSL distro's agents a minute.
 func TestRescanLooksAgain(t *testing.T) {
 	h := t.TempDir()

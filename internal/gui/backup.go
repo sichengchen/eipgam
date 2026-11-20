@@ -11,12 +11,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/davsync"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/davsync"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // backupRoutes are the Settings page's Export and Import, and the WebDAV
@@ -64,12 +64,12 @@ func backupRoutes(mux *http.ServeMux, w Windows) {
 			return
 		}
 		dir := downloads()
-		name := filepath.Join(dir, "magpie-"+time.Now().Format("2006-01-02")+backup.Ext)
+		name := filepath.Join(dir, "eipgam-"+time.Now().Format("2006-01-02")+backup.Ext)
 		for i := 2; ; i++ { // never over an earlier one
 			if _, err := os.Stat(name); err != nil {
 				break
 			}
-			name = filepath.Join(dir, fmt.Sprintf("magpie-%s-%d%s", time.Now().Format("2006-01-02"), i, backup.Ext))
+			name = filepath.Join(dir, fmt.Sprintf("eipgam-%s-%d%s", time.Now().Format("2006-01-02"), i, backup.Ext))
 		}
 		if err := edit.WriteAtomic(name, data); err != nil {
 			fail(rw, err)
@@ -341,7 +341,7 @@ func autoView() backup.AutoView {
 
 // writable says whether a file can be made in dir.
 func writable(dir string) error {
-	f, err := os.CreateTemp(dir, ".magpie-backup-*.tmp")
+	f, err := os.CreateTemp(dir, ".eipgam-backup-*.tmp")
 	if err != nil {
 		return err
 	}
@@ -350,7 +350,7 @@ func writable(dir string) error {
 }
 
 // busy is what of a sync's failure the status doesn't hold: that it waited
-// its time out for another magpie's. The rest is in the status.
+// its time out for another eipgam's. The rest is in the status.
 func busy(err error) error {
 	if errors.Is(err, davsync.ErrBusy) {
 		return err

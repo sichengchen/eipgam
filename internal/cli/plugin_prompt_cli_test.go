@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // TestAskPromptPasswordIsUnseen: a plugin question of type "password" (a

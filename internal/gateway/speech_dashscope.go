@@ -31,13 +31,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // dashScopeAudio is whether p is asked for model, a qwen-audio model of
 // the kind given, at DashScope's own API: a key (not a subscription's
-// account, another magpie or a plugin) of a DashScope provider whose plan
+// account, another eipgam or a plugin) of a DashScope provider whose plan
 // names the model, or names it qwen-audio-…-tts/-asr.
 func dashScopeAudio(p provider.Provider, model, kind string) bool {
 	if p.Account != nil || p.IsPlugin() || p.IsRemoteMagpie() || !dashScope(p) {

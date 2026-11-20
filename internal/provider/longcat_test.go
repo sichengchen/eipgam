@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // Its list, /openai/v1/models with the key as a Bearer, as the docs'

@@ -289,9 +289,9 @@ func (rw *Writer) event(ev []byte) error {
 }
 
 // waitEvents are the events a stream sends while the model is slow, which
-// say nothing of the answer: Anthropic's ping, which its API and magpie's
+// say nothing of the answer: Anthropic's ping, which its API and eipgam's
 // encoder send in the middle of a tool call's arguments, Responses'
-// keepalive, and response.in_progress and response.queued, magpie's
+// keepalive, and response.in_progress and response.queued, eipgam's
 // keepalive on that protocol.
 var waitEvents = []string{"ping", "keepalive", "response.in_progress", "response.queued"}
 

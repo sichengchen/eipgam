@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A video a client gives the model (#6135, #4101) is a File part whose

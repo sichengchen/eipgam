@@ -25,9 +25,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // jevSure is how confident Jev must be of an intent for it to count, a
@@ -448,7 +448,7 @@ func maskedState(ctx context.Context, text, user, reply string) (string, string,
 }
 
 // systemOne posts body to p's System One API and returns the answer,
-// counting it in the usage as magpie's own. A gateway serving Jev is asked
+// counting it in the usage as eipgam's own. A gateway serving Jev is asked
 // and answers in its own way (decideAsk, decideAnswer). With the request
 // archive on it keeps the call as it keeps one a client sent (wangb on
 // Discord: 请求存档开启, 但是 systemone 的请求没有记录下来), its usage row
@@ -495,7 +495,7 @@ func (s *Server) systemOne(ctx context.Context, p provider.Provider, model strin
 	return b, nil
 }
 
-// decided is a decision call as it went and came back: the request magpie
+// decided is a decision call as it went and came back: the request eipgam
 // sent and its body (in the provider's own shape), for the request archive,
 // and the answer's status, body and headers.
 type decided struct {
@@ -533,7 +533,7 @@ func (s *Server) postDecideSent(ctx context.Context, p provider.Provider, model 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", RouterAgent)
 	if p.IsRemoteMagpie() {
-		req.Header.Set("User-Agent", "magpie/"+Version)
+		req.Header.Set("User-Agent", "eipgam/"+Version)
 		passOnCaller(ctx, req)
 	}
 	if via == provider.ViaVercelEval {
@@ -562,7 +562,7 @@ func (s *Server) postDecideSent(ctx context.Context, p provider.Provider, model 
 // (ARNO on Discord: clef模型是支持图像输入的).
 const maxSystemOneBody = 16 << 20
 
-// serveSystemOne is magpie's own System One API. The model's prefix names
+// serveSystemOne is eipgam's own System One API. The model's prefix names
 // the Jev provider (gptload-jev/jev-latest); the rest is what that provider
 // is asked, at its /v1/systemone. The call is a route of its own, as a
 // conversation is: the Routing view and the day's jsonl would otherwise

@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gui"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/gui"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A routing group or a provider saved answers before the agents' model
@@ -50,12 +50,12 @@ func TestSaveAnswersBeforeTheAgentsSync(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// Pi runs a model of magpie's: connected, so a sync writes its list
-	if err := os.WriteFile(filepath.Join(dir, "settings.json"), []byte(`{"defaultProvider":"magpie","defaultModel":"a/m1"}`), 0o600); err != nil {
+	// Pi runs a model of eipgam's: connected, so a sync writes its list
+	if err := os.WriteFile(filepath.Join(dir, "settings.json"), []byte(`{"defaultProvider":"eipgam","defaultModel":"a/m1"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	// Pi as magpie connected it (Connect's connect.was stash): a sync
-	// writes only an agent connected in magpie
+	// Pi as eipgam connected it (Connect's connect.was stash): a sync
+	// writes only an agent connected in eipgam
 	if err := os.WriteFile(filepath.Join(filepath.Dir(provider.Path()), "stash.json"), []byte(`{"pi.connect.was":"{}"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}

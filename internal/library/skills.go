@@ -23,9 +23,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/source"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/source"
 	"gopkg.in/yaml.v3"
 )
 
@@ -285,15 +285,15 @@ func dropsLetters(n string) bool {
 
 // ---- linking into agents --------------------------------------------------
 
-// marker is left in a copy magpie makes where it can't link (Windows
+// marker is left in a copy eipgam makes where it can't link (Windows
 // without the right to), to know the copy for its own.
-const marker = ".magpie-library"
+const marker = ".eipgam-library"
 
-// ours reports whether the entry at p is magpie's link (or copy) of the
+// ours reports whether the entry at p is eipgam's link (or copy) of the
 // library's skill by that name.
 func ours(p, name string) bool {
 	// a link in a WSL distro is read there (linkTarget), Windows can't;
-	// one to magpie's copy in the distro is magpie's (wsl_skills.go)
+	// one to eipgam's copy in the distro is eipgam's (wsl_skills.go)
 	if to, ok := linkTarget(p); ok {
 		return filepath.Clean(to) == filepath.Clean(skillDir(name)) || inWSLStore(to, name)
 	}
@@ -323,7 +323,7 @@ func link(p, name string) error {
 	return markCopy(p, "copied from "+skillDir(name)+"\n")
 }
 
-// markCopy writes magpie's mark into a copy just made at p: what it says,
+// markCopy writes eipgam's mark into a copy just made at p: what it says,
 // then the hash of what was copied. A sync tells a copy is still the
 // library's skill by that hash and the mark's time (copyIsFresh), without
 // reading every file of every copy each time (#1031).
@@ -335,7 +335,7 @@ func markCopy(p, says string) error {
 	return os.WriteFile(filepath.Join(p, marker), []byte(says), 0o644)
 }
 
-// markedHash is the hash magpie's mark at p says was copied, if it says one.
+// markedHash is the hash eipgam's mark at p says was copied, if it says one.
 func markedHash(p string) (string, bool) {
 	b, err := os.ReadFile(filepath.Join(p, marker))
 	if err != nil {
@@ -349,7 +349,7 @@ func markedHash(p string) (string, bool) {
 	return "", false
 }
 
-// copyIn puts a copy of the library's skill at p, marked as magpie's, in
+// copyIn puts a copy of the library's skill at p, marked as eipgam's, in
 // place of a link: made beside it and put in the place of what is there,
 // so the agent never finds half of one.
 func copyIn(p, name string) error {
@@ -359,13 +359,13 @@ func copyIn(p, name string) error {
 	}
 	// an old copy a previous swap couldn't remove is tried again
 	dropOld(p, name)
-	next := filepath.Join(filepath.Dir(p), "."+name+".magpie-next")
+	next := filepath.Join(filepath.Dir(p), "."+name+".eipgam-next")
 	os.RemoveAll(next)
 	if err := copyDir(realDir(lib), next); err != nil {
 		os.RemoveAll(next)
 		return err
 	}
-	if err := markCopy(next, "copied from "+lib+" by magpie, and copied again when it changes\n"); err != nil {
+	if err := markCopy(next, "copied from "+lib+" by eipgam, and copied again when it changes\n"); err != nil {
 		os.RemoveAll(next)
 		return err
 	}
@@ -381,7 +381,7 @@ func copyIn(p, name string) error {
 	// The old copy is moved aside whole before the new one goes in, and only
 	// then removed: removing it in place can fail part-way (a file held open
 	// on Windows), which would leave the agent a copy with no SKILL.md and no
-	// marker that magpie no longer knows for its own.
+	// marker that eipgam no longer knows for its own.
 	old := oldPath(p, name)
 	if err := os.Rename(p, old); err != nil {
 		os.RemoveAll(next)
@@ -402,7 +402,7 @@ func copyIn(p, name string) error {
 
 // oldPrefix starts the name an old copy of a skill is moved aside to while
 // the new one is put in its place.
-func oldPrefix(name string) string { return "." + name + ".magpie-old" }
+func oldPrefix(name string) string { return "." + name + ".eipgam-old" }
 
 // oldPath is a free name beside p to move the old copy of a skill aside to.
 func oldPath(p, name string) string {
@@ -610,7 +610,7 @@ func sharedSkillsDir() string { return filepath.Join(home(), ".agents", "skills"
 func sharedHas(name string) bool { return sharedEntry(name) != "" }
 
 // sharedEntry is the user's own entry in ~/.agents/skills (not a link
-// magpie made) by which the agents reading that folder find the library's
+// eipgam made) by which the agents reading that folder find the library's
 // skill by that name: the very folder the library's is or links to. That
 // is the entry by its name, or, for a library skill linked to a folder
 // right in the shared one under another name, that entry. "" when none.
@@ -639,7 +639,7 @@ func sharedEntry(name string) string {
 // agent reading that folder knows each by: its SKILL.md's name, else its
 // folder's. Pi, Codex and Gemini CLI go by that name, so a library skill
 // by it given to such an agent in its own folder too is the skill twice
-// (math_milian: Pi's "hunk-review" collision). magpie's own entries there
+// (math_milian: Pi's "hunk-review" collision). eipgam's own entries there
 // (a link into the library, a marked copy) and the library's own folders
 // aren't the user's and aren't in it.
 type sharedOwn map[string][]string
@@ -744,7 +744,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 		return s.gives(id) || slices.ContainsFunc(sharers, s.gives)
 	}
 	// an agent that reads ~/.agents/skills as well as its own folder finds
-	// a skill magpie put there for another (Kimi Code) already: a link in
+	// a skill eipgam put there for another (Kimi Code) already: a link in
 	// its own too would be the skill twice
 	shared := realDir(sharedSkillsDir())
 	isShared := realDir(t.Skills) == shared
@@ -839,7 +839,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 		if routed[s.Name] {
 			continue
 		}
-		// in a WSL distro, magpie's one copy there is what the agent's
+		// in a WSL distro, eipgam's one copy there is what the agent's
 		// link leads to (wsl_skills.go): made, or made again, first
 		if t.Store != "" && !cp {
 			if made, err := l.storeSkill(t, s.Name); err != nil {
@@ -888,7 +888,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 			if ours(p, s.Name) {
 				dropOld(p, s.Name)
 			}
-			// magpie's copy in an agent given links now is a link again
+			// eipgam's copy in an agent given links now is a link again
 			// (#896), unless no link can be made here (Windows without the
 			// right to), where the copy stays
 			if ours(p, s.Name) && !cp && !linked(p) {
@@ -904,7 +904,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 				}
 			}
 			// a copy is made again once the library's skill has changed: in
-			// an agent that takes copies, and where magpie couldn't link
+			// an agent that takes copies, and where eipgam couldn't link
 			// (Windows without the right to) and left a copy instead
 			again := cp && linked(p)
 			if ours(p, s.Name) && !linked(p) && l.libHash(s.Name) != "" {
@@ -956,7 +956,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 	a.Skills = mine
 }
 
-// sweepShared takes magpie's own entries out of ~/.agents/skills once no
+// sweepShared takes eipgam's own entries out of ~/.agents/skills once no
 // agent whose folder it is, or that still reads it for the skill, has it
 // any more: an entry put there for an agent that reads its own folder now
 // (Kimi Code, #4379) would go on reaching every reader of the folder,
@@ -1040,7 +1040,7 @@ type probeEntry struct {
 var probeLife = 15 * time.Minute
 
 // skillTemp starts the name of a download's folder in the temp dir.
-const skillTemp = "magpie-skill-"
+const skillTemp = "eipgam-skill-"
 
 // keepProbe caches p's download under input for probeLife, in place of
 // one before it; the folder is removed when it is replaced or expires, not
@@ -1065,7 +1065,7 @@ func keepProbe(input string, p *Probe, tmp string) {
 	}
 }
 
-// sweepStaleDownloads removes the downloads a magpie that quit left in the
+// sweepStaleDownloads removes the downloads a eipgam that quit left in the
 // temp dir (#2321): a folder of ours over an hour old, longer than a probe
 // is kept or a fetch takes, so none in use.
 func sweepStaleDownloads() {
@@ -1167,7 +1167,7 @@ func fetchWhole(src Source, name string) (string, error) {
 	c := &http.Client{Timeout: 2 * time.Minute}
 	get := func(u string) (*http.Response, bool, error) {
 		req, _ := http.NewRequest("GET", u, nil)
-		req.Header.Set("User-Agent", "magpie")
+		req.Header.Set("User-Agent", "eipgam")
 		return doGitHub(req, func(r *http.Request) (*http.Response, error) { return source.Do(c, r) })
 	}
 	if tooBig.has(src) {
@@ -2415,7 +2415,7 @@ func ownSkill(l *Library, name, agentID string) (*Skill, *Target, error) {
 	}
 	t := targetByID(id)
 	if t == nil || t.Skills == "" {
-		return nil, nil, fmt.Errorf("%s has no skills folder magpie knows of", agentID)
+		return nil, nil, fmt.Errorf("%s has no skills folder eipgam knows of", agentID)
 	}
 	return s, t, nil
 }
@@ -2489,9 +2489,9 @@ func foundSkills(l *Library) []FoundSkill {
 			}
 			p := filepath.Join(pl.dir, name)
 			f := byName[name]
-			// magpie's link to the library's folder is an agent having the
+			// eipgam's link to the library's folder is an agent having the
 			// one found there
-			// and the skill router's entry and slash stubs are magpie's own
+			// and the skill router's entry and slash stubs are eipgam's own
 			// (skill_router.go)
 			if strings.HasPrefix(name, ".") || ours(p, name) && (f == nil || f.Library == "") || l.skill(name) != nil || !nameRe.MatchString(name) ||
 				routerOurs(p) {
@@ -2740,7 +2740,7 @@ func canPutBack(s *Skill) bool {
 // had it (BeiWeiji on X: one taken out of the library was gone from the
 // agents too). Its folder moves back to where it was, or the library's
 // link to it goes; each agent's link to it is made again, and a copy it
-// had of the very same files copied back. magpie's own links in their
+// had of the very same files copied back. eipgam's own links in their
 // place go first. Something of the user's in the folder's old place now
 // leaves it all as it is (false): the skill is removed as any other is.
 // One in an agent's entry is left as it is.
@@ -2995,7 +2995,7 @@ func setAside(agent, p string) (string, error) {
 
 // sameTree is whether two skill folders (links followed) hold the same
 // files with the same bytes, leaving aside what Finder or version control
-// keeps in one (.DS_Store, .git) and the mark on magpie's own copy.
+// keeps in one (.DS_Store, .git) and the mark on eipgam's own copy.
 // Two folders unchanged since they were last compared aren't read again
 // (treememo.go).
 func sameTree(a, b string) bool { return sameTreeIn(nil, a, b) }

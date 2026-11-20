@@ -3,7 +3,7 @@ package gui
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Alibaba Cloud's two Token Plan presets at aliyuncs.com ask for the

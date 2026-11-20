@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// nnlrl_75403 on Discord: the magpie using this one as its Remote magpie
+// nnlrl_75403 on Discord: the eipgam using this one as its Remote eipgam
 // updated, and asks this one to follow. It updates as its own automatic
 // update would, restarting once nothing is in flight, or says why not:
 // already there, the user's updates off, a container, a package
@@ -25,7 +25,7 @@ func TestUpdateAskedByAnotherMagpie(t *testing.T) {
 	busy := &fakeBusy{}
 	busy.set(gateway.Busy{Requests: 1})
 	// a download under way: begin finds it, and the ask waits for it
-	u := &updater{state: "downloading", exe: "/opt/magpie/magpie", latest: &update.Release{Version: "v0.1.200"}}
+	u := &updater{state: "downloading", exe: "/opt/eipgam/eipgam", latest: &update.Release{Version: "v0.1.200"}}
 	quick(t, busy, u)
 	var restarts atomic.Int32
 	u.autoRestart = func() bool { restarts.Add(1); return true }
@@ -80,9 +80,9 @@ func TestUpdateAskedByAnotherMagpie(t *testing.T) {
 		{&updater{stuck: "container", autoRestart: restart}, "container"},
 		{&updater{stuck: "not-writable", autoRestart: restart}, "not-writable"},
 		{&updater{stuck: "translocated", autoRestart: restart}, "not-writable"},
-		{&updater{stuck: "package", packaged: &update.Packaged{Manager: "pacman", Package: "magpie-bin"}, autoRestart: restart}, "package"},
-		// magpie serve's place, with nothing that restarts it here
-		{&updater{exe: "/opt/magpie/magpie"}, "not-writable"},
+		{&updater{stuck: "package", packaged: &update.Packaged{Manager: "pacman", Package: "eipgam-bin"}, autoRestart: restart}, "package"},
+		// eipgam serve's place, with nothing that restarts it here
+		{&updater{exe: "/opt/eipgam/eipgam"}, "not-writable"},
 	} {
 		got := c.u.updateAsked("v0.1.200")
 		if got.State != "unsupported" || got.Why != c.why {
@@ -97,7 +97,7 @@ func TestUpdateAskedByAnotherMagpie(t *testing.T) {
 	}
 }
 
-// The row of a Remote magpie says what its last ask came to, in words
+// The row of a Remote eipgam says what its last ask came to, in words
 // the page translates: updating for a while, or why it didn't, with the
 // command a container or a package manager is updated by.
 func TestRemoteUpdateNote(t *testing.T) {
@@ -112,8 +112,8 @@ func TestRemoteUpdateNote(t *testing.T) {
 		say, tip string
 	}{
 		{provider.RemoteUpdate{State: "updating", Version: "v0.1.200"}, "updating to {v}", "{v}"},
-		{provider.RemoteUpdate{State: "unsupported", Why: "container"}, "can't update itself", "docker pull ghcr.io/yetone/magpie:latest"},
-		{provider.RemoteUpdate{State: "unsupported", Why: "package", Manager: "Homebrew", Command: "brew upgrade magpie"}, "can't update itself", "{cmd}"},
+		{provider.RemoteUpdate{State: "unsupported", Why: "container"}, "can't update itself", "rebuild the image"},
+		{provider.RemoteUpdate{State: "unsupported", Why: "package", Manager: "Homebrew", Command: "brew upgrade eipgam"}, "can't update itself", "{cmd}"},
 		{provider.RemoteUpdate{State: "unsupported", Why: "not-writable"}, "can't update itself", "update it there"},
 		{provider.RemoteUpdate{State: "off"}, "automatic updates off", "turned off"},
 		{provider.RemoteUpdate{State: "old"}, "update it there", "too old"},

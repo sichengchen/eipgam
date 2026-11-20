@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"encoding/json"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"strings"
 	"testing"
 )

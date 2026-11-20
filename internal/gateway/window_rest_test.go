@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A subscription that fails with a window full rests until the window
@@ -47,7 +47,7 @@ func TestRoutingHoldsAWindowRestToLongestQuota(t *testing.T) {
 // window that counts it counts some models only: the account's other
 // models are still in theirs (plugins#817, zane668). ZCode's Start Plan
 // gift gives GLM-5.3 and GLM-5.3-Flash a bucket each; GLM-5.3's spent,
-// its 200 "exceed quota limit" reached magpie as a 502 that did not
+// its 200 "exceed quota limit" reached eipgam as a 502 that did not
 // stream (failOther) and rested the whole account until the bucket
 // renewed, Flash's own bucket with 71% left with it. A window of the
 // whole account full still rests the account.
@@ -55,7 +55,7 @@ func TestScopedWindowFullRestsTheModelOnly(t *testing.T) {
 	now := time.Now()
 	reset := now.Add(22 * time.Hour).UTC().Format(time.RFC3339)
 	weekend := now.Add(3 * 24 * time.Hour).UTC().Format(time.RFC3339)
-	// the zcode plugin's startUsage as the report's `magpie quota zcode`
+	// the zcode plugin's startUsage as the report's `eipgam quota zcode`
 	// read it: each bucket lists its model and the model's -Trial entry
 	gift := `{"name":"GLM-5.3","used":100,"amount":3000000,"limit":3000000,"span":86400,"resetsAt":"` + reset + `","models":["glm-5.3","GLM-5.3-Trial"]},` +
 		`{"name":"GLM-5.3-Flash","used":29,"amount":1459132,"limit":5000000,"span":86400,"resetsAt":"` + reset + `","models":["glm-5.3-flash","GLM-5.3-Flash-Trial"]},` +

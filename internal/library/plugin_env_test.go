@@ -100,7 +100,7 @@ func TestPluginHookReadsRootFromItsProgram(t *testing.T) {
 	}
 }
 
-// What a magpie before this wrote, process.env.CLAUDE_PLUGIN_ROOT as it was,
+// What a eipgam before this wrote, process.env.CLAUDE_PLUGIN_ROOT as it was,
 // is resolved at the next sync, with nothing installed again.
 func TestPluginHookWrittenBeforeIsResolved(t *testing.T) {
 	h := sandbox(t)
@@ -110,7 +110,7 @@ func TestPluginHookWrittenBeforeIsResolved(t *testing.T) {
 	root := filepath.Join(Dir(), "plugins", "ponytail")
 	lit := "'" + filepath.ToSlash(root) + "'"
 
-	// as the old magpie left library.json and Claude Code's settings
+	// as the old eipgam left library.json and Claude Code's settings
 	for _, f := range []string{path(), filepath.Join(h, ".claude/settings.json")} {
 		s := read(t, f)
 		if !strings.Contains(s, lit) {

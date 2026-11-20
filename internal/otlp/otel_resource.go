@@ -22,11 +22,11 @@ var otelResource struct {
 }
 
 // otelResourceAttributes is the resource every export carries:
-// service.name=magpie, with the standard OTEL_RESOURCE_ATTRIBUTES merged
+// service.name=eipgam, with the standard OTEL_RESOURCE_ATTRIBUTES merged
 // over it and OTEL_SERVICE_NAME over that (#5167). Only what the user set
 // is added; nothing about the machine is looked up.
 //
-// magpie's "magpie" is the fallback the spec gives the SDK
+// eipgam's "eipgam" is the fallback the spec gives the SDK
 // (unknown_service), not identity the user supplied, so a service.name the
 // user set wins. An empty service.name counts as unset, as an empty
 // OTEL_SERVICE_NAME does.
@@ -45,7 +45,7 @@ func otelResourceAttributes() []otelAttribute {
 		values = map[string]string{}
 	}
 	if values["service.name"] == "" {
-		values["service.name"] = "magpie"
+		values["service.name"] = "eipgam"
 	}
 	if name != "" {
 		values["service.name"] = name

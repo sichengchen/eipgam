@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // genAsks are generationConfigs a Gemini client sends, each with the keys a
-// Gemini upstream should be sent beside what magpie rebuilds, and the keys
+// Gemini upstream should be sent beside what eipgam rebuilds, and the keys
 // it must not be sent that the client didn't ask for.
 var genAsks = []struct {
 	name   string
@@ -33,7 +33,7 @@ var genAsks = []struct {
 			"speechConfig":       `{"voiceConfig":{"prebuiltVoiceConfig":{"voiceName":"Aoede"}}}`,
 			"responseFormat":     `{"text":{}}`,
 		},
-		// magpie reads one answer: a second candidate would be mixed in
+		// eipgam reads one answer: a second candidate would be mixed in
 		[]string{"candidateCount"},
 	},
 	{
@@ -43,7 +43,7 @@ var genAsks = []struct {
 		[]string{"candidateCount"},
 	},
 	{
-		"beside what magpie reads",
+		"beside what eipgam reads",
 		`{"temperature":0.4,"topK":40}`,
 		map[string]string{"topK": `40`, "temperature": `0.4`},
 		nil,
@@ -77,12 +77,12 @@ func genUpstream(t *testing.T, model string) (*asksKept, error) {
 	return rec, nil
 }
 
-// A Gemini client's generationConfig fields magpie doesn't read — topK,
+// A Gemini client's generationConfig fields eipgam doesn't read — topK,
 // seed, the penalties, responseModalities, mediaResolution,
 // speechConfig, responseFormat — reach a Gemini API as they were sent
 // (#3937, yinwu01): a request asked for one body is translated, and was
-// built again without everything else the client asked. What magpie reads
-// or writes itself goes as magpie builds it.
+// built again without everything else the client asked. What eipgam reads
+// or writes itself goes as eipgam builds it.
 func TestGeminiGenConfigReachesTheGeminiAPI(t *testing.T) {
 	const model = "gemini-3-pro"
 	fresh(t)
@@ -114,8 +114,8 @@ func TestGeminiGenConfigReachesTheGeminiAPI(t *testing.T) {
 	}
 }
 
-// A model whose id says it draws is sent magpie's own responseModalities
-// even when the client asked for its own: magpie's word for a draw model
+// A model whose id says it draws is sent eipgam's own responseModalities
+// even when the client asked for its own: eipgam's word for a draw model
 // stands (buildCodeAssistSent), and the rest of what the client asked goes
 // beside it.
 func TestGeminiGenConfigDrawModelKeepsMagpiesModalities(t *testing.T) {

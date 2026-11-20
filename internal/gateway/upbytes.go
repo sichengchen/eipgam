@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // upBytes is what a request's tries sent up to the vendor, kept in the

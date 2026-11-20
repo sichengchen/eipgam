@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // Settings' currency "By provider" shows a provider's costs in yuan when

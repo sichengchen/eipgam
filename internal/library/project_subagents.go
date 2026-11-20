@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // A project can be given library subagents (jinpwng on X), each for some
@@ -29,7 +29,7 @@ import (
 //	Copilot CLI   .github/agents/<name>.agent.md  "Repository-level custom agents are stored in the .github/agents directory"
 //
 // A file is recorded by its hash (Project.AgentFiles), as the user-wide
-// ones are: magpie writes over or takes away only one still exactly as it
+// ones are: eipgam writes over or takes away only one still exactly as it
 // wrote it, and a file of the user's by the same name is never touched.
 // Nothing is written outside the project's folder, so the agents' own
 // (global) subagents stay as they are.
@@ -45,7 +45,7 @@ var projectSubagentDirs = map[string]string{
 }
 
 // ProjectSubagentsDir is the folder, in a project, an agent reads its
-// subagents from: "" for one magpie can't give a project's subagents to.
+// subagents from: "" for one eipgam can't give a project's subagents to.
 func ProjectSubagentsDir(agentID string) string { return projectSubagentDirs[agentID] }
 
 // projectSubagentSpec is the shape of agent id's subagent files, kept in
@@ -152,9 +152,9 @@ func (l *Library) syncProjectSubagents(p *Project, fail func(what string, err er
 		cur, err := os.ReadFile(abs)
 		switch {
 		case err == nil && bytes.Equal(cur, body):
-			// the same as magpie would write: taken as magpie's
+			// the same as eipgam would write: taken as eipgam's
 		case err == nil:
-			fail("subagent:"+w.s.Name, fmt.Errorf("%s is in the project already and isn't magpie's: it's left as it is", rel))
+			fail("subagent:"+w.s.Name, fmt.Errorf("%s is in the project already and isn't eipgam's: it's left as it is", rel))
 			continue
 		case !os.IsNotExist(err):
 			fail("subagent:"+w.s.Name, err)
@@ -194,7 +194,7 @@ func ProjectSubagents(dir string, names, agents []string) (*Result, error) {
 		var ids []string
 		for _, id := range agents {
 			if ProjectSubagentsDir(id) == "" {
-				return fmt.Errorf("magpie knows of no folder %s reads a project's subagents from", id)
+				return fmt.Errorf("eipgam knows of no folder %s reads a project's subagents from", id)
 			}
 			ids = set(ids, id, true)
 		}

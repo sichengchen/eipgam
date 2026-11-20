@@ -1,7 +1,7 @@
 package library
 
 // A plugin that gives tools (OpenCode's tool hook, served at the gateway's
-// /mcp/magpie/tools) is a server in the Library of its own (chenxiang0010
+// /mcp/eipgam/tools) is a server in the Library of its own (chenxiang0010
 // on Discord: Search1API's tools in the MCP hub). Once the plugin host has
 // noted the plugin's tools (plugin-tools.json), the library adds a server
 // named by the plugin's short name (search1api), at the gateway's
@@ -36,9 +36,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // pluginToolsOf and runPluginToolOf are the gateway's, a test's fakes in
@@ -77,7 +77,7 @@ func adoptPluginTools() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	// and each Remote magpie's router's (bridge_mcp.go)
+	// and each Remote eipgam's router's (bridge_mcp.go)
 	if plugins, bridges := l.adoptPlugins(), l.adoptBridges(); !plugins && !bridges {
 		return false, nil
 	}

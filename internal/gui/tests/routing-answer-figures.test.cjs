@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             w: Math.round(box.getBoundingClientRect().width),
           };
         });
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.waitForFunction(() => document.querySelector(".rt-cap"));
         await page.waitForTimeout(300); // the first trace in, the long poll waiting
 

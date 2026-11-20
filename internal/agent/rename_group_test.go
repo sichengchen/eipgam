@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A routing group given another id takes the agents on it along, as a
 // provider's rename does: Codex, Claude Code (its model and tiers),
-// OpenCode and Pi were left on group/<old>, a group magpie no longer had,
+// OpenCode and Pi were left on group/<old>, a group eipgam no longer had,
 // and the user had to pick it again in each (lucis0116 on X).
 func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 	home := syncHome(t)
@@ -20,15 +20,15 @@ func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 		t.Fatal(err)
 	}
 	codexCfg := filepath.Join(home, ".codex", "config.toml")
-	codexCat := filepath.Join(home, ".codex", "magpie-models.json")
-	writeFile(t, codexCfg, "model = \"group/smart\"\nmodel_provider = \"magpie\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(home, ".codex", "eipgam-models.json")
+	writeFile(t, codexCfg, "model = \"group/smart\"\nmodel_provider = \"eipgam\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
 	piSettings := filepath.Join(home, ".pi", "agent", "settings.json")
-	writeFile(t, piModels, `{"providers":{"magpie":{"name":"magpie","models":[]}}}`)
-	writeFile(t, piSettings, `{"defaultProvider":"magpie","defaultModel":"group/smart"}`)
+	writeFile(t, piModels, `{"providers":{"eipgam":{"name":"eipgam","models":[]}}}`)
+	writeFile(t, piSettings, `{"defaultProvider":"eipgam","defaultModel":"group/smart"}`)
 	oc := filepath.Join(home, ".config", "opencode", "opencode.json")
-	writeFile(t, oc, `{"model":"magpie/group/smart"}`)
+	writeFile(t, oc, `{"model":"eipgam/group/smart"}`)
 	setUpInMagpie("pi", "opencode")
 	claudeCfg := filepath.Join(home, ".claude", "settings.json")
 	writeFile(t, claudeCfg, `{}`)
@@ -56,7 +56,7 @@ func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 	if v, _ := edit.GetJSON(piSettings, "defaultModel"); v != "group/clever" {
 		t.Errorf("pi defaultModel = %v", v)
 	}
-	if v, _ := edit.GetJSON(oc, "model"); v != "magpie/group/clever" {
+	if v, _ := edit.GetJSON(oc, "model"); v != "eipgam/group/clever" {
 		t.Errorf("opencode model = %v", v)
 	}
 	claude := readFile(claudeCfg)
@@ -75,8 +75,8 @@ func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 // at its next launch (TestCodexEffortPickKeepsTheAppRunning says why).
 func TestCodexAppRouteIgnoresARename(t *testing.T) {
 	home := syncHome(t)
-	codexCat := filepath.Join(home, ".codex", "magpie-models.json")
-	writeFile(t, filepath.Join(home, ".codex", "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"magpie\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(home, ".codex", "eipgam-models.json")
+	writeFile(t, filepath.Join(home, ".codex", "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"eipgam\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	SyncCatalog()
 	before, _, known := codexAppRoute()

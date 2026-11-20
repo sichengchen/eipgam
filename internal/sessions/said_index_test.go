@@ -288,7 +288,7 @@ func TestSearchSaidForgetsGoneAndRewrittenSessions(t *testing.T) {
 	}
 }
 
-// An agent magpie may not read is in no answer, even while the index
+// An agent eipgam may not read is in no answer, even while the index
 // still holds it.
 func TestSearchSaidLeavesOutAgentsNotRead(t *testing.T) {
 	dir := t.TempDir()
@@ -306,7 +306,7 @@ func TestSearchSaidLeavesOutAgentsNotRead(t *testing.T) {
 	}
 }
 
-// The real list: every agent's sessions, of the agents magpie may read.
+// The real list: every agent's sessions, of the agents eipgam may read.
 func TestSaidSessionsListsTheAgentsRead(t *testing.T) {
 	d := consentHome(t)
 	writeTwoAgents(t, d)

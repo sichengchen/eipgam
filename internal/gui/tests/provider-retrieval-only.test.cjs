@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, [relay(retrieval)], retrieval));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
 
         // the add form's Fetch models
         await page.locator("#addProvider").click();
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(await hint.allTextContents(), [say(lang, retrieval ? ONLY : ADD_EMPTY)]);
 
         // the saved provider's editor
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Embed Relay" }).first().click();
         await page.locator(".editor .ehead b", { hasText: "Embed Relay" }).waitFor();
         const all = await page.locator(".editor .hint").allTextContents();

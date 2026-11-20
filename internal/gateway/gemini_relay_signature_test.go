@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A relay serving Gemini on chat completions under a host of its own
 // (Mamba_asr on X: "peta-gemini", gemini-4-argon) gives a call's thought
 // signature in extra_content as Google's API does, and turns the next
-// turn away without it: 400 "missing a thought_signature". magpie gave
+// turn away without it: 400 "missing a thought_signature". eipgam gave
 // the signature back to Gemini's own host and to a local one only, so
 // on the relay every second tool turn failed, from Claude Code, Codex
 // and a Chat client that keeps no extra_content alike. A signature goes

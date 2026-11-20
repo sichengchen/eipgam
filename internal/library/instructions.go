@@ -15,19 +15,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
-// The part of an agent's instructions file magpie writes sits between
+// The part of an agent's instructions file eipgam writes sits between
 // these two lines; the rest of the file is the user's.
 const (
-	blockBegin = "<!-- magpie:begin · written by magpie from its Library -->"
-	blockEnd   = "<!-- magpie:end -->"
+	blockBegin = "<!-- eipgam:begin · written by eipgam from its Library -->"
+	blockEnd   = "<!-- eipgam:end -->"
 )
 
-// defaultSet is the set magpie had before there were more: its text is
+// defaultSet is the set eipgam had before there were more: its text is
 // where the one shared text always was.
 const defaultSet = "default"
 
@@ -115,8 +115,8 @@ func extraPath(agent string) string {
 	return filepath.Join(Dir(), "instructions", fileName(agent)+".md")
 }
 
-// setText is a set's text as kept at p. Magpie's part is left out of it:
-// that part is what magpie wrote from the set, never the set. A set kept in
+// setText is a set's text as kept at p. eipgam's part is left out of it:
+// that part is what eipgam wrote from the set, never the set. A set kept in
 // the file an agent reads (instructions.md linked to ~/.claude/CLAUDE.md, or
 // both linked to one file of the user's, #2349) has one, and read with it
 // every write put the whole file into its own part again, so the file
@@ -145,7 +145,7 @@ func writeText(path, text string) error {
 	return edit.WriteAtomic(path, []byte(text+"\n"))
 }
 
-// wanted is what magpie writes into the agent's file: the shared text,
+// wanted is what eipgam writes into the agent's file: the shared text,
 // the agent's own additions after it, and memory's published digest for
 // it last; "" for nothing.
 func (l *Library) wanted(agent string) string {
@@ -240,8 +240,8 @@ func SetMemoryInInstructions(on bool) (*Result, error) {
 	})
 }
 
-// split takes a file apart: what is before magpie's part, magpie's part,
-// and what is after it. ok is false when magpie has no part in it.
+// split takes a file apart: what is before eipgam's part, eipgam's part,
+// and what is after it. ok is false when eipgam has no part in it.
 func split(file string) (before, block, after string, ok bool) {
 	i := strings.Index(file, blockBegin)
 	if i < 0 {
@@ -255,7 +255,7 @@ func split(file string) (before, block, after string, ok bool) {
 	return file[:i], strings.TrimSpace(rest[:j]), rest[j+len(blockEnd):], true
 }
 
-// own is the file without magpie's part: the user's own instructions.
+// own is the file without eipgam's part: the user's own instructions.
 // Every part goes, and an end line left over: a part written into itself
 // (#2349) holds others, each ended after the first end.
 func own(file string) string {
@@ -277,7 +277,7 @@ func own(file string) string {
 	return strings.TrimSpace(file)
 }
 
-// withBlock is the file with magpie's part set to text, or taken out for "".
+// withBlock is the file with eipgam's part set to text, or taken out for "".
 // A new part goes after what the user has written.
 func withBlock(file, text string) string {
 	file = strings.ReplaceAll(file, "\r\n", "\n")
@@ -378,7 +378,7 @@ func (l *Library) syncInstructions(t *Target, all []*Target, b *backups, res *Re
 	file := string(raw)
 	if l.isSetFile(t.Instructions) {
 		// the agent reads the set's own file, so it has the text already:
-		// magpie writes no part into it, and takes out one written before
+		// eipgam writes no part into it, and takes out one written before
 		a.Instructions, a.InstrHash = false, ""
 		file = strings.ReplaceAll(file, "\r\n", "\n")
 		if !strings.Contains(file, blockBegin) && !strings.Contains(file, blockEnd) {
@@ -423,7 +423,7 @@ func (l *Library) syncInstructions(t *Target, all []*Target, b *backups, res *Re
 		if a.InstrHash == hash("") {
 			red = "; the last write on record hashes empty, a library reset under the agents"
 		}
-		log.Printf("library: %s: nothing to write, %s still holds magpie's part%s: left alone", id, t.Instructions, red)
+		log.Printf("library: %s: nothing to write, %s still holds eipgam's part%s: left alone", id, t.Instructions, red)
 		return
 	}
 	if ok && want != "" && a.InstrHash != "" && hash(have) != a.InstrHash && hash(want) == a.InstrHash {
@@ -487,13 +487,13 @@ type AgentInstructions struct {
 	On       bool   `json:"on"`
 	Extra    string `json:"extra"`              // what this agent gets besides
 	Own      int    `json:"own"`                // lines of the user's own in the file
-	Edited   bool   `json:"edited,omitempty"`   // magpie's part was changed in the file
+	Edited   bool   `json:"edited,omitempty"`   // eipgam's part was changed in the file
 	Override string `json:"override,omitempty"` // a file the agent reads instead
 	Profile  bool   `json:"profile,omitempty"`  // the file is the user's profile to the agent (Target.Profile)
 	// Asleep is the WSL distro, not running now, the agent is in: its row
-	// is what magpie last knew of it (asleepInstructions), its file isn't
+	// is what eipgam last knew of it (asleepInstructions), its file isn't
 	// read, and a change is written there when the distro next runs.
-	// Unseen: magpie never saw where it keeps its instructions
+	// Unseen: eipgam never saw where it keeps its instructions
 	Asleep string `json:"asleep,omitempty"`
 	Unseen bool   `json:"unseen,omitempty"`
 }
@@ -553,7 +553,7 @@ func (l *Library) instructionsView(targets []*Target, asleep []*agent.Agent) *In
 		}
 		v.Agents = append(v.Agents, ai)
 	}
-	// a stopped WSL distro's agents, by what magpie last knew of them:
+	// a stopped WSL distro's agents, by what eipgam last knew of them:
 	// nothing of theirs is opened, which would start the distro (#3896)
 	for _, a := range asleep {
 		if ai, ok := l.asleepInstructions(a); ok {
@@ -569,7 +569,7 @@ type InstructionsChange struct {
 	Shared *string            `json:"shared,omitempty"`
 	Agents []string           `json:"agents,omitempty"`
 	Extra  map[string]*string `json:"extra,omitempty"`
-	// Rewrite writes magpie's part again into these agents' files, over
+	// Rewrite writes eipgam's part again into these agents' files, over
 	// edits made there.
 	Rewrite []string `json:"rewrite,omitempty"`
 	// The sets: texts by set, a set to switch the agents to, one to add
@@ -655,7 +655,7 @@ func SaveInstructions(c InstructionsChange) (*Result, error) {
 func ImportInstructions(id string) (*Result, error) {
 	t := targetByID(id)
 	if t == nil || t.Instructions == "" {
-		return nil, fmt.Errorf("%s has no instructions file magpie knows", id)
+		return nil, fmt.Errorf("%s has no instructions file eipgam knows", id)
 	}
 	if t.Profile {
 		// moved out, the profile would go into every agent's file, and the
@@ -790,7 +790,7 @@ func (l *Library) changeSets(c InstructionsChange) error {
 }
 
 // linkable is the file a new set can be linked to, made absolute, or why
-// not: a file magpie writes into (an agent's own instructions, where the
+// not: a file eipgam writes into (an agent's own instructions, where the
 // set would be read from the text written from it), one of the library's
 // own, a folder, or one another set has.
 func (l *Library) linkable(file string) (string, error) {
@@ -811,7 +811,7 @@ func (l *Library) linkable(file string) (string, error) {
 		return "", fmt.Errorf("%s is a folder: give a file", file)
 	}
 	if strings.Contains(readText(file), blockBegin) {
-		return "", fmt.Errorf("magpie writes its instructions into %s: a set can't be kept there too", file)
+		return "", fmt.Errorf("eipgam writes its instructions into %s: a set can't be kept there too", file)
 	}
 	if lib := realBelow(Dir()); real == lib || strings.HasPrefix(real, lib+string(filepath.Separator)) || real == realBelow(path()) {
 		return "", fmt.Errorf("%s is the library's own", file)
@@ -824,7 +824,7 @@ func (l *Library) linkable(file string) (string, error) {
 	for _, t := range everyTarget() {
 		for _, p := range []string{t.Instructions, t.Override} {
 			if p != "" && realBelow(p) == real {
-				return "", fmt.Errorf("%s is %s's own instructions, which magpie writes into: a set can't be kept there", file, t.Agent.Name)
+				return "", fmt.Errorf("%s is %s's own instructions, which eipgam writes into: a set can't be kept there", file, t.Agent.Name)
 			}
 		}
 	}
@@ -892,15 +892,15 @@ func KeepLinked(ctx context.Context, interval time.Duration) {
 		keepWoken()
 		// a git worktree made or removed beside a project follows it
 		keepProjectTrees()
-		// Claude Code's auto-compaction beside a bili plugin magpie
+		// Claude Code's auto-compaction beside a bili plugin eipgam
 		// installed before it kept it on
 		keepBiliCompact()
 		// bili start, while an agent goes through its /bili/ prefix
 		keepBiliServe(ctx)
-		// the skills and prompts of a Remote magpie's Library, when
+		// the skills and prompts of a Remote eipgam's Library, when
 		// switched on (borrow.go)
 		keepBorrowed(ctx)
-		// the models a Remote magpie's agents are on, for the agents
+		// the models a Remote eipgam's agents are on, for the agents
 		// here still on them (agent/remote_picks.go)
 		agent.FollowRemotePicks(ctx)
 		// once a day, what agents saved to memory meanwhile

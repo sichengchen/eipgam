@@ -11,8 +11,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A GLM Coding Plan is known by its OpenAI endpoint, the Coding Plan's
@@ -77,7 +77,7 @@ func TestReadGLMSearch(t *testing.T) {
 	}
 }
 
-// glmSearchPlan is a fake GLM Coding Plan: its model calls magpie's web_search
+// glmSearchPlan is a fake GLM Coding Plan: its model calls eipgam's web_search
 // once, then answers; its search MCP server answers as the docs say it
 // does, in an event stream, or with reply in place of its results.
 type glmSearchPlan struct {
@@ -164,7 +164,7 @@ func newGLMSearchPlan(t *testing.T) *glmSearchPlan {
 
 // A model of a GLM Coding Plan has its searches done by the plan's search
 // MCP server, with the plan's key, as the plan's MCP config would: with
-// nothing else set up in magpie it searches all the same. Before, such a
+// nothing else set up in eipgam it searches all the same. Before, such a
 // model had no search at all. A searcher Settings names still searches for
 // it; a search the tool refuses says why; and a pay-as-you-go key, which
 // the server doesn't serve, never asks it.

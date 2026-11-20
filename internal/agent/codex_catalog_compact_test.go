@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Codex is told where to compact a long conversation (#876) both from the
 // gateway's /models (provider.CodexListed, which sets catalog.Model.Compact)
-// and from the list magpie writes for it on disk (magpie-models.json,
+// and from the list eipgam writes for it on disk (eipgam-models.json,
 // codex.go:593 -> codexcat.Catalog(magpieModels("codex"))).
 //
 // magpieModels left Compact unset, so codexcat fell back to the one for
@@ -27,7 +27,7 @@ func TestCodexCatalogCompactAtReachesDisk(t *testing.T) {
 	if err := provider.SetModelCompacts("relay", map[string]int{"*": 100000}); err != nil {
 		t.Fatalf("SetModelCompacts: %v", err)
 	}
-	// connect Codex to magpie on a magpie model, as the app does: it writes
+	// connect Codex to eipgam on a eipgam model, as the app does: it writes
 	// the catalog it reads from disk
 	cx := codex(home)
 	if err := cx.Fields[0].Set("relay/glm-4.6"); err != nil {
@@ -43,7 +43,7 @@ func TestCodexCatalogCompactAtReachesDisk(t *testing.T) {
 				Compact       int    `json:"auto_compact_token_limit"`
 			} `json:"models"`
 		}
-		raw := readFile(filepath.Join(home, ".codex", "magpie-models.json"))
+		raw := readFile(filepath.Join(home, ".codex", "eipgam-models.json"))
 		if err := json.Unmarshal([]byte(raw), &got); err != nil {
 			t.Fatalf("%v: %s", err, raw)
 		}

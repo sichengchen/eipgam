@@ -18,8 +18,8 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zstd"
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 func freshDicts(t *testing.T) {
@@ -92,7 +92,7 @@ func (c *agentChat) turn(i int) []byte {
 	return b
 }
 
-// A long agent conversation, sent to a remote magpie turn by turn: what
+// A long agent conversation, sent to a remote eipgam turn by turn: what
 // went on the wire as it was, as zstd, and as "dcz" against the body
 // before, with two conversations' turns interleaved as two agents send
 // them. The numbers go in the commit.
@@ -120,7 +120,7 @@ func TestDictSavingOnALongConversation(t *testing.T) {
 			if i > 0 && d.enc != "dcz" {
 				t.Fatalf("turn %d of %d went %q", i, k, d.enc)
 			}
-			// the other magpie decodes it and keeps it
+			// the other eipgam decodes it and keeps it
 			if d.enc == "dcz" {
 				r := httptest.NewRequest("POST", "/v1/messages", bytes.NewReader(wire))
 				r.Header = req.Header.Clone()
@@ -152,7 +152,7 @@ func TestDictSavingOnALongConversation(t *testing.T) {
 	}
 }
 
-// wireDecoded is a hop's body as the other magpie reads it: a "dcz" one
+// wireDecoded is a hop's body as the other eipgam reads it: a "dcz" one
 // against whichever caller's kept body it names.
 func wireDecoded(h http.Header, b []byte) []byte {
 	var rd io.Reader
@@ -264,8 +264,8 @@ func sameMessages(t *testing.T, vendor []byte, sent []byte) {
 	}
 }
 
-// A long conversation through a remote magpie (gaubeebangeel on X): every
-// turn went to the other magpie whole. Now the first goes whole, offered
+// A long conversation through a remote eipgam (gaubeebangeel on X): every
+// turn went to the other eipgam whole. Now the first goes whole, offered
 // kept, and each after it as "dcz" against the one before, a few percent
 // of it, and the vendor behind still gets the conversation whole.
 func TestRemoteMagpieBodyGoesAgainstTheOneBefore(t *testing.T) {
@@ -277,7 +277,7 @@ func TestRemoteMagpieBodyGoesAgainstTheOneBefore(t *testing.T) {
 			t.Fatalf("turn %d: %d %s", i, rec.Code, rec.Body.String())
 		}
 		if hop.n() != i+1 || vendor.n() != i+1 {
-			t.Fatalf("turn %d: the other magpie asked %d times, the vendor %d", i, hop.n(), vendor.n())
+			t.Fatalf("turn %d: the other eipgam asked %d times, the vendor %d", i, hop.n(), vendor.n())
 		}
 		hd := hop.header(i)
 		if hd.Get(KeepBodyHeader) == "" {
@@ -286,7 +286,7 @@ func TestRemoteMagpieBodyGoesAgainstTheOneBefore(t *testing.T) {
 		wire := len(hop.wire(i))
 		if i == 0 {
 			if hd.Get("Content-Encoding") != "" {
-				t.Fatalf("turn 0 went %q to a magpie not yet known to keep bodies", hd.Get("Content-Encoding"))
+				t.Fatalf("turn 0 went %q to a eipgam not yet known to keep bodies", hd.Get("Content-Encoding"))
 			}
 		} else if hd.Get("Content-Encoding") != "dcz" || hd.Get(availableDictHeader) == "" || i != 5 && wire*4 > len(body) {
 			// turn 5's screenshot is new, and as large compressed
@@ -304,7 +304,7 @@ func TestRemoteMagpieBodyGoesAgainstTheOneBefore(t *testing.T) {
 	}
 }
 
-// The other magpie restarted, and holds no body: the "dcz" turn is
+// The other eipgam restarted, and holds no body: the "dcz" turn is
 // answered with DictMissHeader before any vendor is asked, and goes again
 // whole; the agent never sees it.
 func TestRemoteMagpieLostDictionaryResendsWhole(t *testing.T) {
@@ -319,7 +319,7 @@ func TestRemoteMagpieLostDictionaryResendsWhole(t *testing.T) {
 		t.Fatalf("turn 1: %d %s", rec.Code, rec.Body.String())
 	}
 	if hop.n() != 3 || vendor.n() != 2 {
-		t.Fatalf("the other magpie asked %d times, the vendor %d", hop.n(), vendor.n())
+		t.Fatalf("the other eipgam asked %d times, the vendor %d", hop.n(), vendor.n())
 	}
 	if hop.header(1).Get("Content-Encoding") != "dcz" || hop.header(2).Get("Content-Encoding") != "" || !json.Valid(hop.wire(2)) {
 		t.Fatalf("turn 1 went %q then %q, %d bytes", hop.header(1).Get("Content-Encoding"), hop.header(2).Get("Content-Encoding"), len(hop.wire(2)))
@@ -334,7 +334,7 @@ func TestRemoteMagpieLostDictionaryResendsWhole(t *testing.T) {
 	}
 }
 
-// A magpie from before this never says it keeps a body: it is sent every
+// A eipgam from before this never says it keeps a body: it is sent every
 // one as it was, uncompressed, as before.
 func TestRemoteMagpieFromBeforeIsSentBodiesAsTheyWere(t *testing.T) {
 	freshRemoteTurns(t)
@@ -364,11 +364,11 @@ func TestRemoteMagpieFromBeforeIsSentBodiesAsTheyWere(t *testing.T) {
 	}
 }
 
-// keptRequest is a magpie's request to h, from addr with key id.
+// keptRequest is a eipgam's request to h, from addr with key id.
 func keptRequest(body []byte, key, addr string, header map[string]string) *http.Request {
 	r := httptest.NewRequest("POST", "/v1/messages", bytes.NewReader(body))
 	r.RemoteAddr = addr
-	r.Header.Set("User-Agent", "magpie/0.1.9999")
+	r.Header.Set("User-Agent", "eipgam/0.1.9999")
 	for k, v := range header {
 		r.Header.Set(k, v)
 	}
@@ -429,7 +429,7 @@ func TestKeptBodyIsOnlyItsCallers(t *testing.T) {
 	if rec.Code != 200 || reached != 2 || !bytes.Equal(got, next) {
 		t.Fatalf("own caller: %d, reached %d, %d bytes", rec.Code, reached, len(got))
 	}
-	// a client that isn't a magpie gets nothing kept, and a "dcz" body is
+	// a client that isn't a eipgam gets nothing kept, and a "dcz" body is
 	// one it can't send
 	rec = httptest.NewRecorder()
 	r := keptRequest(first, "keyA", "10.0.0.2:1", map[string]string{KeepBodyHeader: "dcz"})
@@ -440,7 +440,7 @@ func TestKeptBodyIsOnlyItsCallers(t *testing.T) {
 	}
 }
 
-// A magpie keeps no more than dictPerScope bodies of a caller, nor more
+// A eipgam keeps no more than dictPerScope bodies of a caller, nor more
 // than its bounds in bytes, the least lately used going first.
 func TestKeptBodiesBounded(t *testing.T) {
 	k := newKeptBodies()

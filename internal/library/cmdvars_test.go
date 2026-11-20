@@ -19,8 +19,8 @@ func TestCmdVarsPerAgent(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
-	t.Setenv("MAGPIE_T_SET", "v1")
-	os.Unsetenv("MAGPIE_T_UNSET")
+	t.Setenv("EIPGAM_T_SET", "v1")
+	os.Unsetenv("EIPGAM_T_UNSET")
 	lv := loginVars
 	loginVars = func([]string) map[string]string { return nil }
 	// the home's variable as on a Mac or Linux (Windows':
@@ -30,12 +30,12 @@ func TestCmdVarsPerAgent(t *testing.T) {
 	t.Cleanup(func() { loginVars, cmdOS = lv, was })
 
 	s := &Server{Name: "x", Transport: "stdio", Command: "$HOME/bin/x",
-		Args: []string{"--notes", "~/notes", "${MAGPIE_T_SET}", "$MAGPIE_T_UNSET", "$1", "a~/b", "~"}}
+		Args: []string{"--notes", "~/notes", "${EIPGAM_T_SET}", "$EIPGAM_T_UNSET", "$1", "a~/b", "~"}}
 	keep := func(ref func(string) string) []string {
-		return []string{ref("HOME") + "/bin/x", "--notes", h + "/notes", ref("MAGPIE_T_SET"), ref("MAGPIE_T_UNSET"), "$1", "a~/b", h}
+		return []string{ref("HOME") + "/bin/x", "--notes", h + "/notes", ref("EIPGAM_T_SET"), ref("EIPGAM_T_UNSET"), "$1", "a~/b", h}
 	}
 	dollar := func(n string) string { return "${" + n + "}" }
-	put := []string{h + "/bin/x", "--notes", h + "/notes", "v1", "$MAGPIE_T_UNSET", "$1", "a~/b", h}
+	put := []string{h + "/bin/x", "--notes", h + "/notes", "v1", "$EIPGAM_T_UNSET", "$1", "a~/b", h}
 	for _, c := range []struct {
 		name string
 		f    mcpFile
@@ -53,11 +53,11 @@ func TestCmdVarsPerAgent(t *testing.T) {
 		{"copilot", mcpFile{Format: fmtCopilot}, put},
 		{"claude desktop", mcpFile{Format: fmtDesktop}, put},
 		{"pi-mcp-extension", mcpFile{Format: fmtPi, Literal: true}, put},
-		// in WSL: the distro's home, and no variable of magpie's
+		// in WSL: the distro's home, and no variable of eipgam's
 		{"codex in WSL", mcpFile{Format: fmtCodex, WSL: true, Home: "/home/me"},
-			[]string{"/home/me/bin/x", "--notes", "/home/me/notes", "${MAGPIE_T_SET}", "$MAGPIE_T_UNSET", "$1", "a~/b", "/home/me"}},
+			[]string{"/home/me/bin/x", "--notes", "/home/me/notes", "${EIPGAM_T_SET}", "$EIPGAM_T_UNSET", "$1", "a~/b", "/home/me"}},
 		{"claude in WSL", mcpFile{Format: fmtClaude, WSL: true, Home: "/home/me"},
-			[]string{"${HOME}/bin/x", "--notes", "/home/me/notes", "${MAGPIE_T_SET}", "${MAGPIE_T_UNSET}", "$1", "a~/b", "/home/me"}},
+			[]string{"${HOME}/bin/x", "--notes", "/home/me/notes", "${EIPGAM_T_SET}", "${EIPGAM_T_UNSET}", "$1", "a~/b", "/home/me"}},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			got := c.f.withCmdVars(s)
@@ -112,16 +112,16 @@ func TestCmdVarsSync(t *testing.T) {
 	}
 }
 
-// magpie starts a command with its ~ and variables put in: the check (and
-// so the MCP router, which starts it the same way) and Codex on magpie.
+// eipgam starts a command with its ~ and variables put in: the check (and
+// so the MCP router, which starts it the same way) and Codex on eipgam.
 func TestCmdVarsLaunch(t *testing.T) {
 	fake := fakeStdio(t, "ok", nil)
 	dir, base := filepath.Dir(fake.Command), filepath.Base(fake.Command)
-	t.Setenv("MAGPIE_T_DIR", dir)
+	t.Setenv("EIPGAM_T_DIR", dir)
 	byVar := *fake
-	byVar.Command = "$MAGPIE_T_DIR/" + base
+	byVar.Command = "$EIPGAM_T_DIR/" + base
 	if h := CheckServer(context.Background(), &byVar); h.State != "ok" || h.Tools != 3 {
-		t.Errorf("$MAGPIE_T_DIR: %+v", h)
+		t.Errorf("$EIPGAM_T_DIR: %+v", h)
 	}
 	// a home of the test's own (the fake refuses one outside it), with the
 	// server in it
@@ -140,7 +140,7 @@ func TestCmdVarsLaunch(t *testing.T) {
 	if h := CheckServer(context.Background(), &byHome); h.State != "ok" || h.Tools != 3 {
 		t.Errorf("~: %+v", h)
 	}
-	spec, ok := specOf(&Server{Transport: "stdio", Command: "${HOME}/bin/x", Args: []string{"~/a", "$MAGPIE_T_DIR"}})
+	spec, ok := specOf(&Server{Transport: "stdio", Command: "${HOME}/bin/x", Args: []string{"~/a", "$EIPGAM_T_DIR"}})
 	if want := []string{h + "/a", dir}; !ok || spec.Command != h+"/bin/x" || !slices.Equal(spec.Args, want) {
 		t.Errorf("spec: %+v", spec)
 	}
@@ -155,7 +155,7 @@ func TestCmdVarsUserProfile(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
-	t.Setenv("MAGPIE_T_AD", `C:\AD`)
+	t.Setenv("EIPGAM_T_AD", `C:\AD`)
 	t.Setenv("Y", "set")
 	lv := loginVars
 	loginVars = func([]string) map[string]string { return nil }
@@ -164,7 +164,7 @@ func TestCmdVarsUserProfile(t *testing.T) {
 	t.Cleanup(func() { loginVars, cmdOS = lv, was })
 
 	s := &Server{Name: "pinky", Transport: "stdio", Command: `%USERPROFILE%\AppData\Local\Programs\Pinky\pinky.exe`,
-		Args: []string{`~\x`, "$USERPROFILE/y", `%MAGPIE_T_AD%\z`, "%userprofile%", "%Y%", "100%", "%20"},
+		Args: []string{`~\x`, "$USERPROFILE/y", `%EIPGAM_T_AD%\z`, "%userprofile%", "%Y%", "100%", "%20"},
 		Env:  map[string]string{"CFG": `%USERPROFILE%\c`, "D": "~/d", "T": "${TOKEN}", "P": "50%"}}
 	env := map[string]string{"CFG": h + `\c`, "D": h + "/d", "T": "${TOKEN}", "P": "50%"}
 	for _, c := range []struct {
@@ -175,21 +175,21 @@ func TestCmdVarsUserProfile(t *testing.T) {
 		{"windows", "codex", mcpFile{Format: fmtCodex},
 			[]string{h + `\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, h + "/y", `C:\AD\z`, h, "set", "100%", "%20"}},
 		{"windows", "claude", mcpFile{Format: fmtClaude},
-			[]string{`${USERPROFILE}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "${USERPROFILE}/y", `${MAGPIE_T_AD}\z`, "${USERPROFILE}", "${Y}", "100%", "%20"}},
+			[]string{`${USERPROFILE}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "${USERPROFILE}/y", `${EIPGAM_T_AD}\z`, "${USERPROFILE}", "${Y}", "100%", "%20"}},
 		{"windows", "cursor", mcpFile{Format: fmtCursor},
-			[]string{`${env:USERPROFILE}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "${env:USERPROFILE}/y", `${env:MAGPIE_T_AD}\z`, "${env:USERPROFILE}", "${env:Y}", "100%", "%20"}},
+			[]string{`${env:USERPROFILE}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "${env:USERPROFILE}/y", `${env:EIPGAM_T_AD}\z`, "${env:USERPROFILE}", "${env:Y}", "100%", "%20"}},
 		{"darwin", "codex", mcpFile{Format: fmtCodex},
-			[]string{h + `\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, h + "/y", `%MAGPIE_T_AD%\z`, h, "%Y%", "100%", "%20"}},
+			[]string{h + `\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, h + "/y", `%EIPGAM_T_AD%\z`, h, "%Y%", "100%", "%20"}},
 		{"darwin", "claude", mcpFile{Format: fmtClaude},
-			[]string{`${HOME}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "${HOME}/y", `%MAGPIE_T_AD%\z`, "${HOME}", "%Y%", "100%", "%20"}},
+			[]string{`${HOME}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "${HOME}/y", `%EIPGAM_T_AD%\z`, "${HOME}", "%Y%", "100%", "%20"}},
 		{"linux", "opencode", mcpFile{Format: fmtOpenCode},
-			[]string{`{env:HOME}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "{env:HOME}/y", `%MAGPIE_T_AD%\z`, "{env:HOME}", "%Y%", "100%", "%20"}},
+			[]string{`{env:HOME}\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, "{env:HOME}/y", `%EIPGAM_T_AD%\z`, "{env:HOME}", "%Y%", "100%", "%20"}},
 		{"linux", "codex", mcpFile{Format: fmtCodex},
-			[]string{h + `\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, h + "/y", `%MAGPIE_T_AD%\z`, h, "%Y%", "100%", "%20"}},
+			[]string{h + `\AppData\Local\Programs\Pinky\pinky.exe`, h + `\x`, h + "/y", `%EIPGAM_T_AD%\z`, h, "%Y%", "100%", "%20"}},
 		// an agent in WSL, from Windows: the distro's HOME, no variable of
 		// Windows'
 		{"windows", "claude in WSL", mcpFile{Format: fmtClaude, WSL: true, Home: "/home/me"},
-			[]string{`${HOME}\AppData\Local\Programs\Pinky\pinky.exe`, `/home/me\x`, "${HOME}/y", `%MAGPIE_T_AD%\z`, "${HOME}", "%Y%", "100%", "%20"}},
+			[]string{`${HOME}\AppData\Local\Programs\Pinky\pinky.exe`, `/home/me\x`, "${HOME}/y", `%EIPGAM_T_AD%\z`, "${HOME}", "%Y%", "100%", "%20"}},
 	} {
 		t.Run(c.os+" "+c.name, func(t *testing.T) {
 			cmdOS = c.os
@@ -210,7 +210,7 @@ func TestCmdVarsUserProfile(t *testing.T) {
 		t.Errorf("the library's server was changed: %+v", s)
 	}
 	cmdOS = was
-	// magpie starting it: the home's variables are this home on every
+	// eipgam starting it: the home's variables are this home on every
 	// system
 	spec, ok := specOf(s)
 	if !ok || !strings.HasPrefix(spec.Command, h+`\AppData`) || spec.Args[1] != h+"/y" || spec.Args[3] != h || spec.Env["CFG"] != h+`\c` || spec.Env["D"] != h+"/d" {

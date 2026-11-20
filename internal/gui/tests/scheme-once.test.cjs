@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // An address that already has its scheme is never given another (eachg0 on
-// X: a Remote magpie's "http://…" became "http://http://…"): http or https,
+// X: a Remote eipgam's "http://…" became "http://http://…"): http or https,
 // in any letter case, with or without a trailing slash. One saved twice
 // reads as one. The helpers are tried in the page, and a local server's
 // Server address is typed each way and the Endpoints follow.
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", server("en", saves, asks));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
 
     const ws = await page.evaluate(() => [
       "192.168.1.20:3425", "http://192.168.1.20:3425", "HTTP://192.168.1.20:3425/", "Http://h:1/v1/",

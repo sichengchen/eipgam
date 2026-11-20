@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // The tests run in a home of their own, never the user's real files, and
@@ -15,10 +15,10 @@ import (
 // and a host started in a home without a models.dev catalog fetched the
 // real one for up to 30s (#1922).
 //
-// With MAGPIE_CLI_TEST_SERVE set, inside a test's sandbox, the test binary
-// is `magpie serve` of a released version (serve_update_test.go).
+// With EIPGAM_CLI_TEST_SERVE set, inside a test's sandbox, the test binary
+// is `eipgam serve` of a released version (serve_update_test.go).
 func TestMain(m *testing.M) {
-	if os.Getenv("MAGPIE_CLI_TEST_SERVE") != "" {
+	if os.Getenv("EIPGAM_CLI_TEST_SERVE") != "" {
 		if os.Getenv(testenv.Marker) == "" {
 			os.Exit(2)
 		}

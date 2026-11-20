@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       t.after(async () => { await browser.close(); });
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       await page.locator(".rt-day").first().waitFor(); // the view is drawn
       await page.locator(".rt-day:visible").nth(1).click(); // Live, then the day with the requests
       const row = page.locator(".rt-req").first();

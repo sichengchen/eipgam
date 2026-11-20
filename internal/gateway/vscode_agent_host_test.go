@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // VS Code's Agents window runs `codex app-server` (main at 8fb6054,
@@ -47,9 +47,9 @@ func TestVSCodeAgentHostIsCodex(t *testing.T) {
 }
 
 // One of Codex's own models asked from the Agents window on Codex's
-// magpie provider, which no account in magpie serves, goes on Codex's own
+// eipgam provider, which no account in eipgam serves, goes on Codex's own
 // sign-in as the Codex CLI's does (TestCodexOwnModelOnMagpieThreadGoesOnSignIn),
-// not 404 "magpie knows no model" (justruman on Discord: 7 of 23 calls
+// not 404 "eipgam knows no model" (justruman on Discord: 7 of 23 calls
 // failed).
 func TestVSCodeAgentHostOwnModelGoesOnSignIn(t *testing.T) {
 	_, models := codexOwnOffMagpieSetup(t, false)

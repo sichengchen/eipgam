@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // 小八 on Discord: "路由组的外显模型名可以选择去掉 group/ 这个前缀吗". With
@@ -16,7 +16,7 @@ import (
 // place of group/fast; GET /v1/models/fast answers for it, and a request
 // for fast reaches the group. Not listed so: a group whose id a provider
 // serves a model by (that bare id is the model row's, which reaches the
-// group as the gateway routes it, listed once), a group magpie found
+// group as the gateway routes it, listed once), a group eipgam found
 // (auto/glm-5.3, listed as glm-5.3 already), and a group a key may not
 // use. Off, the list is as it was.
 func TestBareIDsListUserGroups(t *testing.T) {

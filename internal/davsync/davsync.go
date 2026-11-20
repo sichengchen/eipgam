@@ -1,15 +1,15 @@
-// Package davsync keeps magpie's setup the same on every computer through
+// Package davsync keeps eipgam's setup the same on every computer through
 // a WebDAV folder, an S3-compatible bucket or a GitHub repository. What goes there is a backup (see internal/backup),
 // sealed with a passphrase before it leaves the computer, so the server
 // only ever holds a file it can't read.
 //
-// The magpie serving the gateway syncs every few minutes. The setup is
+// The eipgam serving the gateway syncs every few minutes. The setup is
 // taken in five parts: providers (with their pictures and groups),
 // settings, profiles, the agents' models and the library (instructions,
 // MCP servers and skills). A part changed only here is
 // pushed; one changed only on the server is brought in; one changed on
 // both since the last sync keeps the newer, and the one it replaced is
-// saved in the sync folder beside magpie's files and named in a notice.
+// saved in the sync folder beside eipgam's files and named in a notice.
 // What the server holds is mirrored: a provider removed on one computer
 // goes from the others. A computer joining a folder keeps the gateway keys
 // the folder's store has never seen; after the join, a key removed on the
@@ -35,19 +35,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/profile"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // addPlugins is backup.AddPlugins: a var so a test installs nothing.
@@ -61,13 +61,13 @@ var removePlugin = func(name string) error {
 	return provider.RemovePlugin(ctx, name)
 }
 
-// Every is how often the gateway's magpie syncs.
+// Every is how often the gateway's eipgam syncs.
 const Every = 3 * time.Minute
 
 // Parts, in the order they are told.
 var Parts = []string{"providers", "settings", "profiles", "agents", "library"}
 
-// Config is the sync's setup, kept in sync.json beside magpie's other
+// Config is the sync's setup, kept in sync.json beside eipgam's other
 // files, readable by the user alone, as provider keys are. An s3://bucket/prefix
 // address is an S3-compatible bucket, User its access key ID and Password
 // the secret, kept as a WebDAV password is. For github://owner/repo/prefix,
@@ -123,7 +123,7 @@ type Config struct {
 	Other *Server `json:"other,omitempty"`
 	// Servers keeps every inactive kind, including Other for older clients.
 	Servers map[string]Server `json:"servers,omitempty"`
-	// AutoEvery is how many minutes apart the gateway's magpie syncs by
+	// AutoEvery is how many minutes apart the gateway's eipgam syncs by
 	// itself: 0 is Every's 3, Manual never — then only Sync now syncs
 	// (#847). Set by SetAuto alone; Configure keeps it.
 	AutoEvery int `json:"autoEvery,omitempty"`
@@ -799,7 +799,7 @@ func syncNow(ctx context.Context, force bool, expect string) error {
 	defer unlock()
 	mu.Lock()
 	defer mu.Unlock()
-	// read again under the lock: another magpie may have turned sync off,
+	// read again under the lock: another eipgam may have turned sync off,
 	// or changed it, while this one waited
 	c, ok := Load()
 	if !ok {
@@ -920,7 +920,7 @@ func run(ctx context.Context, first time.Duration) {
 }
 
 func collect(c Config) (backup.Bundle, error) {
-	b, err := backup.Collect(c.Keys, "magpie")
+	b, err := backup.Collect(c.Keys, "eipgam")
 	if b.Settings == nil {
 		s := settings.Load()
 		b.Settings = &s
@@ -1026,7 +1026,7 @@ func syncedProviders(ps []provider.Provider) []provider.Provider {
 }
 
 // unset says whether b holds nothing of its own in part p: no provider
-// or routing group, settings as a new magpie has them, no profile, a
+// or routing group, settings as a new eipgam has them, no profile, a
 // library with nothing in it. A computer joining a folder whose file's
 // part is unset is joining a folder whose first writer had none of that
 // part, not one where it was removed (#5642): a part is said unset only
@@ -1053,7 +1053,7 @@ func unset(b backup.Bundle, p string) bool {
 	case "library":
 		l := b.Library
 		if l == nil {
-			return false // from a magpie before the library went: handled apart
+			return false // from a eipgam before the library went: handled apart
 		}
 		for _, t := range l.Texts {
 			if strings.TrimSpace(t) != "" {
@@ -1104,7 +1104,7 @@ func take(to *backup.Bundle, from backup.Bundle, part string) {
 		if to.Keys || (to.ProvidersKeys != nil && *to.ProvidersKeys) {
 			// Keep the server's secrets the upload hasn't: all its keys when
 			// it was sent without, and an access key or balance token a
-			// keyed one from an older magpie doesn't know (#1821).
+			// keyed one from an older eipgam doesn't know (#1821).
 			server := map[string]provider.Provider{}
 			for _, p := range to.Providers {
 				server[p.ID] = p
@@ -1142,7 +1142,7 @@ func take(to *backup.Bundle, from backup.Bundle, part string) {
 			to.Proxies = &px
 		}
 		to.ProvidersKeys = backup.Flag(keys || (to.ProvidersKeys != nil && *to.ProvidersKeys))
-		to.Keys = to.Keys || keys // the whole-bundle bit follows it, for a magpie that reads no per-part ones: it keeps the server's keys on its own upload then
+		to.Keys = to.Keys || keys // the whole-bundle bit follows it, for a eipgam that reads no per-part ones: it keeps the server's keys on its own upload then
 	case "settings":
 		keys := from.Keys || (from.SettingsKeys != nil && *from.SettingsKeys)
 		s := from.Settings
@@ -1254,7 +1254,7 @@ func bring(b backup.Bundle, part string) error {
 				}
 			}
 		}
-		if b.Searches == nil { // from a magpie before them: the ones here stay
+		if b.Searches == nil { // from a eipgam before them: the ones here stay
 			return nil
 		}
 		return provider.MirrorSearchAPIs(*b.Searches)
@@ -1457,7 +1457,7 @@ func syncOnce(ctx context.Context, c Config, st *state, pv *Plan) error {
 	// push writes b over etag; were, as the parts on the server and here
 	// were before it, is kept when the write is blind
 	push := func(b backup.Bundle, etag string, were blind) error {
-		b.Created, b.App = time.Now().UTC(), "magpie"
+		b.Created, b.App = time.Now().UTC(), "eipgam"
 		sealed, err := backup.Seal(b, c.Passphrase)
 		if err != nil {
 			return err
@@ -1592,7 +1592,7 @@ func syncOnce(ctx context.Context, c Config, st *state, pv *Plan) error {
 		if L[p] == R[p] || !c.syncs(p) {
 			continue
 		}
-		if p == "library" && remote.Library == nil { // from a magpie before the library went: this computer's goes up
+		if p == "library" && remote.Library == nil { // from a eipgam before the library went: this computer's goes up
 			take(&merged, local, p)
 			continue
 		}
@@ -1727,7 +1727,7 @@ func syncOnce(ctx context.Context, c Config, st *state, pv *Plan) error {
 	}
 	st.Own, st.Here, R = after, kept, Rafter
 	// the plugins the other computers removed, removed here as Settings
-	// removes one; one that can't be (its agent is on magpie) is tried
+	// removes one; one that can't be (its agent is on eipgam) is tried
 	// again at the next sync, and isn't sent up meanwhile
 	var stuck []string
 	for _, name := range goneThere {
@@ -1866,7 +1866,7 @@ func without(es []plugin.Entry, names []string) []plugin.Entry {
 // here lacks was removed here (goneHere), and one the server lacks was
 // removed there (goneThere, still here). A plugin on one side that base
 // never had is a new one, and stays. Nothing is told when base is unknown
-// or the server's file carries no plugin list (an older magpie).
+// or the server's file carries no plugin list (an older eipgam).
 func pluginPlan(base []string, local, remote *[]plugin.Entry) (goneHere, goneThere []string) {
 	if len(base) == 0 || remote == nil {
 		return nil, nil

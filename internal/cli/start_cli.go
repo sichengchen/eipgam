@@ -8,26 +8,26 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
-// `magpie <agent> run [args…]` is what the function magpie puts in the
-// user's shells for an agent that takes magpie's gateway and model only
+// `eipgam <agent> run [args…]` is what the function eipgam puts in the
+// user's shells for an agent that takes eipgam's gateway and model only
 // from how it is started (Agent.Start: the built-in agy, an agent plugin
-// with launch) runs: the agent's command on PATH, given magpie's
-// variables and model while the agent is on one of magpie's models, and
+// with launch) runs: the agent's command on PATH, given eipgam's
+// variables and model while the agent is on one of eipgam's models, and
 // as it is otherwise (and with an argument that runs it plain, agy's
 // remote-control, which needs agy's Google sign-in). Every argument is the
-// agent's, --help too. `magpie <agent> env` prints those variables, the
+// agent's, --help too. `eipgam <agent> env` prints those variables, the
 // value of each flag it is started with (settings=<file> for --settings)
-// and the model, one NAME=value a line and nothing off magpie, for
+// and the model, one NAME=value a line and nothing off eipgam, for
 // PowerShell's function.
 
 func startUsage(id string, s agent.Starting) string {
 	vars := strings.Join(s.Names(), ", ")
 	if vars == "" {
-		vars = "magpie's gateway"
+		vars = "eipgam's gateway"
 	}
 	model := ""
 	for i := 0; i+1 < len(s.Args); i += 2 {
@@ -36,18 +36,18 @@ func startUsage(id string, s agent.Starting) string {
 	if s.Flag != "" {
 		model = " and\n" + s.Flag + " <its model> (not when you give " + s.Flag + " yourself)"
 	}
-	return fmt.Sprintf(`magpie %[1]s run [args…]   start %[2]s, on magpie while its model is one of magpie's
+	return fmt.Sprintf(`eipgam %[1]s run [args…]   start %[2]s, on eipgam while its model is one of eipgam's
 
 The %[2]s on your PATH starts with %[3]s%[4]s; every argument is
-%[2]s's. Off magpie's models it starts as it is. The function %[2]s magpie
+%[2]s's. Off eipgam's models it starts as it is. The function %[2]s eipgam
 puts in your shell's profile runs this.
 
-magpie %[1]s env           the variables and model it starts %[2]s with, a
-                         NAME=value a line; nothing while it isn't on magpie
+eipgam %[1]s env           the variables and model it starts %[2]s with, a
+                         NAME=value a line; nothing while it isn't on eipgam
 `, id, s.Bin, vars, model)
 }
 
-// startCmd is `magpie <agent> run|env …` for an agent magpie starts
+// startCmd is `eipgam <agent> run|env …` for an agent eipgam starts
 // (agent.Starter); ok false for another form.
 func startCmd(args []string) (ok bool, err error) {
 	if len(args) < 2 || args[1] != "run" && args[1] != "env" {
@@ -66,7 +66,7 @@ func startCmd(args []string) (ok bool, err error) {
 			fmt.Print(startUsage(args[0], s))
 			return true, nil
 		}
-		return true, fmt.Errorf("magpie %s env takes nothing after it, not %q", args[0], args[2])
+		return true, fmt.Errorf("eipgam %s env takes nothing after it, not %q", args[0], args[2])
 	}
 	if s.Model == "" {
 		return true, nil
@@ -82,7 +82,7 @@ func startCmd(args []string) (ok bool, err error) {
 }
 
 // startExec starts the program at path as name with args and env, in
-// place of magpie where the system can (start_exec_*.go); tests set it.
+// place of eipgam where the system can (start_exec_*.go); tests set it.
 var startExec = startExecOS
 
 // startLook is the command on PATH; tests set it.
@@ -94,7 +94,7 @@ func startRun(s agent.Starting, args []string) error {
 		return fmt.Errorf("%s isn't installed, or isn't on your PATH", s.Bin)
 	}
 	if self, err := os.Executable(); err == nil && sameProgram(self, path) {
-		return errors.New("the " + s.Bin + " on your PATH is magpie itself; install the agent")
+		return errors.New("the " + s.Bin + " on your PATH is eipgam itself; install the agent")
 	}
 	env := os.Environ()
 	if slices.ContainsFunc(args, s.Plained) {

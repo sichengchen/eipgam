@@ -11,12 +11,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/memdistill"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/memdistill"
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // Conversations are read into memory through the gateway this process

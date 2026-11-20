@@ -16,7 +16,7 @@ import (
 )
 
 // Antigravity CLI's (agy's) calls (#2097, parkavenue9639: a call agy made
-// without magpie was counted nowhere). Each conversation keeps a transcript
+// without eipgam was counted nowhere). Each conversation keeps a transcript
 // of its steps in
 // ~/.gemini/antigravity-cli/brain/<conversation id>/.system_generated/logs/transcript_full.jsonl,
 // one JSON object a line. A model's step, as agy 1.2.16 writes it (tried in
@@ -42,7 +42,7 @@ import (
 // {1 key, 2 value}: "last_step_index" n is step n+1, which stands when the
 // step's own row can't be read. A call whose model can't be read keeps
 // none (DvnT662 on X: Usage → Requests showed agy's own calls with no
-// model). The provider stays unknown. A step agy sent through magpie is
+// model). The provider stays unknown. A step agy sent through eipgam is
 // the gateway's to count: usage's matcher pairs it with the gateway's
 // record by its tokens and time (agy sends no session header).
 //

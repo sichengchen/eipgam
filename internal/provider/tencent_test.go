@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 	tcEntKeys  = "https://console.tencentcloud.com/tokenhub/tokenplan"
 	tcEntDocs  = "https://cloud.tencent.com/document/product/1823/130659"
 	// TokenHub's China host, its plans there, and where its Token Plan 个人版
-	// was before Tencent moved it (ysm119): mainland China's, which magpie
+	// was before Tencent moved it (ysm119): mainland China's, which eipgam
 	// leaves out
 	tcCNHost      = "https://tokenhub.tencentmaas.com"
 	tcCNPlanChat  = tcCNHost + "/plan/v3"
@@ -145,16 +145,16 @@ func TestTencentCloud(t *testing.T) {
 			t.Fatalf("imported from %+v: %+v", e, im)
 		}
 	}
-	// a magpie://import link: Tencent Cloud at a region, an old link by
+	// a eipgam://import link: Tencent Cloud at a region, an old link by
 	// TokenHub's old id, and the old id at another region, each where it
 	// says
 	for _, c := range tcRegions {
 		links := []string{
-			"magpie://import?preset=tencent-cloud&region=" + c.region,
-			"magpie://import?preset=tencent-tokenhub&region=" + c.region,
+			"eipgam://import?preset=tencent-cloud&region=" + c.region,
+			"eipgam://import?preset=tencent-tokenhub&region=" + c.region,
 		}
 		if c.region == "intl" {
-			links = append(links, "magpie://import?preset=tencent-tokenhub")
+			links = append(links, "eipgam://import?preset=tencent-tokenhub")
 		}
 		for _, link := range links {
 			p, err := ParseImport(link)
@@ -169,7 +169,7 @@ func TestTencentCloud(t *testing.T) {
 	}
 	// a link made for a China region, or by a China preset's id, lands on
 	// no China endpoint
-	for _, link := range []string{"magpie://import?preset=tencent-cloud&region=plan", "magpie://import?preset=tencent-cloud&region=cn", "magpie://import?preset=tencent-token-plan"} {
+	for _, link := range []string{"eipgam://import?preset=tencent-cloud&region=plan", "eipgam://import?preset=tencent-cloud&region=cn", "eipgam://import?preset=tencent-token-plan"} {
 		if p, err := ParseImport(link); err == nil && strings.Contains(p.Chat+p.Responses+p.Anthropic, "tokenhub.tencentmaas.com") {
 			t.Fatalf("%s: %+v", link, p)
 		}
@@ -211,7 +211,7 @@ func TestTencentCloudEnterprisePlan(t *testing.T) {
 				t.Fatalf("imported from %+v at %+v", e, got)
 			}
 		}
-		p, err := ParseImport("magpie://import?preset=tencent-cloud&region=" + c.region)
+		p, err := ParseImport("eipgam://import?preset=tencent-cloud&region=" + c.region)
 		if err != nil || p.Chat != r.Chat || p.Responses != r.Responses || p.Anthropic != r.Anthropic || p.KeysURL != c.keys {
 			t.Fatalf("link: %v %+v", err, p)
 		}
@@ -246,7 +246,7 @@ func TestTencentCloudOldPresetsKeepWorking(t *testing.T) {
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	// providers.json as an older magpie wrote it
+	// providers.json as an older eipgam wrote it
 	old := `{"providers":[
 {"id":"tencent-token-plan","name":"Tencent Cloud Token Plan","icon":"tencentcloud-color","preset":"tencent-token-plan","key":"sk-tp-plan",
  "chat":"` + tcOldPlanChat + `","anthropic":"` + tcOldPlanMsgs + `","models":["glm-5.3","hy3"]},

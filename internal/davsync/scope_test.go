@@ -9,13 +9,13 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-const serverFile = "/dav/magpie/magpie.magpie-backup"
+const serverFile = "/dav/eipgam/eipgam.eipgam-backup"
 
 func scopeServer(t *testing.T) (*fakeDAV, Config) {
 	fake := &fakeDAV{files: map[string][]byte{}, etags: map[string]string{}, dirs: map[string]bool{"/dav": true}}

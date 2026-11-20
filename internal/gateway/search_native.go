@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
 )
 
 // searchTally counts the web searches a provider's reply says it ran by
@@ -104,7 +104,7 @@ const maxNativeSearchRows = 20
 func logNativeSearches(ctx context.Context, n int, at time.Time, agent, providerID, host, model string) {
 	who := access.Caller(ctx)
 	for range min(n, maxNativeSearchRows) {
-		budget.Append(usage.Record{Time: at, Agent: cmp.Or(agent, "magpie"), Kind: "web_search", Source: usage.SourceSearch,
+		budget.Append(usage.Record{Time: at, Agent: cmp.Or(agent, "eipgam"), Kind: "web_search", Source: usage.SourceSearch,
 			Provider: providerID, Host: host, Requested: model, Model: model, Status: http.StatusOK,
 			CallerKeyID: who.KeyID, CallerKeyName: who.KeyName, CallerIssuerID: who.IssuerID()})
 	}

@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #1907: under Codex's accounts, with more than one on, a tick has magpie
+// #1907: under Codex's accounts, with more than one on, a tick has eipgam
 // only switch Codex's own sign-in between them, its requests going straight
 // to OpenAI instead of through the gateway. Ticking it posts
 // provider/switchonly, and the redraw keeps it ticked; unticking posts it
@@ -59,9 +59,9 @@ const label = {
 };
 const strings = [
   "Only switch {agent}'s sign-in",
-  "When an account is used up, magpie signs {agent} in to the next one, and requests go straight to OpenAI. Open {agent} sessions keep their account until reopened.",
-  "magpie only switches {agent}'s sign-in; its requests go straight to OpenAI",
-  "A connected {agent} fails over to your other accounts through magpie again",
+  "When an account is used up, eipgam signs {agent} in to the next one, and requests go straight to OpenAI. Open {agent} sessions keep their account until reopened.",
+  "eipgam only switches {agent}'s sign-in; its requests go straight to OpenAI",
+  "A connected {agent} fails over to your other accounts through eipgam again",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -76,13 +76,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, codex(opts), posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         await page.locator(".editor .acc").first().waitFor();
         return { page, errors, posts };
       };
 
-      test(`${engine} ${width} ${lang}: a tick has magpie only switch Codex's sign-in`, async (t) => {
+      test(`${engine} ${width} ${lang}: a tick has eipgam only switch Codex's sign-in`, async (t) => {
         const { page, errors, posts } = await open(t, {});
         const only = page.locator(".editor .accts .switch-only label");
         assert.equal((await only.textContent()).trim(), label[lang]);

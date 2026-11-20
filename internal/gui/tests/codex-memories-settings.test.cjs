@@ -34,7 +34,7 @@ const settings = (lang) => ({
   dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
   codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
   trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-  version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+  version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
   proxyNow: "none", proxySource: "none", login: false,
   visionModels: [], imageGenModels: [], lanURLs: [], titleModels: [],
   fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await browser.close();
         });
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await openAgentSettings(page);
         const row = page.locator("#codexMemoriesRow");
         const pick = page.locator("#codexMemoriesPick button");
@@ -172,7 +172,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.route("**/*", server("en", [], false));
     t.after(() => browser.close());
     await watchSettingsReads(page);
-    await page.goto("http://magpie.test/?view=agents");
+    await page.goto("http://eipgam.test/?view=agents");
     await openAgentSettings(page, "claude");
     // Long conversations, its one row (the owner merged the two, 11-12), and
     // Claude Code's own rows under it

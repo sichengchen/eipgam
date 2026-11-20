@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // passOn sets a saved provider's errors to the client's (errors=pass).
@@ -88,7 +88,7 @@ func TestPassErrorsNotInferred(t *testing.T) {
 }
 
 // Another API's error is written in the client's shape with the vendor's
-// type, numeric code and words, and nothing of magpie's in it, streamed or
+// type, numeric code and words, and nothing of eipgam's in it, streamed or
 // not.
 func TestPassErrorsOtherAPI(t *testing.T) {
 	for _, stream := range []bool{false, true} {

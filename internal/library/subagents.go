@@ -15,10 +15,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Subagents (#2283) are agents of their own the main agent hands a task
@@ -45,10 +45,10 @@ import (
 // (codex-rs core/src/agent/child_config.rs, apply_spawn_agent_role after
 // apply_requested_spawn_agent_model_overrides), so the subagent's
 // requests carry it. Every other agent's subagent runs on the model that
-// agent picks for it (the page says so). What magpie wrote is recorded file
-// by file with its hash (Applied.Subagents): a file still as magpie wrote
-// it is magpie's to rewrite or remove, one the user changed is theirs from
-// then on, and a file by that name magpie didn't write is never touched.
+// agent picks for it (the page says so). What eipgam wrote is recorded file
+// by file with its hash (Applied.Subagents): a file still as eipgam wrote
+// it is eipgam's to rewrite or remove, one the user changed is theirs from
+// then on, and a file by that name eipgam didn't write is never touched.
 
 // Subagent is one the agents ticked for it are given.
 type Subagent struct {
@@ -68,7 +68,7 @@ type Subagent struct {
 	FromHash string  `json:"fromHash,omitempty"`
 }
 
-// SubagentFile is a file magpie wrote for a subagent, and the hash of what
+// SubagentFile is a file eipgam wrote for a subagent, and the hash of what
 // it wrote there.
 type SubagentFile struct {
 	Name string `json:"name"`
@@ -109,7 +109,7 @@ func (sp *subagentSpec) path(name string) string { return filepath.Join(sp.dir, 
 
 // wslNoSubagents is why an agent in WSL is given no subagents, its distro
 // running or not.
-const wslNoSubagents = "magpie gives no subagents to an agent in WSL yet"
+const wslNoSubagents = "eipgam gives no subagents to an agent in WSL yet"
 
 func subagentSpecOf(t *Target) (*subagentSpec, string) {
 	a := t.Agent
@@ -161,7 +161,7 @@ func subagentSpecOf(t *Target) (*subagentSpec, string) {
 		sp.ext = ".agent.md"
 		return sp, ""
 	}
-	return nil, "magpie can't give " + a.Name + " subagents: it reads none from a folder of its own"
+	return nil, "eipgam can't give " + a.Name + " subagents: it reads none from a folder of its own"
 }
 
 // yamlStr is s as a YAML scalar: JSON's quoted string is one.
@@ -300,20 +300,20 @@ func (l *Library) syncSubagents(t *Target, b *backups, res *Result) {
 	a.Subagents = syncOwnFiles(t, "subagent", a.Subagents, files, b, res)
 }
 
-// ownFile is a file of its own magpie wants an agent to have, for the
+// ownFile is a file of its own eipgam wants an agent to have, for the
 // library's item called name: at path, with what body renders.
 type ownFile struct {
 	name, path string
 	body       func() []byte
 }
 
-// syncOwnFiles writes each file wanted, and takes out every one magpie
+// syncOwnFiles writes each file wanted, and takes out every one eipgam
 // wrote before (had) that is wanted no more, for subagents and slash
-// commands alike. A file still as magpie wrote it (its hash) is magpie's
+// commands alike. A file still as eipgam wrote it (its hash) is eipgam's
 // to rewrite or remove; one the user changed is theirs from then on; one
-// by that name magpie didn't write is never touched, and is a problem
-// under noun:name, unless it says what magpie would write, when it is
-// taken as magpie's. It returns what magpie wrote, sorted by path.
+// by that name eipgam didn't write is never touched, and is a problem
+// under noun:name, unless it says what eipgam would write, when it is
+// taken as eipgam's. It returns what eipgam wrote, sorted by path.
 func syncOwnFiles(t *Target, noun string, had []SubagentFile, want []ownFile, b *backups, res *Result) []SubagentFile {
 	id := t.Agent.ID
 	wanted := map[string]*ownFile{} // path → the file wanted there
@@ -345,14 +345,14 @@ func syncOwnFiles(t *Target, noun string, had []SubagentFile, want []ownFile, b 
 			// gone: written again below if it is still wanted
 			continue
 		case err != nil:
-			// can't tell whether it is still magpie's: left, and kept on
+			// can't tell whether it is still eipgam's: left, and kept on
 			// record, untouched
 			res.fail(id, noun+":"+f.Name, err)
 			kept = append(kept, f)
 			done[f.Path] = true
 			continue
 		case subagentHash(cur) != f.Hash:
-			// changed since magpie wrote it: the user's from now on, which
+			// changed since eipgam wrote it: the user's from now on, which
 			// the loop below says if the library still wants that name
 			continue
 		}
@@ -387,9 +387,9 @@ func syncOwnFiles(t *Target, noun string, had []SubagentFile, want []ownFile, b 
 		cur, err := os.ReadFile(w.path)
 		switch {
 		case err == nil && bytes.Equal(cur, body):
-			// the same as magpie would write: taken as magpie's
+			// the same as eipgam would write: taken as eipgam's
 		case err == nil:
-			res.fail(id, noun+":"+w.name, fmt.Errorf("%s has a %s of its own at %s, which magpie leaves as it is", t.Agent.Name, ownNoun[noun], w.path))
+			res.fail(id, noun+":"+w.name, fmt.Errorf("%s has a %s of its own at %s, which eipgam leaves as it is", t.Agent.Name, ownNoun[noun], w.path))
 			continue
 		case !os.IsNotExist(err):
 			res.fail(id, noun+":"+w.name, err)
@@ -411,7 +411,7 @@ var ownNoun = map[string]string{"subagent": "subagent", "command": "slash comman
 // ---- changes ---------------------------------------------------------------
 
 // SaveSubagent adds a subagent, or replaces the one called old (renaming
-// it: the files magpie wrote by the old name go).
+// it: the files eipgam wrote by the old name go).
 func SaveSubagent(old string, s Subagent) (*Result, error) {
 	s.Name = strings.TrimSpace(s.Name)
 	s.Description = strings.Join(strings.Fields(s.Description), " ")
@@ -464,7 +464,7 @@ func SubagentAgentsSet(name string, agents []string) (*Result, error) {
 }
 
 // RemoveSubagents takes the subagents named out of the library, and the
-// files magpie wrote of them, still as it wrote them, out of every agent.
+// files eipgam wrote of them, still as it wrote them, out of every agent.
 func RemoveSubagents(names []string) (*Result, error) {
 	if len(names) == 0 {
 		return nil, errors.New("no subagents to remove")
@@ -494,7 +494,7 @@ type SubagentView struct {
 // SubagentAgentView is an agent the Subagents tab lists.
 type SubagentAgentView struct {
 	ID string `json:"id"`
-	// Dir is where its subagents are; No is why magpie can't give it any
+	// Dir is where its subagents are; No is why eipgam can't give it any
 	Dir string `json:"dir,omitempty"`
 	No  string `json:"no,omitempty"`
 	WSL bool   `json:"wsl,omitempty"`
@@ -508,9 +508,9 @@ type SubagentAgentView struct {
 }
 
 // subagentsView is the Subagents page for these agents, and those in
-// stopped WSL distros (asleep) that the page lists by what magpie last
+// stopped WSL distros (asleep) that the page lists by what eipgam last
 // knew of them (asleepView): greyed as while their distro runs, since
-// magpie gives no agent in WSL subagents yet, and nothing of theirs opened
+// eipgam gives no agent in WSL subagents yet, and nothing of theirs opened
 // (#3896, #4238).
 func (l *Library) subagentsView(targets []*Target, asleep []*agent.Agent, of func(string) map[string]string) ([]SubagentView, []SubagentAgentView) {
 	agents := []SubagentAgentView{}

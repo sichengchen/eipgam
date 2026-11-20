@@ -12,18 +12,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // TylerBai_loveai on X: Codex (the app) signed in to ChatGPT and not
 // connected, two more of the user's ChatGPT accounts added and on in
-// magpie. magpie pointed Codex at its gateway by itself for account
-// failover (#1385), so every Codex request went through magpie while the
+// eipgam. eipgam pointed Codex at its gateway by itself for account
+// failover (#1385), so every Codex request went through eipgam while the
 // Agents row said not connected, until a Disconnect and cleanup. A Codex
 // that isn't connected goes straight to OpenAI: no start, sync or pick of
-// one of its own models writes magpie into its config, however many of its
+// one of its own models writes eipgam into its config, however many of its
 // accounts are on.
 func TestCodexNotConnectedStaysOffMagpie(t *testing.T) {
 	me, _ := json.Marshal(codexChatGPTAuth("me@example.com", "acct-1"))
@@ -42,7 +42,7 @@ func TestCodexNotConnectedStaysOffMagpie(t *testing.T) {
 		t.Helper()
 		cfg := read()
 		if strings.Contains(cfg, "openai_base_url") || strings.Contains(cfg, "model_provider") || strings.Contains(cfg, "127.0.0.1") {
-			t.Fatalf("%s: an unconnected Codex pointed at magpie:\n%s", when, cfg)
+			t.Fatalf("%s: an unconnected Codex pointed at eipgam:\n%s", when, cfg)
 		}
 		if cx.Wired() || cx.FailingOver() || cx.FailoverSaid() != "" || CodexOwnOnly() {
 			t.Fatalf("%s: wired %v, failing over %v", when, cx.Wired(), cx.FailingOver())
@@ -52,7 +52,7 @@ func TestCodexNotConnectedStaysOffMagpie(t *testing.T) {
 		}
 	}
 	SyncCatalog()
-	check("magpie's start")
+	check("eipgam's start")
 	for i := 0; i < 2; i++ {
 		if err := cx.Sync(); err != nil {
 			t.Fatal(err)
@@ -68,11 +68,11 @@ func TestCodexNotConnectedStaysOffMagpie(t *testing.T) {
 	check("own model picked")
 }
 
-// A Codex a magpie from before pointed at the gateway for failover, the
+// A Codex a eipgam from before pointed at the gateway for failover, the
 // reporter's config as they upgrade: the base URL it marked goes as Sync
 // next runs, the Codex app's app-server restarted for it like any change of
 // route, and it stays gone. So does CC Switch's OpenAI mirror that failover
-// pointed at magpie (xuxing0727 on X), back to CC Switch's own bytes.
+// pointed at eipgam (xuxing0727 on X), back to CC Switch's own bytes.
 func TestCodexFailoverFromBeforeTakenOut(t *testing.T) {
 	me, _ := json.Marshal(codexChatGPTAuth("me@example.com", "acct-1"))
 	accountsOn := func() {
@@ -119,14 +119,14 @@ func TestCodexFailoverFromBeforeTakenOut(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); cfg != unified || cx.FailingOver() {
-		t.Fatalf("CC Switch's mirror left on magpie (failing over %v):\n%s", cx.FailingOver(), cfg)
+		t.Fatalf("CC Switch's mirror left on eipgam (failing over %v):\n%s", cx.FailingOver(), cfg)
 	}
 }
 
 // A base URL the user wrote in config.toml by hand, to have Codex's own
-// models go through magpie, stays when magpie starts (Sync): what failover
+// models go through eipgam, stays when eipgam starts (Sync): what failover
 // wrote is taken away, and only that (#856: it was gone again after every
-// magpie update).
+// eipgam update).
 func TestCodexHandWrittenBaseURLStays(t *testing.T) {
 	base := gateway.URL() + gateway.CodexPath
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
@@ -143,10 +143,10 @@ func TestCodexHandWrittenBaseURLStays(t *testing.T) {
 }
 
 // #1385 (shenghsi): Codex signed in to ChatGPT, not connected, with two
-// more of the user's ChatGPT accounts on in magpie, pointed at the gateway
-// by a magpie from before for failover. Till Sync takes that out, the
-// Agents row says it goes through magpie for that, and Codex's model list
-// is its own, not its own and 62 of magpie's. Connected, it is magpie's
+// more of the user's ChatGPT accounts on in eipgam, pointed at the gateway
+// by a eipgam from before for failover. Till Sync takes that out, the
+// Agents row says it goes through eipgam for that, and Codex's model list
+// is its own, not its own and 62 of eipgam's. Connected, it is eipgam's
 // models' again.
 func TestCodexFailoverOnlyKeepsOwnModels(t *testing.T) {
 	claims := func(m map[string]any) string {
@@ -169,7 +169,7 @@ func TestCodexFailoverOnlyKeepsOwnModels(t *testing.T) {
 	b, _ := json.Marshal(saved)
 	os.MkdirAll(filepath.Dir(provider.Path()), 0o755)
 	os.WriteFile(filepath.Join(filepath.Dir(provider.Path()), "logins.json"), b, 0o600)
-	// what a magpie from before wrote for failover
+	// what a eipgam from before wrote for failover
 	if err := edit.SetTOMLTop(filepath.Join(home, ".codex", "config.toml"), edit.KV{Path: "openai_base_url", Value: here(home).codexURL()}); err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +211,7 @@ func TestCodexFailoverOnlyKeepsOwnModels(t *testing.T) {
 		t.Errorf("failover-only Codex lists %v, want just gpt-5.5", got)
 	}
 
-	// connected, magpie's models are in its list and the row says connected
+	// connected, eipgam's models are in its list and the row says connected
 	if ok, err := cx.Join(); !ok || err != nil {
 		t.Fatalf("join %v %v", ok, err)
 	}
@@ -219,6 +219,6 @@ func TestCodexFailoverOnlyKeepsOwnModels(t *testing.T) {
 		t.Errorf("joined: wired %v, failing over %v, own only %v", cx.Wired(), cx.FailingOver(), CodexOwnOnly())
 	}
 	if got := strings.Join(models(), " "); !strings.Contains(got, "fake/m1") {
-		t.Errorf("joined Codex lists %v, want magpie's too", got)
+		t.Errorf("joined Codex lists %v, want eipgam's too", got)
 	}
 }

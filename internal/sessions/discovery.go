@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
 // Directory membership changes with the directory's mtime; file contents don't.

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
 // #6111 (Abandon332 on X): the CLI sets a remote server's headers, env and

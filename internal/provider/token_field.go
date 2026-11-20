@@ -7,7 +7,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Chat Completions has two names for a reply's length. OpenAI's own API

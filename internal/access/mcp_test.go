@@ -10,8 +10,8 @@ import (
 // A key's MCP list is servers whole and <server>/<tool> entries, kept as
 // written; "-" alone holds it to none, and a bad entry is refused.
 func TestCleanMCP(t *testing.T) {
-	got, err := CleanMCP([]string{" github ", "", "fs/read", "github/search_code", "fs/read", "magpie-web-search/web_fetch"})
-	if err != nil || !slices.Equal(got, []string{"github", "fs/read", "magpie-web-search/web_fetch"}) {
+	got, err := CleanMCP([]string{" github ", "", "fs/read", "github/search_code", "fs/read", "eipgam-web-search/web_fetch"})
+	if err != nil || !slices.Equal(got, []string{"github", "fs/read", "eipgam-web-search/web_fetch"}) {
 		t.Fatal(got, err)
 	}
 	if got, err := CleanMCP([]string{NoMCP}); err != nil || !slices.Equal(got, []string{NoMCP}) {
@@ -56,7 +56,7 @@ func TestKeyMCPAllows(t *testing.T) {
 		{"github", "create_issue", true},
 		{"fs", "read", true},
 		{"fs", "write", false},
-		{"magpie-web-search", "web_search", false},
+		{"eipgam-web-search", "web_search", false},
 		{"fs/read", "", false},
 	} {
 		if got := who.MCPAllows(c.server, c.tool); got != c.want {

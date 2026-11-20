@@ -5,9 +5,9 @@ package cli
 import (
 	"log"
 
-	"github.com/yetone/magpie/internal/applog"
-	"github.com/yetone/magpie/internal/gui"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/applog"
+	"github.com/sichengchen/eipgam/internal/gui"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 const hasGUI = true
@@ -15,7 +15,7 @@ const hasGUI = true
 // runGUI starts the desktop app, writing its log to a file (startLog).
 func runGUI(showMain bool, link string) error {
 	startLog("app")
-	// SIGHUP, which Wails leaves to magpie, drains the gateway first
+	// SIGHUP, which Wails leaves to eipgam, drains the gateway first
 	defer stopGatewayOnSignal(guiStop)()
 	return openApp(showMain, link)
 }
@@ -37,8 +37,8 @@ func runWindow(view string) error {
 }
 
 // runUninstallWindow starts the app with its window on Settings ›
-// Uninstall magpie, asking, or brings the running one's there: what
-// Windows' Installed apps runs for magpie's Uninstall.
+// Uninstall eipgam, asking, or brings the running one's there: what
+// Windows' Installed apps runs for eipgam's Uninstall.
 func runUninstallWindow() error {
 	gui.OpenUninstall = true
 	return runGUI(true, "")

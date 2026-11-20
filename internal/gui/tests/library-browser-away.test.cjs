@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Magpie Browser's sheet looked at from a browser magpie's folders are out
-// of reach of: magpie in a container (Docker) or on another computer. The
+// eipgam Browser's sheet looked at from a browser eipgam's folders are out
+// of reach of: eipgam in a container (Docker) or on another computer. The
 // folder it writes can't be loaded there, so the sheet offers Download the
 // extension, which posts the page's own address and gets the extension as
 // a zip pointed at it with a gateway key of its own, and the steps to load
@@ -20,8 +20,8 @@ const { I18N } = strings();
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const tr = (lang, s, vars = {}) => Object.entries(vars).reduce((o, [k, v]) => o.replace(`{${k}}`, v), lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
-const DIR = `${HOME}/Magpie Browser Extension`;
-const ABOUT = "Use your own browser: your tabs, signed in to the sites you use. Open pages, click, type, upload, read and take screenshots, through the Magpie Browser extension.";
+const DIR = `${HOME}/eipgam Browser Extension`;
+const ABOUT = "Use your own browser: your tabs, signed in to the sites you use. Open pages, click, type, upload, read and take screenshots, through the eipgam Browser extension.";
 
 function fixture(lang) {
   const st = { connected: false, setups: 0, downloads: [], ext: "0.1.7" };
@@ -35,14 +35,14 @@ function fixture(lang) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") {
       return json({
-        dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+        dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
         agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", mcp: `${HOME}/.claude.json`, skills: `${HOME}/.claude/skills` }],
         instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
       });
     }
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "magpie-browser", name: "magpie-browser", title: "Magpie Browser", publisher: "Magpie", description: ABOUT, transport: "stdio", runs: "magpie", featured: true, optIn: true, have: "" },
+        { id: "eipgam-browser", name: "eipgam-browser", title: "eipgam Browser", publisher: "eipgam", description: ABOUT, transport: "stdio", runs: "eipgam", featured: true, optIn: true, have: "" },
         { id: "fetch", name: "fetch", title: "Fetch", description: "Read the web.", transport: "stdio", runs: "uvx", featured: true, have: "" },
       ] });
     }
@@ -51,7 +51,7 @@ function fixture(lang) {
     if (url.pathname === "/api/library/browser/setup") { st.setups++; return json(browser()); }
     if (url.pathname === "/api/library/browser/extension" && req.method() === "POST") {
       st.downloads.push(JSON.parse(req.postData() || "{}"));
-      return route.fulfill({ contentType: "application/zip", headers: { "Content-Disposition": 'attachment; filename="Magpie Browser Extension.zip"' }, body: Buffer.from("PK\x05\x06" + "\0".repeat(18), "binary") });
+      return route.fulfill({ contentType: "application/zip", headers: { "Content-Disposition": 'attachment; filename="eipgam Browser Extension.zip"' }, body: Buffer.from("PK\x05\x06" + "\0".repeat(18), "binary") });
     }
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
@@ -67,7 +67,7 @@ function fixture(lang) {
 const wide = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": away from magpie, Magpie Browser's sheet downloads the extension", async (t) => {
+  test(engine + ": away from eipgam, eipgam Browser's sheet downloads the extension", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const shots = [];
@@ -90,9 +90,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", f.route);
-          await page.addInitScript(() => { localStorage.setItem("magpie.libTab", "mcp"); });
-          await page.goto("http://magpie.test:3430/?view=library");
-          await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="magpie-browser"]').click();
+          await page.addInitScript(() => { localStorage.setItem("eipgam.libTab", "mcp"); });
+          await page.goto("http://eipgam.test:3430/?view=library");
+          await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="eipgam-browser"]').click();
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
           const box = sheet.locator(".mk-browser");
@@ -107,15 +107,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           shots.push([`${lang}-${width}-new`, await sheet.screenshot()]);
 
           const [download] = await Promise.all([page.waitForEvent("download"), go.click()]);
-          assert.equal(download.suggestedFilename(), "Magpie Browser Extension.zip");
+          assert.equal(download.suggestedFilename(), "eipgam Browser Extension.zip");
           // the page's own address, whose port hands the gateway's routes on
-          assert.deepEqual(f.st.downloads, [{ at: "http://magpie.test:3430" }]);
-          assert.equal(f.st.setups, 0, "nothing is written on magpie's side");
+          assert.deepEqual(f.st.downloads, [{ at: "http://eipgam.test:3430" }]);
+          assert.equal(f.st.setups, 0, "nothing is written on eipgam's side");
           assert.deepEqual(await box.locator(".mk-browser-steps li").allTextContents(), [
             w("Unzip the download."),
             w("Open chrome://extensions (edge://extensions in Edge) in the browser you use every day."),
             w("Turn on Developer mode."),
-            w("Click Load unpacked and choose the unzipped Magpie Browser Extension folder."),
+            w("Click Load unpacked and choose the unzipped eipgam Browser Extension folder."),
           ]);
           assert.equal(await box.locator(".mk-browser-steps").isVisible(), true);
           assert.equal(await box.locator(".mk-browser-folder").isVisible(), false);
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // an older one connected: downloaded again, over the old folder
           f.st.ext = "0.1.6";
           await page.waitForFunction((s) => document.querySelector("#modal .mk-browser-update:not([hidden])")?.textContent === s,
-            w("Magpie Browser {v} is ready: download the extension again, unzip it over the old folder, and reload Magpie Browser on chrome://extensions (edge://extensions in Edge).", { v: "0.1.7" }), { timeout: 10000 });
+            w("eipgam Browser {v} is ready: download the extension again, unzip it over the old folder, and reload eipgam Browser on chrome://extensions (edge://extensions in Edge).", { v: "0.1.7" }), { timeout: 10000 });
           assert.equal((await go.textContent()).trim(), w("Download the extension"));
           assert.equal(await wide(page), 0);
           assert.equal(await sheet.evaluate((e) => e.scrollWidth - e.clientWidth), 0);

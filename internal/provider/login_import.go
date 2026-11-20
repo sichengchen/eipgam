@@ -18,13 +18,13 @@ package provider
 // a line is taken too, and for Claude a setup-token a line (what `claude
 // setup-token` prints, sk-ant-oat…): that one is added as the setup-token
 // path adds it (AddClaudeSetupToken), never taken for a refresh token. They all sign in with the agents' own OAuth clients, the ones
-// magpie uses.
+// eipgam uses.
 //
 // A ChatGPT one is checked the way a sign-in is finished: its refresh token
 // traded for new tokens and the account asked for. That rotates the token,
-// so the file it came from stops working: the account is magpie's from then
-// on, as a sign-in in magpie would make it. A Claude one is kept as it
-// came, magpie asking Anthropic nothing; Claude Code refreshes it the first
+// so the file it came from stops working: the account is eipgam's from then
+// on, as a sign-in in eipgam would make it. A Claude one is kept as it
+// came, eipgam asking Anthropic nothing; Claude Code refreshes it the first
 // time it runs on it. Tokens are never logged or sent back.
 
 import (
@@ -37,7 +37,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // loginImport is one account read from a file.
@@ -115,7 +115,7 @@ func parseLoginImport(agent, data string) ([]loginImport, error) {
 				return nil, errors.New("an encrypted claude-swap export: decrypt it first (gpg -d), then import what that gives")
 			}
 			if n, ok := x["version"].(float64); !ok || n != 1 {
-				return nil, fmt.Errorf("a claude-swap export of format %v: magpie reads format 1 (claude-swap 0.29)", x["version"])
+				return nil, fmt.Errorf("a claude-swap export of format %v: eipgam reads format 1 (claude-swap 0.29)", x["version"])
 			}
 		}
 		var walk func(v any)
@@ -413,7 +413,7 @@ func importLogins(ctx context.Context, agent string, files []string, accessOnly 
 	if len(all) > maxGoogleImport {
 		return nil, fmt.Errorf("%d accounts; at most %d at a time", len(all), maxGoogleImport)
 	}
-	// the refresh tokens magpie holds already, the agent's own included
+	// the refresh tokens eipgam holds already, the agent's own included
 	have := map[string]string{}
 	// kept access token only, an account is told by its access token: one
 	// imported again with a newer one (the other computer's Codex renewed
@@ -616,10 +616,10 @@ func importSetupToken(token string) ImportedAccount {
 }
 
 // claudeImportOlder is why a Claude sign-in in a file wasn't taken.
-const claudeImportOlder = "magpie has a newer sign-in for this account (Claude Code's own, when it is signed in to it): kept, not replaced by this file's"
+const claudeImportOlder = "eipgam has a newer sign-in for this account (Claude Code's own, when it is signed in to it): kept, not replaced by this file's"
 
 // claudeNewerKept is the account in kept that l, a Claude sign-in read
-// from a file, is the same account as, when what magpie has for it is no
+// from a file, is the same account as, when what eipgam has for it is no
 // older than the file's and can still be used. Its refresh token differs
 // (ImportLogins answers "exists" for the same one), so one of the two is
 // spent or about to be: Claude Code refreshes its own and the tool the
@@ -681,13 +681,13 @@ func importLogin(ctx context.Context, agent string, e loginImport, name string, 
 			scopes = claudeImportScopes
 		}
 		// kept as it came, not tried: trying it would ask Anthropic, which
-		// magpie never does with a Claude sign-in. Claude Code refreshes it
+		// eipgam never does with a Claude sign-in. Claude Code refreshes it
 		// the first time it runs on the account, its access token taken
 		// for spent.
 		c := claudeCredentials{raw: map[string]any{}, OAuth: claudeAuth{AccessToken: e.accessToken, RefreshToken: e.refreshToken,
 			ExpiresAt: 1, Scopes: scopes}}
 		if e.email == "" {
-			return fail("the file doesn't say which Claude account this is; sign in to it from magpie instead")
+			return fail("the file doesn't say which Claude account this is; sign in to it from eipgam instead")
 		}
 		acct := map[string]any{"emailAddress": e.email}
 		if e.claudeAccount != "" {

@@ -57,13 +57,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         usageCardsHidden: ["stepfun|s@x.y|balance", "minimax|m@x.y|plan"], usageWindowsHidden: [],
       };
       const context = await browser.newContext({ viewport: { width: 440, height: 600 }, reducedMotion: "reduce" });
-      await context.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "usage"); } catch {} });
+      await context.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "usage"); } catch {} });
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, settings));
-      await page.goto("http://magpie.test/?mode=panel");
+      await page.goto("http://eipgam.test/?mode=panel");
       await page.waitForSelector("#panelQuota .pq-foot .pq-arrange");
       const drawn = () => page.evaluate(() => [...document.querySelectorAll("#panelQuota .pq-card")].map((c) =>
         (c.classList.contains("bal") ? "bal " : "plan ") + c.dataset.card + (c.querySelector(".quota-balance") ? " +balance" : "")));

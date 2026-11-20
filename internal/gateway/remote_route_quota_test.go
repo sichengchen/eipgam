@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // #6708 (zzh11223311 on X): a group of two Remote magpies, each serving
@@ -18,11 +18,11 @@ import (
 // both "not known" (used 0 in the routing log) and went by tokens and
 // stickiness alone. Each is weighed now by its Claude card, as last read
 // from it: B, with more of a week that renews sooner, goes first. A
-// magpie passes on what routing reads of the cards it has from another,
-// so a third magpie weighs them too.
+// eipgam passes on what routing reads of the cards it has from another,
+// so a third eipgam weighs them too.
 func TestRemoteMagpiesWeighedByTheirCards(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	provider.ForgetRemoteCardsForTest()
 	t.Cleanup(provider.ForgetRemoteCardsForTest)
 	now := time.Now()
@@ -49,11 +49,11 @@ func TestRemoteMagpiesWeighedByTheirCards(t *testing.T) {
 		t.Cleanup(srv.Close)
 		return srv
 	}
-	ra := remote("sk-magpie-a", claude("a@x.com", 51, 117*time.Hour))
-	rb := remote("sk-magpie-b", claude("b@x.com", 25, 44*time.Hour))
+	ra := remote("sk-eipgam-a", claude("a@x.com", 51, 117*time.Hour))
+	rb := remote("sk-eipgam-b", claude("b@x.com", 25, 44*time.Hour))
 	for _, p := range []provider.Provider{
-		{ID: "mac-a", Name: "Mac A", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-a", Chat: ra.URL},
-		{ID: "mac-b", Name: "Mac B", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-b", Chat: rb.URL},
+		{ID: "mac-a", Name: "Mac A", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-a", Chat: ra.URL},
+		{ID: "mac-b", Name: "Mac B", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-b", Chat: rb.URL},
 	} {
 		if err := provider.Save(p); err != nil {
 			t.Fatal(err)
@@ -85,7 +85,7 @@ func TestRemoteMagpiesWeighedByTheirCards(t *testing.T) {
 		}
 	}
 
-	// this gateway tells a magpie using it what routing reads of the cards
+	// this gateway tells a eipgam using it what routing reads of the cards
 	// it has from mac-a and mac-b
 	gw := httptest.NewServer(lanGuard(New().Handler()))
 	defer gw.Close()
@@ -106,7 +106,7 @@ func TestRemoteMagpiesWeighedByTheirCards(t *testing.T) {
 		w.Write(body)
 	}))
 	defer via.Close()
-	if err := provider.Save(provider.Provider{ID: "home", Name: "Home", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-via", Chat: via.URL}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "home", Name: "Home", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-via", Chat: via.URL}); err != nil {
 		t.Fatal(err)
 	}
 	provider.RemoteCards(context.Background())
@@ -115,8 +115,8 @@ func TestRemoteMagpiesWeighedByTheirCards(t *testing.T) {
 		t.Fatal(err)
 	}
 	if al, inner, ok := provider.RemoteAllowance(*home, "mac-b/claude/claude-sonnet-5-5", false); !ok || inner != "claude-sonnet-5-5" {
-		t.Errorf("a third magpie doesn't know mac-b's Claude: %v %q", ok, inner)
+		t.Errorf("a third eipgam doesn't know mac-b's Claude: %v %q", ok, inner)
 	} else if u, _ := al.For(inner, now); u != 25 {
-		t.Errorf("a third magpie reads mac-b's Sonnet used %v, want 25", u)
+		t.Errorf("a third eipgam reads mac-b's Sonnet used %v, want 25", u)
 	}
 }

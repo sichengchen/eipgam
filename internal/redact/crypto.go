@@ -11,14 +11,14 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Crypto wallet secrets, masked with the other secrets (Options.Secrets):
 // the private keys wallets and chain tools export, in the shapes they
 // export them in. A wallet key is a secret like an API key, and no vendor
 // needs one. An agent that pastes a keyfile into a message sends it to
-// every provider behind magpie. (Rex Zhou, #4025)
+// every provider behind eipgam. (Rex Zhou, #4025)
 //
 // A shape alone is no key where a hash or a signature has it too, so a
 // shape with no prefix of its own is taken only when the key proves

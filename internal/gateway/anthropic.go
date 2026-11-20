@@ -14,9 +14,9 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // ---- Anthropic Messages -----------------------------------------------------
@@ -63,7 +63,7 @@ func (b aBlock) MarshalJSON() ([]byte, error) {
 	if b.Type != "thinking" {
 		return json.Marshal(plain(b))
 	}
-	// a thinking block always says its signature, empty for one magpie
+	// a thinking block always says its signature, empty for one eipgam
 	// sends unsigned (noReasoning, or a turn's thinking replayed): the
 	// Messages API schema has it as a string, and OpenRouter's endpoint
 	// turns a block without one away (#2883)
@@ -152,7 +152,7 @@ func readAnthropic(body []byte, clientMarks, facts bool) (*Request, error) {
 }
 
 // readAdvised is readAnthropic; advised, Claude Code's advisor is one
-// magpie runs (advisor_serve.go): its calls and results in the
+// eipgam runs (advisor_serve.go): its calls and results in the
 // conversation are read as the model's tool calls and their results, and
 // its instructions stay as Claude Code wrote them.
 func readAdvised(body []byte, clientMarks, facts, advised bool) (*Request, error) {
@@ -251,7 +251,7 @@ func readAdvised(body []byte, clientMarks, facts, advised bool) (*Request, error
 				case "thinking":
 					msg.Parts = append(msg.Parts, Part{Kind: Thinking, Text: b.Thinking, Signature: b.Signature, block: true})
 				case "server_tool_use":
-					// the advisor's call, as magpie gave it (advisor_serve.go)
+					// the advisor's call, as eipgam gave it (advisor_serve.go)
 					if advised && b.Name == advisorTool {
 						msg.Parts = append(msg.Parts, Part{Kind: ToolCall, ID: adviceInID(b.ID), Name: advisorTool, Args: json.RawMessage(`{}`), block: true})
 					}
@@ -297,7 +297,7 @@ func readAdvised(body []byte, clientMarks, facts, advised bool) (*Request, error
 			}
 			if strings.HasPrefix(t.Type, "advisor_") {
 				if advised {
-					// run by magpie: offered as a tool of the model's
+					// run by eipgam: offered as a tool of the model's
 					// own when the reply is asked (advisor_serve.go)
 					r.Advisor = cmp.Or(r.Advisor, advisorID(t.Model))
 					continue
@@ -591,8 +591,8 @@ func claudeVersionOf(model string) (major, minor int, ok bool) {
 
 // adaptiveThinking is an Anthropic request as a model that thinks only
 // adaptively takes it: thinking.type=enabled with a budget — sent by an
-// agent that doesn't know the model (its name in magpie, an alias, or a
-// group's member, mapped to the vendor's later), or by magpie fitting an
+// agent that doesn't know the model (its name in eipgam, an alias, or a
+// group's member, mapped to the vendor's later), or by eipgam fitting an
 // effort to it — goes as thinking.type=adaptive, with the budget as the
 // effort it is nearest in output_config.effort unless one is there (Keenc
 // on Discord: claude-opus-5-5 answered 400). Read off the model the body
@@ -613,7 +613,7 @@ func adaptiveThinking(body []byte) []byte {
 	}
 	fields := map[string]any{"thinking": thinking}
 	// a level a turn's message carries is the one asked: a top-level effort
-	// made of the budget would be read first by the next magpie, and by
+	// made of the budget would be read first by the next eipgam, and by
 	// parseAnthropicRequest, over it (a High asked as 31999 went on as max;
 	// DIYgod on X)
 	if gjson.GetBytes(body, "output_config.effort").String() == "" && turnEffort(body) == "" {
@@ -694,7 +694,7 @@ func thinkingOffOf(model string) thinkingOff {
 // the model it is sent to takes that (thinkingOffOf). Claude Code turns
 // thinking off for auto mode's classifier and its side queries whenever
 // it can't tell the model refuses it — a model reached through a gateway
-// is one — and magpie turns it off itself when fitting an effort of none
+// is one — and eipgam turns it off itself when fitting an effort of none
 // or a budget that doesn't fit; claude-sonnet-5-5 answered every one of
 // them 400 (#1454). Sonnet 5.5 is sent between_tools, alone in thinking,
 // with an effort above high asked as high; Opus 5.5, Fable and Mythos are
@@ -841,7 +841,7 @@ func samplingRefused(model string) bool {
 
 // samplingAsTaken is an Anthropic request without temperature, top_p and
 // top_k when the model it is sent to refuses them (samplingRefused):
-// Claude Code's auto mode classifier, and magpie's own classifiers, ask at
+// Claude Code's auto mode classifier, and eipgam's own classifiers, ask at
 // temperature 0. model is the vendor's name, from the body or, for
 // Bedrock and Vertex, the path. Any other request goes byte for byte as it
 // came.
@@ -1086,11 +1086,11 @@ func anthropicBody(r *Request, model string, replay bool) []byte {
 	// within Anthropic's four. A request that brought cache_control of its
 	// own (parseTranslated, #4571) is rebuilt with those instead: the
 	// blocks the client marked stand marked again (the parts loop), the
-	// tail and the system take the client's ttl, and none of magpie's own
+	// tail and the system take the client's ttl, and none of eipgam's own
 	// are added — a mark the client put on thinking, which Anthropic does
 	// not mark, or on a block the rebuild drops is left out. A request
 	// that marks nothing (one that only mentions the field in its text)
-	// is magpie's to mark, as before.
+	// is eipgam's to mark, as before.
 	mark := addedMark(r, model)
 	var tail, systemMark map[string]string
 	if c := r.clientCache; c == nil || c.count == 0 {

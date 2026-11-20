@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A long Codex conversation's compaction, as Codex sends it: the history
@@ -68,7 +68,7 @@ func restingNow(t *testing.T) []string {
 // "response protection is unavailable" for that history. It is the
 // request, not an account: asked once, not on every account and then the
 // last again, and no account rests for it. The compaction goes to the
-// backend as it came only with native compaction on (#2582); off, magpie
+// backend as it came only with native compaction on (#2582); off, eipgam
 // summarises it, as TestProtectionRefusedCompactionAsText's model is.
 func TestProtectionRefusalAskedOnceNobodyRests(t *testing.T) {
 	for _, said := range []string{
@@ -93,7 +93,7 @@ func TestProtectionRefusalAskedOnceNobodyRests(t *testing.T) {
 	}
 }
 
-// The same compaction on a magpie model served by the ChatGPT accounts:
+// The same compaction on a eipgam model served by the ChatGPT accounts:
 // refused so, it is asked again once with the conversation as plain text,
 // as vs's control experiment was answered, and Codex gets its compaction.
 func TestProtectionRefusedCompactionAsText(t *testing.T) {
@@ -178,7 +178,7 @@ func TestProtectionBrokenOffCompactionAsText(t *testing.T) {
 	}
 }
 
-// Broken off as text too, the summary is magpie's own, and Codex goes on.
+// Broken off as text too, the summary is eipgam's own, and Codex goes on.
 func TestProtectionBrokenOffTwiceCompactsLocally(t *testing.T) {
 	codexSignedIn(t, "two@example.com")
 	brokenOffUp(t, true)

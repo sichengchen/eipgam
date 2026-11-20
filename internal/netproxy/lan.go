@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-// A host on the user's own network — another computer's magpie (a Remote
-// magpie), an Ollama on the NAS — is reached directly, whatever proxy the
-// settings, the environment or the system name (#982: a Remote magpie at
+// A host on the user's own network — another computer's eipgam (a Remote
+// eipgam), an Ollama on the NAS — is reached directly, whatever proxy the
+// settings, the environment or the system name (#982: a Remote eipgam at
 // a LAN name was asked through the Mac's proxy, which answered 502 Bad
 // Gateway, and its model list never came). A proxy is for reaching
 // vendors; one elsewhere can't reach the user's network, and one on this
@@ -90,7 +90,7 @@ func lanIP(ip net.IP) bool {
 
 // lanDial is how long a connection to an address on the user's own
 // network is waited for: one there is taken within milliseconds, while
-// one nobody holds any more (a Remote magpie whose computer's router
+// one nobody holds any more (a Remote eipgam whose computer's router
 // handed it another address, le13ure on X) went unanswered until the
 // system gave up, over a minute on macOS and two on Linux, each try of a
 // request, before its retries, or the look for where it went

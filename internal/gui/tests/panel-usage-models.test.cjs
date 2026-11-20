@@ -79,9 +79,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultTimeout(5000);
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
-        await p.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "stats"); } catch {} });
+        await p.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "stats"); } catch {} });
         await p.route("**/*", serve(lang, asked));
-        await p.goto("http://magpie.test/?mode=panel");
+        await p.goto("http://eipgam.test/?mode=panel");
         await p.locator("#panelUsage .pu-card .led-rank .rk").first().waitFor();
         return p;
       };

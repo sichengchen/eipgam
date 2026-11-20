@@ -51,8 +51,8 @@ for (const engine of engines) for (const lang of ["en", "zh", "zh-TW", "ja", "de
       const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
       return route.fulfill({ body: await fs.readFile(file), contentType });
     });
-    await page.context().route((url) => url.hostname !== "magpie.test", (route) => route.fulfill({ contentType: "text/html", body: "" }));
-    await page.goto("http://magpie.test/");
+    await page.context().route((url) => url.hostname !== "eipgam.test", (route) => route.fulfill({ contentType: "text/html", body: "" }));
+    await page.goto("http://eipgam.test/");
     await page.waitForFunction((l) => state.settings.lang === l, lang);
     await page.evaluate(() => {
       providers = providers || { providers: [], presets: [], plugins: [] };
@@ -82,7 +82,7 @@ for (const engine of engines) for (const lang of ["en", "zh", "zh-TW", "ja", "de
     assert.deepEqual(canceled, ["c1"]);
     const text = await box.innerText();
     assert.ok(text.includes(await translated("Add a Claude account by setup-token")), text);
-    assert.ok(text.includes(await translated("Paste the token {cmd} printed. magpie gives it to Claude Code for this account's requests only; Claude Code itself stays signed in as it is.", { cmd: "claude setup-token" })), text);
+    assert.ok(text.includes(await translated("Paste the token {cmd} printed. eipgam gives it to Claude Code for this account's requests only; Claude Code itself stays signed in as it is.", { cmd: "claude setup-token" })), text);
     assert.ok(text.includes(await translated("A setup-token can't tell its email or allowance: the account is named by the token, and its allowance shows once a reply tells it.")), text);
     const field = box.locator(".claude-token input");
     const add = box.locator('.claude-token button[type="submit"]');
@@ -127,7 +127,7 @@ for (const engine of engines) for (const lang of ["en", "zh", "zh-TW", "ja", "de
     const tokUse = rows.tok.buttons.find((b) => b.text === use);
     assert.ok(tokUse, JSON.stringify(rows.tok));
     assert.equal(tokUse.title, await translated("Switch {agent} itself to this setup-token, in its settings.json; its own sign-in stays", { agent: "Claude Code" }));
-    assert.ok(!rows.tok.text.includes(await said("magpie only")), rows.tok.text);
+    assert.ok(!rows.tok.text.includes(await said("eipgam only")), rows.tok.text);
     assert.ok(!rows.pro.buttons.some((b) => b.text === use), JSON.stringify(rows.pro));
     const posted = page.waitForRequest((r) => new URL(r.url()).pathname === "/api/login/switch");
     await page.locator('#accts-under-test [data-account-id="Claude setup-token 3204d0"] button.text', { hasText: use }).click();

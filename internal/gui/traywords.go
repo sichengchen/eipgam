@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // pageWords are the page's own translations (assets/i18n.js's I18N) in
@@ -29,7 +29,7 @@ func pageWords(lang string) map[string]string {
 }
 
 // The tray asks pageWord for a dozen words or so, again on every usage
-// read. One language's whole table held ~2 MB of an idle tray magpie's
+// read. One language's whole table held ~2 MB of an idle tray eipgam's
 // heap, so only the words asked for are kept (wordsAsked); the table a
 // new word was looked up in is kept a minute (wordsTable), for the other
 // new words of the same card, and let go on the first ask after that.

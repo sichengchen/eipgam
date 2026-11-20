@@ -84,7 +84,7 @@ func TestHookSessionStartNarrowed(t *testing.T) {
 		t.Errorf("problems for the agents that took it: %+v", p)
 	}
 
-	// an agent's own edit of the entry magpie wrote is theirs: changing the
+	// an agent's own edit of the entry eipgam wrote is theirs: changing the
 	// hook leaves it, and the new one is written beside it
 	s := read(t, claude)
 	write(t, claude, strings.Replace(s, "cat AGENTS.md", "cat AGENTS.md CLAUDE.md", 1))

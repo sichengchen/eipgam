@@ -6,13 +6,13 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// OpenRemote shows another magpie's page (remote.go) in a window of its
+// OpenRemote shows another eipgam's page (remote.go) in a window of its
 // own, link carrying its key; the window open already is pointed at link
 // and brought up. It is an ordinary titled window: the page is that
-// magpie's web page, which draws no title bar of its own.
+// eipgam's web page, which draws no title bar of its own.
 func (h *host) OpenRemote(link, title string) {
 	application.InvokeSync(func() {
 		h.dockFront(settings.Load(), true, true)

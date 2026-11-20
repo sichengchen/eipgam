@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A Claude joined over the network (a Remote magpie provider) shows its
+// A Claude joined over the network (a Remote eipgam provider) shows its
 // windows in Routing's Accounts and keys like a local account does, as the
 // computer that holds the account read them: the Usage page's cards with
 // `from`. Claude's row is told Claude's cards, not Codex's; a remote whose
@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
 const iso = (ms) => new Date(ms).toISOString();
-const remote = (id, name, model) => ({ id: id + "-k", provider: id, name, preset: "remote-magpie", icon: "magpie", kind: "provider", model, known: false });
+const remote = (id, name, model) => ({ id: id + "-k", provider: id, name, preset: "remote-eipgam", icon: "eipgam", kind: "provider", model, known: false });
 // elm's model as a remote names it, its provider there first
 const accts = [remote("home", "Home", "claude-opus-5"), remote("den", "Den", "claude-opus-5"), remote("elm", "Elm", "claude/claude-opus-5")];
 const route = {
@@ -28,9 +28,9 @@ const cards = [
     { name: "7 days", used: 12, resetsAt: iso(now + 73 * 3600e3) },
   ] },
   { provider: "home/codex", name: "Codex · Home", kind: "subscription", user: "c@example.com", from: "Home", windows: [{ name: "5 hours", used: 77 }] },
-  { provider: "den", name: "Den", icon: "magpie", kind: "subscription", from: "Den", windows: [], error: "couldn't reach the remote magpie: connection refused" },
+  { provider: "den", name: "Den", icon: "eipgam", kind: "subscription", from: "Den", windows: [], error: "couldn't reach the remote eipgam: connection refused" },
   // the remote read, its Claude card didn't: the Usage page shows why, so does Routing
-  { provider: "elm", name: "Elm", icon: "magpie", kind: "subscription", from: "Elm", windows: [] },
+  { provider: "elm", name: "Elm", icon: "eipgam", kind: "subscription", from: "Elm", windows: [] },
   { provider: "elm/claude", name: "Claude · Elm", kind: "subscription", user: "e@example.com", from: "Elm", windows: [], error: "Claude's usage read was rate limited" },
   { provider: "elm/codex", name: "Codex · Elm", kind: "subscription", user: "e@example.com", from: "Elm", windows: [], error: "codex is signed out" },
 ];
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [], asks = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang, asks));
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://eipgam.test/?view=routing");
                     await page.locator(".rt-act .wins span").first().waitFor();
             const rows = page.locator(".rt-act");
             const denRow = rows.nth(0), elmRow = rows.nth(1), homeRow = rows.nth(2); // listed by name

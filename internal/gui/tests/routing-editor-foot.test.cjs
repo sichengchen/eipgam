@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, web));
-          await page.goto("http://magpie.test/?view=groups");
+          await page.goto("http://eipgam.test/?view=groups");
           await page.locator(".rt-group").nth(15).waitFor();
           // a group far down the list, its editor opened in its place
           await page.evaluate(() => [...document.querySelectorAll(".rt-group")[20].querySelectorAll("button")].find((b) => b.textContent === t("Edit")).click());

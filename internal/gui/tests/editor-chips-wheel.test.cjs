@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; page.errors.push(e.message); });
       await page.route("**/*", serve(n));
-      await page.goto("http://magpie.test/?view=providers&edit=relayco");
+      await page.goto("http://eipgam.test/?view=providers&edit=relayco");
       await page.locator(".editor .mchips .mchip").first().waitFor({ timeout: 60000 });
       // Advanced opened: the editor taller than its window, so its body scrolls
       const adv = page.locator(".editor details.advanced");

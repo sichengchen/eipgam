@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // The models.dev catalog's anthropic rows, as models.dev served them on
@@ -43,7 +43,7 @@ func writeAnthropicCatalog(t *testing.T, rows ...string) {
 // A Claude model models.dev lists after the Claude account's list was
 // last fetched is served at once, as the catalog has it: the copy a fetch
 // keeps doesn't hold it out until the next Refresh (wakaka on Discord:
-// Haiku 5.5 in Claude Code on the same account, not in magpie).
+// Haiku 5.5 in Claude Code on the same account, not in eipgam).
 func TestClaudeAccountServesModelsListedSinceItsFetch(t *testing.T) {
 	home := claudeHome(t)
 	claudeSignIn(t, home, time.Now().Add(time.Hour))
@@ -180,7 +180,7 @@ const mdFable52 = `"claude-fable-5-2":{"id":"claude-fable-5-2","name":"Claude Fa
 // Claude Fable 5.2, once the catalog sync has models.dev's row, is on a
 // Claude account's list first (newest), at Anthropic's price, window and
 // efforts, and served beside picks that held every model listed before
-// it (thelegendof2414 on X: Fable 5.2 not in magpie's list).
+// it (thelegendof2414 on X: Fable 5.2 not in eipgam's list).
 func TestClaudeAccountListsFable52(t *testing.T) {
 	home := claudeHome(t)
 	claudeSignIn(t, home, time.Now().Add(time.Hour))
@@ -213,7 +213,7 @@ func TestClaudeAccountListsFable52(t *testing.T) {
 }
 
 // Fetch models again on a Claude subscription fetches models.dev's list
-// first when the catalog magpie keeps is older than a few minutes: a
+// first when the catalog eipgam keeps is older than a few minutes: a
 // model launched since the day's sync is on the list the user asked for
 // (hhdaxia on X: Fable 5.2 in Claude Code's /model, on models.dev, and
 // not in the vendor's list "just now" fetched). Outside a process that

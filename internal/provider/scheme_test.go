@@ -24,7 +24,7 @@ func TestWithScheme(t *testing.T) {
 	}
 }
 
-// A Remote magpie's address typed with its scheme, in any case, with or
+// A Remote eipgam's address typed with its scheme, in any case, with or
 // without the slash, is one scheme in every URL; one saved twice by an older
 // editor reads as one (eachg0 on X).
 func TestRemoteMagpieSchemeOnce(t *testing.T) {

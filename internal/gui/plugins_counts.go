@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/stats"
+	"github.com/sichengchen/eipgam/internal/stats"
 )
 
-// Discover's counts, read from usemagpie.ai (stats): each plugin's users
+// Discover's counts, read from the configured stats service (stats): each plugin's users
 // and likes, and each MCP server's users for the Library's market, asked
 // at most every hour. Nothing is sent back.
 

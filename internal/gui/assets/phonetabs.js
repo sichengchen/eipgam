@@ -1,4 +1,4 @@
-// magpie web on a phone (app.js phoneWeb): the pages are a tab bar at the
+// eipgam web on a phone (app.js phoneWeb): the pages are a tab bar at the
 // window's foot, as an iPhone app's (app.css). Five fit; with more, the
 // fifth is More, a menu of the rest, marked while one of them is open
 // (geraldpppppp on X: Agents and the Library were past the edge of a

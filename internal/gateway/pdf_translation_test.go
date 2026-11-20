@@ -6,7 +6,7 @@ import (
 )
 
 // A PDF only reaches the model when the request is relayed as sent; the
-// moment magpie translates it, the file is lost — the Responses input_file
+// moment eipgam translates it, the file is lost — the Responses input_file
 // and the Messages document are dropped whole, and the Chat file becomes
 // the placeholder text "[attachment application/pdf]" (#5452). Each shape
 // survives its translation now: the parts parse into file parts, and every

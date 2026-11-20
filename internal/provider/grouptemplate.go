@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A template is a routing group made of the user's own models for a need

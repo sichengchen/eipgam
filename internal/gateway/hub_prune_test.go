@@ -32,7 +32,7 @@ func (h *heldHub) Prune() {
 // 3dbbb173e). A Prune held mid-call keeps the gateway's end waiting.
 func TestGatewayEndEndsHubPruner(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", freeAddr(t))
+	t.Setenv("EIPGAM_ADDR", freeAddr(t))
 	was := hubPruneEvery
 	hubPruneEvery = time.Millisecond
 	t.Cleanup(func() { hubPruneEvery = was })

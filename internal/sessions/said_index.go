@@ -1,7 +1,7 @@
 package sessions
 
 // What was said in every agent's sessions, searched at once (cryingLiu on
-// X): the Sessions page's search across agents, and the magpie-sessions
+// X): the Sessions page's search across agents, and the eipgam-sessions
 // MCP server's search_sessions, which lets an agent find what was said in
 // another agent's session.
 //
@@ -24,7 +24,7 @@ package sessions
 // Words are a letter-or-digit run, matched by their start ("auth" finds
 // "authentication", not "oauth"); Chinese, Japanese and Korean have no
 // spaces, so each two characters side by side are a word there. An agent
-// magpie may not read (Reads) is left out of the index the next time it
+// eipgam may not read (Reads) is left out of the index the next time it
 // is brought up to date, and out of every answer at once.
 
 import (
@@ -43,7 +43,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // SaidHit is one session a search found, and the words round where.
@@ -122,13 +122,13 @@ func SearchSaid(ctx context.Context, needle, agent string, limit int) (SaidFound
 }
 
 // SearchSaidSince is SearchSaid of the sessions last used at since or
-// after (`magpie sessions search --days`).
+// after (`eipgam sessions search --days`).
 func SearchSaidSince(ctx context.Context, needle, agent string, since time.Time, limit int) (SaidFound, error) {
 	return saidIdx.searchSince(ctx, needle, agent, since, limit)
 }
 
 // SaidReady brings the index up to date as a search does, but waits for
-// it at most wait, not saidWait: a command run once (`magpie sessions
+// it at most wait, not saidWait: a command run once (`eipgam sessions
 // search`) has no next search to find the rest by. progress, when
 // given, is told every second how far it got.
 func SaidReady(ctx context.Context, wait time.Duration, progress func(indexed, total int)) error {
@@ -288,7 +288,7 @@ func (x *saidIndex) refresh(db *sql.DB) {
 	x.mu.Lock()
 	x.sessions, x.indexed, x.total, x.listed = now, done, len(list), true
 	x.mu.Unlock()
-	// gone, or of an agent magpie may no longer read
+	// gone, or of an agent eipgam may no longer read
 	for k := range rows {
 		if _, ok := now[k]; !ok {
 			saidDrop(db, k)
@@ -639,7 +639,7 @@ func (x *saidIndex) searchSince(ctx context.Context, needle, agent string, since
 }
 
 // saidSessions are every session whose conversation can be read, of the
-// agents magpie may read, as the Sessions page lists them.
+// agents eipgam may read, as the Sessions page lists them.
 func saidSessions() []saidSession {
 	storeMu.RLock()
 	defer storeMu.RUnlock()

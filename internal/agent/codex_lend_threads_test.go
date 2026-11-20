@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // harris on Discord (the Codex app, after CC Switch): "This chat uses
 // openai, but your current provider is custom. Switch to openai to
 // continue". CC Switch left its "custom" at the top of config.toml, which
-// magpie keeps since #4347, and Codex 0.166 resumes a thread only on the
+// eipgam keeps since #4347, and Codex 0.166 resumes a thread only on the
 // provider it is on: every thread started on OpenAI before was refused,
 // and switching to OpenAI would refuse custom's instead. A sync moves
 // OpenAI's threads to the provider Codex is on, and gives them back once

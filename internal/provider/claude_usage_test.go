@@ -14,7 +14,7 @@ import (
 )
 
 // fakeClaudeUsage has Claude Code's /usage print out (or fail with err),
-// counting its runs, and fails the test on any request magpie makes to
+// counting its runs, and fails the test on any request eipgam makes to
 // Anthropic itself.
 func fakeClaudeUsage(t *testing.T, out *atomic.Value, fail *atomic.Bool) *atomic.Int32 {
 	t.Helper()
@@ -31,7 +31,7 @@ func fakeClaudeUsage(t *testing.T, out *atomic.Value, fail *atomic.Bool) *atomic
 		return out.Load().(string), nil
 	})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Errorf("magpie asked Anthropic itself: %s", r.URL)
+		t.Errorf("eipgam asked Anthropic itself: %s", r.URL)
 	}))
 	oldBase, oldWait, oldUsed := claudeBase, claudeUsageWait, claudeUsedSince
 	claudeBase = srv.URL
@@ -502,7 +502,7 @@ func sessionReset() string {
 
 // A first reading that failed is tried again after the wait even when
 // Claude Code wasn't used since: with nothing kept, an account whose
-// Claude Code is never run through magpie showed "not read" for good.
+// Claude Code is never run through eipgam showed "not read" for good.
 func TestClaudeFirstReadFailureTriedAgain(t *testing.T) {
 	var out atomic.Value
 	out.Store("Current session: 40% used · resets " + sessionReset() + "\nCurrent week (all models): 10% used · resets " + soon(3) + " at 2pm (UTC)\n")

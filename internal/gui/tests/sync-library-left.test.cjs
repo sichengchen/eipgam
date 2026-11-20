@@ -20,7 +20,7 @@ const HOME = "/Users/jason";
 const FETCH = "pdf: not fetched from its source on this computer yet (Update tries again): git isn't installed";
 
 const library = {
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/.claude/skills` }],
   instructions: { agents: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], newSkills: [], checkDue: false,
   skills: [
@@ -31,7 +31,7 @@ const library = {
 
 function serve(lang, sync) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/eipgam",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.route("**/*", serve(lang, c.sync));
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator("#prefs").click();
           await openPart(page, "sync");
           await page.locator("#syncList .sync-preview-row").waitFor({ state: "visible" });
@@ -115,8 +115,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           if (c.name === "left out") {
             // the skill not fetched yet is tagged in Library › Skills
-            await page.evaluate(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
-            await page.goto("http://magpie.test/");
+            await page.evaluate(() => { try { localStorage.setItem("eipgam.libTab", "skills"); } catch {} });
+            await page.goto("http://eipgam.test/");
             await page.locator('button[data-view="library"]').click();
             const v = page.locator("#view-library");
             const tag = v.locator(".lib-skill .lib-tag.lib-pending");

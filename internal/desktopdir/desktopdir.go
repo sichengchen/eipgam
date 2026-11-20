@@ -4,7 +4,7 @@
 // On macOS they are ~/Library/Application Support/Claude and Claude-3p, on
 // Linux $XDG_CONFIG_HOME/Claude and Claude-3p. On Windows Desktop's own
 // data (its claude_desktop_config.json, Cowork's sessions and skills) is
-// %APPDATA%\Claude, its 3p mode's is %LOCALAPPDATA%\Claude-3p, and magpie
+// %APPDATA%\Claude, its 3p mode's is %LOCALAPPDATA%\Claude-3p, and eipgam
 // writes deploymentMode into %LOCALAPPDATA%\Claude as CC Switch does.
 //
 // Desktop installed from the setup.exe that installs an MSIX package (as on
@@ -41,7 +41,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
 // Dirs are Claude Desktop's folders on one computer.
@@ -50,7 +50,7 @@ type Dirs struct {
 	// claude_desktop_config.json with its MCP servers, Cowork's sessions
 	// and skills (%APPDATA%\Claude on Windows).
 	Data string
-	// Mode is the Claude folder magpie writes deploymentMode into: Data,
+	// Mode is the Claude folder eipgam writes deploymentMode into: Data,
 	// except on Windows (%LOCALAPPDATA%\Claude, as CC Switch writes it).
 	Mode string
 	// ThreeP is Claude-3p, Desktop's whole userData in its 3p mode.
@@ -128,15 +128,15 @@ func Sets(goos, home string, getenv func(string) string) []Dirs {
 	return []Dirs{{Data: filepath.Join(d, "Claude"), Mode: filepath.Join(d, "Claude"), ThreeP: filepath.Join(d, "Claude-3p")}}
 }
 
-// IsolatedName is the folder of the Claude Desktop magpie can start on
+// IsolatedName is the folder of the Claude Desktop eipgam can start on
 // its own (#5671): Desktop run with --user-data-dir set to it keeps all its
 // data there, its 3p mode's too, beside the user's own Claude and Claude-3p.
-const IsolatedName = "Claude-Magpie-3p"
+const IsolatedName = "Claude-eipgam-3p"
 
 // Isolated is that folder on goos for home, "" where Desktop can't run in
 // it: only macOS has it. Desktop's 3p folder there is its userData with
 // "-3p" added unless it ends so already (GY in 2.7032's and 4.4212's
-// index.pre.js), so --user-data-dir=…/Claude-Magpie-3p is that folder
+// index.pre.js), so --user-data-dir=…/Claude-eipgam-3p is that folder
 // itself. On Windows the 3p folder is %LOCALAPPDATA%\Claude-3p whatever
 // the userData, and Desktop sets its userData to it in 3p mode, so a
 // second one would share the first's; Linux has no Desktop of
@@ -162,7 +162,7 @@ func isolatedHere(goos, home string) string {
 // %LOCALAPPDATA%\AnthropicClaude\claude.exe, and the MSIX's has its
 // package folder (Sets' Package). Installed and not yet opened, Desktop has
 // none of its folders (#1482); it still reads at its first start what
-// magpie writes into them. False elsewhere, where the folders tell.
+// eipgam writes into them. False elsewhere, where the folders tell.
 func Installed(goos, home string, getenv func(string) string) bool {
 	if goos != "windows" {
 		return false

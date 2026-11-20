@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Join with a password (EV_John_Liu on X): on a magpie shared on the
+// Join with a password (EV_John_Liu on X): on a eipgam shared on the
 // network, Settings › Local network sets a password, and another computer
 // opens <address>/join, types it and a name for itself, and gets a gateway
 // key of its own, shown once, with its setup (Claude Code, Codex, another
-// magpie, OpenAI-compatible) filled in. The join page is the gateway's own
+// eipgam, OpenAI-compatible) filled in. The join page is the gateway's own
 // keypage.html, served under its Content-Security-Policy; the key never
 // rides in an address. Chromium and WebKit, 390px, every language; no
 // backend, the API is faked here.
@@ -19,14 +19,14 @@ const html = fs.readFileSync(path.resolve(__dirname, "../../gateway/keypage.html
 const CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 const BASE = "http://192.168.1.20:3425";
 const PW = "correct horse";
-const KEY = "sk-magpie-joined-0123456789";
+const KEY = "sk-eipgam-joined-0123456789";
 const ME = {
   name: "Studio Mac", readOnly: false, version: "dev", limits: [],
   usage: { today: { calls: 0 }, "7d": { calls: 0 }, "30d": { calls: 0 } }, topModels: [],
   models: [{ id: "plan/m1", label: "m1 · Plan" }],
 };
 const LOCALE = { en: "en-US", zh: "zh-CN", "zh-TW": "zh-TW", ja: "ja-JP", de: "de-DE" };
-const TITLE = { en: "Join this magpie", zh: "加入这个 magpie", "zh-TW": "加入這個 magpie", ja: "この magpie に参加", de: "Diesem magpie beitreten" };
+const TITLE = { en: "Join this eipgam", zh: "加入这个 eipgam", "zh-TW": "加入這個 eipgam", ja: "この eipgam に参加", de: "Diesem eipgam beitreten" };
 
 async function openJoin(browser, lang, { open = true } = {}) {
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, locale: LOCALE[lang], reducedMotion: "reduce" })).newPage();
@@ -38,15 +38,15 @@ async function openJoin(browser, lang, { open = true } = {}) {
   await page.route("**/*", (route) => {
     const req = route.request(), url = new URL(req.url());
     if (url.pathname === "/join") return route.fulfill({ contentType: "text/html; charset=utf-8", headers: { "Content-Security-Policy": CSP }, body: html });
-    if (url.pathname === "/v1/magpie/join" && req.method() === "GET") return route.fulfill({ json: { open } });
-    if (url.pathname === "/v1/magpie/join") {
+    if (url.pathname === "/v1/eipgam/join" && req.method() === "GET") return route.fulfill({ json: { open } });
+    if (url.pathname === "/v1/eipgam/join") {
       const body = req.postDataJSON();
       seen.posts.push(body);
       if (!open) return route.fulfill({ status: 404, json: { error: { message: "off" } } });
       if (body.password !== PW) return route.fulfill({ status: 401, json: { error: { message: "wrong password" } } });
       return route.fulfill({ status: 201, json: { key: KEY, id: "k9", name: body.name } });
     }
-    if (url.pathname === "/v1/magpie/me") {
+    if (url.pathname === "/v1/eipgam/me") {
       if (req.headers().authorization !== "Bearer " + KEY) return route.fulfill({ status: 401, json: {} });
       return route.fulfill({ json: ME });
     }
@@ -64,7 +64,7 @@ const file = async (route, url) => {
 };
 function settingsServer(lang, posts, over) {
   const s = {
-    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "/config/magpie",
+    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "/config/eipgam",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], allowIPs: [], mtlsCerts: [],
     lan: true, lanURLs: [BASE], fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, ...over,
@@ -120,10 +120,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator("#name").textContent(), "Studio Mac");
         assert.equal(await page.locator("#onceKey").textContent(), KEY);
         assert.equal(await page.locator("#pw").inputValue(), "", "the password is taken out of the field");
-        // another magpie's setup, with this address and the key
-        await page.click(`#tabs [data-tab="magpie"]`);
+        // another eipgam's setup, with this address and the key
+        await page.click(`#tabs [data-tab="eipgam"]`);
         const snip = await page.locator("#snip pre").first().textContent();
-        assert.equal(snip, `magpie provider add remote-magpie '${KEY}' url='${BASE}'`);
+        assert.equal(snip, `eipgam provider add remote-eipgam '${KEY}' url='${BASE}'`);
         await page.click(`#tabs [data-tab="claude"]`);
         assert.match(await page.locator("#snip pre").first().textContent(), new RegExp(`"ANTHROPIC_BASE_URL": "${BASE}"[\\s\\S]*"${KEY}"`));
         // no key or password in an address, nothing thrown, nothing wider than the phone

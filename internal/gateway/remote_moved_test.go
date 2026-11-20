@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// A Remote magpie whose computer came back at another address
+// A Remote eipgam whose computer came back at another address
 // (luckymanjc on Discord: A's router gives it a new IP each boot): the
 // request that finds no one at the old one is answered from the address
 // that lists for the provider's key, and the provider is saved there.
@@ -67,14 +67,14 @@ func TestRemoteMagpieMovedIsFound(t *testing.T) {
 	}
 }
 
-// A magpie proves it holds a gateway key to another computer that asks
+// A eipgam proves it holds a gateway key to another computer that asks
 // with no key (provider.RemoteProvePath), while it is shared: the HMAC of
 // the asker's nonce and the address it was reached at, under the key the
 // id names. A key it hasn't, or has turned off, gets 404; a web page and
 // any ask while it isn't shared get nothing; the key never goes back.
 func TestRemoteProveAnswersOnlyTheKeysHolder(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	resetAuthThrottle()
 	t.Cleanup(resetAuthThrottle)
 	keys, secrets := newCaller(t, "B")
@@ -108,7 +108,7 @@ func TestRemoteProveAnswersOnlyTheKeysHolder(t *testing.T) {
 	if want := hex.EncodeToString(provider.RemoteProof(secrets[0], nonce, "192.168.1.2:3425")); out.Proof != want {
 		t.Errorf("proof %q, want %q", out.Proof, want)
 	}
-	if w := ask(provider.RemoteKeyID("sk-magpie-key-not-here")); w.Code != http.StatusNotFound {
+	if w := ask(provider.RemoteKeyID("sk-eipgam-key-not-here")); w.Code != http.StatusNotFound {
 		t.Errorf("a key it hasn't: %d %s", w.Code, w.Body)
 	}
 	for _, hdr := range [][]string{{"Origin", "http://192.168.1.2:3425"}, {"User-Agent", "Mozilla/5.0"}, {"Sec-Fetch-Mode", "cors"}} {
@@ -135,7 +135,7 @@ func TestRemoteProveAnswersOnlyTheKeysHolder(t *testing.T) {
 	}
 }
 
-// A Remote magpie's new address, saved while a request to it is being
+// A Remote eipgam's new address, saved while a request to it is being
 // retried (le13ure on X: "实时的请求却不会立刻改变而是反复重试"), is where
 // the retry goes: the old one is asked no more.
 func TestRemoteMagpieRetryGoesToTheSavedAddress(t *testing.T) {
@@ -192,7 +192,7 @@ func TestRemoteMagpieRetryGoesToTheSavedAddress(t *testing.T) {
 	}
 }
 
-// A pause before a Remote magpie is asked again ends when its new address
+// A pause before a Remote eipgam is asked again ends when its new address
 // is saved, or at once when it was saved before the pause began; a pause
 // for nobody that moved runs its course.
 func TestPauseEndsWhenReaddressed(t *testing.T) {
@@ -204,7 +204,7 @@ func TestPauseEndsWhenReaddressed(t *testing.T) {
 	held, _ := provider.Find(id)
 	cs := []candidate{{p: *held, model: "m", rest: held.ID}}
 	if readdressedOf([]candidate{{p: provider.Provider{ID: "x", Chat: "http://h/v1"}}}) != nil {
-		t.Error("a pause for no Remote magpie wakes for edits")
+		t.Error("a pause for no Remote eipgam wakes for edits")
 	}
 	done := make(chan bool, 1)
 	go func() { done <- pauseUntilReaddressed(context.Background(), time.Hour, readdressedOf(cs)) }()

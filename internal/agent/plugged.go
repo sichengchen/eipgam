@@ -2,12 +2,12 @@ package agent
 
 // An agent a plugin adds (internal/agentplug) is wired as a built-in one
 // that keeps its model in a file is: its model field picks among the
-// agent's own models and magpie's, and a model through magpie writes the
+// agent's own models and eipgam's, and a model through eipgam writes the
 // model, as the plugin spells it, and the keys the plugin's connect
 // returns (where the gateway is, its key). What the user had under every
-// key magpie writes is stashed first and put back when magpie steps out,
+// key eipgam writes is stashed first and put back when eipgam steps out,
 // so a plugin needs no code for that. The plugin says only where things
-// go; magpie does every write, to the one file the plugin names, and to
+// go; eipgam does every write, to the one file the plugin names, and to
 // the file of its startup model when it keeps that apart (PiG's
 // settings.json beside its models.json, agentplug.Startup).
 
@@ -20,20 +20,20 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/sichengchen/eipgam/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/update"
+	"github.com/sichengchen/eipgam/internal/usage"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/agentplug"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/update"
-	"github.com/yetone/magpie/internal/usage"
 )
 
 func init() {
-	// the agents plugins add come and go, unlike magpie's own; one whose
+	// the agents plugins add come and go, unlike eipgam's own; one whose
 	// id is a built-in's is the built-in's, which the gateway asks first
 	usage.PluginAgents = func() []usage.Known {
 		list, _ := agentplug.List()
@@ -45,16 +45,16 @@ func init() {
 	}
 }
 
-// pluggedStash is what magpie keeps of an agent plugin's file while it is
+// pluggedStash is what eipgam keeps of an agent plugin's file while it is
 // wired: what was under each key it wrote (absent where there was nothing,
 // as the file spells it), the model it wrote, and the key whose value is
-// the gateway's key, which says the wiring is still magpie's.
+// the gateway's key, which says the wiring is still eipgam's.
 type pluggedStash struct {
 	Had   map[string]string `json:"had"`
 	Ref   string            `json:"ref"`
 	Mark  string            `json:"mark,omitempty"`
 	Value string            `json:"value,omitempty"`
-	// Wrote are the strings magpie wrote, by key, for Check to tell
+	// Wrote are the strings eipgam wrote, by key, for Check to tell
 	// one changed since
 	Wrote map[string]string `json:"wrote,omitempty"`
 	// Spec and Format are the plugin's and its file's, so what the user
@@ -63,7 +63,7 @@ type pluggedStash struct {
 	Spec   string `json:"spec,omitempty"`
 	Format string `json:"format,omitempty"`
 	// Made are the objects a merge key sits in (and the key itself) that
-	// the file didn't have before magpie's first write, shallowest
+	// the file didn't have before eipgam's first write, shallowest
 	// first: each is taken out again when it is left empty
 	Made []string `json:"made,omitempty"`
 }
@@ -111,7 +111,7 @@ func pluggedAgents(home string, builtin []*Agent, errs map[string]string) []*Age
 	for _, p := range list {
 		if taken[p.Desc.ID] {
 			if errs != nil {
-				errs[p.Spec] = fmt.Sprintf("agent id %q is magpie's own agent's", p.Desc.ID)
+				errs[p.Spec] = fmt.Sprintf("agent id %q is eipgam's own agent's", p.Desc.ID)
 			}
 			continue
 		}
@@ -132,7 +132,7 @@ func PluginPath(p string) string {
 func pluggedPath(home, p string) string { return pluggedPathEnv(home, p, os.Getenv) }
 
 // pluggedPathEnv is pluggedPath with the variables getenv gives: none in
-// a WSL distro, whose variables magpie can't read.
+// a WSL distro, whose variables eipgam can't read.
 func pluggedPathEnv(home, p string, getenv func(string) string) string {
 	p = os.Expand(p, func(k string) string {
 		if k == "HOME" {
@@ -226,8 +226,8 @@ func (f pluggedFile) del(keys []string) error {
 }
 
 // put writes kvs into f, keeping in st.Had what each key held before
-// magpie's first write, and puts back what the user had under a key
-// magpie wrote before and kvs no longer has.
+// eipgam's first write, and puts back what the user had under a key
+// eipgam wrote before and kvs no longer has.
 func (f pluggedFile) put(st *pluggedStash, kvs []edit.KV) error {
 	wrote := map[string]bool{}
 	for _, kv := range kvs {
@@ -259,8 +259,8 @@ func (f pluggedFile) put(st *pluggedStash, kvs []edit.KV) error {
 	return f.set(kvs)
 }
 
-// wired says the agent id's file is still as magpie wired it, by st: the
-// gateway's key magpie wrote is there.
+// wired says the agent id's file is still as eipgam wired it, by st: the
+// gateway's key eipgam wrote is there.
 func (f pluggedFile) wired(id string, st pluggedStash) bool {
 	if st.Mark == "" {
 		return true
@@ -269,7 +269,7 @@ func (f pluggedFile) wired(id string, st pluggedStash) bool {
 	return v == st.Value || ourKey(v) || v == gateway.TokenFor(id)
 }
 
-// restore puts back what the user had under every key magpie wrote, as st
+// restore puts back what the user had under every key eipgam wrote, as st
 // stashed it under key, and forgets it.
 func (f pluggedFile) restore(key string, st pluggedStash) error {
 	var del []string
@@ -362,8 +362,8 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 	}
 	f := pluggedFile{ppath(d.Config), d.Format}
 	key := "plugin:" + id + ":" + f.path
-	// bf: the agent's own settings file, where config is magpie's alone
-	// (agentplug.Desc.Base): the user's model is there off magpie
+	// bf: the agent's own settings file, where config is eipgam's alone
+	// (agentplug.Desc.Base): the user's model is there off eipgam
 	var bf *pluggedFile
 	if d.Base != "" {
 		bf = &pluggedFile{ppath(d.Base), d.Format}
@@ -380,13 +380,13 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		b, _ := json.Marshal(st)
 		stash(map[string]string{key: string(b)})
 	}
-	// onMagpie: magpie wrote the file, and the gateway's key it wrote is
+	// onMagpie: eipgam wrote the file, and the gateway's key it wrote is
 	// still there
 	onMagpie := func() (pluggedStash, bool) {
 		st, ok := saved()
 		return st, ok && f.wired(id, st)
 	}
-	// restore puts back what the user had; magpie's own file (with a
+	// restore puts back what the user had; eipgam's own file (with a
 	// base) goes as a whole
 	restore := func(st pluggedStash) error {
 		if err := f.restore(key, st); err != nil || bf == nil {
@@ -402,7 +402,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 	l := newLaunch(d, at.native(f.path))
 	gkey := func() string { return agentKeyAt(id, at.gw()) }
 	// only: the agent picks its model itself among those connect writes
-	// (#2374), so magpie writes no model, and the switch is its one field;
+	// (#2374), so eipgam writes no model, and the switch is its one field;
 	// or it keeps its startup model in a file apart (sf), which its model
 	// field writes, and config holds connect's keys alone
 	only := d.Model == ""
@@ -412,16 +412,16 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		sf = &pluggedFile{ppath(d.Startup.Config), d.Startup.Format}
 		skey = "plugin:" + id + ":" + sf.path
 	}
-	// startSaved is what magpie keeps of the startup file
+	// startSaved is what eipgam keeps of the startup file
 	startSaved := func() (pluggedStash, bool) {
 		var st pluggedStash
 		v := stashShared()[skey]
 		return st, sf != nil && v != "" && json.Unmarshal([]byte(v), &st) == nil
 	}
-	// startOn: the startup file starts on magpie's provider still, as
+	// startOn: the startup file starts on eipgam's provider still, as
 	// startup's first key of a string says (PiG's defaultProvider), else
-	// on the model magpie wrote. A model picked in the agent since among
-	// magpie's (PiG's /model, saved) is still magpie's.
+	// on the model eipgam wrote. A model picked in the agent since among
+	// eipgam's (PiG's /model, saved) is still eipgam's.
 	startOn := func() (pluggedStash, bool) {
 		st, ok := startSaved()
 		return st, ok && sf.wired(id, st)
@@ -451,8 +451,8 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		stash(map[string]string{skey: string(b)})
 		return nil
 	}
-	// startModel is the startup model as the field shows it: magpie's
-	// when the file starts on magpie still and the model is one of its
+	// startModel is the startup model as the field shows it: eipgam's
+	// when the file starts on eipgam still and the model is one of its
 	startModel := func() string {
 		v, _ := sf.get(d.Startup.Model)
 		if _, ok := onMagpie(); ok {
@@ -465,7 +465,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		return v
 	}
 	// startRestore puts back what the user had in the startup file, where
-	// it starts on magpie still; a model of their own picked in the agent
+	// it starts on eipgam still; a model of their own picked in the agent
 	// since is theirs, and the stash is dropped
 	startRestore := func() error {
 		if sf == nil {
@@ -509,7 +509,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		in := map[string]any{
 			"gateway": map[string]any{"url": at.gw(), "v1": at.v1(), "key": gk},
 			"models":  models,
-			// magpie's decision models, apart from the chat models agents
+			// eipgam's decision models, apart from the chat models agents
 			// offer for a conversation (pluggedDecisionModels)
 			"decisionModels": pluggedDecisionModels(id),
 			"agent":          map[string]any{"id": id, "config": f.path},
@@ -550,7 +550,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		if !was {
 			st = pluggedStash{Had: map[string]string{}, Made: f.made(d.Merge)}
 		}
-		// a key magpie wrote before that connect no longer returns gets
+		// a key eipgam wrote before that connect no longer returns gets
 		// what the user had back
 		if err := f.put(&st, kvs); err != nil {
 			return err
@@ -558,7 +558,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		st.Ref, st.Mark, st.Value, st.Wrote = ref, mark, gk, strs
 		if mark == "" && l != nil && ref != "" {
 			// nothing written is the key, which goes in the environment:
-			// the model says it is magpie's file still (holds)
+			// the model says it is eipgam's file still (holds)
 			st.Value = d.Prefix + ref
 		}
 		st.Spec, st.Format = p.Spec, f.format
@@ -579,7 +579,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		}
 		v, _ := f.get(d.Model)
 		if ok {
-			// one of magpie's models picked in the agent since is magpie's
+			// one of eipgam's models picked in the agent since is eipgam's
 			// still, for one started on it (its picker lists them all)
 			if r, has := strings.CutPrefix(v, d.Prefix); has && (r == st.Ref || l != nil && isMagpie(r)) {
 				return magpieID + "/" + r
@@ -588,7 +588,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		return v
 	}
 	// magpieModel is the model as the agent names it while it is one of
-	// magpie's, "" otherwise
+	// eipgam's, "" otherwise
 	magpieModel := func() string {
 		if r, ok := strings.CutPrefix(get(), magpieID+"/"); ok {
 			return d.Prefix + r
@@ -607,7 +607,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 			return l.distroFunction(kind, l.vars(at.gw(), gkey()), read, file, held)
 		}}
 	}
-	// shell gives the shells the function while the agent is on magpie's
+	// shell gives the shells the function while the agent is on eipgam's
 	// models, and takes it out after; never at a stopped distro
 	shell := func() {
 		if l != nil && !at.cold {
@@ -668,11 +668,11 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 					continue
 				}
 				if _, ok := f.raw(k); !ok {
-					return fmt.Sprintf("%s's %s (%s) is gone, so it no longer reaches magpie", d.Name, m, filepath.Base(f.path))
+					return fmt.Sprintf("%s's %s (%s) is gone, so it no longer reaches eipgam", d.Name, m, filepath.Base(f.path))
 				}
 			}
 			if p := lsh.stale(); p != "" {
-				return fmt.Sprintf("%s's function %s in %s names magpie at an address it no longer has", d.Name, l.bin, at.native(p))
+				return fmt.Sprintf("%s's function %s in %s names eipgam at an address it no longer has", d.Name, l.bin, at.native(p))
 			}
 			return ""
 		},
@@ -719,7 +719,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		Sync: func() error {
 			defer shell()
 			if st, ok := onMagpie(); ok && sf != nil {
-				// the startup model too while it is magpie's, as it is
+				// the startup model too while it is eipgam's, as it is
 				// now; else connect's list alone, for the agent's picker
 				if r, ok := strings.CutPrefix(startModel(), magpieID+"/"); ok {
 					return wire(r)
@@ -729,7 +729,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 				if v, _ := f.get(d.Model); only || v == d.Prefix+st.Ref {
 					return wire(st.Ref)
 				} else if r, ok := strings.CutPrefix(get(), magpieID+"/"); ok && l != nil {
-					// another of magpie's, picked in the agent
+					// another of eipgam's, picked in the agent
 					return wire(r)
 				}
 			}
@@ -751,7 +751,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		paths = append(paths, bf.path)
 	}
 	if sf != nil {
-		// a model of the agent's own picked in it, magpie's provider still
+		// a model of the agent's own picked in it, eipgam's provider still
 		// in its list: connected, as joined, not drift (#2424's Beside)
 		a.Beside = func() bool {
 			_, ok := onMagpie()
@@ -760,7 +760,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 		paths = append(paths, sf.path)
 	}
 	if only && sf == nil {
-		// magpie as its provider, on or off: the models are the agent's
+		// eipgam as its provider, on or off: the models are the agent's
 		// to pick, in the list connect writes
 		a.Fields = []Field{{
 			Key: "provider", Label: "provider",
@@ -780,7 +780,7 @@ func plugged(at place, p *agentplug.Agent) *Agent {
 				return nil
 			},
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: magpieID, Label: "magpie", Icon: "magpie"}}
+				return []Option{{Value: magpieID, Label: "eipgam", Icon: "eipgam"}}
 			},
 		}}
 	}
@@ -854,7 +854,7 @@ func pluggedOwn(p *agentplug.Agent, f pluggedFile, bf *pluggedFile, cur string) 
 }
 
 // pluggedIcon is the picture the plugin gives its agent, else the one the
-// plugin market gives the plugin, else magpie's generic one.
+// plugin market gives the plugin, else eipgam's generic one.
 func pluggedIcon(p *agentplug.Agent) string {
 	if ic := provider.PluginOwnIcon(p.Desc.Icon); ic != "" {
 		return ic
@@ -862,7 +862,7 @@ func pluggedIcon(p *agentplug.Agent) string {
 	if ic := provider.MarketIcon(plugin.Icon(p.Spec, p.Desc.ID)); ic != "" {
 		return ic
 	}
-	// magpie's glyph for one it has no picture of, not an empty square
+	// eipgam's glyph for one it has no picture of, not an empty square
 	return "generic"
 }
 

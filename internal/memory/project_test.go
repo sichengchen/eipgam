@@ -8,10 +8,10 @@ import (
 
 func TestRemoteKey(t *testing.T) {
 	for in, want := range map[string]string{
-		"https://github.com/yetone/magpie.git":        "github.com/yetone/magpie",
-		"https://GitHub.com/yetone/magpie/":           "github.com/yetone/magpie",
-		"git@github.com:yetone/magpie.git":            "github.com/yetone/magpie",
-		"ssh://git@github.com:22/yetone/magpie":       "github.com/yetone/magpie",
+		"https://github.com/sichengchen/eipgam.git":   "github.com/sichengchen/eipgam",
+		"https://GitHub.com/sichengchen/eipgam/":      "github.com/sichengchen/eipgam",
+		"git@github.com:sichengchen/eipgam.git":       "github.com/sichengchen/eipgam",
+		"ssh://git@github.com:22/sichengchen/eipgam":  "github.com/sichengchen/eipgam",
 		"https://user:tok@gitlab.example.com/g/sub/r": "gitlab.example.com/g/sub/r",
 		"file:///srv/repos/x.git":                     "",
 		"/srv/repos/x.git":                            "",
@@ -37,8 +37,8 @@ func put(t *testing.T, p, s string) {
 // A clone, its worktree and a folder deep in either are one project.
 func TestProjectOfIsTheRepository(t *testing.T) {
 	d := t.TempDir()
-	main := filepath.Join(d, "magpie")
-	put(t, filepath.Join(main, ".git", "config"), "[core]\n\tbare = false\n[remote \"upstream\"]\n\turl = git@github.com:other/fork.git\n[remote \"origin\"]\n\turl = https://github.com/yetone/magpie.git\n")
+	main := filepath.Join(d, "eipgam")
+	put(t, filepath.Join(main, ".git", "config"), "[core]\n\tbare = false\n[remote \"upstream\"]\n\turl = git@github.com:other/fork.git\n[remote \"origin\"]\n\turl = https://github.com/sichengchen/eipgam.git\n")
 	wt := filepath.Join(d, "wt", "memory")
 	put(t, filepath.Join(wt, ".git"), "gitdir: "+filepath.Join(main, ".git", "worktrees", "memory")+"\n")
 	put(t, filepath.Join(main, ".git", "worktrees", "memory", "commondir"), "../..\n")
@@ -48,7 +48,7 @@ func TestProjectOfIsTheRepository(t *testing.T) {
 	}
 	for _, dir := range []string{main, deep} {
 		p := ProjectOf(dir)
-		if p == nil || p.Key != "github.com/yetone/magpie" || p.Name != "magpie" {
+		if p == nil || p.Key != "github.com/sichengchen/eipgam" || p.Name != "eipgam" {
 			t.Fatalf("ProjectOf(%s) = %+v", dir, p)
 		}
 	}

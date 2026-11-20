@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // Every entry of Codex's own catalog says effective_context_window_percent
-// (95); magpie's lacked it (codealc on X: Codex 0.166 on a Copilot Gemini
+// (95); eipgam's lacked it (codealc on X: Codex 0.166 on a Copilot Gemini
 // worked out no limit and never compacted), for a model with no window
 // known as for one with, and for a vendor-listed entry that omitted it.
 func TestCodexCatalogSaysEffectivePercent(t *testing.T) {

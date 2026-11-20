@@ -6,11 +6,11 @@ import "strings"
 // token plan on Providers and Routing): on a plan, a subscription or
 // token package paid ahead, or pay as you go, each call billed as used.
 // The Providers list and a routing group's card say it. The user's word
-// (Provider.Billing) stands; else it is read from what magpie knows of
+// (Provider.Billing) stands; else it is read from what eipgam knows of
 // the provider: a signed-in account is a plan, a preset's plan or pay as
 // you go endpoints (its Regions) say theirs, a key of a vendor or relay
 // is pay as you go. A provider added by its address, a local server or
-// another magpie says nothing until the user sets it.
+// another eipgam says nothing until the user sets it.
 const (
 	BillingPlan  = "plan"
 	BillingPAYG  = "payg"
@@ -18,7 +18,7 @@ const (
 )
 
 // BillingOK reports whether s is a billing the user may set: plan, pay
-// as you go, or "" for magpie to read it.
+// as you go, or "" for eipgam to read it.
 func BillingOK(s string) bool { return s == "" || s == BillingPlan || s == BillingPAYG }
 
 // planPresets are presets whose keys are a plan's alone, with no pay as
@@ -30,7 +30,7 @@ var planPresets = map[string]bool{
 }
 
 // unsaidPresets are vendors and relays whose one endpoint takes a plan's
-// keys and pay as you go's alike, or that are free, so magpie can't say
+// keys and pay as you go's alike, or that are free, so eipgam can't say
 // which a key is (MiniMax's Coding Plan keys),
 // and decision models, which bill as their own provider does.
 var unsaidPresets = map[string]bool{
@@ -55,7 +55,7 @@ func regionBilling(r *Region) string {
 	return ""
 }
 
-// BillingKind is how p bills: the user's word, else what magpie reads of
+// BillingKind is how p bills: the user's word, else what eipgam reads of
 // it (BillingPlan, BillingPAYG, BillingMixed), "" when it can't say.
 func (p Provider) BillingKind() string {
 	if p.Billing != "" {

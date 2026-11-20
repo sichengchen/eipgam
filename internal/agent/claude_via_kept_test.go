@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Claude Code's magpie list is kept as viaMagpie is: its model and tier
+// Claude Code's eipgam list is kept as viaMagpie is: its model and tier
 // fields asked it each poll, for the picker and again for Drift, built
 // anew each time (30 MB of forty polls with real accounts). Each caller
 // still has a copy of its own, and a provider saved since is offered.

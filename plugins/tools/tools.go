@@ -1,5 +1,5 @@
 // Package tools serves the tools the user's plugins give (their OpenCode
-// tool hook) to every agent, over magpie's plugin tools MCP server
+// tool hook) to every agent, over eipgam's plugin tools MCP server
 // (internal/gateway/tools_mcp.go, docs/subsystems/plugin-tools.md). While
 // a plugin that is on gives a tool, it stays on.
 //
@@ -10,9 +10,9 @@
 package tools
 
 import (
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/gwtool"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
 )
 
 func init() {

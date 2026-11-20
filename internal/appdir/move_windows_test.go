@@ -7,7 +7,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// Without Developer Mode a user may not make symlinks (#973): magpie's
+// Without Developer Mode a user may not make symlinks (#973): eipgam's
 // folders are linked by a junction, which moves and comes back the same.
 func TestMoveByJunction(t *testing.T) {
 	old := symlink

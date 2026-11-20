@@ -17,12 +17,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/source"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/source"
 )
 
 // codexClientVersion is the oldest Codex CLI version the models list is
@@ -81,7 +81,7 @@ func codexModelsAt(ctx context.Context, sign func(context.Context, *http.Request
 
 // CodexLiveList is the ChatGPT backend's model list for the account Codex
 // is signed in to now, as the backend sends it: its entries, their
-// base_instructions among them, untouched. magpie writes it for the Codex
+// base_instructions among them, untouched. eipgam writes it for the Codex
 // app beside the sign-in (agent.CodexDesktopList), whose picker shows only
 // the models a flag of OpenAI's names unless Codex reads its list from a
 // file. An error when Codex is not signed in to ChatGPT, the backend
@@ -134,7 +134,7 @@ func CodexLiveList(ctx context.Context) ([]byte, error) {
 func CodexClientVersion() string { return codexVersion() }
 
 // CodexVersionBehind says a list asked for Codex version asked is behind
-// now, the version magpie asks as (CodexClientVersion), or its version
+// now, the version eipgam asks as (CodexClientVersion), or its version
 // isn't known (codexListBehind).
 func CodexVersionBehind(asked, now string) bool {
 	return asked == "" || asked != now && newerVersion(asked, now) != asked
@@ -264,7 +264,7 @@ func newerVersion(a, b string) string {
 }
 
 // codexSeen is the newest version a Codex client that came through the
-// gateway said it was. Codex CLI is often out of magpie's reach — installed
+// gateway said it was. Codex CLI is often out of eipgam's reach — installed
 // where a desktop app's PATH doesn't go, its models_cache.json written by
 // the version before an update — and the backend serves a model only to a
 // client new enough for it: signed by the pool as an older Codex, a model
@@ -391,7 +391,7 @@ func accountModels(agent, user string) string {
 	return agent + "@" + keyID(strings.ToLower(user))
 }
 
-// Lists reports whether the account's plan has the model, as far as magpie
+// Lists reports whether the account's plan has the model, as far as eipgam
 // knows: one whose list was never fetched is taken to have them all.
 func (a *Account) Lists(model string) bool {
 	if a == nil {
@@ -430,10 +430,10 @@ func (a *Account) Lists(model string) bool {
 
 // listLags says the account's own list, which leaves model out
 // (Lists), can't say the plan lacks it: the list is older than the model,
-// as magpie knows it. That is so when an account in listing (those whose
+// as eipgam knows it. That is so when an account in listing (those whose
 // lists have it) has had it only since after this one's list was fetched,
 // the vendor giving the model since, or when a ChatGPT account's list was
-// asked for an older Codex than magpie speaks as now, or for one it didn't
+// asked for an older Codex than eipgam speaks as now, or for one it didn't
 // keep, as the backend lists a model only to a client new enough for it
 // (wudao_85256 on Discord: two Plus accounts, the second's list asked
 // before gpt-6.1-sol was listed to the Codex asking, and Routing said "its
@@ -482,7 +482,7 @@ func (a *Account) listLags(model string, listing []AccountOn) bool {
 const listRound = 10 * time.Minute
 
 // codexListBehind says a ChatGPT account's list asked for Codex version
-// asked is behind the one magpie asks as now, or its version wasn't kept:
+// asked is behind the one eipgam asks as now, or its version wasn't kept:
 // a model the backend lists only to a newer client may be missing from it.
 func codexListBehind(asked string) bool { return CodexVersionBehind(asked, codexVersion()) }
 
@@ -652,7 +652,7 @@ func codexFetchSaved(ctx context.Context) {
 		}
 		asked := codexSavedAsked.m[strings.ToLower(l.User)]
 		if codexListBehind(catalog.LiveAsked(key)) && now.Sub(asked) >= codexBehindRetry {
-			// asked for an older Codex than magpie speaks as now: its
+			// asked for an older Codex than eipgam speaks as now: its
 			// list may lack what the backend lists to the newer one
 			fresh = append(fresh, due{l.User, at})
 			continue
@@ -689,7 +689,7 @@ func codexFetchSaved(ctx context.Context) {
 }
 
 // CodexListed is the catalog as a Codex signed in to ChatGPT is handed it,
-// after the backend's own models: all but a ChatGPT account's in magpie,
+// after the backend's own models: all but a ChatGPT account's in eipgam,
 // which the backend lists already. A group answers for its first member
 // but is not that provider's.
 func CodexListed() []catalog.Model {
@@ -703,9 +703,9 @@ func CodexListed() []catalog.Model {
 
 // CodexListedBeside is CodexListed for a Codex whose sign-in's list, from
 // the backend, has the slugs in backend: with a ChatGPT account's own
-// models that list lacks among them, by magpie's id (codex/<slug>), which
-// reaches them through magpie on the account that has them. Codex signed
-// in to a Free account, a Team one on in magpie beside it, was handed the
+// models that list lacks among them, by eipgam's id (codex/<slug>), which
+// reaches them through eipgam on the account that has them. Codex signed
+// in to a Free account, a Team one on in eipgam beside it, was handed the
 // Free plan's list alone, and the Team plan's models were in every agent
 // but Codex (bigfisheatsmall on X), though the codex provider lists them
 // (codexPoolModels) and routing sends them to that account.
@@ -718,10 +718,10 @@ func CodexListedBeside(backend map[string]bool) []catalog.Model {
 	}, func(e Entry) bool { return !CodexOwn(e) || !backend[e.Model] })
 }
 
-// CodexCatalog is shown as a Codex that names magpie its model_provider is
+// CodexCatalog is shown as a Codex that names eipgam its model_provider is
 // handed it from GET /v1/codex/models (#1281): every model, a ChatGPT
-// account's own among them, since that Codex reaches them through magpie's
-// /v1 by magpie's id, not through the ChatGPT backend's list.
+// account's own among them, since that Codex reaches them through eipgam's
+// /v1 by eipgam's id, not through the ChatGPT backend's list.
 func CodexCatalog(shown []Entry) []catalog.Model {
 	find := GroupFinder()
 	return codexListed(shown, func(id string) []Member {
@@ -752,8 +752,8 @@ func CodexNativeHidden() map[string]bool {
 
 // CodexOwnLeftOut is the rule for Show Codex's own models turned off
 // (OwnModelsHidden, iiiiiimone on X): it says of a slug in the sign-in's
-// list whether Codex's list leaves it out, so the picker offers magpie's
-// models alone. A model magpie serves on a ChatGPT account of the user's
+// list whether Codex's list leaves it out, so the picker offers eipgam's
+// models alone. A model eipgam serves on a ChatGPT account of the user's
 // stays, as the Agents page's picker keeps it (Served), and so does keep,
 // the one Codex is set to, which Codex would otherwise run on fallback
 // metadata. nil while the switch is on. Hidden jobs (codex-auto-review) are
@@ -775,7 +775,7 @@ func CodexOwnLeftOut(keep string) func(slug string) bool {
 // CodexOrder is where each model of Codex's list goes when the user put
 // them in an order of their own on the Agents page (#855), by the slug
 // Codex knows it by — a ChatGPT account's own by its bare one, as the
-// backend lists it, and by magpie's id, as magpie lists one the backend's
+// backend lists it, and by eipgam's id, as eipgam lists one the backend's
 // list lacks — and whether they did. A model it doesn't name keeps
 // its place after them.
 func CodexOrder() (map[string]int, bool) {
@@ -800,7 +800,7 @@ func CodexOrder() (map[string]int, bool) {
 		}
 		put(e.ID)
 		// the account's own goes by its bare slug where the backend's list
-		// has it, and by magpie's id where that list lacks it
+		// has it, and by eipgam's id where that list lacks it
 		// (CodexListedBeside): GPT-6.2, beside a list asked for before it
 		// came, went last in the Codex app's picker wherever it was put
 		// (Wangalan167673 on X)
@@ -811,14 +811,14 @@ func CodexOrder() (map[string]int, bool) {
 	return out, true
 }
 
-// CodexListTag names the list Codex is handed, for its ETag: magpie's models,
+// CodexListTag names the list Codex is handed, for its ETag: eipgam's models,
 // the account's own taken out of it, the order they are in, the windows set on them, the auto-review model, and whether its OpenAI models say
 // multi-agent V1 (settings.CodexAgentsV1), so any of them changing has
 // Codex ask for the list again.
 func CodexListTag() string { return codexListTag("") }
 
-// CodexOwnListTag names the list a Codex that reaches magpie for account
-// failover alone is handed, its own models without magpie's (#1385). Neither
+// CodexOwnListTag names the list a Codex that reaches eipgam for account
+// failover alone is handed, its own models without eipgam's (#1385). Neither
 // it nor CodexListTag's is a part of the other, so Codex asks again when it
 // moves from one list to the other; a V1 list's mark stays in front.
 func CodexOwnListTag() string { return codexListTag("own") }
@@ -826,7 +826,7 @@ func CodexOwnListTag() string { return codexListTag("own") }
 // buildCodexListTag is codexListTag built afresh from the catalog.
 func buildCodexListTag(kind string) string {
 	ms := CodexListed()
-	// and a ChatGPT account's own models, listed by magpie's id where the
+	// and a ChatGPT account's own models, listed by eipgam's id where the
 	// sign-in's list lacks them (CodexListedBeside): another account on
 	// gaining or losing one has Codex ask for the list again
 	if kind != "own" {
@@ -872,7 +872,7 @@ func buildCodexListTag(kind string) string {
 	if v := codexcat.AutoReviewModel(); v != "" {
 		ms = append(ms, catalog.Model{ID: "~autoreview:" + v})
 	}
-	// and the effort new sessions start at, which magpie's models take as
+	// and the effort new sessions start at, which eipgam's models take as
 	// their default (codexcat.ModelDefault): another one set, Codex asks
 	// for the list again
 	if v := codexcat.NewSessionEffort(); v != "" {
@@ -887,7 +887,7 @@ func buildCodexListTag(kind string) string {
 // the codex provider, the gateway keeps its /models answer to those (see
 // codexModels). Not narrowed — the account's list is left whole. The picks
 // are Picks: a model the vendor listed since they were saved is kept, as
-// magpie's catalog serves it, or the account's own list froze at what was
+// eipgam's catalog serves it, or the account's own list froze at what was
 // listed when the user picked (#5062).
 //
 // A provider switched off picks nothing, as it serves no agent anything
@@ -929,7 +929,7 @@ func CodexNativePicked() (map[string]bool, bool) {
 // provider (Provider.ContextOf), as /v1/models says it (#674). ok is false
 // for a model the user set none for, whose entry keeps the backend's window
 // — unless restore, for an entry not fresh from the backend: Codex's
-// models_cache.json keeps what magpie last handed it, a window since taken
+// models_cache.json keeps what eipgam last handed it, a window since taken
 // away among it, so such an entry takes the account's own list's again.
 func CodexNativeWindow(restore bool) func(slug string) (n, most int, ok bool) {
 	p, _ := find(All(), "codex")
@@ -944,7 +944,7 @@ func CodexNativeWindow(restore bool) func(slug string) (n, most int, ok bool) {
 		}
 		for _, m := range live {
 			if m.ID == slug && m.Context > 0 {
-				// a list without the max (saved before magpie kept
+				// a list without the max (saved before eipgam kept
 				// it) leaves the cache's own; Window still raises it to
 				// the window when it's below
 				return capped.Capped(m.Context), capped.Capped(m.MaxContext), true
@@ -956,9 +956,9 @@ func CodexNativeWindow(restore bool) func(slug string) (n, most int, ok bool) {
 
 // CodexWindow is the context window Codex works in for one of its own
 // models, by the backend's slug, for a request to the ChatGPT backend or
-// OpenAI's API that Codex sent through magpie: the window the user set on
+// OpenAI's API that Codex sent through eipgam: the window the user set on
 // the codex provider, else the one the account's own list gives (user, ""
-// for any), else magpie's Codex subscription's, else Codex CLI's
+// for any), else eipgam's Codex subscription's, else Codex CLI's
 // models_cache.json's; 0 when none says. models.dev's input limit for the
 // same id is OpenAI's API's (gpt-5.5's 922K), not the window Codex holds
 // a conversation to (272K): netube on Discord saw Routing say 922K for a
@@ -1039,14 +1039,14 @@ func codexListedIf(shown []Entry, members func(id string) []Member, listed func(
 	return ms
 }
 
-// codexUnknownLevels are the levels Codex is offered on a model magpie
+// codexUnknownLevels are the levels Codex is offered on a model eipgam
 // has no word on (CodexEfforts): the three every API that takes a
 // reasoning effort reads, OpenAI's Chat and Responses and the relays
 // copying them.
 var codexUnknownLevels = []string{"low", "medium", "high"}
 
 // CodexEfforts are the levels Codex's picker offers for e: its own, or,
-// for a model nothing magpie reads says anything about — a custom
+// for a model nothing eipgam reads says anything about — a custom
 // provider's model-code, a relay's alias — low, medium and high. Codex
 // sends such a model an effort whatever its entry lists (medium, or the
 // one config.toml starts sessions at), and the gateway passes an effort
@@ -1063,7 +1063,7 @@ func CodexEfforts(e Entry) []string {
 	return slices.Clone(codexUnknownLevels)
 }
 
-// levelsUnknown reports whether nothing magpie reads says which reasoning
+// levelsUnknown reports whether nothing eipgam reads says which reasoning
 // levels e's model has, or that it has none: not its vendor's own list
 // (levels, or an entry in Codex's shape), not the vendor's catalog, not
 // models.dev under any provider, not the user.
@@ -1116,12 +1116,12 @@ func codexApart(shown []Entry, labels []string, listed func(Entry) bool) []strin
 // CodexTiers sets on m what Codex is offered on e's service tiers
 // (codexcat.Entries turns them into the entry's service_tiers): one source
 // for every list Codex is handed, the gateway's and the models.json file
-// magpie writes for a Codex CLI that names magpie its provider (#1530).
+// eipgam writes for a Codex CLI that names eipgam its provider (#1530).
 func CodexTiers(m *catalog.Model, e Entry, members func(id string) []Member) {
 	// a provider the user added by its address is sent the tier Codex
 	// asks for as it is (hsiangron on X)
 	m.OwnTier = e.Group == "" && e.Provider.Preset == "" && e.Provider.Account == nil && e.Provider.ID != ""
-	// another magpie offers the tiers its own Codex is offered on the
+	// another eipgam offers the tiers its own Codex is offered on the
 	// model, and is sent the one Codex asks for as it is (#1234); a
 	// provider plugin, those it says its vendor serves the model at, and
 	// is sent the one Codex asks for when it is among them (#2514)

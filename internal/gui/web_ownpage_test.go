@@ -10,7 +10,7 @@ import (
 // the browser sends it the page's SameSite=Lax cookie: its "simple" POST
 // (text/plain, no-cors) to /api/library/servers/save, then
 // /api/library/mcp/check, would start an MCP server of its own as the
-// user. Through the whole chain `magpie web` serves, with the page's
+// user. Through the whole chain `eipgam web` serves, with the page's
 // cookie, every such request is turned away, and the page's own still
 // reach the API.
 func TestWebAPIAnswersItsOwnPageOnly(t *testing.T) {
@@ -42,8 +42,8 @@ func TestWebAPIAnswersItsOwnPageOnly(t *testing.T) {
 		call("the LAN address on another port", false, "POST", path, "192.168.1.20:3430", marks("same-site", "Origin", "http://192.168.1.20:8080")...)
 		call("the LAN address on another port, an old browser", false, "POST", path, "192.168.1.20:3430", marks("", "Origin", "http://192.168.1.20:8080")...)
 		// a sibling name behind the same reverse proxy
-		call("a sibling subdomain", false, "POST", path, "magpie.example.com", marks("same-site", "Origin", "https://blog.example.com")...)
-		call("a sibling subdomain, an old browser", false, "POST", path, "magpie.example.com", marks("", "Origin", "https://blog.example.com")...)
+		call("a sibling subdomain", false, "POST", path, "eipgam.example.com", marks("same-site", "Origin", "https://blog.example.com")...)
+		call("a sibling subdomain, an old browser", false, "POST", path, "eipgam.example.com", marks("", "Origin", "https://blog.example.com")...)
 		call("another site", false, "POST", path, "127.0.0.1:3430", marks("cross-site", "Origin", "https://evil.example")...)
 		// a sandboxed frame or a local file
 		call("Origin null", false, "POST", path, "127.0.0.1:3430", marks("cross-site", "Origin", "null")...)
@@ -54,7 +54,7 @@ func TestWebAPIAnswersItsOwnPageOnly(t *testing.T) {
 	}
 	// a read another page sends: an <img>, a link, a form's GET
 	call("a GET from another port", false, "GET", "/api/import/x", "127.0.0.1:3430", marks("same-site")...)
-	call("a GET from a sibling subdomain", false, "GET", "/api/import/x", "magpie.example.com", "Sec-Fetch-Site", "same-site", "Sec-Fetch-Dest", "image")
+	call("a GET from a sibling subdomain", false, "GET", "/api/import/x", "eipgam.example.com", "Sec-Fetch-Site", "same-site", "Sec-Fetch-Dest", "image")
 	call("a link from another site", false, "GET", "/api/import/x", "127.0.0.1:3430", "Sec-Fetch-Site", "cross-site", "Sec-Fetch-Dest", "document", "Sec-Fetch-Mode", "navigate")
 	call("a preflight from another port", false, "OPTIONS", save, "127.0.0.1:3430", "Origin", "http://127.0.0.1:8080", "Sec-Fetch-Site", "same-site")
 
@@ -63,17 +63,17 @@ func TestWebAPIAnswersItsOwnPageOnly(t *testing.T) {
 	call("the page's own origin", true, "POST", save, "127.0.0.1:3430", append([]string{"Origin", "http://127.0.0.1:3430", "Sec-Fetch-Site", "same-origin"}, own...)...)
 	call("the page's own origin, an old browser", true, "POST", save, "127.0.0.1:3430", append([]string{"Origin", "http://127.0.0.1:3430"}, own...)...)
 	call("the page's own origin on the LAN", true, "POST", save, "192.168.1.20:3430", append([]string{"Origin", "http://192.168.1.20:3430", "Sec-Fetch-Site", "same-origin"}, own...)...)
-	call("behind a proxy that keeps the Host", true, "POST", save, "magpie.example.com", append([]string{"Origin", "https://magpie.example.com"}, own...)...)
+	call("behind a proxy that keeps the Host", true, "POST", save, "eipgam.example.com", append([]string{"Origin", "https://eipgam.example.com"}, own...)...)
 	// a proxy that passes on a Host of its own (nginx's default): the
-	// browser's word is enough, and so is MAGPIE_PUBLIC_URL's address
-	call("behind a proxy that rewrites the Host", true, "POST", save, "127.0.0.1:3430", append([]string{"Origin", "https://magpie.example.com", "Sec-Fetch-Site", "same-origin"}, own...)...)
+	// browser's word is enough, and so is EIPGAM_PUBLIC_URL's address
+	call("behind a proxy that rewrites the Host", true, "POST", save, "127.0.0.1:3430", append([]string{"Origin", "https://eipgam.example.com", "Sec-Fetch-Site", "same-origin"}, own...)...)
 	call("a page's own read", true, "GET", "/api/state", "127.0.0.1:3430", "Sec-Fetch-Site", "same-origin", "Sec-Fetch-Mode", "cors", "Sec-Fetch-Dest", "empty")
 	call("the address typed in", true, "GET", "/api/state", "127.0.0.1:3430", "Sec-Fetch-Site", "none", "Sec-Fetch-Mode", "navigate", "Sec-Fetch-Dest", "document")
 	call("a client that isn't a browser, with the key's cookie", true, "POST", save, "127.0.0.1:3430", "Content-Type", "application/json")
 	// the page's files aren't the API
 	call("the page itself from a link elsewhere", true, "GET", "/", "127.0.0.1:3430", "Sec-Fetch-Site", "cross-site", "Sec-Fetch-Mode", "navigate", "Sec-Fetch-Dest", "document")
 
-	t.Setenv("MAGPIE_PUBLIC_URL", "https://magpie.example.com/")
-	call("an old browser behind a proxy that rewrites the Host, MAGPIE_PUBLIC_URL set", true, "POST", save, "127.0.0.1:3430", append([]string{"Origin", "https://magpie.example.com"}, own...)...)
-	call("a sibling subdomain, MAGPIE_PUBLIC_URL set", false, "POST", save, "127.0.0.1:3430", marks("same-site", "Origin", "https://blog.example.com")...)
+	t.Setenv("EIPGAM_PUBLIC_URL", "https://eipgam.example.com/")
+	call("an old browser behind a proxy that rewrites the Host, EIPGAM_PUBLIC_URL set", true, "POST", save, "127.0.0.1:3430", append([]string{"Origin", "https://eipgam.example.com"}, own...)...)
+	call("a sibling subdomain, EIPGAM_PUBLIC_URL set", false, "POST", save, "127.0.0.1:3430", marks("same-site", "Origin", "https://blog.example.com")...)
 }

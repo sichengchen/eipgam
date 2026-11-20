@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // callLine is one call as usage.jsonl has it.
@@ -156,7 +156,7 @@ func TestOldBackupWithoutUsage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// as a magpie before it wrote the file: no "usage" field at all
+	// as a eipgam before it wrote the file: no "usage" field at all
 	sealed, err := Seal(b, "pass")
 	if err != nil {
 		t.Fatal(err)

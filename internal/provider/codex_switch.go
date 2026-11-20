@@ -2,14 +2,14 @@ package provider
 
 // Signing Codex or Claude Code in to the next of its accounts when the one
 // it is on has used its allowance up. Codex's requests on its own models go
-// through magpie while more of its accounts are on there, and move on to
+// through eipgam while more of its accounts are on there, and move on to
 // the next account when one is out — but the Codex app, once it knows the
 // account it is signed in to is out, may not send at all, so no request
-// reaches magpie to move on. Claude Code on its own models never comes
-// through magpie: it asks Anthropic as the account it is signed in to, and
+// reaches eipgam to move on. Claude Code on its own models never comes
+// through eipgam: it asks Anthropic as the account it is signed in to, and
 // that account being out ends its turns with "You've hit your session
 // limit" while the gateway has long moved on to another (#208). So
-// whichever magpie runs the gateway signs the agent in to the next account
+// whichever eipgam runs the gateway signs the agent in to the next account
 // that is on and has room, as switching it on the Accounts page would: a
 // session started after that is on it from the first turn.
 //
@@ -28,8 +28,8 @@ package provider
 // switch the user makes meanwhile ends that. With KeepLogin on the subscription, the agent
 // stays signed in to the first, whatever it has left (#524); with
 // KeepLoginAs, to that account, wherever it stands in the order. Not while
-// magpie only switches the sign-in (SwitchOnly): moving it is then all
-// magpie is asked to do, and kept on one account nothing would ever move
+// eipgam only switches the sign-in (SwitchOnly): moving it is then all
+// eipgam is asked to do, and kept on one account nothing would ever move
 // (#1907, keepsLogin).
 
 import (
@@ -46,12 +46,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lastgood"
 )
 
 // ClaudeThroughMagpie is set by the agent package: whether Claude Code's
-// settings send its requests to magpie's gateway (ANTHROPIC_BASE_URL),
+// settings send its requests to eipgam's gateway (ANTHROPIC_BASE_URL),
 // whatever its model and however it signs in there. NextLogin then never
 // moves its sign-in off a spent account. false until it is set, and in a
 // process without the agent package.
@@ -62,10 +62,10 @@ const loginSwitchEvery = 5 * time.Minute
 
 // codexNearOutEvery is how often the account Codex is signed in to is read
 // while it is near out (codexNearOut) or out: the Codex app greys its Send
-// from its own reading, and magpie takes the turns over only once its
+// from its own reading, and eipgam takes the turns over only once its
 // reading says the account is out too, so five minutes apart left Send
 // grey for up to five (Ethereal499 on X). Read again as soon after the
-// reset, magpie gives the app its ChatGPT side back as soon.
+// reset, eipgam gives the app its ChatGPT side back as soon.
 const codexNearOutEvery = time.Minute
 
 // codexNearShare is the share of a window past which the account counts
@@ -98,7 +98,7 @@ func codexLookEvery(u map[string]SubscriptionQuota) time.Duration {
 // is signed in to is read then, in place of loginSwitchEvery: nothing
 // runs on the account, so a reading every five minutes told nothing new
 // and asked chatgpt.com 288 times a day (dludream on Discord). Requests
-// magpie sends on the account keep its windows current from what each
+// eipgam sends on the account keep its windows current from what each
 // reply says (NoteCodexLimits), and a session written to again has the
 // next look read it at once (codexDue).
 const (
@@ -170,7 +170,7 @@ func SpentShareOf(routing string) float64 {
 	return SpentShare
 }
 
-// loginSwitching is how magpie moves agent's sign-in, as its subscription
+// loginSwitching is how eipgam moves agent's sign-in, as its subscription
 // says: the share the account it is on is moved off at, and whether it is
 // kept on the first instead (keepsLogin).
 func loginSwitching(agent string) (share float64, keep bool) {
@@ -182,15 +182,15 @@ func loginSwitching(agent string) (share float64, keep bool) {
 	return SpentShare, false
 }
 
-// returnsToFirst says whether magpie signs agent back in to the account
+// returnsToFirst says whether eipgam signs agent back in to the account
 // it moved it off once that has room again (#408), rather than leaving it
 // on the one it moved it to till that is spent in turn. The sign-in goes
-// back where it follows the gateway: Codex's requests go through magpie,
+// back where it follows the gateway: Codex's requests go through eipgam,
 // whose Smart and In order give the first account requests again once it
 // has room (#209), and In order on any subscription is the user's word
 // that the first comes first. Where the sign-in is what spends the
 // accounts — Claude Code asks Anthropic itself, and Codex whose sign-in
-// alone magpie switches (SwitchOnly) — going back at the first's reset
+// alone eipgam switches (SwitchOnly) — going back at the first's reset
 // left the account moved to part used and started the first's next
 // window early, which is not "use one up, then the next" (hxy920830 on
 // X): there it stays, unless the user said the first comes first. Nor
@@ -209,12 +209,12 @@ func returnsToFirst(agent string) bool {
 	return agent == "codex"
 }
 
-// backShare is the share below which the account magpie moved the agent
+// backShare is the share below which the account eipgam moved the agent
 // off is signed back in to: no longer low, as Smart counts it (the
 // gateway's lowShare), so it doesn't go back and forth at the edge.
 const backShare = 90
 
-// switchedAgents are the agents whose account magpie moves on.
+// switchedAgents are the agents whose account eipgam moves on.
 var switchedAgents = []string{"codex", "claude"}
 
 // usedUp reports whether an account's allowance is used up at now: a
@@ -223,7 +223,7 @@ func usedUp(q SubscriptionQuota, now time.Time) bool {
 	return usedPast(q, 100, now)
 }
 
-// UsedUp is usedUp for the CLI's magpie quota wait, so what it waits out
+// UsedUp is usedUp for the CLI's eipgam quota wait, so what it waits out
 // is what stops an account here.
 func UsedUp(q SubscriptionQuota, now time.Time) bool { return usedUp(q, now) }
 
@@ -274,16 +274,16 @@ func usedPast(q SubscriptionQuota, share float64, now time.Time) bool {
 }
 
 // NextLogin is the account agent should be signed in to instead of the
-// one it is on: the account magpie moved it off, once that has room again
+// one it is on: the account eipgam moved it off, once that has room again
 // (back); else, when the one it is on is spent, the first of its other
-// accounts that are on in magpie, in the order they were saved, whose
+// accounts that are on in eipgam, in the order they were saved, whose
 // allowance is known and not spent, or, when every one is past its line
 // too, the one with the most room left (roomLeft). A saved Claude account
 // not read yet is read then (readSpare). ok is false when the agent should
 // stay.
 func NextLogin(ctx context.Context, agent string) (from, to string, back, ok bool) {
 	if leftAlone(agent) {
-		return "", "", false, false // magpie has no say in its sign-in, or was told to leave it be
+		return "", "", false, false // eipgam has no say in its sign-in, or was told to leave it be
 	}
 	if agent == "claude" && claudeTokenInUse() != "" {
 		// on a setup-token the user switched it to, whose allowance can't
@@ -354,9 +354,9 @@ func NextLogin(ctx context.Context, agent string) (from, to string, back, ok boo
 	// a spent account served nothing and only took away what Claude Code
 	// has as that account, its claude.ai connectors (MCP) among them. The
 	// user set Claude Code back to their main account over and over, and
-	// magpie moved it to their quota account again each time (oreoft on
+	// eipgam moved it to their quota account again each time (oreoft on
 	// Discord). It stays where the user put it then; moving it is all
-	// magpie is asked to do under SwitchOnly, whose accounts the gateway
+	// eipgam is asked to do under SwitchOnly, whose accounts the gateway
 	// doesn't serve.
 	if agent == "claude" && ClaudeThroughMagpie() && !SwitchOnly(agent) {
 		return "", "", false, false
@@ -391,7 +391,7 @@ func NextLogin(ctx context.Context, agent string) (from, to string, back, ok boo
 	for _, l := range spares {
 		q, known := u[l.User]
 		if agent == "claude" && (!known || unreadSpare(q)) {
-			// a saved Claude account magpie has no reading of: read now,
+			// a saved Claude account eipgam has no reading of: read now,
 			// by Claude Code's /usage in its own directory, one account at
 			// a time and only till one has room
 			q, known = readSpare(ctx, l)
@@ -443,14 +443,14 @@ func roomLeft(q SubscriptionQuota, share float64, caps WindowCaps, now time.Time
 	return room
 }
 
-// NextInOrder is the account `magpie accounts switch <agent> next` signs
+// NextInOrder is the account `eipgam accounts switch <agent> next` signs
 // agent in to: of its other accounts the agent can be signed in to, taken
 // in their order from the one after the account it is on, the first whose
 // allowance is known and has room; when none has, the one with the most
 // room left (roomLeft), and over says so. A saved Claude account not read
 // yet is read then, as NextLogin's spares are.
 //
-// An account off in magpie is taken too, as switching to it by name or
+// An account off in eipgam is taken too, as switching to it by name or
 // from the accounts list is: on/off is whether the gateway's requests go
 // to it, not whether the agent may be signed in to it. An account the
 // agent signed itself in to (Claude Code's /login, codex login) starts
@@ -470,7 +470,7 @@ func NextInOrder(ctx context.Context, agent string) (to string, over bool, err e
 		}
 	}
 	if len(order) == 0 {
-		return "", false, fmt.Errorf("%s has no other account in magpie to switch to", agent)
+		return "", false, fmt.Errorf("%s has no other account in eipgam to switch to", agent)
 	}
 	users := make([]string, 0, len(order))
 	for _, l := range order {
@@ -497,7 +497,7 @@ func NextInOrder(ctx context.Context, agent string) (to string, over bool, err e
 		}
 	}
 	if best == "" {
-		return "", false, fmt.Errorf("magpie has no reading of %s's other accounts' usage: name the one to switch to (magpie accounts switch %s <email>)", agent, agent)
+		return "", false, fmt.Errorf("eipgam has no reading of %s's other accounts' usage: name the one to switch to (eipgam accounts switch %s <email>)", agent, agent)
 	}
 	return best, true, nil
 }
@@ -558,7 +558,7 @@ func SwitchWhenSpent(ctx context.Context, agent string) (string, error) {
 			if codexRestartsApp() || !back {
 				log.Printf("codex: the Codex app is still signed in to %s, and shows its limits, until its app-server is restarted once no Codex turn runs", was)
 			} else {
-				log.Printf("codex: the Codex app is still signed in to %s, and shows its limits, until it is restarted: magpie restarts it for a switch back only with \"Restart the Codex app to follow\" on", was)
+				log.Printf("codex: the Codex app is still signed in to %s, and shows its limits, until it is restarted: eipgam restarts it for a switch back only with \"Restart the Codex app to follow\" on", was)
 			}
 		}
 	}
@@ -567,7 +567,7 @@ func SwitchWhenSpent(ctx context.Context, agent string) (string, error) {
 	return to, nil
 }
 
-// loginReturn is the account magpie signed an agent out of when it was
+// loginReturn is the account eipgam signed an agent out of when it was
 // spent (Back), and the one it signed it in to (To): while the agent is
 // still on To, Back is signed in again once it has room.
 type loginReturn struct {
@@ -588,7 +588,7 @@ func readLoginReturns() map[string]loginReturn {
 }
 
 // loginReturnOf is the account to sign agent back in to, when it is still
-// on the one magpie moved it to (active): one signed in otherwise since,
+// on the one eipgam moved it to (active): one signed in otherwise since,
 // by the user or the agent itself, is the user's choice.
 func loginReturnOf(agent, active string) (loginReturn, bool) {
 	loginReturnsMu.Lock()
@@ -634,12 +634,12 @@ var codexWasUsedUp atomic.Bool
 // noteCodexUsedUp tells the agents' files when the account Codex is signed
 // in to runs out (CodexUsedUp: of its allowance and its credits), or has
 // room again: the Codex app sends nothing at all for an account that is
-// out, a magpie model's turn included, so the agent package then makes
-// magpie Codex's provider, and puts it back beside the sign-in after
+// out, a eipgam model's turn included, so the agent package then makes
+// eipgam Codex's provider, and puts it back beside the sign-in after
 // (#540). Only a change is told: from the last look's answer, or from
 // known, what CodexUsedUpKnown said before this look read again, which
 // is what the sync last went by. Codex signed in by hand to an account
-// whose kept reading said held made magpie its provider at that sync,
+// whose kept reading said held made eipgam its provider at that sync,
 // and the look's fresh "room" was the same as its last answer (for the
 // account Codex was on before), so nothing told the sync again.
 func noteCodexUsedUp(known, now bool) {
@@ -725,13 +725,13 @@ func KeepOnAnAccountWithRoom(ctx context.Context) {
 // restartCodexAppLeftOnSpent has the Codex app's app-server restarted, as
 // a switch off a used-up account has it (codexAppSwitched spent), when it
 // is still on an account Codex was switched off (CodexAppStale) and that
-// account is now held (codexHeld). magpie's switch back to the first, or to
+// account is now held (codexHeld). eipgam's switch back to the first, or to
 // the account Codex is kept signed in to, leaves the app running unless
 // RestartApp is on, and the app-server keeps the account it started on:
-// once that one ran out, the app greyed Send for every model, magpie's and
-// another provider's too, while magpie read only the account Codex is
+// once that one ran out, the app greyed Send for every model, eipgam's and
+// another provider's too, while eipgam read only the account Codex is
 // signed in to, which had room, and never restarted it (nb5p on Discord:
-// B first in magpie, the app on A). Once for each app-server left.
+// B first in eipgam, the app on A). Once for each app-server left.
 func restartCodexAppLeftOnSpent(ctx context.Context) {
 	was := CodexAppStale()
 	if was == "" {

@@ -1,8 +1,8 @@
 package provider
 
-// A Remote magpie whose computer came back at another address
+// A Remote eipgam whose computer came back at another address
 // (luckymanjc on Discord): computer A's router hands it a new IP now and
-// then, a boot often enough, and B's Remote magpie, saved at the old
+// then, a boot often enough, and B's Remote eipgam, saved at the old
 // one, reached nothing until the user typed the new one in. So when B
 // can't connect to it at all, B looks for it on the networks it shares
 // with it: every address of the old one's /24 and of each of B's own
@@ -15,14 +15,14 @@ package provider
 // key, and the provider's own headers, go to no address that hasn't
 // proved first that it holds the key (proves): B sends a nonce of its
 // own and the key's id (sha256 of the key, RemoteKeyID) to
-// RemoteProvePath, which needs no key, and only a magpie with an enabled
+// RemoteProvePath, which needs no key, and only a eipgam with an enabled
 // gateway key of that id answers the HMAC of the nonce and the address
-// it was reached at (RemoteProof) under the key. Another magpie, an older
+// it was reached at (RemoteProof) under the key. Another eipgam, an older
 // one without the route, and anything else answer nothing B can check,
 // and are passed over without a keyed request. An address that proved
-// is then asked its model list with the key; one whose list this magpie
-// made (its magpie_via ends with catalog.Self, remote_self.go) is this
-// magpie and is passed over. The address found is saved as the
+// is then asked its model list with the key; one whose list this eipgam
+// made (its eipgam_via ends with catalog.Self, remote_self.go) is this
+// eipgam and is passed over. The address found is saved as the
 // provider's, as if the user had typed it, and the request or list that
 // failed is asked there.
 //
@@ -47,8 +47,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // seekDial is how long each address is given to take the connection.
@@ -73,7 +73,7 @@ const seekNets = 4
 var seekMu sync.Mutex
 var seekLast = map[string]time.Time{}
 
-// seekAt is the addresses (host:port) a Remote magpie last at host:port
+// seekAt is the addresses (host:port) a Remote eipgam last at host:port
 // may be at now, nearest first. Tests give their own. Whatever takes the
 // connection at one is sent nothing keyed until it proves it holds the
 // key (isRemote, proves).
@@ -81,7 +81,7 @@ var seekAt = lanNeighbours
 
 // SeekHere has every look made at ats alone, as if any look made before
 // were long ago, until restore: for the gateway's tests, whose Remote
-// magpie is on loopback.
+// eipgam is on loopback.
 func SeekHere(ats []string) (restore func()) {
 	seekMu.Lock()
 	old := seekAt
@@ -100,7 +100,7 @@ func SeekHere(ats []string) (restore func()) {
 // computer that moved, or is off, leaves behind.
 var unconnected = lazyre.New(`dial tcp |connectex|no route to host|host is down|network is unreachable`)
 
-// SeekMoved is p, a Remote magpie a request found no one at (err), at
+// SeekMoved is p, a Remote eipgam a request found no one at (err), at
 // the address it was found at on this computer's network, saved there:
 // the request is made again at it. Requests failing at once wait for one
 // look, and one is made at most every seekEvery.
@@ -124,7 +124,7 @@ func SeekMoved(ctx context.Context, p Provider, err error) (Provider, bool) {
 	return p, true
 }
 
-// Readdressed is p, a Remote magpie, at the address it is saved at now,
+// Readdressed is p, a Remote eipgam, at the address it is saved at now,
 // when that is another than p's: the user typed the new one in, or a look
 // (seekMoved) found it there, while a request held p as it read it (le13ure
 // on X: a request asked the old address again and again, through its
@@ -149,7 +149,7 @@ var edited = struct {
 	ch chan struct{}
 }{ch: make(chan struct{})}
 
-// Edited is closed when this magpie next writes the providers.
+// Edited is closed when this eipgam next writes the providers.
 func Edited() <-chan struct{} {
 	edited.Lock()
 	defer edited.Unlock()
@@ -246,8 +246,8 @@ func seekMoved(ctx context.Context, id string) (*Provider, bool) {
 	return nil, false
 }
 
-// isRemote says the magpie at at is p's: it proves it holds p's key, then
-// lists for it, and isn't this magpie. The key goes out only after the
+// isRemote says the eipgam at at is p's: it proves it holds p's key, then
+// lists for it, and isn't this eipgam. The key goes out only after the
 // proof.
 func isRemote(ctx context.Context, p Provider, scheme, at string) bool {
 	if !proves(ctx, scheme, at, p.Key) {
@@ -261,7 +261,7 @@ func isRemote(ctx context.Context, p Provider, scheme, at string) bool {
 	}
 	var list struct {
 		Data []struct {
-			Via []string `json:"magpie_via"`
+			Via []string `json:"eipgam_via"`
 		} `json:"data"`
 	}
 	if json.Unmarshal(b, &list) != nil {
@@ -269,19 +269,19 @@ func isRemote(ctx context.Context, p Provider, scheme, at string) bool {
 	}
 	for _, m := range list.Data {
 		if len(m.Via) > 0 {
-			// a test's own gateway serves its Remote magpie (LeaveOutSelf)
+			// a test's own gateway serves its Remote eipgam (LeaveOutSelf)
 			return !LeaveOutSelf || m.Via[len(m.Via)-1] != catalog.Self()
 		}
 	}
 	return true
 }
 
-// RemoteProvePath is where a magpie proves, with no key sent to it, that
+// RemoteProvePath is where a eipgam proves, with no key sent to it, that
 // it holds a gateway key: POST {"nonce": hex, "key_id": RemoteKeyID(key)}
 // is answered {"proof": hex of RemoteProof(key, nonce, the address it was
 // reached at)}, or 404 when no enabled gateway key there has that id
 // (the gateway's remote_prove.go).
-const RemoteProvePath = "/v1/magpie/prove"
+const RemoteProvePath = "/v1/eipgam/prove"
 
 // RemoteKeyID is the id a proof names key by: its sha256, in hex.
 func RemoteKeyID(key string) string {
@@ -289,13 +289,13 @@ func RemoteKeyID(key string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// RemoteProof is what a magpie holding key, reached at at (host:port),
+// RemoteProof is what a eipgam holding key, reached at at (host:port),
 // answers nonce with: HMAC-SHA256 under key of the nonce and the address.
 // The address is in it so that a host passing B's nonce on to the real
-// magpie elsewhere gets a proof for that magpie's address, not its own.
+// eipgam elsewhere gets a proof for that eipgam's address, not its own.
 func RemoteProof(key, nonce, at string) []byte {
 	m := hmac.New(sha256.New, []byte(key))
-	io.WriteString(m, "magpie-prove-v1\n"+nonce+"\n"+proofAt(at))
+	io.WriteString(m, "eipgam-prove-v1\n"+nonce+"\n"+proofAt(at))
 	return m.Sum(nil)
 }
 
@@ -323,7 +323,7 @@ var proveClient = func() *http.Client {
 	return &http.Client{Transport: t, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 }()
 
-// proves says the magpie at at holds key: it answered a nonce of ours with
+// proves says the eipgam at at holds key: it answered a nonce of ours with
 // the proof only key's holder, reached at at, can make. Neither key nor
 // any header of the provider's own goes with the ask.
 func proves(ctx context.Context, scheme, at, key string) bool {

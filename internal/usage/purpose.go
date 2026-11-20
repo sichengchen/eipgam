@@ -31,7 +31,7 @@ var purposeKinds = func() map[string]PurposeKind {
 	add("Image description", "vision")
 	add("Routing classifier", "routing")
 	add("Connection check", "connection_check") // Claude Desktop's (gateway.KindDesktopCheck)
-	add("Test", "provider_test")                // magpie's own (probelog.KindTest)
+	add("Test", "provider_test")                // eipgam's own (probelog.KindTest)
 	add("Detect APIs", "api_detect")            // probelog.KindDetect
 	add("Model list", "model_list")             // probelog.KindList
 	add("MCP tool", KindMCP)                    // an MCP tool call (SourceMCP)
@@ -40,7 +40,7 @@ var purposeKinds = func() map[string]PurposeKind {
 	// Claude Code names neither of these requests, so the gateway tells them
 	// by their content: the *_inferred kinds. They share the purpose of the
 	// plain kind (a client's own marker, were one sent), and say in their
-	// name that magpie read it from the body, not that the client said so.
+	// name that eipgam read it from the body, not that the client said so.
 	pair := func(name, kind string) {
 		out[kind] = PurposeKind{"kind:" + kind, name}
 		out[kind+InferredSuffix] = PurposeKind{"kind:" + kind, name + " (inferred)"}

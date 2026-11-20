@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/netproxy"
 )
 
 // DefaultServer is the Bark app's own server, used when none is set.
@@ -49,11 +49,11 @@ func proxied() http.RoundTripper {
 }
 
 // group names the pushes in the Bark app's list.
-const group = "magpie"
+const group = "eipgam"
 
-// icon is magpie's own icon, which the Bark app shows on each push. It is
-// the site's copy of the app's apple-touch-icon.
-const icon = "https://usemagpie.ai/apple-touch-icon.png"
+// icon is eipgam's own icon, which the Bark app shows on each push. It is
+// the app's apple-touch-icon from the eipgam repository.
+const icon = "https://raw.githubusercontent.com/sichengchen/eipgam/main/internal/gui/assets/icons/apple-touch-icon.png"
 
 // Push sends title and body to t. The error names the server's answer,
 // never the device key.

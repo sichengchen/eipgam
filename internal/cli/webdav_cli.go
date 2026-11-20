@@ -11,37 +11,37 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/davsync"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/davsync"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // WebDAV, S3 and GitHub sync from the terminal: what Settings › Sync does, through
 // the same davsync.Configure, Now, Off and Dismiss. One backend is on at a time.
 
 const webdavUsage = `usage:
-  magpie webdav                           whether sync is on, where to, and how the last sync went
-  magpie webdav on <address> [user=…] [keys=no] [agents=no] [library=no]
+  eipgam webdav                           whether sync is on, where to, and how the last sync went
+  eipgam webdav on <address> [user=…] [keys=no] [agents=no] [library=no]
                                           keep providers, settings, profiles, agents' models and the library
                                           the same on every computer through a WebDAV folder (a folder named
-                                          magpie is made in it), and sync at once; asks for the password
+                                          eipgam is made in it), and sync at once; asks for the password
                                           (with a user) and the passphrase
-  magpie webdav set k=v…                  change it: address, user, providers, settings, profiles, keys, agents,
+  eipgam webdav set k=v…                  change it: address, user, providers, settings, profiles, keys, agents,
                                           library, memory, usage, sign-ins (yes|no);
                                           password= and passphrase= ask for a new one
-  magpie webdav now                       sync now (the gateway also syncs by itself while it runs: see auto)
-  magpie webdav preview                   what syncing now would change, here and on the server; nothing is changed
-  magpie webdav undo-sync [anyway]        put back what the last sync brought in, on this computer only
-  magpie webdav auto off|3|15|30|60       how often the gateway syncs by itself, in minutes; off: only when asked
-  magpie webdav follow on|off             on: this computer takes the server's setup on every sync and sends
+  eipgam webdav now                       sync now (the gateway also syncs by itself while it runs: see auto)
+  eipgam webdav preview                   what syncing now would change, here and on the server; nothing is changed
+  eipgam webdav undo-sync [anyway]        put back what the last sync brought in, on this computer only
+  eipgam webdav auto off|3|15|30|60       how often the gateway syncs by itself, in minutes; off: only when asked
+  eipgam webdav follow on|off             on: this computer takes the server's setup on every sync and sends
                                           none of its own; a change made here is replaced, a copy kept in the
                                           sync folder. off: both ways, as before
-  magpie webdav restore                   make this computer's setup the server's; what is here is kept first
-  magpie webdav undo                      put back what the last restore replaced
-  magpie webdav upload                    put this computer's setup over a server file that isn't a backup
+  eipgam webdav restore                   make this computer's setup the server's; what is here is kept first
+  eipgam webdav undo                      put back what the last restore replaced
+  eipgam webdav upload                    put this computer's setup over a server file that isn't a backup
                                           (empty, cut short, another app's); the server's is kept first
-  magpie webdav dismiss                   clear what the last sync said it replaced
-  magpie webdav off                       turn it off; the file on the server stays
+  eipgam webdav dismiss                   clear what the last sync said it replaced
+  eipgam webdav off                       turn it off; the file on the server stays
 
   passphrase  the same on every computer: the file is sealed with it on this one, and the server only
               ever sees it sealed. Keep it: without it the file can't be opened. Never the password:
@@ -65,42 +65,42 @@ const webdavUsage = `usage:
               here never go up, the server's never come in, and nothing here is taken away;
               none: every one syncs
   first sync  on a computer that had its own setup, each part that differs becomes the server's; what
-              was here is kept in the sync folder beside magpie's files, and magpie webdav says so
-  moving      magpie webdav on with S3 sync on moves sync to the folder; the bucket, endpoint, access key
-              and secret are kept, and magpie s3 on alone moves back to them
+              was here is kept in the sync folder beside eipgam's files, and eipgam webdav says so
+  moving      eipgam webdav on with S3 sync on moves sync to the folder; the bucket, endpoint, access key
+              and secret are kept, and eipgam s3 on alone moves back to them
 
   Piped in, the password (when asked) is the first line of stdin and the passphrase the next.
-  An S3-compatible bucket instead: magpie s3 help.
+  An S3-compatible bucket instead: eipgam s3 help.
 
-  e.g. magpie webdav on https://dav.jianguoyun.com/dav/ user=me@example.com
-       magpie webdav set agents=no library=no
+  e.g. eipgam webdav on https://dav.jianguoyun.com/dav/ user=me@example.com
+       eipgam webdav set agents=no library=no
 `
 
 const s3Usage = `usage:
-  magpie s3                               whether sync is on, where to, and how the last sync went
-  magpie s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] [region=…] [path-style=yes]
+  eipgam s3                               whether sync is on, where to, and how the last sync went
+  eipgam s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] [region=…] [path-style=yes]
                [keys=no] [agents=no] [library=no]
                                           keep providers, settings, profiles, agents' models and the library
                                           the same on every computer through an S3-compatible bucket (AWS S3,
-                                          Cloudflare R2, Backblaze B2, MinIO, a NAS…), in <prefix>/magpie/,
+                                          Cloudflare R2, Backblaze B2, MinIO, a NAS…), in <prefix>/eipgam/,
                                           and sync at once; asks for the secret and the passphrase
-  magpie s3 set k=v…                      change it: address, bucket, prefix, endpoint, region, access-key-id,
+  eipgam s3 set k=v…                      change it: address, bucket, prefix, endpoint, region, access-key-id,
                                           path-style, providers, settings, profiles, keys, agents, library, memory,
                                           usage, sign-ins (yes|no); secret= and
                                           passphrase= ask for a new one
-  magpie s3 now                           sync now (the gateway also syncs by itself while it runs: see auto)
-  magpie s3 preview                       what syncing now would change, here and on the server; nothing is changed
-  magpie s3 undo-sync [anyway]            put back what the last sync brought in, on this computer only
-  magpie s3 auto off|3|15|30|60           how often the gateway syncs by itself, in minutes; off: only when asked
-  magpie s3 follow on|off                 on: this computer takes the server's setup on every sync and sends
+  eipgam s3 now                           sync now (the gateway also syncs by itself while it runs: see auto)
+  eipgam s3 preview                       what syncing now would change, here and on the server; nothing is changed
+  eipgam s3 undo-sync [anyway]            put back what the last sync brought in, on this computer only
+  eipgam s3 auto off|3|15|30|60           how often the gateway syncs by itself, in minutes; off: only when asked
+  eipgam s3 follow on|off                 on: this computer takes the server's setup on every sync and sends
                                           none of its own; a change made here is replaced, a copy kept in the
                                           sync folder. off: both ways, as before
-  magpie s3 restore                       make this computer's setup the server's; what is here is kept first
-  magpie s3 undo                          put back what the last restore replaced
-  magpie s3 upload                        put this computer's setup over a bucket file that isn't a backup
+  eipgam s3 restore                       make this computer's setup the server's; what is here is kept first
+  eipgam s3 undo                          put back what the last restore replaced
+  eipgam s3 upload                        put this computer's setup over a bucket file that isn't a backup
                                           (empty, cut short, another app's); the bucket's is kept first
-  magpie s3 dismiss                       clear what the last sync said it replaced
-  magpie s3 off                           turn it off; the file in the bucket stays
+  eipgam s3 dismiss                       clear what the last sync said it replaced
+  eipgam s3 off                           turn it off; the file in the bucket stays
 
   endpoint    the server, https://…; none is AWS. R2: https://<account>.r2.cloudflarestorage.com
   region      none is us-east-1, or auto on R2; AWS says which when it is another
@@ -124,32 +124,32 @@ const s3Usage = `usage:
               the subscriptions whose sign-ins stay on this computer, by id (claude,codex): theirs
               here never go up, the server's never come in, and nothing here is taken away;
               none: every one syncs
-  moving      magpie s3 on with WebDAV sync on moves sync to the bucket; the WebDAV address, user and
-              password are kept, and magpie webdav on alone moves back to them
+  moving      eipgam s3 on with WebDAV sync on moves sync to the bucket; the WebDAV address, user and
+              password are kept, and eipgam webdav on alone moves back to them
 
   Piped in, the secret (when asked) is the first line of stdin and the passphrase the next.
-  A WebDAV folder instead: magpie webdav help.
+  A WebDAV folder instead: eipgam webdav help.
 
-  e.g. magpie s3 on s3://my-bucket/magpie endpoint=https://<account>.r2.cloudflarestorage.com access-key-id=…
-       magpie s3 on s3://backups endpoint=http://nas.local:9000 path-style=yes access-key-id=…
+  e.g. eipgam s3 on s3://my-bucket/eipgam endpoint=https://<account>.r2.cloudflarestorage.com access-key-id=…
+       eipgam s3 on s3://backups endpoint=http://nas.local:9000 path-style=yes access-key-id=…
 `
 
 const githubUsage = `usage:
-  magpie github                           whether sync is on, where to, and how the last sync went
-  magpie github on github://owner/repo[/folder] [branch=…] [keys=no] [agents=no] [library=no]
+  eipgam github                           whether sync is on, where to, and how the last sync went
+  eipgam github on github://owner/repo[/folder] [branch=…] [keys=no] [agents=no] [library=no]
                                           keep the encrypted setup in an existing GitHub repository; asks for a token and passphrase
-  magpie github set k=v…                  change it: address, branch, providers, settings, profiles, keys, agents,
+  eipgam github set k=v…                  change it: address, branch, providers, settings, profiles, keys, agents,
                                           library, memory, usage, sign-ins (yes|no)
-  magpie github now                       sync now
-  magpie github preview                   what syncing now would change, here and on the server; nothing is changed
-  magpie github undo-sync [anyway]        put back what the last sync brought in, on this computer only
-  magpie github auto off|3|15|30|60       how often the gateway syncs by itself, in minutes
-  magpie github follow on|off             on: this computer takes the repository's setup and sends none of its own
-  magpie github restore                   make this computer's setup the repository's; what is here is kept first
-  magpie github undo                       put back what the last restore replaced
-  magpie github upload                     put this computer's setup over a repository file that isn't a backup; the old file is kept first
-  magpie github dismiss                   clear what the last sync said it replaced
-  magpie github off                       turn it off; the encrypted file and its commit history stay
+  eipgam github now                       sync now
+  eipgam github preview                   what syncing now would change, here and on the server; nothing is changed
+  eipgam github undo-sync [anyway]        put back what the last sync brought in, on this computer only
+  eipgam github auto off|3|15|30|60       how often the gateway syncs by itself, in minutes
+  eipgam github follow on|off             on: this computer takes the repository's setup and sends none of its own
+  eipgam github restore                   make this computer's setup the repository's; what is here is kept first
+  eipgam github undo                       put back what the last restore replaced
+  eipgam github upload                     put this computer's setup over a repository file that isn't a backup; the old file is kept first
+  eipgam github dismiss                   clear what the last sync said it replaced
+  eipgam github off                       turn it off; the encrypted file and its commit history stay
 
   token      asked for, unechoed, and saved only for this repository. It needs
              Contents read and write permission. The repository must already
@@ -165,7 +165,7 @@ const githubUsage = `usage:
              no: that part stays as it is on each computer, never brought in nor sent up
 `
 
-// syncKind is magpie webdav's, magpie s3's or magpie github's server.
+// syncKind is eipgam webdav's, eipgam s3's or eipgam github's server.
 type syncKind struct {
 	name, cmd, usage string
 }
@@ -178,21 +178,21 @@ var (
 
 func (k syncKind) turnOn() string {
 	if k.cmd == "s3" {
-		return "magpie s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] turns it on"
+		return "eipgam s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] turns it on"
 	}
 	if k.cmd == "github" {
-		return "magpie github on github://<owner>/<repo>[/<folder>] turns it on"
+		return "eipgam github on github://<owner>/<repo>[/<folder>] turns it on"
 	}
-	return "magpie webdav on <address> [user=…] turns it on"
+	return "eipgam webdav on <address> [user=…] turns it on"
 }
 
-// webdavCmd is magpie webdav ….
+// webdavCmd is eipgam webdav ….
 func webdavCmd(args []string) error { return syncCmd(webdavKind, args) }
 
-// s3Cmd is magpie s3 ….
+// s3Cmd is eipgam s3 ….
 func s3Cmd(args []string) error { return syncCmd(s3Kind, args) }
 
-// githubCmd is magpie github ….
+// githubCmd is eipgam github ….
 func githubCmd(args []string) error { return syncCmd(githubKind, args) }
 
 func syncCmd(k syncKind, args []string) error {
@@ -208,12 +208,12 @@ func syncCmd(k syncKind, args []string) error {
 		return syncNow(k)
 	case "auto":
 		if len(args) != 2 {
-			return fmt.Errorf("magpie %s auto off|3|15|30|60", k.cmd)
+			return fmt.Errorf("eipgam %s auto off|3|15|30|60", k.cmd)
 		}
 		m := davsync.Manual
 		if args[1] != "off" {
 			if _, err := fmt.Sscan(args[1], &m); err != nil {
-				return fmt.Errorf("magpie %s auto off|3|15|30|60, not %q", k.cmd, args[1])
+				return fmt.Errorf("eipgam %s auto off|3|15|30|60, not %q", k.cmd, args[1])
 			}
 		}
 		if err := davsync.SetAuto(m); err != nil {
@@ -222,7 +222,7 @@ func syncCmd(k syncKind, args []string) error {
 		return syncShow(k)
 	case "follow":
 		if len(args) != 2 || args[1] != "on" && args[1] != "off" {
-			return fmt.Errorf("magpie %s follow on|off", k.cmd)
+			return fmt.Errorf("eipgam %s follow on|off", k.cmd)
 		}
 		if err := davsync.SetFollowServer(args[1] == "on"); err != nil {
 			if errors.Is(err, davsync.ErrOff) {
@@ -248,7 +248,7 @@ func syncCmd(k syncKind, args []string) error {
 		if len(parts) == 0 {
 			fmt.Println("nothing differed: nothing was replaced")
 		} else if args[0] == "restore" {
-			fmt.Printf("restored from the server: %s; what was here is kept, and magpie %s undo puts it back\n", strings.Join(parts, ", "), k.cmd)
+			fmt.Printf("restored from the server: %s; what was here is kept, and eipgam %s undo puts it back\n", strings.Join(parts, ", "), k.cmd)
 		} else {
 			fmt.Printf("put back: %s\n", strings.Join(parts, ", "))
 		}
@@ -269,12 +269,12 @@ func syncCmd(k syncKind, args []string) error {
 		}
 		force := len(args) == 2 && args[1] == "anyway"
 		if len(args) > 2 || len(args) == 2 && !force {
-			return fmt.Errorf("magpie %s undo-sync [anyway]", k.cmd)
+			return fmt.Errorf("eipgam %s undo-sync [anyway]", k.cmd)
 		}
 		parts, err := davsync.UndoSync(force)
 		var since *davsync.ChangedSince
 		if errors.As(err, &since) {
-			return fmt.Errorf("%s changed here since that sync: magpie %s undo-sync anyway puts back what was there before it, a copy of now kept first", partNames(since.Parts), k.cmd)
+			return fmt.Errorf("%s changed here since that sync: eipgam %s undo-sync anyway puts back what was there before it, a copy of now kept first", partNames(since.Parts), k.cmd)
 		}
 		if err != nil {
 			return err
@@ -298,7 +298,7 @@ func syncCmd(k syncKind, args []string) error {
 	case "off":
 		// the other's is turned off by its own command, not by a slip
 		if c, ok := davsync.Load(); ok && c.Kind() != k.name {
-			return fmt.Errorf("%s sync is on, not %s: magpie %s off turns it off", c.Kind(), k.name, strings.ToLower(c.Kind()))
+			return fmt.Errorf("%s sync is on, not %s: eipgam %s off turns it off", c.Kind(), k.name, strings.ToLower(c.Kind()))
 		}
 		if err := davsync.Off(); err != nil {
 			return err
@@ -326,7 +326,7 @@ func syncSet(k syncKind, args []string, on bool) error {
 	c, was := davsync.Load()
 	if was && c.Kind() != k.name {
 		if !on {
-			return fmt.Errorf("%s sync is on, not %s: magpie %s set changes it; %s", c.Kind(), k.name, strings.ToLower(c.Kind()), k.turnOn())
+			return fmt.Errorf("%s sync is on, not %s: eipgam %s set changes it; %s", c.Kind(), k.name, strings.ToLower(c.Kind()), k.turnOn())
 		}
 		next := davsync.Config{Passphrase: c.Passphrase, Keys: c.Keys, Agents: c.Agents, Library: c.Library, Memory: c.Memory, Usage: c.Usage, SignIns: c.SignIns, SignInsExcept: c.SignInsExcept,
 			Providers: c.Providers, Settings: c.Settings, Profiles: c.Profiles}
@@ -453,9 +453,9 @@ func syncSet(k syncKind, args []string, on bool) error {
 			return fmt.Errorf("%q is not a GitHub address (github://owner/repo or github://owner/repo/folder)", c.URL)
 		}
 		if c.GitHub() {
-			return fmt.Errorf("%q is not a WebDAV address (https://...): magpie github on %s for a GitHub repository", c.URL, c.URL)
+			return fmt.Errorf("%q is not a WebDAV address (https://...): eipgam github on %s for a GitHub repository", c.URL, c.URL)
 		}
-		return fmt.Errorf("%q is not a WebDAV address (https://…): magpie s3 on %s for an S3 bucket", c.URL, c.URL)
+		return fmt.Errorf("%q is not a WebDAV address (https://…): eipgam s3 on %s for an S3 bucket", c.URL, c.URL)
 	}
 	if err := davsync.Check(c); err != nil {
 		return err
@@ -491,7 +491,7 @@ func syncSet(k syncKind, args []string, on bool) error {
 	}
 	// and sync at once, so a wrong address or password shows now
 	if err := syncNow(k); err != nil {
-		fmt.Fprintln(os.Stderr, muted.Render(fmt.Sprintf("It is on: magpie %s set k=v… changes it, magpie %s off turns it off.", k.cmd, k.cmd)))
+		fmt.Fprintln(os.Stderr, muted.Render(fmt.Sprintf("It is on: eipgam %s set k=v… changes it, eipgam %s off turns it off.", k.cmd, k.cmd)))
 		return err
 	}
 	return nil
@@ -530,11 +530,11 @@ func syncShow(k syncKind) error {
 	if !v.On {
 		fmt.Println(k.name + " sync is off")
 		if k.cmd == "s3" {
-			fmt.Println(muted.Render("magpie s3 on s3://<bucket> keeps providers, settings, profiles, agents' models and the library the same on every computer (magpie s3 help)"))
+			fmt.Println(muted.Render("eipgam s3 on s3://<bucket> keeps providers, settings, profiles, agents' models and the library the same on every computer (eipgam s3 help)"))
 		} else if k.cmd == "github" {
-			fmt.Println(muted.Render("magpie github on github://<owner>/<repo>[/<folder>] keeps providers, settings, profiles, agents' models and the library in an encrypted GitHub file (magpie github help)"))
+			fmt.Println(muted.Render("eipgam github on github://<owner>/<repo>[/<folder>] keeps providers, settings, profiles, agents' models and the library in an encrypted GitHub file (eipgam github help)"))
 		} else {
-			fmt.Println(muted.Render("magpie webdav on <address> keeps providers, settings, profiles, agents' models and the library the same on every computer (magpie webdav help)"))
+			fmt.Println(muted.Render("eipgam webdav on <address> keeps providers, settings, profiles, agents' models and the library the same on every computer (eipgam webdav help)"))
 		}
 		return nil
 	}
@@ -616,11 +616,11 @@ func syncShow(k syncKind) error {
 	}
 	if o := v.Other; o != nil {
 		if o.Kind == "s3" {
-			fmt.Println(muted.Render("  S3 " + o.URL + " is kept, not synced to: magpie s3 on moves back to it"))
+			fmt.Println(muted.Render("  S3 " + o.URL + " is kept, not synced to: eipgam s3 on moves back to it"))
 		} else if o.Kind == "github" {
-			fmt.Println(muted.Render("  GitHub " + o.URL + " is kept, not synced to: magpie github on moves back to it"))
+			fmt.Println(muted.Render("  GitHub " + o.URL + " is kept, not synced to: eipgam github on moves back to it"))
 		} else {
-			fmt.Println(muted.Render("  WebDAV " + o.URL + " is kept, not synced to: magpie webdav on moves back to it"))
+			fmt.Println(muted.Render("  WebDAV " + o.URL + " is kept, not synced to: eipgam webdav on moves back to it"))
 		}
 	}
 
@@ -636,11 +636,11 @@ func syncShow(k syncKind) error {
 		fmt.Println("  couldn't share usage:", v.UsageError)
 	}
 	if len(v.SignIn) > 0 {
-		fmt.Println("  synced settings use these, not signed in on this computer (sync carries settings, not sign-ins, unless sign-ins=yes; to use one here: magpie accounts add <id>):", strings.Join(v.SignIn, ", "))
+		fmt.Println("  synced settings use these, not signed in on this computer (sync carries settings, not sign-ins, unless sign-ins=yes; to use one here: eipgam accounts add <id>):", strings.Join(v.SignIn, ", "))
 	}
 	if n := v.Notice; n != nil && n.Restored {
 		fmt.Println("  Restored from the server:", partNames(n.Here))
-		fmt.Println(muted.Render("  This computer's setup from before is kept in " + tilde(n.Saved) + " (magpie " + cmd + " undo puts it back; magpie " + cmd + " dismiss clears this)"))
+		fmt.Println(muted.Render("  This computer's setup from before is kept in " + tilde(n.Saved) + " (eipgam " + cmd + " undo puts it back; eipgam " + cmd + " dismiss clears this)"))
 	} else if n != nil {
 		if len(n.Here) > 0 && n.Followed {
 			fmt.Println("  This computer follows the server, so what was changed here is replaced by the server's:", partNames(n.Here))
@@ -654,21 +654,21 @@ func syncShow(k syncKind) error {
 		if dir == "" {
 			dir = filepath.Join(settings.Dir(), "sync")
 		}
-		fmt.Println(muted.Render("  The copies replaced are kept in " + tilde(dir) + " (magpie restore opens one; magpie " + cmd + " dismiss clears this)"))
+		fmt.Println(muted.Render("  The copies replaced are kept in " + tilde(dir) + " (eipgam restore opens one; eipgam " + cmd + " dismiss clears this)"))
 	}
 	if a := v.Applied; a != nil {
-		fmt.Println(muted.Render("  The last sync brought in " + partNames(a.Parts) + " " + syncWhen(a.At) + " (magpie " + cmd + " undo-sync puts back what was here)"))
+		fmt.Println(muted.Render("  The last sync brought in " + partNames(a.Parts) + " " + syncWhen(a.At) + " (eipgam " + cmd + " undo-sync puts back what was here)"))
 	}
 	if v.FollowServer {
-		fmt.Println("  follows the server: takes its setup, sends none of its own (magpie " + cmd + " follow off syncs both ways)")
+		fmt.Println("  follows the server: takes its setup, sends none of its own (eipgam " + cmd + " follow off syncs both ways)")
 	}
 	switch {
 	case v.Auto == 0:
-		fmt.Println(muted.Render("  Syncs only when asked: magpie " + cmd + " now syncs once (magpie " + cmd + " auto 3 syncs by itself again)"))
+		fmt.Println(muted.Render("  Syncs only when asked: eipgam " + cmd + " now syncs once (eipgam " + cmd + " auto 3 syncs by itself again)"))
 	case !gateway.Running():
-		fmt.Println(muted.Render(fmt.Sprintf("  No gateway runs here: nothing syncs by itself until one does (the app, magpie web or magpie serve), every %d minutes; magpie %s now syncs once", v.Auto, cmd)))
+		fmt.Println(muted.Render(fmt.Sprintf("  No gateway runs here: nothing syncs by itself until one does (the app, eipgam web or eipgam serve), every %d minutes; eipgam %s now syncs once", v.Auto, cmd)))
 	default:
-		fmt.Println(muted.Render(fmt.Sprintf("  Syncs by itself every %d minutes (magpie %s auto changes it)", v.Auto, cmd)))
+		fmt.Println(muted.Render(fmt.Sprintf("  Syncs by itself every %d minutes (eipgam %s auto changes it)", v.Auto, cmd)))
 	}
 	return nil
 }
@@ -729,7 +729,7 @@ func printPlan(p davsync.Plan, k syncKind) {
 	if changes == 0 {
 		fmt.Println(muted.Render("  nothing would change"))
 	} else {
-		fmt.Println(muted.Render("  magpie " + k.cmd + " now syncs; magpie " + k.cmd + " undo-sync puts back what it brought in"))
+		fmt.Println(muted.Render("  eipgam " + k.cmd + " now syncs; eipgam " + k.cmd + " undo-sync puts back what it brought in"))
 	}
 }
 

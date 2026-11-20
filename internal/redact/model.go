@@ -6,7 +6,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A local model (internal/pii, Settings → Privacy's "Find with a local
@@ -281,7 +281,7 @@ func withModel(o Options, texts []string) Options {
 // secret. Each goes as written now:
 //   - a piece cut out of a longer word, whatever its kind;
 //   - a name with a digit, a slash, an @ or a file's dot in it, all in
-//     lower case (magpie, claude-in-chrome), a path's part, or an
+//     lower case (eipgam, claude-in-chrome), a path's part, or an
 //     assistant's or a model's own (Claude, Codex, Haiku 4.5);
 //   - an account that is a commit's hash, a version, or a number with
 //     nothing before it to say it is an account's; a phone number that is
@@ -919,7 +919,7 @@ var assistantNames = map[string]bool{
 	"claude": true, "chatgpt": true, "gpt": true, "codex": true, "gemini": true, "copilot": true,
 	"grok": true, "kimi": true, "qwen": true, "deepseek": true, "cursor": true, "devin": true,
 	"kiro": true, "opencode": true, "opus": true, "sonnet": true, "haiku": true, "fable": true,
-	"glm": true, "doubao": true, "magpie": true, "jev": true,
+	"glm": true, "doubao": true, "eipgam": true, "jev": true,
 }
 
 var (

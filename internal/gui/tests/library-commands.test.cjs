@@ -4,7 +4,7 @@
 // is kept once and given to agents with the chips every other tab has.
 // Its row shows /name and what it is for, wrapped. Asides say which
 // agents it is given to take only $ARGUMENTS (so a command using $1 isn't
-// written for them) and which agents magpie can't write one for: Codex,
+// written for them) and which agents eipgam can't write one for: Codex,
 // which reads custom prompts no more, and an agent in WSL. Their chips
 // are greyed, say why, and post nothing. A row's chip posts
 // commands/agents. Add opens the editor with every agent that can take
@@ -34,10 +34,10 @@ const COMMAND_AGENTS = [
   { id: "codex", no: "Codex reads custom prompts no more: its skills took their place" },
   { id: "gemini", dir: `${HOME}/.gemini/commands` },
   { id: "opencode", dir: `${HOME}/.config/opencode/commands`, args: true },
-  { id: WSL, wsl: true, no: "magpie gives no slash commands to an agent in WSL yet" },
+  { id: WSL, wsl: true, no: "eipgam gives no slash commands to an agent in WSL yet" },
 ];
 const lib = (commands) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("gemini", "Gemini CLI"), agent("opencode", "OpenCode"), agent(WSL, "Claude Code (Ubuntu)")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills: [], problems: [],
   hooks: [], hookAgents: [], subagents: [], subagentAgents: [], commands, commandAgents: COMMAND_AGENTS,
@@ -75,7 +75,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -123,14 +123,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [], errors = [];
         const open = async (width) => {
           const ctx = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "commands"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "commands"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
           await page.route("**/*", server(lang, state, posts));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           await page.locator("#view-library .lib-command").first().waitFor();
           return { ctx, page };
@@ -170,7 +170,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await wrapped(page, 420);
         // Gemini takes only $ARGUMENTS, and review uses $1
         await v.locator(".lib-commands-noargs").filter({ hasText: w("{agents} take only $ARGUMENTS, all the words at once: a command that uses $1, $2… isn't written for them.", { agents: "Gemini CLI" }) }).waitFor();
-        await v.locator(".lib-commands-no").filter({ hasText: w("magpie can't give slash commands to {agents}: their chips are greyed, and say why.", { agents: "Codex, Claude Code (Ubuntu)" }) }).waitFor();
+        await v.locator(".lib-commands-no").filter({ hasText: w("eipgam can't give slash commands to {agents}: their chips are greyed, and say why.", { agents: "Codex, Claude Code (Ubuntu)" }) }).waitFor();
 
         // Codex and the agent in WSL: greyed, say why, and a click posts nothing
         const codex = row("review").locator('.lib-ag[data-agent="codex"]');
@@ -178,7 +178,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await codex.getAttribute("title"), w("Codex reads custom prompts no more: its skills took their place"));
         const wsl = row("review").locator(`.lib-ag[data-agent="${WSL}"]`);
         assert.equal(await wsl.getAttribute("aria-disabled"), "true");
-        assert.equal(await wsl.getAttribute("title"), w("magpie gives slash commands only to agents on this computer, not yet to {agent} in WSL", { agent: "Claude Code (Ubuntu)" }));
+        assert.equal(await wsl.getAttribute("title"), w("eipgam gives slash commands only to agents on this computer, not yet to {agent} in WSL", { agent: "Claude Code (Ubuntu)" }));
         await press(page, codex);
         await press(page, wsl);
         await page.waitForTimeout(150);

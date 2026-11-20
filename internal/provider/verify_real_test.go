@@ -46,7 +46,7 @@ func TestVerificationLinkWhole(t *testing.T) {
 		if link, _ := Verification([]byte(msg)); link != realVerifyURL {
 			t.Fatalf("escape %v: from the message %q", esc, link)
 		}
-		// the message passed on again as an error body (a Remote magpie's,
+		// the message passed on again as an error body (a Remote eipgam's,
 		// the gateway's answer to an agent): the link read back whole
 		again, _ := json.Marshal(map[string]any{"error": map[string]any{"message": msg}})
 		if link, _ := Verification(again); link != realVerifyURL {

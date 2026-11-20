@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 	"golang.org/x/sys/unix"
 )
 

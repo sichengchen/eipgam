@@ -7,7 +7,7 @@ package agent
 // variable that takes precedence over the setting is told of, never
 // written over.
 //
-// Where Codex compacts, and Claude Code wherever magpie's own window is
+// Where Codex compacts, and Claude Code wherever eipgam's own window is
 // what it runs at, is one value: Long conversations (settings.CompactAt,
 // FullContext), which Sync writes into each agent's config. Tune reads and
 // sets that value, so the Usage page and the agents' settings never show
@@ -26,9 +26,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The settings tune knows.
@@ -47,24 +47,24 @@ type TuneSetting struct {
 	Value string `json:"value,omitempty"` // "" when nothing sets it
 	// Where Value comes from: settings (the agent's own config file),
 	// model (Claude Code's modelSettings for the model), env, or long
-	// (TuneLong: magpie's Long conversations, "" under Full window)
+	// (TuneLong: eipgam's Long conversations, "" under Full window)
 	Source string `json:"source,omitempty"`
 	// Locked names the variable that takes precedence over the setting,
 	// which tune leaves as it is: putting the advice in would change nothing
 	Locked string `json:"locked,omitempty"`
 	// Ours: tune put Value in, and Undo puts back what was there
 	Ours bool `json:"ours,omitempty"`
-	// Take: what is Locked is one magpie can take over on the user's say
+	// Take: what is Locked is one eipgam can take over on the user's say
 	// (TuneTakeOver)
 	Take bool `json:"take,omitempty"`
 }
 
-// TuneLong is the Source of a window that is magpie's Long conversations,
-// which Apply and Undo change in magpie's settings, not in the agent's file.
+// TuneLong is the Source of a window that is eipgam's Long conversations,
+// which Apply and Undo change in eipgam's settings, not in the agent's file.
 const TuneLong = "long"
 
 // codexCompactKey is the key tune wrote Codex's window to before it went
-// to Long conversations; one the user wrote comes before magpie's window.
+// to Long conversations; one the user wrote comes before eipgam's window.
 const codexCompactKey = "model_auto_compact_token_limit"
 
 // tuneLongKey is the stash of Long conversations as it was before tune
@@ -114,7 +114,7 @@ func longOurs(s settings.Settings, agent string) bool {
 }
 
 // longApply puts n in Long conversations, what it was kept the first time
-// for Undo. Sync then writes it into every agent magpie routes.
+// for Undo. Sync then writes it into every agent eipgam routes.
 func longApply(agent string, n int) error {
 	s := settings.Load()
 	key, a := longKey(s, agent), s.ForAgent(agent)
@@ -138,7 +138,7 @@ func longUndo(agent string) error {
 	key := longKey(s, agent)
 	st, ok := tuneLongStashed(key)
 	if !ok {
-		return fmt.Errorf("magpie didn't set Long conversations")
+		return fmt.Errorf("eipgam didn't set Long conversations")
 	}
 	defer forget(key)
 	if !longOurs(s, agent) {
@@ -155,7 +155,7 @@ func longUndo(agent string) error {
 
 // tuneMigrateCodex moves a model_auto_compact_token_limit tune wrote into
 // Codex's config.toml before (tune.codex.compact) into Long conversations,
-// and puts back what the file had. Long conversations at magpie's default
+// and puts back what the file had. Long conversations at eipgam's default
 // takes it, as the user's own choice; one the user set takes it only when
 // it is lower, which is where Codex compacted (it stops at the lesser of
 // the limit and the window it is told), so nothing changes for them. A
@@ -172,7 +172,7 @@ func tuneMigrateCodex(home string) {
 		return
 	}
 	// the stash goes only once the limit is out of the file: one that
-	// couldn't be moved is still magpie's, and tried again at the next
+	// couldn't be moved is still eipgam's, and tried again at the next
 	// read, never left in the file as if the user had written it
 	if n, err := strconv.Atoi(st.Set); err == nil && n > 0 {
 		if err := longApply("codex", codexLongTakes(n)); err != nil {
@@ -192,7 +192,7 @@ func tuneMigrateCodex(home string) {
 
 // codexLongTakes is the window Long conversations for Codex has once a
 // limit n from Codex's config.toml is moved into it: n, where Long
-// conversations is at magpie's default or Full window; else the lesser of
+// conversations is at eipgam's default or Full window; else the lesser of
 // the two, where Codex compacted with both (it stops at the lesser of the
 // limit and the window it is told), so nothing changes for the user.
 func codexLongTakes(n int) int {
@@ -204,27 +204,27 @@ func codexLongTakes(n int) int {
 }
 
 // tuneFileKey stashes the limit the user had in Codex's config.toml when
-// they let magpie set it (TuneTakeOver), as the file had it: Undo writes
+// they let eipgam set it (TuneTakeOver), as the file had it: Undo writes
 // it back.
 const tuneFileKey = "tune.codex.compact_file"
 
-// TuneTakeOver is the user's say that magpie sets what Codex's config.toml
+// TuneTakeOver is the user's say that eipgam sets what Codex's config.toml
 // sets before it, the Locked of TuneRead (sufeng1894 on X: the Usage
 // page's Codex card was locked by a model_auto_compact_token_limit, with
-// no way to adjust it from magpie). The limit moves into Long
+// no way to adjust it from eipgam). The limit moves into Long
 // conversations for Codex (codexLongTakes, as tuneMigrateCodex moves
 // tune's own) and out of the file; a background compaction threshold of
 // the user's in [features.async_compaction] becomes Background
-// compaction's, in Settings, and stays in the file as magpie's. Undo puts
+// compaction's, in Settings, and stays in the file as eipgam's. Undo puts
 // both back as they were. Nothing of the user's is taken without this.
 func TuneTakeOver(home, agent string) error {
 	if agent != "codex" {
-		return fmt.Errorf("%s has nothing in its config that magpie can take over", agent)
+		return fmt.Errorf("%s has nothing in its config that eipgam can take over", agent)
 	}
 	_, limit := codexOwnLimit(home)
 	_, _, async := asyncTakeable(home)
 	if !limit && !async {
-		return fmt.Errorf("Codex's config.toml sets nothing magpie can take over")
+		return fmt.Errorf("Codex's config.toml sets nothing eipgam can take over")
 	}
 	if limit {
 		if err := compactTakeOver(home); err != nil {
@@ -238,7 +238,7 @@ func TuneTakeOver(home, agent string) error {
 }
 
 // codexOwnLimit is the model_auto_compact_token_limit Codex's config.toml
-// has at its top, as a token count: ok when there is one magpie can take.
+// has at its top, as a token count: ok when there is one eipgam can take.
 func codexOwnLimit(home string) (int, bool) {
 	p := tunePlace{path: filepath.Join(here(tuneHome(home)).codexHome(), "config.toml"), key: codexCompactKey, toml: true}
 	v, has := p.get()
@@ -265,7 +265,7 @@ func compactTakeOver(home string) error {
 }
 
 // codexLongUndo is Undo on Codex's window in Long conversations: Long
-// conversations as it was, and the limit the user let magpie take
+// conversations as it was, and the limit the user let eipgam take
 // (tuneFileKey) back in config.toml, unless either changed since.
 func codexLongUndo(home string) error {
 	ours := longOurs(settings.Load(), "codex")
@@ -326,7 +326,7 @@ func tuneWhere(home, agent, knob, model string) (tunePlace, error) {
 		case TuneCompact:
 			n := claudeName(model)
 			if n == "" {
-				return tunePlace{}, fmt.Errorf("%q is no Claude model: Claude Code's window for it is magpie's own, under Settings", model)
+				return tunePlace{}, fmt.Errorf("%q is no Claude model: Claude Code's window for it is eipgam's own, under Settings", model)
 			}
 			return tunePlace{path: path, key: "modelSettings." + n + ".autoCompactWindow", env: []string{claudeCompactEnv}, number: true}, nil
 		case TuneCache:
@@ -352,7 +352,7 @@ func (p tunePlace) get() (string, bool) {
 }
 
 // envOf is a variable Claude Code starts with: in settings.json's env, or
-// magpie's own, which a terminal it is run from most likely has too.
+// eipgam's own, which a terminal it is run from most likely has too.
 func (p tunePlace) envOf(k string) string {
 	if v, _ := edit.GetJSON(p.path, "env."+k); v != "" {
 		return v
@@ -374,7 +374,7 @@ func TuneRead(home, agent, knob, model string) (TuneSetting, error) {
 		var s TuneSetting
 		if v, ok := p.get(); ok {
 			// the user's own limit: Codex stops at it before the window
-			// magpie tells it
+			// eipgam tells it
 			s.Value, s.Source, s.Locked = strings.Trim(v, `"'`), "settings", codexCompactKey
 			_, s.Take = codexOwnLimit(home)
 			return s, nil
@@ -406,7 +406,7 @@ func TuneRead(home, agent, knob, model string) (TuneSetting, error) {
 			}
 		} else if agent == "claude" && knob == TuneCompact {
 			// the top-level window serves every model with none of its
-			// own: magpie's Long conversations where magpie wrote it
+			// own: eipgam's Long conversations where eipgam wrote it
 			if v, ok := edit.GetJSON(p.path, "autoCompactWindow"); ok && v != "auto" {
 				if claudeLongWindow(p.path, "autoCompactWindow", "claude.compact_default") {
 					// Long conversations as typed, which the file holds to
@@ -426,7 +426,7 @@ func TuneRead(home, agent, knob, model string) (TuneSetting, error) {
 }
 
 // claudeLongEnv says the CLAUDE_CODE_AUTO_COMPACT_WINDOW Claude Code has
-// is the one magpie wrote in settings.json from Long conversations
+// is the one eipgam wrote in settings.json from Long conversations
 // (writeCompact), not a provider's Compact at for the main model or the
 // user's own.
 func claudeLongEnv(path, v string) bool {
@@ -436,7 +436,7 @@ func claudeLongEnv(path, v string) bool {
 }
 
 // claudeLongWindow says the window at key in Claude Code's settings.json
-// is the one magpie wrote there (its stash under stashKey) from Long
+// is the one eipgam wrote there (its stash under stashKey) from Long
 // conversations, not a provider's Compact at for the main model or the
 // user's own.
 func claudeLongWindow(path, key, stashKey string) bool {
@@ -530,7 +530,7 @@ type TuneKnob struct {
 // card keeps them there when a range has too few calls to advise on
 // (linkaww on Discord: a 1-hour cache put in, with no way back to 5
 // minutes). The cache lifetimes are also picked in Claude Code's own
-// settings (ClaudeCacheSet), which makes them the user's. One in magpie's Long
+// settings (ClaudeCacheSet), which makes them the user's. One in eipgam's Long
 // conversations or Codex's background compaction is left out: Settings
 // shows and changes those.
 func TuneKept(home, agent string) []TuneKnob {
@@ -568,8 +568,8 @@ func TuneKept(home, agent string) []TuneKnob {
 // computer's Claude Code reads them, whoever set them, when its folder is
 // here: the main conversation's always, the subagents' when something
 // sets it. They change what this computer's Claude Code sends, whichever
-// magpie its requests go on to (linkaww on Discord: Claude Code through a
-// Remote magpie, too few calls read here to advise on, and the card had
+// eipgam its requests go on to (linkaww on Discord: Claude Code through a
+// Remote eipgam, too few calls read here to advise on, and the card had
 // no row to tell the cache it keeps, or a way back to 5 minutes).
 func TuneCacheHere(home string) []TuneKnob {
 	p, err := tuneWhere(home, "claude", TuneCache, "")
@@ -608,7 +608,7 @@ func TuneUndo(home, agent, knob, model string) error {
 	}
 	st, ok := tuneStashed(agent, knob, model)
 	if !ok {
-		return fmt.Errorf("magpie didn't set %s", p.key)
+		return fmt.Errorf("eipgam didn't set %s", p.key)
 	}
 	defer forget(tuneKey(agent, knob, model))
 	if v, _ := p.get(); strings.Trim(v, `"'`) != st.Set {
@@ -679,7 +679,7 @@ type tuneAsyncStash struct {
 	Percent int  `json:"percent"`
 	Set     int  `json:"set"`
 	// the threshold, and enabled = true, the user had in config.toml when
-	// they let magpie take it over (asyncTakeOver), which Undo gives back
+	// they let eipgam take it over (asyncTakeOver), which Undo gives back
 	Own        int  `json:"own,omitempty"`
 	OwnEnabled bool `json:"ownEnabled,omitempty"`
 }
@@ -726,7 +726,7 @@ func asyncApply(home, value string) error {
 		return fmt.Errorf("Codex compacts in the background past 1 to 100%% of a model's window, not %q", value)
 	}
 	if own := codexAsyncOwn(home); own != "" {
-		return fmt.Errorf("Codex's config.toml sets %s, which comes before magpie's: take it out first", own)
+		return fmt.Errorf("Codex's config.toml sets %s, which comes before eipgam's: take it out first", own)
 	}
 	s := settings.Load()
 	st, ok := asyncStashed()
@@ -744,7 +744,7 @@ func asyncApply(home, value string) error {
 func asyncUndo(home string) error {
 	st, ok := asyncStashed()
 	if !ok {
-		return fmt.Errorf("magpie didn't set Codex's background compaction")
+		return fmt.Errorf("eipgam didn't set Codex's background compaction")
 	}
 	defer forget(tuneAsyncKey)
 	if !asyncOurs(settings.Load()) {
@@ -761,7 +761,7 @@ func asyncUndo(home string) error {
 
 // asyncTakeable is the background compaction threshold of the user's that
 // Codex's config.toml has in its [features.async_compaction] table, the
-// one thing there that keeps magpie's from being read: ok when magpie can
+// one thing there that keeps eipgam's from being read: ok when eipgam can
 // take it over (asyncTakeOver). enabled: the table's enabled = true is the
 // user's too.
 func asyncTakeable(home string) (n int, enabled, ok bool) {
@@ -785,12 +785,12 @@ func asyncTakeable(home string) (n int, enabled, ok bool) {
 
 // asyncTakeOver makes the user's threshold Background compaction's: the
 // setting takes its value, and the config's key is counted as the one
-// magpie wrote (codexAsyncSync's stash), so it is changed and taken out
+// eipgam wrote (codexAsyncSync's stash), so it is changed and taken out
 // with the setting from now on. Nothing in the file changes.
 func asyncTakeOver(home string) error {
 	n, enabled, ok := asyncTakeable(home)
 	if !ok {
-		return fmt.Errorf("Codex's config.toml sets no background compaction threshold magpie can take over")
+		return fmt.Errorf("Codex's config.toml sets no background compaction threshold eipgam can take over")
 	}
 	s := settings.Load()
 	st, had := asyncStashed()
@@ -814,7 +814,7 @@ func asyncTakeOver(home string) error {
 	return provider.SetCodexAsyncCompact(true, n)
 }
 
-// asyncGiveBack puts the threshold (and enabled = true) the user let magpie
+// asyncGiveBack puts the threshold (and enabled = true) the user let eipgam
 // take back in config.toml as theirs, unless they changed the file since.
 func asyncGiveBack(home string, st tuneAsyncStash) error {
 	at := here(tuneHome(home))

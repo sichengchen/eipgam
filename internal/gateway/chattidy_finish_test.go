@@ -54,7 +54,7 @@ func TestChatCallsEndToolCalls(t *testing.T) {
 	}
 }
 
-// #4944 (Hermes through magpie): a stream whose reply is text alone ends,
+// #4944 (Hermes through eipgam): a stream whose reply is text alone ends,
 // on the reporter's upstream, on a frame that says finish_reason
 // "tool_calls" and carries no tool_calls key in any delta — the reporter's
 // bare call of the model ends its real calls with just that shape

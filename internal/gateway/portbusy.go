@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // Who holds the gateway's port when it can't listen there (pluoki on X:
@@ -31,8 +31,8 @@ type PortHeld struct {
 	// Tailscale: Tailscale's serve or funnel has the port (the holder is
 	// Tailscale's, or `tailscale serve status` lists the port)
 	Tailscale bool `json:"tailscale,omitempty"`
-	// Own: the holder is a magpie of this install (the background
-	// service, `magpie daemon`, starting up or restarted onto an update),
+	// Own: the holder is a eipgam of this install (the background
+	// service, `eipgam daemon`, starting up or restarted onto an update),
 	// which serves the gateway once it answers: nothing to quit or move
 	Own bool `json:"own,omitempty"`
 	// Alt: a port to give Tailscale's HTTPS proxy in its place
@@ -46,10 +46,10 @@ var (
 	readOwn    = ownMagpie
 )
 
-// ownMagpie says h is a magpie running this install's program: the same
+// ownMagpie says h is a eipgam running this install's program: the same
 // file as this process's, symlinks followed (the service starts
-// ~/.local/bin/magpie, a link to the app's binary), as proc.RunsMagpie
-// reads its process. Norethcy on X: `magpie daemon restart` after an
+// ~/.local/bin/eipgam, a link to the app's binary), as proc.RunsMagpie
+// reads its process. Norethcy on X: `eipgam daemon restart` after an
 // update, and the app said another program held the port.
 func ownMagpie(h proc.Holder) bool {
 	if h.PID <= 0 || h.Path == "" || !proc.RunsMagpie(h.PID, h.Path) {
@@ -148,7 +148,7 @@ func (b PortHeld) Sentence() string {
 	}
 	s := fmt.Sprintf("port %s is held by %s", b.Port, who)
 	if b.Tailscale {
-		s += fmt.Sprintf(": its serve or funnel is set to that port. Point it at magpie from another port: tailscale serve --https=%s http://127.0.0.1:%s (tailscale serve status lists what it serves now)", b.Alt, b.Port)
+		s += fmt.Sprintf(": its serve or funnel is set to that port. Point it at eipgam from another port: tailscale serve --https=%s http://127.0.0.1:%s (tailscale serve status lists what it serves now)", b.Alt, b.Port)
 	}
 	return s
 }

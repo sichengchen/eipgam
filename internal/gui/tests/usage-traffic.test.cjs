@@ -7,7 +7,7 @@
 // period with no bytes says so. Under the Requests card, while requests are
 // in flight, "↑ 1.0 MB/s · ↓ 40 KB/s" says how fast traffic flows now, read
 // from /api/usage/traffic a second apart; it goes when the gateway is idle,
-// says nothing when another magpie serves the gateway ({}), and the page
+// says nothing when another eipgam serves the gateway ({}), and the page
 // stops asking once the Requests aren't looked at. At 1180 and 420 wide the
 // page never scrolls sideways. Chromium and WebKit, every language; no
 // backend, the API is faked.
@@ -98,7 +98,7 @@ async function open(browser, lang, width, bytes, state) {
   p.setDefaultNavigationTimeout(60000);
   p.on("pageerror", (e) => errors.push(e.message));
   await p.route("**/*", server(lang, bytes, state));
-  await p.goto("http://magpie.test/");
+  await p.goto("http://eipgam.test/");
   await p.locator('[data-view="usage"]').first().click();
   await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
   await p.locator("#ledChart svg").waitFor();
@@ -207,7 +207,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
     });
 
-    // another magpie serves the gateway: no rate, nothing made up
+    // another eipgam serves the gateway: no rate, nothing made up
     await t.test("served elsewhere", async () => {
       const state = { mode: "elsewhere", asked: 0 };
       const { ctx, p, errors } = await open(browser, "en", 1180, true, state);

@@ -5,7 +5,7 @@
 // Settings, in the window, picks another currency and number units; when
 // the panel is shown again it reads the settings again, and its cost, its
 // counts and its chart's axis say what was picked, not what was picked
-// when it was first drawn: ¥ at the rate magpie has, 万 / 亿. Then back to
+// when it was first drawn: ¥ at the rate eipgam has, 万 / 亿. Then back to
 // $ and K / M / B. Each language: 万 / 亿 is Chinese's alone, so the
 // others check the currency only. Chromium and WebKit; no backend, the API
 // is faked.
@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_PANEL_UNITS_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_PANEL_UNITS_ASSETS || path.join(__dirname, "../assets"));
 const midnight = new Date();
 midnight.setHours(0, 0, 0, 0);
 
@@ -38,7 +38,7 @@ function ledger() {
   };
 }
 
-// /api/state as magpie answers it: the settings, and beside them the rate
+// /api/state as eipgam answers it: the settings, and beside them the rate
 // a cny cost is shown at (none looked up for usd)
 function serve(lang, store) {
   return async (route) => {
@@ -84,7 +84,7 @@ async function hideAndShow(p, store) {
   assert(store.stateReads > before, "shown again, the panel reads the state again");
 }
 
-const LANGS = (process.env.MAGPIE_LANGS || "zh,en,zh-TW,ja,de").split(",");
+const LANGS = (process.env.EIPGAM_LANGS || "zh,en,zh-TW,ja,de").split(",");
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   test(engine + ": the tray panel's Usage tab follows Settings' currency and number units", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", serve(lang, store));
-        await p.goto("http://magpie.test/?mode=panel");
+        await p.goto("http://eipgam.test/?mode=panel");
         await p.locator('[data-ptab="stats"]').click();
         await p.locator("#panelUsage .pu-card .led-chart svg").waitFor();
         let s = await shown(p);
@@ -156,8 +156,8 @@ async function openPanel(browser, lang, store, width, tab) {
     if (store.slowState && new URL(route.request().url()).pathname === "/api/state") await new Promise((r) => setTimeout(r, 400));
     return plain(route);
   });
-  await p.addInitScript((tab) => { try { localStorage.setItem("magpie.panelTab", tab); } catch {} }, tab);
-  await p.goto("http://magpie.test/?mode=panel");
+  await p.addInitScript((tab) => { try { localStorage.setItem("eipgam.panelTab", tab); } catch {} }, tab);
+  await p.goto("http://eipgam.test/?mode=panel");
   return { ctx, p, errors };
 }
 const costShown = (p) => p.evaluate(() => document.querySelectorAll("#panelUsage .pu-tot .blk .v")[2]?.textContent.trim() || "");

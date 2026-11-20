@@ -5,21 +5,21 @@ import (
 	"log"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // A fresh install of the Stable channel's version stays on Stable
-// (fishmagic80 on X). usemagpie.ai offers Stable's downloads beside the
+// (fishmagic80 on X). the release service offers Stable's downloads beside the
 // newest's, and Settings' Update channel is every version until changed,
 // so an app put in from a Stable download was offered the newest at its
 // first check. Before that check, a fresh install (whatsNew.start: no
-// version run before, and magpie's folder new) asks the feed for Stable's
+// version run before, and eipgam's folder new) asks the feed for Stable's
 // version; when it is this one and a newer one is out, the channel becomes
 // Stable. A channel already set is kept, and so is every version when
 // this one is also the newest, where the download can't be told apart.
 
-// freshInstall: this run is magpie's first here, and the channel isn't
+// freshInstall: this run is eipgam's first here, and the channel isn't
 // settled yet. A feed that can't be read leaves it for the next check.
 var freshInstall atomic.Bool
 

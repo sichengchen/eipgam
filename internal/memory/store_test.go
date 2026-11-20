@@ -228,7 +228,7 @@ func TestCutOffChangeIsFinished(t *testing.T) {
 	}
 }
 
-// A hand edit made while magpie changes the same memory stays: the write
+// A hand edit made while eipgam changes the same memory stays: the write
 // leaves a file that changed since it was read.
 func TestHandEditDuringAChangeStays(t *testing.T) {
 	fresh(t)

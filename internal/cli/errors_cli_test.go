@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // errors= sets whether a keyed provider's errors go to the agent as the
@@ -13,7 +13,7 @@ func TestProviderSetErrors(t *testing.T) {
 	for _, c := range []struct {
 		v    string
 		want bool
-	}{{"pass", true}, {"magpie", false}, {"pass-through", true}, {"default", false}} {
+	}{{"pass", true}, {"eipgam", false}, {"pass-through", true}, {"default", false}} {
 		if err := applyPairs(&p, []string{"errors=" + c.v}); err != nil || p.PassErrors != c.want {
 			t.Fatalf("errors=%s: %v, got %v", c.v, err, p.PassErrors)
 		}

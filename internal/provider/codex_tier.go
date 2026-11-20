@@ -5,12 +5,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // CodexServiceTier is the service tier set for every request Codex sends
 // (settings.CodexServiceTier): "" as Codex asks it, settings.CodexTierStandard
-// for none, "priority" or "ultrafast". A value this magpie doesn't know
+// for none, "priority" or "ultrafast". A value this eipgam doesn't know
 // (a newer one's, a file edited by hand) is read as "" and changes nothing.
 func CodexServiceTier() string {
 	v := strings.TrimSpace(heldSettings().CodexServiceTier)
@@ -49,9 +49,9 @@ func SetCodexOpen(v string) error {
 	return settings.Save(s)
 }
 
-// CodexClient is the Codex client magpie presents to the ChatGPT backend
+// CodexClient is the Codex client eipgam presents to the ChatGPT backend
 // (settings.CodexClient): "" for Codex CLI, "desktop" for the Codex app. A
-// value this magpie doesn't know (a newer one's, a file edited by hand) is
+// value this eipgam doesn't know (a newer one's, a file edited by hand) is
 // read as "" and changes nothing.
 func CodexClient() string {
 	v := strings.TrimSpace(heldSettings().CodexClient)

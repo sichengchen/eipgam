@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The day card's Copy picture (nivekxft on X, "分享图片失败: Cannot read
-// properties of undefined (reading 'write')"): magpie web opened over plain
+// properties of undefined (reading 'write')"): eipgam web opened over plain
 // http, or a webview, has no navigator.clipboard. The picture is then copied
 // as a selected <img> by the page's copy command; where that fails too, the
 // page gets a message that says to save it, not a TypeError.
@@ -52,7 +52,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
       });
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.waitForFunction(() => typeof t === "function" && window.bootPrefs);
       const run = () => page.evaluate(async () => {
         await import("/pageshare.js");

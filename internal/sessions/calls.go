@@ -18,8 +18,8 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
+	"github.com/sichengchen/eipgam/internal/desktopdir"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/desktopdir"
 )
 
 // Call is one model call as an agent's own session file records it.
@@ -362,7 +362,7 @@ func callSourcesInto(out []file, codex []file) []file {
 // desktopDataDirs are Claude Desktop's folders on this computer that
 // hold sessions: its own (%APPDATA%\Claude on Windows, or the MSIX
 // package's, and the real ones beside a package's), the Claude folder
-// magpie writes and Claude-3p, as desktopdir finds them.
+// eipgam writes and Claude-3p, as desktopdir finds them.
 func desktopDataDirs() []string { return desktopdir.Everywhere() }
 
 // headLen is how much of a file's start is kept to know it again.
@@ -482,9 +482,9 @@ func cxAnswerItem(b []byte) bool {
 		return false
 	}
 	switch typeAfter(h, cxPayload) {
-	// magpie_reasoning: a reasoning item of magpie's, written so as Codex let
-	// magpie go (PortCodexRolloutsLeft)
-	case "reasoning", "magpie_reasoning", "function_call", "custom_tool_call", "web_search_call", "local_shell_call", "tool_search_call", "image_generation_call":
+	// eipgam_reasoning: a reasoning item of eipgam's, written so as Codex let
+	// eipgam go (PortCodexRolloutsLeft)
+	case "reasoning", "eipgam_reasoning", "function_call", "custom_tool_call", "web_search_call", "local_shell_call", "tool_search_call", "image_generation_call":
 		return true
 	case "message":
 		return typeAfter(h, cxRole) == "assistant"
@@ -1448,7 +1448,7 @@ func ReadCallSource(s CallSource) []Call {
 // desktopEntrypoint is a Claude Code transcript's entrypoint when Claude
 // Desktop ran it for its Code tab: "claude-desktop", or
 // "claude-desktop-3p" in its third-party inference mode (Desktop 2.7032's
-// nK: type "3p"), the mode a gateway such as magpie's is set in.
+// nK: type "3p"), the mode a gateway such as eipgam's is set in.
 func desktopEntrypoint(e string) bool {
 	return e == "claude-desktop" || e == "claude-desktop-3p"
 }

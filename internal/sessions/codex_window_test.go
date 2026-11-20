@@ -10,7 +10,7 @@ import (
 )
 
 // TestCodexSessionReadOnAfterRestart: a live Codex rollout that grew after
-// magpie started again is read on from where the last read ended, by the
+// eipgam started again is read on from where the last read ended, by the
 // Sessions list and the Requests reader alike, and counts what a read from
 // its first line counts. Its window lived in memory alone, so the first
 // line after a restart read the whole rollout again for each: a 100 MB

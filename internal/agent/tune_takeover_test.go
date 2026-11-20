@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // TestTuneCodexTakeOver: a model_auto_compact_token_limit of the user's
 // locks the Codex card (sufeng1894 on X), and the card's one action lets
-// magpie set it: the limit moves into Long conversations (the rule
+// eipgam set it: the limit moves into Long conversations (the rule
 // tuneMigrateCodex moves tune's own by) and out of config.toml, the card
 // adjusts it from then on, and Undo puts both back. Nothing of the user's
 // moves without that say.
@@ -57,7 +57,7 @@ func TestTuneCodexTakeOver(t *testing.T) {
 			t.Fatal(err)
 		}
 		if got := settings.Load(); got.CompactAt != 0 || got.FullContext {
-			t.Fatalf("Long conversations %d after undo, want magpie's default", got.CompactAt)
+			t.Fatalf("Long conversations %d after undo, want eipgam's default", got.CompactAt)
 		}
 		if got := tuneFile(t, path); !strings.Contains(got, "model_auto_compact_token_limit = 140000") || !strings.Contains(got, "x = true") {
 			t.Fatalf("undo didn't put the user's limit back:\n%s", got)
@@ -131,7 +131,7 @@ func TestTuneCodexTakeOver(t *testing.T) {
 // TestTuneCodexTakeOverAsync: a background compaction threshold of the
 // user's in config.toml (the screenshot's second lock) becomes Background
 // compaction's on the same say: Settings takes its share, the file keeps
-// it as magpie's, a sync leaves it, and Undo gives it back as the user's.
+// it as eipgam's, a sync leaves it, and Undo gives it back as the user's.
 func TestTuneCodexTakeOverAsync(t *testing.T) {
 	home := tuneSandbox(t)
 	path := filepath.Join(home, ".codex", "config.toml")
@@ -192,7 +192,7 @@ func TestTuneCodexTakeOverAsync(t *testing.T) {
 }
 
 // TestTuneCodexMigrateKeepsStash: a limit an older tune wrote that can't
-// be moved out of config.toml yet stays stashed as magpie's and is moved
+// be moved out of config.toml yet stays stashed as eipgam's and is moved
 // at a later read; before, the stash went first, and the limit was left
 // in the file as if the user had written it, locking the card.
 func TestTuneCodexMigrateKeepsStash(t *testing.T) {

@@ -3,7 +3,7 @@
 // Providers page, where every subscription then stops working, said nothing
 // of it (the scattered settings audit after netube99 on X). A line over the
 // list now says they are off, with a Settings › Privacy that opens the
-// switch, lit; while they are on, no line. MAGPIE_NO_ACCOUNTS says so
+// switch, lit; while they are on, no line. EIPGAM_NO_ACCOUNTS says so
 // instead. Every language, Chromium and WebKit, at 1100 and 420 wide,
 // nothing past the window's edge.
 const assert = require("node:assert/strict");
@@ -50,7 +50,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.errors = [];
           page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; page.errors.push(e.message); });
           await page.route("**/*", serve(lang, mode));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator("#view-providers .row", { hasText: "Relay" }).first().waitFor();
           return page;
         };
@@ -78,11 +78,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(await page.locator("#navBack").isVisible(), "Back to Providers");
         assert.deepEqual(page.errors, []);
 
-        // MAGPIE_NO_ACCOUNTS: why it is off, once Settings has been read
+        // EIPGAM_NO_ACCOUNTS: why it is off, once Settings has been read
         page = await open("env");
         await page.evaluate(() => api("settings").then((s) => { prefs = s; renderMovable(); }));
         await page.locator("#movable .discovery-off").waitFor();
-        assert.equal((await page.locator("#movable .discovery-off .dep-why").textContent()).trim(), await tr(page, "Off for this run: MAGPIE_NO_ACCOUNTS is set"));
+        assert.equal((await page.locator("#movable .discovery-off .dep-why").textContent()).trim(), await tr(page, "Off for this run: EIPGAM_NO_ACCOUNTS is set"));
         assert.deepEqual(page.errors, []);
       });
     }

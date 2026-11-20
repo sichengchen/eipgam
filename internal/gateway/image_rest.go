@@ -4,14 +4,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 func init() { provider.ImageRest = imageRestOf }
 
 // imageRestOf is when the ChatGPT account user draws again, as the refusal
 // that rested its image model said (restDrawer; usage_limit_reached's
-// resets_at), while that rest holds. It is the only thing magpie learns of
+// resets_at), while that rest holds. It is the only thing eipgam learns of
 // the account's image allowance, which the backend shows no share of
 // (provider.ImageLane, #6160), and it is only that: not when the allowance
 // began, nor what it counted. The latest of several resting image models

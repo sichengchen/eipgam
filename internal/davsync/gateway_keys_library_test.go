@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Adding gateway keys to a keyless backup must not make a later library
@@ -50,7 +50,7 @@ func TestGatewayKeysPreserveLibrarySecretsSync(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		f.mu.Lock()
-		data := slices.Clone(f.objects["team x+y/magpie/magpie.magpie-backup"])
+		data := slices.Clone(f.objects["team x+y/eipgam/eipgam.eipgam-backup"])
 		f.mu.Unlock()
 		got, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {
@@ -174,7 +174,7 @@ func TestGatewayKeysWithLibraryOffSync(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		f.mu.Lock()
-		data := slices.Clone(f.objects["team x+y/magpie/magpie.magpie-backup"])
+		data := slices.Clone(f.objects["team x+y/eipgam/eipgam.eipgam-backup"])
 		f.mu.Unlock()
 		got, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {

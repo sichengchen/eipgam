@@ -38,7 +38,7 @@ func claudeLoginOf(t *testing.T, user string) Login {
 }
 
 // liukaybee on X: accounts added by `claude setup-token`, and Claude Code
-// itself switched among them, never connected to magpie. Use on such an
+// itself switched among them, never connected to eipgam. Use on such an
 // account puts its token in Claude Code's settings.json env, which Claude
 // Code takes over its stored sign-in; that sign-in is left as it is, and a
 // switch to a signed-in account takes the token out again.
@@ -51,7 +51,7 @@ func TestClaudeCodeSwitchedToSetupToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// the user's own env stays beside magpie's token
+	// the user's own env stays beside eipgam's token
 	writeFile(t, claudeSettingsFile(), map[string]any{"env": map[string]any{"FOO": "bar"}, "model": "opus"})
 	tok, err := AddClaudeSetupToken(testSetupToken)
 	if err != nil {
@@ -117,7 +117,7 @@ func TestClaudeCodeSwitchedToSetupToken(t *testing.T) {
 }
 
 // A CLAUDE_CODE_OAUTH_TOKEN the user set in settings.json themselves is
-// theirs: magpie writes none over it, and takes it out on no switch.
+// theirs: eipgam writes none over it, and takes it out on no switch.
 func TestClaudeOwnEnvTokenLeftAlone(t *testing.T) {
 	claudeThree(t)
 	team := "team@x.com · Acme"
@@ -136,10 +136,10 @@ func TestClaudeOwnEnvTokenLeftAlone(t *testing.T) {
 		t.Fatalf("the user's own token became %q", v)
 	}
 	if claudeLoginOf(t, tok).Uses {
-		t.Fatal("the user's own token was taken for magpie's")
+		t.Fatal("the user's own token was taken for eipgam's")
 	}
 
-	// magpie's, then changed by the user: theirs from then on
+	// eipgam's, then changed by the user: theirs from then on
 	writeFile(t, claudeSettingsFile(), map[string]any{})
 	if err := SwitchLogin("claude", tok); err != nil {
 		t.Fatal(err)
@@ -154,7 +154,7 @@ func TestClaudeOwnEnvTokenLeftAlone(t *testing.T) {
 }
 
 // A settings.json that can't be read holds what it holds: no token is
-// written into it, and the record of magpie's stays until it can be read.
+// written into it, and the record of eipgam's stays until it can be read.
 func TestClaudeEnvTokenUnreadableSettings(t *testing.T) {
 	claudeThree(t)
 	tok, err := AddClaudeSetupToken(testSetupToken)
@@ -212,7 +212,7 @@ func TestClaudeSetupTokenRemovedLeavesSettings(t *testing.T) {
 	}
 }
 
-// Claude Code on a setup-token the user picked is left there by magpie's
+// Claude Code on a setup-token the user picked is left there by eipgam's
 // own switching (Switch accounts only), whose allowance it can't read:
 // the spent sign-in under it is no reason to move.
 func TestClaudeSetupTokenInUseNotMovedOff(t *testing.T) {
@@ -260,7 +260,7 @@ func TestClaudeSetupTokenInUseNotMovedOff(t *testing.T) {
 	if v, _ := envTokenOf(t); v != testSetupToken {
 		t.Fatalf("settings.json's token became %q", v)
 	}
-	// back on its sign-in, magpie moves it as before
+	// back on its sign-in, eipgam moves it as before
 	if err := SwitchLogin("claude", "pro@x.com"); err != nil {
 		t.Fatal(err)
 	}

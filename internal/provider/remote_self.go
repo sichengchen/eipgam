@@ -1,25 +1,25 @@
 package provider
 
-// A Remote magpie that is this magpie itself (hanslin1666 on Discord):
-// computer B uses A through a Remote magpie provider, sync carries that
+// A Remote eipgam that is this eipgam itself (hanslin1666 on Discord):
+// computer B uses A through a Remote eipgam provider, sync carries that
 // provider to A, and on A it points at A. Each of its models is one of
 // A's own, a request for it a pass more through A's gateway on its way
 // there, and each one stands beside the model it is in A's lists and
-// groups. The list A fetches from it says so: each model's magpie_via
-// ends with the magpie that listed it (catalog.ViaHere), and that is A's
+// groups. The list A fetches from it says so: each model's eipgam_via
+// ends with the eipgam that listed it (catalog.ViaHere), and that is A's
 // own catalog.Self. So the fetch keeps, in remote-self.json, that this
-// provider at this address is this magpie, and the provider is left out
+// provider at this address is this eipgam, and the provider is left out
 // of routing and lists (SelfLeftOut), unless the user keeps it anyway
 // (KeepSelf, the editor's "Use it anyway").
 //
 // The file is this computer's own: it is never in a backup or a sync, as
 // B's copy of the provider points at A, which is not B. Self is made up
 // again each run, so the record is what stands between runs, until the
-// next fetch: one whose lister is another magpie, or one from before
-// magpie_via, which names none, takes it away. An empty list or a failed
+// next fetch: one whose lister is another eipgam, or one from before
+// eipgam_via, which names none, takes it away. An empty list or a failed
 // fetch tells nothing and changes nothing. The record holds the address
 // it was found at: a provider moved to another address is not this
-// magpie until a fetch there says so.
+// eipgam until a fetch there says so.
 
 import (
 	"encoding/json"
@@ -31,14 +31,14 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
-// LeaveOutSelf is whether a Remote magpie found to be this magpie is left
-// out. The gateway's tests serve their Remote magpie from their own
+// LeaveOutSelf is whether a Remote eipgam found to be this eipgam is left
+// out. The gateway's tests serve their Remote eipgam from their own
 // process, and turn it off.
 var LeaveOutSelf = true
 
@@ -47,7 +47,7 @@ func remoteSelfPath() string { return filepath.Join(settings.Dir(), "remote-self
 var remoteSelfMu = filelock.Mutex{Path: func() string { return remoteSelfPath() + ".lock" }}
 
 // remoteSelf is the file as read, by provider id the address it answered
-// as this magpie at, for the settings folder it was read from.
+// as this eipgam at, for the settings folder it was read from.
 var remoteSelf struct {
 	sync.RWMutex
 	path string
@@ -71,7 +71,7 @@ func readRemoteSelf(path string) (map[string]string, error) {
 	return ids, nil
 }
 
-// selfAt is the address provider id was found to be this magpie at, if
+// selfAt is the address provider id was found to be this eipgam at, if
 // it was. A file that can't be read records nothing: the provider is
 // served as it was before, until a fetch writes the file again.
 func selfAt(id string) (string, bool) {
@@ -97,7 +97,7 @@ func selfAt(id string) (string, bool) {
 	return at, ok
 }
 
-// anySelf says some provider was found to be this magpie: the fast way
+// anySelf says some provider was found to be this eipgam: the fast way
 // past ThroughSelf for everyone else.
 func anySelf() bool {
 	selfAt("") // loaded for this settings folder
@@ -110,7 +110,7 @@ func anySelf() bool {
 // remoteMagpieEndpoints wrote it.
 func (p Provider) selfRoot() string { return strings.TrimRight(strings.TrimSpace(p.Chat), "/") }
 
-// SelfAnswered says this Remote magpie was found to be this magpie, at
+// SelfAnswered says this Remote eipgam was found to be this eipgam, at
 // the address it has now.
 func (p Provider) SelfAnswered() bool {
 	if !p.IsRemoteMagpie() {
@@ -121,13 +121,13 @@ func (p Provider) SelfAnswered() bool {
 }
 
 // SelfLeftOut is whether the provider is left out of routing and lists as
-// a Remote magpie that is this magpie, which the user didn't keep.
+// a Remote eipgam that is this eipgam, which the user didn't keep.
 func (p Provider) SelfLeftOut() bool {
 	return LeaveOutSelf && !p.KeepSelf && p.SelfAnswered()
 }
 
-// noteSelf keeps what a Remote magpie's fetched list says of whether it is
-// this magpie: the magpie that listed a model is its magpie_via's last.
+// noteSelf keeps what a Remote eipgam's fetched list says of whether it is
+// this eipgam: the eipgam that listed a model is its eipgam_via's last.
 func noteSelf(p Provider, ms []catalog.Model) {
 	if !p.IsRemoteMagpie() || len(ms) == 0 {
 		return
@@ -170,12 +170,12 @@ func noteSelf(p Provider, ms []catalog.Model) {
 	remoteSelf.path, remoteSelf.ids = path, ids
 	remoteSelf.Unlock()
 	if self {
-		log.Printf("%s: this Remote magpie is this magpie itself; left out of routing unless kept (Providers › %s › Use it anyway)", p.ID, p.Name)
+		log.Printf("%s: this Remote eipgam is this eipgam itself; left out of routing unless kept (Providers › %s › Use it anyway)", p.ID, p.Name)
 	}
 }
 
-// ThroughSelf is the model id a request names with a Remote magpie that is
-// this magpie, and left out, taken off the front: rem/own/m1 is own/m1
+// ThroughSelf is the model id a request names with a Remote eipgam that is
+// this eipgam, and left out, taken off the front: rem/own/m1 is own/m1
 // here, as it is on the other computer, whose agents' picks sync brings
 // over (hanslin1666).
 func ThroughSelf(id string) string {
@@ -199,7 +199,7 @@ func ThroughSelf(id string) string {
 	return id
 }
 
-// SetKeepSelf keeps a Remote magpie that is this magpie in routing, or
+// SetKeepSelf keeps a Remote eipgam that is this eipgam in routing, or
 // leaves it out again (Provider.KeepSelf).
 func SetKeepSelf(id string, keep bool) error {
 	p, err := Find(id)
@@ -207,7 +207,7 @@ func SetKeepSelf(id string, keep bool) error {
 		return err
 	}
 	if !p.IsRemoteMagpie() {
-		return errors.New(p.Name + " is not a Remote magpie")
+		return errors.New(p.Name + " is not a Remote eipgam")
 	}
 	p.KeepSelf = keep
 	return Save(*p)

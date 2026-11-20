@@ -7,19 +7,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/filelock"
 )
 
 // milianxinqi on X, the Codex app: "Model provider mismatch. This chat
-// uses magpie, but your current provider is OpenAI. Switch to magpie to
+// uses eipgam, but your current provider is OpenAI. Switch to eipgam to
 // continue." ("用的好好的，codex 突然就弹这个了"). The ChatGPT account ran
-// out, magpie became Codex's provider (the takeover) and the chat was
-// started on magpie. At the account's reset Sync put Codex back beside
+// out, eipgam became Codex's provider (the takeover) and the chat was
+// started on eipgam. At the account's reset Sync put Codex back beside
 // its sign-in, on OpenAI, while the Codex app kept the app-server the
 // takeover started (Restart the Codex app to follow is off by default)
 // with the chat loaded and its lock held, so bringBack couldn't move it
 // and every send in it was refused. The takeover now waits while a Codex
-// holds a chat on magpie, and ends once the app lets it go.
+// holds a chat on eipgam, and ends once the app lets it go.
 func TestCodexTakeoverWaitsForTheOpenChat(t *testing.T) {
 	const id = "019a0000-0000-7000-8000-0000000000c1"
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
@@ -35,12 +35,12 @@ func TestCodexTakeoverWaitsForTheOpenChat(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) {
-		t.Fatalf("used up, magpie not Codex's provider:\n%s", cfg)
+	if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) {
+		t.Fatalf("used up, eipgam not Codex's provider:\n%s", cfg)
 	}
 	// the chat started during the takeover, quiet, that the Codex app has
 	// loaded (codex-rs rollout writer_lock.rs)
-	path := codexThreadOn(t, dir, id, "magpie")
+	path := codexThreadOn(t, dir, id, "eipgam")
 	old := time.Now().Add(-10 * time.Minute)
 	os.Chtimes(path, old, old)
 	letGo := holdCodexThreadLock(t, dir, id)
@@ -50,11 +50,11 @@ func TestCodexTakeoverWaitsForTheOpenChat(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) {
-		t.Fatalf("the account back with a chat on magpie open in the Codex app, Codex was put on OpenAI under it (\"This chat uses magpie, but your current provider is OpenAI\"):\n%s", cfg)
+	if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) {
+		t.Fatalf("the account back with a chat on eipgam open in the Codex app, Codex was put on OpenAI under it (\"This chat uses eipgam, but your current provider is OpenAI\"):\n%s", cfg)
 	}
-	if p := codexRowOn(t, dir, id); p != "magpie" {
-		t.Fatalf("the open chat is on %q, want magpie, the provider Codex is on", p)
+	if p := codexRowOn(t, dir, id); p != "eipgam" {
+		t.Fatalf("the open chat is on %q, want eipgam, the provider Codex is on", p)
 	}
 	select {
 	case <-asked:
@@ -73,14 +73,14 @@ func TestCodexTakeoverWaitsForTheOpenChat(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); strings.Contains(cfg, "model_provider =") {
-		t.Fatalf("the chat let go, magpie still Codex's provider:\n%s", cfg)
+		t.Fatalf("the chat let go, eipgam still Codex's provider:\n%s", cfg)
 	}
 	if p := codexRowOn(t, dir, id); p != "openai" {
 		t.Fatalf("the chat is on %q after the takeover ended, want openai, where Codex resumes it", p)
 	}
 }
 
-// With Restart the Codex app to follow on, magpie restarts the app-server
+// With Restart the Codex app to follow on, eipgam restarts the app-server
 // for the takeover's end and moves the chats it has open first
 // (codexRetagOpenThreads): nothing waits.
 func TestCodexTakeoverEndsAtOnceWhenTheAppFollows(t *testing.T) {
@@ -100,7 +100,7 @@ func TestCodexTakeoverEndsAtOnceWhenTheAppFollows(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	path := codexThreadOn(t, dir, id, "magpie")
+	path := codexThreadOn(t, dir, id, "eipgam")
 	old := time.Now().Add(-10 * time.Minute)
 	os.Chtimes(path, old, old)
 	holdCodexThreadLock(t, dir, id)

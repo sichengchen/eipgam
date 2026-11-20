@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // inFlight counts, for each key or account (candidate.who), the requests
@@ -69,7 +69,7 @@ func burstSpread(routing string, g *provider.Group, sameMember, reorder bool, cs
 // burstAlike says whether cs[i] is one routing would as soon send the
 // request to as cs[0]: ready as cs[0] is, on the same footing (a fallback
 // as a fallback, a key fit for the protocol as well, through the same
-// remote magpie), and alike by what its routing goes by — any of a round
+// remote eipgam), and alike by what its routing goes by — any of a round
 // In turn; By pace, both on a pace alike within a tenth with no wallet
 // told apart and neither near its cap; Least used, used within a point.
 // Other routings pick for their own reasons and keep their order. In a

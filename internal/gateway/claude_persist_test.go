@@ -19,7 +19,7 @@ func (h *resumeHarness) runStartedSince(before map[string]string) string {
 	return ""
 }
 
-// A conversation whose run waited for its next turn when magpie stopped
+// A conversation whose run waited for its next turn when eipgam stopped
 // (an update, a restart) goes on from its saved session in the gateway that
 // starts next: Claude Code is started with --resume on it and told the turn
 // alone. Before, the run's session was removed as the gateway ended, and
@@ -32,7 +32,7 @@ func TestClaudeIdleRunSurvivesARestart(t *testing.T) {
 	for pid := range h.runs() {
 		sid = "s" + pid
 	}
-	h.s.subscription.abortAll() // magpie stops
+	h.s.subscription.abortAll() // eipgam stops
 	if got := h.sessions(); !containsStr(got, sid) {
 		t.Fatalf("the idle run's session was removed as the gateway ended: %v", got)
 	}

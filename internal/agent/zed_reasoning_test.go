@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A model that thinks is written with a reasoning_effort, which is what
@@ -30,7 +30,7 @@ func TestZedReasoningEffort(t *testing.T) {
 		t.Fatal(err)
 	}
 	a := zedAt(filepath.Join(home, "zed"))
-	if err := a.Field("model").Set("magpie/relay/gpt-5"); err != nil {
+	if err := a.Field("model").Set("eipgam/relay/gpt-5"); err != nil {
 		t.Fatal(err)
 	}
 	// efforts is each model's reasoning_effort by name, "-" for none
@@ -78,7 +78,7 @@ func TestZedReasoningEffort(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	// and a change in magpie has the models written again
+	// and a change in eipgam has the models written again
 	if err := provider.SetModelOutput("relay/gpt-5", 64000); err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func TestZedReasoningEffort(t *testing.T) {
 	}
 	want := map[string]string{"relay/gpt-5": "medium", "relay/flash": "none", "relay/glm-5.3": "high", "relay/plain": "-"}
 	check(want)
-	if err := a.Field("model").Set("magpie/relay/flash"); err != nil {
+	if err := a.Field("model").Set("eipgam/relay/flash"); err != nil {
 		t.Fatal(err)
 	}
 	check(want)

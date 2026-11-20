@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // claudeLaunchHome is a sandbox HOME with a relay's models, the user's own
@@ -26,11 +26,11 @@ func claudeLaunchHome(t *testing.T, user string) (home, userPath, launch string)
 	return home, userPath, filepath.Join(dir, "settings.json")
 }
 
-// claude-magpie (baranwang on X): `claude` on the user's own account,
-// `claude-magpie` through magpie, nothing switched back and forth. The
+// claude-eipgam (baranwang on X): `claude` on the user's own account,
+// `claude-eipgam` through eipgam, nothing switched back and forth. The
 // launch file carries what a connect writes into settings.json (the
-// gateway, its key, a model of magpie's and the tiers), and blanks what
-// would take a request past magpie; the user's settings.json is left byte
+// gateway, its key, a model of eipgam's and the tiers), and blanks what
+// would take a request past eipgam; the user's settings.json is left byte
 // for byte, and the Agents page's Claude Code (Wired, Check) still reads
 // that file alone.
 func TestClaudeLaunchFileIsWiredAndTheUsersIsNot(t *testing.T) {
@@ -53,10 +53,10 @@ func TestClaudeLaunchFileIsWiredAndTheUsersIsNot(t *testing.T) {
 	}
 	m, _ := edit.GetJSON(launch, "model")
 	if !isMagpie(strings.TrimSuffix(m, "[1m]")) {
-		t.Fatalf("launch file's model %q isn't one of magpie's:\n%s", m, readFile(launch))
+		t.Fatalf("launch file's model %q isn't one of eipgam's:\n%s", m, readFile(launch))
 	}
 	if v, _ := env("ANTHROPIC_DEFAULT_HAIKU_MODEL"); !isMagpie(v) {
-		t.Fatalf("launch file's haiku tier %q isn't one of magpie's:\n%s", v, readFile(launch))
+		t.Fatalf("launch file's haiku tier %q isn't one of eipgam's:\n%s", v, readFile(launch))
 	}
 	for _, k := range claudeLaunchBlanks() {
 		if v, has := env(k); !has || v != "" {
@@ -78,10 +78,10 @@ func TestClaudeLaunchFileIsWiredAndTheUsersIsNot(t *testing.T) {
 			t.Fatal("the launch file is listed among the agents")
 		}
 	}
-	// a stand-in for a Claude model a claude-magpie session names, from
-	// the launch file while the user's own file is off magpie
+	// a stand-in for a Claude model a claude-eipgam session names, from
+	// the launch file while the user's own file is off eipgam
 	if s := StandIn("claude", "claude-opus-4-6-20260101"); s == "" {
-		t.Error("no stand-in for a claude-magpie session's model")
+		t.Error("no stand-in for a claude-eipgam session's model")
 	}
 
 	// a second start keeps the model the file has
@@ -99,7 +99,7 @@ func TestClaudeLaunchFileIsWiredAndTheUsersIsNot(t *testing.T) {
 	}
 }
 
-// While magpie is shared at an address beyond loopback, the gateway takes
+// While eipgam is shared at an address beyond loopback, the gateway takes
 // its sharing key alone: the launch file carries that, and is set again
 // when the gateway moves.
 func TestClaudeLaunchFileTakesTheSharedKey(t *testing.T) {
@@ -107,7 +107,7 @@ func TestClaudeLaunchFileTakesTheSharedKey(t *testing.T) {
 	if _, err := ClaudeLaunch(home); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_ADDR", "172.23.80.1:3425")
+	t.Setenv("EIPGAM_ADDR", "172.23.80.1:3425")
 	if err := access.ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestClaudeLaunchFileTakesTheSharedKey(t *testing.T) {
 }
 
 // Claude Code saves a /model pick to the user's settings.json, never to a
-// --settings file (2.1.318). A magpie model picked in a claude-magpie
+// --settings file (2.1.318). A eipgam model picked in a claude-eipgam
 // session goes to the launch file, and the user's file gets its model
 // back, so a plain claude isn't left asking Anthropic for it; a Claude
 // model of its own stays where Claude Code put it.
@@ -135,7 +135,7 @@ func TestClaudeLaunchAfterTakesBackAMagpiePick(t *testing.T) {
 		t.Fatal(err)
 	}
 	mark := ClaudeLaunchBefore(home)
-	// what /model leaves: the launch file's spelling of a magpie model
+	// what /model leaves: the launch file's spelling of a eipgam model
 	if err := edit.SetJSON(userPath, edit.KV{Path: "model", Value: "relay/glm-4.6"}); err != nil {
 		t.Fatal(err)
 	}

@@ -1,6 +1,6 @@
 //go:build !darwin
 
-// Package rosetta says whether magpie runs under Rosetta, which only
+// Package rosetta says whether eipgam runs under Rosetta, which only
 // macOS has.
 package rosetta
 

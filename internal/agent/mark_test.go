@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // commentable says whether an agent reads path as TOML, YAML or dotenv,
@@ -40,7 +40,7 @@ func modTimes(home string) map[string]time.Time {
 	return m
 }
 
-// Codex's own keys that name magpie get a note on how to undo them by
+// Codex's own keys that name eipgam get a note on how to undo them by
 // hand, not only the base URL.
 func TestCodexMarkedLines(t *testing.T) {
 	codexHome(t, "", "model = \"gpt-5.5\"\n")
@@ -53,9 +53,9 @@ func TestCodexMarkedLines(t *testing.T) {
 	b, _ := os.ReadFile(a.Path)
 	got := string(b)
 	for _, want := range []string{
-		"# magpie: Codex on magpie's local gateway; Disconnect in magpie or `magpie uninstall` undoes it, or delete this line and the model line\nmodel_provider = \"magpie\"\n",
-		"# magpie: magpie's model list for Codex; " + undo + ", or delete this line\nmodel_catalog_json = ",
-		"# magpie: for Codex threads started on magpie; unused while model_provider doesn't name magpie\nbase_url = \"" + gateway.URL() + "/v1\"\n",
+		"# eipgam: Codex on eipgam's local gateway; Disconnect in eipgam or `eipgam uninstall` undoes it, or delete this line and the model line\nmodel_provider = \"eipgam\"\n",
+		"# eipgam: eipgam's model list for Codex; " + undo + ", or delete this line\nmodel_catalog_json = ",
+		"# eipgam: for Codex threads started on eipgam; unused while model_provider doesn't name eipgam\nbase_url = \"" + gateway.URL() + "/v1\"\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("missing %q in:\n%s", want, got)
@@ -70,11 +70,11 @@ func TestCodexMarkedLines(t *testing.T) {
 	}
 }
 
-// Every agent magpie writes into a TOML, YAML or dotenv config gets a
-// comment line over each line that points at the gateway, saying magpie
-// wrote it and how to undo it: Jevik_AI on X deleted magpie's folders by hand and
+// Every agent eipgam writes into a TOML, YAML or dotenv config gets a
+// comment line over each line that points at the gateway, saying eipgam
+// wrote it and how to undo it: Jevik_AI on X deleted eipgam's folders by hand and
 // was left with a Codex config naming a gateway that no longer ran, and
-// nothing in it naming magpie. Disconnect takes each note with its line.
+// nothing in it naming eipgam. Disconnect takes each note with its line.
 func TestMarkedLinesEveryAgent(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	edit.Mark = lineNote
@@ -137,7 +137,7 @@ func TestMarkedLinesEveryAgent(t *testing.T) {
 			}
 			for p, b := range agentFiles(t, home) {
 				for _, l := range strings.Split(b, "\n") {
-					if strings.Contains(l, "# "+edit.MarkTag) && !strings.Contains(l, "Codex threads started on magpie") {
+					if strings.Contains(l, "# "+edit.MarkTag) && !strings.Contains(l, "Codex threads started on eipgam") {
 						t.Errorf("%s: a note outlived Disconnect: %q", p, l)
 					}
 				}

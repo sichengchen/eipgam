@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 
 function serve(lang) {
   return async (route) => {
@@ -46,7 +46,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.waitForSelector("#nav button.on");
       assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "the sidebar shows");
       const prefs = page.locator("#side .side-foot #prefs");

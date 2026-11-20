@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gwtool"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// ownMCPNames asks the gateway for magpie's own MCP servers, as the chat
+// ownMCPNames asks the gateway for eipgam's own MCP servers, as the chat
 // page plugin does, and gives each one's name and path.
 func ownMCPNames(t *testing.T, s *Server) map[string]string {
 	t.Helper()
@@ -58,11 +58,11 @@ func TestOwnMCPNoneWhenNothingIsOn(t *testing.T) {
 func TestOwnMCPListsVisionWhileOn(t *testing.T) {
 	s, _ := eyed(t)
 	toolsAre(t, 0)
-	if got := ownMCPNames(t, s); got["magpie-vision"] != VisionMCPPath {
+	if got := ownMCPNames(t, s); got["eipgam-vision"] != VisionMCPPath {
 		t.Fatalf("vision on: %v", got)
 	}
 	noVision(t)
-	if got := ownMCPNames(t, s); got["magpie-vision"] != "" {
+	if got := ownMCPNames(t, s); got["eipgam-vision"] != "" {
 		t.Fatalf("vision off: %v", got)
 	}
 }
@@ -94,14 +94,14 @@ func TestOwnMCPListsSearchWhileOn(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	if got := ownMCPNames(t, s); got["magpie-web-search"] != SearchMCPPath {
+	if got := ownMCPNames(t, s); got["eipgam-web-search"] != SearchMCPPath {
 		t.Fatalf("search on: %v", got)
 	}
 	stop := gwtool.Gate() // plugins/search off: nothing serves web_search
 	defer stop()
 	searchOn() // TestMain's
 	defer func() { searchOn = gwtool.Serve(gwtool.WebSearch) }()
-	if got := ownMCPNames(t, s); got["magpie-web-search"] != "" {
+	if got := ownMCPNames(t, s); got["eipgam-web-search"] != "" {
 		t.Fatalf("plugins/search off: %v", got)
 	}
 }
@@ -112,46 +112,46 @@ func TestOwnMCPListsPluginToolsWhileOn(t *testing.T) {
 	fresh(t)
 	s := New()
 	toolsAre(t, 2)
-	if got := ownMCPNames(t, s); got["magpie-tools"] != ToolsMCPPath {
+	if got := ownMCPNames(t, s); got["eipgam-tools"] != ToolsMCPPath {
 		t.Fatalf("tools on: %v", got)
 	}
 	toolsAre(t, 0)
-	if got := ownMCPNames(t, s); got["magpie-tools"] != "" {
+	if got := ownMCPNames(t, s); got["eipgam-tools"] != "" {
 		t.Fatalf("no plugin gives a tool: %v", got)
 	}
 	toolsAre(t, 2)
 	stop := gwtool.Gate() // plugins/tools off
 	defer stop()
-	if got := ownMCPNames(t, s); got["magpie-tools"] != "" {
+	if got := ownMCPNames(t, s); got["eipgam-tools"] != "" {
 		t.Fatalf("plugins/tools off: %v", got)
 	}
 	defer gwtool.Serve(gwtool.PluginTools)()
-	if got := ownMCPNames(t, s); got["magpie-tools"] != ToolsMCPPath {
+	if got := ownMCPNames(t, s); got["eipgam-tools"] != ToolsMCPPath {
 		t.Fatalf("plugins/tools on: %v", got)
 	}
 }
 
-// Each of magpie's own servers the Library's Discover lists says why it
+// Each of eipgam's own servers the Library's Discover lists says why it
 // can't answer yet exactly while ownMCP leaves it out, and tells nothing
 // set up from turned off in Settings (matrix0487 on Discord: all three in
 // Discover, never a dead tool).
 func TestOwnUnreadyWhileNotListed(t *testing.T) {
 	fresh(t)
 	toolsAre(t, 0)
-	for _, n := range []string{"magpie-web-search", "magpie-vision", imageServerName} {
+	for _, n := range []string{"eipgam-web-search", "eipgam-vision", imageServerName} {
 		if why := OwnUnready(n); !strings.Contains(why, "yet") {
 			t.Errorf("%s with nothing set up: %q", n, why)
 		}
 	}
-	if why := OwnUnready("magpie-browser"); why != "" {
-		t.Errorf("magpie-browser: %q", why)
+	if why := OwnUnready("eipgam-browser"); why != "" {
+		t.Errorf("eipgam-browser: %q", why)
 	}
 	s, _ := eyed(t)
-	if got := ownMCPNames(t, s); got["magpie-vision"] == "" || OwnUnready("magpie-vision") != "" {
-		t.Fatalf("a model sees: listed %v, unready %q", got, OwnUnready("magpie-vision"))
+	if got := ownMCPNames(t, s); got["eipgam-vision"] == "" || OwnUnready("eipgam-vision") != "" {
+		t.Fatalf("a model sees: listed %v, unready %q", got, OwnUnready("eipgam-vision"))
 	}
 	noVision(t)
-	if why := OwnUnready("magpie-vision"); !strings.Contains(why, "off in Settings") {
+	if why := OwnUnready("eipgam-vision"); !strings.Contains(why, "off in Settings") {
 		t.Fatalf("vision off: %q", why)
 	}
 	st := settings.Load()
@@ -166,7 +166,7 @@ func TestOwnUnreadyWhileNotListed(t *testing.T) {
 	defer stop()
 	searchOn()
 	defer func() { searchOn = gwtool.Serve(gwtool.WebSearch) }()
-	if why := OwnUnready("magpie-web-search"); !strings.Contains(why, "Plugins") {
+	if why := OwnUnready("eipgam-web-search"); !strings.Contains(why, "Plugins") {
 		t.Fatalf("plugins/search off: %q", why)
 	}
 }

@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Coming back to the Routing page after magpie ran out of sight doesn't let
-// loose a flock of magpies (#302, JoeyMa-zh: after magpie had been in the
+// Coming back to the Routing page after eipgam ran out of sight doesn't let
+// loose a flock of magpies (#302, JoeyMa-zh: after eipgam had been in the
 // background a while, opening Routing again showed a flood of birds flying
 // at once). Out of sight — the window hidden, a covered window drawing no
-// frames without saying it is hidden, or another tab of magpie's open —
+// frames without saying it is hidden, or another tab of eipgam's open —
 // many requests come and are answered; then the page is seen again. What
 // was answered meanwhile is listed, not flown: at most the few requests
 // still under way fly, and the flights of the ones past never play.
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           feed.closed = true;
           await browser.close();
         });
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-req").first().waitFor();
         await page.waitForTimeout(2500); // the first request's play ends
 

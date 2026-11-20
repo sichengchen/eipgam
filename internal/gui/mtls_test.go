@@ -12,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func mtlsMux(t *testing.T, w Windows) func(r *http.Request) (int, settingsJSON, string) {
@@ -69,7 +69,7 @@ func TestSettingsMTLSIssueRevoke(t *testing.T) {
 	if code != 200 || len(s.MTLSCerts) != 1 || s.MTLSCerts[0].Name != "laptop" || s.MTLSSaved == "" {
 		t.Fatalf("issue: %d %s", code, out)
 	}
-	dir := filepath.Join(h, "Downloads", "magpie-laptop")
+	dir := filepath.Join(h, "Downloads", "eipgam-laptop")
 	for _, f := range []string{"client.pem", "client-key.pem", "ca.pem"} {
 		if _, err := os.Stat(filepath.Join(dir, f)); err != nil {
 			t.Fatalf("not saved: %v", err)
@@ -96,7 +96,7 @@ func TestSettingsMTLSIssueRevoke(t *testing.T) {
 
 // A page open from another computer never shuts itself out: without a
 // certificate it can't turn mTLS on; with one it can't revoke that one
-// or issue its name again. The computer magpie runs on can do all three.
+// or issue its name again. The computer eipgam runs on can do all three.
 func TestSettingsMTLSPageLockout(t *testing.T) {
 	h := sandboxHome(t)
 	os.MkdirAll(filepath.Join(h, "Downloads"), 0o755)
@@ -108,7 +108,7 @@ func TestSettingsMTLSPageLockout(t *testing.T) {
 		t.Fatal("not issued")
 	}
 	serial := s.MTLSCerts[0].Serial
-	leaf := leafFile(t, filepath.Join(h, "Downloads", "magpie-phone", "client.pem"))
+	leaf := leafFile(t, filepath.Join(h, "Downloads", "eipgam-phone", "client.pem"))
 	web := mtlsMux(t, webHost{})
 
 	far := mtlsReq("/api/settings/mtls", `{"on":true}`)
@@ -164,18 +164,18 @@ func TestProviderSaveClientCert(t *testing.T) {
 		return w.Code, w.Body.String()
 	}
 	base := `{"id":"home","name":"Home","key":"k","chat":"https://home.example:3425/v1","icon":"generic"`
-	certs := `"clientCert":"~/Downloads/magpie-laptop/client.pem","clientKey":"~/Downloads/magpie-laptop/client-key.pem","serverCA":"~/Downloads/magpie-laptop/ca.pem"`
+	certs := `"clientCert":"~/Downloads/eipgam-laptop/client.pem","clientKey":"~/Downloads/eipgam-laptop/client-key.pem","serverCA":"~/Downloads/eipgam-laptop/ca.pem"`
 	if code, out := post(base + `,"new":true,` + certs + `}`); code != 200 {
 		t.Fatalf("%d %s", code, out)
 	}
 	p, _ := provider.Find("home")
-	if p.ClientCert != filepath.Join(h, "Downloads", "magpie-laptop", "client.pem") || p.ServerCA == "" {
+	if p.ClientCert != filepath.Join(h, "Downloads", "eipgam-laptop", "client.pem") || p.ServerCA == "" {
 		t.Fatalf("saved %q %q", p.ClientCert, p.ServerCA)
 	}
 	info := providerInfo(*p, nil)
 	// shown with the system's separator: "~\Downloads\…" on Windows,
 	// which CertPath reads back the same (#5928)
-	if want := "~" + string(filepath.Separator) + filepath.Join("Downloads", "magpie-laptop", "client.pem"); !info.TakesClientCert || info.ClientCert != want {
+	if want := "~" + string(filepath.Separator) + filepath.Join("Downloads", "eipgam-laptop", "client.pem"); !info.TakesClientCert || info.ClientCert != want {
 		t.Fatalf("shown %v %q", info.TakesClientCert, info.ClientCert)
 	}
 	if back, err := provider.CertPath(info.ClientCert); err != nil || back != p.ClientCert {
@@ -193,7 +193,7 @@ func TestProviderSaveClientCert(t *testing.T) {
 	if p, _ = provider.Find("home"); p.ClientCert != "" || p.ServerCA != "" {
 		t.Fatal("sent empty, still kept")
 	}
-	if code, _ := post(base + `,"from":"home","models":[],"headers":{},"clientCert":"~/Downloads/magpie-laptop/client.pem"}`); code == 200 {
+	if code, _ := post(base + `,"from":"home","models":[],"headers":{},"clientCert":"~/Downloads/eipgam-laptop/client.pem"}`); code == 200 {
 		t.Fatal("a certificate without its key saved")
 	}
 }

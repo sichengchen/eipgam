@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // qwenInputRefusal is a local Qwen server's Responses API turning away an
@@ -90,7 +90,7 @@ const subagentTurn = `{"model":%q,"stream":%t,"store":false,"input":[
 
 // cyberestro on X: a Codex subagent on a local Qwen server's Responses
 // API was refused 400 "Unsupported input item: agent_message", the item
-// its task comes in, and magpie gave the 400 back, every turn. The turn
+// its task comes in, and eipgam gave the 400 back, every turn. The turn
 // is now asked again translated on the same API, the agent_message as the
 // user's turn it is, and the next turn goes translated at once; a server
 // that takes the item still gets it as sent.

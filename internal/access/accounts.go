@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // CleanAccounts is a key's account list as kept (#905): each entry
@@ -96,7 +96,7 @@ func CleanAccounts(in []string) ([]string, error) {
 }
 
 // ExcludeMark starts an entry's account to keep the key off it:
-// "<provider>/!<ref>" (LeiWang_2000 on X). A magpie older than the mark
+// "<provider>/!<ref>" (LeiWang_2000 on X). A eipgam older than the mark
 // reads it as an account no provider has, which holds the key to none of
 // that provider's: it fails closed.
 const ExcludeMark = "!"

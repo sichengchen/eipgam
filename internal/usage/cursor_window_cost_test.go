@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // A call the Cursor plugin served on a model listed at a context size
 // (claude-opus-5-5@300k) is counted at its model's price on the request
 // log, as a call on the plain id is, not at no cost (RyuJeXu on X, whose
-// dashboard reads magpie's usage). A call on a model no catalog prices
+// dashboard reads eipgam's usage). A call on a model no catalog prices
 // (Cursor's auto) stays unpriced.
 func TestCursorWindowCallIsPriced(t *testing.T) {
 	pageHome(t)

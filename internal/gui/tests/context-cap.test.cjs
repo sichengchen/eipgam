@@ -16,7 +16,7 @@ const { watchSettingsReads, settingsDrawn, wheelTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 
 function server(lang, posted) {
-  let cur = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, fx: { rate: 7.2, at: new Date().toISOString(), stale: false } };
+  let cur = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, fx: { rate: 7.2, at: new Date().toISOString(), stale: false } };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posted));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=models");
+      await page.goto("http://eipgam.test/?view=settings&tab=models");
       await settingsDrawn(page);
       const row = page.locator("#contextCapRow"), field = row.locator("input.context-cap");
       await field.waitFor();

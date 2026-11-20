@@ -87,19 +87,19 @@ window.davForm = function (v) {
   const advIn = el("div", "stack");
   advIn.append(profL, useL, siL, exL, siSay, el("div", "hint", t("Usage goes as a file a day: times, tokens, models and costs, never what was said. Turn it on on each computer that shares its own.")));
   adv.append(el("summary", "", t("Advanced")), advIn);
-  const davFields = [...field(t("Address"), url, t("A folder named magpie is made in it.")),
+  const davFields = [...field(t("Address"), url, t("A folder named eipgam is made in it.")),
     ...field(t("User"), user),
     ...field(t("Password"), pass)];
   const s3Fields = [...field(t("Endpoint"), endpoint, t("Empty for AWS S3; for R2, B2, MinIO and the like, their S3 API address.")),
     ...field(t("Bucket"), bucket),
-    ...field(t("Prefix"), prefix, t("The backup goes in a folder named magpie under it.")),
+    ...field(t("Prefix"), prefix, t("The backup goes in a folder named eipgam under it.")),
     ...field(t("Region"), region),
     ...field(t("Access key"), keyID),
     ...field(t("Secret"), secret),
     ...field("", pathL, t("MinIO and most NAS servers need it."))];
   const ghFields = [...field(t("Repository"), repo, t("An existing private GitHub repository, in owner/repo form.")),
     ...field(t("Branch"), branch, t("Empty uses the repository's default branch. Empty repositories are initialized by the first sync; other branches must already exist.")),
-    ...field(t("Folder"), ghPrefix, t("The encrypted backup goes in <folder>/magpie/magpie.magpie-backup. Each update creates a commit.")),
+    ...field(t("Folder"), ghPrefix, t("The encrypted backup goes in <folder>/eipgam/eipgam.eipgam-backup. Each update creates a commit.")),
     ...field(t("GitHub token"), token, t("A fine-grained token for this repository with Contents: read and write. Kept on this computer, separately from the library's GitHub token."))];
   // which one is synced to, and that the other's settings stay
   const to = field(t("Sync to"), segs(Object.entries(syncNames).map(([id, n]) => [id, id === active ? t("{kind} · on", { kind: n }) : n]), kind, (k) => { kind = k; show(); }), " ");
@@ -176,7 +176,7 @@ window.davForm = function (v) {
   };
   ed.addEventListener("paste", (e) => {
     const text = e.clipboardData?.getData("text") || "";
-    if (!text.includes("magpie-sync:")) return;
+    if (!text.includes("eipgam-sync:")) return;
     e.preventDefault();
     pasted = text;
     openPasted();
@@ -283,7 +283,7 @@ window.importForm = function () {
   let data = "";
   const file = el("input");
   file.type = "file";
-  file.accept = ".magpie-backup";
+  file.accept = ".eipgam-backup";
   file.hidden = true;
   const name = el("span", "fname", t("No file chosen"));
   const pick = el("button", "text", t("Choose…"));

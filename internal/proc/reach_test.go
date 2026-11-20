@@ -13,12 +13,12 @@ import (
 
 // A PATH folder on a mount that doesn't answer is left out of a look, and
 // the command is found in the folders after it: a look walking PATH past
-// such a folder blocked magpie's start-up for over a minute, after `open
+// such a folder blocked eipgam's start-up for over a minute, after `open
 // -a` (ifccod7391564 on X). The gone mount is a probe that doesn't return
 // and a walk of PATH that reports itself; the old lookup walked it.
 func TestHungPathFolderIsLeftOut(t *testing.T) {
 	hung, good := t.TempDir(), t.TempDir()
-	tool := "magpie-reach-tool"
+	tool := "eipgam-reach-tool"
 	file := tool
 	if runtime.GOOS == "windows" {
 		file += ".exe"

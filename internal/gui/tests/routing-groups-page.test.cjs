@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const models = [
   { id: "a/m", name: "m", providerName: "A", icon: "generic" },
   { id: "b/m", name: "m", providerName: "B", icon: "generic" },
@@ -88,7 +88,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, web));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-reqs > *").first().waitFor({ state: "attached", timeout: boot });
         await page.locator(".rt-group", { hasText: "Mine" }).waitFor({ state: "attached", timeout: boot });
 
@@ -180,7 +180,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve("en", false));
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://eipgam.test/?view=routing");
     await page.locator(".rt-group", { hasText: "Mine" }).waitFor({ state: "attached", timeout: boot });
     const go = page.locator('#view-routing .rt-go[data-go="group:mine"]').first();
     await go.waitFor({ timeout: boot });
@@ -192,7 +192,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const rb = await row.boundingBox();
     assert(rb.y >= 0 && rb.y + rb.height <= 700, "its row in sight");
     // the window opened on a new group of a model: the groups page
-    await page.goto("http://magpie.test/?view=groups&newgroup=a%2Fn");
+    await page.goto("http://eipgam.test/?view=groups&newgroup=a%2Fn");
     await page.locator("#view-groups .rt-gedit").first().waitFor({ timeout: boot });
     assert.equal(await page.locator("#view-groups").isVisible(), true);
     assert.deepEqual(errors, []);
@@ -226,7 +226,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (at === "/api/usage/quotas") return r.fulfill({ json: [] });
         return base(r);
       });
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const row = page.locator('#view-groups .rt-group[data-id="mine"]');
       await row.waitFor({ timeout: boot });
       await page.waitForFunction(() => Array.isArray(quotas), null, { timeout: boot });

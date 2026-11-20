@@ -75,15 +75,15 @@ async function open(browser, lang, width, height) {
   const context = await browser.newContext({ viewport: { width, height } });
   const page = await context.newPage();
   // the block grid, the look these cells are drawn in (the map is the default)
-  await page.addInitScript(() => { try { localStorage.setItem("magpie.ctxLook", "grid"); } catch {} });
-  // folded is the reader's own choice, kept in magpie.ctxShut; set once, so a reload keeps what the page stores
-  await page.addInitScript(() => { try { if (!sessionStorage.getItem("seeded")) { sessionStorage.setItem("seeded", "1"); localStorage.setItem("magpie.ctxShut", "1"); } } catch {} });
+  await page.addInitScript(() => { try { localStorage.setItem("eipgam.ctxLook", "grid"); } catch {} });
+  // folded is the reader's own choice, kept in eipgam.ctxShut; set once, so a reload keeps what the page stores
+  await page.addInitScript(() => { try { if (!sessionStorage.getItem("seeded")) { sessionStorage.setItem("seeded", "1"); localStorage.setItem("eipgam.ctxShut", "1"); } } catch {} });
   page.setDefaultTimeout(5000);
   page.setDefaultNavigationTimeout(60000);
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang));
-  await page.goto("http://magpie.test/?view=routing");
+  await page.goto("http://eipgam.test/?view=routing");
   await page.locator(".rt-req").nth(routes.length - 1).waitFor();
   await page.locator(".rt-ctx > *").first().waitFor();
   await page.waitForTimeout(500);
@@ -107,7 +107,7 @@ async function click(page, b) {
   await page.waitForTimeout(300);
 }
 const scrollTop = (page) => page.evaluate(() => document.querySelector("#view-routing").scrollTop);
-const stored = (page) => page.evaluate(() => localStorage.getItem("magpie.ctxShut"));
+const stored = (page) => page.evaluate(() => localStorage.getItem("eipgam.ctxShut"));
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   test(`${engine}: the context window on Routing folds to one line`, async (t) => {

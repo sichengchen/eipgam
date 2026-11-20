@@ -13,7 +13,7 @@ import (
 )
 
 // The Codex app's own logs, read for the page it shows when it can't go on
-// after magpie restarted its app-server (provider.CodexAppCrashed, see
+// after eipgam restarted its app-server (provider.CodexAppCrashed, see
 // provider/codex_app_crash.go). The app writes them as its file logger
 // does in 26.1021 (file-based-logger: macOS ~/Library/Logs/<bundle id>,
 // Windows %LOCALAPPDATA%\Codex\Logs, Linux $XDG_STATE_HOME/codex/logs,
@@ -201,5 +201,5 @@ func codexAppRelaunch(ctx context.Context) error {
 		}
 		return reopenBundle(ctx, a, c.bundle, c.exe)
 	}
-	return errors.New("magpie reopens the Codex app on macOS and Windows only")
+	return errors.New("eipgam reopens the Codex app on macOS and Windows only")
 }

@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // jiangguochao666 on X: an agent's model picker says free by a model its
@@ -36,7 +36,7 @@ func TestPickerSaysAZeroPricedModelIsFree(t *testing.T) {
 	}
 	of := func() map[string]Option {
 		out := map[string]Option{}
-		for _, o := range viaMagpie("opencode", "magpie/") {
+		for _, o := range viaMagpie("opencode", "eipgam/") {
 			out[o.Ref] = o
 		}
 		return out

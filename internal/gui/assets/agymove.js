@@ -13,11 +13,11 @@ window.agyMoveLine = function () {
   if (!users.length) return null;
   const ids = users.join(",");
   let hid = "";
-  try { hid = localStorage.getItem("magpie.agyMoveHidden") || ""; } catch {}
+  try { hid = localStorage.getItem("eipgam.agyMoveHidden") || ""; } catch {}
   if (hid === ids && !agySaid) return null;
   const named = users.filter(Boolean);
   const hide = el("button", "text", t("Not now"));
-  hide.onclick = () => { try { localStorage.setItem("magpie.agyMoveHidden", ids); } catch {} agySaid = null; renderMovable(); };
+  hide.onclick = () => { try { localStorage.setItem("eipgam.agyMoveHidden", ids); } catch {} agySaid = null; renderMovable(); };
   const go = el("button", "text action", agySaid?.busy || (agySaid?.why ? t("Try again") : t("Move")));
   go.disabled = go.classList.toggle("busy", !!agySaid?.busy);
   go.onclick = async () => {

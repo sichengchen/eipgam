@@ -1,25 +1,25 @@
 package gateway
 
-// The native route: a provider's own API, reached through magpie
+// The native route: a provider's own API, reached through eipgam
 // (axelburks on Discord). /v1/images/generations and /v1/videos take
 // OpenAI's shape and pass on the vendor fields they don't read, but a
-// vendor's API grows faster than magpie maps it. A caller who wants all of
+// vendor's API grows faster than eipgam maps it. A caller who wants all of
 // it asks
 //
-//	<METHOD> /v1/magpie/native/<provider>/<path>
+//	<METHOD> /v1/eipgam/native/<provider>/<path>
 //
-// and magpie sends it to the provider's host, at /<path> as the caller
+// and eipgam sends it to the provider's host, at /<path> as the caller
 // wrote it (not under the configured base's /v1 or /api/v3: a vendor's
 // API has v2 paths too), the body and query as they came, signed with
 // the provider's key; the answer comes back as it came, a stream as it
-// arrives. So magpie relays every API a key of the user's reaches without
+// arrives. So eipgam relays every API a key of the user's reaches without
 // handing the key out. What it keeps of the gateway:
 //
 //   - the gateway's own guards first, as every route (a key from beyond
 //     loopback, corsGuard's Origin checks, lanGuard's Host check, a
 //     read-only key refused, the key's rate);
 //   - a key held to models, accounts or a spend limit is refused: a path
-//     magpie doesn't read can't be tied to a model, and magpie prices no
+//     eipgam doesn't read can't be tied to a model, and eipgam prices no
 //     answer it doesn't read, so it can't hold such a key to them. Such a
 //     key uses the OpenAI routes;
 //   - an API key's provider only (nativeKeyed): a vendor's or the user's
@@ -46,14 +46,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // NativePath is where a provider's own API is reached.
-const NativePath = "/v1/magpie/native/"
+const NativePath = "/v1/eipgam/native/"
 
 // nativeMethods are the methods the native route takes.
 var nativeMethods = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete}
@@ -79,12 +79,12 @@ func (s *Server) native(w http.ResponseWriter, r *http.Request) {
 		s.record(*call)
 	}
 	if k := access.Caller(r.Context()); nativeHeld(k) {
-		fail(http.StatusForbidden, fmt.Sprintf("The gateway key %q is held to some models, accounts or a spend limit, which magpie can't hold a vendor's own API to: use /v1/images/generations and /v1/videos, which pass on the vendor's own fields too", k.KeyName))
+		fail(http.StatusForbidden, fmt.Sprintf("The gateway key %q is held to some models, accounts or a spend limit, which eipgam can't hold a vendor's own API to: use /v1/images/generations and /v1/videos, which pass on the vendor's own fields too", k.KeyName))
 		return
 	}
 	found, err := provider.Find(id)
 	if err != nil || !found.On() || found.DecideOnly() {
-		fail(http.StatusNotFound, fmt.Sprintf("magpie has no provider %q turned on", id))
+		fail(http.StatusNotFound, fmt.Sprintf("eipgam has no provider %q turned on", id))
 		return
 	}
 	s.nativeAny(w, r, *found, call, fail)
@@ -93,7 +93,7 @@ func (s *Server) native(w http.ResponseWriter, r *http.Request) {
 // nativeKeyed: p is reached with an API key of the user's, a vendor's or
 // their own provider's: no subscription, OAuth sign-in or plugin account
 // (Account), no Vertex AI (a Google token, not a key) and no remote
-// magpie (its key is a gateway key, and its own routes are magpie's).
+// eipgam (its key is a gateway key, and its own routes are eipgam's).
 func nativeKeyed(p provider.Provider) bool {
 	return p.Account == nil && p.Key != "" && !p.IsRemoteMagpie() && !p.IsVertex()
 }
@@ -168,7 +168,7 @@ func nativeQuery(raw string) string {
 // nativeDropped are the caller's headers that never go to the vendor:
 // its auth (a gateway key in any place callerKeys reads one, and any
 // other credential), the browser's and a proxy's, the hop's own, and
-// magpie's; and what a proxy says of the caller (proxyIdentity). The rest
+// eipgam's; and what a proxy says of the caller (proxyIdentity). The rest
 // go as they came.
 var nativeDropped = map[string]bool{
 	"Authorization": true, "Proxy-Authorization": true, "X-Api-Key": true, "Api-Key": true, "X-Goog-Api-Key": true, "Cookie": true,
@@ -182,14 +182,14 @@ func nativeHeaderDropped(k string) bool {
 	return nativeDropped[k] || proxyIdentity(k) || strings.HasPrefix(k, "X-Magpie-") || strings.HasPrefix(k, "Sec-")
 }
 
-// proxyIdentity says k is what a proxy or tunnel in front of magpie says
+// proxyIdentity says k is what a proxy or tunnel in front of eipgam says
 // of the caller: its address (every forwardHeaders entry, X-Forwarded-*,
 // Cloudflare's Cf-*) or who it is (Tailscale Serve's Tailscale-User-Login,
 // the user's email, -Name and -Profile-Pic; a LazyCat box's X-HC-*, the
 // box account a signed-in browser or app is, its role, its device and
 // when it signed in, which the box's ingress adds to every request it
-// passes an app, the gateway's client routes too). It is for magpie to
-// judge a request by (proxied), never for a vendor or a server magpie
+// passes an app, the gateway's client routes too). It is for eipgam to
+// judge a request by (proxied), never for a vendor or a server eipgam
 // passes the request on to.
 func proxyIdentity(k string) bool {
 	k = http.CanonicalHeaderKey(k)
@@ -274,7 +274,7 @@ func (s *Server) nativeAny(w http.ResponseWriter, r *http.Request, p provider.Pr
 			dec := json.NewDecoder(bytes.NewReader(body))
 			dec.UseNumber() // a seed or an id goes as it came
 			if err := dec.Decode(&v); err != nil || dec.More() {
-				fail(http.StatusUnsupportedMediaType, "Settings › Privacy masks what goes to a vendor, and magpie masks a JSON body only: this one isn't JSON, so nothing was sent. Send JSON, or set this provider to go unmasked")
+				fail(http.StatusUnsupportedMediaType, "Settings › Privacy masks what goes to a vendor, and eipgam masks a JSON body only: this one isn't JSON, so nothing was sent. Send JSON, or set this provider to go unmasked")
 				return
 			}
 			// the value inside a list, so a lone string is masked as well

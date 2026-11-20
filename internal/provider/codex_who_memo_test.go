@@ -41,7 +41,7 @@ func TestCodexWhoKeptByBytes(t *testing.T) {
 }
 
 // TestAuthMemoBounded says the memo never holds more than authMemoMax
-// credentials, so tokens renewed every hour don't pile up in a magpie
+// credentials, so tokens renewed every hour don't pile up in a eipgam
 // running for weeks.
 func TestAuthMemoBounded(t *testing.T) {
 	var m authMemo[int]

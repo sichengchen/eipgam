@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // geminiDrawn is a Gemini API's answer with one image drawn.
@@ -37,14 +37,14 @@ func TestImagesAPISizeReachesTheGeminiAPI(t *testing.T) {
 		body = b
 		return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(geminiDrawn))}, nil
 	})}
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a magpie","size":"4096x4096"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a eipgam","size":"4096x4096"}`)
 	if code != 200 || len(a.Data) != 1 {
 		t.Fatalf("%d %s", code, raw)
 	}
 	if sent := gjson.GetBytes(body, "generationConfig.imageConfig").Raw; !sameConfig(sent, `{"aspectRatio":"1:1","imageSize":"4K"}`) {
 		t.Fatalf("size 4096x4096: imageConfig was %s: %s", sent, body)
 	}
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a magpie","size":"1536x1024"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a eipgam","size":"1536x1024"}`)
 	if code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -52,7 +52,7 @@ func TestImagesAPISizeReachesTheGeminiAPI(t *testing.T) {
 		t.Fatalf("size 1536x1024: imageConfig was %s: %s", sent, body)
 	}
 	// a size the model's 1K default draws at is the ratio alone, as before
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a magpie","size":"1024x1024"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a eipgam","size":"1024x1024"}`)
 	if code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -60,7 +60,7 @@ func TestImagesAPISizeReachesTheGeminiAPI(t *testing.T) {
 		t.Fatalf("size 1024x1024: imageConfig was %s: %s", sent, body)
 	}
 	// a Gemini 2.x image model draws at 1K only: the ratio alone, as before
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-2.5-flash-image","prompt":"a magpie","size":"4096x4096"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-2.5-flash-image","prompt":"a eipgam","size":"4096x4096"}`)
 	if code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -68,7 +68,7 @@ func TestImagesAPISizeReachesTheGeminiAPI(t *testing.T) {
 		t.Fatalf("gemini-2.5-flash-image 4096x4096: imageConfig was %s: %s", sent, body)
 	}
 	// a ratio asked as one is no size
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a magpie","size":"16:9"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gg/gemini-3-pro-image-preview","prompt":"a eipgam","size":"16:9"}`)
 	if code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}

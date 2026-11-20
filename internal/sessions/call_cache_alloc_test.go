@@ -26,7 +26,7 @@ func TestCallsWriteKeepsNoPatchListPerFrame(t *testing.T) {
 	}
 	a, b := mk("a.jsonl", 3*framePatches), mk("b.jsonl", 10)
 	// no collection while it counts: one empties the pool, as it does
-	// for a moment on a running magpie
+	// for a moment on a running eipgam
 	runtime.GC()
 	defer debug.SetGCPercent(debug.SetGCPercent(-1))
 	writeCalls(a, 0, false)

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // /api/usage/traffic answers the gateway's bytes so far and its requests

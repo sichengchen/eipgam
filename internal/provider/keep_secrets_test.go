@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 func keepSecretsHome(t *testing.T) {
@@ -29,7 +29,7 @@ func keepSecretsHome(t *testing.T) {
 
 // #1821: a Volcengine provider's AccessKey ID and Secret went missing from
 // providers.json. Sync and a restore bring the provider whole from another
-// computer; one that knows no access key (a magpie before v0.1.1142, or
+// computer; one that knows no access key (a eipgam before v0.1.1142, or
 // one it was never given on) sends the same key and nothing else, and
 // that wiped it here. Kept now while the key is the one here, as a copy
 // without keys keeps its secret headers too; another key is another
@@ -178,7 +178,7 @@ func TestPlanCardWithoutAccessKey(t *testing.T) {
 		{ID: "qwen-payg", Name: "Qwen", Preset: "qwen", Chat: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", Key: "sk-k"},
 		{ID: "ali-off", Name: "Alibaba off", Preset: "alibaba-token-plan", Chat: aliPlan, Key: "sk-sp-k", Off: true},
 		{ID: "tencent-cloud", Name: "Tencent Cloud", Preset: "tencent-cloud", Chat: "https://tokenhub-intl.tencentmaas.com/plan/v3", Key: "sk-tp-1"},
-		// TokenHub's China host is no plan magpie reads: no card asks it
+		// TokenHub's China host is no plan eipgam reads: no card asks it
 		// for an access key
 		{ID: "tc-gz", Name: "Tencent China", Preset: "tencent-cloud", Chat: "https://tokenhub.tencentmaas.com/plan/v3", Key: "sk-tp-2"},
 		// a custom provider at a plan's address is the user's own: no card

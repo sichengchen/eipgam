@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 const base = { icon: "generic", catalog: "", agents: [], fallback: [], headers: {}, keyList: [], balanceToken: { takes: false, set: false }, proxy: "", ready: true, key: { set: true, masked: "sk-…one" } };
 const relay = (saved) => ({
   ...base, id: "ark", name: "Ark", chat: "https://ark.example.com/api/v3", responses: "", anthropic: "", gemini: "", decide: "https://ark.example.com/api/v3", decideAPIKind: true, takesModelHeaders: true,
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [], posts = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, posts, saved));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           return { page, errors, posts };
         };
         const settingsOf = async (page, name) => {

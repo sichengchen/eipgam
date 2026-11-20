@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseImportPreset(t *testing.T) {
-	p, err := ParseImport("magpie://import?preset=moonshot&key=sk-abc123&models=kimi-k3,%20kimi-k2.6")
+	p, err := ParseImport("eipgam://import?preset=moonshot&key=sk-abc123&models=kimi-k3,%20kimi-k2.6")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestParseImportPreset(t *testing.T) {
 // A region with a key page of its own (Qianfan's pay as you go, on the
 // IAM page) names it in the parsed provider, before it is ever saved.
 func TestParseImportRegionKeys(t *testing.T) {
-	p, err := ParseImport("magpie://import?preset=tencent-cloud&region=enterprise-intl")
+	p, err := ParseImport("eipgam://import?preset=tencent-cloud&region=enterprise-intl")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestParseImportCustom(t *testing.T) {
 		"keys":      {"javascript:alert(1)"},
 		"catalog":   {"openai"},
 	}
-	p, err := ParseImport("magpie://import?" + q.Encode())
+	p, err := ParseImport("eipgam://import?" + q.Encode())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,38 +67,38 @@ func TestParseImportRegion(t *testing.T) {
 		t.Skip("no preset with regions")
 	}
 	r := pr.Regions[1]
-	p, err := ParseImport("magpie://import?preset=" + pr.ID + "&region=" + r.ID)
+	p, err := ParseImport("eipgam://import?preset=" + pr.ID + "&region=" + r.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if p.Chat != r.Chat || p.Anthropic != r.Anthropic || p.Preset != pr.ID {
 		t.Fatalf("got %+v, want region %+v", p, r)
 	}
-	if _, err := ParseImport("magpie://import?preset=" + pr.ID + "&region=nowhere"); err == nil {
+	if _, err := ParseImport("eipgam://import?preset=" + pr.ID + "&region=nowhere"); err == nil {
 		t.Fatal("unknown region accepted")
 	}
 }
 
 // A Gemini-compatible relay is added in the app, the TUI and
-// `magpie provider set` with a Gemini URL alone (#1346, #2201); a link
+// `eipgam provider set` with a Gemini URL alone (#1346, #2201); a link
 // naming one was refused as giving no base URL, and a gemini= beside
 // chat= was dropped without a word.
 func TestParseImportGemini(t *testing.T) {
-	p, err := ParseImport("magpie://import?name=Gemini%20Relay&gemini=https://relay.example/v1beta&key=sk-g")
+	p, err := ParseImport("eipgam://import?name=Gemini%20Relay&gemini=https://relay.example/v1beta&key=sk-g")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if p.Gemini != "https://relay.example/v1beta" || p.Chat != "" || p.Responses != "" || p.Anthropic != "" {
 		t.Fatalf("gemini only: got %+v", p)
 	}
-	p, err = ParseImport("magpie://import?name=X&chat=https://relay.example/v1/&gemini=https://relay.example/v1beta")
+	p, err = ParseImport("eipgam://import?name=X&chat=https://relay.example/v1/&gemini=https://relay.example/v1beta")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if p.Chat != "https://relay.example/v1" || p.Gemini != "https://relay.example/v1beta" {
 		t.Fatalf("chat and gemini: got %+v", p)
 	}
-	if _, err := ParseImport("magpie://import?name=X&gemini=not-a-url"); err == nil {
+	if _, err := ParseImport("eipgam://import?name=X&gemini=not-a-url"); err == nil {
 		t.Fatal("a bad gemini= was accepted")
 	}
 }
@@ -106,16 +106,16 @@ func TestParseImportGemini(t *testing.T) {
 func TestParseImportRejects(t *testing.T) {
 	for _, link := range []string{
 		"https://usemagpie.ai/import?preset=deepseek",
-		"magpie://delete?id=deepseek",
-		"magpie://import",
-		"magpie://import?preset=nope",
-		"magpie://import?name=X",
-		"magpie://import?name=X&chat=http://relay.example/v1",
-		"magpie://import?name=X&chat=https://user:pw@relay.example/v1",
-		"magpie://import?name=X&chat=file:///etc/passwd",
-		"magpie://import?name=magpie&chat=https://x.example/v1",
-		"magpie://import?name=%E2%80%94&chat=https://x.example/v1",
-		"magpie://import?preset=deepseek&key=sk%0Aevil",
+		"eipgam://delete?id=deepseek",
+		"eipgam://import",
+		"eipgam://import?preset=nope",
+		"eipgam://import?name=X",
+		"eipgam://import?name=X&chat=http://relay.example/v1",
+		"eipgam://import?name=X&chat=https://user:pw@relay.example/v1",
+		"eipgam://import?name=X&chat=file:///etc/passwd",
+		"eipgam://import?name=eipgam&chat=https://x.example/v1",
+		"eipgam://import?name=%E2%80%94&chat=https://x.example/v1",
+		"eipgam://import?preset=deepseek&key=sk%0Aevil",
 	} {
 		if p, err := ParseImport(link); err == nil {
 			t.Errorf("%s: accepted as %+v", link, p)
@@ -128,9 +128,9 @@ func TestParseImportRejects(t *testing.T) {
 // refused, saying how it is added, rather than offered as a provider that
 // wants a key and can't be saved.
 func TestParseImportVertex(t *testing.T) {
-	for _, link := range []string{"magpie://import?preset=google-vertex", "magpie://import?preset=Google-Vertex&key=AQ.abc&name=Vertex"} {
+	for _, link := range []string{"eipgam://import?preset=google-vertex", "eipgam://import?preset=Google-Vertex&key=AQ.abc&name=Vertex"} {
 		_, err := ParseImport(link)
-		if err == nil || !strings.Contains(err.Error(), "magpie provider add google-vertex project=") {
+		if err == nil || !strings.Contains(err.Error(), "eipgam provider add google-vertex project=") {
 			t.Errorf("%s: %v", link, err)
 		}
 	}
@@ -142,7 +142,7 @@ func TestParseImportIcon(t *testing.T) {
 		"chat": {"https://relay.example/v1"},
 		"icon": {"https://relay.example/logo.svg?v=2"},
 	}
-	p, err := ParseImport("magpie://import?" + q.Encode())
+	p, err := ParseImport("eipgam://import?" + q.Encode())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,7 +151,7 @@ func TestParseImportIcon(t *testing.T) {
 	}
 	// an explicit icon wins over the catalog's own logo
 	q.Set("catalog", "openai")
-	if p, err = ParseImport("magpie://import?" + q.Encode()); err != nil || p.IconURL == "" {
+	if p, err = ParseImport("eipgam://import?" + q.Encode()); err != nil || p.IconURL == "" {
 		t.Fatalf("with a catalog: %+v, %v", p, err)
 	}
 	for _, bad := range []string{
@@ -164,7 +164,7 @@ func TestParseImportIcon(t *testing.T) {
 		"not a url",
 	} {
 		q.Set("icon", bad)
-		if _, err := ParseImport("magpie://import?" + q.Encode()); err == nil {
+		if _, err := ParseImport("eipgam://import?" + q.Encode()); err == nil {
 			t.Errorf("icon %q accepted", bad)
 		}
 	}
@@ -172,14 +172,14 @@ func TestParseImportIcon(t *testing.T) {
 
 func TestParseImportLocalHTTP(t *testing.T) {
 	for _, host := range []string{"localhost:11434", "127.0.0.1:8080", "192.168.1.20:8000", "box.local"} {
-		if _, err := ParseImport("magpie://import?name=Local&chat=http://" + host + "/v1"); err != nil {
+		if _, err := ParseImport("eipgam://import?name=Local&chat=http://" + host + "/v1"); err != nil {
 			t.Errorf("%s: %v", host, err)
 		}
 	}
 }
 
 func TestParseImportForms(t *testing.T) {
-	for _, link := range []string{"magpie:import?preset=moonshot", "magpie:///import?preset=moonshot", "MAGPIE://import/?preset=moonshot"} {
+	for _, link := range []string{"eipgam:import?preset=moonshot", "eipgam:///import?preset=moonshot", "EIPGAM://import/?preset=moonshot"} {
 		if _, err := ParseImport(link); err != nil {
 			t.Errorf("%s: %v", link, err)
 		}
@@ -194,7 +194,7 @@ func TestParseImportNameCutKeepsCharactersWhole(t *testing.T) {
 		"chat": {"https://relay.example/v1"},
 		"key":  {"sk-relay"},
 	}
-	p, err := ParseImport("magpie://import?" + q.Encode())
+	p, err := ParseImport("eipgam://import?" + q.Encode())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +213,7 @@ func TestParseImportBalance(t *testing.T) {
 		"balance_path":   {"data.total_available"},
 		"balance_method": {"post"},
 	}
-	p, err := ParseImport("magpie://import?" + q.Encode())
+	p, err := ParseImport("eipgam://import?" + q.Encode())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func TestParseImportBalance(t *testing.T) {
 	}
 	// a preset's endpoint host counts as the link's own
 	q = url.Values{"preset": {"moonshot"}, "balance": {"https://api.moonshot.ai/v1/users/me/balance"}, "balance_method": {"GET"}}
-	if p, err = ParseImport("magpie://import?" + q.Encode()); err != nil || p.BalanceURL == "" || p.BalanceMethod != "" {
+	if p, err = ParseImport("eipgam://import?" + q.Encode()); err != nil || p.BalanceURL == "" || p.BalanceMethod != "" {
 		t.Fatalf("preset: %+v %v", p.BalanceURL, err)
 	}
 	for _, bad := range []url.Values{
@@ -237,12 +237,12 @@ func TestParseImportBalance(t *testing.T) {
 	} {
 		bad.Set("name", "Relay")
 		bad.Set("chat", "https://relay.example/v1")
-		if p, err := ParseImport("magpie://import?" + bad.Encode()); err == nil {
+		if p, err := ParseImport("eipgam://import?" + bad.Encode()); err == nil {
 			t.Errorf("%v: took balance %q", bad, p.BalanceURL)
 		}
 	}
 	// none named, none set
-	if p, err := ParseImport("magpie://import?name=Relay&chat=https://relay.example/v1"); err != nil || p.BalanceURL != "" || p.BalancePath != "" || p.BalanceMethod != "" {
+	if p, err := ParseImport("eipgam://import?name=Relay&chat=https://relay.example/v1"); err != nil || p.BalanceURL != "" || p.BalancePath != "" || p.BalanceMethod != "" {
 		t.Fatalf("no balance: %+v %v", p, err)
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // claudeSemverRE finds a version (1.2.3) in a CLI's --version, and

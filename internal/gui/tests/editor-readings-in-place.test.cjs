@@ -77,7 +77,7 @@ for (const engine of ["chromium", "webkit"]) {
       let let_in;
       const readings = new Promise((r) => (let_in = r));
       await page.route("**/*", serve(lang, readings));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude" }).first().click();
       await page.locator(".editor .accts .acc").nth(N - 1).waitFor();
       assert.equal(await page.locator(".editor .accts .aq-w").count(), 0, "no readings before they are let in");

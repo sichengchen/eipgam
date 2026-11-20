@@ -45,7 +45,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.waitForSelector("#quotaMode:not([hidden]) .opt");
         // with the trend's range shown too, as when a curve is on
         await page.evaluate(() => { document.querySelector("#quotaTrend").hidden = false; });

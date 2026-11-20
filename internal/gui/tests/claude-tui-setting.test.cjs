@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The Claude Code editor's one "Claude Code runs as" row (Anotiaww on X: it
-// was disabled in magpie web as a gateway while a second row, "interactive
+// was disabled in eipgam web as a gateway while a second row, "interactive
 // mode", beside it did the same job). One row, TUI or claude -p, in the app
-// and in magpie web as a gateway; both choices can be pressed; pressing
+// and in eipgam web as a gateway; both choices can be pressed; pressing
 // claude -p saves claudePrintMode with the rest of the settings kept and the
 // page not moved, and TUI turns it back. In English, Chinese, Japanese and
 // German, 1100 and 420 wide.

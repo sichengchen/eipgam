@@ -13,7 +13,7 @@ package provider
 // X-Device-Mid, a UUID it keeps as deviceMid, on every request, and
 // /api/v1/zcode-plan/billing/balance refuses one without it (400, code
 // 3001 "parameter error", #282). The server only asks that it is there, so
-// magpie keeps a UUID of its own, made once for this machine beside
+// eipgam keeps a UUID of its own, made once for this machine beside
 // providers.json — never ZCode's.
 
 import (
@@ -25,7 +25,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 var zcodeDevices = struct {

@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: name }).first().click();
         await page.locator(".editor details.advanced").waitFor({ state: "attached" });
         const words = await page.evaluate((l) => Object.fromEntries(["Images per request", "Save", "Images per request: {v} is not a whole number up to 1000",

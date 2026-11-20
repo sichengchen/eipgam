@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The tray panel's Allowances tab leaves out the subscriptions set hidden
@@ -171,11 +171,11 @@ func TestUsageArrangeWindowsHidden(t *testing.T) {
 	want(nil)
 }
 
-// A client magpie doesn't know is counted as one of its agents from the
+// A client eipgam doesn't know is counted as one of its agents from the
 // Usage page's Agents list (#1958, NorethSea), saved on its own and kept
 // through a save of the Settings page; As "" counts it on its own again.
-// An agent magpie knows isn't counted as another, nor anything as
-// magpie, nor as a client that isn't an agent.
+// An agent eipgam knows isn't counted as another, nor anything as
+// eipgam, nor as a client that isn't an agent.
 func TestUsageArrangeCountClient(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
@@ -204,8 +204,8 @@ func TestUsageArrangeCountClient(t *testing.T) {
 	want(map[string]string{"hermes-codex-thread-bridge": "codex"})
 	for _, bad := range []string{
 		`{"count":{"client":"claude-code","as":"codex"}}`,
-		`{"count":{"client":"magpie-router","as":"codex"}}`,
-		`{"count":{"client":"my-bridge","as":"magpie"}}`,
+		`{"count":{"client":"eipgam-router","as":"codex"}}`,
+		`{"count":{"client":"my-bridge","as":"eipgam"}}`,
 		`{"count":{"client":"my-bridge","as":"Python-urllib"}}`,
 		`{"count":{"client":"","as":"codex"}}`,
 	} {

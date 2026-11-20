@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Settings › Sync's Data folder (CHENGJIAHEGOXIS and buhaodeshiyehao on X:
-// magpie's files on another disk). The row shows where magpie's files are,
+// eipgam's files on another disk). The row shows where eipgam's files are,
 // with Show and Move…; Move… says what a move does in the app's own dialog
 // before anything is picked, Cancel posts nothing, and Choose a folder…
-// posts the move, the button then saying magpie restarts. A move that
-// can't restart (another magpie serving) says it waits, with Cancel; once
+// posts the move, the button then saying eipgam restarts. A move that
+// can't restart (another eipgam serving) says it waits, with Cancel; once
 // moved, the row shows the folder on the disk and Move back, and a move
 // that failed says why. In all five languages, at 1100 and 420px,
 // Chromium and WebKit, nothing wider than the window. The API is faked;
@@ -25,12 +25,12 @@ const tr = (lang, k, vars = {}) => {
   return s.replace(/\{(\w+)\}/g, (_, v) => vars[v]);
 };
 
-const home = { config: "~/.config/magpie", cache: "~/.cache/magpie" };
-const disk = "/Volumes/Samsung T7 Shield with a long name to wrap/magpie";
+const home = { config: "~/.config/eipgam", cache: "~/.cache/eipgam" };
+const disk = "/Volumes/Samsung T7 Shield with a long name to wrap/eipgam";
 
 function serve(lang, posts, state) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/eipgam",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
 
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator("#prefs").click();
         await openPart(page, "sync");
         const list = page.locator("#syncList");
@@ -108,19 +108,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await row.locator("button", { hasText: w("Move…") }).click();
         const ask = page.locator(".data-folder-ask");
         await ask.waitFor({ state: "visible" });
-        assert.equal(await ask.locator(".ehead b").textContent(), w("Move magpie's files to another disk?"));
+        assert.equal(await ask.locator(".ehead b").textContent(), w("Move eipgam's files to another disk?"));
         await ask.locator("button", { hasText: w("Cancel") }).click();
         await ask.waitFor({ state: "detached" });
         assert.deepEqual(posts, []);
 
-        // Choose a folder… moves: magpie restarts for it
+        // Choose a folder… moves: eipgam restarts for it
         await row.locator("button", { hasText: w("Move…") }).click();
         await ask.locator("button", { hasText: w("Choose a folder…") }).click();
         await page.waitForFunction((s) => document.querySelector(".data-folder-ask .primary")?.textContent === s, w("Restarting…"));
         assert.deepEqual(posts, ["move"]);
         await page.evaluate(() => closeConfirmAsk());
 
-        // another magpie serving: the move waits, said, with Cancel
+        // another eipgam serving: the move waits, said, with Cancel
         state.view = { ...home };
         state.other = true;
         await reopen();
@@ -129,8 +129,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await ask.waitFor({ state: "detached" });
         await page.waitForFunction(() => document.querySelectorAll("#syncList .data-folder-said").length === 2);
         assert.deepEqual(await row.locator(".data-folder-said").allTextContents(), [
-          w("Moves to {dir} when magpie starts again", { dir: disk }),
-          w("Another magpie serves the gateway (magpie serve): stop it, then open magpie again to move them"),
+          w("Moves to {dir} when eipgam starts again", { dir: disk }),
+          w("Another eipgam serves the gateway (eipgam serve): stop it, then open eipgam again to move them"),
         ]);
         assert.equal(await row.locator("button", { hasText: w("Move…") }).count(), 0, "no second move while one waits");
         await row.locator("button", { hasText: w("Cancel") }).click();
@@ -139,14 +139,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // moved: the folder on the disk, and Move back, which asks too;
         // the last failure said under it
-        state.view = { ...home, configAt: disk + "/config", cacheAt: disk + "/cache", moved: disk, error: "/Volumes/X/magpie has files in it already: pick another folder, or empty it" };
+        state.view = { ...home, configAt: disk + "/config", cacheAt: disk + "/cache", moved: disk, error: "/Volumes/X/eipgam has files in it already: pick another folder, or empty it" };
         await reopen();
         assert.equal(await row.locator(".data-folder-dir").textContent(), disk);
         const bad = row.locator(".data-folder-said.bad");
         assert.equal(await bad.textContent(), w("The last move wasn't made: {error}", { error: state.view.error }));
         await row.locator("button", { hasText: w("Move back") }).click();
         await ask.waitFor({ state: "visible" });
-        assert.equal(await ask.locator(".ehead b").textContent(), w("Move magpie's files back to this computer?"));
+        assert.equal(await ask.locator(".ehead b").textContent(), w("Move eipgam's files back to this computer?"));
         assert.match(await ask.textContent(), new RegExp(home.config.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
         await ask.locator("button", { hasText: w("Cancel") }).click();
         await ask.waitFor({ state: "detached" });

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Codex's auto-review of an approval, as codex-rs's guardian sends it: on
@@ -64,7 +64,7 @@ func TestCodexReviewSpentFollowsTheGroup(t *testing.T) {
 	}
 }
 
-// The conversation on one of magpie's models, picked in the Codex app
+// The conversation on one of eipgam's models, picked in the Codex app
 // beside the spent ChatGPT sign-in: its auto-review, on codex-auto-review
 // through the sign-in, goes on to that model when the account is out.
 func TestCodexReviewSpentFollowsMagpieModel(t *testing.T) {
@@ -72,14 +72,14 @@ func TestCodexReviewSpentFollowsMagpieModel(t *testing.T) {
 		t.Run(x.name, func(t *testing.T) {
 			b := &spentBackend{refuse: x.refuse}
 			spentAccount(t, b, false)
-			a := &scripted{replies: []reply{{200, "", chatSSEReply("from magpie's model")}}}
+			a := &scripted{replies: []reply{{200, "", chatSSEReply("from eipgam's model")}}}
 			scriptedOn(t, "a", provider.Chat, a)
 			s := New()
 			if rec := reviewOn(s, `{"model":"a/m","stream":true,"input":"ping"}`, false); rec.Code != 200 || b.n.Load() != 0 {
 				t.Fatalf("turn: %d %q, ChatGPT asked %d", rec.Code, rec.Body.String(), b.n.Load())
 			}
 			rec := reviewOn(s, reviewTurn, true)
-			if rec.Code != 200 || !strings.Contains(rec.Body.String(), "from magpie's model") || b.n.Load() != 1 || a.n != 2 {
+			if rec.Code != 200 || !strings.Contains(rec.Body.String(), "from eipgam's model") || b.n.Load() != 1 || a.n != 2 {
 				t.Fatalf("review: %d %q, ChatGPT asked %d, a %d", rec.Code, rec.Body.String(), b.n.Load(), a.n)
 			}
 		})
@@ -87,7 +87,7 @@ func TestCodexReviewSpentFollowsMagpieModel(t *testing.T) {
 }
 
 // With nowhere else for the conversation to go (no fallback, no group, no
-// turn of magpie's to follow), the review still has the backend's own
+// turn of eipgam's to follow), the review still has the backend's own
 // refusal, as it had.
 func TestCodexReviewSpentNowhereElseRelayed(t *testing.T) {
 	b := &spentBackend{refuse: codexSpent[0].refuse}

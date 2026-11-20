@@ -2,7 +2,7 @@
 // FakeshadowzZ on X: the Library's Claude plugins tab. A Claude Code plugin
 // is one row: its parts (skills, MCP servers, hooks, subagents), the agents
 // it is given to, a switch that turns it on or off as a whole, and a dialog
-// with what it holds, what magpie doesn't carry, Update and Remove (which
+// with what it holds, what eipgam doesn't carry, Update and Remove (which
 // asks first). Find plugins posts plugins/probe and lists what it found
 // with an Install that posts plugins/install; a chip posts plugins/agents,
 // the switch plugins/on. No native <select>; nothing wider than the window
@@ -24,14 +24,14 @@ const SUB_AGENTS = [
   { id: "cursor", dir: `${HOME}/.cursor/agents` },
   { id: "droid", dir: `${HOME}/.factory/droids`, mcp: true },
   { id: "opencode", dir: `${HOME}/.config/opencode/agents` },
-  { id: WSL, wsl: true, no: "magpie gives no subagents to an agent in WSL yet" },
+  { id: WSL, wsl: true, no: "eipgam gives no subagents to an agent in WSL yet" },
 ];
 const MODELS = [{ id: "openai/gpt-6-sol", name: "GPT-6 Sol", note: "OpenAI" }, { id: "group/review", name: "review", group: true }];
 const LONG = "Reviews code a change touched and reports only real bugs: logic errors, edge cases, races and leaks, never style, and never refactors that have nothing to do with the change.";
 const PLUGIN = { name: "code-kit", version: "1.2.0", description: LONG, agents: ["claude", "codex"], skills: ["code-kit-tdd"], mcp: ["code-kit-docs"], hooks: ["code-kit-lint"], subagents: ["code-kit-reviewer"], left: [{ what: "commands/ship.md", why: "slash commands aren't carried" }], source: "/Users/chuan/code-kit", installed: "2026-11-11" };
 const FOUND = { source: "/Users/chuan/market", candidates: [{ name: "fresh-kit", description: "A new one", skills: 2, mcp: 1, hooks: 0, subagents: 1 }, { name: "code-kit", description: "Have it", skills: 1, mcp: 0, hooks: 0, subagents: 0, have: true }] };
 const lib = (plugins) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills: [], problems: [],
   hooks: [], hookAgents: [], subagents: [], subagentAgents: [], plugins,
@@ -71,7 +71,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -119,14 +119,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [], errors = [];
         const open = async (width) => {
           const ctx = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "plugins"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "plugins"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
           await page.route("**/*", server(lang, state, posts));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           await page.locator("#view-library .lib-plugin").first().waitFor();
           return { ctx, page };

@@ -8,17 +8,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// An agent's own models, beside magpie's in its picker, can be left out
+// An agent's own models, beside eipgam's in its picker, can be left out
 // (MizuIro-H, #1642, on DeepSeek Harness's): the agent's model list has a
-// switch for them, its pickers then offer magpie's alone, the model it is
+// switch for them, its pickers then offer eipgam's alone, the model it is
 // set to stays, and another agent's pickers are as they were. Copilot CLI's
-// own are Auto and the models of Copilot's list magpie last fetched.
+// own are Auto and the models of Copilot's list eipgam last fetched.
 func TestAgentOwnModelsHidden(t *testing.T) {
 	sandboxHome(t)
 	if err := catalog.SaveLive("copilot", "https://api.githubcopilot.com", []catalog.Model{{ID: "gpt-5.4"}, {ID: "claude-sonnet-4.6"}}); err != nil {
@@ -45,28 +45,28 @@ func TestAgentOwnModelsHidden(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	values := func(a *agent.Agent, vals map[string]string) (own, magpie []string) {
+	values := func(a *agent.Agent, vals map[string]string) (own, eipgam []string) {
 		for _, f := range agentFields(a, vals) {
 			if f.Key != "model" {
 				continue
 			}
 			for _, o := range f.Options {
 				if o.Ref != "" {
-					magpie = append(magpie, o.Value)
+					eipgam = append(eipgam, o.Value)
 				} else {
 					own = append(own, o.Value)
 				}
 			}
 		}
-		return own, magpie
+		return own, eipgam
 	}
 	all := []string{"auto", "gpt-5.4", "claude-sonnet-4.6"}
 
 	if got := call("GET", ""); !got.Own || got.OwnHidden {
 		t.Fatalf("copilot's list: %+v, want its own models there and shown", got)
 	}
-	if own, magpie := values(copilot, map[string]string{}); !slices.Equal(own, all) || len(magpie) == 0 {
-		t.Fatalf("before: own %v, magpie's %v", own, magpie)
+	if own, eipgam := values(copilot, map[string]string{}); !slices.Equal(own, all) || len(eipgam) == 0 {
+		t.Fatalf("before: own %v, eipgam's %v", own, eipgam)
 	}
 
 	if got := call("POST", `{"ownHidden":true}`); !got.OwnHidden {
@@ -78,9 +78,9 @@ func TestAgentOwnModelsHidden(t *testing.T) {
 	if got := call("GET", ""); !got.Own || !got.OwnHidden {
 		t.Fatalf("copilot's list after: %+v", got)
 	}
-	own, magpie := values(copilot, map[string]string{})
-	if len(own) != 0 || !slices.Contains(magpie, "magpie/relay/m1") {
-		t.Fatalf("hidden: own %v left, magpie's %v", own, magpie)
+	own, eipgam := values(copilot, map[string]string{})
+	if len(own) != 0 || !slices.Contains(eipgam, "eipgam/relay/m1") {
+		t.Fatalf("hidden: own %v left, eipgam's %v", own, eipgam)
 	}
 	// the one it is set to stays, the others go
 	if own, _ := values(copilot, map[string]string{"model": "gpt-5.4"}); !slices.Equal(own, []string{"gpt-5.4"}) {
@@ -90,7 +90,7 @@ func TestAgentOwnModelsHidden(t *testing.T) {
 	if provider.OwnModelsHidden("codex") {
 		t.Fatal("codex hides its own too")
 	}
-	// the effort field, not a picker of magpie's models, keeps every level
+	// the effort field, not a picker of eipgam's models, keeps every level
 	for _, f := range agentFields(copilot, map[string]string{}) {
 		if f.Key == "effort" && len(f.Options) == 0 {
 			t.Fatal("effort lost its levels")

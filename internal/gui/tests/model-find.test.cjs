@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator('.row.provider[data-id="relay"]').click();
       await page.locator(".mfoot button", { hasText: w.names }).click();
       const list = page.locator(".mnames:not([hidden])");

@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A Remote magpie (or a provider of the user's) at https:// with a
+// A Remote eipgam (or a provider of the user's) at https:// with a
 // self-signed certificate (Zhangzhangi on X): the editor's Advanced holds a
 // Server certificate row. "Trust its certificate…" asks provider/peekcert,
 // shows the fingerprint and why this computer refuses it, and "Trust this
@@ -26,14 +26,14 @@ const boot = (route, lang) => route.fulfill({ contentType: "text/javascript", bo
 const SHA = "3f".repeat(16) + "a0".repeat(16);
 const PINNED = "ab".repeat(32);
 const colon = (h) => h.toUpperCase().match(/../g).join(":");
-const WHY = 'x509: "api.magpie.local" certificate is not standards compliant';
+const WHY = 'x509: "api.eipgam.local" certificate is not standards compliant';
 
 const base = {
   icon: "generic", chat: "", responses: "", anthropic: "", catalog: "",
   models: [{ id: "m", name: "m", on: true }], agents: [], fallback: [], headers: {},
   key: { set: true, masked: "mk-…one" }, keyList: [], balanceToken: { takes: false, set: false }, proxy: "",
 };
-const remote = { ...base, id: "remote-magpie", name: "Remote magpie", preset: "remote-magpie", icon: "magpie", chat: "https://api.magpie.local:13003/v1", takesClientCert: true };
+const remote = { ...base, id: "remote-eipgam", name: "Remote eipgam", preset: "remote-eipgam", icon: "eipgam", chat: "https://api.eipgam.local:13003/v1", takesClientCert: true };
 const own = { ...base, id: "box", name: "Own Box", chat: "https://box.example/v1", takesClientCert: true };
 const pinned = { ...base, id: "pinned", name: "Pinned Box", chat: "https://pinned.example/v1", takesClientCert: true, serverPin: PINNED };
 const plain = { ...base, id: "plain", name: "Plain Box", chat: "http://192.168.1.21:8000/v1", takesClientCert: true };
@@ -56,7 +56,7 @@ function server(lang, posts, peek) {
     providers: [remote, own, pinned, plain, lms, openai],
     presets: [
       { id: "openai", name: "OpenAI", kind: "vendor", icon: "openai", chat: "https://api.openai.example/v1", added: true },
-      { id: "remote-magpie", name: "Remote magpie", kind: "magpie", icon: "magpie", chat: "", added: true },
+      { id: "remote-eipgam", name: "Remote eipgam", kind: "eipgam", icon: "eipgam", chat: "", added: true },
       { id: "lmstudio", name: "LM Studio", kind: "local", icon: "lmstudio", chat: "http://localhost:1234/v1", added: true },
     ],
     excluded: [], gateway: { running: true, window: true },
@@ -88,7 +88,7 @@ async function open(browser, lang, name, width, peek = {}) {
   page.on("pageerror", (e) => errors.push(e.message));
   const posts = [];
   await page.route("**/*", server(lang, posts, peek));
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://eipgam.test/?view=providers");
   await page.locator(".row.provider", { hasText: name }).first().click();
   await page.locator(".editor .bar").waitFor();
   const adv = page.locator(".editor details.advanced");
@@ -137,9 +137,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
       for (const width of [1100, 420]) {
-        for (const name of ["Remote magpie", "Own Box"]) {
+        for (const name of ["Remote eipgam", "Own Box"]) {
           await t.test(`${lang} ${width}px ${name}: peek, trust, save`, async () => {
-            const seen = { host: "api.magpie.local:13003", sha256: SHA, subject: "api.magpie.local", issuer: "api.magpie.local", notAfter: "2027-11-10T00:00:00Z", checks: false, why: WHY };
+            const seen = { host: "api.eipgam.local:13003", sha256: SHA, subject: "api.eipgam.local", issuer: "api.eipgam.local", notAfter: "2027-11-10T00:00:00Z", checks: false, why: WHY };
             const { page, errors, posts, adv } = await open(browser, lang, name, width, { seen });
             const w = await words(page, Object.values(en));
             if (lang !== "en") for (const s of Object.values(en)) assert.notEqual(w[s], s, `"${s}" has no ${lang} translation`);
@@ -154,7 +154,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const card = box.locator(".pin-seen");
             await card.waitFor();
             const peeked = posts.find((p) => p.action === "peekcert");
-            assert.equal(peeked.body.id, name === "Remote magpie" ? "remote-magpie" : "box");
+            assert.equal(peeked.body.id, name === "Remote eipgam" ? "remote-eipgam" : "box");
             assert.equal((await card.locator(".pin-fp").textContent()).trim(), colon(SHA));
             assert.equal((await card.locator(".hint.err").textContent()).trim(), WHY);
             await fits(page, box, width);

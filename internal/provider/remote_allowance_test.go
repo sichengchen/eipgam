@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// #6708 (zzh11223311 on X): routing weighs a Remote magpie by the cards
+// #6708 (zzh11223311 on X): routing weighs a Remote eipgam by the cards
 // it tells, as last read here. Each window is read as the remote's
 // routing reads it (its span, the model it alone counts), the account
 // with the most left for the model when the remote has several, and
@@ -26,7 +26,7 @@ func TestRemoteAllowance(t *testing.T) {
 	cards := []SubscriptionQuota{
 		claude("a@x.com", 51, 117*time.Hour),
 		claude("b@x.com", 80, 20*time.Hour),
-		// a card it has from a magpie behind it, by its whole path
+		// a card it has from a eipgam behind it, by its whole path
 		{Provider: "home/codex", Name: "Codex · Home", User: "c@x.com", Kind: "subscription", Via: []string{"home-self"},
 			Windows: []QuotaWindow{{Name: "Week", Used: 30, ResetsAt: at(48 * time.Hour)}}},
 	}
@@ -96,7 +96,7 @@ func TestRemoteAllowance(t *testing.T) {
 	} else if u, _ := a.For("claude-opus-5", now); u != 95 {
 		t.Errorf("Opus used %v, want 95", u)
 	}
-	// a third magpie's card, its span named by the window's name
+	// a third eipgam's card, its span named by the window's name
 	if a, inner, ok := RemoteAllowance(*p, "home/codex/gpt-5.6-sol", true); !ok || inner != "gpt-5.6-sol" {
 		t.Errorf("home/codex: %v %q", ok, inner)
 	} else if _, due := a.Pace(inner, now); !due.Equal(*at(48 * time.Hour)) {

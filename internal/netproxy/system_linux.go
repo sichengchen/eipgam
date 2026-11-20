@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // system reads the desktop's proxy (desktop.go): KDE's kioslaverc on a KDE

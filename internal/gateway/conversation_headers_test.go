@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // withHeaders gives the saved provider id the headers.
@@ -100,7 +100,7 @@ func TestHeadersDerivedSessionMatchesExtraBody(t *testing.T) {
 	}
 	one := ask(`[{"role":"user","content":"first"}]`)
 	again := ask(`[{"role":"user","content":"first"},{"role":"assistant","content":"OK"},{"role":"user","content":"next"}]`)
-	if !strings.HasPrefix(one, "magpie-") || one != again {
+	if !strings.HasPrefix(one, "eipgam-") || one != again {
 		t.Errorf("ids %q %q", one, again)
 	}
 }

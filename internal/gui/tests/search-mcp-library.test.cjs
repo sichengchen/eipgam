@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// lutra_fs on Discord: Settings › Models › Web search shows magpie's search
+// lutra_fs on Discord: Settings › Models › Web search shows eipgam's search
 // as an "MCP server", but Library › MCP servers didn't have it, so there
 // was nowhere to give it to an agent but copying its address. The Library
-// now has it as Magpie Web Search, magpie's own server beside Magpie Image
-// and Magpie Browser, given only to the agents picked for it, and the
-// Settings row says the way there as the Library is: Give agents Magpie
+// now has it as eipgam Web Search, eipgam's own server beside eipgam Image
+// and eipgam Browser, given only to the agents picked for it, and the
+// Settings row says the way there as the Library is: Give agents eipgam
 // Web Search… opens its sheet in the Library, which says where a search
 // goes; with the Library off, Turn on the Library switches it on; gateway
 // mode, which has no Library, offers neither. Every language, Chromium and
@@ -24,7 +24,7 @@ const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const tr = (lang, s) => (lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
 const HINT = "Pick the agents that may search with it: each search goes where Settings › Models › Web search sends it, and costs what that charges.";
-const ABOUT = "Search the web with the search set in Magpie (Settings › Models › Web search), and read a page by its URL.";
+const ABOUT = "Search the web with the search set in eipgam (Settings › Models › Web search), and read a page by its URL.";
 
 function fixture(lang, { libOn, have = false, gateway = false }) {
   const st = { libOn };
@@ -32,7 +32,7 @@ function fixture(lang, { libOn, have = false, gateway = false }) {
   const builtins = () => [{ id: "library", name: "Library", sub: "Instructions, MCP servers and skills for every agent", on: st.libOn, chosen: st.libOn, source: "preset", state: st.libOn ? "active" : "off", inUse: 0 }];
   const settings = () => ({
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999", port: 3999,
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision: "", imageGen: "", lanURLs: [],
     visionModels: [], imageGenModels: [],
     searcher: "", searchChoices: [],
@@ -43,10 +43,10 @@ function fixture(lang, { libOn, have = false, gateway = false }) {
     ...(gateway ? { web: true, gatewayMode: "on", gatewayOn: true } : {}),
   });
   const lib = () => ({
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents: [{ id: "pi", name: "Pi", icon: "generic", mcp: `${HOME}/.pi/mcp.json`, skills: `${HOME}/.pi/skills` }],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
-    servers: have ? [{ name: "magpie-web-search", transport: "stdio", command: "/Applications/magpie.app/Contents/MacOS/magpie", args: ["mcp", "search"], agents: ["pi"] }] : [],
+    servers: have ? [{ name: "eipgam-web-search", transport: "stdio", command: "/Applications/eipgam.app/Contents/MacOS/eipgam", args: ["mcp", "search"], agents: ["pi"] }] : [],
   });
   const route = async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -66,8 +66,8 @@ function fixture(lang, { libOn, have = false, gateway = false }) {
     if (url.pathname === "/api/library") return json(lib());
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "magpie-image", name: "magpie-image", title: "Magpie Image", publisher: "Magpie", description: "Generate and edit images with the image model set in Magpie.", transport: "stdio", runs: "magpie", featured: true, optIn: true, have: "" },
-        { id: "magpie-web-search", name: "magpie-web-search", title: "Magpie Web Search", publisher: "Magpie", description: ABOUT, transport: "stdio", runs: "magpie", featured: true, optIn: true, have: have ? "magpie-web-search" : "" },
+        { id: "eipgam-image", name: "eipgam-image", title: "eipgam Image", publisher: "eipgam", description: "Generate and edit images with the image model set in eipgam.", transport: "stdio", runs: "eipgam", featured: true, optIn: true, have: "" },
+        { id: "eipgam-web-search", name: "eipgam-web-search", title: "eipgam Web Search", publisher: "eipgam", description: ABOUT, transport: "stdio", runs: "eipgam", featured: true, optIn: true, have: have ? "eipgam-web-search" : "" },
       ] });
     }
     if (url.pathname === "/api/library/market/skills") return json({ items: [] });
@@ -110,7 +110,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", f.route);
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=models");
+      await page.goto("http://eipgam.test/?view=settings&tab=models");
       await settingsDrawn(page);
       await row(page).waitFor();
       return { page, posts: f.posts };
@@ -118,10 +118,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of LANGS) {
       const w = (s) => tr(lang, s);
       for (const width of [1100, 420]) {
-        await t.test(`${lang} at ${width}px: Give agents Magpie Web Search… opens its sheet in the Library`, async () => {
+        await t.test(`${lang} at ${width}px: Give agents eipgam Web Search… opens its sheet in the Library`, async () => {
           const { page } = await open(lang, width, { libOn: true });
           const go = row(page).locator(".who button.search-mcp-lib");
-          assert.equal((await go.textContent()).trim(), w("Give agents Magpie Web Search…"));
+          assert.equal((await go.textContent()).trim(), w("Give agents eipgam Web Search…"));
           // the address and its copy button stay as they were
           assert.equal(await row(page).locator(".val button").count(), 1);
           assert.equal(await wide(page), 0);
@@ -130,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
           assert.equal(await page.locator("#view-library").isVisible(), true);
-          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Magpie Web Search");
+          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "eipgam Web Search");
           assert.equal((await sheet.locator(".mk-about").textContent()).trim(), w(ABOUT));
           assert.equal((await sheet.locator(".mk-hint").first().textContent()).trim(), w(HINT));
           // opt in: no agent is ticked until it is picked
@@ -146,7 +146,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal((await go.textContent()).trim(), w("Turn on the Library"));
           assert.equal(await wide(page), 0);
           await go.click();
-          await page.waitForFunction((s) => document.querySelector("#searchMcpRow button.search-mcp-lib")?.textContent.trim() === s, w("Give agents Magpie Web Search…"));
+          await page.waitForFunction((s) => document.querySelector("#searchMcpRow button.search-mcp-lib")?.textContent.trim() === s, w("Give agents eipgam Web Search…"));
           assert.deepEqual(posts, [{ id: "library", on: true }]);
           assert.deepEqual(page.errors, []);
           await page.context().close();
@@ -155,7 +155,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang}: one already in the library opens MCP servers with nothing over it`, async () => {
         const { page } = await open(lang, 1100, { libOn: true, have: true });
         await row(page).locator("button.search-mcp-lib").click();
-        await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="magpie-web-search"]').waitFor();
+        await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="eipgam-web-search"]').waitFor();
         assert.equal(await page.locator("#modal .mk-sheet").count(), 0);
         assert.deepEqual(page.errors, []);
         await page.context().close();

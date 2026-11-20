@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Copilot bills a cache write at one price however long it is kept: its
@@ -22,7 +22,7 @@ func TestCopilotOneHourCacheWriteAtItsWritePrice(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
-	// models.dev's entry as magpie's cache had it on 2026-10-24, with a
+	// models.dev's entry as eipgam's cache had it on 2026-10-24, with a
 	// tier added to check the tiers are priced alike
 	os.WriteFile(catalog.CachePath(), []byte(`{
 	  "anthropic":{"id":"anthropic","models":{
@@ -42,7 +42,7 @@ func TestCopilotOneHourCacheWriteAtItsWritePrice(t *testing.T) {
 		t.Errorf("past its tier an hour's write is %v; want the tier's cache write, $10", long.OneHour())
 	}
 	// Copilot's own count for this request: 7,844,300,000 nano-AIU, $0.078443
-	// (input 2, output 4, a 15,671-token 1-hour write); magpie said $0.125456
+	// (input 2, output 4, a 15,671-token 1-hour write); eipgam said $0.125456
 	if got := pr.CostSplit(2, 4, 0, 15671, 15671); math.Abs(got-0.078443) > 1e-9 {
 		t.Errorf("the 1-hour write request costs $%.6f; Copilot billed $0.078443", got)
 	}

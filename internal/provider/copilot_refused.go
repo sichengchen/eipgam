@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // copilotRefusedFor is how long a refused model stays left out: a plan

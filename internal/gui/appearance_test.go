@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func appearanceHome(t *testing.T) http.Handler {
@@ -73,7 +73,7 @@ func TestAccentSetting(t *testing.T) {
 			t.Fatalf("accent %q was taken: %d", bad, rec.Code)
 		}
 	}
-	// and "" is magpie's own again, with nothing drawn over it
+	// and "" is eipgam's own again, with nothing drawn over it
 	if rec := lookServe(srv, "POST", "/api/settings", `{"theme":"light","lang":"en","accent":""}`); rec.Code != http.StatusOK || settings.Load().Accent != "" {
 		t.Fatalf("accent not reset: %d %q", rec.Code, settings.Load().Accent)
 	}
@@ -141,7 +141,7 @@ func TestAccentReadable(t *testing.T) {
 	}
 }
 
-// A picture behind the pages is saved under magpie's folder, served back,
+// A picture behind the pages is saved under eipgam's folder, served back,
 // drawn under a veil by boot.js, and removed with its file; what isn't a
 // picture is refused.
 func TestWallpaper(t *testing.T) {
@@ -219,14 +219,14 @@ func TestWallpaperStampWithoutFile(t *testing.T) {
 		t.Fatalf("drawn without a file: %s", css)
 	}
 	if css := lookCSS(settings.Settings{}); css != "" {
-		t.Fatalf("magpie's own look drew: %s", css)
+		t.Fatalf("eipgam's own look drew: %s", css)
 	}
 }
 
 // A colour of the user's own tints the theme's grounds, not only what is
 // chosen: the dark theme read as grey with a purple picked (CHENGJIAHEGOXIS
 // on X, 「目前我个人感觉深色比较灰」, then 「依然没变」 on v0.1.4116 with the
-// thumbs tinted). magpie's own look, and a grey pick, keep app.css's grey.
+// thumbs tinted). eipgam's own look, and a grey pick, keep app.css's grey.
 func TestAccentTintsGrounds(t *testing.T) {
 	vars := func(css, sel string) map[string]string {
 		i := strings.Index(css, sel+"{")
@@ -244,7 +244,7 @@ func TestAccentTintsGrounds(t *testing.T) {
 		return out
 	}
 	if css := lookCSS(settings.Settings{}); css != "" {
-		t.Fatalf("magpie's own look draws %q", css)
+		t.Fatalf("eipgam's own look draws %q", css)
 	}
 	css := lookCSS(settings.Settings{Accent: "#7c3aed"})
 	for _, c := range []struct {
@@ -369,12 +369,12 @@ func TestLookFixture(t *testing.T) {
 	}
 }
 
-// Black, Graphite and magpie's own drew the same grey grounds, and black's
+// Black, Graphite and eipgam's own drew the same grey grounds, and black's
 // ink was Graphite's grey (CHENGJIAHEGOXIS on X, 「这三个颜色……都显示是一样
 // 的」, 「尤其是黑色始终一直是灰色」). Black now draws a black page on the
 // dark theme, its cards, menus and lines the same steps above it, with a
 // light ink of its own; on the light theme it is black ink. Graphite keeps
-// the grey grounds with its grey ink, and magpie's own draws nothing.
+// the grey grounds with its grey ink, and eipgam's own draws nothing.
 func TestBlackIsBlack(t *testing.T) {
 	blk, _ := parseHex("#000000")
 	gra, _ := parseHex("#52525b")
@@ -436,7 +436,7 @@ func TestBlackIsBlack(t *testing.T) {
 // (CHENGJIAHEGOXIS on X: 「纯黑……感觉色对不上」, 「感觉是有浅灰存在，所以
 // 导致深变浅」). Black's grounds are neutral greys over #000000, a dark
 // colour's page goes down toward black in its own hue, and Graphite and
-// the presets keep magpie's grounds.
+// the presets keep eipgam's grounds.
 func TestDarkPickDarkensPage(t *testing.T) {
 	blk, _ := parseHex("#000000")
 	for _, set := range [][]surface{darkSurfaces, darkPanelSurfaces, {{"--pop-bg", darkPop}}} {
@@ -450,7 +450,7 @@ func TestDarkPickDarkensPage(t *testing.T) {
 		c, _ := parseHex(pick)
 		bg := ground(darkBg, c, true)
 		if lightness(bg) > lightness(darkBg)-0.05 {
-			t.Errorf("%s: its page %s is not darker than magpie's %s", pick, bg.hex(), darkBg.hex())
+			t.Errorf("%s: its page %s is not darker than eipgam's %s", pick, bg.hex(), darkBg.hex())
 		}
 		if bg[2]-bg[0] < 8 {
 			t.Errorf("%s: its page %s is not the colour's blue", pick, bg.hex())

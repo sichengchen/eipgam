@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // sandbox points distill.json and memory.json at the test's own files,
@@ -104,7 +104,7 @@ func TestOffReadsNothing(t *testing.T) {
 }
 
 // Only a main session that has been quiet for Quiet, is readable, isn't
-// magpie's own, said enough and is newer than Since is read; what it
+// eipgam's own, said enough and is newer than Since is read; what it
 // proposes waits as a candidate with where it came from, when it quotes
 // the user (case, spaces and punctuation aside), and is dropped when the
 // quote is missing or words the user never wrote; it isn't read again
@@ -205,7 +205,7 @@ func TestWhatIsSent(t *testing.T) {
 			t.Errorf("sent: %q", w)
 		}
 	}
-	for _, w := range []string{"magpie", "claude", "codex", "openai", "anthropic", "gpt", "gemini"} {
+	for _, w := range []string{"eipgam", "claude", "codex", "openai", "anthropic", "gpt", "gemini"} {
 		if strings.Contains(strings.ToLower(sys+strings.Split(user, "Conversation:")[0]), w) {
 			t.Errorf("names %q", w)
 		}

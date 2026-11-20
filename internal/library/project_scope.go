@@ -11,9 +11,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/claudelock"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/claudelock"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // A project is the library's global set, the servers and skills given to
@@ -56,13 +56,13 @@ var (
 func ProjectOffAgents() []string      { return slices.Clone(projectOffAgents) }
 func ProjectSkillOffAgents() []string { return slices.Clone(projectSkillOffAgents) }
 
-// claudeLocal is what magpie wrote in Claude Code's record of a project.
+// claudeLocal is what eipgam wrote in Claude Code's record of a project.
 type claudeLocal struct {
 	// Root is the record's key (claudeRoot)
 	Root string `json:"root"`
-	// Servers are the entries magpie wrote in its mcpServers
+	// Servers are the entries eipgam wrote in its mcpServers
 	Servers []string `json:"servers,omitempty"`
-	// Off are the names magpie put in its disabledMcpServers
+	// Off are the names eipgam put in its disabledMcpServers
 	Off []string `json:"off,omitempty"`
 }
 
@@ -91,7 +91,7 @@ func jsonKey(k string) (string, bool) {
 }
 
 // claudeDefaults are the fields Claude Code gives a project's record when
-// it makes one (2.1.316), for a record magpie makes first.
+// it makes one (2.1.316), for a record eipgam makes first.
 func claudeDefaults() map[string]any {
 	return map[string]any{
 		"allowedTools": []any{}, "mcpContextUris": []any{}, "mcpServers": map[string]any{},
@@ -136,7 +136,7 @@ func (l *Library) projectHubs(p *Project) map[string]*Server {
 		if t.MCP.supports(hs) != nil {
 			continue
 		}
-		// an entry called magpie of the user's own is left to win
+		// an entry called eipgam of the user's own is left to win
 		if es, err := t.MCP.entries(); err != nil {
 			continue
 		} else if e := es[HubEntry]; e != nil {
@@ -162,7 +162,7 @@ func (l *Library) projectByKey(key string) *Project {
 
 // syncClaudeLocal keeps Claude Code's record of the project holding the
 // project's hub entry (hub, or nil) in its local scope and the servers it
-// turns off in its disabledMcpServers; what magpie wrote there before and
+// turns off in its disabledMcpServers; what eipgam wrote there before and
 // no longer wants comes out, and nothing else of the record changes.
 func (l *Library) syncClaudeLocal(p *Project, hub *Server, fail func(what string, err error)) {
 	var want []string
@@ -201,7 +201,7 @@ func (l *Library) syncClaudeLocal(p *Project, hub *Server, fail func(what string
 	}
 	k, ok := jsonKey(root)
 	if !ok {
-		fail("claude", fmt.Errorf("Claude Code's record of %s can't be written by magpie", root))
+		fail("claude", fmt.Errorf("Claude Code's record of %s can't be written by eipgam", root))
 		return
 	}
 	base := "projects." + k
@@ -231,7 +231,7 @@ func (l *Library) syncClaudeLocal(p *Project, hub *Server, fail func(what string
 		if raw, ok := edit.GetJSONRaw(path, base+".mcpServers."+hub.Name); ok {
 			_ = json.Unmarshal([]byte(raw), &old)
 			if old != nil && !slices.Contains(rec.Servers, hub.Name) {
-				fail("claude", fmt.Errorf("Claude Code has a server called %s for %s already that isn't magpie's: it's left as it is", hub.Name, root))
+				fail("claude", fmt.Errorf("Claude Code has a server called %s for %s already that isn't eipgam's: it's left as it is", hub.Name, root))
 				old = nil
 				hub = nil
 			}
@@ -278,7 +278,7 @@ func (l *Library) syncClaudeLocal(p *Project, hub *Server, fail func(what string
 	p.Claude = rec
 }
 
-// clearClaudeLocal takes what magpie wrote out of Claude Code's record
+// clearClaudeLocal takes what eipgam wrote out of Claude Code's record
 // rec names, its lock held.
 func clearClaudeLocal(path string, rec *claudeLocal) error {
 	k, ok := jsonKey(rec.Root)
@@ -419,7 +419,7 @@ func (l *Library) syncSkillsOff(p *Project, fail func(what string, err error)) {
 	}
 }
 
-// dropMadeFile takes away a file magpie made once nothing is left in it;
+// dropMadeFile takes away a file eipgam made once nothing is left in it;
 // one with anything of the user's in it is theirs from then on.
 func (p *Project) dropMadeFile(rel string) {
 	i := slices.Index(p.MadeFiles, rel)
@@ -445,10 +445,10 @@ func (p *Project) dropMadeFile(rel string) {
 // ---- worktrees -------------------------------------------------------------
 
 // syncTrees gives the project's folder in each other worktree of its
-// repository the project's set, as its own project magpie keeps records
+// repository the project's set, as its own project eipgam keeps records
 // of (Project.Trees), and takes it back out of a folder that is no longer
 // one of them. A worktree gone from disk takes its records with it:
-// nothing of magpie's is left there to take back. Claude Code keeps a
+// nothing of eipgam's is left there to take back. Claude Code keeps a
 // worktree's project under the main worktree's record (claudeRoot), so
 // that one serves them all.
 func (l *Library) syncTrees(p *Project, res *Result, hubs map[string]*Server) {
@@ -472,7 +472,7 @@ func (l *Library) syncTrees(p *Project, res *Result, hubs map[string]*Server) {
 			continue
 		}
 		// no longer one of the repository's worktrees, or no longer the
-		// project's: what magpie put there comes out
+		// project's: what eipgam put there comes out
 		t.Skills, t.Servers, t.ServersOff, t.SkillsOff, t.Subagents = nil, nil, nil, nil, nil
 		t.Instr, t.InstrAgents = "", nil
 		l.syncFolder(t, res, nil)
@@ -495,19 +495,19 @@ func (p *Project) tree(dir string) *Project {
 	return nil
 }
 
-// holds says whether magpie has anything of its own in the folder still.
+// holds says whether eipgam has anything of its own in the folder still.
 func (p *Project) holds() bool {
 	return len(p.Placed) > 0 || len(p.Wrote) > 0 || len(p.CodexOff) > 0 || len(p.Overrides) > 0 || len(p.MadeFiles) > 0 || len(p.AgentFiles) > 0 || len(p.InstrFiles) > 0
 }
 
-// ignored are the files and folders of the project magpie put there, which
+// ignored are the files and folders of the project eipgam put there, which
 // are kept out of git.
 func (p *Project) ignored() []string {
 	out := slices.Concat(p.Placed, p.MadeFiles)
 	for _, f := range p.AgentFiles {
 		out = append(out, f.Path)
 	}
-	// a file magpie made for the project's instructions; one of the
+	// a file eipgam made for the project's instructions; one of the
 	// user's, in git or not, stays as git has it
 	for _, f := range p.InstrFiles {
 		if f.Made {
@@ -579,7 +579,7 @@ func ProjectServerOff(dir, name string, agents []string) (*Result, error) {
 		var ids []string
 		for _, id := range agents {
 			if !slices.Contains(projectOffAgents, id) {
-				return fmt.Errorf("magpie can't turn a server off in one project for %s", id)
+				return fmt.Errorf("eipgam can't turn a server off in one project for %s", id)
 			}
 			ids = set(ids, id, true)
 		}
@@ -614,7 +614,7 @@ func ProjectSkillsOff(dir string, names, agents []string) (*Result, error) {
 		var ids []string
 		for _, id := range agents {
 			if !slices.Contains(projectSkillOffAgents, id) {
-				return fmt.Errorf("magpie can't turn a skill off in one project for %s", id)
+				return fmt.Errorf("eipgam can't turn a skill off in one project for %s", id)
 			}
 			ids = set(ids, id, true)
 		}

@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// baksili_ on X: with Extra usage off in magpie, a Claude account whose
+// baksili_ on X: with Extra usage off in eipgam, a Claude account whose
 // plan is used up is held at 100% as routing plans it (capHeld, which
 // every account of a provider, group or fallback goes through), not
 // sent a request Anthropic would bill as extra usage; one with room is
@@ -43,7 +43,7 @@ func TestClaudeNoExtraUsageHoldsTheAccount(t *testing.T) {
 		t.Fatalf("traced: %+v", ws)
 	}
 	msg, back := cappedError("claude-sonnet-5", ws, now)
-	for _, want := range []string{"set in magpie not to spend extra usage", "has used up a usage window and is set not to spend extra usage", "claudeNoExtraUsage off"} {
+	for _, want := range []string{"set in eipgam not to spend extra usage", "has used up a usage window and is set not to spend extra usage", "claudeNoExtraUsage off"} {
 		if !strings.Contains(msg, want) {
 			t.Errorf("refusal %q lacks %q", msg, want)
 		}

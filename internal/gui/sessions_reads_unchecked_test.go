@@ -8,14 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// baysonfox on X, again: magpie was installed after Antigravity 2.0, so the
+// baysonfox on X, again: eipgam was installed after Antigravity 2.0, so the
 // first choice ("allow selected") listed the app and it was left off beside
 // agy CLI. Named off, it was never "new", so neither the Sessions page nor
-// Usage asked again, and the app's calls made without magpie were counted
+// Usage asked again, and the app's calls made without eipgam were counted
 // nowhere while agy's were. An agent left off in that first choice is asked
 // about once more, on both pages; Show/Count reads it and its calls come
 // into Usage › Requests; an agent turned off on its own (Keep off,

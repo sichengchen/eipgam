@@ -6,13 +6,13 @@
 // here, Discover's browse bar says it is looking on GitHub, and picking
 // the GitHub origin shows cards still to come; let go, its cards come in
 // and the word goes. A search while it waits says the same. When the ask
-// fails, a line says so with Try again, which asks again. magpie
+// fails, a line says so with Try again, which asks again. eipgam
 // answering with an error beside the list (GitHub unreachable from the
 // reader's desktop: till on Discord) is said too: with no list, why and
-// Try again, which has magpie ask GitHub at once (?again=1); with the
+// Try again, which has eipgam ask GitHub at once (?again=1); with the
 // cards it could give, how many more couldn't be read, and why. English,
 // Chinese, Japanese and German, wide and 440px, in Chromium and WebKit;
-// nothing scrolls on a click. MAGPIE_WAIT_ASSETS names an older assets
+// nothing scrolls on a click. EIPGAM_WAIT_ASSETS names an older assets
 // directory, to see this fail on the code before it.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -20,7 +20,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_WAIT_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_WAIT_ASSETS || path.resolve(__dirname, "../assets"));
 
 const REPOS = [
   { spec: "opencode-claude-auth", repo: "griffinmartin/opencode-claude-auth", url: "https://github.com/griffinmartin/opencode-claude-auth", owner: "griffinmartin", description: "OpenCode plugin that uses your existing Claude Code credentials — no separate login needed. ", stars: 1301, license: "MIT", pushed: "2026-09-22T23:47:15Z", package: "opencode-claude-auth", version: "2.2.1" },
@@ -31,7 +31,7 @@ const LISTINGS = [
 ];
 
 // gh: how /api/plugins/github answers each time it is asked, in turn: a
-// promise held until let go, "fail", or { json } as magpie's answer;
+// promise held until let go, "fail", or { json } as eipgam's answer;
 // urls: each ask's URL
 function server(lang, gh, urls = []) {
   let asked = 0;
@@ -55,7 +55,7 @@ function server(lang, gh, urls = []) {
     }
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -92,8 +92,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang, gh, urls));
-            await page.addInitScript(() => { try { localStorage.setItem("magpie.pluginTab", "discover"); } catch {} });
-            await page.goto("http://magpie.test/?view=plugins");
+            await page.addInitScript(() => { try { localStorage.setItem("eipgam.pluginTab", "discover"); } catch {} });
+            await page.goto("http://eipgam.test/?view=plugins");
             const view = page.locator("#view-plugins");
             await view.waitFor({ state: "visible" });
             await view.locator(".pm-card", { hasText: "Zed" }).waitFor();
@@ -161,7 +161,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await f.view.locator(".pm-ghwarn").count(), 0);
           assert.deepEqual(f.errors, []);
 
-          // magpie answers, but GitHub couldn't give it the list: said
+          // eipgam answers, but GitHub couldn't give it the list: said
           // with why
           const why = 'http://raw.githubusercontent.com/a/b/main/package.json: Get "https://raw.githubusercontent.com/a/b/main/package.json": dial tcp: i/o timeout';
           const urls = [];
@@ -183,7 +183,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await eLine.waitFor();
           await eq.fill("");
           await eLine.waitFor();
-          // Try again has magpie ask GitHub at once
+          // Try again has eipgam ask GitHub at once
           await eLine.getByRole("button", { name: w.again }).click();
           await e.view.locator(".pm-ghlook").waitFor();
           later.go();
@@ -214,7 +214,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.deepEqual(urls2, ["/api/plugins/github", "/api/plugins/github?again=1"]);
           assert.deepEqual(m.errors, []);
 
-          // GitHub too slow, as magpie tells it (why: "slow"): the line
+          // GitHub too slow, as eipgam tells it (why: "slow"): the line
           // says so in the reader's language, not Go's "no answer in 8s",
           // and the error as it came is its hover (the Kiko03O1 reply on
           // X: ui 设计能不能好看点); Try again reads as a button, in the accent

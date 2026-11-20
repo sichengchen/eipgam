@@ -7,7 +7,7 @@
 // every built-in with settings has, builtin-places.test.cjs); Settings,
 // with the plugin off, says so first and turns it on there (featOff), and no "Now done by"
 // stands under it; a Library search server's sheet says the agents call it
-// themselves, beside magpie's web search, and opens Settings, naming the
+// themselves, beside eipgam's web search, and opens Settings, naming the
 // search API there for one Settings has too. Every language, Chromium and
 // WebKit, at 1100 and 420 wide, nothing running off to the side; no
 // backend, the API is faked here.
@@ -23,7 +23,7 @@ const { I18N } = strings();
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const tr = (lang, s) => (lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
-const OWN = "Agents call it themselves, beside magpie's web search, which doesn't use it.";
+const OWN = "Agents call it themselves, beside eipgam's web search, which doesn't use it.";
 const AS_API = "As a search API in Settings › Models › Web search, {name} searches for every model, with no server to add.";
 
 // search: the Web search plugin as builtinsState gives it: on, and what
@@ -37,7 +37,7 @@ function fixture(lang, { on = true, searches = [] } = {}) {
   ];
   const settings = () => ({
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999", port: 3999,
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision: "", imageGen: "", lanURLs: [],
     visionModels: [], imageGenModels: [],
     searcher: "", searchChoices: [], searchProvider: "Kimi",
@@ -47,7 +47,7 @@ function fixture(lang, { on = true, searches = [] } = {}) {
     builtins: builtins(),
   });
   const lib = () => ({
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents: [{ id: "pi", name: "Pi", icon: "generic", mcp: `${HOME}/.pi/mcp.json`, skills: `${HOME}/.pi/skills` }],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [], servers: [],
   });
@@ -84,7 +84,7 @@ function fixture(lang, { on = true, searches = [] } = {}) {
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], gateway: { running: true } });
     if (url.pathname === "/api/window/fit") return route.fulfill({ status: 204 });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     const body = await fs.readFile(file).catch(() => null);
@@ -117,8 +117,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; page.errors.push(e.message); }); // a goto in WebKit can cut off a fetch (#1350)
       await page.route("**/*", f.route);
-      await page.addInitScript(() => { localStorage.setItem("magpie.libTab", "mcp"); });
-      await page.goto("http://magpie.test/" + where);
+      await page.addInitScript(() => { localStorage.setItem("eipgam.libTab", "mcp"); });
+      await page.goto("http://eipgam.test/" + where);
       return { page, posts: f.posts };
     };
     const builtinTab = async (page) => {

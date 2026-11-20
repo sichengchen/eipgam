@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // readOnlyRefused is every route a read-only key is refused, by the pattern
@@ -20,15 +20,15 @@ import (
 // classified before it ships: the guard refuses it until then.
 var readOnlyRefused = []string{
 	// the Library's skills and prompts: a held key is a display, not a client
-	"GET /v1/magpie/library",
+	"GET /v1/eipgam/library",
 	// the models this computer's agents are on: a client's picks to follow
-	"GET /v1/magpie/agent-models",
+	"GET /v1/eipgam/agent-models",
 	// model lists and their Ollama spellings: what the key could use
 	"GET /v1/models", "GET /models", "GET /v1/models/{id...}", "GET /muse-code/models",
 	"GET /api/hello", "GET /api/version", "GET /api/tags",
 	"POST /api/show", "POST /api/chat", "POST /api/generate",
 	// writes, another key's routes, the whole trace, debugging
-	"POST /v1/magpie/usage/requests", "POST " + provider.RemoteRefreshPath,
+	"POST /v1/eipgam/usage/requests", "POST " + provider.RemoteRefreshPath,
 	// the chat page's models, its chat, files and speech
 	"GET " + ChatPagePath + "/models",
 	"POST " + ChatPagePath + "/anthropic/v1/messages",
@@ -38,13 +38,13 @@ var readOnlyRefused = []string{
 	"POST " + ChatPagePath + "/v1/tools/tts",
 	// a Codex reset, which can't be undone (#3850)
 	"POST " + provider.RemoteCodexResetPath,
-	// an update another magpie asks for
+	// an update another eipgam asks for
 	"POST " + provider.RemoteUpdatePath,
-	"GET /v1/magpie/route", "GET /v1/magpie/trace",
+	"GET /v1/eipgam/route", "GET /v1/eipgam/trace",
 	"GET " + ClaudeRunsPath, "GET " + HeapPath, "GET " + CPUPath, "GET " + GoroutinesPath,
 	"POST " + RestartPath,
 	AdminPath, "POST " + KeysPath, "GET " + KeysPath, "DELETE " + KeysPath + "/{id}", "POST " + OIDCKeysPath,
-	"GET /v1/magpie/omarchy", "OPTIONS /v1/magpie/omarchy",
+	"GET /v1/eipgam/omarchy", "OPTIONS /v1/eipgam/omarchy",
 	// models, a WebSocket's upgrade and count_tokens among them
 	"POST /v1/chat/completions", "POST /chat/completions",
 	"POST /v1/responses", "POST /responses", "GET /v1/responses", "GET /responses",
@@ -93,7 +93,7 @@ func requestsFor(pattern string) [][2]string {
 	return out
 }
 
-// Steven on Discord: an ESP32 desk display polls magpie's quotas and usage
+// Steven on Discord: an ESP32 desk display polls eipgam's quotas and usage
 // on his network every 15s and sends no model request, yet the key it
 // keeps in flash had to be one that could spend every account. A
 // read-only key is answered the stats alone: every other route the
@@ -104,7 +104,7 @@ func requestsFor(pattern string) [][2]string {
 // account's quotas, and none of it is a key's secret.
 func TestReadOnlyKeyEveryRoute(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	var reached atomic.Int32
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reached.Add(1)
@@ -194,11 +194,11 @@ func TestReadOnlyKeyEveryRoute(t *testing.T) {
 			}
 		}
 		// the usage summary, which a held key isn't told, and the quotas
-		c, b := do("GET", "/v1/magpie/usage", from, display)
+		c, b := do("GET", "/v1/eipgam/usage", from, display)
 		if c != 200 || !strings.Contains(b, "Laptop") {
 			t.Errorf("read-only key from %s: the usage summary: %d %.300s", from, c, b)
 		}
-		if c, b := do("GET", "/v1/magpie/quotas", from, display); c != 200 || strings.Contains(b, provider.KeyHeldCode) {
+		if c, b := do("GET", "/v1/eipgam/quotas", from, display); c != 200 || strings.Contains(b, provider.KeyHeldCode) {
 			t.Errorf("read-only key from %s: the quotas: %d %.300s", from, c, b)
 		}
 	}

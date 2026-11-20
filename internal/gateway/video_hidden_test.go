@@ -6,13 +6,13 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // axelburks on Discord: a provider's video models are ticked in its
 // editor as its image ones are. One unticked there (HiddenVideomakers)
-// leaves generate_video's list, another magpie's list and Automatic, and
+// leaves generate_video's list, another eipgam's list and Automatic, and
 // still makes its video when named; its image models are left as they
 // were.
 func TestHiddenVideomakerLeavesListsButStillFilms(t *testing.T) {

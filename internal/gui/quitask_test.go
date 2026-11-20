@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// A Quit the user chose while agents go through magpie asks first
-// (Aisiverto on X: Codex's 502s after magpie was quit, with nothing to
+// A Quit the user chose while agents go through eipgam asks first
+// (Aisiverto on X: Codex's 502s after eipgam was quit, with nothing to
 // say why). The window's Quit reaches AskQuit; the question's own Quit
-// (now=1) quits; a browser's page (magpie web) has no window to ask in
+// (now=1) quits; a browser's page (eipgam web) has no window to ask in
 // and quits.
 func TestWindowQuitAsksFirst(t *testing.T) {
 	quits := 0
@@ -66,7 +66,7 @@ type askingHost struct {
 
 func (h askingHost) AskQuit() { h.asked <- struct{}{} }
 
-// The question names the agents magpie is in, and only those.
+// The question names the agents eipgam is in, and only those.
 func TestQuitListsWiredAgents(t *testing.T) {
 	yes := func() bool { return true }
 	got := wiredAgents([]*agent.Agent{
@@ -97,7 +97,7 @@ func TestQuitAPIListsAgents(t *testing.T) {
 	}
 }
 
-// With no gateway served here (another magpie serves it, and goes on
+// With no gateway served here (another eipgam serves it, and goes on
 // serving the agents) a Quit cuts nobody off.
 func TestQuitAgentsNoneWithoutGateway(t *testing.T) {
 	if served.Load() != nil {
@@ -177,7 +177,7 @@ func TestQuitDontAskAgain(t *testing.T) {
 // quitting on, the app's quit restores the connected agents and its next
 // start connects them again; off (the default), a quit leaves them as
 // they are. With it on a Quit needs no question, and a gateway served by
-// another magpie leaves its agents alone.
+// another eipgam leaves its agents alone.
 func TestRestoreAgentsOnQuit(t *testing.T) {
 	sandboxHome(t)
 	old := [...]any{servedHere, quitDetect, quitRestore, startAgents, startRewire}
@@ -210,7 +210,7 @@ func TestRestoreAgentsOnQuit(t *testing.T) {
 	servedHere = func() bool { return false }
 	restoreAgentsOnQuit()
 	if restored != 0 {
-		t.Fatal("another magpie serves the gateway, yet the quit put its agents back")
+		t.Fatal("another eipgam serves the gateway, yet the quit put its agents back")
 	}
 	servedHere = func() bool { return true }
 	restoreAgentsOnQuit()
@@ -228,7 +228,7 @@ func TestRestoreAgentsOnQuit(t *testing.T) {
 }
 
 // jtbbtnt54249 on X: after Disconnect and quit, every agent's switch was
-// off when magpie opened again. The question's Disconnect and quit now
+// off when eipgam opened again. The question's Disconnect and quit now
 // puts the agents back as Put agents back when quitting does, setting on
 // or off (the next start connects them again: agent.RewireOnStart), not
 // with each row's Disconnect, whose mark kept them off for good. One that

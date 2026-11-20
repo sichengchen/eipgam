@@ -11,7 +11,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // advisedUpstream is a Chat Completions upstream serving two models: the
@@ -131,7 +131,7 @@ func blockTypes(blocks []map[string]any) string {
 }
 
 // Claude Code's advisor on a model whose upstream has none (Awad_Yoo on
-// X): magpie offers the model an advisor tool, asks the advisor model when
+// X): eipgam offers the model an advisor tool, asks the advisor model when
 // it is called, and tells Claude Code of it as Anthropic's server does, a
 // server_tool_use and an advisor_tool_result with the advice, before the
 // model's answer. Before, the advisor was left out and Claude Code's
@@ -250,8 +250,8 @@ func TestAdvisorFailureIsAnErrorCode(t *testing.T) {
 }
 
 // Who runs the advisor: Anthropic's server for a Claude model with a Claude
-// advisor of the same provider, magpie for a model magpie can ask the
-// advisor beside, nobody for an advisor model magpie doesn't serve or a
+// advisor of the same provider, eipgam for a model eipgam can ask the
+// advisor beside, nobody for an advisor model eipgam doesn't serve or a
 // tool of the client's own by the name.
 func TestAdvisedHere(t *testing.T) {
 	fresh(t)

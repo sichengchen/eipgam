@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The Sessions page's consent and Settings' rows (RustCats on X): a fresh
@@ -97,7 +97,7 @@ func TestSessionReadsRoutes(t *testing.T) {
 }
 
 // An agent installed after "allow selected" (baysonfox on X: Antigravity
-// 2.0's sessions showed only while it was connected to magpie, agy CLI's
+// 2.0's sessions showed only while it was connected to eipgam, agy CLI's
 // always). The choice read agy only, and nothing asked about the agent
 // found later. /api/sessions/reads marks it new; the page's Show their
 // sessions names it on and its sessions are listed, and Keep off names it

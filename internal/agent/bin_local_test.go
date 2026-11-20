@@ -6,18 +6,18 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // Xuanwo on X: the official installer puts agy in ~/.local/bin, which a
-// magpie started from a desktop launcher has not on its PATH; Antigravity
+// eipgam started from a desktop launcher has not on its PATH; Antigravity
 // CLI was reported as not found on Linux.
 func TestDetectedFindsBinInLocalBin(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("PATH", t.TempDir())
-	a := &Agent{ID: "agy", Name: "Antigravity CLI", Bin: "magpie-test-agy", Dir: filepath.Join(home, ".gemini", "antigravity-cli"), Path: filepath.Join(home, ".gemini", "antigravity-cli", "settings.json")}
+	a := &Agent{ID: "agy", Name: "Antigravity CLI", Bin: "eipgam-test-agy", Dir: filepath.Join(home, ".gemini", "antigravity-cli"), Path: filepath.Join(home, ".gemini", "antigravity-cli", "settings.json")}
 	if a.Detected() {
 		t.Fatal("detected with nothing installed")
 	}

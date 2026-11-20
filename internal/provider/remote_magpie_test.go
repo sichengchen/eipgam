@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
-// Another magpie is added by its address however it was typed, and
+// Another eipgam is added by its address however it was typed, and
 // speaks every API there: Chat and Responses at /v1, Messages at the root.
 // Its whole list is offered, being already what its user exposed.
 func TestRemoteMagpie(t *testing.T) {
@@ -36,7 +36,7 @@ func TestRemoteMagpie(t *testing.T) {
 		t.Errorf("custom: %+v", p)
 	}
 
-	if err := Save(Provider{ID: "office", Preset: RemoteMagpiePreset, Key: "sk-magpie-x", Chat: "http://192.168.1.20:3425"}); err != nil {
+	if err := Save(Provider{ID: "office", Preset: RemoteMagpiePreset, Key: "sk-eipgam-x", Chat: "http://192.168.1.20:3425"}); err != nil {
 		t.Fatal(err)
 	}
 	var ms []catalog.Model
@@ -53,7 +53,7 @@ func TestRemoteMagpie(t *testing.T) {
 	if n := len(p.Exposed()); n != len(ms) {
 		t.Errorf("exposed %d of %d", n, len(ms))
 	}
-	if !p.Ready() || p.Icon != "magpie" {
+	if !p.Ready() || p.Icon != "eipgam" {
 		t.Errorf("%+v", p)
 	}
 }

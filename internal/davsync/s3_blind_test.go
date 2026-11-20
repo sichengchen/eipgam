@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // #1776 (tsuixl, Aliyun OSS, which answers a conditional PUT 400
@@ -24,7 +24,7 @@ func TestS3BlindWriteGoneOverIsMergedAgain(t *testing.T) {
 	f.noCond = true
 	cfg := f.config(srv)
 	ctx := context.Background()
-	const key = "team x+y/magpie/magpie.magpie-backup"
+	const key = "team x+y/eipgam/eipgam.eipgam-backup"
 	sync := func(t *testing.T) {
 		t.Helper()
 		if err := Now(ctx); err != nil {

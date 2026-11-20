@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/probelog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/probelog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// SourceProbe is Record.Source for a request magpie sent a provider on its
+// SourceProbe is Record.Source for a request eipgam sent a provider on its
 // own, outside any agent's turn (probelog): the editor's Test, Detect
 // APIs, a model list's refresh. Its Kind says which (probelog.KindTest,
 // KindDetect, KindList). Such a row is listed on the request log, told
@@ -21,8 +21,8 @@ import (
 const SourceProbe = "probe"
 
 // SourceMCP is Record.Source for an agent's call to a tool of one of
-// magpie's own MCP servers: the gateway's (image, vision, web search,
-// plugin tools, the MCP hub) and the Magpie Image server an agent runs
+// eipgam's own MCP servers: the gateway's (image, vision, web search,
+// plugin tools, the MCP hub) and the eipgam Image server an agent runs
 // (ferock on Discord). Its Kind is KindMCP, Requested the tool's name as
 // it was called, Host the server's, Provider and Model what the tool used
 // when it used a model, Millis how long the call took and Error what a
@@ -32,7 +32,7 @@ const SourceProbe = "probe"
 const SourceMCP = "mcp"
 
 // SourceSearch is Record.Source for one ask of a search API (Tavily,
-// Brave, …) by a web search magpie ran (cybercaius on Discord: which
+// Brave, …) by a web search eipgam ran (cybercaius on Discord: which
 // search API each search used couldn't be seen). Its Kind is
 // "web_search", Agent the agent the search was for, Requested the API's
 // name, Host where it was asked, ProviderKeyID and ProviderKeyName the key
@@ -47,7 +47,7 @@ const SourceSearch = "search"
 // them by.
 const KindMCP = "mcp"
 
-// IsProbe is a request magpie sent on its own (SourceProbe), an MCP tool
+// IsProbe is a request eipgam sent on its own (SourceProbe), an MCP tool
 // call (SourceMCP) or a search API's (SourceSearch): a row listed and
 // counted nowhere.
 func (r Record) IsProbe() bool {
@@ -120,7 +120,7 @@ func eachProbe(blocks []*rowChunk, since time.Time, f func(r Record, off int64))
 
 func init() {
 	probelog.Sink = func(p probelog.Row) {
-		r := Record{Time: p.Time, Agent: "magpie", Provider: p.Provider, ProviderAccount: p.Account,
+		r := Record{Time: p.Time, Agent: "eipgam", Provider: p.Provider, ProviderAccount: p.Account,
 			Host: p.Host, Model: p.Model, Requested: p.Model, Status: p.Status, Millis: p.Millis,
 			Error: clipProbeError(p.Error), Endpoint: p.Endpoint, Kind: p.Kind, Source: SourceProbe}
 		if quietProbe(r) {
@@ -130,10 +130,10 @@ func init() {
 	}
 }
 
-// quietProbe is a request of magpie's own the request log leaves out: a
-// model list that was answered. magpie asks for one by itself, at start-up,
+// quietProbe is a request of eipgam's own the request log leaves out: a
+// model list that was answered. eipgam asks for one by itself, at start-up,
 // behind the panel and the Providers page, and on a schedule (a Remote
-// magpie's every 10 minutes, RemoteMagpieEvery), so the Requests page
+// eipgam's every 10 minutes, RemoteMagpieEvery), so the Requests page
 // filled with rows of 0 tokens that no agent sent (ferock on Discord). One
 // that failed is listed, as is every Test and Detect APIs: a list that
 // couldn't be fetched is why models are missing, and the row says why.

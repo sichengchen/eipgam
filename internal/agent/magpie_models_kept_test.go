@@ -3,14 +3,14 @@ package agent
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // magpieModels answers from the list it built while nothing the catalog
 // is built from changed: the window's drift poll asked each agent's Drift
 // for its list again per field every 15s, each built whole with its
-// prices and Vision's ranking (14.5 GB of 33 GB a live magpie allocated
+// prices and Vision's ranking (14.5 GB of 33 GB a live eipgam allocated
 // in 53 minutes). A provider or a setting saved since is seen at once.
 func TestMagpieModelsKeptWhileCatalogStays(t *testing.T) {
 	syncHome(t)
@@ -78,7 +78,7 @@ func TestViaMagpieKeptWhileCatalogStays(t *testing.T) {
 		t.Fatalf("oa's models not offered: %v", got)
 	}
 	// a prefix is kept apart from the bare list
-	if got := refs("magpie/"); !got["magpie/oa/gpt-5.5"] {
+	if got := refs("eipgam/"); !got["eipgam/oa/gpt-5.5"] {
 		t.Fatalf("the prefixed list: %v", got)
 	}
 	built := testing.AllocsPerRun(5, func() { buildVia("pi", "") })

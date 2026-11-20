@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
-// Hyprland is whether magpie runs under Hyprland, Omarchy's compositor or
+// Hyprland is whether eipgam runs under Hyprland, Omarchy's compositor or
 // anyone else's. A Wayland window can't place itself there, so a tray panel
 // that asks to go under its icon opens wherever Hyprland floats it (the
 // middle of the screen), framed and dimmed like any other window.
@@ -102,7 +102,7 @@ func panelRule(title, mon string, x, y int) string {
 	if mon != "" {
 		on = "monitor = " + strconv.Quote(mon) + ", "
 	}
-	return fmt.Sprintf(`hl.window_rule({ name = "magpie-panel", match = { title = %s }, tag = "-default-opacity", float = true, pin = true, border_size = 0, no_shadow = true, opacity = "1 1", no_anim = true, %smove = { %d, %d } })`,
+	return fmt.Sprintf(`hl.window_rule({ name = "eipgam-panel", match = { title = %s }, tag = "-default-opacity", float = true, pin = true, border_size = 0, no_shadow = true, opacity = "1 1", no_anim = true, %smove = { %d, %d } })`,
 		strconv.Quote("^"+regexpQuote(title)+"$"), on, x, y)
 }
 
@@ -112,20 +112,20 @@ func panelRule(title, mon string, x, y int) string {
 // and Hyprland tells a program nothing of clicks on others. While the panel
 // is open, a left-click bind that lets the click through (non_consuming)
 // announces each one on Hyprland's event socket, and WatchClicks hears it.
-const clickEvent = "magpie-click"
+const clickEvent = "eipgam-click"
 
 // ReportClicks has Hyprland announce every left click, until StopClicks.
 func ReportClicks() error {
-	return hyprctl("eval", `if magpie_click then magpie_click:remove() end magpie_click = hl.bind("mouse:272", function() hl.dispatch(hl.dsp.event("`+clickEvent+`")) end, { non_consuming = true })`)
+	return hyprctl("eval", `if eipgam_click then eipgam_click:remove() end eipgam_click = hl.bind("mouse:272", function() hl.dispatch(hl.dsp.event("`+clickEvent+`")) end, { non_consuming = true })`)
 }
 
 // StopClicks takes the bind away again.
 func StopClicks() error {
-	return hyprctl("eval", `if magpie_click then magpie_click:remove() magpie_click = nil end`)
+	return hyprctl("eval", `if eipgam_click then eipgam_click:remove() eipgam_click = nil end`)
 }
 
 // WatchClicks calls click on each click ReportClicks announces, for as long
-// as magpie runs, reconnecting when Hyprland restarts.
+// as eipgam runs, reconnecting when Hyprland restarts.
 func WatchClicks(click func()) {
 	sock := filepath.Join(appdir.Getenv("XDG_RUNTIME_DIR"), "hypr", os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"), ".socket2.sock")
 	for {

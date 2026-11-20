@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// Vendors spell the same model differently; a group magpie finds joins
+// Vendors spell the same model differently; a group eipgam finds joins
 // them all.
 func TestAutoGroupsSameModel(t *testing.T) {
 	for in, want := range map[string]string{
@@ -105,7 +105,7 @@ func TestGroupInputsAreItsMembers(t *testing.T) {
 	}
 }
 
-// A group whose first member is a ChatGPT account's model is still magpie's
+// A group whose first member is a ChatGPT account's model is still eipgam's
 // to list to a signed-in Codex: the backend lists the model, not the group.
 func TestCodexListedKeepsGroups(t *testing.T) {
 	acct := Provider{ID: "codex-me", Account: &Account{Agent: "codex"}}

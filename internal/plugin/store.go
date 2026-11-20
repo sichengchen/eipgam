@@ -1,16 +1,16 @@
-// Package plugin runs OpenCode's provider plugins for magpie.
+// Package plugin runs OpenCode's provider plugins for eipgam.
 //
 // A subscription a vendor may object to being used outside its own app is
 // not built into magpie: a plugin signs in to it and makes its requests,
 // the way OpenCode's plugins do (opencode-gemini-auth and the like), and
-// magpie runs those same plugins. They are npm packages (or local files)
+// eipgam runs those same plugins. They are npm packages (or local files)
 // written against OpenCode's plugin API (@opencode-ai/plugin, v1): their
 // auth hook gives the sign-in methods and a loader whose fetch carries the
-// requests, their config and provider hooks the models. magpie runs them
+// requests, their config and provider hooks the models. eipgam runs them
 // under Bun, downloaded the first time a plugin is added, in one process
 // (host.js) it talks to over stdin and stdout.
 //
-// What magpie keeps: plugins.json, the plugins and the config handed to
+// What eipgam keeps: plugins.json, the plugins and the config handed to
 // them (OpenCode's, its provider section: a plugin's options); the npm
 // packages under plugins/; plugin-auth.json, the sign-ins, in OpenCode's
 // auth.json shape (so one can be moved between the two).
@@ -34,16 +34,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/steady"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // Entry is one plugin the user added.
@@ -77,11 +77,11 @@ var listMu sync.Mutex
 
 // listFileMu is held through every read a change is made from and its
 // write of plugins.json (the mutators below): the gateway that runs all
-// day and a magpie run from a terminal (`magpie plugin options …`, the
+// day and a eipgam run from a terminal (`eipgam plugin options …`, the
 // plugin manager) are separate processes, and listMu never saw the other
 // one, so the later whole-list write went out with what the other had
 // saved since its read (#4666). Under it every change reads the file
-// afresh, so both changes stand. A lock another magpie holds is waited
+// afresh, so both changes stand. A lock another eipgam holds is waited
 // for up to filelock.Wait, then gone on without, as before there was
 // one; the same shape as mcpauth's fileMu.
 var listFileMu = filelock.Mutex{Path: func() string { return listPath() + ".lock" }}
@@ -137,19 +137,19 @@ func mendPackageJSON() {
 	_ = edit.WriteAtomic(pj, head)
 }
 
-// Dir is the folder magpie installs npm plugins into.
+// Dir is the folder eipgam installs npm plugins into.
 func Dir() string { return filepath.Join(settings.Dir(), "plugins") }
 
 // AuthPath is the plugins' sign-ins, OpenCode's auth.json in shape.
 func AuthPath() string { return filepath.Join(settings.Dir(), "plugin-auth.json") }
 
 // authLockStale is how long plugin-auth.json.lock is held at most: one
-// older was left by a host or a magpie that died holding it.
+// older was left by a host or a eipgam that died holding it.
 const authLockStale = 10 * time.Second
 
 // lockAuth takes plugin-auth.json.lock, which host.js takes too, for a
 // change to plugin-auth.json read afresh under it: two hosts (one being
-// restarted) and magpie never write each other's accounts away. It gives
+// restarted) and eipgam never write each other's accounts away. It gives
 // the unlock.
 func lockAuth() func() {
 	lock := AuthPath() + ".lock"
@@ -259,7 +259,7 @@ func cloneJSON(v any) any {
 	}
 }
 
-// writeWhole writes b to p by a rename, so a magpie or the host reading
+// writeWhole writes b to p by a rename, so a eipgam or the host reading
 // p meanwhile reads the old file or the new one, never one half-written,
 // and flushed to the disk first, so a machine that goes down meanwhile
 // doesn't leave p all zero (#1505); read back with steady.ReadFile, which
@@ -289,7 +289,7 @@ func save(l List) error {
 	return nil
 }
 
-// listSeen is plugins.json as this magpie last wrote or read it.
+// listSeen is plugins.json as this eipgam last wrote or read it.
 var listSeen struct {
 	sync.Mutex
 	stamp string
@@ -297,7 +297,7 @@ var listSeen struct {
 }
 
 // listStamp is plugins.json as it is now, and what is installed: bun's
-// package.json and lockfile in Dir(), which `magpie plugin update` changes
+// package.json and lockfile in Dir(), which `eipgam plugin update` changes
 // without touching plugins.json (#952: a terminal's update to 0.1.18 left
 // the app's host answering with 0.1.17 until it was killed).
 func listStamp() string {
@@ -311,14 +311,14 @@ func listStamp() string {
 	return b.String()
 }
 
-// hostStale is set when another magpie changed the plugins (magpie plugin
+// hostStale is set when another eipgam changed the plugins (eipgam plugin
 // add, remove, update or move in a terminal while the app runs): the host
 // running has the old ones loaded.
 var hostStale atomic.Bool
 
-// checkList notices plugins.json changed by another magpie, or a plugin
+// checkList notices plugins.json changed by another eipgam, or a plugin
 // added by its path edited (pathstamp.go): the host is started again with
-// the plugins as they are, and the providers the other magpie last saw
+// the plugins as they are, and the providers the other eipgam last saw
 // asked for are the ones known meanwhile.
 func checkList() {
 	st := seenStamp()
@@ -575,7 +575,7 @@ func notPlugin(target string) error {
 	if name == "" {
 		name = filepath.Base(target)
 	}
-	why := fmt.Sprintf("%s isn't an OpenCode or magpie plugin: its package names no file to load (no main or exports in package.json, no index file)", name)
+	why := fmt.Sprintf("%s isn't an OpenCode or eipgam plugin: its package names no file to load (no main or exports in package.json, no index file)", name)
 	if len(pkg.Bin) > 0 && string(pkg.Bin) != "null" {
 		why += ", only a command (bin). If it is an MCP server, add it under Library › MCP servers instead"
 	}
@@ -793,7 +793,7 @@ func install(ctx context.Context, spec string) error {
 	if _, err := os.Stat(pj); err != nil {
 		// through temp and rename, as every write of it: a write cut
 		// short would leave bun a package.json it can't read
-		if err := edit.WriteAtomic(pj, []byte("{\n  \"name\": \"magpie-plugins\",\n  \"private\": true\n}\n")); err != nil {
+		if err := edit.WriteAtomic(pj, []byte("{\n  \"name\": \"eipgam-plugins\",\n  \"private\": true\n}\n")); err != nil {
 			installMu.Unlock()
 			return err
 		}
@@ -900,7 +900,7 @@ func installAt(ctx context.Context, pkg, version string) error {
 		// what bun said comes first: the page's status line shows the
 		// start of a long message
 		if m := minAge.FindStringSubmatch(err.Error()); m != nil {
-			return fmt.Errorf("%s %s isn't installed yet: Bun's minimumReleaseAge (in a .bunfig.toml) holds back versions published less than %s ago, and magpie installs it once it is older (%w)", pkg, version, ageText(m[1]), err)
+			return fmt.Errorf("%s %s isn't installed yet: Bun's minimumReleaseAge (in a .bunfig.toml) holds back versions published less than %s ago, and eipgam installs it once it is older (%w)", pkg, version, ageText(m[1]), err)
 		}
 		var said []string
 		for _, l := range strings.Split(err.Error(), "\n") {
@@ -1127,7 +1127,7 @@ func command(ctx context.Context, name string, args ...string) *exec.Cmd {
 	return proc.CommandContext(ctx, name, args...)
 }
 
-// env is the plugins' environment: magpie's, with its proxy.
+// env is the plugins' environment: eipgam's, with its proxy.
 func env() []string { return netproxy.Env(os.Environ()) }
 
 // dlEnv is env for a program that downloads plugins (bun add, update and

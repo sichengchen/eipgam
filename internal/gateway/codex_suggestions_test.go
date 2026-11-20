@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // codexSuggests is one of the Codex app's prompt-suggestion calls (source
 // ambient_suggestions, or the safety check, ambient_suggestion_safety) as
-// it sends them with magpie as its provider: to /v1/responses, on the model
+// it sends them with eipgam as its provider: to /v1/responses, on the model
 // its server names, from this computer.
 func codexSuggests(t *testing.T, s *Server, key, model, source string) *httptest.ResponseRecorder {
 	t.Helper()
@@ -30,9 +30,9 @@ func codexSuggests(t *testing.T, s *Server, key, model, source string) *httptest
 }
 
 // @0xcb198609 on X: the Codex app's prompt suggestions, which read the
-// project and connected apps in the background, ran on whatever magpie's
+// project and connected apps in the background, ran on whatever eipgam's
 // auto picked (76.9k tokens on deepseek-v4-pro), and Codex has no setting
-// for their model. With one set in magpie both calls go there, a bare
+// for their model. With one set in eipgam both calls go there, a bare
 // model of OpenAI's included, the Routing page saying why, and Codex's
 // own turns stay where they were.
 func TestCodexSuggestionsMoved(t *testing.T) {
@@ -68,7 +68,7 @@ func TestCodexSuggestionsMoved(t *testing.T) {
 }
 
 // Nothing set (the default: as Codex sends them), another agent's call of
-// that kind, and a model set that magpie doesn't serve or the user
+// that kind, and a model set that eipgam doesn't serve or the user
 // disabled: the call goes on as asked.
 func TestCodexSuggestionsLeft(t *testing.T) {
 	for _, tc := range []struct{ name, target, key string }{
@@ -102,7 +102,7 @@ func TestCodexSuggestionsLeft(t *testing.T) {
 	}
 }
 
-// Codex signed in to ChatGPT sends the suggestions to magpie's ChatGPT
+// Codex signed in to ChatGPT sends the suggestions to eipgam's ChatGPT
 // backend route on OpenAI's model. With a model set for them they go
 // there, ChatGPT isn't asked, and the trace keeps the model asked.
 func TestCodexSuggestionsMovedOffChatGPT(t *testing.T) {
@@ -135,7 +135,7 @@ func TestCodexSuggestionsMovedOffChatGPT(t *testing.T) {
 	}
 }
 
-// A bare name names no model of magpie's.
+// A bare name names no model of eipgam's.
 func TestCodexSuggestionsModelRefusesBareName(t *testing.T) {
 	fresh(t)
 	if err := provider.SetCodexSuggestionsModel("gpt-6-luna"); err == nil {

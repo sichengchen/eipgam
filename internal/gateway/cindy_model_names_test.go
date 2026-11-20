@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Cindy's model discovery (parseModelsListResponse in its app) names a row
-// by display_name before name, and showed magpie's GLM-5.3-Flash of three
+// by display_name before name, and showed eipgam's GLM-5.3-Flash of three
 // providers three times the same (cdredfox on X). Cindy is told each model
 // by the name the agents' lists give it: with its provider's after it, and
 // with the provider left out, plain only where no other has that name. A

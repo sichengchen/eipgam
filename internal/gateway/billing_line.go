@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // Claude Code begins its system prompt with a billing line, a block of its
@@ -18,7 +18,7 @@ import (
 // without the line (#1600, justrun1983). It goes on only to a Claude model
 // asked on Anthropic's Messages API (Anthropic's own, a relay's, Bedrock's),
 // as Claude Code sent it. The Claude subscription's run sends its own
-// (withoutBillingHeader), another magpie decides for the provider it picks,
+// (withoutBillingHeader), another eipgam decides for the provider it picks,
 // and Code Assist is sent it as before (antigravityTurnsAway, #666).
 
 // billingLine is a system block that is the billing line and nothing else.

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // LeiWang_2000 on X: a gateway key held to an account group ("@<id>"),
@@ -65,8 +65,8 @@ func TestGatewayKeyAccountGroupsKeyedRoutes(t *testing.T) {
 		{"messages", "/v1/messages", `{"model":"relay/m","max_tokens":16,"messages":[{"role":"user","content":"hi"}]}`, false},
 		{"responses", "/v1/responses", `{"model":"relay/m","input":"hi"}`, false},
 		{"count_tokens", "/v1/messages/count_tokens", `{"model":"relay/m","messages":[{"role":"user","content":"hi"}]}`, true},
-		{"images", "/v1/images/generations", `{"model":"relay/gpt-image-1","prompt":"a magpie"}`, false},
-		{"videos", "/v1/videos", `{"model":"office/grok-imagine-video","prompt":"a magpie"}`, false},
+		{"images", "/v1/images/generations", `{"model":"relay/gpt-image-1","prompt":"a eipgam"}`, false},
+		{"videos", "/v1/videos", `{"model":"office/grok-imagine-video","prompt":"a eipgam"}`, false},
 		{"systemone", "/v1/systemone", `{"model":"jev/jev-latest","state":{"message":"hi"},"questions":{"intent":{"type":"choice"}}}`, false},
 	}
 	// served by the one account of each provider want names

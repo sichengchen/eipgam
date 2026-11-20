@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // usedReply is a chat answer of 350 tokens, which the key's limits count.
@@ -208,11 +208,11 @@ func TestKeyModelLimitHoldsMediaGroups(t *testing.T) {
 	if w := keyCall(h, secrets[0], "/v1/chat/completions", `{"model":"flare/chat","messages":[{"role":"user","content":"hi"}]}`); w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	w := keyCall(h, secrets[0], "/v1/images/generations", `{"model":"group/pics","prompt":"a magpie"}`)
+	w := keyCall(h, secrets[0], "/v1/images/generations", `{"model":"group/pics","prompt":"a eipgam"}`)
 	if w.Code != 200 || spent.calls != 1 || len(e.got("/v1/images/generations")) != 1 {
 		t.Fatal("a drawing group didn't go on past its spent member", w.Code, w.Body.String(), spent.calls)
 	}
-	spentSaid(t, keyCall(h, secrets[0], "/v1/images/generations", `{"model":"group/lone","prompt":"a magpie"}`), "flare/*")
+	spentSaid(t, keyCall(h, secrets[0], "/v1/images/generations", `{"model":"group/lone","prompt":"a eipgam"}`), "flare/*")
 	spentSaid(t, keyCall(h, secrets[0], "/v1/embeddings", `{"model":"group/emb","input":"hi"}`), "flare/*")
 	if spent.calls != 1 {
 		t.Fatal("a spent member was asked", spent.calls)
@@ -221,7 +221,7 @@ func TestKeyModelLimitHoldsMediaGroups(t *testing.T) {
 
 // A limit of the whole key, as every one from before, is untouched by
 // limits of some models beside it: it counts every model, and says its
-// reset to a remote magpie.
+// reset to a remote eipgam.
 func TestKeyModelLimitBesideTheWholeKey(t *testing.T) {
 	fresh(t)
 	budget.Forget()

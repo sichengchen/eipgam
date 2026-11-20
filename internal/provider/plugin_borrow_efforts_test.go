@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // laomao04_65777 on Discord: in Codex, SenseTime Raccoon's (商汤小浣熊's)
@@ -22,7 +22,7 @@ import (
 // variants keeps them, and one it doesn't say thinks gets none borrowed.
 func TestPluginThinkingModelBorrowsEfforts(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
 	os.WriteFile(catalog.CachePath(), []byte(`{
 	  "moonshotai":{"id":"moonshotai","models":{"kimi-k3":{"id":"kimi-k3","reasoning":true,

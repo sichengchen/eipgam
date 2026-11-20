@@ -11,7 +11,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 
 function serve(lang) {
   return async (route) => {
@@ -57,14 +57,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     for (const size of sizes) for (const lang of langs) await t.test(`${size.name} ${lang}`, async () => {
       const context = await browser.newContext({ viewport: { width: size.width, height: size.height } });
-      if (size.side) await context.addInitScript(() => { try { localStorage.setItem("magpie.navLayout", "side"); } catch {} });
+      if (size.side) await context.addInitScript(() => { try { localStorage.setItem("eipgam.navLayout", "side"); } catch {} });
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.waitForSelector("#nav button.on");
       assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "the sidebar shows");
       const prefs = page.locator("#side .side-foot #prefs");

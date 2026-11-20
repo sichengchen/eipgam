@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // A project can be given instructions of its own (VictorHong1022 on X), so
@@ -16,7 +16,7 @@ import (
 // file each picked agent reads a project's instructions from, between the
 // same two marker lines the user-wide part has (instructions.go). The rest
 // of the file is the user's and is never touched; turned off, the part
-// comes out, and a file magpie made goes once nothing is left in it.
+// comes out, and a file eipgam made goes once nothing is left in it.
 //
 // The names each agent reads, in a project's folder, the first one there
 // being the one it reads (and the first name the one made when none is):
@@ -55,7 +55,7 @@ var projectInstrOrder = map[string][]string{
 }
 
 // ProjectInstrFile is the file, in a project, an agent reads the
-// project's instructions from when there is none yet: "" for one magpie
+// project's instructions from when there is none yet: "" for one eipgam
 // can't give a project's instructions to.
 func ProjectInstrFile(agentID string) string {
 	if n := projectInstrNames[agentID]; len(n) > 0 {
@@ -115,8 +115,8 @@ func projectInstrRenames(agents []string) map[string]string {
 	return out
 }
 
-// InstrFile is a project file magpie wrote the project's instructions
-// into: the hash of the part as written, and whether magpie made the file.
+// InstrFile is a project file eipgam wrote the project's instructions
+// into: the hash of the part as written, and whether eipgam made the file.
 type InstrFile struct {
 	Path string `json:"path"`
 	Hash string `json:"hash"`
@@ -144,7 +144,7 @@ func (l *Library) syncProjectInstr(p *Project, fail func(what string, err error)
 	}
 	var globals map[string]bool // the agents' user-wide files, found once
 	var kept []InstrFile
-	// what's no longer wanted: magpie's part out, and a file it made away
+	// what's no longer wanted: eipgam's part out, and a file it made away
 	// once nothing of the user's is in it
 	for _, f := range p.InstrFiles {
 		if wanted[f.Path] {
@@ -200,7 +200,7 @@ func (l *Library) syncProjectInstr(p *Project, fail func(what string, err error)
 			continue
 		}
 		if globals[realBelow(abs)] {
-			fail("instructions", fmt.Errorf("%s is an agent's user-wide instructions file, which magpie writes from the shared instructions: it's left as it is", rel))
+			fail("instructions", fmt.Errorf("%s is an agent's user-wide instructions file, which eipgam writes from the shared instructions: it's left as it is", rel))
 			if had {
 				kept = append(kept, r)
 			}
@@ -293,7 +293,7 @@ func ProjectInstructions(dir string, c ProjectInstr) (*Result, error) {
 			var ids []string
 			for _, id := range *c.Agents {
 				if ProjectInstrFile(id) == "" {
-					return fmt.Errorf("magpie knows of no file %s reads a project's instructions from", id)
+					return fmt.Errorf("eipgam knows of no file %s reads a project's instructions from", id)
 				}
 				ids = set(ids, id, true)
 			}

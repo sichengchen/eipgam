@@ -54,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const gone = page.locator('.row.provider[data-id="gone"]');
         await gone.waitFor();
         assert.equal(await gone.locator(".badge", { hasText: badge[lang] }).count(), 1);

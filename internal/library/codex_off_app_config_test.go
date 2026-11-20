@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // what the Codex app (ChatGPT.app 26.1021) writes into config.toml for its
@@ -50,9 +50,9 @@ NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "9230e2bd"
 open_links_in = "app"
 `
 
-// darwish4021 on Discord: Codex switched off on magpie, its app's browser
+// darwish4021 on Discord: Codex switched off on eipgam, its app's browser
 // configuration was gone. The library gives Codex its servers one way on
-// magpie and another off it (agent.Rewired); the app's own servers and
+// eipgam and another off it (agent.Rewired); the app's own servers and
 // everything else it wrote stay through both, imported into the library
 // or not.
 func TestCodexOffKeepsAppsOwnConfig(t *testing.T) {
@@ -80,7 +80,7 @@ func TestCodexOffKeepsAppsOwnConfig(t *testing.T) {
 			}
 			on := read(t, path)
 			if !strings.Contains(on, RunPath+"mem") {
-				t.Fatalf("on magpie, not given through the gateway as it should be:\n%s", on)
+				t.Fatalf("on eipgam, not given through the gateway as it should be:\n%s", on)
 			}
 			wired = false
 			if _, err := Sync(); err != nil {
@@ -93,7 +93,7 @@ func TestCodexOffKeepsAppsOwnConfig(t *testing.T) {
 				}
 			}
 			if t.Failed() {
-				t.Logf("on magpie:\n%s\n\noff:\n%s", on, off)
+				t.Logf("on eipgam:\n%s\n\noff:\n%s", on, off)
 			}
 		})
 	}

@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // TestGeminiNotAntigravity: a ~/.gemini holding only what Antigravity keeps

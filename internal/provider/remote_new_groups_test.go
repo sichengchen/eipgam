@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
-// A remote magpie whose picks leave one of its models out: a routing group
+// A remote eipgam whose picks leave one of its models out: a routing group
 // its user makes there later is offered here at once, with no tick in the
 // editor, while a new model of its providers still waits for one, and a
 // group the user saw and unticked stays out (KoiLx0 on X: office/group/opus

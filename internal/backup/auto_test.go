@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/profile"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // autoHome is a machine of its own with the setup setUp makes, and the
@@ -85,7 +85,7 @@ func TestAutoBackupOnSchedule(t *testing.T) {
 	tick(t0.Add(-time.Hour), true)
 }
 
-// A magpie that starts again goes by the newest backup in the folder, not
+// A eipgam that starts again goes by the newest backup in the folder, not
 // a fresh start: no backup at every launch.
 func TestAutoBackupAfterRestartWaits(t *testing.T) {
 	autoHome(t)
@@ -146,7 +146,7 @@ func TestAutoBackupPrunes(t *testing.T) {
 	if err := SaveAuto(AutoConfig{Keep: 3, Dir: dir, Hours: 1}); err != nil {
 		t.Fatal(err)
 	}
-	mine := []string{"notes.txt", "magpie-2026-11-01.magpie-backup", "magpie-20200101-000000-auto.json.bak"}
+	mine := []string{"notes.txt", "eipgam-2026-11-01.eipgam-backup", "eipgam-20200101-000000-auto.json.bak"}
 	for _, f := range mine {
 		if err := os.WriteFile(filepath.Join(dir, f), []byte("mine"), 0o644); err != nil {
 			t.Fatal(err)
@@ -332,15 +332,15 @@ func TestAutoHalfWrittenNeverListed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cut := "magpie-20261101-000000-auto.json"
+	cut := "eipgam-20261101-000000-auto.json"
 	if err := os.WriteFile(filepath.Join(dir, cut), whole[:len(whole)/2], 0o600); err != nil {
 		t.Fatal(err)
 	}
-	changed := "magpie-20261101-000001-auto.json"
+	changed := "eipgam-20261101-000001-auto.json"
 	if err := os.WriteFile(filepath.Join(dir, changed), []byte(strings.Replace(string(whole), `"theme":"dark"`, `"theme":"pink"`, 1)), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, ".magpie-backup-123.tmp"), whole, 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".eipgam-backup-123.tmp"), whole, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if l := autoList(t); len(l) != 1 || l[0].Name != good.Name {
@@ -368,10 +368,10 @@ func TestAutoHalfWrittenNeverListed(t *testing.T) {
 	}
 }
 
-// Backups in magpie's own folder, the default, are said to be there: a
+// Backups in eipgam's own folder, the default, are said to be there: a
 // reinstalled system or a wiped disk takes them along with the setup
-// (two_2025. on Discord, whose magpie is on C:). One picked elsewhere
-// isn't, nor one in a folder whose name only starts like magpie's.
+// (two_2025. on Discord, whose eipgam is on C:). One picked elsewhere
+// isn't, nor one in a folder whose name only starts like eipgam's.
 func TestAutoInsideMagpiesFolder(t *testing.T) {
 	autoHome(t)
 	if v := AutoStatus(); !v.Inside || v.Custom {
@@ -382,7 +382,7 @@ func TestAutoInsideMagpiesFolder(t *testing.T) {
 		t.Fatal(err)
 	}
 	if v := AutoStatus(); !v.Inside {
-		t.Errorf("picked %q in magpie's folder: not said to be inside", v.Dir)
+		t.Errorf("picked %q in eipgam's folder: not said to be inside", v.Dir)
 	}
 	for _, out := range []string{t.TempDir(), settings.Dir() + "-backups"} {
 		if err := SaveAuto(AutoConfig{Dir: out}); err != nil {
@@ -397,7 +397,7 @@ func TestAutoInsideMagpiesFolder(t *testing.T) {
 			t.Fatal(err)
 		}
 		if v := AutoStatus(); !v.Inside {
-			t.Errorf("magpie's folder in other letter case %q: not said to be inside", v.Dir)
+			t.Errorf("eipgam's folder in other letter case %q: not said to be inside", v.Dir)
 		}
 	}
 }

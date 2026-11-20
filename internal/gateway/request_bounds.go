@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zstd"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Bound a single body and its read time without limiting how long a client
@@ -21,8 +21,8 @@ import (
 //
 // The limit is on the decoded body. Codex sends the whole conversation on
 // every turn, its screenshots inline as base64, and zstd-compressed to a
-// ChatGPT account, which magpie compresses again on the way out: a long
-// session that read many images went past 128 MB decoded and got magpie's
+// ChatGPT account, which eipgam compresses again on the way out: a long
+// session that read many images went past 128 MB decoded and got eipgam's
 // 413 on every retry, while the same turn is a fraction of that on the
 // wire (NeoPengZhile, #1422). 512 MB leaves such a session room and still
 // bounds what one request may hold in memory.
@@ -36,15 +36,15 @@ const codexBodyMost = 2 << 30
 
 // codexBodyLimit is the decoded limit of a turn on Codex's own backend
 // path (CodexPath, the relay, its WebSocket): a sixteenth of what
-// magpie's processes may use (bodyRoomSize's memory), defaultBodyLimit at
+// eipgam's processes may use (bodyRoomSize's memory), defaultBodyLimit at
 // least and codexBodyMost at most. Codex keeps every image it generated
 // in the conversation, a ~3 MB PNG as ~4 MB of base64 each, and over
 // HTTP sends the conversation whole every turn: a session that generated
-// and revised images for a while went past 512 MB and got magpie's 413,
+// and revised images for a while went past 512 MB and got eipgam's 413,
 // while Codex signed in to OpenAI directly kept going (dallascao on
 // Discord). One of Codex's own models is sent on to its sign-in as it
 // came, at about four times the body's size in Go heap at its peak; a
-// turn for a magpie model is translated, at several times that, and keeps
+// turn for a eipgam model is translated, at several times that, and keeps
 // defaultBodyLimit (codexBackend). The bound still holds a zstd bomb: no
 // body decodes past it.
 func codexBodyLimit() int64 {
@@ -143,7 +143,7 @@ func (b *idleBody) Read(p []byte) (int, error) {
 	return n, err
 }
 
-// errBodyEncoding is a Content-Encoding magpie can't decode.
+// errBodyEncoding is a Content-Encoding eipgam can't decode.
 var errBodyEncoding = errors.New("unsupported Content-Encoding")
 
 // decodedBody reads r.Body through its Content-Encoding: Codex sends its
@@ -163,11 +163,11 @@ func decodedBody(r *http.Request) (io.ReadCloser, error) {
 		}
 		rd = &pooledZstd{d}
 	case "dcz":
-		// against a body another magpie sent before (remote_dict.go),
+		// against a body another eipgam sent before (remote_dict.go),
 		// only one keptBodyRequests found for this request
 		dict := dictOf(r.Context())
 		if dict == nil {
-			return nil, fmt.Errorf("%w: magpie can't read a %q body; send it as identity, gzip or zstd", errBodyEncoding, enc)
+			return nil, fmt.Errorf("%w: eipgam can't read a %q body; send it as identity, gzip or zstd", errBodyEncoding, enc)
 		}
 		d, err := dczReader(r.Body, dict)
 		if err != nil {
@@ -181,7 +181,7 @@ func decodedBody(r *http.Request) (io.ReadCloser, error) {
 		}
 		rd = g
 	default:
-		return nil, fmt.Errorf("%w: magpie can't read a %q body; send it as identity, gzip or zstd", errBodyEncoding, enc)
+		return nil, fmt.Errorf("%w: eipgam can't read a %q body; send it as identity, gzip or zstd", errBodyEncoding, enc)
 	}
 	r.Header.Del("Content-Encoding")
 	return rd, nil
@@ -285,7 +285,7 @@ func readBoundedRequestBody(w http.ResponseWriter, r *http.Request, limits reque
 }
 
 // sizedReadFirst is the most readSized sets aside before a byte has come:
-// a client that says more than it sends makes magpie hold no more than
+// a client that says more than it sends makes eipgam hold no more than
 // this, or twice what it sent.
 const sizedReadFirst = 1 << 20
 
@@ -344,12 +344,12 @@ func readSized(r io.Reader, declared int64) ([]byte, error) {
 	}
 }
 
-// overLimit says a body is over magpie's own limit, and that it is
-// magpie's, not the provider's: an agent shows the message as it comes,
+// overLimit says a body is over eipgam's own limit, and that it is
+// eipgam's, not the provider's: an agent shows the message as it comes,
 // and a bare "Payload Too Large" read as the model's or the vendor's
 // (#1422). writeError adds what to do about it.
 func overLimit(limit int64) error {
-	return fmt.Errorf("request body is over magpie's gateway limit of %s (decoded); the provider was not asked", sizeWord(limit))
+	return fmt.Errorf("request body is over eipgam's gateway limit of %s (decoded); the provider was not asked", sizeWord(limit))
 }
 
 // sizeWord is a byte count in MB, or in KB or bytes when it is smaller,

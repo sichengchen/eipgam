@@ -14,7 +14,7 @@ import (
 // each new reading of any account (a few times a minute with a dozen
 // accounts), and json.Marshal made the whole of it anew each time, with
 // three times for each point (~750 KB, ~300k allocations a minute on a
-// live magpie, a quarter of all it allocated idle).
+// live eipgam, a quarter of all it allocated idle).
 var quotaHistBuf []byte
 
 // appendQuotaHist is json.Marshal(h) appended to b, byte for byte, made

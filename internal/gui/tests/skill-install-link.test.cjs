@@ -20,7 +20,7 @@ const probe = {
   ],
 };
 const lib = () => ({
-  dir: `${HOME}/.config/magpie/library`, backups: `${HOME}/.config/magpie/backups`, home: HOME,
+  dir: `${HOME}/.config/eipgam/library`, backups: `${HOME}/.config/eipgam/backups`, home: HOME,
   agents: [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/.claude/skills` }],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills: [],
 });
@@ -68,13 +68,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const run = async (lang, width) => {
       const posts = [];
       const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.locator('button[data-view="library"]').click();
       const src = page.locator('#view-library input[data-lib="source"]');
       await src.fill("biubiu/skills");

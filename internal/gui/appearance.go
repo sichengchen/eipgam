@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Settings › General's Accent color and Background image
-// (CHENGJIAHEGOXIS on X): a colour of the user's own for magpie's
+// (CHENGJIAHEGOXIS on X): a colour of the user's own for eipgam's
 // buttons, links and selection, and a picture of their own behind the
 // window's pages. Both are drawn by lookCSS, a stylesheet boot.js puts in
 // the page before it paints and /api/appearance/css hands a page whose
@@ -25,10 +25,10 @@ import (
 // maxWallpaper is the largest picture taken.
 const maxWallpaper = 16 << 20
 
-// wallpaperTypes are the pictures every webview magpie runs in draws.
+// wallpaperTypes are the pictures every webview eipgam runs in draws.
 var wallpaperTypes = []string{"image/png", "image/jpeg", "image/gif", "image/webp"}
 
-// wallpaperType is b's type when it is a picture magpie takes.
+// wallpaperType is b's type when it is a picture eipgam takes.
 func wallpaperType(b []byte) (string, error) {
 	if len(b) == 0 || len(b) > maxWallpaper {
 		return "", fmt.Errorf("a background image is %d MB at most", maxWallpaper>>20)
@@ -53,7 +53,7 @@ func lookKey(s settings.Settings) string {
 }
 
 // lookCSS is the stylesheet that draws s's accent and wallpaper, "" for
-// magpie's own look. It never applies under Omarchy, whose theme is the
+// eipgam's own look. It never applies under Omarchy, whose theme is the
 // look there.
 func lookCSS(s settings.Settings) string {
 	var b strings.Builder
@@ -180,7 +180,7 @@ func inkOn(c, toward rgb, against ...rgb) rgb {
 // accentVars are the theme's --accent, its soft fill, the text on it, the
 // selection, --mark and --mark-fill, from c. --mark is the ink of what is
 // chosen (the open page's sidebar icon, a switch's or tab's chosen
-// option), magpie's own text colour without an accent of the user's, as a
+// option), eipgam's own text colour without an accent of the user's, as a
 // Mac's Graphite: without it a colour picked showed nowhere on Settings,
 // nor on most pages (CHENGJIAHEGOXIS on X, 「选中任意强调色没反应」).
 // --mark-fill is the ground under it, a segmented control's thumb or a

@@ -9,7 +9,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// The screen coming back, and only that, draws magpie's windows again: an
+// The screen coming back, and only that, draws eipgam's windows again: an
 // unlock, or the display on after it was off. Windows says the display is
 // on when the watch is registered; that is no change.
 func TestScreenBackFrom(t *testing.T) {

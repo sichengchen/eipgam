@@ -17,7 +17,7 @@ import (
 
 // Bundle is the library as a backup carries it to another computer: the
 // instruction sets and the one on, what each agent gets besides, the MCP
-// servers, the skills with their files and the subagents. What magpie
+// servers, the skills with their files and the subagents. What eipgam
 // wrote into each agent (Applied, the subagents' files among it) is this
 // computer's own and stays out. It is made the
 // same way every time — no times, everything in order — so two computers
@@ -29,41 +29,41 @@ type Bundle struct {
 	MCP          []*Server         `json:"mcp"`
 	Skills       []*CarriedSkill   `json:"skills"`
 	Icons        map[string]string `json:"icons,omitempty"`
-	// Subagents are nil in a bundle from a magpie before they were
+	// Subagents are nil in a bundle from a eipgam before they were
 	// carried, which knew nothing of this computer's: Put keeps them. Collect
 	// always sets it, empty too, so taking the last one out is carried.
 	Subagents *[]*Subagent `json:"subagents,omitempty"`
-	// Commands are nil in a bundle from a magpie before slash commands,
+	// Commands are nil in a bundle from a eipgam before slash commands,
 	// as Subagents are: Put keeps this computer's.
 	Commands *[]*Command `json:"commands,omitempty"`
-	// Hooks are nil in a bundle from a magpie before they were carried,
+	// Hooks are nil in a bundle from a eipgam before they were carried,
 	// as Subagents are: Put keeps this computer's. Applied.Hooks, the
-	// entries magpie wrote into each agent here, stays out.
+	// entries eipgam wrote into each agent here, stays out.
 	Hooks *[]*Hook `json:"hooks,omitempty"`
-	// Env is nil in a bundle from a magpie before variables were carried:
+	// Env is nil in a bundle from a eipgam before variables were carried:
 	// Put keeps this computer's. Applied.Env stays out. A backup made
 	// without keys carries the names with empty values (WithoutSecrets).
 	Env *[]*EnvVar `json:"env,omitempty"`
-	// Bili is billion-context's own billion-context.json, with magpie's
+	// Bili is billion-context's own billion-context.json, with eipgam's
 	// recipe at the default gateway address (carriedBili). It is nil when
 	// this computer has none or it can't be read, and in a bundle from a
-	// magpie before it was carried: Put keeps this computer's then.
+	// eipgam before it was carried: Put keeps this computer's then.
 	Bili *string `json:"bili,omitempty"`
 	// ClaudePlugins are the marketplaces and plugins installed in Claude
 	// Code itself (claude_plugins.go). nil when there are none, or they
-	// can't be read, and in a bundle from a magpie before them: Put adds
+	// can't be read, and in a bundle from a eipgam before them: Put adds
 	// nothing then. Put only adds, so one computer's never takes away
 	// another's.
 	ClaudePlugins *ClaudePlugins `json:"claudePlugins,omitempty"`
 	// Plugins are the library's own Claude plugins (plugin.go), each as a
 	// whole: its parts aren't among the skills, servers, hooks and
 	// subagents above, and each computer makes them again from it
-	// (plugin_carry.go). nil in a bundle from a magpie before they were
+	// (plugin_carry.go). nil in a bundle from a eipgam before they were
 	// carried: Put keeps this computer's then.
 	Plugins *[]*CarriedPlugin `json:"plugins,omitempty"`
-	// NoAgents says the Library was told by a magpie whose page shows no
+	// NoAgents says the Library was told by a eipgam whose page shows no
 	// agent (a container, a NAS, gateway mode; Shared): its skills and
-	// prompts are ticked for none there, and a magpie that takes them
+	// prompts are ticked for none there, and a eipgam that takes them
 	// gives one ticked for none to the agents a new one goes to (Borrow).
 	NoAgents bool `json:"noAgents,omitempty"`
 }
@@ -92,7 +92,7 @@ type CarriedSkill struct {
 	// Fetch is a skill carried as its source (skill_carry.go): the other
 	// computer fetches it from there, at the version Hash names (Commit
 	// too, for a git repository's), and Files are only what fit, standing
-	// in until then. A magpie from before this leaves it out and writes
+	// in until then. A eipgam from before this leaves it out and writes
 	// the files, as it did.
 	Fetch  bool   `json:"fetch,omitempty"`
 	Hash   string `json:"hash,omitempty"`
@@ -148,7 +148,7 @@ func Collect() (*Bundle, error) {
 		if l.ownedPart(s.Bundle) { // with its plugin (plugin_carry.go)
 			continue
 		}
-		// magpie's own by name, each computer's own binary; a server
+		// eipgam's own by name, each computer's own binary; a server
 		// started its own way here goes with the synced start (mcp_here.go)
 		c := *carried(carriedStart(s))
 		c.Agents = orNone(slices.Sorted(slices.Values(s.Agents)))
@@ -381,7 +381,7 @@ func (b *Bundle) check() error {
 				return fmt.Errorf("an empty subagent")
 			}
 			// the name is the file's in every agent's folder; the agents
-			// are left as they come, as a skill's are: one a newer magpie
+			// are left as they come, as a skill's are: one a newer eipgam
 			// gives subagents to is no target here and gets nothing
 			if !subagentNameRe.MatchString(s.Name) || slices.Contains(reservedSubagents, s.Name) {
 				return fmt.Errorf("the subagent name %q", s.Name)
@@ -451,7 +451,7 @@ func (b *Bundle) check() error {
 				return fmt.Errorf("an empty hook")
 			}
 			// the event and agents are left as they come: one a newer
-			// magpie knows and this one doesn't is a problem on the
+			// eipgam knows and this one doesn't is a problem on the
 			// agent it is given to (syncHooks), not a refused library
 			if err := checkName("hook", h.Name); err != nil {
 				return err
@@ -586,13 +586,13 @@ func filled(m, have map[string]string, secret func(string) bool) map[string]stri
 
 // Put makes the library what b says — its instructions, servers and
 // skills in place of the ones here — and writes it into the agents, which
-// keep whatever of theirs isn't magpie's. The skills are written aside
+// keep whatever of theirs isn't eipgam's. The skills are written aside
 // first, and only once all of them are there does any go in; a skill
 // replaced or taken out is kept with the backups, and so is an
 // instructions file that changes. A skill that comes linked to a folder
 // this computer has too is linked to it; else it comes as its files. A
 // skill whose files are as they are here is left alone. The subagents
-// replace the ones here too, unless b is from a magpie that didn't carry
+// replace the ones here too, unless b is from a eipgam that didn't carry
 // them.
 func Put(b *Bundle) (*Result, error) {
 	if err := b.check(); err != nil {
@@ -614,7 +614,7 @@ func Put(b *Bundle) (*Result, error) {
 		defer os.RemoveAll(stage)
 		// this computer's plugins' parts stand aside while the items are
 		// replaced, the bundle carrying none of them, and the plugins
-		// are put after (plugin_carry.go). A bundle from a magpie before
+		// are put after (plugin_carry.go). A bundle from a eipgam before
 		// plugins were carried has their parts as its own items, naming
 		// the other computer's folder: this computer's stay instead
 		held := l.holdPluginParts()
@@ -791,7 +791,7 @@ func Put(b *Bundle) (*Result, error) {
 
 		l.putServers(b.MCP)
 		l.Icons = maps.Clone(b.Icons)
-		// the agents are written on the sync change runs: what magpie
+		// the agents are written on the sync change runs: what eipgam
 		// wrote here (Applied) decides, file by file, what is its own
 		if b.Subagents != nil {
 			subs := []*Subagent{}
@@ -820,7 +820,7 @@ func Put(b *Bundle) (*Result, error) {
 			l.Commands = cmds
 		}
 		// the same for hooks: Applied.Hooks decides, entry by entry,
-		// what magpie takes out of each agent's file here
+		// what eipgam takes out of each agent's file here
 		if b.Hooks != nil {
 			hooks := []*Hook{}
 			for _, h := range *b.Hooks {

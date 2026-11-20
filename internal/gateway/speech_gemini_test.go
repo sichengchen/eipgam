@@ -15,10 +15,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
 )
 
 // geminiPCM is speech as Gemini's TTS gives it: 16-bit PCM, bytes no text
@@ -68,7 +68,7 @@ func wavOf(t *testing.T, b []byte) ([]byte, int) {
 // 24 kHz WAV, and the call is in the usage ledger with Gemini's counts.
 func TestGeminiSpeechOnVertex(t *testing.T) {
 	s, v := vertexSpeaker(t)
-	code, h, got := postSpeech(t, s, "/v1/audio/speech", `{"model":"google-vertex/gemini-2.5-flash-preview-tts","input":"Hello from the magpie.","voice":"coral","instructions":"Say cheerfully","speed":1.25}`)
+	code, h, got := postSpeech(t, s, "/v1/audio/speech", `{"model":"google-vertex/gemini-2.5-flash-preview-tts","input":"Hello from the eipgam.","voice":"coral","instructions":"Say cheerfully","speed":1.25}`)
 	if code != 200 || h.Get("Content-Type") != "audio/wav" {
 		t.Fatalf("%d %q %s", code, h.Get("Content-Type"), got)
 	}
@@ -87,7 +87,7 @@ func TestGeminiSpeechOnVertex(t *testing.T) {
 	if g := gjson.GetBytes(b, "generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName").String(); g != "Sulafat" {
 		t.Fatalf("voice %q: %s", g, b)
 	}
-	if g := gjson.GetBytes(b, "contents.0.parts.0.text").String(); g != "Say cheerfully: Hello from the magpie." || gjson.GetBytes(b, "contents.0.role").String() != "user" {
+	if g := gjson.GetBytes(b, "contents.0.parts.0.text").String(); g != "Say cheerfully: Hello from the eipgam." || gjson.GetBytes(b, "contents.0.role").String() != "user" {
 		t.Fatalf("contents %s", b)
 	}
 	if bytes.Contains(b, []byte("speed")) || bytes.Contains(b, []byte(`"model"`)) {
@@ -105,7 +105,7 @@ func TestGeminiSpeechOnVertex(t *testing.T) {
 	}
 }
 
-// response_format pcm is Gemini's PCM as it came; a format magpie has no
+// response_format pcm is Gemini's PCM as it came; a format eipgam has no
 // encoder for (mp3, OpenAI's default, opus…) is a WAV, said so in its
 // Content-Type; one OpenAI has none of is turned away, as is a stream,
 // and neither reaches Google. The voice is a Gemini one by its name in any

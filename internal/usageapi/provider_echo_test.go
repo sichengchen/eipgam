@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // TestLedgerSaysItsOneProvider: a page filtered to one provider says which,

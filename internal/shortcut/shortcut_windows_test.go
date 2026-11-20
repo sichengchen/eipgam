@@ -13,8 +13,8 @@ import (
 func TestWrite(t *testing.T) {
 	dir := t.TempDir()
 	lnk := filepath.Join(dir, Name+".lnk")
-	exe := filepath.Join(dir, "a", "magpie.exe")
-	moved := filepath.Join(dir, "b", "magpie.exe")
+	exe := filepath.Join(dir, "a", "eipgam.exe")
+	moved := filepath.Join(dir, "b", "eipgam.exe")
 	for _, f := range []string{exe, moved} {
 		os.MkdirAll(filepath.Dir(f), 0o755)
 		os.WriteFile(f, []byte("MZ"), 0o755)
@@ -36,20 +36,20 @@ func TestWrite(t *testing.T) {
 	}
 }
 
-// magpie is in Installed apps (Jevik_AI on X deleted it by hand, which
+// eipgam is in Installed apps (Jevik_AI on X deleted it by hand, which
 // runs no code, and Codex kept pointing at a gateway that was gone): the
 // entry opens this exe's Uninstall, follows an exe that moved, goes with
-// Remove, and one another magpie's exe still holds stays.
+// Remove, and one another eipgam's exe still holds stays.
 func TestInstalledAppsEntry(t *testing.T) {
 	was, wasApp := uninstallKey, appPath
-	uninstallKey = `Software\magpie-test\` + t.Name() + `\Uninstall\magpie`
-	appPath = `Software\magpie-test\` + t.Name() + `\App Paths\magpie.exe`
+	uninstallKey = `Software\eipgam-test\` + t.Name() + `\Uninstall\eipgam`
+	appPath = `Software\eipgam-test\` + t.Name() + `\App Paths\eipgam.exe`
 	t.Cleanup(func() {
 		registry.DeleteKey(registry.CURRENT_USER, uninstallKey)
 		registry.DeleteKey(registry.CURRENT_USER, appPath)
-		registry.DeleteKey(registry.CURRENT_USER, `Software\magpie-test\`+t.Name()+`\Uninstall`)
-		registry.DeleteKey(registry.CURRENT_USER, `Software\magpie-test\`+t.Name()+`\App Paths`)
-		registry.DeleteKey(registry.CURRENT_USER, `Software\magpie-test\`+t.Name())
+		registry.DeleteKey(registry.CURRENT_USER, `Software\eipgam-test\`+t.Name()+`\Uninstall`)
+		registry.DeleteKey(registry.CURRENT_USER, `Software\eipgam-test\`+t.Name()+`\App Paths`)
+		registry.DeleteKey(registry.CURRENT_USER, `Software\eipgam-test\`+t.Name())
 		uninstallKey, appPath = was, wasApp
 	})
 	read := func(name string) string {
@@ -62,8 +62,8 @@ func TestInstalledAppsEntry(t *testing.T) {
 		return v
 	}
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "a", "magpie.exe")
-	other := filepath.Join(dir, "b", "magpie.exe")
+	exe := filepath.Join(dir, "a", "eipgam.exe")
+	other := filepath.Join(dir, "b", "eipgam.exe")
 	for _, f := range []string{exe, other} {
 		os.MkdirAll(filepath.Dir(f), 0o755)
 		os.WriteFile(f, []byte("MZ"), 0o755)
@@ -76,12 +76,12 @@ func TestInstalledAppsEntry(t *testing.T) {
 	if read("DisplayName") != Name || read("InstallLocation") != filepath.Dir(exe) || read("DisplayIcon") != exe+",0" {
 		t.Fatalf("entry: %q %q %q", read("DisplayName"), read("InstallLocation"), read("DisplayIcon"))
 	}
-	// another magpie, still there, keeps its entry
+	// another eipgam, still there, keeps its entry
 	if err := unregisterAppPath(other); err != nil {
 		t.Fatal(err)
 	}
 	if read("UninstallString") == "" {
-		t.Fatal("removed another magpie's entry")
+		t.Fatal("removed another eipgam's entry")
 	}
 	if err := unregisterAppPath(exe); err != nil {
 		t.Fatal(err)
@@ -89,7 +89,7 @@ func TestInstalledAppsEntry(t *testing.T) {
 	if read("UninstallString") != "" {
 		t.Fatal("the entry stayed after Remove")
 	}
-	// one whose exe is gone goes with any magpie's uninstall
+	// one whose exe is gone goes with any eipgam's uninstall
 	registerUninstall(other)
 	os.Remove(other)
 	if err := unregisterUninstall(exe); err != nil {

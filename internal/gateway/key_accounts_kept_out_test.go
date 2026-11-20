@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // LeiWang_2000 on X: a gateway key may keep some accounts out instead of
@@ -24,7 +24,7 @@ import (
 // after the key was saved is one it uses, and one kept out is never
 // asked, on every route that spends an account: chat, Anthropic's
 // messages, responses, count_tokens, /v1/models, images, videos, System
-// One, and a ChatGPT account's turn on magpie's endpoint and on Codex's.
+// One, and a ChatGPT account's turn on eipgam's endpoint and on Codex's.
 
 // keptOutUp stands in for a keyed provider on every route, noting the key
 // each request came with.
@@ -126,8 +126,8 @@ func TestGatewayKeyKeptOutAccountsKeyedRoutes(t *testing.T) {
 		{"messages", "/v1/messages", `{"model":"relay/m","max_tokens":16,"messages":[{"role":"user","content":"hi"}]}`, false},
 		{"responses", "/v1/responses", `{"model":"relay/m","input":"hi"}`, false},
 		{"count_tokens", "/v1/messages/count_tokens", `{"model":"relay/m","messages":[{"role":"user","content":"hi"}]}`, true},
-		{"images", "/v1/images/generations", `{"model":"relay/gpt-image-1","prompt":"a magpie"}`, false},
-		{"videos", "/v1/videos", `{"model":"office/grok-imagine-video","prompt":"a magpie"}`, false},
+		{"images", "/v1/images/generations", `{"model":"relay/gpt-image-1","prompt":"a eipgam"}`, false},
+		{"videos", "/v1/videos", `{"model":"office/grok-imagine-video","prompt":"a eipgam"}`, false},
 		{"systemone", "/v1/systemone", `{"model":"jev/jev-latest","state":{"message":"hi"},"questions":{"intent":{"type":"choice"}}}`, false},
 	}
 	listed := func() bool {
@@ -177,7 +177,7 @@ func TestGatewayKeyKeptOutAccountsKeyedRoutes(t *testing.T) {
 	}
 }
 
-// A ChatGPT account kept out is never asked, on magpie's endpoint and on
+// A ChatGPT account kept out is never asked, on eipgam's endpoint and on
 // Codex's, and one signed in after the key was saved serves.
 func TestGatewayKeyKeptOutCodexAccounts(t *testing.T) {
 	heads := twoAccounts(t)
@@ -237,8 +237,8 @@ func TestGatewayKeyKeptOutCodexAccounts(t *testing.T) {
 	}
 }
 
-// codexSignInLater adds a ChatGPT account to magpie's saved sign-ins, as
-// signing in from magpie does, after codexSignedIn.
+// codexSignInLater adds a ChatGPT account to eipgam's saved sign-ins, as
+// signing in from eipgam does, after codexSignedIn.
 func codexSignInLater(t *testing.T, email, acct string) {
 	t.Helper()
 	claims := func(m map[string]any) string {

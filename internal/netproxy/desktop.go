@@ -10,7 +10,7 @@ import (
 // app's environment: GNOME (and Cinnamon, MATE, Budgie, which take its
 // settings) in gsettings, KDE in kioslaverc. Clash Verge and its kind set
 // both when their system proxy is turned on, and an app opened from the
-// desktop's menu has no *_PROXY, so magpie's Auto found none and went
+// desktop's menu has no *_PROXY, so eipgam's Auto found none and went
 // direct (#4147).
 
 // parseGsettings reads `gsettings list-recursively org.gnome.system.proxy`:
@@ -48,7 +48,7 @@ func parseGsettings(out string) Proxy {
 
 // parseKioslaverc reads KDE's kioslaverc: a proxy only with ProxyType=1,
 // set by hand (2 is a PAC, 3 finds one on the network, 4 is *_PROXY,
-// which magpie reads anyway). KDE writes an address with its port after a
+// which eipgam reads anyway). KDE writes an address with its port after a
 // space ("http://127.0.0.1 7897"), and a SOCKS one as socks://.
 func parseKioslaverc(conf string) Proxy {
 	kv := map[string]string{}

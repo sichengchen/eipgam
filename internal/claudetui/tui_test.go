@@ -21,12 +21,12 @@ import (
 	"unicode/utf8"
 )
 
-// The test binary is also the shim (MAGPIE_TUI_TEST=shim) and a fake
-// Claude Code (MAGPIE_TUI_TEST=claude): interactive, it shows a prompt,
+// The test binary is also the shim (EIPGAM_TUI_TEST=shim) and a fake
+// Claude Code (EIPGAM_TUI_TEST=claude): interactive, it shows a prompt,
 // writes each line typed into its transcript as a turn answered "echo:
 // <line>"; with -p it answers each stream-json line with a -p result.
 func TestMain(m *testing.M) {
-	switch os.Getenv("MAGPIE_TUI_TEST") {
+	switch os.Getenv("EIPGAM_TUI_TEST") {
 	case "shim":
 		// FAKE_IMAGE_PAD: imagePad, as another system's
 		if pad := os.Getenv("FAKE_IMAGE_PAD"); pad != "" {
@@ -338,7 +338,7 @@ func fakeClaude(args []string) {
 			_, _ = tapped.WriteString(`{"tap":"on"}` + "\n")
 		}
 	}
-	// FAKE_MCP_DELAY: magpie's tool server is listed that long after the
+	// FAKE_MCP_DELAY: eipgam's tool server is listed that long after the
 	// prompt shows, as Claude Code connects its MCP servers beside it; a
 	// message sent before then is answered without the tools
 	listed := mcpListed(args)
@@ -467,7 +467,7 @@ func fakeClaude(args []string) {
 		mu.Unlock()
 		if listed != "" {
 			if _, err := os.Stat(listed); err != nil {
-				line += " (without magpie's tools)"
+				line += " (without eipgam's tools)"
 			}
 		}
 		if tapped != nil {
@@ -493,7 +493,7 @@ func fakeClaude(args []string) {
 			// Claude Code drawn again before a slow /usage's panel: its
 			// banner and folder, as ikunbots' read told them (v0.1.2738)
 			if after := os.Getenv("FAKE_USAGE_BANNER"); after != "" {
-				fmt.Print("\x1b[2J\x1b[H ▐▛███▜▌   Claude Code v2.1.316\r\n▝▜█████▛▘  Opus 4.8 · Claude Pro\r\n  ▘▘ ▝▝    /private/var/folders/3d/qhyx6qps/T/magpie-claude-work-501\r\n\r\n" +
+				fmt.Print("\x1b[2J\x1b[H ▐▛███▜▌   Claude Code v2.1.316\r\n▝▜█████▛▘  Opus 4.8 · Claude Pro\r\n  ▘▘ ▝▝    /private/var/folders/3d/qhyx6qps/T/eipgam-claude-work-501\r\n\r\n" +
 					strings.Repeat("─", 80) + "\r\n❯ \r\n" + strings.Repeat("─", 80) + "\r\n")
 				ms, err := strconv.Atoi(after)
 				if err != nil {
@@ -589,7 +589,7 @@ func runShim(t *testing.T, env []string, pargs []string, lines []string, want in
 	cmd := exec.Command(exe, pargs...)
 	tmp := filepath.Join(home, "tmp")
 	_ = os.Mkdir(tmp, 0o700)
-	cmd.Env = append(os.Environ(), "MAGPIE_TUI_TEST=shim", "HOME="+home, "XDG_CACHE_HOME="+filepath.Join(home, "cache"), "LOCALAPPDATA="+filepath.Join(home, "cache"),
+	cmd.Env = append(os.Environ(), "EIPGAM_TUI_TEST=shim", "HOME="+home, "XDG_CACHE_HOME="+filepath.Join(home, "cache"), "LOCALAPPDATA="+filepath.Join(home, "cache"),
 		"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp, "CLAUDE_CONFIG_DIR="+cfg)
 	cmd.Env = append(cmd.Env, env...)
 	stdin, _ := cmd.StdinPipe()
@@ -602,7 +602,7 @@ func runShim(t *testing.T, env []string, pargs []string, lines []string, want in
 		_ = cmd.Process.Kill()
 		_ = cmd.Wait()
 	})
-	t.Setenv("MAGPIE_TUI_TEST_CFG", cfg)
+	t.Setenv("EIPGAM_TUI_TEST_CFG", cfg)
 	for _, l := range lines {
 		// a line after "raw:" is said as it is
 		if raw, ok := strings.CutPrefix(l, "raw:"); ok {
@@ -684,14 +684,14 @@ func TestShimTurnsInteractive(t *testing.T) {
 	if !strings.Contains(texts[1], `\n/help"`) {
 		t.Fatalf("the second turn said %s", texts[1])
 	}
-	args, _ := os.ReadFile(filepath.Join(os.Getenv("MAGPIE_TUI_TEST_CFG"), "args"))
+	args, _ := os.ReadFile(filepath.Join(os.Getenv("EIPGAM_TUI_TEST_CFG"), "args"))
 	got := strings.Split(string(args), "\n")
 	for _, no := range []string{"-p", "--dangerously-skip-permissions", "--output-format", "--verbose", "--thinking-display"} {
 		if slices.Contains(got, no) {
 			t.Errorf("the interactive Claude Code was given %s: %q", no, got)
 		}
 	}
-	for _, yes := range []string{"--no-chrome", "mcp__magpie,WebSearch", "--session-id", "high"} {
+	for _, yes := range []string{"--no-chrome", "mcp__eipgam,WebSearch", "--session-id", "high"} {
 		if !slices.Contains(got, yes) {
 			t.Errorf("the interactive Claude Code wasn't given %s: %q", yes, got)
 		}
@@ -728,7 +728,7 @@ func TestShimPastesImages(t *testing.T) {
 	}
 	// Claude Code has them once their message is in the transcript: the
 	// files are gone while the helper goes on
-	left, _ := filepath.Glob(filepath.Join(filepath.Dir(os.Getenv("MAGPIE_TUI_TEST_CFG")), "tmp", imagesPrefix+"*"))
+	left, _ := filepath.Glob(filepath.Join(filepath.Dir(os.Getenv("EIPGAM_TUI_TEST_CFG")), "tmp", imagesPrefix+"*"))
 	if len(left) > 0 {
 		t.Fatalf("the images are left after their message: %v", left)
 	}
@@ -801,8 +801,8 @@ func TestShimPaddedImageTakenWithoutMarks(t *testing.T) {
 func TestImagePasteWindowsLength(t *testing.T) {
 	for _, path := range []string{
 		`C:\x\image-1.png`,
-		`C:\Users\administrator\AppData\Local\Temp\magpie-claude-images-123456-987654321\image-12.png`,
-		`C:\Users\张三丰\AppData\Local\Temp\magpie-claude-images-123456-987654321\image-1.png`,
+		`C:\Users\administrator\AppData\Local\Temp\eipgam-claude-images-123456-987654321\image-12.png`,
+		`C:\Users\张三丰\AppData\Local\Temp\eipgam-claude-images-123456-987654321\image-1.png`,
 	} {
 		w := imagePaste(path, 900)
 		if n := utf8.RuneCountInString(w); n <= 800 || len(w) >= 1024 || strings.TrimRight(w, " ") != path || strings.Contains(w, "\x1b") {
@@ -949,7 +949,7 @@ func runEndsTold(t *testing.T, home string, env []string, line string) (out, std
 	tmp := filepath.Join(home, "tmp")
 	_ = os.Mkdir(tmp, 0o700)
 	cmd := exec.Command(exe, append([]string{fakePath(t)}, pArgs...)...)
-	cmd.Env = append(os.Environ(), "MAGPIE_TUI_TEST=shim", "HOME="+home, "XDG_CACHE_HOME="+filepath.Join(home, "cache"), "LOCALAPPDATA="+filepath.Join(home, "cache"),
+	cmd.Env = append(os.Environ(), "EIPGAM_TUI_TEST=shim", "HOME="+home, "XDG_CACHE_HOME="+filepath.Join(home, "cache"), "LOCALAPPDATA="+filepath.Join(home, "cache"),
 		"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp, "CLAUDE_CONFIG_DIR="+cfg)
 	cmd.Env = append(cmd.Env, env...)
 	stdin, _ := cmd.StdinPipe()
@@ -1002,7 +1002,7 @@ func TestShimNeverPrints(t *testing.T) {
 		// (#5042), said at once, not waited out
 		{"bypass disclaimer left to the user", "asks to accept", []string{"FAKE_BYPASS=1"}},
 		// a folder trusted for the run is not the disclaimer accepted:
-		// the bridge trusts magpie's folder in the user's own account too
+		// the bridge trusts eipgam's folder in the user's own account too
 		{"bypass disclaimer with the folder trusted", "asks to accept", []string{"FAKE_BYPASS=1", TrustEnv + "=1"}},
 		// at once, not after readyWait: runEnds waits 30s (#4504)
 		{"asks to sign in", "sign", []string{"FAKE_LOGIN=1"}},
@@ -1027,20 +1027,20 @@ func TestShimNeverPrints(t *testing.T) {
 }
 
 // The first message waits for Claude Code to have listed the tools of
-// magpie's tool server, which it connects as its prompt shows: sent at
+// eipgam's tool server, which it connects as its prompt shows: sent at
 // the prompt, it was answered without the agent's tools (MinhuWang on X,
 // a pi agent, the MCP server slow to load).
 func TestShimFirstMessageWaitsForTools(t *testing.T) {
 	listed := filepath.Join(t.TempDir(), "listed")
 	cfg, _ := json.Marshal(map[string]any{"mcpServers": map[string]any{
-		"magpie": map[string]any{"command": "magpie", "args": []string{MCPCommand, "callback", "tools.json", listed}},
+		"eipgam": map[string]any{"command": "eipgam", "args": []string{MCPCommand, "callback", "tools.json", listed}},
 	}})
 	args := slices.Clone(pArgs)
 	args[slices.Index(args, "--mcp-config")+1] = string(cfg)
 	start := time.Now()
 	out := runShim(t, []string{"FAKE_MCP_DELAY=2s"}, append([]string{fakePath(t)}, args...), []string{"hello"}, 3)
 	b, _ := json.Marshal(out[1]["message"])
-	if out[1]["type"] != "assistant" || !strings.Contains(string(b), "echo: hello") || strings.Contains(string(b), "without magpie's tools") {
+	if out[1]["type"] != "assistant" || !strings.Contains(string(b), "echo: hello") || strings.Contains(string(b), "without eipgam's tools") {
 		t.Fatalf("the first turn said %s", b)
 	}
 	if d := time.Since(start); d < 2*time.Second {
@@ -1099,7 +1099,7 @@ func TestShimEndsAtItsCallersDeadline(t *testing.T) {
 		// FAKE_USAGE names no panel: nothing is drawn for /usage
 		{"no /usage panel", `{"type":"command","command":"/usage"}`, "hadn't drawn /usage's panel in the", "", []string{"FAKE_USAGE=" + filepath.Join(t.TempDir(), "none")}},
 		// the banner drawn again and no panel after it: never told as one
-		{"banner, no /usage panel", `{"type":"command","command":"/usage"}`, "hadn't drawn /usage's panel in the", "magpie-claude-work-501", []string{"FAKE_USAGE_BANNER=never"}},
+		{"banner, no /usage panel", `{"type":"command","command":"/usage"}`, "hadn't drawn /usage's panel in the", "eipgam-claude-work-501", []string{"FAKE_USAGE_BANNER=never"}},
 		// Claude Code up only after the first deadline, as on a loaded
 		// machine: run again with more time, never failed for it
 		{"trust unanswered, slow to start", `{"type":"user","message":{"role":"user","content":"hello"}}`, "asked whether to trust " + wd + ", not answered in the", "trust this folder", []string{"FAKE_TRUST=deaf", TrustEnv + "=1", "FAKE_SLOW_START=3500ms"}},
@@ -1169,11 +1169,11 @@ func TestShimTrustsWhenTold(t *testing.T) {
 	}
 }
 
-// The Bypass Permissions disclaimer, drawn where the claude magpie spawns
+// The Bypass Permissions disclaimer, drawn where the claude eipgam spawns
 // runs with --dangerously-skip-permissions (the user's claude may be a
 // wrapper that adds it, #5042) and the config folder hasn't accepted it
 // once, is told yes when BypassEnv says so: only in an account folder of
-// magpie's (claudeBypassEnv), since Claude Code records the acceptance in
+// eipgam's (claudeBypassEnv), since Claude Code records the acceptance in
 // that folder's settings.json and the next run is shown none of it.
 func TestShimAcceptsBypassDisclaimer(t *testing.T) {
 	out := runShim(t, []string{"FAKE_BYPASS=1", BypassEnv + "=1"}, append([]string{fakePath(t)}, pArgs...), []string{"hello"}, 3)
@@ -1245,7 +1245,7 @@ func TestTranslatorAPIError(t *testing.T) {
 func TestTranslatorTellsTheRowsUUID(t *testing.T) {
 	l := &lines{}
 	tr := newTranslator(l)
-	tr.row([]byte(`{"type":"assistant","uuid":"row-1","message":{"id":"m","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_1","name":"mcp__magpie__Read","input":{}}]}}`))
+	tr.row([]byte(`{"type":"assistant","uuid":"row-1","message":{"id":"m","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_1","name":"mcp__eipgam__Read","input":{}}]}}`))
 	if len(l.out) != 1 || l.out[0]["uuid"] != "row-1" {
 		t.Fatalf("got %v", l.out)
 	}
@@ -1255,7 +1255,7 @@ func TestTranslatorTellsTheRowsUUID(t *testing.T) {
 // and is handed TERM through WSLENV, the gateway's own names kept.
 func TestShimInWSL(t *testing.T) {
 	s := &shim{wsl: &WSL{Args: []string{"-d", "Ubuntu"}, Mount: "/mnt/", Projects: `\\wsl$\Ubuntu\home\me\.claude\projects`}}
-	if got := s.path(`C:\Users\me\AppData\Local\Temp\magpie-images-1\1.png`); got != "/mnt/c/Users/me/AppData/Local/Temp/magpie-images-1/1.png" {
+	if got := s.path(`C:\Users\me\AppData\Local\Temp\eipgam-images-1\1.png`); got != "/mnt/c/Users/me/AppData/Local/Temp/eipgam-images-1/1.png" {
 		t.Fatalf("path %q", got)
 	}
 	if got := (&shim{}).path("/tmp/a.png"); got != "/tmp/a.png" {
@@ -1363,7 +1363,7 @@ func usagePanel200(t *testing.T, rows ...string) string {
 // panel draws no window, Anthropic leaving each out until the request that
 // starts it, at most the plan's credit. It was told as the panel's words,
 // and Claude Code's banner above them was the card's error ("Claude Code's
-// usage showed no usage figures: …magpie-claude-work…", koohoko5924,
+// usage showed no usage figures: …eipgam-claude-work…", koohoko5924,
 // v0.1.3057). It is told as no window started.
 func TestShimReadsUsageWithNoWindow(t *testing.T) {
 	for name, rows := range map[string][]string{
@@ -1404,7 +1404,7 @@ func TestShimToldWhyUsageFailed(t *testing.T) {
 }
 
 func TestUsageWhy(t *testing.T) {
-	banner := "▐▛███▜▌ Claude Code v2.1.316 ▘▘ ▝▝ /private/var/folders/3d/x/T/magpie-claude-work-501 ──── ❯ /usage ──── "
+	banner := "▐▛███▜▌ Claude Code v2.1.316 ▘▘ ▝▝ /private/var/folders/3d/x/T/eipgam-claude-work-501 ──── ❯ /usage ──── "
 	for screen, want := range map[string]string{
 		banner + "Settings Status Config Usage Stats Session Total cost: $0.0000 Usage: 0 input, 0 output, 0 cache read, 0 cache write Error: Failed to load usage data r to retry · Esc to cancel":            "Error: Failed to load usage data",
 		banner + "Settings Status Config Usage Stats Session Total cost: $1.20 Total code changes: 403 lines added, 2 lines removed Usage: 9 input, 0 output, 0 cache read, 0 cache write Loading usage data…": "Settings Status Config Usage Stats Session Loading usage data…",
@@ -1428,7 +1428,7 @@ func TestUsageNoWindow(t *testing.T) {
 		tab + "Refreshing…":                                               false,
 		tab + "Spend limit $50 Esc to cancel":                             false,
 		"Settings Usage /usage is only available for subscription plans.": false,
-		"▐▛███▜▌ Claude Code v2.1.316 /private/var/folders/3d/x/T/magpie-claude-work-501": false,
+		"▐▛███▜▌ Claude Code v2.1.316 /private/var/folders/3d/x/T/eipgam-claude-work-501": false,
 	} {
 		if got := usageNoWindow(screen); got != want {
 			t.Errorf("usageNoWindow(%q) = %v, want %v", screen, got, want)
@@ -1458,7 +1458,7 @@ func TestUsageDrawn(t *testing.T) {
 		t.Fatal("2.1.316's panel isn't taken as drawn")
 	}
 	for screen, want := range map[string]bool{
-		"▐▛███▜▌ Claude Code v2.1.316 ▘▘ ▝▝ /private/var/folders/3d/x/T/magpie-claude-work-501 ──── ❯ ────": false,
+		"▐▛███▜▌ Claude Code v2.1.316 ▘▘ ▝▝ /private/var/folders/3d/x/T/eipgam-claude-work-501 ──── ❯ ────": false,
 		"Settings Status Config Usage Stats Loading usage…":               false,
 		"Settings Usage /usage is only available for subscription plans.": true,
 	} {

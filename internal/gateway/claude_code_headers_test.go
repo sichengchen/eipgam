@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A relay that serves only Claude Code (#179: packy's "only accessible via
 // the official Claude CLI") gets Claude Code's own headers and body as it
-// sent them, the provider's key in place of magpie's
+// sent them, the provider's key in place of eipgam's
 func TestClaudeCodeHeadersReachAnthropicRelay(t *testing.T) {
 	f := &fake{t: t, ctype: "application/json", reply: `{"id":"msg","type":"message","content":[]}`}
 	up := setup(t, provider.Anthropic, f)
@@ -69,13 +69,13 @@ func TestClaudeCodeHeadersReachAnthropicRelay(t *testing.T) {
 		}
 	}
 
-	// a provider with no key of its own still never sees magpie's
+	// a provider with no key of its own still never sees eipgam's
 	p, _ := provider.Find("fake")
 	p.Key = ""
 	provider.Save(*p)
 	send("/v1/messages", claude)
 	if a, k := f.head.Get("Authorization"), f.head.Get("X-Api-Key"); a != "" || k != "" {
-		t.Errorf("magpie's key leaked: %q %q", a, k)
+		t.Errorf("eipgam's key leaked: %q %q", a, k)
 	}
 	if f.head.Get("X-App") != "cli" {
 		t.Errorf("x-app: %v", f.head)

@@ -21,11 +21,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // The gateway makes videos: POST /v1/videos, GET /v1/videos/{id} and
@@ -39,9 +39,9 @@ import (
 // to: <cli-chat-proxy.grok.com/v1>/videos/generations starts one and answers
 // with its request_id.
 //
-// Another magpie's videos (a Remote magpie's, #545) are asked of it, at its
+// Another eipgam's videos (a Remote eipgam's, #545) are asked of it, at its
 // own videos API: its id for one goes, encoded, in the id given here, and
-// what it answers comes back with this magpie's id and name for the model.
+// what it answers comes back with this eipgam's id and name for the model.
 // A provider set up with a base URL whose own model list marks a model
 // "kind": "video" (#1446) is asked the same way, at the OpenAI-shaped
 // videos API under its base, on the key that started the video.
@@ -64,7 +64,7 @@ const maxVideoBytes = 512 << 20
 const videoTimeout = 5 * time.Minute
 
 // Videomakers are the models a provider can make videos with: a Grok
-// subscription's, another magpie's, a preset plan's models when magpie
+// subscription's, another eipgam's, a preset plan's models when eipgam
 // implements that vendor's video API, a MiniMax API key's H3 models
 // (video_minimax.go), and those a provider's own model list marks as video
 // models (customVideomakers).
@@ -111,11 +111,11 @@ func OfferedVideomakers(p provider.Provider) []catalog.Model {
 }
 
 // customVideomakers are the video models of a provider set up with a base
-// URL — not a subscription's account, not another magpie, not a preset plan
-// whose own video API magpie speaks — that its fetched model list marks
+// URL — not a subscription's account, not another eipgam, not a preset plan
+// whose own video API eipgam speaks — that its fetched model list marks
 // "kind": "video" (catalog.LiveVideomakers, #1446), or the user said make
 // videos (provider.SetModelKind, #1399). They are asked at the
-// OpenAI-shaped videos API under its base, as another magpie's are. A
+// OpenAI-shaped videos API under its base, as another eipgam's are. A
 // model's name alone makes none of them one: a list that doesn't say so,
 // and a user who doesn't, leave the provider making no videos. A plugin's
 // are the models it says give video (capabilities.output.video), asked
@@ -152,7 +152,7 @@ func customVideomakersOf(p provider.Provider, avail func() []catalog.Model) []ca
 	return slices.DeleteFunc(out, func(m catalog.Model) bool { return p.ModelKind(m.ID) == provider.KindImage })
 }
 
-// videoBase is the root of the OpenAI-shaped videos API of another magpie
+// videoBase is the root of the OpenAI-shaped videos API of another eipgam
 // or a provider set up with a base URL: its Chat base, or a Responses-only
 // relay's Responses base, under which it serves the images API too; a
 // plugin's fetch whatever API its chat is on (Provider.OpenAIBase).
@@ -234,12 +234,12 @@ func Videomaker() string {
 }
 
 // VideomakerMissing is the model Settings › Models › Images › Video generation
-// names when magpie can't make videos with it any more, so that
+// names when eipgam can't make videos with it any more, so that
 // AutoVideomaker's makes them in its place, as DrawerMissing is Image
 // generation's. "" when none is named or it resolves.
 func VideomakerMissing() string { return VideomakerMissingOf(settings.Shared().VideoGen) }
 
-// VideomakerMissingOf is v, a Video generation pick, when magpie can't
+// VideomakerMissingOf is v, a Video generation pick, when eipgam can't
 // make videos with it: its provider is gone, off or decide-only, or no
 // longer has it among its Videomakers (a custom provider's model the user
 // no longer marks a video model, #1399). A routing group resolves while
@@ -323,7 +323,7 @@ func bareVideomaker(name string) (provider.Provider, string, bool) {
 		}
 	}
 	// any grok-imagine-video*, as videosCreate takes with the provider
-	// named: the vendor's newer ones work before magpie lists them (#1857)
+	// named: the vendor's newer ones work before eipgam lists them (#1857)
 	for _, p := range provider.All() {
 		if p.On() && !p.DecideOnly() && drawsGrok(p) && strings.HasPrefix(name, grokVideoFamily) {
 			return p, name, true
@@ -341,7 +341,7 @@ type filming struct {
 	Start                        *picture  // the first frame to animate
 	End                          *picture  // the last frame, where the video ends (MiniMax)
 	References                   []picture // images the video draws its subjects from
-	// the request's other fields, which magpie doesn't read: a provider's
+	// the request's other fields, which eipgam doesn't read: a provider's
 	// own videos API takes them as they came (Agnes's mode, aspect_ratio;
 	// #1399, shen-joe: "mode 不能为空")
 	Extra map[string]any
@@ -349,7 +349,7 @@ type filming struct {
 	Form bool
 }
 
-// filmingRead are the fields of a videos request magpie reads itself.
+// filmingRead are the fields of a videos request eipgam reads itself.
 var filmingRead = []string{"model", "prompt", "seconds", "size", "input_reference", "last_frame", "reference_images", "reference_images[]"}
 
 // readFilming reads a videos request: JSON, or the multipart form OpenAI's
@@ -676,7 +676,7 @@ func videoObject(id, model string, started time.Time, st videoState, f filming) 
 func videoMaker(id string) (p provider.Provider, vendorID string, started time.Time, err error) {
 	pid, vendorID, started, by, ok := parseVideoID(id)
 	if !ok {
-		return p, "", started, fmt.Errorf("%q isn't the id of a video magpie is making", id)
+		return p, "", started, fmt.Errorf("%q isn't the id of a video eipgam is making", id)
 	}
 	found, ferr := provider.Find(pid)
 	if ferr == nil && (filmsMiniMax(*found) || filmsDashScope(*found)) {
@@ -712,19 +712,19 @@ func videoMaker(id string) (p provider.Provider, vendorID string, started time.T
 	return *found, vendorID, started, nil
 }
 
-// remoteVideoID is the id of a video another magpie (p) is making, by its
+// remoteVideoID is the id of a video another eipgam (p) is making, by its
 // id there: that has dots in it, so it goes in base64.
 func remoteVideoID(p provider.Provider, theirs string, t time.Time) string {
 	return videoID(p, base64.RawURLEncoding.EncodeToString([]byte(theirs)), t)
 }
 
-// theirVideoID is the other magpie's id of a video, from remoteVideoID's.
+// theirVideoID is the other eipgam's id of a video, from remoteVideoID's.
 func theirVideoID(vendorID string) string {
 	b, _ := base64.RawURLEncoding.DecodeString(vendorID)
 	return string(b)
 }
 
-// remoteVideoBody is f as another magpie's videos API takes it: OpenAI's,
+// remoteVideoBody is f as another eipgam's videos API takes it: OpenAI's,
 // the images as data URLs.
 func remoteVideoBody(model string, f filming) []byte {
 	req := map[string]any{}
@@ -755,7 +755,7 @@ func remoteVideoBody(model string, f filming) []byte {
 	return b
 }
 
-// asOurs is another magpie's video object with this magpie's id for it and
+// asOurs is another eipgam's video object with this eipgam's id for it and
 // name for its model.
 func asOurs(b []byte, p provider.Provider, id string) (map[string]any, error) {
 	var obj map[string]any
@@ -770,7 +770,7 @@ func asOurs(b []byte, p provider.Provider, id string) (map[string]any, error) {
 }
 
 // filmsOpenAI is whether p makes videos at an OpenAI-shaped videos API:
-// another magpie, or a provider whose model list marks video models, but
+// another eipgam, or a provider whose model list marks video models, but
 // for xAI's own API (filmsXAI), which has none.
 func filmsOpenAI(p provider.Provider) bool {
 	return p.IsRemoteMagpie() || len(customVideomakers(p)) > 0 && !xaiHost(p)
@@ -798,7 +798,7 @@ func grokVideosRoot(p provider.Provider) string {
 	return strings.TrimRight(cmp.Or(p.Base(provider.Responses), videoBase(p)), "/")
 }
 
-// remoteVideoURL is where another magpie, or a provider's OpenAI-shaped
+// remoteVideoURL is where another eipgam, or a provider's OpenAI-shaped
 // videos API, answers for a video, with suffix ("" or "/content").
 func remoteVideoURL(p provider.Provider, vendorID, suffix string) string {
 	return videoBase(p) + "/videos/" + url.PathEscape(theirVideoID(vendorID)) + suffix
@@ -871,7 +871,7 @@ func (s *Server) videosCreate(w http.ResponseWriter, r *http.Request) {
 			fail(404, switchedOff(off, f.Model))
 			return
 		}
-		fail(404, fmt.Sprintf("magpie knows no model %q to make videos with", f.Model))
+		fail(404, fmt.Sprintf("eipgam knows no model %q to make videos with", f.Model))
 		return
 	}
 	g, ms, isGroup := mediaMembers(f.Model, provider.KindVideo)
@@ -1048,7 +1048,7 @@ type videoStart struct {
 	onKey bool
 }
 
-// startVideo starts f's video on p's model: at another magpie's videos
+// startVideo starts f's video on p's model: at another eipgam's videos
 // API, a provider's OpenAI-shaped one, MiniMax's, DashScope's or Grok's. A
 // failure before any vendor is asked (the model makes no videos, a key may
 // use none of the provider's keys) has asked unset.
@@ -1106,19 +1106,19 @@ func (s *Server) startVideo(ctx context.Context, r *http.Request, p provider.Pro
 	v.custom = !v.remote && !xai && filmsCustom(p, model)
 	minimax := !v.remote && !v.custom && makesMiniMaxVideo(p, model)
 	dashscope := !v.remote && !v.custom && !minimax && makesDashScopeVideo(p, model)
-	// any grok-imagine-video*, not only those listed: the vendor's newer ones work before magpie names them
+	// any grok-imagine-video*, not only those listed: the vendor's newer ones work before eipgam names them
 	if !v.remote && !v.custom && !minimax && !dashscope && !xai && (!drawsGrok(p) || !strings.HasPrefix(model, grokVideoFamily)) {
 		v.unfit = true
-		return v, 400, fmt.Errorf(`%s/%s can't make videos: magpie makes videos with a Grok subscription's or an xAI API key's grok-imagine-video, a MiniMax API key's MiniMax-H3 models, an Alibaba Token Plan's Wan 3.0 and HappyHorse models, another magpie's, and a provider's models its own model list marks "kind": "video" or that you mark a Video model (right-click the model in the provider's editor: Makes…)`, p.ID, model)
+		return v, 400, fmt.Errorf(`%s/%s can't make videos: eipgam makes videos with a Grok subscription's or an xAI API key's grok-imagine-video, a MiniMax API key's MiniMax-H3 models, an Alibaba Token Plan's Wan 3.0 and HappyHorse models, another eipgam's, and a provider's models its own model list marks "kind": "video" or that you mark a Video model (right-click the model in the provider's editor: Makes…)`, p.ID, model)
 	}
-	// another magpie is asked at its videos API, which says itself what
+	// another eipgam is asked at its videos API, which says itself what
 	// it can't make
 	at, field := grokVideosRoot(p)+"/videos/generations", "request_id"
 	var body []byte
 	switch {
 	case v.remote, v.custom:
 		// a provider's OpenAI-shaped videos API is asked as another
-		// magpie's is: OpenAI's body, its answer its own
+		// eipgam's is: OpenAI's body, its answer its own
 		at, field, body = videoBase(p)+"/videos", "id", remoteVideoBody(model, f)
 	case minimax:
 		var err error
@@ -1210,7 +1210,7 @@ func videoModelHeld(r *http.Request, p provider.Provider, model string) string {
 }
 
 // openAIVideo is how a video at an OpenAI-shaped videos API (another
-// magpie's, a provider's) is going, with this magpie's id for it, and the
+// eipgam's, a provider's) is going, with this eipgam's id for it, and the
 // model making it as that API names it.
 func (s *Server) openAIVideo(ctx context.Context, p provider.Provider, vendorID, id string) (map[string]any, string, int, error) {
 	b, code, err := s.sendAs(ctx, p, http.MethodGet, remoteVideoURL(p, vendorID, ""), "", nil, true)
@@ -1366,7 +1366,7 @@ func videoType(head []byte, said string) string {
 	return "video/mp4"
 }
 
-// remoteVideoContent passes on the bytes of a video another magpie, or a
+// remoteVideoContent passes on the bytes of a video another eipgam, or a
 // provider's OpenAI-shaped videos API, made, or what it says of one it
 // hasn't.
 func (s *Server) remoteVideoContent(ctx context.Context, w http.ResponseWriter, p provider.Provider, vendorID string) {
@@ -1376,11 +1376,11 @@ func (s *Server) remoteVideoContent(ctx context.Context, w http.ResponseWriter, 
 		writeError(w, provider.Chat, 502, err.Error())
 		return
 	}
-	// magpie's, or the agent's own where the provider passes it on (#1851)
+	// eipgam's, or the agent's own where the provider passes it on (#1851)
 	stampUA(ctx, p, req.Header)
 	if p.IsRemoteMagpie() {
 		// vendors are told no caller
-		req.Header.Set("User-Agent", "magpie/"+Version)
+		req.Header.Set("User-Agent", "eipgam/"+Version)
 		passOnCaller(ctx, req)
 		passOnUA(req, callerUA(ctx))
 	}

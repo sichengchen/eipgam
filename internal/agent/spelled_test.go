@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-// An agent that spells a model provider/model, magpie's as magpie/<ref>:
-// one of its own providers named as one of magpie's (its own relay, and
-// magpie's relay) is its own model, not magpie's. The row isn't connected
-// on it, and Disconnect from magpie puts it back and is done, rather than
+// An agent that spells a model provider/model, eipgam's as eipgam/<ref>:
+// one of its own providers named as one of eipgam's (its own relay, and
+// eipgam's relay) is its own model, not eipgam's. The row isn't connected
+// on it, and Disconnect from eipgam puts it back and is done, rather than
 // leaving the row connected on the model it went back to (#835, an agent's
 // own deepseek/deepseek-v4-pro).
 func TestOwnProviderNamedAsMagpies(t *testing.T) {
@@ -28,7 +28,7 @@ func TestOwnProviderNamedAsMagpies(t *testing.T) {
 				t.Fatalf("own model reads %q", v)
 			}
 			if a.Wired() {
-				t.Fatal("its own relay/glm-4.6 reads as magpie's")
+				t.Fatal("its own relay/glm-4.6 reads as eipgam's")
 			}
 			if err := a.Connect(); err != nil {
 				t.Fatal(err)
@@ -49,8 +49,8 @@ func TestOwnProviderNamedAsMagpies(t *testing.T) {
 	}
 }
 
-// OpenCode's own provider that sends to magpie's gateway is magpie's all
-// the same (openCodeRef names a model there by it), once magpie set
+// OpenCode's own provider that sends to eipgam's gateway is eipgam's all
+// the same (openCodeRef names a model there by it), once eipgam set
 // OpenCode up: before that, it is a provider the user wrote by hand and
 // theirs (handWired, JFunfunfun on X).
 func TestOpenCodeGatewayProviderIsMagpies(t *testing.T) {
@@ -63,15 +63,15 @@ func TestOpenCodeGatewayProviderIsMagpies(t *testing.T) {
 	if a.Wired() {
 		t.Fatalf("its own provider at the gateway, written by hand, reads as connected: %v", a.Values())
 	}
-	// as magpie opencode relay/glm-4.6 sets it (9b1641a49)
+	// as eipgam opencode relay/glm-4.6 sets it (9b1641a49)
 	if err := a.Apply("model", "relay/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if !a.Wired() {
-		t.Fatalf("a model through its own provider at the gateway isn't magpie's: %v (%s)", a.Values(), filepath.Base(a.Path))
+		t.Fatalf("a model through its own provider at the gateway isn't eipgam's: %v (%s)", a.Values(), filepath.Base(a.Path))
 	}
 	writeMode(t, a.Path, `{"provider":{"relay":{"options":{"baseURL":"https://x/v1"},"models":{"glm-4.6":{}}}},"model":"relay/glm-4.6"}`, 0o644)
 	if a.Wired() {
-		t.Fatalf("its own relay elsewhere reads as magpie's: %v", a.Values())
+		t.Fatalf("its own relay elsewhere reads as eipgam's: %v", a.Values())
 	}
 }

@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 type codexTestCall struct {
@@ -346,7 +346,7 @@ func TestCodexSessionAPIAddsOwnModelEffort(t *testing.T) {
 		t.Fatalf("GUI usage requests: %d %s", guiUsage.Code, guiUsage.Body)
 	}
 	gwUsage := httptest.NewRecorder()
-	gwRequest := httptest.NewRequest("GET", "/v1/magpie/usage/requests?period=all", nil)
+	gwRequest := httptest.NewRequest("GET", "/v1/eipgam/usage/requests?period=all", nil)
 	gwRequest.RemoteAddr = "127.0.0.1:5000"
 	gateway.New().Handler().ServeHTTP(gwUsage, gwRequest)
 	if gwUsage.Code != http.StatusOK {

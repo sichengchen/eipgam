@@ -5,15 +5,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/tune"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/tune"
 )
 
-// Tuned for you weighs a model magpie routes at what magpie bills its
-// provider, not by its name (#3435). Claude Code is given magpie's models
+// Tuned for you weighs a model eipgam routes at what eipgam bills its
+// provider, not by its name (#3435). Claude Code is given eipgam's models
 // as provider/model ids, which no name rule took for Claude: a Claude model
 // on an Anthropic-billed provider was weighed with an hour's cache write at
 // a 5-minute one's price, so calls seconds apart were left on the hour they
@@ -23,7 +23,7 @@ func TestTuneWeighsRoutedCallsAtTheirProvidersPrice(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	home := t.TempDir()
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
-	// models.dev's entry as magpie's cache had it on 2026-10-24
+	// models.dev's entry as eipgam's cache had it on 2026-10-24
 	os.WriteFile(catalog.CachePath(), []byte(`{"anthropic":{"id":"anthropic","models":{
 	  "claude-opus-5-5":{"id":"claude-opus-5-5","cost":{"input":4,"output":20,"cache_read":0.2,"cache_write":5}}}}}`), 0o644)
 	catalog.Reset()

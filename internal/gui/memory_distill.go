@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/memdistill"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/memdistill"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // distillView is the Memory tab's "learn from conversations" row: the
@@ -76,7 +76,7 @@ func servedModels() []modelRef {
 }
 
 // distillAuto is the model conversations are read with when none is
-// picked: the small model magpie picks to describe images, one of the
+// picked: the small model eipgam picks to describe images, one of the
 // user's own subscriptions first (gateway.AutoVision).
 func distillAuto() string { return gateway.AutoVision() }
 
@@ -87,7 +87,7 @@ func distillAuto() string { return gateway.AutoVision() }
 func distillComplete(ctx context.Context, model, effort, system, user string) (string, error) {
 	gw := served.Load()
 	if gw == nil {
-		return "", errors.New("the gateway isn't served by this magpie")
+		return "", errors.New("the gateway isn't served by this eipgam")
 	}
 	body, err := json.Marshal(map[string]any{
 		"model": model, "max_tokens": 4096, "system": system,

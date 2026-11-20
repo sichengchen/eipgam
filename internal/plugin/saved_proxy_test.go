@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A plugin's request whose choice names a saved proxy goes through it;

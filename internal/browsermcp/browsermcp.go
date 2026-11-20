@@ -1,20 +1,20 @@
-// Package browsermcp is `magpie mcp browser`: the browser MCP server
+// Package browsermcp is `eipgam mcp browser`: the browser MCP server
 // (gateway.BrowserMCPPath) over stdio, for an agent that starts its MCP
 // servers as commands. Each message is passed to the running gateway and
 // its answer back; the process is one agent session, which goes on in the
 // tab it was working in.
 //
-// `magpie mcp search` is the web search MCP server (gateway.SearchMCPPath)
-// passed on the same way, with no session: the Library's Magpie Web
-// Search, which an agent is given as a command as it is Magpie Browser
+// `eipgam mcp search` is the web search MCP server (gateway.SearchMCPPath)
+// passed on the same way, with no session: the Library's eipgam Web
+// Search, which an agent is given as a command as it is eipgam Browser
 // (lutra_fs on Discord: the search was an address in Settings alone).
-// `magpie mcp vision` is image recognition's (gateway.VisionMCPPath), the
-// Library's Magpie Image Recognition (matrix0487 on Discord, #4653).
-// `magpie mcp memory` is memory's (gateway.MemoryMCPPath), sent with the
+// `eipgam mcp vision` is image recognition's (gateway.VisionMCPPath), the
+// Library's eipgam Image Recognition (matrix0487 on Discord, #4653).
+// `eipgam mcp memory` is memory's (gateway.MemoryMCPPath), sent with the
 // folder the agent started it in, for the project its memories are kept
 // for, and the client name the agent gave at initialize, for which agent
 // it is.
-// `magpie mcp sessions` is the sessions' (gateway.SessionsMCPPath): what
+// `eipgam mcp sessions` is the sessions' (gateway.SessionsMCPPath): what
 // was said in every agent's sessions on this computer.
 package browsermcp
 
@@ -33,13 +33,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // Run serves stdin and stdout until stdin ends.
 func Run(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp browser takes no arguments")
+		return fmt.Errorf("eipgam mcp browser takes no arguments")
 	}
 	return serve(os.Stdin, os.Stdout, gatewayBase())
 }
@@ -48,7 +48,7 @@ func Run(args []string) error {
 // stdin ends.
 func RunSearch(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp search takes no arguments")
+		return fmt.Errorf("eipgam mcp search takes no arguments")
 	}
 	return serveSearch(os.Stdin, os.Stdout, gatewayBase())
 }
@@ -57,7 +57,7 @@ func RunSearch(args []string) error {
 // until stdin ends.
 func RunVision(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp vision takes no arguments")
+		return fmt.Errorf("eipgam mcp vision takes no arguments")
 	}
 	return serveVision(os.Stdin, os.Stdout, gatewayBase())
 }
@@ -66,7 +66,7 @@ func RunVision(args []string) error {
 // ends.
 func RunMemory(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp memory takes no arguments")
+		return fmt.Errorf("eipgam mcp memory takes no arguments")
 	}
 	wd, _ := os.Getwd()
 	return serveMemory(os.Stdin, os.Stdout, gatewayBase(), wd)
@@ -76,7 +76,7 @@ func RunMemory(args []string) error {
 // stdin ends.
 func RunSessions(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp sessions takes no arguments")
+		return fmt.Errorf("eipgam mcp sessions takes no arguments")
 	}
 	return serveSessions(os.Stdin, os.Stdout, gatewayBase())
 }
@@ -84,11 +84,11 @@ func RunSessions(args []string) error {
 // serveSessions passes each line to the gateway's sessions server. A
 // search while the index is first made reads for a few seconds.
 func serveSessions(in io.Reader, out io.Writer, base string) error {
-	return relay(in, &bridge{base: base, path: gateway.SessionsMCPPath, title: "Magpie Sessions", client: &http.Client{Timeout: time.Minute}, out: out})
+	return relay(in, &bridge{base: base, path: gateway.SessionsMCPPath, title: "eipgam Sessions", client: &http.Client{Timeout: time.Minute}, out: out})
 }
 
 func gatewayBase() string {
-	base := strings.TrimRight(os.Getenv("MAGPIE_GATEWAY"), "/")
+	base := strings.TrimRight(os.Getenv("EIPGAM_GATEWAY"), "/")
 	if base == "" {
 		base = gateway.URL()
 	}
@@ -107,13 +107,13 @@ type message struct {
 }
 
 func serve(in io.Reader, out io.Writer, base string) error {
-	return relay(in, &bridge{base: base, path: gateway.BrowserMCPPath, title: "Magpie Browser", session: session(), client: &http.Client{Timeout: 2 * time.Minute}, out: out})
+	return relay(in, &bridge{base: base, path: gateway.BrowserMCPPath, title: "eipgam Browser", session: session(), client: &http.Client{Timeout: 2 * time.Minute}, out: out})
 }
 
 // serveSearch passes each line to the gateway's web search server. A
 // search that reads a page through a slow searcher model takes minutes.
 func serveSearch(in io.Reader, out io.Writer, base string) error {
-	return relay(in, &bridge{base: base, path: gateway.SearchMCPPath, title: "Magpie Web Search", client: &http.Client{Timeout: 5 * time.Minute}, out: out})
+	return relay(in, &bridge{base: base, path: gateway.SearchMCPPath, title: "eipgam Web Search", client: &http.Client{Timeout: 5 * time.Minute}, out: out})
 }
 
 // serveVision passes each line to the gateway's image recognition server.
@@ -121,7 +121,7 @@ func serveSearch(in io.Reader, out io.Writer, base string) error {
 // (32 MiB), and a look by a slow model takes minutes.
 func serveVision(in io.Reader, out io.Writer, base string) error {
 	wd, _ := os.Getwd()
-	return relay(in, &bridge{base: base, path: gateway.VisionMCPPath, title: "Magpie Image Recognition", client: &http.Client{Timeout: 5 * time.Minute}, out: out,
+	return relay(in, &bridge{base: base, path: gateway.VisionMCPPath, title: "eipgam Image Recognition", client: &http.Client{Timeout: 5 * time.Minute}, out: out,
 		most: 32 << 20, fix: func(b []byte) []byte { return imageFrom(b, wd) }})
 }
 
@@ -131,7 +131,7 @@ func serveVision(in io.Reader, out io.Writer, base string) error {
 func serveMemory(in io.Reader, out io.Writer, base, wd string) error {
 	var mu sync.Mutex
 	client := ""
-	b := &bridge{base: base, path: gateway.MemoryMCPPath, title: "Magpie Memory", client: &http.Client{Timeout: time.Minute}, out: out}
+	b := &bridge{base: base, path: gateway.MemoryMCPPath, title: "eipgam Memory", client: &http.Client{Timeout: time.Minute}, out: out}
 	b.fix = func(body []byte) []byte {
 		// read in order, before the calls after it are passed on
 		if name := clientName(body); name != "" {
@@ -207,7 +207,7 @@ func imageFrom(b []byte, wd string) []byte {
 }
 
 // callerSession is the browser session a message goes on in: the hub's
-// caller's, which magpie's MCP router names in a call's _meta
+// caller's, which eipgam's MCP router names in a call's _meta
 // (gateway.HubSessionMeta) since it runs this one process for every agent
 // behind it, else this process's own. Two agents behind the router then
 // work in tabs of their own, as two given this server directly do.
@@ -303,7 +303,7 @@ func (s *bridge) pass(m message, body []byte) {
 	}
 	resp, err := s.client.Do(r)
 	if err != nil {
-		s.fail(m.ID, "magpie isn't running, so "+s.title+" can't be reached: start magpie ("+err.Error()+")")
+		s.fail(m.ID, "eipgam isn't running, so "+s.title+" can't be reached: start eipgam ("+err.Error()+")")
 		return
 	}
 	defer resp.Body.Close()
@@ -312,7 +312,7 @@ func (s *bridge) pass(m message, body []byte) {
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
-		s.fail(m.ID, fmt.Sprintf("magpie answered %d: %s", resp.StatusCode, strings.TrimSpace(string(b))))
+		s.fail(m.ID, fmt.Sprintf("eipgam answered %d: %s", resp.StatusCode, strings.TrimSpace(string(b))))
 		return
 	}
 	s.write(b)

@@ -8,7 +8,7 @@
 //
 // The files grow long (hundreds of MB), so each one's parse is kept by path,
 // size and time, and a file that only grew is read on from where it was left.
-// The parses are kept on disk too, in magpie's cache folder.
+// The parses are kept on disk too, in eipgam's cache folder.
 package sessions
 
 import (
@@ -34,14 +34,14 @@ import (
 	"unicode/utf8"
 
 	"github.com/klauspost/compress/zstd"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/bridgesid"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/dirent"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/bridgesid"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/dirent"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Tokens is a count of tokens. Input excludes what was read from cache.
@@ -119,10 +119,10 @@ type CodexIdentity struct {
 // Session is one agent session.
 type Session struct {
 	ReadOnly bool `json:"read_only,omitempty"`
-	// Gateway: seen only through magpie's gateway, with no file of the
+	// Gateway: seen only through eipgam's gateway, with no file of the
 	// agent's on this computer (external.go)
 	Gateway       bool          `json:"gateway,omitempty"`
-	Agent         string        `json:"agent"` // magpie agent id: claude, codex, opencode, pi, omp, zcode, dsh, cline, qoder, qoder-cn, grok, workbuddy, workbuddy-ai, codebuddy, droid, cursor, hermes, alma, openmausbot, liveagent, kimi, agy
+	Agent         string        `json:"agent"` // eipgam agent id: claude, codex, opencode, pi, omp, zcode, dsh, cline, qoder, qoder-cn, grok, workbuddy, workbuddy-ai, codebuddy, droid, cursor, hermes, alma, openmausbot, liveagent, kimi, agy
 	ID            string        `json:"id"`
 	Cwd           string        `json:"cwd"`
 	Title         string        `json:"title"` // the name it was given, else the agent's own title, else the first prompt
@@ -155,7 +155,7 @@ type Session struct {
 	// WSL is the WSL distro the session ran in, its files read through
 	// \\wsl.localhost (see wsl.go); "" for this computer's own
 	WSL string `json:"wsl,omitempty"`
-	// Convs are the ids magpie's gateway keys the session's requests by
+	// Convs are the ids eipgam's gateway keys the session's requests by
 	// when they carry no session id of their own (dshConvs)
 	Convs []string `json:"-"`
 	// ResponseIDs are the ids of the replies the session's own requests
@@ -223,7 +223,7 @@ type state struct {
 	// int32 beside CdRead: the head is headLen bytes at most, and the 8 bytes
 	// it saves take a state from the 448-byte size class to 416 (#2278)
 	HeadSize int32 `json:"head_size,omitempty"`
-	// Claude Code: parsed by a magpie that reads /cd's relocated lines
+	// Claude Code: parsed by a eipgam that reads /cd's relocated lines
 	// (ccRelocated), so Cwd is the folder the session was last moved to
 	CdRead        bool           `json:"cd_read,omitempty"`
 	ContentHash   digest         `json:"content_hash,omitzero"`
@@ -371,11 +371,11 @@ type day struct {
 	Skills named[int] `json:"k,omitempty"`
 }
 
-// routerSkill is the one skill magpie's skill router gives an agent
+// routerSkill is the one skill eipgam's skill router gives an agent
 // (library.RouterSkill). Calling it up only lists the skills behind it,
 // and the one the agent then reads is counted (routedSkill), so it isn't
 // counted as a skill of its own: every routed use would be counted twice.
-const routerSkill = "magpie-skills"
+const routerSkill = "eipgam-skills"
 
 // tool counts a call of a tool, and of a skill when it calls one up; a
 // skill called up with no tool (Pi's /skill:name) has no name.
@@ -395,9 +395,9 @@ func (s *state) tool(at time.Time, name, skill string) {
 	}
 }
 
-// routedSkill is the skill a read of path calls up through magpie's
-// skill router (library's skill_router.go): an agent given magpie-skills
-// reads a skill's SKILL.md under magpie-skills/.skills/<name>/ with its
+// routedSkill is the skill a read of path calls up through eipgam's
+// skill router (library's skill_router.go): an agent given eipgam-skills
+// reads a skill's SKILL.md under eipgam-skills/.skills/<name>/ with its
 // file tool, not its Skill tool. "" for any other path.
 func routedSkill(path string) string {
 	p := strings.ReplaceAll(path, `\`, "/")
@@ -896,7 +896,7 @@ func joinedIs(s, a, b string, sep ...byte) bool {
 // gateway counts every call of it already, under the agent that asked, and
 // read here too it was counted again as a local session's (iwinux on X).
 // It is the id alone that tells, so it holds wherever the run saved it: an
-// account's folder or the user's own, a caller's project or magpie's, WSL.
+// account's folder or the user's own, a caller's project or eipgam's, WSL.
 func bridged(agent, id string) bool { return agent == "claude" && bridgesid.Is(id) }
 
 func listCCFiles(agent, dir string) []file {
@@ -1384,7 +1384,7 @@ var (
 func CachePath() string { return filepath.Join(filepath.Dir(catalog.CachePath()), "sessions.json") }
 
 // cacheVersion changes when a parse would come out differently, so the
-// parses kept by an older magpie are read again.
+// parses kept by an older eipgam are read again.
 // 2: each file's usage by day, and its active time
 // 3: the active time by hour of the day
 // 4: the tool calls and skills a day
@@ -1416,7 +1416,7 @@ func CachePath() string { return filepath.Join(filepath.Dir(catalog.CachePath())
 const cacheVersion = 29
 
 // parseVersions is cacheVersion for one agent's parses, 0 when not listed:
-// raised, the parses of that agent's files kept by an older magpie are read
+// raised, the parses of that agent's files kept by an older eipgam are read
 // again, and the rest stand.
 //
 // codex 1, zcode 1: a fork's copies of its parent's usage are the
@@ -1478,7 +1478,7 @@ func loadCache() {
 		if ok {
 			cache = files
 			if old {
-				// an older magpie's JSON: written again in the binary
+				// an older eipgam's JSON: written again in the binary
 				// form, or it stays JSON until a file changes
 				saveCache()
 			}
@@ -1563,7 +1563,7 @@ var saveGap = time.Minute
 // lost or outdated index), not a poll catching up with a live session. Its
 // checkpoints wait scanSaveGap, not saveGap, and its last save waits for
 // nothing: under saveGap a scan's later checkpoints and its end waited a
-// minute after its first checkpoint, and a magpie quit or updated within
+// minute after its first checkpoint, and a eipgam quit or updated within
 // it kept a few hundred of 17,000 files, so each start read 22 GB of
 // rollouts again (15 to 28 s before Sessions showed, 70 to 94 s of CPU).
 var (
@@ -1680,7 +1680,7 @@ func refresh(want, all []file) {
 			parsing[f.path] = make(chan struct{})
 			todo = append(todo, f)
 		} else if (s.Agent != f.agent || f.agent == "claude" && !s.CdRead) && parsing[f.path] == nil {
-			// kept by a magpie that didn't name the agent: named now, so
+			// kept by a eipgam that didn't name the agent: named now, so
 			// a raise of another agent's parseVersions keeps it. A Claude
 			// Code parse whose folder is the file's (not ccStale) is as a
 			// read of the relocated lines would make it, and is marked so,
@@ -1794,7 +1794,7 @@ func refresh(want, all []file) {
 	}
 	// What is read is kept on disk every checkpointEvery, not only at the
 	// end: a first read of a long history on a slow disk runs for minutes,
-	// and a magpie quit before the end (its CPU full, #1665) kept nothing
+	// and a eipgam quit before the end (its CPU full, #1665) kept nothing
 	// of it, so the next start read it all again.
 	checkpointGap, endGap := saveGap, saveGap
 	if len(jobs) >= scanFiles {
@@ -2148,7 +2148,7 @@ func assemble(fs []file, price func(string) *catalog.Price, codexTitle func(stri
 // to resume it, its subagents): whether List lists the session, and its
 // agent, id, title and usage. The stats ask it of every session on each
 // poll, and building every session's subagents there read each Claude Code
-// subagent's file again (3.5 GB of a live magpie's 6.3 GB of scans).
+// subagent's file again (3.5 GB of a live eipgam's 6.3 GB of scans).
 func assembleListed(fs []file, price func(string) *catalog.Price, codexTitle func(string) string) (Session, bool) {
 	sortSessionFiles(fs)
 	s := Session{Agent: fs[0].agent, Path: fs[0].path, Models: []Model{}, WSL: fs[0].m().wsl}
@@ -2641,7 +2641,7 @@ func scanBuffer(f io.Reader, off int64) int {
 
 // lineReaders keep scanAt's read buffers between scans, one pool per
 // power-of-two size from scanBuffer's 16 KiB to its 1 MiB. Every scan
-// allocated its own: a live magpie's start read ~3,200 Claude Code subagent
+// allocated its own: a live eipgam's start read ~3,200 Claude Code subagent
 // files for their first lines (ccTask), most over 1 MiB, and with the
 // session and call reads scanAt allocated 6.3 GB in 48 minutes, 3.8 GB of
 // it these buffers, while ~157 MB was live. A pool keeps about one buffer
@@ -2718,7 +2718,7 @@ func openLines(path string) (io.ReadCloser, error) {
 
 // streams holds decoders between packed reads. A decoder made for each
 // read allocated its window (a packed rollout's is 2 MiB, held in 3 MiB at
-// low memory) and its block buffers every time: 75 GB of a live magpie's
+// low memory) and its block buffers every time: 75 GB of a live eipgam's
 // first read of 11,591 rollouts. One kept here keeps them, and is let go
 // with the pool's other idle ones by the garbage collector. streamShelf
 // keeps a few first, across collections.
@@ -2859,7 +2859,7 @@ func titleCut(s string) (string, bool) {
 
 var dated = lazyre.New(`-\d{8}$`)
 
-// priceOf prices a model as a session names it: one through magpie as
+// priceOf prices a model as a session names it: one through eipgam as
 // "<provider>/<model>" at the price the gateway counts it at — what the user
 // set for that provider and model, else that provider's own list price, else
 // its maker's on models.dev — and a bare id only ever at its maker's, which is
@@ -2968,7 +2968,7 @@ func resumeCommand(distro, agent, id, cwd, path string) string {
 		run = "kimi --session " + id
 	case "agy":
 		// --conversation picks it up from any folder; one started on
-		// magpie's gateway needs the variables and --model it was
+		// eipgam's gateway needs the variables and --model it was
 		// started with
 		run = "agy --conversation " + id
 		if AgyStart != nil && distro == "" {

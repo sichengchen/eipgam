@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Parry_Moody and Cyrus on Discord: Codex on OpenAI through an API key
-// before magpie, and for two days every older conversation in the Codex
+// before eipgam, and for two days every older conversation in the Codex
 // app said "继续聊天未成功: This chat uses openai, but your current
-// provider is magpie. Switch to openai to continue". Codex 0.166 on keeps
+// provider is eipgam. Switch to openai to continue". Codex 0.166 on keeps
 // a thread paginated (history_mode "paginated"), and reads its provider
 // from its row in the state database, not from its files (codex-rs
 // thread-store read_thread: "Paginated history may contain only a suffix,
@@ -25,7 +25,7 @@ import (
 // older than 30 days, and the rest of a big history past a sync's budget,
 // on OpenAI.
 //
-// Every paginated thread of OpenAI's now moves to magpie by its row
+// Every paginated thread of OpenAI's now moves to eipgam by its row
 // alone, of any age, its files neither rewritten nor copied, and back at
 // the Disconnect the same way. One a Codex has open stays, as its writer
 // would put its provider back, and so does a legacy thread past 30 days
@@ -87,12 +87,12 @@ func TestCodexPagedThreadsFollowByRow(t *testing.T) {
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	if p, _ := edit.GetTOMLTop(filepath.Join(dir, "config.toml"), "model_provider"); p != "magpie" {
-		t.Fatalf("provider %q, want magpie as Codex's provider with an API key", p)
+	if p, _ := edit.GetTOMLTop(filepath.Join(dir, "config.toml"), "model_provider"); p != "eipgam" {
+		t.Fatalf("provider %q, want eipgam as Codex's provider with an API key", p)
 	}
-	want := map[string]string{old: "magpie", open: "openai", legacy: "openai", theirs: "custom"}
+	want := map[string]string{old: "eipgam", open: "openai", legacy: "openai", theirs: "custom"}
 	for _, id := range many {
-		want[id] = "magpie"
+		want[id] = "eipgam"
 	}
 	check := func(when string) {
 		t.Helper()
@@ -126,13 +126,13 @@ func TestCodexPagedThreadsFollowByRow(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	want[open] = "magpie"
+	want[open] = "eipgam"
 	check("let go")
 	if err := cx.Unwire(); err != nil {
 		t.Fatal(err)
 	}
 	for id, w := range want {
-		if w == "magpie" {
+		if w == "eipgam" {
 			want[id] = "openai"
 		}
 	}

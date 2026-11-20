@@ -9,12 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // Claude Science in a WSL distro (shuitunlulu_ on Discord): its daemon
-// runs in the distro, so magpie on Windows starts it there through
+// runs in the distro, so eipgam on Windows starts it there through
 // wsl.exe, with ANTHROPIC_BASE_URL set, as it does this machine's
 // (claudescience.go), and keeps it so from the keeper while the distro
 // runs; it never starts a stopped distro to.
@@ -22,7 +22,7 @@ import (
 // The daemon takes http only to a loopback address, and sends its Claude
 // sign-in as its key. In mirrored (or consomme) networking the distro's
 // 127.0.0.1 is Windows', and it is given the gateway's own address. Under
-// NAT it is given a relay magpie starts in the distro: socat on
+// NAT it is given a relay eipgam starts in the distro: socat on
 // 127.0.0.1:<the gateway's port> there, to Windows' address on the WSL
 // network, which the gateway listens on while on loopback; the WSL key,
 // which it can't send as a key, goes first in the address's path, where
@@ -39,9 +39,9 @@ const scienceWSLScript = `g=$1; shift; b="$HOME/.local/bin/claude-science"; [ -x
 // running; one to another (Windows' address moved with a restart of WSL)
 // is stopped first, with the connections it forked (its own process
 // group, as setsid starts it). Its pid and where it leads are kept in
-// ~/.claude-science/magpie-relay; a pid there is taken for it only while
+// ~/.claude-science/eipgam-relay; a pid there is taken for it only while
 // /proc says it is socat.
-const scienceRelayScript = `port=$1; to=$2; d="$HOME/.claude-science"; pf="$d/magpie-relay"; ` +
+const scienceRelayScript = `port=$1; to=$2; d="$HOME/.claude-science"; pf="$d/eipgam-relay"; ` +
 	`if [ -r "$pf" ]; then read -r pid was < "$pf"; if [ -n "$pid" ] && [ "$(cat /proc/$pid/comm 2>/dev/null)" = socat ]; then [ "$was" = "$to" ] && exit 0; kill -TERM -"$pid" 2>/dev/null || kill "$pid" 2>/dev/null; sleep 0.3; fi; rm -f "$pf"; fi; ` +
 	`[ -z "$to" ] && exit 0; ` +
 	`command -v socat >/dev/null 2>&1 || { echo "socat isn't installed in the distro (sudo apt install socat)"; exit 3; }; ` +
@@ -57,7 +57,7 @@ var scienceWSLKeeps = struct {
 	mu   map[string]*sync.Mutex
 }{keep: map[string]*scienceKeeper{}, mu: map[string]*sync.Mutex{}}
 
-// scienceWSLMark is magpie's note of the daemon it started in distro
+// scienceWSLMark is eipgam's note of the daemon it started in distro
 // name: one file a distro, as each keeps its own.
 func scienceWSLMark(name string) string {
 	safe := strings.Map(func(r rune) rune {
@@ -144,9 +144,9 @@ func scienceRelay(name, port, to string) error {
 	out, err := scienceWSLRun(name, 30*time.Second, scienceRelayScript, port, to)
 	if err != nil {
 		if said := strings.TrimSpace(string(out)); said != "" {
-			return fmt.Errorf("the relay to magpie's gateway in WSL %s: %s", name, said)
+			return fmt.Errorf("the relay to eipgam's gateway in WSL %s: %s", name, said)
 		}
-		return fmt.Errorf("the relay to magpie's gateway in WSL %s: %w", name, err)
+		return fmt.Errorf("the relay to eipgam's gateway in WSL %s: %w", name, err)
 	}
 	return nil
 }
@@ -164,7 +164,7 @@ func scienceIn(p place) *Agent {
 	// the relay leads to Windows' address on the WSL network, where the
 	// gateway listens and Windows' firewall may keep WSL out: its row says
 	// so as any agent pointed there would (reach.go), though its one value
-	// isn't a model of magpie's, which is what Drift asks that of
+	// isn't a model of eipgam's, which is what Drift asks that of
 	check := a.Check
 	a.Check = func() string {
 		if c := check(); c != "" || !h.wired() {
@@ -187,7 +187,7 @@ func scienceIn(p place) *Agent {
 	return a
 }
 
-// wslScienceHosts are the Claude Sciences of the running distros magpie
+// wslScienceHosts are the Claude Sciences of the running distros eipgam
 // connected: none, and no wsl.exe run, while it connected none.
 func wslScienceHosts() []*scienceHost {
 	marks, _ := filepath.Glob(filepath.Join(appdir.Config(), "claude-science-wsl-*.json"))

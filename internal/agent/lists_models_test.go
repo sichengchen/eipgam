@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // listsSandbox is a HOME of its own with one provider of two models.
@@ -23,7 +23,7 @@ func listsSandbox(t *testing.T) (home, cfg string) {
 	return home, cfg
 }
 
-// An agent whose switch puts magpie's models in a picker of its own, with
+// An agent whose switch puts eipgam's models in a picker of its own, with
 // no field of its picking among them, lists only the ones picked for it on
 // the Agents page, as every other agent does: ZCode was given every model,
 // with no way to hide one (#1508, NovaTrailX). ListsModels is what gives
@@ -33,14 +33,14 @@ func TestEveryPickerOfMagpiesModelsCanBeNarrowed(t *testing.T) {
 	var bare, menus []string
 	for _, a := range builtins(home, cfg) {
 		vals := a.Values()
-		refs, magpie := false, false
+		refs, eipgam := false, false
 		for _, f := range a.Fields {
 			if f.Options == nil {
 				continue
 			}
 			for _, o := range f.Options(vals) {
 				refs = refs || o.Ref != ""
-				magpie = magpie || o.Value == magpieID
+				eipgam = eipgam || o.Value == magpieID
 			}
 		}
 		switch {
@@ -49,12 +49,12 @@ func TestEveryPickerOfMagpiesModelsCanBeNarrowed(t *testing.T) {
 		case refs, a.ID == "claude-desktop":
 		case a.ListsModels:
 			menus = append(menus, a.ID)
-		case magpie:
+		case eipgam:
 			bare = append(bare, a.ID)
 		}
 	}
 	if len(bare) > 0 {
-		t.Errorf("magpie's models are put in these agents' pickers with no way to pick which: %v", bare)
+		t.Errorf("eipgam's models are put in these agents' pickers with no way to pick which: %v", bare)
 	}
 	for _, id := range []string{"t3code", CursorLocalID} {
 		if !slices.Contains(menus, id) {

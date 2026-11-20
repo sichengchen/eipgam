@@ -8,10 +8,10 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A turn on one of magpie's ChatGPT accounts that the ChatGPT backend
+// A turn on one of eipgam's ChatGPT accounts that the ChatGPT backend
 // refuses as the account's usage limit (429 usage_limit_reached) or as a
 // plan without Codex (usage_not_included) reaches the agent in the
 // backend's own shape: the error's type, plan_type, resets_at and
@@ -20,15 +20,15 @@ import (
 // exactly those (codex-rs codex-api api_bridge.rs: a 429 whose error type
 // is usage_limit_reached is UsageLimitReached, with its plan, its reset
 // and the rate limits parsed from the x-codex-* headers). Re-typed as
-// magpie's rate_limit_error, with the headers left behind, Codex read the
+// eipgam's rate_limit_error, with the headers left behind, Codex read the
 // same 429 as a retryable one: it asked again, then stopped on "exceeded
 // retry limit, last status: 429" with no reset time and no limit for the
 // app to show (bitssly on X, the ChatGPT app on Windows with every Codex
-// account out). Only the message is magpie's (the provider named), as
+// account out). Only the message is eipgam's (the provider named), as
 // every other vendor error's is.
 //
-// A turn magpie holds before asking any account (each at a usage cap the
-// user set, or used up and set not to spend its credits) keeps magpie's
+// A turn eipgam holds before asking any account (each at a usage cap the
+// user set, or used up and set not to spend its credits) keeps eipgam's
 // words and type: those say which setting to change, and Codex shows a
 // usage_limit_reached in its own words alone.
 
@@ -53,7 +53,7 @@ func codexOutRefusal(p provider.Provider, proto provider.Protocol, status int, b
 }
 
 // writeCodexOut answers a codexOutRefusal as the backend did: its error
-// object, its message magpie's msg, and the x-codex-* headers of h.
+// object, its message eipgam's msg, and the x-codex-* headers of h.
 func writeCodexOut(w http.ResponseWriter, h http.Header, status int, msg string, b []byte) int {
 	var e struct {
 		Error map[string]any `json:"error"`

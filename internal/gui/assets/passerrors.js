@@ -1,10 +1,10 @@
 // A provider of a key's Errors menu in its editor's Advanced (ne9ko9 on
-// Discord): magpie handles them (asked again, the next provider tried,
+// Discord): eipgam handles them (asked again, the next provider tried,
 // said as the agent's API says it), or they pass through as the vendor
 // sent them, asked once. app.js imports this when the editor draws the
 // Errors row, so it weighs nothing on the core.
 window.passErrorsFill = function fill(b, d) {
-  const ERR = [["", "magpie handles"], ["pass", "Pass through"]];
+  const ERR = [["", "eipgam handles"], ["pass", "Pass through"]];
   const now = () => ERR[d.passErrors ? 1 : 0];
   b.type = "button";
   b.setAttribute("aria-haspopup", "menu");

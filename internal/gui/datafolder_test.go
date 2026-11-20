@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // pickAndQuit is the app's windows with the picker answering dir, and Quit
@@ -25,9 +25,9 @@ type pickAndQuit struct {
 func (p pickAndQuit) Quit() { p.quit <- struct{}{} }
 
 // Settings' Data folder (CHENGJIAHEGOXIS and buhaodeshiyehao on X): Move…
-// takes a folder from the picker, asks for the move and starts magpie again
+// takes a folder from the picker, asks for the move and starts eipgam again
 // to make it, as the app quits; nothing is moved under the running one.
-// With another magpie serving the gateway, it is asked for and nothing
+// With another eipgam serving the gateway, it is asked for and nothing
 // restarts. Cancel forgets it.
 func TestDataFolderMoveRestarts(t *testing.T) {
 	h := sandboxHome(t)
@@ -44,7 +44,7 @@ func TestDataFolderMoveRestarts(t *testing.T) {
 		if other {
 			return gateway.Served{Running: true, Pid: os.Getpid() + 1}
 		}
-		return gateway.Served{Running: true, Pid: os.Getpid()} // this magpie's own
+		return gateway.Served{Running: true, Pid: os.Getpid()} // this eipgam's own
 	}
 	win := pickAndQuit{pickFolder{dir: disk}, make(chan struct{}, 1)}
 	mux := http.NewServeMux()
@@ -78,7 +78,7 @@ func TestDataFolderMoveRestarts(t *testing.T) {
 		t.Fatal("the app didn't quit for the restart")
 	}
 	if _, ok := os.Readlink(appdir.Config()); ok == nil {
-		t.Fatal("moved under the running magpie")
+		t.Fatal("moved under the running eipgam")
 	}
 	if !appdir.MoveAsked() {
 		t.Fatal("no move asked for")
@@ -88,12 +88,12 @@ func TestDataFolderMoveRestarts(t *testing.T) {
 		t.Fatal("cancel left the move asked for")
 	}
 
-	// another magpie serves: asked for, no restart, said
+	// another eipgam serves: asked for, no restart, said
 	other = true
 	out = call("/api/datafolder/move", `{"dir":`+jsonString(disk)+`}`, 200)
 	view, _ = out["view"].(map[string]any)
 	if out["restart"] != false || view["other"] != true || restarts != 1 {
-		t.Fatalf("with another magpie serving: %v, %d restarts", out, restarts)
+		t.Fatalf("with another eipgam serving: %v, %d restarts", out, restarts)
 	}
 	call("/api/datafolder/cancel", "", 200)
 

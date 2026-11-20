@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// magpie accounts export (heyiwei5 and Rk1ngggg on X): warns first, writes
+// eipgam accounts export (heyiwei5 and Rk1ngggg on X): warns first, writes
 // nothing until agreed to, writes 0600 files that import back, never prints
 // a token and never writes over a file.
 func TestAccountsExport(t *testing.T) {

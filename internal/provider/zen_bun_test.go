@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // zenBunCase is a transport of Dispatch's that dials nothing, and the

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // lc on Discord: the editor's "Send requests unmasked" is saved on a

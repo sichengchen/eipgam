@@ -135,7 +135,7 @@ func TestBrowserRecordsAVideo(t *testing.T) {
 	record := func(format string) (string, []byte, string) {
 		t.Helper()
 		ok("browser", map[string]any{"action": "record_start"}, "Recording")
-		page := ok("browser", map[string]any{"action": "navigate", "url": site.URL}, "Magpie fixture")
+		page := ok("browser", map[string]any{"action": "navigate", "url": site.URL}, "eipgam fixture")
 		name := regexp.MustCompile(`textbox "Name"[^\n]*\[ref=(e\d+)\]`).FindStringSubmatch(page)
 		if name == nil {
 			t.Fatalf("no Name field in:\n%s", page)

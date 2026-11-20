@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// moveHome is a sandbox with magpie's folders in it, each with files: the
+// moveHome is a sandbox with eipgam's folders in it, each with files: the
 // config with a nested file and a link, the cache with one file.
 func moveHome(t *testing.T) (cfg, cache, disk string) {
 	t.Helper()
@@ -69,7 +69,7 @@ func checkFiles(t *testing.T, cfg, cache string) {
 }
 
 // The folders go to the other disk with a link left where they were, so
-// every path magpie and the agents know still reads them, and come back.
+// every path eipgam and the agents know still reads them, and come back.
 // Across disks (rename failing) they are copied, and the old copy goes.
 func TestMoveToAnotherDiskAndBack(t *testing.T) { moveAndBack(t) }
 
@@ -141,16 +141,16 @@ func moveAndBack(t *testing.T) {
 	}
 }
 
-// A folder that has files in it already, one in magpie's own folder, or
-// a path that isn't absolute, is refused before magpie quits for it.
+// A folder that has files in it already, one in eipgam's own folder, or
+// a path that isn't absolute, is refused before eipgam quits for it.
 func TestMoveTargetRefused(t *testing.T) {
 	cfg, _, disk := moveHome(t)
 	os.MkdirAll(filepath.Join(disk, MoveName), 0o755)
 	os.WriteFile(filepath.Join(disk, MoveName, "theirs.txt"), []byte("x"), 0o600)
 	for name, dir := range map[string]string{
 		"has files":     disk,
-		"magpie's own":  filepath.Join(cfg, "skills"),
-		"magpie itself": cfg,
+		"eipgam's own":  filepath.Join(cfg, "skills"),
+		"eipgam itself": cfg,
 		"relative":      "ssd",
 		"not there":     filepath.Join(disk, "gone"),
 	} {
@@ -193,7 +193,7 @@ func TestMoveCopyFailsLeavesAll(t *testing.T) {
 		t.Fatal("moved with a file it couldn't read")
 	}
 	if _, ok := linkOf(cfg); ok {
-		t.Fatal("magpie's folder is a link after a failed copy")
+		t.Fatal("eipgam's folder is a link after a failed copy")
 	}
 	checkFiles(t, cfg, cache)
 	if _, err := os.Stat(filepath.Join(root, "config")); err == nil {
@@ -201,8 +201,8 @@ func TestMoveCopyFailsLeavesAll(t *testing.T) {
 	}
 }
 
-// The disk unplugged: magpie's folder leads nowhere, which is an error
-// main stops on, never an empty magpie; a move can't be made from it.
+// The disk unplugged: eipgam's folder leads nowhere, which is an error
+// main stops on, never an empty eipgam; a move can't be made from it.
 func TestMovedDiskGoneIsUnreachable(t *testing.T) {
 	cfg, _, disk := moveHome(t)
 	root, err := Target(disk)

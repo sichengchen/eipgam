@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The Cline plugin's provider has ClinePass's Upstream tick too (ARNO on
@@ -58,7 +58,7 @@ func TestClinePluginTickSendsNoProviderOptions(t *testing.T) {
 			{"/v1/chat/completions", `{"model":"` + pid + `/fake-1","messages":[{"role":"user","content":"hi"}]}`},
 			{"/v1/chat/completions", `{"model":"` + pid + `/glm-5.3-flash","messages":[{"role":"user","content":"hi"}]}`},
 		} {
-			// each ask is one request, unless magpie tried it again: then
+			// each ask is one request, unless eipgam tried it again: then
 			// it says why, and a try the vendor answered is never sent twice
 			rt := postProto(t, New(), req.path, req.body)
 			tries += len(rt.Tries)

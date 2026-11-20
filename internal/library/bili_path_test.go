@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
-// TestBiliFindsClaudeOffPath: magpie found Claude Code in a folder its
+// TestBiliFindsClaudeOffPath: eipgam found Claude Code in a folder its
 // PATH doesn't reach (proc.FindTool's; ~/.local/bin stands for it here),
 // and bili's install, which runs `claude mcp add bili` by name, failed with
 // "spawnSync claude ENOENT" (fwxkogaia on X). The real biliRun is given a

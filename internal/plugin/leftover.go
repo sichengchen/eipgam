@@ -14,9 +14,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A leftover is a dependency of plugins/package.json that no plugin on the
@@ -455,7 +455,7 @@ func dropBroken(err error, also ...string) []string {
 // the version the add was for, "" when that isn't known (a tag or a
 // range): with it, the package is to be in at that version, and a failure
 // that names no package is another's too, as Bun names a package of its
-// own it couldn't install. Bun names some failures in words magpie doesn't
+// own it couldn't install. Bun names some failures in words eipgam doesn't
 // read, and printed one that way before "Saved lockfile" with GoAnyAPI
 // installed from the dist branch at the version asked, and the add failed
 // (CHENGJIAHEGOXIS on X, v0.1.4210: "Failed to install 1 package").

@@ -6,24 +6,24 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentplug"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // goneAgentSrc is an agent plugin as agent-kilo is: a JSONC file, the
 // model under "model", a provider block of its own.
 const goneAgentSrc = `
-export const agent = { id: "kilo", name: "Kilo", config: "~/.config/kilo/kilo.jsonc", model: "model", prefix: "magpie/" };
+export const agent = { id: "kilo", name: "Kilo", config: "~/.config/kilo/kilo.jsonc", model: "model", prefix: "eipgam/" };
 export function connect({ gateway }) {
-  return { "provider.magpie": { npm: "@ai-sdk/openai-compatible", options: { baseURL: gateway.v1, apiKey: gateway.key } } };
+  return { "provider.eipgam": { npm: "@ai-sdk/openai-compatible", options: { baseURL: gateway.v1, apiKey: gateway.key } } };
 }
 `
 
 const goneAgentMine = "{\n  // mine\n  \"model\": \"anthropic/claude-sonnet-4-5\", // mine\n  \"provider\": {\n    \"anthropic\": {}\n  }\n}\n"
 
 // goneAgentHome has the kilo plugin, its kilo.jsonc as the user wrote it,
-// and kilo on magpie's a/m through `magpie kilo a/m`; it returns the file
+// and kilo on eipgam's a/m through `eipgam kilo a/m`; it returns the file
 // and the plugin's folder.
 func goneAgentHome(t *testing.T) (string, string) {
 	t.Helper()
@@ -59,7 +59,7 @@ func fileIs(t *testing.T, path, want string) {
 	}
 }
 
-// `magpie plugin off` and `magpie plugin rm` put the agent's config back
+// `eipgam plugin off` and `eipgam plugin rm` put the agent's config back
 // byte for byte before the plugin goes (#3810).
 func TestPluginOffAndRemovePutTheAgentBack(t *testing.T) {
 	for _, op := range []string{"off", "rm"} {
@@ -73,8 +73,8 @@ func TestPluginOffAndRemovePutTheAgentBack(t *testing.T) {
 	}
 }
 
-// With the plugin deleted on disk, `magpie kilo default` puts kilo.jsonc
-// back from what magpie stashed, where it said "unknown agent".
+// With the plugin deleted on disk, `eipgam kilo default` puts kilo.jsonc
+// back from what eipgam stashed, where it said "unknown agent".
 func TestGoneAgentDefault(t *testing.T) {
 	path, dir := goneAgentHome(t)
 	os.RemoveAll(dir)

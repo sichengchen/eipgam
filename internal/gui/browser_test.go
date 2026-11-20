@@ -11,11 +11,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// A browser magpie's folders are out of reach of downloads the extension,
+// A browser eipgam's folders are out of reach of downloads the extension,
 // pointed at the page's own address and given a gateway key of its own,
 // the same key each time while it is on.
 func TestBrowserExtensionDownload(t *testing.T) {
@@ -29,7 +29,7 @@ func TestBrowserExtensionDownload(t *testing.T) {
 		if w.Code != 200 {
 			return w.Code, ""
 		}
-		if got := w.Header().Get("Content-Disposition"); got != `attachment; filename="Magpie Browser Extension.zip"` {
+		if got := w.Header().Get("Content-Disposition"); got != `attachment; filename="eipgam Browser Extension.zip"` {
 			t.Errorf("Content-Disposition %q", got)
 		}
 		zr, err := zip.NewReader(bytes.NewReader(w.Body.Bytes()), int64(w.Body.Len()))
@@ -37,7 +37,7 @@ func TestBrowserExtensionDownload(t *testing.T) {
 			t.Fatal(err)
 		}
 		for _, f := range zr.File {
-			if f.Name == "Magpie Browser Extension/config.js" {
+			if f.Name == "eipgam Browser Extension/config.js" {
 				rc, _ := f.Open()
 				b, _ := io.ReadAll(rc)
 				rc.Close()
@@ -71,8 +71,8 @@ func TestBrowserExtensionDownload(t *testing.T) {
 	if !who.Browser || !who.ReadOnly || who.Issues {
 		t.Fatalf("the zip's key isn't held to the extension: %+v", who)
 	}
-	_, config = download(`{"at":"https://magpie.example.com/"}`)
-	if !strings.Contains(config, `GATEWAY = "wss://magpie.example.com"`) || keyOf(config) != first {
+	_, config = download(`{"at":"https://eipgam.example.com/"}`)
+	if !strings.Contains(config, `GATEWAY = "wss://eipgam.example.com"`) || keyOf(config) != first {
 		t.Fatalf("a second download got %q, want the same key at wss", config)
 	}
 	if keys, _ := access.List(); len(keys) != 1 || keys[0].Name != browserKeyName {
@@ -90,7 +90,7 @@ func TestBrowserExtensionDownload(t *testing.T) {
 	} else if gateway.OwnBrowserKey() != w.KeyID {
 		t.Fatal("the new key isn't recorded as the own browser's")
 	}
-	// one a magpie from before made with full access is held to the
+	// one a eipgam from before made with full access is held to the
 	// extension before it is handed out again, the same secret
 	old, err := access.Update("add-key", access.Change{Name: browserKeyName})
 	if err != nil {
@@ -102,10 +102,10 @@ func TestBrowserExtensionDownload(t *testing.T) {
 	}
 	_, config = download(`{"at":"http://localhost:3430"}`)
 	if keyOf(config) != old {
-		t.Fatal("the key a magpie from before made wasn't handed out again")
+		t.Fatal("the key a eipgam from before made wasn't handed out again")
 	}
 	if w, ok := access.Authenticate(old); !ok || !w.Browser || !w.ReadOnly {
-		t.Fatalf("the key a magpie from before made isn't held to the extension: %+v", w)
+		t.Fatalf("the key a eipgam from before made isn't held to the extension: %+v", w)
 	}
 	for _, at := range []string{"ftp://x", "http://u:p@x:1", "http://x/path", "http://x?k=1", "javascript:alert(1)"} {
 		b, _ := json.Marshal(map[string]string{"at": at})

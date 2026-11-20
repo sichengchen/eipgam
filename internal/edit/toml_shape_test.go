@@ -50,7 +50,7 @@ func tomlBigFile(size int) []string {
 	for i := 0; b.Len() < size; i++ {
 		fmt.Fprintf(&b, "[projects.\"/Users/me/p%d\"]\ntrust_level = \"trusted\" # note\n\n", i)
 	}
-	b.WriteString("model_provider = \"magpie\"\n")
+	b.WriteString("model_provider = \"eipgam\"\n")
 	return splitLines("model_provider = \"x\"\n" + b.String())
 }
 
@@ -96,7 +96,7 @@ func parseTOMLRatio(t *testing.T, small, large []string) (tomlFile, float64, tim
 
 // A big config.toml is parsed in a time that grows with its size, not its
 // square: Codex's own reached 1.5 MB, and each key's line was counted from
-// the top of the file, a third of a second at every magpie start.
+// the top of the file, a third of a second at every eipgam start.
 //
 // The check is a ratio of parses, not a bound in seconds: a runner at load
 // ~190 took the still-linear 3 MB parse past the old 1s bound and went red

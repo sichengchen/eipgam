@@ -17,11 +17,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/catalog"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/catalog"
 )
 
-// OpenCode Zen's free models are listed: magpie asks them as OpenCode does
+// OpenCode Zen's free models are listed: eipgam asks them as OpenCode does
 // (gateway/zenfree.go), so they answer.
 func TestOpenCodeZenListsFreeModels(t *testing.T) {
 	p, err := FromPreset("opencode-zen")

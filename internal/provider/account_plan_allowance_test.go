@@ -134,7 +134,7 @@ func TestAccountPlanKeyAllowance(t *testing.T) {
 }
 
 // A StepFun key is weighed by its Step Plan's windows, read with
-// magpie's sign-in; one not signed in is no windows, not an error.
+// eipgam's sign-in; one not signed in is no windows, not an error.
 func TestStepPlanKeyAllowance(t *testing.T) {
 	keyLimitsHome(t)
 	forgetPlanQuotas()

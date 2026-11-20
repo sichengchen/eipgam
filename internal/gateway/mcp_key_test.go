@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/mcpauth/mcpauthtest"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // keyHeldToMCP is a gateway key (and its secret) held to the MCP servers
@@ -26,21 +26,21 @@ func keyHeldToMCP(t *testing.T, name string, mcp ...string) string {
 }
 
 // A key held to some MCP servers and tools (wakaka on Discord) is held on
-// magpie's own servers: a server it isn't given answers 403, a server it
+// eipgam's own servers: a server it isn't given answers 403, a server it
 // is given some tools of lists those alone and refuses a call of another
 // before it runs, and OwnMCPPath leaves the others out. A key held to
 // nothing, and a request with no key, see every tool as before.
 func TestKeyMCPOwnServer(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	apis := newSearchAPIs(t)
 	if err := provider.SetSearchAPI(apis.api("tavily", "tvly-k")); err != nil {
 		t.Fatal(err)
 	}
 	s := New()
 	h := lanGuard(s.Handler())
-	fetchOnly := keyHeldToMCP(t, "Fetch", "magpie-web-search/web_fetch")
+	fetchOnly := keyHeldToMCP(t, "Fetch", "eipgam-web-search/web_fetch")
 	other := keyHeldToMCP(t, "Other", "github")
 	free := keyHeldToMCP(t, "Free")
 	auth := func(secret string) []string { return []string{"Authorization", "Bearer " + secret} }
@@ -57,7 +57,7 @@ func TestKeyMCPOwnServer(t *testing.T) {
 	if w.Code != 200 || !strings.Contains(w.Body.String(), `"web_fetch"`) || strings.Contains(w.Body.String(), `"name":"web_search"`) || !strings.Contains(w.Body.String(), "may not use the tool web_search") {
 		t.Fatalf("a batch: %d %s", w.Code, w.Body)
 	}
-	if w := mcpPost(h, here, mcpSearchCall, auth(other)...); w.Code != http.StatusForbidden || !strings.Contains(w.Body.String(), "may not use the MCP server magpie-web-search") {
+	if w := mcpPost(h, here, mcpSearchCall, auth(other)...); w.Code != http.StatusForbidden || !strings.Contains(w.Body.String(), "may not use the MCP server eipgam-web-search") {
 		t.Fatalf("a key not given the server: %d %s", w.Code, w.Body)
 	}
 	if len(apis.asked) != 0 {
@@ -88,22 +88,22 @@ func TestKeyMCPOwnServer(t *testing.T) {
 		}
 		return names
 	}
-	if got := own(auth(other)...); slices.Contains(got, "magpie-web-search") {
+	if got := own(auth(other)...); slices.Contains(got, "eipgam-web-search") {
 		t.Errorf("a key not given web search is told of it: %v", got)
 	}
-	if got := own(auth(fetchOnly)...); !slices.Contains(got, "magpie-web-search") {
+	if got := own(auth(fetchOnly)...); !slices.Contains(got, "eipgam-web-search") {
 		t.Errorf("a key given web_fetch isn't told of its server: %v", got)
 	}
-	if got := own(); !slices.Contains(got, "magpie-web-search") {
+	if got := own(); !slices.Contains(got, "eipgam-web-search") {
 		t.Errorf("no key: %v", got)
 	}
 
-	r := httptest.NewRequest("GET", "/v1/magpie/limit", nil)
+	r := httptest.NewRequest("GET", "/v1/eipgam/limit", nil)
 	r.RemoteAddr = here
 	r.Header.Set("Authorization", "Bearer "+fetchOnly)
 	lw := httptest.NewRecorder()
 	h.ServeHTTP(lw, r)
-	if !strings.Contains(lw.Body.String(), `"mcp":["magpie-web-search/web_fetch"]`) {
+	if !strings.Contains(lw.Body.String(), `"mcp":["eipgam-web-search/web_fetch"]`) {
 		t.Errorf("the key isn't told its MCP list: %s", lw.Body)
 	}
 }
@@ -179,7 +179,7 @@ func TestKeyMCPHub(t *testing.T) {
 	}
 }
 
-// /mcp/<server>, a server magpie signed in to: a key not given it is
+// /mcp/<server>, a server eipgam signed in to: a key not given it is
 // refused before the server is asked, a key given some of its tools has
 // a call of another answered with an error and never sent, and a batch
 // holding one refused whole.
@@ -223,7 +223,7 @@ func TestKeyMCPProxy(t *testing.T) {
 	}
 }
 
-// /mcp/run/<server>, a command magpie runs: a key given some of its tools
+// /mcp/run/<server>, a command eipgam runs: a key given some of its tools
 // is listed those alone, in a JSON answer or an event stream however it
 // is cut into writes, and a call of another never reaches the server. A
 // key given the server whole, and one held to nothing, get its answers as
@@ -281,7 +281,7 @@ func TestKeyMCPRun(t *testing.T) {
 	if m.Error == nil || !strings.Contains(m.Error.Message, "may not use the tool write") {
 		t.Fatalf("a call of write: %+v", m)
 	}
-	// the body is passed on as magpie read it (strictMCPBody)
+	// the body is passed on as eipgam read it (strictMCPBody)
 	if len(got) != 2 || got[0] != `fs {"id":2,"jsonrpc":"2.0","method":"tools/list"}` {
 		t.Fatalf("the server got %q", got)
 	}
@@ -298,7 +298,7 @@ func TestKeyMCPRun(t *testing.T) {
 	}
 }
 
-// An answer magpie can't read (an encoding it didn't ask for) isn't passed
+// An answer eipgam can't read (an encoding it didn't ask for) isn't passed
 // to a key held to some tools: the tools it lists couldn't be cut.
 func TestKeyMCPFilterRefusesUnreadable(t *testing.T) {
 	rec := httptest.NewRecorder()
@@ -313,10 +313,10 @@ func TestKeyMCPFilterRefusesUnreadable(t *testing.T) {
 	}
 }
 
-// A relayed server reads the body magpie passes on, keys as written: a
+// A relayed server reads the body eipgam passes on, keys as written: a
 // call of a tool the key may not use doesn't get past mcpKeyGuard by a key
 // Go's decoder reads in another case (NAME, METHOD, Params, paramſ), and a
-// key given twice reaches the server once, as magpie checked it.
+// key given twice reaches the server once, as eipgam checked it.
 func TestKeyMCPRelayReadsOneWay(t *testing.T) {
 	fresh(t)
 	var got []string
@@ -356,7 +356,7 @@ func TestKeyMCPRelayReadsOneWay(t *testing.T) {
 			t.Fatalf("%s: %d %s, the server got %q", body, w.Code, w.Body, got)
 		}
 	}
-	// a key given twice: the server is sent the one magpie read
+	// a key given twice: the server is sent the one eipgam read
 	for _, c := range []struct{ body, want string }{
 		{`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"write","name":"read"}}`, `{"id":3,"jsonrpc":"2.0","method":"tools/call","params":{"name":"read"}}`},
 		{`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"write"},"method":"tools/list"}`, `{"id":3,"jsonrpc":"2.0","method":"tools/list","params":{"name":"write"}}`},

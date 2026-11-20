@@ -6,9 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // An agent's pick of a model may be sent in its vendor's fast mode (#954),
@@ -48,7 +48,7 @@ func UltraPicks(agent string) []string {
 // Ultrafast: a ChatGPT model that one of Codex's accounts lists the tier
 // on (Account.Tiers), or a plugin's model, with fast mode, that the plugin
 // says its vendor serves at ultrafast (serviceTiers, #2514), or another
-// magpie's model its list offers ultrafast on (#1234), or a model OpenAI's
+// eipgam's model its list offers ultrafast on (#1234), or a model OpenAI's
 // API serves at ultrafast on that API (OpenAIUltra), or a GPT model on a
 // provider the user added by its address (OwnFast) that OpenAI offers
 // Ultrafast on: its API serves it so (OpenAIUltra), one of Codex's accounts
@@ -72,7 +72,7 @@ func UltraOn(p Provider, model string, ultra map[string]bool) bool {
 		return listed && CanFast(p, model) && pluginTierOn(pp.ID, m, "ultrafast")
 	}
 	if p.IsRemoteMagpie() {
-		// another magpie's model it offers Ultrafast on, beside Fast
+		// another eipgam's model it offers Ultrafast on, beside Fast
 		return CanFast(p, model) && slices.Contains(RemoteTiers(p, model), "ultrafast")
 	}
 	if OwnFast(p, model) {
@@ -81,7 +81,7 @@ func UltraOn(p Provider, model string, ultra map[string]bool) bool {
 	}
 	if p.Account == nil {
 		// OpenAI's own API, on its Responses, for the models its Ultrafast
-		// mode names (OpenAIUltra); a magpie in Docker has no Codex CLI
+		// mode names (OpenAIUltra); a eipgam in Docker has no Codex CLI
 		// whose list could say so (OoopsHh on X)
 		return HostOf(p.Responses) == "api.openai.com" && CanFast(p, model) && OpenAIUltra(model)
 	}
@@ -106,7 +106,7 @@ func UltraModels() map[string]bool {
 }
 
 // SetFastPick sends agent's requests for the entry id fast, or not. Only a
-// model with a fast mode magpie can ask for (CanFast) is switched on.
+// model with a fast mode eipgam can ask for (CanFast) is switched on.
 func SetFastPick(agent, id string, fast bool) error {
 	tier := ""
 	if fast {
@@ -126,7 +126,7 @@ func SetFastTier(agent, id, tier string) error {
 	switch tier {
 	case "", "priority", "ultrafast":
 	default:
-		return fmt.Errorf("magpie knows no tier %q", tier)
+		return fmt.Errorf("eipgam knows no tier %q", tier)
 	}
 	if tier != "" {
 		if IsGroupRef(id) {
@@ -134,13 +134,13 @@ func SetFastTier(agent, id, tier string) error {
 		}
 		p, model, ok := Resolve(id)
 		if !ok {
-			return fmt.Errorf("magpie knows no model %q", id)
+			return fmt.Errorf("eipgam knows no model %q", id)
 		}
 		if p.ID+"/"+model != id {
 			return fmt.Errorf("%s is not a model as <provider>/<model>", id)
 		}
 		if !CanFast(p, model) {
-			return fmt.Errorf("%s has no fast mode magpie can ask for", id)
+			return fmt.Errorf("%s has no fast mode eipgam can ask for", id)
 		}
 		if tier == "ultrafast" && !CanUltra(p, model) {
 			return fmt.Errorf("no account offers Ultrafast on %s", id)

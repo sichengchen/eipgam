@@ -1,4 +1,4 @@
-/* magpie — one quiet surface, real logos, controls that read as pop-up buttons. */
+/* eipgam — one quiet surface, real logos, controls that read as pop-up buttons. */
 :root {
   --bg: #f4f4f6;
   --card: #ffffff;
@@ -39,7 +39,7 @@
   --x-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 2l6 6M8 2l-6 6' stroke='%23000' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
   --amber: #b45309;
   --amber-soft: #fbf0df;
-  /* an agent magpie set up that no longer goes through it */
+  /* an agent eipgam set up that no longer goes through it */
   --drift: #ce2c31;
   --drift-soft: #feebec;
   --pop-bg: rgba(255, 255, 255, .94);
@@ -100,7 +100,7 @@
   --tk-s: #98d8a4; --tk-k: #c4b5fd; --tk-f: #93c5fd; --tk-n: #f2b544; --tk-v: #67e8f9; --tk-o: #f0abfc; --tk-c: #8b8b94;
   --c1: #a5b4fc; --c2: #7dd3fc; --c3: #6ee7b7; --c4: #fcd34d; --c5: #f9a8d4; --c6: #c4b5fd; --c7: #94a3b8;
 }
-/* magpie draws both themes itself. The root says so, as index.html's meta
+/* eipgam draws both themes itself. The root says so, as index.html's meta
    does, so a browser that repaints light pages dark (Chrome's Auto Dark
    Theme, Safari's Adaptive Dark Mode) leaves the page alone (xjp on X).
    The page under it takes the theme shown, so native controls, scrollbars
@@ -133,13 +133,13 @@
 html, body { height: 100%; }
 /* Wails' macOS Hide orders the window out; WebKit may keep the page marked
    visible there, so pause its infinite CSS animations until it is shown. */
-html.magpie-out-of-sight,
-html.magpie-out-of-sight *,
-html.magpie-out-of-sight *::before,
-html.magpie-out-of-sight *::after { animation-play-state: paused !important; }
+html.eipgam-out-of-sight,
+html.eipgam-out-of-sight *,
+html.eipgam-out-of-sight *::before,
+html.eipgam-out-of-sight *::after { animation-play-state: paused !important; }
 /* out of sight a while: nothing is drawn, so WebKit lets go of every
    layer's buffers, which it keeps for a hidden window (#5530) */
-html.magpie-asleep body { content-visibility: hidden; }
+html.eipgam-asleep body { content-visibility: hidden; }
 body {
   font: var(--ui-style, normal) var(--ui-weight, 400) 13px/1.4 var(--ui-font, var(--font)); font-stretch: var(--ui-stretch, 100%);
   color: var(--fg);
@@ -257,10 +257,10 @@ body:not(.window.linux) #winclose { display: none; }
    as GNOME draws its close button, and set a little apart from the icons */
 .icon.winclose { align-self: center; width: 22px; height: 22px; margin-left: 8px; border-radius: 50%; background: var(--pill); color: var(--fg-2); }
 .icon.winclose:hover { background: color-mix(in srgb, var(--fg) 12%, transparent); }
-/* the magpie flaps, flicks its tail and bobs when the window opens and on
+/* the eipgam flaps, flicks its tail and bobs when the window opens and on
    hover. It moves in pieces cut from the logo, and is drawn whole at rest, so
    the cuts never show. */
-.logo svg { display: block; overflow: visible; }
+.logo svg { display: block; overflow: visible; transform: scaleX(-1); }
 .logo .parts, .logo.wag .whole { display: none; }
 .logo.wag .parts { display: inline; }
 .logo .tail { transform-box: view-box; transform-origin: 14px 22px; }
@@ -319,7 +319,7 @@ body.panel .seg { display: none; }
    WebKit turns a whole svg on a layer snapped to the pixel grid, so off a
    whole pixel its ring circles about a point a pixel or so off its centre */
 .icon.spin svg > * { transform-box: view-box; transform-origin: 50% 50%; animation: spin .9s linear infinite; }
-/* a newer magpie is ready: a quiet pill before the header's icons. It
+/* a newer eipgam is ready: a quiet pill before the header's icons. It
    opens from nothing, so the title bar's tools beside the sidebar (app.js
    tools) slide over to make room, not jump 80px at once (#4057) */
 .update {
@@ -352,7 +352,7 @@ body.panel .seg { display: none; }
 .update-hide:focus-visible { opacity: 1; pointer-events: auto; } /* its own rule: Safari before 15.4 drops a list holding it */
 .update-hide:hover { color: var(--fg); }
 .update[hidden] + .update-hide, .update.busy + .update-hide { display: none; }
-/* a narrow header (fitTop): the magpie without its name, Update as its arrow,
+/* a narrow header (fitTop): the eipgam without its name, Update as its arrow,
    the tabs closer together, still in the middle of the window, and only when
    they don't fit there, in the row rather than over it: halfway between what
    is either side of them, not a third of the room their left and two thirds
@@ -370,7 +370,7 @@ body:not(.side-nav) #nav button[data-view="groups"], body.side-nav .rt-togroups 
 /* and when even that doesn't fit, the tabs scroll sideways rather than push the page wider */
 .top.packed .seg { min-width: 0; flex: 0 1 auto; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
 .top.packed .seg::-webkit-scrollbar { display: none; }
-/* magpie web on a phone, or a browser as narrow (phoneWeb): the magpie and
+/* eipgam web on a phone, or a browser as narrow (phoneWeb): the eipgam and
    the icons in the header, the pages a tab bar at the foot, as an iPhone
    app's: each tab its mark over its word, five at most, the fifth More
    when there are more (phonetabs.js). A strip that slid sideways hid the
@@ -432,12 +432,12 @@ body.side-nav { --side-w: 212px; padding-left: var(--side-w); }
    (app.js sideDrag): the reach a little either side of the line, the line
    itself unchanged */
 .side-edge { position: absolute; top: 0; bottom: 0; right: -4px; width: 8px; z-index: 1; cursor: col-resize; touch-action: none; }
-/* a finger needs more than a pointer's reach: an iPad's in magpie web */
+/* a finger needs more than a pointer's reach: an iPad's in eipgam web */
 @media (pointer: coarse) { .side-edge { right: -12px; width: 24px; } }
 .side-edge:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
 body.side-drag, body.side-drag * { cursor: col-resize !important; user-select: none; }
 /* its top is the title bar's left end: the sidebar's button (app.js
-   layoutNav), then the magpie, at the header's own height and left padding,
+   layoutNav), then the eipgam, at the header's own height and left padding,
    so the button is in the one place whether the sidebar shows or not, as
    Finder's and Notes' is (ztf4080 on X) */
 .side-top { flex: none; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px 0 14px; }
@@ -445,7 +445,7 @@ body.side-drag, body.side-drag * { cursor: col-resize !important; user-select: n
 /* a sidebar too narrow for the name keeps the bird (app.js fitTop) */
 .side-top.tight .brand > span:not(.logo) { display: none; }
 /* the traffic lights are the sidebar's top left, as in a Mac app's sidebar;
-   the button and the magpie beside them, level with them (see .top above) */
+   the button and the eipgam beside them, level with them (see .top above) */
 body.window.mac .side-top { height: calc(50px / var(--zoom, 1)); padding: calc(2px / var(--zoom, 1)) 0 0 calc(96px / var(--zoom, 1)); }
 .side-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 10px 10px; }
 /* laid from its end, Settings' button and the gateway's line kept where
@@ -815,7 +815,7 @@ body.panel #agents > .row .ag-handle::before { left: -8px; }
    hidden by hand, and has to be seen to be found (#479) */
 .ag-show:focus-visible { outline: 1.5px solid var(--fg-2); outline-offset: 1px; }
 .ag-show svg { color: var(--muted); }
-/* an agent whose config was rewritten since magpie set it: a line under
+/* an agent whose config was rewritten since eipgam set it: a line under
    its name saying so, and the button that sets it again */
 /* a drifted agent: a coral pill on its name's line — the row keeps its
    height and the pickers their columns */
@@ -826,12 +826,12 @@ body.panel #agents > .row .ag-handle::before { left: -8px; }
 .ag-fix:active { transform: scale(.96); }
 .ag-fix:focus-visible { outline: 1.5px solid var(--drift); outline-offset: 1px; }
 .ag-fix.busy { pointer-events: none; opacity: .7; }
-/* a desktop app to restart for magpie's change (agent.AppBehind): the
+/* a desktop app to restart for eipgam's change (agent.AppBehind): the
    row's waiting colour, not a fault's */
 .ag-fix.ag-restart { background: color-mix(in srgb, var(--amber) 13%, transparent); color: var(--amber); }
 .ag-fix.ag-restart:hover { background: color-mix(in srgb, var(--amber) 22%, transparent); }
 .ag-fix.ag-restart:focus-visible { outline-color: var(--amber); }
-/* the accounts that keep an agent going through magpie for failover (#1385) */
+/* the accounts that keep an agent going through eipgam for failover (#1385) */
 .ag-acc { display: inline-flex; align-items: center; flex: none; height: 20px; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--fg-2); font: inherit; font-size: 11.5px; line-height: 1; cursor: pointer; transition: background-color .15s, color .15s; }
 .ag-acc:hover { background: var(--pill); color: var(--fg); }
 .ag-acc:focus-visible { outline: 1.5px solid var(--fg-2); outline-offset: 1px; }
@@ -844,7 +844,7 @@ body.panel #agents > .row .ag-handle::before { left: -8px; }
 .ag-who .ok { display: none; flex: none; align-items: center; gap: 3px; color: var(--green); font-weight: 600; }
 .ag-who.done .ok { display: inline-flex; }
 .ag-fix.busy svg > * { transform-box: view-box; transform-origin: 50% 50%; animation: spin .8s linear infinite; }
-/* what has to listen at an address no agent reaches magpie by (#1013): long addresses wrap, and it can be copied */
+/* what has to listen at an address no agent reaches eipgam by (#1013): long addresses wrap, and it can be copied */
 .drift-why { overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; }
 /* the agent's CLI on its name's line (#202): its version faint, and a quiet
    pill that updates it when a newer one is out — the row keeps its height */
@@ -1126,7 +1126,7 @@ body.panel .row.pref.flash { border-radius: 10px; }
 .subscription-head b { font-size: 12.5px; font-weight: 600; }
 .subscription-account { display: flex; align-items: baseline; gap: 7px; margin: 0 0 6px; font-size: 11px; color: var(--fg-2); }
 /* every account after the first has a hairline over it, whatever the one
-   before ends with (normalcoder_ on X: magpie's own requests, which no
+   before ends with (normalcoder_ on X: eipgam's own requests, which no
    list of row kinds named, ran two accounts together) */
 .subscription-card.several > :not(.subscription-head, .quota-all) + .subscription-account { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line); }
 /* of several accounts, each a card of its own inside the provider's
@@ -1296,10 +1296,10 @@ body.panel .row.pref.flash { border-radius: 10px; }
 :root[data-colorblind="1"] :is(.qc-line, .qc-dash)[data-series="6"] { stroke-dasharray: 12 4 3.5 4 3.5 4; }
 .quota-resets { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 10.5px; font-variant-numeric: tabular-nums; }
 .quota-resets .text { margin-left: auto; flex: none; font-size: 11px; padding: 2px 7px; }
-/* a remote magpie's gateway key (#1547): its cycle, calls, used up */
+/* a remote eipgam's gateway key (#1547): its cycle, calls, used up */
 .quota-keyline { margin-top: 7px; font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .quota-keyline.spent { color: var(--red); }
-/* magpie's own requests, apart from the agents' (#1839) */
+/* eipgam's own requests, apart from the agents' (#1839) */
 .own-badge { display: inline-flex; align-items: center; flex: none; margin-left: 6px; font-size: 9.5px; font-weight: 550; line-height: 16px; padding: 0 6px; border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent); border-radius: 5px; color: var(--muted); background: color-mix(in srgb, var(--muted) 8%, var(--card)); white-space: nowrap; vertical-align: 1px; }
 .led .who .own-badge { margin-left: 0; }
 .quota-own { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 7px; font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -1364,7 +1364,7 @@ body.masked :hover > .acct-eye, body.masked .pq-card:hover .acct-eye, body.maske
 @media (prefers-reduced-motion: reduce) { .quota-refresh { transition: none; } }
 .skeleton { display: block; border-radius: 5px; background: linear-gradient(90deg, var(--skel, var(--pill)) 25%, var(--skel-hi, var(--pill-hover)) 45%, var(--skel, var(--pill)) 65%); background-size: 240% 100%; animation: skeleton-shift 1.4s ease-in-out infinite; }
 @keyframes skeleton-shift { from { background-position: 100% 0; } to { background-position: -100% 0; } }
-/* magpie's bird on what is loading, placed by its feet (skelBird, and the
+/* eipgam's bird on what is loading, placed by its feet (skelBird, and the
    plugin page's README strings) */
 .sk-bird { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 1; pointer-events: none; }
 .sk-bird.roam { position: fixed; z-index: 32; }
@@ -2646,7 +2646,7 @@ body .foot .status.lift { white-space: normal; overflow-wrap: anywhere; text-ove
 .pop li.reset .ic { opacity: .75; }
 .pop li.custom .v { color: var(--fg); }
 .pop li.custom .n { color: var(--muted); }
-/* the models on the agent's own account through magpie, folded into one
+/* the models on the agent's own account through eipgam, folded into one
    row (#496): a chevron says it opens, turned down while open */
 .pop li.fold .v { color: var(--muted); }
 .pop li.fold .chev { display: inline-flex; margin-left: auto; flex: none; color: var(--faint); transition: transform .18s cubic-bezier(.22, 1, .36, 1); }
@@ -2711,7 +2711,7 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 /* the status card: a dot where the logo would be, the URL as a pill */
 .gwcard { margin: 4px 0 2px; }
 /* the gateway's mark, the sidebar's glyph in a tile, its two lights the
-   state: green running, amber not or served by an older magpie */
+   state: green running, amber not or served by an older eipgam */
 .gw { min-height: 52px; padding: 8px 10px 8px 11px; gap: 8px 11px; flex-wrap: wrap; }
 .gw .gw-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; flex: none; color: var(--fg-2); background: var(--pill); box-shadow: inset 0 0 0 1px var(--line-2); }
 .gw .gw-mark svg { display: block; }
@@ -2983,7 +2983,7 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 .badge.off { background: var(--pill); color: var(--muted); }
 .badge.free { background: var(--green-soft); color: var(--green); }
 /* a model's context, when it is a large one: grey, as it is a fact, not a warning */
-/* which way a model goes (#726): through magpie, or straight to its vendor */
+/* which way a model goes (#726): through eipgam, or straight to its vendor */
 .badge.path { letter-spacing: .02em; text-transform: none; white-space: nowrap; }
 .badge.path.via { background: var(--accent-soft); color: var(--accent); }
 .badge.path.direct { background: var(--pill); color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
@@ -3216,7 +3216,7 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 .abal-form [aria-invalid], .abal-form .abal-f-m.bad { border-color: var(--red); }
 .abal-form .abal-f-bar { display: flex; justify-content: flex-end; margin-top: 4px; }
 .acc .acap-held { color: var(--fg); }
-/* held for magpie's requests, not the agent signed in to it: a warning */
+/* held for eipgam's requests, not the agent signed in to it: a warning */
 .acc .acap-held.acap-direct { color: var(--amber); }
 .accts .acc.with-am { flex-wrap: wrap; row-gap: 3px; }
 .acc .acct-models { flex-basis: 100%; display: grid; gap: 7px; padding: 6px 0 2px 25px; cursor: auto; }
@@ -3834,9 +3834,9 @@ body:not(.side-nav) #addSheet > .row-head.stuck::before { opacity: 1; box-shadow
 .editor .segs { max-width: 100%; flex-wrap: wrap; }
 .opt { position: relative; z-index: 1; white-space: nowrap; height: 22px; padding: 0 10px; border-radius: 5px; font-size: 12px; color: var(--muted); transition: color .18s var(--ease), transform .14s var(--ease); }
 .opt.on { color: var(--mark); }
-/* how often magpie checks for updates, while it doesn't by itself */
+/* how often eipgam checks for updates, while it doesn't by itself */
 .update-every-row.off .segs, .update-restart-row.off .segs, .search-all-row.off .segs { opacity: .55; }
-/* Command line: each shell's `magpie`, a dot for whether it runs this app */
+/* Command line: each shell's `eipgam`, a dot for whether it runs this app */
 .cli-row .sub { overflow-wrap: anywhere; }
 .cli-shells { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
 .cli-shell { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--muted); min-height: 22px; }
@@ -4275,7 +4275,7 @@ body:not(.side-nav) #view-settings .set-head.stuck::before { opacity: 1; box-sha
 .view.plugin-page { padding: 0; }
 .plugin-frame { flex: 1; display: block; width: 100%; min-height: 240px; border: 0; background: transparent; }
 .view.plugin-page > .slot-error { margin: 0 12px; }
-/* a plugin's panels in magpie's own pages (P5): each a card, as tall as
+/* a plugin's panels in eipgam's own pages (P5): each a card, as tall as
    what its frame draws, under its title */
 .plugin-slot { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .plugin-slot[hidden] { display: none; }
@@ -5210,7 +5210,7 @@ body.window .row.agent .who.with-models { flex-wrap: wrap; row-gap: 0; }
 .am-only .lib-switch { flex: none; }
 .am-only > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .am-foot .am-reset { flex: none; }
-/* the agent's own models, beside magpie's in its picker or not (#1642) */
+/* the agent's own models, beside eipgam's in its picker or not (#1642) */
 .am-own { display: flex; align-items: center; gap: 6px; min-width: 0; margin-top: 8px; font-size: 12px; color: var(--fg-2); cursor: pointer; }
 .am-own .lib-switch { flex: none; }
 .am-own > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -5229,7 +5229,7 @@ body.window .row.agent .who.with-models { flex-wrap: wrap; row-gap: 0; }
 .am-order.sorting .am-or { transition: transform .22s cubic-bezier(.22, 1, .36, 1); cursor: grabbing; }
 .am-order .am-or.dragging { position: relative; z-index: 2; transition: none; background: var(--pop-bg); box-shadow: 0 6px 18px rgba(20, 22, 30, .12), 0 0 0 1px var(--line); }
 
-/* ---- an agent's switch onto magpie ---------------------------------------- */
+/* ---- an agent's switch onto eipgam ---------------------------------------- */
 /* the rows drawn again under the line said beneath each name had WebKit's
    scroll anchoring move the list a few px before the page was held back
    (claude-direct.test.cjs); the page holds the reader itself */
@@ -5242,10 +5242,10 @@ body.window .row.agent.gone > .ag-conn { margin-left: auto; }
 .ag-conn-row .ag-conn-said { flex: 1; min-width: 0; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ag-conn-row .lib-switch { cursor: pointer; }
 
-/* 「接入」 in the window: a row says whether the agent goes through magpie —
+/* 「接入」 in the window: a row says whether the agent goes through eipgam —
    a line under its name, a link that opens it, its switch */
 .ag-lead { margin: 0 2px 12px; font-size: 12.5px; color: var(--fg-2); }
-/* a magpie of another version serving the gateway (plugins/gateway gatewaySkewLine) */
+/* a eipgam of another version serving the gateway (plugins/gateway gatewaySkewLine) */
 .gw-skew { margin: 0 0 12px; }
 .gw-skew .gw-skew-err { color: var(--fg-2); }
 .ag-lead b { font-weight: 600; color: var(--fg); }
@@ -5377,7 +5377,7 @@ body.window .row + .row.agent.conn > .who { min-height: 41px; } /* the line abov
 /* Claude Desktop's "largest window only" switch (#1272): its words beside it, the hint after them */
 .ag-longest, .ag-isolated, .ag-iso-claude { cursor: pointer; }
 .ag-longest-say, .ag-isolated-say, .ag-iso-claude-say { color: var(--fg-2); }
-/* the Claude Magpie app's own Claude Code folder (#6459), folded under Advanced */
+/* the Claude eipgam app's own Claude Code folder (#6459), folded under Advanced */
 .ag-iso-more > summary, .prefs-more > summary { font-size: 12px; line-height: 18px; color: var(--fg-2); list-style: none; display: inline-flex; align-items: center; gap: 5px; padding: 3px 0; border-radius: 4px; cursor: pointer; transition: color .12s ease; }
 .ag-iso-more > summary::-webkit-details-marker, .prefs-more > summary::-webkit-details-marker { display: none; }
 .ag-iso-more > summary::before, .prefs-more > summary::before { content: ""; flex: none; width: 10px; height: 10px; background: var(--muted); transition: transform .2s cubic-bezier(.23, 1, .32, 1), background-color .12s ease;
@@ -5518,7 +5518,7 @@ input[type="checkbox"]:disabled { opacity: .45; }
 
 /* a disabled model's pattern, as typed (#1867): an id or a glob */
 .disabled-model .name { font-family: var(--code); font-size: 12px; overflow-wrap: anywhere; }
-/* Settings › Models › Images: the way to the Magpie Image tool, under its words (#2091) */
+/* Settings › Models › Images: the way to the eipgam Image tool, under its words (#2091) */
 .lib-way .link { padding-left: 0; padding-right: 0; white-space: normal; text-align: start; }
 /* Settings › Proxy's Test result (#2076): under the row's text */
 .row.pref .sub.proxy-check { margin-top: 3px; white-space: normal; overflow-wrap: anywhere; }
@@ -5567,7 +5567,7 @@ body .row.agent .ag-prefs .row.pref .who { display: block; }
 .editor .prov-prefs .warm-at { flex: 0 1 auto; min-width: 0; max-width: 100%; flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
 /* an account's own time goes under its picks, not above them: a pick pressed stays where it was */
 .editor .prov-prefs .warm-at:not(.times) { flex-wrap: wrap-reverse; }
-/* the editor's Claude Code runs as row switches it; magpie web as a
+/* the editor's Claude Code runs as row switches it; eipgam web as a
    gateway has that row's switch off, so this one shows there */
 /* Settings' search finds them; not searching, the links stay out */
 #view-settings:not(.set-searching) :is(#agentPrefLinks, #provPrefLinks) { display: none; }

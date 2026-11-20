@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/yetone/magpie/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lastgood"
 )
 
 // LoadChecked tells settings that aren't there (no error) from settings

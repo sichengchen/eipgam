@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // paultian on Discord: in gateway mode the Sessions page and Usage ›
@@ -136,7 +136,7 @@ func TestGatewayModeListsNoOwnSessions(t *testing.T) {
 		t.Fatalf("gateway mode off: the trash has no %s: %+v", trashed, trash)
 	}
 
-	// magpie web's page, put in gateway mode by Settings
+	// eipgam web's page, put in gateway mode by Settings
 	webPage.Store(true)
 	t.Cleanup(func() {
 		webPage.Store(false)

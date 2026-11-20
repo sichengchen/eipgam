@@ -10,22 +10,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // codexTitlesTo is where a request Codex makes for a thread's title goes
 // (#705): a hidden turn of its own (thread_title,
 // thread_title_reconsideration), which Codex sends on a model it chooses
 // itself — gpt-5.6-luna when signed in to ChatGPT, its provider list's
-// default or first model when magpie is its provider. "" for a request
+// default or first model when eipgam is its provider. "" for a request
 // that isn't one, or one left to go as Codex sent it; "off", or the model
 // that writes the title: settings.CodexTitles, else the conversation's
 // model (codexSideTo). Codex reads a title only as the {"title": …} its
 // text.format asks for, which a model behind the Chat or Anthropic API is never shown, so
-// a title on one of magpie's models goes through codexTitle whoever picked
-// it (#743: Codex as magpie's provider had none at all, the model's plain
+// a title on one of eipgam's models goes through codexTitle whoever picked
+// it (#743: Codex as eipgam's provider had none at all, the model's plain
 // answer turned down).
 func codexTitlesTo(h http.Header, body []byte, ours bool, session func() string) string {
 	if !isTitleKind(requestCallKind(h, requestSessionMetadata(h, body))) {
@@ -38,29 +38,29 @@ func codexTitlesTo(h http.Header, body []byte, ours bool, session func() string)
 }
 
 // CodexSideModel is the model this machine's Codex is set to when it is
-// one of magpie's, picked beside Codex's ChatGPT sign-in, "" otherwise
+// one of eipgam's, picked beside Codex's ChatGPT sign-in, "" otherwise
 // (agent.CodexSideModel).
 var CodexSideModel func() string
 
 // codexSideTo is the model that answers one of the Codex app's hidden
 // side turns (a thread's title, description or one-line summary) when no
-// setting names one: the model Codex asked for when it is one of magpie's
-// (ours: the request came to magpie's own API, where every model is), "" to
+// setting names one: the model Codex asked for when it is one of eipgam's
+// (ours: the request came to eipgam's own API, where every model is), "" to
 // leave it as Codex sent it. The app asks for these on a model of its own
-// (gpt-6-luna) whatever the conversation is on, so with one of magpie's
+// (gpt-6-luna) whatever the conversation is on, so with one of eipgam's
 // models picked beside the ChatGPT sign-in every one of them went to
 // ChatGPT and spent its allowance, and failed with it once it was used up
 // (atom_Ray on X: an hour on a third-party model took 2% of the 5-hour
 // window). Those go on the session's model (session: Server.codexSideSession),
 // as the conversation's turns do; on Codex's own, as Codex sent them.
 //
-// With magpie as Codex's provider the model asked for is not the user's
+// With eipgam as Codex's provider the model asked for is not the user's
 // pick either: the app asks for a new conversation's title on
 // ephemeralGenerationModel, and when the provider's list lacks it, on the
 // list's default model or else its first (the app's oX), never on the
 // model picked for the conversation (tenacious_eagle_96548 on Discord:
 // the conversation on A/dsf4.1, its title on B/qwen3.7). Those go on the
-// session's model too when magpie knows it, else on the model asked for.
+// session's model too when eipgam knows it, else on the model asked for.
 func codexSideTo(body []byte, ours bool, session func() string) string {
 	m := modelOf(body)
 	if ours {
@@ -91,7 +91,7 @@ func codexDescriptionsTo(h http.Header, body []byte, ours bool, session func() s
 	if to := settings.Shared().CodexDescriptions; to != "" {
 		return to
 	}
-	// Codex on a magpie model gets no schema upstream (#743), so an empty
+	// Codex on a eipgam model gets no schema upstream (#743), so an empty
 	// setting still wraps the model it asked for, as titles do.
 	return codexSideTo(body, ours, session)
 }
@@ -113,7 +113,7 @@ func codexSummariesTo(h http.Header, body []byte, ours bool, session func() stri
 // on a model it picks as it does for a title, with the text in a schema
 // of its own ({"message"}, {"title","body"}). A model behind the Chat or
 // Anthropic API never sees that schema and answers in plain text, which
-// the app turns down, so on one of magpie's models the answer is handed
+// the app turns down, so on one of eipgam's models the answer is handed
 // back in the schema's shape (codexCommit). "" leaves the request as Codex
 // sent it.
 func codexCommitsTo(h http.Header, body []byte, ours bool, session func() string) string {
@@ -255,7 +255,7 @@ func commitJSON(said string, shape titleShape) string {
 // thread's own model, so a long thread on an expensive model pays for
 // every prediction. "" leaves the request as Codex sent it; "off", or a
 // model's id that writes it: settings.CodexPredictions, else the model
-// Codex asked for when it is one of magpie's, else the session's
+// Codex asked for when it is one of eipgam's, else the session's
 // (codexSideTo), whose plain answer is wrapped as titles' and
 // descriptions' are.
 func codexPredictionsTo(h http.Header, body []byte, ours bool, session func() string) string {
@@ -312,7 +312,7 @@ func (s *Server) codexTitle(w http.ResponseWriter, r *http.Request, body []byte,
 	ctx := context.WithValue(r.Context(), titleCheckKey{}, check)
 	ctx = context.WithValue(ctx, titleShapeKey{}, &shape)
 	if to == settings.Shared().CodexTitles {
-		// the model picked for titles in magpie's settings, not by the
+		// the model picked for titles in eipgam's settings, not by the
 		// caller's key (#882)
 		ctx = magpieChose(ctx)
 	}
@@ -340,7 +340,7 @@ func (s *Server) codexTitle(w http.ResponseWriter, r *http.Request, body []byte,
 			"content": []any{map[string]any{"type": "output_text", "text": t, "annotations": []any{}}}})
 	} else if res.Status == "incomplete" {
 		// cut short before any title (max_output_tokens): Codex is told so,
-		// as the vendor told magpie, not that the model finished with
+		// as the vendor told eipgam, not that the model finished with
 		// nothing to say (#1466). Codex takes it as a stream error and asks
 		// again, as it does when its own backend answers so.
 		writeTitleEnd(w, id, nil, res.Usage, "incomplete", res.IncompleteDetails)
@@ -359,7 +359,7 @@ func (s *Server) codexDescription(w http.ResponseWriter, r *http.Request, body [
 		// a finished reply with no message: the app's thread_description
 		// helper reads no {"description"} in it as none (an "empty" result,
 		// not an error) and leaves the thread's description as it was
-		s.sentNowhere(w, r, body, "Descriptions off", "Codex descriptions are off in Codex's settings on magpie's Agents page: answered with no description, sent nowhere", nil)
+		s.sentNowhere(w, r, body, "Descriptions off", "Codex descriptions are off in Codex's settings on eipgam's Agents page: answered with no description, sent nowhere", nil)
 		return
 	}
 	s.codexShaped(w, r, body, to, "description", true, descriptionJSON, noDescription)
@@ -377,7 +377,7 @@ func (s *Server) codexSummary(w http.ResponseWriter, r *http.Request, body []byt
 // codexShaped answers one of Codex's hidden side turns by the model to,
 // its answer handed back as shaped makes it the JSON the turn's schema
 // asks for, which a model behind another API never sees; an answer
-// shaped finds nothing in fails as missing says. chose: magpie picked the
+// shaped finds nothing in fails as missing says. chose: eipgam picked the
 // model in its settings rather than the caller (magpieChose).
 func (s *Server) codexShaped(w http.ResponseWriter, r *http.Request, body []byte, to, what string, chose bool, shaped func(said string) string, missing func(said string) string) {
 	body, _ = codexInput(body, true)
@@ -428,7 +428,7 @@ func (s *Server) codexShaped(w http.ResponseWriter, r *http.Request, body []byte
 func (s *Server) codexPrediction(w http.ResponseWriter, r *http.Request, body []byte, to string) {
 	if to == "off" {
 		s.sentNowhere(w, r, body, "Predictions off",
-			"Codex composer predictions are off in Codex's settings on magpie's Agents page: answered with no prediction, sent nowhere", []any{predictionItem(fmt.Sprintf("resp_magpie_%d", time.Now().UnixNano()), noSuggestion)})
+			"Codex composer predictions are off in Codex's settings on eipgam's Agents page: answered with no prediction, sent nowhere", []any{predictionItem(fmt.Sprintf("resp_magpie_%d", time.Now().UnixNano()), noSuggestion)})
 		return
 	}
 	body, _ = codexInput(body, true)
@@ -661,25 +661,25 @@ func noTitle(said string) string {
 // a finished reply with nothing in it, which Codex takes as no title and
 // leaves the thread named as it was (its thread_title.rs: no message, or
 // no {"title": …} in it, sets none). The Routing and Usage views have it
-// as the title request it was, answered by magpie and sent to no one.
+// as the title request it was, answered by eipgam and sent to no one.
 func (s *Server) codexTitleOff(w http.ResponseWriter, r *http.Request, body []byte) {
-	s.sentNowhere(w, r, body, "Titles off", "Codex titles are off in Codex's settings on magpie's Agents page: answered with no title, sent nowhere", nil)
+	s.sentNowhere(w, r, body, "Titles off", "Codex titles are off in Codex's settings on eipgam's Agents page: answered with no title, sent nowhere", nil)
 }
 
 // sentNowhere answers a hidden turn of Codex's that a setting turned off
 // with these output items, sending it nowhere: who and why are what the
 // Routing and Usage views say of it, the request kept there as what it
-// was, answered by magpie.
+// was, answered by eipgam.
 func (s *Server) sentNowhere(w http.ResponseWriter, r *http.Request, body []byte, who, why string, out []any) {
 	s.answeredHere(r, provider.Responses, body, who, why, func() {
 		writeTitleReply(w, fmt.Sprintf("resp_magpie_%d", time.Now().UnixNano()), out, nil)
 	})
 }
 
-// answeredHere records a request magpie answered itself with write,
-// sending it nowhere: the Routing view has it tried on magpie alone, who
+// answeredHere records a request eipgam answered itself with write,
+// sending it nowhere: the Routing view has it tried on eipgam alone, who
 // naming why, and the Recent calls and the usage ledger have it as
-// answered by magpie, rejected, with why as its error, so Usage and the
+// answered by eipgam, rejected, with why as its error, so Usage and the
 // Sessions it belongs to say what became of it.
 func (s *Server) answeredHere(r *http.Request, from provider.Protocol, body []byte, who, why string, write func()) {
 	start := time.Now()
@@ -687,19 +687,19 @@ func (s *Server) answeredHere(r *http.Request, from provider.Protocol, body []by
 	metadata := requestSessionMetadata(r.Header, body)
 	kind := requestCallKind(r.Header, metadata)
 	model := modelOf(body)
-	seat := Weighed{ID: "magpie", Provider: "magpie", Name: "magpie", Who: who, Kind: "provider", Model: model}
-	by := callerOf(r) // as it is recorded: another magpie's agent by its own name
+	seat := Weighed{ID: "eipgam", Provider: "eipgam", Name: "eipgam", Who: who, Kind: "provider", Model: model}
+	by := callerOf(r) // as it is recorded: another eipgam's agent by its own name
 	tr := s.trace.beginFor(r, Route{Time: start, Agent: by.agent, Session: sessionOf(r.Header), ParentSession: titleParentSession(r.Header, metadata, kind),
-		Kind: kind, Model: model, Provider: "magpie", Order: []Weighed{seat}, Tries: []Try{{ID: seat.ID, Model: model, Start: start}}})
+		Kind: kind, Model: model, Provider: "eipgam", Order: []Weighed{seat}, Tries: []Try{{ID: seat.ID, Model: model, Start: start}}})
 	write()
 	ms := time.Since(start).Milliseconds()
 	s.trace.update(tr, func(t *Route) {
 		t.Tries[0].Done, t.Tries[0].Status, t.Tries[0].Millis, t.Tries[0].Error = true, 200, ms, why
 		t.Done, t.Status, t.Error, t.Millis = true, 200, why, ms
 	})
-	s.record(Call{Route: tr.ID, Time: start, From: from, To: from, Model: model, Provider: "magpie",
+	s.record(Call{Route: tr.ID, Time: start, From: from, To: from, Model: model, Provider: "eipgam",
 		Agent: by.agent, Via: by.via, Kind: kind, Status: 200, Millis: ms, Error: why})
-	appendUsage(r, usage.Record{RouteID: tr.ID, Time: start, Agent: by.agent, Via: by.via, Provider: "magpie", Model: model, Requested: model,
+	appendUsage(r, usage.Record{RouteID: tr.ID, Time: start, Agent: by.agent, Via: by.via, Provider: "eipgam", Model: model, Requested: model,
 		Millis: ms, Status: 200, Rejected: true, Error: why, Session: sessionOf(r.Header), NativeSession: nativeSessionOf(r.Header),
 		Kind: kind, Endpoint: r.URL.Path})
 }
@@ -749,7 +749,7 @@ func writeTitleEnd(w http.ResponseWriter, id string, out []any, used json.RawMes
 // titleShape is the object a title request's text.format asks for: its
 // string properties' bounds and which are required. Codex 0.160's TUI asks
 // for {"title"} alone; another of its builds for a description beside the
-// title, both required and nothing else allowed (#743: magpie gave it the
+// title, both required and nothing else allowed (#743: eipgam gave it the
 // title alone, so it kept the first message as the thread's name).
 type titleShape struct {
 	Properties map[string]struct {
@@ -840,11 +840,11 @@ func titleJSON(said string, shape titleShape) string {
 	return string(b)
 }
 
-// codexSideEffort is a Codex side call's body for to, one of magpie's
+// codexSideEffort is a Codex side call's body for to, one of eipgam's
 // models, asking a reasoning effort to takes. Codex asks low for a title
 // only on its own title model, and none (no effort) on any other; its
 // auto-review asks low only where the model lists low, else the model's
-// default, which Codex has none of for a model of magpie's whose levels
+// default, which Codex has none of for a model of eipgam's whose levels
 // it isn't told. A model that needs an effort turned those away with 400
 // (cybercaius on Discord). With the model's levels known, a call asking
 // no effort, or an off one the model hasn't, is asked at its lowest on

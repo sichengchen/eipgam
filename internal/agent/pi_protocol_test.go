@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// xiaomanweiman on X: Pi's row picks the protocol magpie's models are
-// asked on, in place of typing providers.magpie.api into models.json.
+// xiaomanweiman on X: Pi's row picks the protocol eipgam's models are
+// asked on, in place of typing providers.eipgam.api into models.json.
 // Unpicked it is as before (Chat for the provider, each model on its
 // native API); a pick puts every model on it; an api typed by hand still
 // shows and wins until a pick is made after it.
@@ -24,8 +24,8 @@ func TestPiProtocolPicked(t *testing.T) {
 		t.Fatal(err)
 	}
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"magpie","defaultModel":"relay/glm-4.6"}`)
-	writeFile(t, piModels, `{"providers":{"magpie":{"name":"magpie","api":"openai-completions","models":[]}}}`)
+	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"eipgam","defaultModel":"relay/glm-4.6"}`)
+	writeFile(t, piModels, `{"providers":{"eipgam":{"name":"eipgam","api":"openai-completions","models":[]}}}`)
 	setUpInMagpie("pi")
 	SyncCatalog()
 
@@ -43,7 +43,7 @@ func TestPiProtocolPicked(t *testing.T) {
 		t.Fatal("Pi has no protocol field")
 	}
 	get := func(k string) string {
-		v, _ := edit.GetJSON(piModels, "providers.magpie."+k)
+		v, _ := edit.GetJSON(piModels, "providers.eipgam."+k)
 		return strings.Trim(v, `"`)
 	}
 	model := func(id string) (api, base string) {
@@ -129,7 +129,7 @@ func TestPiProtocolPicked(t *testing.T) {
 	}
 
 	// typed by hand: it shows, and stays
-	if err := edit.SetJSON(piModels, edit.KV{Path: "providers.magpie.api", Value: "openai-responses"}); err != nil {
+	if err := edit.SetJSON(piModels, edit.KV{Path: "providers.eipgam.api", Value: "openai-responses"}); err != nil {
 		t.Fatal(err)
 	}
 	SyncCatalog()

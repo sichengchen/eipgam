@@ -15,8 +15,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // signInEvent is what a hook's onSignIn is handed for a: the provider,
@@ -44,7 +44,7 @@ func tellHooksOfSignIns(ctx context.Context) {
 
 // keepHooksToldOfSignIns looks a minute after the gateway starts and every
 // two minutes after, as the app's alert does: a mark is set as a request is
-// refused, so a look reads magpie's own files and asks no vendor.
+// refused, so a look reads eipgam's own files and asks no vendor.
 func keepHooksToldOfSignIns(ctx context.Context) {
 	t := time.NewTimer(time.Minute)
 	defer t.Stop()

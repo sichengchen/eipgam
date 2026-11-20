@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // notAnAPIReply turns a 2xx reply that can't be a model API's answer into

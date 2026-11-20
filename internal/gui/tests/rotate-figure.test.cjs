@@ -17,7 +17,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROTATE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ROTATE_ASSETS || path.join(__dirname, "../assets"));
 const sub = {
   icon: "generic", catalog: "", models: [{ id: "gpt-5.5", name: "GPT-5.5", on: true }], agents: [], fallback: [], headers: {}, routing: "rotate", affinity: "", ready: true,
   id: "codex", name: "Codex", chat: "", responses: "", anthropic: "", keyList: [],
@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, theme));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: sub.name }).first().click();
         await page.locator(".editor .accts").first().waitFor();
         if (lang !== "en") assert.deepEqual(await page.evaluate(([keys, lang]) => keys.filter((k) => !I18N[lang][k]), [[HINTS[0], HINTS[3], HINTS[4]], lang]), [], "translated");
@@ -150,7 +150,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, theme));
-        await page.goto("http://magpie.test/?view=groups");
+        await page.goto("http://eipgam.test/?view=groups");
         const card = page.locator(".rt-group", { hasText: "Sol" });
         await card.waitFor();
         await card.locator("button", { hasText: new RegExp(`^${await tr(page, "Edit")}$`) }).click();

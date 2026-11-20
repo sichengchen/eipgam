@@ -5,7 +5,7 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // Subscriptions whose sign-ins a sync leaves out on one computer

@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/routes"
 )
 
 // keyed is a vendor that says which key each request came with, and
@@ -232,7 +232,7 @@ func TestOpenRouterFreeAccountRateLimitKeepsProviderRest(t *testing.T) {
 	}
 }
 
-// A model two providers serve is a group magpie finds; a group the user
+// A model two providers serve is a group eipgam finds; a group the user
 // makes routes over its members in the order it names them, the next one
 // taking a request the one before can't.
 func TestRoutingGroups(t *testing.T) {
@@ -282,7 +282,7 @@ func TestRoutingGroups(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// removing one magpie found hides it; showing it brings it back
+	// removing one eipgam found hides it; showing it brings it back
 	if err := provider.DeleteGroup("auto-m"); err != nil {
 		t.Fatal(err)
 	}

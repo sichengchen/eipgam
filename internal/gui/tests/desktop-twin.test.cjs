@@ -1,14 +1,14 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Claude Magpie as a twin (xMopf7RF on X, #6459): Claude Desktop's row,
-// not on magpie, has a "Use Claude Magpie" button beside its switch on a
+// Claude eipgam as a twin (xMopf7RF on X, #6459): Claude Desktop's row,
+// not on eipgam, has a "Use Claude eipgam" button beside its switch on a
 // Mac, not in its status line. It turns the
-// Claude Magpie app on and then connects Desktop, which puts only that
-// app on magpie; the user's own Desktop isn't wired. The button is gone
-// once Desktop is on magpie, and isn't there off a Mac (no isolated in the
-// state). With Claude Magpie made already but Desktop not on magpie (the
+// Claude eipgam app on and then connects Desktop, which puts only that
+// app on eipgam; the user's own Desktop isn't wired. The button is gone
+// once Desktop is on eipgam, and isn't there off a Mac (no isolated in the
+// state). With Claude eipgam made already but Desktop not on eipgam (the
 // reporter of 0.1.4076: "没看到按钮"), or the app deleted since, the button
-// is still there, and the status line says the switch puts Claude Magpie
-// on magpie, not the user's own Desktop with a separate profile.
+// is still there, and the status line says the switch puts Claude eipgam
+// on eipgam, not the user's own Desktop with a separate profile.
 // No click scrolls the page. Every language, wide and narrow, both
 // engines. No backend: faked here.
 const assert = require("node:assert/strict");
@@ -27,7 +27,7 @@ function fixture(lang, offered = true, made = {}) {
   const state = () => ({
     agents: [{
       id: "claude-desktop", name: "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired,
-      fields: [{ key: "provider", label: "provider", value: wired ? "magpie" : "", options: [{ value: "magpie", label: "magpie", icon: "magpie" }] }],
+      fields: [{ key: "provider", label: "provider", value: wired ? "eipgam" : "", options: [{ value: "eipgam", label: "eipgam", icon: "eipgam" }] }],
       models: { shown: 2, listed: 2, by: [{ name: "OpenCode Go", icon: "opencode", n: 2 }], names: ["DeepSeek V4 Pro", "Exo Free"] },
       ...(offered ? { isolated: { ...iso } } : {}),
     }],
@@ -42,7 +42,7 @@ function fixture(lang, offered = true, made = {}) {
     if (url.pathname === "/api/settings/desktop-isolated") {
       posts.push(["isolated", req.postDataJSON()]);
       iso.on = req.postDataJSON().on;
-      iso.launcher = "/test/Applications/Claude Magpie.app";
+      iso.launcher = "/test/Applications/Claude eipgam.app";
       return json(state());
     }
     if (url.pathname === "/api/agents/connect/claude-desktop") {
@@ -64,11 +64,11 @@ function fixture(lang, offered = true, made = {}) {
 }
 
 const W = {
-  en: { st: "Not connected · connecting puts Claude Magpie on magpie; your own Claude Desktop stays signed in with Anthropic", b: "Use Claude Magpie", tip: "A second Claude Desktop, on magpie, in Applications. Your own Claude Desktop isn't changed. macOS only.", ok: "Open Claude Magpie from Applications" },
-  zh: { st: "未接入 · 接入的是 Claude Magpie，你自己的 Claude Desktop 保持 Anthropic 登录", b: "启用 Claude Magpie", tip: "在「应用程序」里加一个接入 magpie 的 Claude Desktop 分身，你自己的 Claude Desktop 保持不变。仅限 macOS。", ok: "从「应用程序」打开 Claude Magpie" },
-  "zh-TW": { st: "未接入 · 接入的是 Claude Magpie，你自己的 Claude Desktop 維持 Anthropic 登入", b: "啟用 Claude Magpie", tip: "在「應用程式」裡加一個接入 magpie 的 Claude Desktop 分身，你自己的 Claude Desktop 保持不變。僅限 macOS。", ok: "從「應用程式」打開 Claude Magpie" },
-  ja: { st: "未接続 · 接続するのは Claude Magpie です。ご自身の Claude Desktop は Anthropic にサインインしたままです", b: "Claude Magpie を使う", tip: "magpie につながる 2 つ目の Claude Desktop を「アプリケーション」に追加します。ご自身の Claude Desktop は変わりません。macOS のみ。", ok: "「アプリケーション」から Claude Magpie を開いてください" },
-  de: { st: "Nicht verbunden · verbunden wird Claude Magpie; dein eigenes Claude Desktop bleibt bei Anthropic angemeldet", b: "Claude Magpie nutzen", tip: "Ein zweites Claude Desktop auf magpie unter Programme. Dein eigenes Claude Desktop bleibt, wie es ist. Nur macOS.", ok: "Öffne Claude Magpie unter Programme" },
+  en: { st: "Not connected · connecting puts Claude eipgam on eipgam; your own Claude Desktop stays signed in with Anthropic", b: "Use Claude eipgam", tip: "A second Claude Desktop, on eipgam, in Applications. Your own Claude Desktop isn't changed. macOS only.", ok: "Open Claude eipgam from Applications" },
+  zh: { st: "未接入 · 接入的是 Claude eipgam，你自己的 Claude Desktop 保持 Anthropic 登录", b: "启用 Claude eipgam", tip: "在「应用程序」里加一个接入 eipgam 的 Claude Desktop 分身，你自己的 Claude Desktop 保持不变。仅限 macOS。", ok: "从「应用程序」打开 Claude eipgam" },
+  "zh-TW": { st: "未接入 · 接入的是 Claude eipgam，你自己的 Claude Desktop 維持 Anthropic 登入", b: "啟用 Claude eipgam", tip: "在「應用程式」裡加一個接入 eipgam 的 Claude Desktop 分身，你自己的 Claude Desktop 保持不變。僅限 macOS。", ok: "從「應用程式」打開 Claude eipgam" },
+  ja: { st: "未接続 · 接続するのは Claude eipgam です。ご自身の Claude Desktop は Anthropic にサインインしたままです", b: "Claude eipgam を使う", tip: "eipgam につながる 2 つ目の Claude Desktop を「アプリケーション」に追加します。ご自身の Claude Desktop は変わりません。macOS のみ。", ok: "「アプリケーション」から Claude eipgam を開いてください" },
+  de: { st: "Nicht verbunden · verbunden wird Claude eipgam; dein eigenes Claude Desktop bleibt bei Anthropic angemeldet", b: "Claude eipgam nutzen", tip: "Ein zweites Claude Desktop auf eipgam unter Programme. Dein eigenes Claude Desktop bleibt, wie es ist. Nur macOS.", ok: "Öffne Claude eipgam unter Programme" },
 };
 const cd = '.row.agent[data-id="claude-desktop"]';
 const twin = `${cd} .ag-twin`;
@@ -83,9 +83,9 @@ async function open(engine, lang, width, offered, t, made) {
   const fx = fixture(lang, offered, made);
   await page.route("**/*", fx.serve);
   t.after(() => browser.close());
-  await page.goto("http://magpie.test/");
+  await page.goto("http://eipgam.test/");
   await page.locator(cd).waitFor({ state: "attached" });
-  // not on magpie, its row is among the folded ones
+  // not on eipgam, its row is among the folded ones
   if (await page.locator(`.agent-fold ${cd}`).count()) {
     await page.locator(".agent-more").click();
     await page.waitForFunction(() => !document.querySelector(".agent-fold-inner")?.inert);
@@ -96,7 +96,7 @@ async function open(engine, lang, width, offered, t, made) {
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(W)) {
     for (const width of [1100, 640]) {
-      test(`${engine} ${lang} ${width}px: Use Claude Magpie makes the app and puts it alone on magpie`, async (t) => {
+      test(`${engine} ${lang} ${width}px: Use Claude eipgam makes the app and puts it alone on eipgam`, async (t) => {
         const w = W[lang];
         const { page, fx, errors } = await open(engine, lang, width, true, t);
         const b = page.locator(twin);
@@ -130,12 +130,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
     }
   }
-  // Claude Magpie made, Desktop not on magpie: with the app there, and
+  // Claude eipgam made, Desktop not on eipgam: with the app there, and
   // with it deleted since (no launcher)
-  for (const made of [{ on: true, launcher: "/test/Applications/Claude Magpie.app" }, { on: true }]) {
+  for (const made of [{ on: true, launcher: "/test/Applications/Claude eipgam.app" }, { on: true }]) {
     for (const lang of Object.keys(W)) {
       for (const width of [1100, 640]) {
-        test(`${engine} ${lang} ${width}px: Claude Magpie made${made.launcher ? "" : ", app gone"}, not on magpie: the button and a line naming it`, async (t) => {
+        test(`${engine} ${lang} ${width}px: Claude eipgam made${made.launcher ? "" : ", app gone"}, not on eipgam: the button and a line naming it`, async (t) => {
           const w = W[lang];
           const { page, fx, errors } = await open(engine, lang, width, true, t, made);
           const b = page.locator(twin);
@@ -155,7 +155,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
     }
   }
-  test(`${engine}: no Use Claude Magpie where Desktop can't run so`, async (t) => {
+  test(`${engine}: no Use Claude eipgam where Desktop can't run so`, async (t) => {
     const { page, errors } = await open(engine, "en", 1100, false, t);
     await page.locator(`${cd} .ag-st`).waitFor();
     assert.equal(await page.locator(twin).count(), 0);

@@ -120,7 +120,7 @@ func (c *digestChallenge) authorize(method, uri, user, pass string, nc uint32) s
 
 // parseDigest picks the challenge to answer from a response's
 // WWW-Authenticate headers: SHA-256 over MD5 when the server offers both.
-// nil when there is no Digest challenge magpie can answer.
+// nil when there is no Digest challenge eipgam can answer.
 func parseDigest(values []string) *digestChallenge {
 	var best *digestChallenge
 	for _, v := range values {

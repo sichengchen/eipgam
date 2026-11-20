@@ -9,7 +9,7 @@ import (
 )
 
 // hermesConfig is a Hermes config.yaml as the user keeps it: their model,
-// a comment, a server of their own with settings magpie doesn't write, and
+// a comment, a server of their own with settings eipgam doesn't write, and
 // an SSE one.
 const hermesConfig = `# my Hermes settings
 model:
@@ -33,7 +33,7 @@ toolsets:
 // agent a plugin adds now, naming this format (pluginMCP's "hermes"), so
 // the format is tried on the file itself: each server is written there
 // beside the user's settings, comments and servers, read back, and only
-// magpie's taken out again.
+// eipgam's taken out again.
 func TestHermesMCPFormat(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "config.yaml")
 	write(t, p, hermesConfig)
@@ -119,7 +119,7 @@ func TestHermesMCPFormat(t *testing.T) {
 		}
 	}
 
-	// a timeout or enabled the user sets on magpie's server stays when it
+	// a timeout or enabled the user sets on eipgam's server stays when it
 	// is written again
 	got = strings.Replace(read(t, p), "    url: https://example.com/mcp\n", "    url: https://example.com/mcp\n    enabled: false\n    timeout: 90\n", 1)
 	write(t, p, got)

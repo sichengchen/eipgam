@@ -19,7 +19,7 @@ package provider
 // A token is refreshed the way its owner would: kiro-cli is asked to
 // refresh its own first, and only when it can't is the token refreshed
 // here and written back where it came from, so the CLI and the IDE go on
-// with the one magpie now holds (a refresh may replace the refresh token).
+// with the one eipgam now holds (a refresh may replace the refresh token).
 
 import (
 	"bytes"
@@ -38,10 +38,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // KiroExecutable finds kiro-cli, which refreshes its own sign-in; a var so
@@ -222,7 +222,7 @@ func readKiroIDE() (kiroCred, bool) {
 }
 
 // readKiroAt is one account's sign-in: the key saved on the provider, one
-// magpie signed in in home, or, with neither, Kiro's own: kiro-cli's, else
+// eipgam signed in in home, or, with neither, Kiro's own: kiro-cli's, else
 // the IDE's.
 func readKiroAt(key, home string) (kiroCred, bool) {
 	if key != "" {
@@ -263,7 +263,7 @@ var kiroAuthCache struct {
 }
 
 // KiroAuthOf is a Kiro account's credentials: those of the key saved on
-// the provider, of the account magpie signed in in home, or of Kiro's own
+// the provider, of the account eipgam signed in in home, or of Kiro's own
 // sign-in when both are "". A token about to expire is refreshed first;
 // stale, after Kiro turned one down, refreshes it now.
 func KiroAuthOf(ctx context.Context, key, home string, stale bool) (KiroAuth, error) {
@@ -276,9 +276,9 @@ func KiroAuthOf(ctx context.Context, key, home string, stale bool) (KiroAuth, er
 	if !ok {
 		delete(kiroAuthCache.m, id)
 		if home != "" {
-			return KiroAuth{}, errors.New("this Kiro account's sign-in is gone; add it again in magpie")
+			return KiroAuth{}, errors.New("this Kiro account's sign-in is gone; add it again in eipgam")
 		}
-		return KiroAuth{}, errors.New("Kiro isn't signed in; add the Kiro subscription in magpie, sign in with `kiro-cli login` or the Kiro IDE, or save a Kiro API key on the provider")
+		return KiroAuth{}, errors.New("Kiro isn't signed in; add the Kiro subscription in eipgam, sign in with `kiro-cli login` or the Kiro IDE, or save a Kiro API key on the provider")
 	}
 	if kiroAuthCache.m == nil {
 		kiroAuthCache.m = map[string]kiroCred{}
@@ -622,7 +622,7 @@ func kiroProfile(ctx context.Context, c kiroCred) (string, error) {
 	return "", last
 }
 
-// kiroLimits is GetUsageLimits' answer, as far as magpie reads it.
+// kiroLimits is GetUsageLimits' answer, as far as eipgam reads it.
 type kiroLimits struct {
 	SubscriptionInfo struct {
 		Title string `json:"subscriptionTitle"`
@@ -654,7 +654,7 @@ func kiroUsageLimits(ctx context.Context, a KiroAuth, email bool) (kiroLimits, e
 }
 
 // plan is the subscription's name as Kiro gives it, "KIRO FREE", said the
-// way the rest of magpie's plans are: "Kiro Free".
+// way the rest of eipgam's plans are: "Kiro Free".
 func (l kiroLimits) plan() string {
 	words := strings.Fields(strings.ToLower(l.SubscriptionInfo.Title))
 	for i, w := range words {

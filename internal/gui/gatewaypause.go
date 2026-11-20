@@ -12,27 +12,27 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Pausing the gateway (me2seeks on X): told the gateway runs while magpie
-// does, the user quit magpie with Disconnect and quit to have it stopped,
+// Pausing the gateway (me2seeks on X): told the gateway runs while eipgam
+// does, the user quit eipgam with Disconnect and quit to have it stopped,
 // and asked for a switch. Pause, from the tray's menu, Settings › General
 // or the Gateway page, does what Disconnect and quit does without the
 // quit: each connected agent is disconnected as its row's Disconnect does
-// (its own settings put back, so it works without magpie), then the
+// (its own settings put back, so it works without eipgam), then the
 // gateway stops listening. Resume serves it again and connects the agents
 // that were connected at the pause. The pause is kept in
 // gateway-paused.json, this computer's alone (no backup or sync carries
-// it), so a magpie started again, or one updated, stays paused, and
+// it), so a eipgam started again, or one updated, stays paused, and
 // nothing starts the gateway meanwhile (serveGatewayLocked): not the
 // watch for a gateway gone, a port change, the Gateway page's Start
 // (which resumes) nor a handover. Connecting an agent, or picking one of
-// magpie's models for it, while paused resumes: the agent would otherwise
+// eipgam's models for it, while paused resumes: the agent would otherwise
 // point at a gateway that isn't there, the 502s of quitask.go. It is the
-// app's own: magpie web is a server whose job is the gateway.
+// app's own: eipgam web is a server whose job is the gateway.
 
 // pausable says this process may pause its gateway: the app's (Run).
 var pausable atomic.Bool
@@ -54,7 +54,7 @@ func pausePath() string { return filepath.Join(settings.Dir(), "gateway-paused.j
 
 // gatewayPaused says whether this process's gateway is paused, and the
 // agents to connect again on resume. A file that is there but can't be
-// read or parsed is a pause whose agents aren't known: only magpie writes
+// read or parsed is a pause whose agents aren't known: only eipgam writes
 // it, and a gateway started on a bad read would serve agents put back on
 // their own settings.
 func gatewayPaused() (bool, []string) {
@@ -99,7 +99,7 @@ var (
 	pauseFind       = agent.Find
 )
 
-// wiredOf is those of as with magpie in their config.
+// wiredOf is those of as with eipgam in their config.
 func wiredOf(as []*agent.Agent) []*agent.Agent {
 	var out []*agent.Agent
 	for _, a := range as {

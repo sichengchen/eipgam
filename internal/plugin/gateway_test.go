@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 func gatewayFixture(t *testing.T, source string) string {
@@ -31,7 +31,7 @@ func gatewayFixture(t *testing.T, source string) string {
 }
 
 // TestHasGatewayLooksOnceASecond: every request asks HasGateway, so it
-// reads the plugins at most once a second (#3725), and at once after magpie
+// reads the plugins at most once a second (#3725), and at once after eipgam
 // wrote a file of its own.
 func TestHasGatewayLooksOnceASecond(t *testing.T) {
 	sandbox(t)
@@ -48,7 +48,7 @@ func TestHasGatewayLooksOnceASecond(t *testing.T) {
 	}
 	filememo.Forget()
 	if HasGateway() {
-		t.Fatal("magpie's own write wasn't looked at")
+		t.Fatal("eipgam's own write wasn't looked at")
 	}
 	if err := os.WriteFile(pkg, []byte(`{"magpie":{"hooks":"./request.js"}}`), 0o644); err != nil {
 		t.Fatal(err)
@@ -504,7 +504,7 @@ func gatewayRequest(ctx context.Context, body []byte, info GatewayContext) []byt
 	return run.Body
 }
 
-// A JS gateway middleware (*.gateway.js, magpie.gateway) and a request hook
+// A JS gateway middleware (*.gateway.js, eipgam.gateway) and a request hook
 // (*.hooks.js, magpie.hooks) never claim the same entry: a hook importing
 // node:fs loaded as middleware too would show "didn't load" for a plugin
 // that works.
@@ -531,10 +531,10 @@ func TestGatewayHookNamesApartFromMiddleware(t *testing.T) {
 			t.Fatal(err)
 		}
 		if got := Gateway(dir) != ""; got != hook {
-			t.Errorf("magpie.%s: hook %v, want %v", key, got, hook)
+			t.Errorf("eipgam.%s: hook %v, want %v", key, got, hook)
 		}
 		if f, _ := Middleware(dir); hook && f != "" {
-			t.Errorf("magpie.%s is loaded as middleware too", key)
+			t.Errorf("eipgam.%s is loaded as middleware too", key)
 		}
 	}
 }

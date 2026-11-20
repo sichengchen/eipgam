@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // exportResources flushes one record and returns the resource attributes
@@ -86,32 +86,32 @@ func exportResources(t *testing.T, attrs, name string) [2]map[string]string {
 // A server identity set in OTEL_RESOURCE_ATTRIBUTES reaches the resource
 // of both signals, as the collector receives them (#5167).
 func TestOTelResourceAttributes(t *testing.T) {
-	magpie := map[string]string{"service.name": "magpie"}
+	eipgam := map[string]string{"service.name": "eipgam"}
 	for _, tc := range []struct {
 		name, attrs, service string
 		want                 map[string]string
 	}{
-		{"default", "", "", magpie},
-		{"whitespace", " \t ", "", magpie},
-		{"server", "service.instance.id=magpie-prod-01,host.name=server-a,deployment.environment.name=production", "", map[string]string{
-			"service.name": "magpie", "service.instance.id": "magpie-prod-01", "host.name": "server-a", "deployment.environment.name": "production",
+		{"default", "", "", eipgam},
+		{"whitespace", " \t ", "", eipgam},
+		{"server", "service.instance.id=eipgam-prod-01,host.name=server-a,deployment.environment.name=production", "", map[string]string{
+			"service.name": "eipgam", "service.instance.id": "eipgam-prod-01", "host.name": "server-a", "deployment.environment.name": "production",
 		}},
 		{"override and duplicate", "service.name=first,service.name=custom,host.name=old,host.name=new", "", map[string]string{"service.name": "custom", "host.name": "new"}},
 		{"encoding and empty", " label%2Ckey = a%2Cb%3Dc%20d+e , empty=,host.name=%E6%9C%BA%E5%99%A8", "", map[string]string{
-			"service.name": "magpie", "label,key": "a,b=c d+e", "empty": "", "host.name": "机器",
+			"service.name": "eipgam", "label,key": "a,b=c d+e", "empty": "", "host.name": "机器",
 		}},
-		{"unencoded UTF-8 kept", "host.name=机器", "", map[string]string{"service.name": "magpie", "host.name": "机器"}},
-		{"empty service name is unset", "service.name=,host.name=a", "", map[string]string{"service.name": "magpie", "host.name": "a"}},
+		{"unencoded UTF-8 kept", "host.name=机器", "", map[string]string{"service.name": "eipgam", "host.name": "机器"}},
+		{"empty service name is unset", "service.name=,host.name=a", "", map[string]string{"service.name": "eipgam", "host.name": "a"}},
 		{"OTEL_SERVICE_NAME wins", "service.name=from-attrs,host.name=a", " gw-eu ", map[string]string{"service.name": "gw-eu", "host.name": "a"}},
 		{"OTEL_SERVICE_NAME alone", "", "gw-eu", map[string]string{"service.name": "gw-eu"}},
 		{"blank OTEL_SERVICE_NAME is unset", "service.name=custom", "  ", map[string]string{"service.name": "custom"}},
 		{"OTEL_SERVICE_NAME over a discarded variable", "host.name=a,broken", "gw-eu", map[string]string{"service.name": "gw-eu"}},
-		{"missing equals", "host.name=server-a,broken", "", magpie},
-		{"trailing comma", "host.name=server-a,", "", magpie},
-		{"empty key", "host.name=server-a, =value", "", magpie},
-		{"bad key escape", "host.name=server-a,bad%ZZ=value", "", magpie},
-		{"bad value escape", "host.name=server-a,label=bad%ZZ", "", magpie},
-		{"not UTF-8 once decoded", "host.name=server-a,label=%FF", "", magpie},
+		{"missing equals", "host.name=server-a,broken", "", eipgam},
+		{"trailing comma", "host.name=server-a,", "", eipgam},
+		{"empty key", "host.name=server-a, =value", "", eipgam},
+		{"bad key escape", "host.name=server-a,bad%ZZ=value", "", eipgam},
+		{"bad value escape", "host.name=server-a,label=bad%ZZ", "", eipgam},
+		{"not UTF-8 once decoded", "host.name=server-a,label=%FF", "", eipgam},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			got := exportResources(t, tc.attrs, tc.service)

@@ -6,20 +6,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // yikelizi9438 on Discord (Windows, the Codex app): "This chat uses
 // custom, but your current provider is openai. Switch to custom to
 // continue", and "Model unavailable" in the composer. Before #4347
-// (v0.1.2652) a magpie model picked beside the ChatGPT sign-in took the
+// (v0.1.2652) a eipgam model picked beside the ChatGPT sign-in took the
 // user's model_provider (CC Switch's "custom") down, keeping it in the
 // stash for the Disconnect: Codex went on OpenAI by the base URL, and
 // every thread started on custom was refused. Nothing moved them, as
-// bringOver moves a provider's threads only onto magpie as Codex's
+// bringOver moves a provider's threads only onto eipgam as Codex's
 // provider. Now, beside the sign-in with the user's provider in the
 // stash and gone from the top, its threads move to OpenAI, where Codex
-// resumes them through magpie, and back to it at the Disconnect, which
+// resumes them through eipgam, and back to it at the Disconnect, which
 // puts the provider back; OpenAI's own threads stay on OpenAI.
 func TestCodexBesideBringsTakenProvidersThreads(t *testing.T) {
 	const (

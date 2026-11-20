@@ -10,14 +10,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 // A gateway key held to some MCP servers and tools (access.Key.MCP,
 // wakaka on Discord) is held to them on every route that reaches one:
 //
-//   - magpie's own servers (web search, image recognition, image
-//     generation, Magpie Browser, the plugin tools) and the hub all answer
+//   - eipgam's own servers (web search, image recognition, image
+//     generation, eipgam Browser, the plugin tools) and the hub all answer
 //     through serveMCP, which refuses a server the key may not use, leaves
 //     the tools it may not use out of tools/list and refuses a tools/call
 //     of one (mcpKeyServe);
@@ -25,15 +25,15 @@ import (
 //     the key by the server behind it: hubServersOf and hubTools leave out
 //     what the key may not use, and hubMCPRun, which every hub call goes
 //     through, refuses it;
-//   - the relays, /mcp/<name> (a remote server magpie signed in to) and
-//     /mcp/run/<name> (a command magpie runs), pass the server's own
+//   - the relays, /mcp/<name> (a remote server eipgam signed in to) and
+//     /mcp/run/<name> (a command eipgam runs), pass the server's own
 //     messages on, so mcpKeyGuard reads the request for a tools/call and
 //     the answer for a tools/list (mcpToolsFilter);
 //   - OwnMCPPath lists only the servers the key may use.
 
 // hubServerName is what serveMCP names the hub by; its tools are the
 // Library's servers', which the hub holds to the key itself.
-const hubServerName = "magpie"
+const hubServerName = "eipgam"
 
 // keyMCPServerRefused is what a key is told of a server it may not use.
 func keyMCPServerRefused(who access.Identity, server string) string {
@@ -204,7 +204,7 @@ func mcpKeyGuard(w http.ResponseWriter, r *http.Request, server string) (_ http.
 		body, msgs, err := strictMCPBody(body)
 		// a message that can't be read can't be told a tool it may use
 		if err != nil {
-			writeJSON(w, http.StatusBadRequest, map[string]any{"jsonrpc": "2.0", "id": nil, "error": map[string]any{"code": -32700, "message": "parse error: the body isn't a JSON-RPC message magpie can read one way: " + err.Error()}})
+			writeJSON(w, http.StatusBadRequest, map[string]any{"jsonrpc": "2.0", "id": nil, "error": map[string]any{"code": -32700, "message": "parse error: the body isn't a JSON-RPC message eipgam can read one way: " + err.Error()}})
 			return nil, nil, nil, false
 		}
 		for _, m := range msgs {
@@ -266,7 +266,7 @@ func (f *mcpToolsFilter) WriteHeader(code int) {
 		f.w.Header().Del("Content-Length")
 		f.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		f.w.WriteHeader(http.StatusBadGateway)
-		io.WriteString(f.w, "the MCP server answered in an encoding ("+enc+") magpie can't read, so it can't hold the answer to the tools this gateway key may use\n")
+		io.WriteString(f.w, "the MCP server answered in an encoding ("+enc+") eipgam can't read, so it can't hold the answer to the tools this gateway key may use\n")
 		return
 	case strings.HasPrefix(ct, "application/json"):
 		f.mode, f.status = mcpFilterJSON, code
@@ -385,11 +385,11 @@ var (
 )
 
 // strictMCPBody is body, a JSON-RPC message or a batch of them, written
-// again from what magpie read of it, and the messages read. Go's decoder
+// again from what eipgam read of it, and the messages read. Go's decoder
 // matches a key in any case and keeps a key's last value, while a relayed
 // server reads keys as written and may keep the first: so a key that is
 // one of the envelope's or params' in another case is refused, and a key
-// given twice reaches the server once, with the value magpie checked.
+// given twice reaches the server once, with the value eipgam checked.
 func strictMCPBody(body []byte) ([]byte, []mcpMessage, error) {
 	t := bytes.TrimSpace(body)
 	if len(t) > 0 && t[0] == '[' {

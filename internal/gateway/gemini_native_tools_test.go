@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // A Gemini client's own Google tools — googleSearch, urlContext,
 // codeExecution — reach Gemini as it sent them, and what googleSearch
 // found comes back to it as the candidate's groundingMetadata
-// (daoche_wuzui on X: magpie's Gemini dropped URL context and Google
+// (daoche_wuzui on X: eipgam's Gemini dropped URL context and Google
 // Search).
 func TestGeminiClientKeepsGoogleTools(t *testing.T) {
 	s, calls := aiStudio(t, nil)

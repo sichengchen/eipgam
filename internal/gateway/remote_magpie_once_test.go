@@ -10,18 +10,18 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// YeYaka88 on X: magpie on a laptop with another computer's magpie as a
-// Remote magpie provider ran its gateway, routing and masking, and then
+// YeYaka88 on X: eipgam on a laptop with another computer's eipgam as a
+// Remote eipgam provider ran its gateway, routing and masking, and then
 // the remote ran each again. A request is masked once, where it is sent
 // from, and a failure the remote answered after its own retries and
-// patience isn't sent there again by this magpie's.
+// patience isn't sent there again by this eipgam's.
 
-// maskOnceSetup is a vendor ("fake", Chat) on a remote magpie served in
-// this process, and "office", the Remote magpie provider for it; both
+// maskOnceSetup is a vendor ("fake", Chat) on a remote eipgam served in
+// this process, and "office", the Remote eipgam provider for it; both
 // mask by the same settings, as they share them here. seen is what the
 // vendor was sent; masked counts the masker's passes.
 func maskOnceSetup(t *testing.T) (remote *httptest.Server, seen func() (string, http.Header), masked *atomic.Int32) {
@@ -73,17 +73,17 @@ func TestRemoteMagpieMasksOnce(t *testing.T) {
 		t.Fatalf("the vendor was sent the word unmasked: %s", body)
 	}
 	if n := masked.Load(); n != 1 {
-		t.Errorf("the request was masked %d times on its way, want once (here, not again on the remote magpie)", n)
+		t.Errorf("the request was masked %d times on its way, want once (here, not again on the remote eipgam)", n)
 	}
 	if v := header.Get(MaskedAsHeader); v != "" {
 		t.Errorf("the vendor was sent %s: %q", MaskedAsHeader, v)
 	}
 }
 
-// The remote masks a request again unless a magpie says it masked it by
+// The remote masks a request again unless a eipgam says it masked it by
 // what the remote masks by: one masked by other settings, or another
 // build's masker, is masked again, and so is a request that only names
-// the header without being a magpie's.
+// the header without being a eipgam's.
 func TestRemoteMagpieMasksWhatItIsNotToldWasMasked(t *testing.T) {
 	remote, seen, masked := maskOnceSetup(t)
 	send := func(ua, as string) string {
@@ -113,14 +113,14 @@ func TestRemoteMagpieMasksWhatItIsNotToldWasMasked(t *testing.T) {
 	for _, c := range []struct{ name, ua, as string }{
 		{"no header", magpieUA(), ""},
 		{"other settings", magpieUA(), "0.0.1/" + strings.Repeat("0", 32)},
-		{"not a magpie's request", "curl/8.0", own},
+		{"not a eipgam's request", "curl/8.0", own},
 	} {
 		masked.Store(0)
 		if body := send(c.ua, c.as); strings.Contains(body, "acmecorp") || masked.Load() != 1 {
 			t.Errorf("%s: masked %d times, the vendor sent %s", c.name, masked.Load(), body)
 		}
 	}
-	// told by a magpie that masks alike, it goes on as it came
+	// told by a eipgam that masks alike, it goes on as it came
 	masked.Store(0)
 	send(magpieUA(), own)
 	if n := masked.Load(); n != 0 {
@@ -159,11 +159,11 @@ func TestRemoteMagpieRoutedFailureNotAskedAgain(t *testing.T) {
 		t.Fatalf("%d %s", code, body)
 	}
 	if n := asked.Load(); n != 1 {
-		t.Errorf("the remote magpie was asked %d times for one request, its own retries and patience spent each time; want once", n)
+		t.Errorf("the remote eipgam was asked %d times for one request, its own retries and patience spent each time; want once", n)
 	}
 }
 
-// A request masked by another build of magpie with the same settings is
+// A request masked by another build of eipgam with the same settings is
 // not masked again, whichever build is newer (Luxzinw on X); one from a
 // build before the masker last changed, or a header that isn't a build's,
 // is.

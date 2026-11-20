@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Short-lived keys (xazaj on X, moving off an enterprise LLM gateway: an
@@ -32,7 +32,7 @@ const (
 
 // expiredKept is how long an expired key stays in the store after it
 // expires, so a client still sending it is told it expired rather than
-// that magpie doesn't know it; Prune removes it after that.
+// that eipgam doesn't know it; Prune removes it after that.
 const expiredKept = time.Hour
 
 // Refused is why Check turned away a key it knows: expired, or bounded by
@@ -121,7 +121,7 @@ func IssueKey(in Issue) (Issued, error) {
 		}
 		p := keys[i]
 		if !p.Issues || p.Issuer != "" {
-			return Issued{}, errors.New("This gateway key can't issue keys: turn it on with magpie gateway-key issuer <id> on")
+			return Issued{}, errors.New("This gateway key can't issue keys: turn it on with eipgam gateway-key issuer <id> on")
 		}
 		if !p.Expires.IsZero() && expires.After(p.Expires) {
 			expires = p.Expires // never outlives its issuer
@@ -278,7 +278,7 @@ func Check(secret string) (Identity, error) {
 // Current: who, a key Check took earlier, is still one it takes now, by
 // the same secret: not turned off, removed, expired, rotated, nor
 // bounded by an issuer that no longer lets it in. A connection a key
-// opened (Magpie Browser's WebSocket) is closed once it isn't. false
+// opened (eipgam Browser's WebSocket) is closed once it isn't. false
 // for no key, and when the store can't be read.
 func Current(who Identity) bool {
 	if who.KeyID == "" {
@@ -305,13 +305,13 @@ func Current(who Identity) bool {
 // ErrNoKey: there is no gateway key with that id.
 var ErrNoKey = errors.New("Key not found")
 
-// ScopeBrowser holds the key id to connecting the Magpie Browser
-// extension alone (Key.Browser), read-only for a magpie from before
-// that, and unable to issue keys. It is for the key a magpie from before
+// ScopeBrowser holds the key id to connecting the eipgam Browser
+// extension alone (Key.Browser), read-only for a eipgam from before
+// that, and unable to issue keys. It is for the key a eipgam from before
 // the scope made for the extension (gui's browserKey), which could use
 // every model and was written into a zip in Downloads: the extension
 // goes on connecting with it, and the copy in the zip loses the rest.
-// The sharing key, which magpie gives its own agents, is never scoped.
+// The sharing key, which eipgam gives its own agents, is never scoped.
 func ScopeBrowser(id string) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -325,7 +325,7 @@ func ScopeBrowser(id string) error {
 	}
 	k := &keys[i]
 	if k.LAN || k.ID == settings.Shared().LANKeyID {
-		return errors.New("The sharing key is given to magpie's own agents, so it can't be held to Magpie Browser")
+		return errors.New("The sharing key is given to eipgam's own agents, so it can't be held to eipgam Browser")
 	}
 	if k.Browser && k.ReadOnly && !k.Issues {
 		return nil
@@ -350,7 +350,7 @@ func identityOf(k Key, keys []Key, now time.Time) (Identity, error) {
 	}
 	accounts, err := expandGroups(k.Accounts, readGroups)
 	if err != nil {
-		return Identity{}, &Refused{Why: fmt.Sprintf("the gateway key %q names an account group, and magpie can't read its account groups now: %v", k.Name, err)}
+		return Identity{}, &Refused{Why: fmt.Sprintf("the gateway key %q names an account group, and eipgam can't read its account groups now: %v", k.Name, err)}
 	}
 	k.Accounts = accounts
 	who := Identity{KeyID: k.ID, KeyName: k.Name, Limit: k.Limit, More: k.More, Models: HeldModels(k.Models, k.Accounts), Aliases: k.Aliases, AccountModels: len(k.Models) == 0 && picksAccounts(k.Accounts), Accounts: k.Accounts, MCP: k.MCP, Quotas: k.Quotas, ReadOnly: k.ReadOnly, Browser: k.Browser, Admin: adminOf(k), Expires: k.Expires, Issues: k.Issues && k.Issuer == "" && !k.Browser, MaxConcurrency: k.MaxConcurrency, ServiceTier: k.ServiceTier, Redact: k.Redact}
@@ -369,7 +369,7 @@ func identityOf(k Key, keys []Key, now time.Time) (Identity, error) {
 	}
 	p := keys[j]
 	if p.Accounts, err = expandGroups(p.Accounts, readGroups); err != nil {
-		return Identity{}, &Refused{Why: fmt.Sprintf("the gateway key %q was issued under a key that names an account group, and magpie can't read its account groups now: %v", k.Name, err)}
+		return Identity{}, &Refused{Why: fmt.Sprintf("the gateway key %q was issued under a key that names an account group, and eipgam can't read its account groups now: %v", k.Name, err)}
 	}
 	pModels := HeldModels(p.Models, p.Accounts)
 	who.AccountModels = len(k.Models) == 0 && len(p.Models) == 0 && (picksAccounts(k.Accounts) || picksAccounts(p.Accounts))

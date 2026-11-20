@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/routes"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // serve serves a Points observer as the gateway would, until the test ends.
@@ -326,18 +326,18 @@ func TestPointsLoadErrors(t *testing.T) {
 	}
 }
 
-// A package's gateway module is named by magpie.middleware or
-// magpie.gateway, and its routings by the package's short name.
+// A package's gateway module is named by eipgam.middleware or
+// eipgam.gateway, and its routings by the package's short name.
 func TestGatewayAlias(t *testing.T) {
-	dir := filepath.Join(t.TempDir(), "magpie-fastest")
+	dir := filepath.Join(t.TempDir(), "eipgam-fastest")
 	os.MkdirAll(dir, 0o755)
-	os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"magpie-fastest","magpie":{"gateway":"gw.js"}}`), 0o644)
+	os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"eipgam-fastest","magpie":{"gateway":"gw.js"}}`), 0o644)
 	os.WriteFile(filepath.Join(dir, "gw.js"), []byte(`export const strategies = { first: (p, s) => s.map((_, i) => i) };`), 0o644)
 	if f, only := plugin.Middleware(dir); f != filepath.Join(dir, "gw.js") || !only {
 		t.Fatalf("Middleware = %q, %v", f, only)
 	}
 	use(t, plugin.Entry{Spec: dir})
-	if st := States()[dir]; st.Error != "" || !slices.Equal(st.Strategies, []string{"magpie-fastest/first"}) {
+	if st := States()[dir]; st.Error != "" || !slices.Equal(st.Strategies, []string{"eipgam-fastest/first"}) {
 		t.Fatalf("%+v", st)
 	}
 	g := filepath.Join(t.TempDir(), "lat.gateway.js")

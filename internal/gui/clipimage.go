@@ -9,13 +9,13 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // copyImageOS puts a PNG on the system's clipboard with the system's own
 // tool (clipImageCommand): Wails' clipboard holds text only.
 func copyImageOS(ctx context.Context, b []byte) error {
-	f, err := os.CreateTemp("", "magpie-clip-*.png")
+	f, err := os.CreateTemp("", "eipgam-clip-*.png")
 	if err != nil {
 		return err
 	}
@@ -57,13 +57,13 @@ func firstLine(s string) string {
 	return strings.TrimSpace(s)
 }
 
-// winClipScript puts the PNG at $env:MAGPIE_CLIP_PNG on Windows' clipboard
+// winClipScript puts the PNG at $env:EIPGAM_CLIP_PNG on Windows' clipboard
 // both as "PNG", which browsers, chat apps and Office paste with its
 // pixels as they are, and as a bitmap for the rest, kept once PowerShell
 // ends (SetDataObject's copy).
 const winClipScript = `$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
-$b = [System.IO.File]::ReadAllBytes($env:MAGPIE_CLIP_PNG)
+$b = [System.IO.File]::ReadAllBytes($env:EIPGAM_CLIP_PNG)
 $d = New-Object System.Windows.Forms.DataObject
 $d.SetData('PNG', $false, (New-Object System.IO.MemoryStream(,$b)))
 $d.SetImage([System.Drawing.Image]::FromStream((New-Object System.IO.MemoryStream(,$b))))
@@ -87,7 +87,7 @@ func clipImageCommand(goos string, getenv func(string) string, look func(string)
 			file,
 		}, nil, nil
 	case "windows":
-		return "powershell.exe", []string{"-NoProfile", "-NonInteractive", "-STA", "-Command", winClipScript}, []string{"MAGPIE_CLIP_PNG=" + file}, nil
+		return "powershell.exe", []string{"-NoProfile", "-NonInteractive", "-STA", "-Command", winClipScript}, []string{"EIPGAM_CLIP_PNG=" + file}, nil
 	}
 	if getenv("WAYLAND_DISPLAY") != "" {
 		if p, err := look("wl-copy"); err == nil {

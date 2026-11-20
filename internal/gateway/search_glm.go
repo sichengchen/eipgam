@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A GLM Coding Plan, Zhipu's or Z.ai's, searches the web with its own Web
@@ -22,7 +22,7 @@ import (
 // Discord): the Streamable HTTP server at the plan's host's
 // provider.ZhipuSearchPath, the key as a Bearer, its tool webSearchPrime
 // asked with {"search_query": "…"} (docs.bigmodel.cn/cn/coding-plan/mcp/search-mcp-server,
-// docs.z.ai/devpack/mcp/search-mcp-server). magpie opens a session
+// docs.z.ai/devpack/mcp/search-mcp-server). eipgam opens a session
 // (initialize, notifications/initialized), calls the tool once and ends
 // the session. The tool answers in a text block; the docs say only that
 // each result has a title, address, summary, site name and icon, so the
@@ -33,14 +33,14 @@ import (
 // As with a Kimi Code plan, a model of the plan has its searches done
 // there first, so a GLM user's searches spend the plan's search allowance
 // rather than another subscription's, and a plan with nothing else set up
-// in magpie searches at all; but only while Settings names no searcher:
+// in eipgam searches at all; but only while Settings names no searcher:
 // one the user named still searches for every model. For another
 // provider's models the plan searches only when Settings names it. A
 // provider with several keys asks each of its plan's keys in turn, on to
 // the next when one fails.
 
 // glmSearchTool is the plan's search tool, and glmSearchProtocol the MCP
-// version magpie asks for.
+// version eipgam asks for.
 const (
 	glmSearchTool     = "webSearchPrime"
 	glmSearchProtocol = "2025-03-26"
@@ -91,7 +91,7 @@ func (s *Server) glmSearchKey(ctx context.Context, p provider.Provider, query st
 	}
 	c := glmMCP{s: s, at: at, key: p.Key}
 	if _, err := c.call(ctx, 1, "initialize", map[string]any{"protocolVersion": glmSearchProtocol, "capabilities": map[string]any{},
-		"clientInfo": map[string]any{"name": "magpie-search", "version": "1"}}); err != nil {
+		"clientInfo": map[string]any{"name": "eipgam-search", "version": "1"}}); err != nil {
 		return nil, c.said(ctx, err)
 	}
 	defer c.end()

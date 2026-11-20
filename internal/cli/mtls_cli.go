@@ -8,26 +8,26 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/mtls"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-const mtlsUsage = `usage: magpie mtls [on|off|issue <device> [--out <folder>]|list|revoke <device or serial>]
-  other computers reach this magpie only with a client certificate it issued (mTLS;
-  hhdaxia on X, #5596). On, the gateway and magpie web's page are served over https://
-  to them with magpie's own CA (or the --tls-cert one), and a request without a good
+const mtlsUsage = `usage: eipgam mtls [on|off|issue <device> [--out <folder>]|list|revoke <device or serial>]
+  other computers reach this eipgam only with a client certificate it issued (mTLS;
+  hhdaxia on X, #5596). On, the gateway and eipgam web's page are served over https://
+  to them with eipgam's own CA (or the --tls-cert one), and a request without a good
   certificate is refused, a gateway key or not. This computer, and a WSL distro's agent
   with its key, are answered as before.
-    magpie mtls               whether it is on, and the certificates issued
-    magpie mtls on|off        require a client certificate from other computers, or stop
-    magpie mtls issue <name>  a certificate for one device: client.pem, client-key.pem and
-                              ca.pem in Downloads/magpie-<name> (or --out <folder>). Give the
+    eipgam mtls               whether it is on, and the certificates issued
+    eipgam mtls on|off        require a client certificate from other computers, or stop
+    eipgam mtls issue <name>  a certificate for one device: client.pem, client-key.pem and
+                              ca.pem in Downloads/eipgam-<name> (or --out <folder>). Give the
                               device all three; the key is not kept here. Issuing a name
                               again revokes the one before.
-    magpie mtls revoke <name> refuses that device's certificate from now on
-  In Remote magpie (or a provider) on the other computer, set Client certificate, Client key
+    eipgam mtls revoke <name> refuses that device's certificate from now on
+  In Remote eipgam (or a provider) on the other computer, set Client certificate, Client key
   and Server CA to the three files. curl: --cert client.pem --key client-key.pem --cacert ca.pem.`
 
 func mtlsCmd(args []string) error {
@@ -50,9 +50,9 @@ func mtlsCmd(args []string) error {
 			fmt.Println("mTLS off: other computers are answered as before (a gateway key, while shared)")
 			return nil
 		}
-		fmt.Println("mTLS on: other computers need a client certificate magpie issued; this computer is answered as before")
+		fmt.Println("mTLS on: other computers need a client certificate eipgam issued; this computer is answered as before")
 		if l, _ := st.List(); len(l) == 0 {
-			fmt.Println("no certificate issued yet: magpie mtls issue <device>")
+			fmt.Println("no certificate issued yet: eipgam mtls issue <device>")
 		}
 		return nil
 	case "issue":
@@ -61,7 +61,7 @@ func mtlsCmd(args []string) error {
 			return err
 		}
 		if len(rest) != 1 {
-			return errors.New("usage: magpie mtls issue <device> [--out <folder>]")
+			return errors.New("usage: eipgam mtls issue <device> [--out <folder>]")
 		}
 		iss, err := st.Issue(rest[0])
 		if err != nil {
@@ -77,12 +77,12 @@ func mtlsCmd(args []string) error {
 		fmt.Printf("issued %q (serial %s, valid until %s)\n", iss.Name, iss.Serial, iss.Expires.Format("2006-01-02"))
 		fmt.Println("  " + dir + string(filepath.Separator) + " client.pem, client-key.pem, ca.pem")
 		if !gateway.MTLSOn() {
-			fmt.Println("mTLS is off: magpie mtls on to require it")
+			fmt.Println("mTLS is off: eipgam mtls on to require it")
 		}
 		return nil
 	case "revoke":
 		if len(args) != 2 {
-			return errors.New("usage: magpie mtls revoke <device or serial>")
+			return errors.New("usage: eipgam mtls revoke <device or serial>")
 		}
 		n, err := st.Revoke(args[1])
 		if err != nil {
@@ -94,7 +94,7 @@ func mtlsCmd(args []string) error {
 		fmt.Printf("revoked %d certificate(s) for %q\n", n, args[1])
 		return nil
 	}
-	return fmt.Errorf("magpie mtls: unknown %q\n%s", args[0], mtlsUsage)
+	return fmt.Errorf("eipgam mtls: unknown %q\n%s", args[0], mtlsUsage)
 }
 
 func mtlsList(st mtls.Store) error {

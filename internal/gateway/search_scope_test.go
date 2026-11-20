@@ -83,8 +83,8 @@ func TestSearchMCPSchemaOffersScope(t *testing.T) {
 			t.Fatalf("no %s in %v", k, v.Properties)
 		}
 	}
-	if strings.Contains(strings.ToLower(searchMCPSchema(5)), "magpie") {
-		t.Fatal("the schema names magpie")
+	if strings.Contains(strings.ToLower(searchMCPSchema(5)), "eipgam") {
+		t.Fatal("the schema names eipgam")
 	}
 }
 

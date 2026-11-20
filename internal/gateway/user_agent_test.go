@@ -9,17 +9,17 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// uaVendor is a key+URL vendor on every API magpie forwards to one: it
+// uaVendor is a key+URL vendor on every API eipgam forwards to one: it
 // keeps the User-Agent each path was asked with, and answers each as its
 // API does.
 type uaVendor struct {
 	mu     sync.Mutex
 	got    map[string]string
-	leaked []string // magpie's ClientUAHeader, which no vendor is sent
+	leaked []string // eipgam's ClientUAHeader, which no vendor is sent
 }
 
 func (v *uaVendor) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +61,7 @@ func (v *uaVendor) sent(path string) (string, bool) {
 }
 
 // uaRoutes are the routes a request reaches a key+URL provider by: what an
-// agent posts magpie, and the path the vendor is asked at.
+// agent posts eipgam, and the path the vendor is asked at.
 var uaRoutes = []struct{ name, path, body, upstream string }{
 	{"anthropic", "/v1/messages", `{"model":"ua/m1","max_tokens":8,"messages":[{"role":"user","content":"hi"}]}`, "/v1/messages"},
 	{"count_tokens", "/v1/messages/count_tokens", `{"model":"ua/m1","messages":[{"role":"user","content":"hi"}]}`, "/v1/messages/count_tokens"},
@@ -69,7 +69,7 @@ var uaRoutes = []struct{ name, path, body, upstream string }{
 	{"responses", "/v1/responses", `{"model":"ua/m1","input":"hi"}`, "/v1/responses"},
 	{"gemini", "/v1beta/models/ug/m1:generateContent", `{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`, "/v1beta/models/m1:streamGenerateContent"},
 	{"embeddings", "/v1/embeddings", `{"model":"ua/embed-1","input":"hi"}`, "/v1/embeddings"},
-	{"images", "/v1/images/generations", `{"model":"ua/gpt-image-1","prompt":"a magpie"}`, "/v1/images/generations"},
+	{"images", "/v1/images/generations", `{"model":"ua/gpt-image-1","prompt":"a eipgam"}`, "/v1/images/generations"},
 }
 
 // uaSetup saves a key+URL provider "ua" on every API, at a uaVendor, with
@@ -118,14 +118,14 @@ func askAs(t *testing.T, s *Server, path, body, ua string) {
 // A key+URL provider is asked with the User-Agent the agent sent (#1851,
 // nb5p on Discord), on every route that reaches it: a coding plan that
 // serves only agents it names knows them by it, and a gateway of the
-// user's own behind magpie sees which agent asked. Set to go as magpie, it
-// is asked as magpie; so it is when the agent sent none, and
-// on magpie's own requests (its classifier's, the image tool's), which no
+// user's own behind eipgam sees which agent asked. Set to go as eipgam, it
+// is asked as eipgam; so it is when the agent sent none, and
+// on eipgam's own requests (its classifier's, the image tool's), which no
 // agent sent. A User-Agent the user set in the provider's headers stands
 // over both.
 func TestUserAgentPassedOn(t *testing.T) {
 	const pi = "pi-coding-agent/0.9.1 (darwin; arm64)"
-	magpie := "magpie/" + Version
+	eipgam := "eipgam/" + Version
 	for _, tt := range []struct {
 		name    string
 		pass    bool
@@ -133,13 +133,13 @@ func TestUserAgentPassedOn(t *testing.T) {
 		ua      string // what the agent sent
 		want    string
 	}{
-		{"as magpie", false, nil, pi, magpie},
+		{"as eipgam", false, nil, pi, eipgam},
 		{"default", true, nil, pi, pi},
-		{"default, the agent sent none", true, nil, "", magpie},
-		{"default, magpie's classifier", true, nil, RouterAgent, magpie},
-		{"default, magpie's image tool", true, nil, "claude-code/2.1.0 " + DrawAgent, magpie},
+		{"default, the agent sent none", true, nil, "", eipgam},
+		{"default, eipgam's classifier", true, nil, RouterAgent, eipgam},
+		{"default, eipgam's image tool", true, nil, "claude-code/2.1.0 " + DrawAgent, eipgam},
 		{"default, the user's own header", true, map[string]string{"User-Agent": "mine/1"}, pi, "mine/1"},
-		{"as magpie, the user's own header", false, map[string]string{"User-Agent": "mine/1"}, pi, "mine/1"},
+		{"as eipgam, the user's own header", false, map[string]string{"User-Agent": "mine/1"}, pi, "mine/1"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			v := uaSetup(t, tt.pass, tt.headers)
@@ -172,27 +172,27 @@ func TestUserAgentClaudeCodeAsBefore(t *testing.T) {
 	}
 }
 
-// Which providers pass it on: a key+URL one unless set to go as magpie, and
+// Which providers pass it on: a key+URL one unless set to go as eipgam, and
 // not a signed-in
 // account (ZCode's Coding Plan signs without a User-Agent of its own, and
-// goes as magpie), a plugin's, a vendor's own client's gateway (OpenCode,
-// Cline, Kilo) or another magpie, each of which goes as the client it
+// goes as eipgam), a plugin's, a vendor's own client's gateway (OpenCode,
+// Cline, Kilo) or another eipgam, each of which goes as the client it
 // signs as.
 func TestUserAgentFor(t *testing.T) {
 	const pi = "pi/1"
-	magpie := "magpie/" + Version
+	eipgam := "eipgam/" + Version
 	for _, tt := range []struct {
 		name string
 		p    provider.Provider
 		want string
 	}{
 		{"key", provider.Provider{Chat: "https://api.example.com/v1"}, pi},
-		{"key, as magpie", provider.Provider{Chat: "https://api.example.com/v1", MagpieUserAgent: true}, magpie},
-		{"account", provider.Provider{Chat: "https://api.z.ai/api/coding/paas/v4", Account: &provider.Account{Agent: "zcode"}}, magpie},
-		{"opencode", provider.Provider{Chat: "https://opencode.ai/zen/v1"}, magpie},
-		{"cline", provider.Provider{Preset: "clinepass", Chat: "https://api.cline.bot/api/v1"}, magpie},
-		{"kilo", provider.Provider{Preset: "kilo", Chat: "https://api.kilo.ai/api/gateway"}, magpie},
-		{"remote magpie", provider.Provider{Preset: provider.RemoteMagpiePreset, Chat: "http://10.0.0.2:3425/v1"}, magpie},
+		{"key, as eipgam", provider.Provider{Chat: "https://api.example.com/v1", MagpieUserAgent: true}, eipgam},
+		{"account", provider.Provider{Chat: "https://api.z.ai/api/coding/paas/v4", Account: &provider.Account{Agent: "zcode"}}, eipgam},
+		{"opencode", provider.Provider{Chat: "https://opencode.ai/zen/v1"}, eipgam},
+		{"cline", provider.Provider{Preset: "clinepass", Chat: "https://api.cline.bot/api/v1"}, eipgam},
+		{"kilo", provider.Provider{Preset: "kilo", Chat: "https://api.kilo.ai/api/gateway"}, eipgam},
+		{"remote eipgam", provider.Provider{Preset: provider.RemoteMagpiePreset, Chat: "http://10.0.0.2:3425/v1"}, eipgam},
 	} {
 		if got := userAgentFor(tt.p, pi); got != tt.want {
 			t.Errorf("%s: %q, want %q", tt.name, got, tt.want)
@@ -207,10 +207,10 @@ func TestUserAgentFor(t *testing.T) {
 	}
 }
 
-// Through another computer's magpie (a Remote magpie provider), the vendor
+// Through another computer's eipgam (a Remote eipgam provider), the vendor
 // at the far end is asked with the agent's User-Agent too, not the near
-// magpie's (nb5p on Discord): the near one hands it over in a header of
-// magpie's own, which the far one takes only from a magpie, and which no
+// eipgam's (nb5p on Discord): the near one hands it over in a header of
+// eipgam's own, which the far one takes only from a eipgam, and which no
 // vendor is sent. An agent that writes that header itself is asked as it
 // is.
 func TestRemoteMagpieRelaysUserAgent(t *testing.T) {
@@ -237,7 +237,7 @@ func TestRemoteMagpieRelaysUserAgent(t *testing.T) {
 			t.Errorf("%s: the far vendor was asked as %q (asked: %v), want the agent's", r.name, got, ok)
 		}
 	}
-	// an agent that sets magpie's header itself, straight to the far one
+	// an agent that sets eipgam's header itself, straight to the far one
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", far.URL+"/v1/chat/completions", strings.NewReader(uaRoutes[2].body))
 	req.Header.Set("Content-Type", "application/json")

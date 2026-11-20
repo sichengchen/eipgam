@@ -243,19 +243,19 @@ func View0(t *testing.T) *View {
 }
 
 // @AXmake110 on X: the Claude plugins page shows a chip for each Claude
-// Code config folder (claude#magpie-desktop), and turning the plugin off
-// for one answered `agent "claude#magpie-desktop": not an agent's id`.
+// Code config folder (claude#eipgam-desktop), and turning the plugin off
+// for one answered `agent "claude#eipgam-desktop": not an agent's id`.
 // Every route that takes an agent's id takes a profile's: the plugin's
 // agents, an agent's own instructions and how it is given skills.
 func TestLibraryTakesAProfilesAgentID(t *testing.T) {
 	h := sandbox(t)
 	pluginAgents(t, h)
-	write(t, filepath.Join(h, ".claude-magpie-desktop/settings.json"), "{}\n")
-	const prof = "claude#magpie-desktop"
+	write(t, filepath.Join(h, ".claude-eipgam-desktop/settings.json"), "{}\n")
+	const prof = "claude#eipgam-desktop"
 	src := filepath.Join(t.TempDir(), "acme")
 	writePlugin(t, src)
 	ok(t)(InstallPlugins(src, nil, []string{"claude", prof}))
-	skill := filepath.Join(h, ".claude-magpie-desktop/skills/tdd")
+	skill := filepath.Join(h, ".claude-eipgam-desktop/skills/tdd")
 	if _, err := os.Lstat(skill); err != nil {
 		t.Fatalf("the profile's skill: %v", err)
 	}

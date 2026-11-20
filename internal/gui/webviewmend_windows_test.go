@@ -31,7 +31,7 @@ import (
 //
 // The windows are real, so this runs on the Windows box's signed-in
 // session, not over ssh (session 0).
-const testMendEnv = "MAGPIE_TEST_WEBVIEW_MEND"
+const testMendEnv = "EIPGAM_TEST_WEBVIEW_MEND"
 
 func TestWebViewComesBackFromEachProcessEnd(t *testing.T) {
 	var session uint32
@@ -49,7 +49,7 @@ func TestWebViewComesBackFromEachProcessEnd(t *testing.T) {
 			cmd := exec.CommandContext(ctx, self, "-test.run=^$")
 			// not t.TempDir: WebView2's processes still hold files in it as
 			// the test ends, and its removal fails the test
-			home, err := os.MkdirTemp("", "magpie-mend-")
+			home, err := os.MkdirTemp("", "eipgam-mend-")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -171,8 +171,8 @@ func init() {
 	loaded := make(chan struct{}, 16)
 	seen := make(chan string, 4096)
 	app := application.New(application.Options{
-		Name:    "magpie webview mend regression",
-		Windows: windowsOptions(), // as magpie's: the last window closed leaves the app running
+		Name:    "eipgam webview mend regression",
+		Windows: windowsOptions(), // as eipgam's: the last window closed leaves the app running
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.URL.Path {
 			case "/vis":
@@ -186,7 +186,7 @@ func init() {
 				return
 			}
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<html><body style="margin:0;background:#2a6f97;height:100vh">magpie<script>fetch("/loaded");const say = () => fetch("/vis?s=" + document.visibilityState);document.addEventListener("visibilitychange", say);setInterval(say, 50)</script></body></html>`)
+			fmt.Fprint(w, `<html><body style="margin:0;background:#2a6f97;height:100vh">eipgam<script>fetch("/loaded");const say = () => fetch("/vis?s=" + document.visibilityState);document.addEventListener("visibilitychange", say);setInterval(say, 50)</script></body></html>`)
 		})},
 	})
 	h := &host{app: app}

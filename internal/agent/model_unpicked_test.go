@@ -5,16 +5,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // JNDliuliuM on X: new models picked for a provider changed Codex's list,
 // but Codex CLI, restarted, still started on the old model: its config
 // kept the model the user had since unchecked. It goes on to the
-// provider's first pick, in each way magpie wires Codex: as its provider,
+// provider's first pick, in each way eipgam wires Codex: as its provider,
 // beside a ChatGPT sign-in (the CLI and the app read the same config) and
-// by its profile alone (codex -p magpie).
+// by its profile alone (codex -p eipgam).
 func TestCodexLeavesAModelUncheckedInItsProvider(t *testing.T) {
 	signedIn := `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`
 	for _, c := range []struct {
@@ -62,7 +62,7 @@ func TestCodexLeavesAModelUncheckedInItsProvider(t *testing.T) {
 			if got := model(); got != "sub/new" {
 				t.Fatalf("model = %q after sub/old was unchecked, want the provider's first pick sub/new:\n%s", got, readFile(path))
 			}
-			if l := readFile(filepath.Join(home, ".codex", "magpie-models.json")); c.auth == "" && (!strings.Contains(l, `"sub/new"`) || strings.Contains(l, `"sub/old"`)) {
+			if l := readFile(filepath.Join(home, ".codex", "eipgam-models.json")); c.auth == "" && (!strings.Contains(l, `"sub/new"`) || strings.Contains(l, `"sub/old"`)) {
 				t.Errorf("Codex's list is not the provider's picks:\n%s", l)
 			}
 		})

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/davsync"
+	"github.com/sichengchen/eipgam/internal/davsync"
 )
 
 // Settings › Sync's Copy setup and its paste on another computer

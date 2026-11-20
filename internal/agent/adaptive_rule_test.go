@@ -3,12 +3,12 @@ package agent
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // #6778 (larryhaonlp): DSH's Xhigh reached agy-cli/gemini-4-hydrogen, on
-// magpie's Anthropic route, as high. pi-ai asks a model on Messages for a
+// eipgam's Anthropic route, as high. pi-ai asks a model on Messages for a
 // budget unless its compat says forceAdaptiveThinking, and the budget path
 // clamps xhigh and max to high's 16384, which agy-cli reads as high. A
 // Gemini 3 or later is now told to think adaptively there, by the one rule

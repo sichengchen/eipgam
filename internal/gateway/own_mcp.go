@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gwtool"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// OwnMCPPath lists the MCP servers magpie serves itself (web search,
+// OwnMCPPath lists the MCP servers eipgam serves itself (web search,
 // image recognition, image generation, memory, the plugins' tools) that are on
 // now, for an app that gives a model the Library's servers and wants
-// magpie's own beside them: the community chat page (ferock on Discord),
+// eipgam's own beside them: the community chat page (ferock on Discord),
 // which read only library.json. A server is listed while an agent that
 // mounts it would get its tools to work: the search while plugins/search
 // serves and something searches (canSearch), image recognition while a
@@ -24,9 +24,9 @@ import (
 // and a plugin that is on gives a tool. Each is named as its own
 // initialize names it, with its path on this gateway; nothing in it is a
 // secret.
-const OwnMCPPath = "/v1/magpie/mcp"
+const OwnMCPPath = "/v1/eipgam/mcp"
 
-// OwnMCP is one of magpie's own MCP servers, as OwnMCPPath lists it.
+// OwnMCP is one of eipgam's own MCP servers, as OwnMCPPath lists it.
 type OwnMCP struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
@@ -37,27 +37,27 @@ type OwnMCP struct {
 // host keeps (never starting it); a variable for tests.
 var toolsOn = plugin.ToolsOn
 
-// ownMCP are magpie's own MCP servers that are on now.
+// ownMCP are eipgam's own MCP servers that are on now.
 func ownMCP() []OwnMCP {
 	out := []OwnMCP{}
 	if canSearch() {
-		out = append(out, OwnMCP{"magpie-web-search", "Magpie Web Search", SearchMCPPath})
+		out = append(out, OwnMCP{"eipgam-web-search", "eipgam Web Search", SearchMCPPath})
 	}
 	if _, ok := seer(); ok {
-		out = append(out, OwnMCP{"magpie-vision", "Magpie Image Recognition", VisionMCPPath})
+		out = append(out, OwnMCP{"eipgam-vision", "eipgam Image Recognition", VisionMCPPath})
 	}
 	if _, ok := drawer(); ok {
-		out = append(out, OwnMCP{imageServerName, "Magpie Image", ImageMCPPath})
+		out = append(out, OwnMCP{imageServerName, "eipgam Image", ImageMCPPath})
 	}
 	// memory is always there: it needs no model
-	out = append(out, OwnMCP{memoryServerName, "Magpie Memory", MemoryMCPPath})
+	out = append(out, OwnMCP{memoryServerName, "eipgam Memory", MemoryMCPPath})
 	// and so are the sessions: it reads what Settings › Sessions allows
-	out = append(out, OwnMCP{sessionsServerName, "Magpie Sessions", SessionsMCPPath})
+	out = append(out, OwnMCP{sessionsServerName, "eipgam Sessions", SessionsMCPPath})
 	if gwtool.Served(gwtool.PluginTools) {
 		// a note that can't be read says nothing: the server is listed,
 		// and its tools/list tells
 		if n, err := toolsOn(); err != nil || n > 0 {
-			out = append(out, OwnMCP{"magpie-tools", "Magpie Plugin Tools", ToolsMCPPath})
+			out = append(out, OwnMCP{"eipgam-tools", "eipgam Plugin Tools", ToolsMCPPath})
 		}
 	}
 	return out
@@ -70,7 +70,7 @@ func (s *Server) ownMCPList(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"servers": ss})
 }
 
-// OwnMCPTools are magpie's own MCP servers that are on now, Magpie
+// OwnMCPTools are eipgam's own MCP servers that are on now, eipgam
 // Browser beside them, each with the names of its tools, for the picker
 // of the servers and tools a gateway key may use (wakaka on Discord). The
 // plugin tools' server is listed with no tools when they can't be read:
@@ -80,9 +80,9 @@ func OwnMCPTools(ctx context.Context) []OwnMCPServer {
 	for _, o := range ownMCP() {
 		s := OwnMCPServer{Name: o.Name, Title: o.Title}
 		switch o.Name {
-		case "magpie-web-search":
+		case "eipgam-web-search":
 			s.Tools = []string{searchMCPTool, fetchMCPTool}
-		case "magpie-vision":
+		case "eipgam-vision":
 			s.Tools = []string{visionMCPTool}
 		case imageServerName:
 			s.Tools = []string{GenerateImageTool, GenerateVideoTool, GenerationResultTool}
@@ -90,7 +90,7 @@ func OwnMCPTools(ctx context.Context) []OwnMCPServer {
 			s.Tools = []string{memorySearchTool, memorySaveTool, memoryForgetTool, memoryContextTool}
 		case sessionsServerName:
 			s.Tools = []string{sessionsSearchTool, sessionsReadTool}
-		case "magpie-tools":
+		case "eipgam-tools":
 			ts, _ := servedTools(ctx)
 			for _, t := range ts {
 				s.Tools = append(s.Tools, t.name)
@@ -98,24 +98,24 @@ func OwnMCPTools(ctx context.Context) []OwnMCPServer {
 		}
 		out = append(out, s)
 	}
-	return append(out, OwnMCPServer{Name: "magpie-browser", Title: "Magpie Browser", Tools: []string{"browser"}})
+	return append(out, OwnMCPServer{Name: "eipgam-browser", Title: "eipgam Browser", Tools: []string{"browser"}})
 }
 
-// OwnMCPServer is one of magpie's own MCP servers with its tools' names.
+// OwnMCPServer is one of eipgam's own MCP servers with its tools' names.
 type OwnMCPServer struct {
 	Name  string   `json:"name"`
 	Title string   `json:"title"`
 	Tools []string `json:"tools"`
 }
 
-// OwnUnready is why magpie's own server name (Magpie Web Search, Magpie
-// Image Recognition, Magpie Image) can't answer yet, in English for the
+// OwnUnready is why eipgam's own server name (eipgam Web Search, eipgam
+// Image Recognition, eipgam Image) can't answer yet, in English for the
 // Library's Discover to say on its row: "" while ownMCP lists it, and for
 // any other name. Its tools answer all the same, with how to set it up
 // (matrix0487 on Discord: all three in Discover, never a dead tool).
 func OwnUnready(name string) string {
 	switch name {
-	case "magpie-web-search":
+	case "eipgam-web-search":
 		switch {
 		case canSearch():
 			return ""
@@ -123,7 +123,7 @@ func OwnUnready(name string) string {
 			return "Web search is off in Plugins › Built-in: its tools say so until it is turned on"
 		}
 		return "Nothing searches yet: add a search API in Settings › Models › Web search, or a provider that can search. Until then its tools say so"
-	case "magpie-vision":
+	case "eipgam-vision":
 		if _, ok := seer(); ok {
 			return ""
 		}

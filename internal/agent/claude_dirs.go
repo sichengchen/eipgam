@@ -15,9 +15,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/desktopiso"
-	"github.com/yetone/magpie/internal/dirent"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/desktopiso"
+	"github.com/sichengchen/eipgam/internal/dirent"
 )
 
 // claudeDirName is the part of a folder's name after ".claude" as a row's

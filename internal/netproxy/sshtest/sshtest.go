@@ -1,4 +1,4 @@
-// Package sshtest is an SSH server on loopback for tests of magpie's SSH
+// Package sshtest is an SSH server on loopback for tests of eipgam's SSH
 // proxy: it logs a user in by password or key and answers each
 // direct-tcpip channel (ssh -D's CONNECT) with an http.Handler of its
 // own, so nothing a test sends through it leaves the machine.

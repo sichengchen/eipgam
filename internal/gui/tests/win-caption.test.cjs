@@ -39,7 +39,7 @@ function serve(lang, web) {
     if (url.pathname === "/api/usage") return json({ days: [] });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
-    if (url.pathname === "/api/library") return json({ dir: "/home/u/.magpie/library", backups: "/home/u/.magpie/backups", home: "/home/u", agents: [],
+    if (url.pathname === "/api/library") return json({ dir: "/home/u/.eipgam/library", backups: "/home/u/.eipgam/backups", home: "/home/u", agents: [],
       instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [] });
     if (url.pathname.startsWith("/api/")) return json({});
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, web));
-        await page.goto(`http://magpie.test/?mode=${mode}`);
+        await page.goto(`http://eipgam.test/?mode=${mode}`);
         await page.waitForFunction(() => document.querySelector("header.top"));
         if (!web) await page.waitForFunction(() => window.__runtimeReady === true);
         if (mode === "window") await page.waitForSelector("#nav button.on");
@@ -193,7 +193,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await context.addInitScript(() => { Object.defineProperty(Navigator.prototype, "platform", { get: () => "Win32" }); window.magpieMaximised = true; });
         const page = await context.newPage();
         await page.route("**/*", serve(lang, false));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.waitForSelector("#nav button.on");
         assert.equal(await page.locator('#wincap [data-cap="max"]').textContent(), "", "restore's glyph from the first paint");
         await context.close();

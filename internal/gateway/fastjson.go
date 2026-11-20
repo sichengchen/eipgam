@@ -954,7 +954,7 @@ func heldLongOf(data []byte) (heldLong, bool) {
 // of each, as a value of its own, checked all of it again: two readers at
 // once (the prompt's, the folder's) each did, before the hash memo knew
 // it. A 516 MB Codex turn of generated images was checked three times over
-// before routing, past the 30s magpie gives its own work there under
+// before routing, past the 30s eipgam gives its own work there under
 // -race on a loaded CI machine (#5281).
 func heldMember(data []byte) bool {
 	if len(data) == 0 {

@@ -3,7 +3,7 @@
 // paginated rollout with no row in Codex's database, sessions.StuckError;
 // @xMopf7RF on X) is refused with stuck and the provider it stays on. The
 // page says why, in the reader's language, and what can be done instead:
-// it stays where it was, and Delete clears it into magpie's trash. Every
+// it stays where it was, and Delete clears it into eipgam's trash. Every
 // language, Chromium and WebKit, wide and narrow; the API is faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -16,7 +16,7 @@ const at = (min) => new Date(Date.now() - min * 60e3).toISOString();
 const sess = (id, title, provider, min) => ({
   agent: "codex", id, title, cwd: "/work/app", start: at(min + 30), last: at(min), models: [], cost: 0, unpriced: 0,
   resume: "codex resume " + id, path: "~/.codex/sessions/x/" + id + ".jsonl.zst", size: 2048, messages: 4, files: 1, deletable: true,
-  provider, uses_provider: "magpie",
+  provider, uses_provider: "eipgam",
 });
 
 function serve(lang, calls) {
@@ -33,12 +33,12 @@ function serve(lang, calls) {
     if (url.pathname === "/api/sessions/manage") {
       return json({
         agents: [{ agent: "codex", count: sessions.length, deletable: true, name: "Codex", icon: "codex-color" }],
-        agent: "codex", sessions, terminal: false, trash: [], trashDir: "~/Library/Application Support/magpie/trash/sessions",
+        agent: "codex", sessions, terminal: false, trash: [], trashDir: "~/Library/Application Support/eipgam/trash/sessions",
       });
     }
     if (url.pathname === "/api/sessions/codex-provider") {
       calls.push(route.request().postDataJSON());
-      return json({ moved: [], refused: [{ id: "a1", error: "rollout-x.jsonl.zst can't move to magpie: …", active: false, stuck: true, from: "zai" }] });
+      return json({ moved: [], refused: [{ id: "a1", error: "rollout-x.jsonl.zst can't move to eipgam: …", active: false, stuck: true, from: "zai" }] });
     }
     if (url.pathname.startsWith("/api/")) return json({});
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
@@ -48,11 +48,11 @@ function serve(lang, calls) {
 }
 
 const words = {
-  en: { nav: "Sessions", button: "Move to magpie…", move: "Move", said: "an old chat can't be moved: Codex keeps its history by byte and has no record of it in its database to move it by. It stays on zai, unchanged, and Codex lists it when it uses zai again. To clear it from here, delete it: it goes to magpie's trash and can be restored." },
-  zh: { nav: "会话", button: "迁移到 magpie…", move: "迁移", said: "「an old chat」无法迁移：Codex 按字节位置保存它的历史，而它的数据库里没有这个会话的记录可供迁移。它保持在 zai 上，不做任何改动；Codex 再次使用 zai 时会列出它。如果想把它从这里清掉，可以删除它：它会进入 magpie 的回收站，可以恢复。" },
-  "zh-TW": { nav: "會話", button: "遷移到 magpie…", move: "遷移", said: "「an old chat」無法遷移：Codex 按位元組位置保存它的歷史，而它的資料庫裡沒有這個會話的紀錄可供遷移。它保持在 zai 上，不做任何改動；Codex 再次使用 zai 時會列出它。如果想把它從這裡清掉，可以刪除它：它會進入 magpie 的回收站，可以恢復。" },
-  ja: { nav: "セッション", button: "magpie に移行…", move: "移行", said: "「an old chat」は移動できません：Codex はこの履歴をバイト位置で保持しており、データベースに移動の手がかりとなる記録がありません。zai のまま変更されず、Codex が再び zai を使うと一覧に表示されます。ここから消すには削除してください。magpie のゴミ箱に移され、復元できます。" },
-  de: { nav: "Sitzungen", button: "Zu magpie umziehen…", move: "Umziehen", said: "„an old chat“ kann nicht verschoben werden: Codex speichert den Verlauf nach Byte-Position und hat in seiner Datenbank keinen Eintrag, über den er sich verschieben ließe. Die Sitzung bleibt unverändert bei zai, und Codex listet sie wieder, sobald es zai verwendet. Um sie hier zu entfernen, löschen Sie sie: Sie kommt in den Papierkorb von magpie und lässt sich wiederherstellen." },
+  en: { nav: "Sessions", button: "Move to eipgam…", move: "Move", said: "an old chat can't be moved: Codex keeps its history by byte and has no record of it in its database to move it by. It stays on zai, unchanged, and Codex lists it when it uses zai again. To clear it from here, delete it: it goes to eipgam's trash and can be restored." },
+  zh: { nav: "会话", button: "迁移到 eipgam…", move: "迁移", said: "「an old chat」无法迁移：Codex 按字节位置保存它的历史，而它的数据库里没有这个会话的记录可供迁移。它保持在 zai 上，不做任何改动；Codex 再次使用 zai 时会列出它。如果想把它从这里清掉，可以删除它：它会进入 eipgam 的回收站，可以恢复。" },
+  "zh-TW": { nav: "會話", button: "遷移到 eipgam…", move: "遷移", said: "「an old chat」無法遷移：Codex 按位元組位置保存它的歷史，而它的資料庫裡沒有這個會話的紀錄可供遷移。它保持在 zai 上，不做任何改動；Codex 再次使用 zai 時會列出它。如果想把它從這裡清掉，可以刪除它：它會進入 eipgam 的回收站，可以恢復。" },
+  ja: { nav: "セッション", button: "eipgam に移行…", move: "移行", said: "「an old chat」は移動できません：Codex はこの履歴をバイト位置で保持しており、データベースに移動の手がかりとなる記録がありません。zai のまま変更されず、Codex が再び zai を使うと一覧に表示されます。ここから消すには削除してください。eipgam のゴミ箱に移され、復元できます。" },
+  de: { nav: "Sitzungen", button: "Zu eipgam umziehen…", move: "Umziehen", said: "„an old chat“ kann nicht verschoben werden: Codex speichert den Verlauf nach Byte-Position und hat in seiner Datenbank keinen Eintrag, über den er sich verschieben ließe. Die Sitzung bleibt unverändert bei zai, und Codex listet sie wieder, sobald es zai verwendet. Um sie hier zu entfernen, löschen Sie sie: Sie kommt in den Papierkorb von eipgam und lässt sich wiederherstellen." },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -69,10 +69,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         const calls = [];
         await page.route("**/*", serve(lang, calls));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const nav = page.locator("#nav").getByRole("button", { name: w.nav, exact: true });
         if (await nav.isVisible()) await nav.click();
-        else await page.goto("http://magpie.test/?view=sessions");
+        else await page.goto("http://eipgam.test/?view=sessions");
         const view = page.locator("#view-sessions");
         const go = view.locator(".sm-provider").getByRole("button", { name: w.button, exact: true });
         await go.click();
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await ask.waitFor();
         await ask.getByRole("button", { name: w.move, exact: true }).click();
         await ask.waitFor({ state: "detached" });
-        assert.deepEqual(calls, [{ moves: [{ id: "a1", to: "magpie" }] }]);
+        assert.deepEqual(calls, [{ moves: [{ id: "a1", to: "eipgam" }] }]);
         await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w.said)
           .catch(async () => assert.equal(await page.locator("#status").textContent(), w.said));
         const wide = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);

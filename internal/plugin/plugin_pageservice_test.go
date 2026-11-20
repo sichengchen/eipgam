@@ -21,9 +21,9 @@ func holdPort(t *testing.T) int {
 	return l.Addr().(*net.TCPAddr).Port
 }
 
-// #5187 (MYCF711): magpie plugin update, run while the app runs, started
+// #5187 (MYCF711): eipgam plugin update, run while the app runs, started
 // a host whose page-chat waited on the port the app's host holds. A host
-// in a magpie that serves no pages loads such a plugin at once, its
+// in a eipgam that serves no pages loads such a plugin at once, its
 // service on a port of its own, and leaves the held port alone.
 func TestHostServingNoPagesLeavesHeldPort(t *testing.T) {
 	sandbox(t)
@@ -52,7 +52,7 @@ func TestHostServingNoPagesLeavesHeldPort(t *testing.T) {
 	}
 }
 
-// hostOptions moves the service only in a magpie that serves no pages,
+// hostOptions moves the service only in a eipgam that serves no pages,
 // only through the option the page names, and keeps the plugin's other
 // options; one that serves pages hands the options on as they are.
 func TestHostOptionsMoveOnlyTheService(t *testing.T) {

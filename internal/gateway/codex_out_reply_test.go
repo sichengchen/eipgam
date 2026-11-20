@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Every one of magpie's ChatGPT accounts used up, Codex's turn routed
+// Every one of eipgam's ChatGPT accounts used up, Codex's turn routed
 // through them: Codex gets the 429 the backend gave, typed
 // usage_limit_reached with its plan and reset and the x-codex-* windows
 // beside it, as it gets it on its own sign-in, so it shows its usage
@@ -87,7 +87,7 @@ func TestCodexEveryAccountOutToldAsTheBackend(t *testing.T) {
 }
 
 // A ChatGPT account's 429 that isn't its usage limit (a rate limit per
-// minute) keeps magpie's shape: Codex retries it, as it should.
+// minute) keeps eipgam's shape: Codex retries it, as it should.
 func TestCodexRateLimitNotToldAsUsedUp(t *testing.T) {
 	p := provider.Provider{ID: "codex", Account: &provider.Account{Agent: "codex"}}
 	if codexOutRefusal(p, provider.Responses, 429, []byte(`{"error":{"type":"rate_limit_exceeded","message":"slow down"}}`)) {

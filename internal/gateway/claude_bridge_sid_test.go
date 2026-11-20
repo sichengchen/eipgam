@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/bridgesid"
+	"github.com/sichengchen/eipgam/internal/bridgesid"
 )
 
 // runSession is the session a run's Claude Code was named: given with

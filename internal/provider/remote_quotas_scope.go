@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
-// Which of a Remote magpie's cards are shown, and which of several copies
+// Which of a Remote eipgam's cards are shown, and which of several copies
 // of one account's card (X on 0.1.3678: three magpies each other's Remote,
 // A → B → C → A, and A's "only one local model" Remote still told Kiro and
 // Codex, by remote-B/kiro and remote-B/remote-C/remote-A/remote-B/…/kiro,
@@ -19,7 +19,7 @@ import (
 //     card's id is the provider path of one of those models' ids, or a
 //     parent of it, whole parts only (provider/model, as that remote lists
 //     them; relay/strata enabled does not tell relay/kiro).
-//   - A card whose way names a magpie twice, or this one and another, is
+//   - A card whose way names a eipgam twice, or this one and another, is
 //     no card (catalog.Loops): it isn't kept (keepRemoteCards) nor told.
 //   - One account's copies are one card, the newest complete reading
 //     (oneCardPerAccount), whatever the way each came by.
@@ -80,7 +80,7 @@ func cardWantedFor(ids []string) func(id string) bool {
 	return func(id string) bool { return paths[id] }
 }
 
-// withoutLoops is cards less those whose way comes back to this magpie.
+// withoutLoops is cards less those whose way comes back to this eipgam.
 func withoutLoops(cards []SubscriptionQuota) []SubscriptionQuota {
 	if !slices.ContainsFunc(cards, func(q SubscriptionQuota) bool { return catalog.Loops(q.Via) }) {
 		return cards

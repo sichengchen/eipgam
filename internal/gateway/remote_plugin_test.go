@@ -14,21 +14,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
-// A plugin's subscription on a magpie another magpie uses as its Remote
-// magpie (eachg0 on X: Tabbit's, through a remote-magpie): its models are
+// A plugin's subscription on a eipgam another eipgam uses as its Remote
+// eipgam (eachg0 on X: Tabbit's, through a remote-eipgam): its models are
 // listed there and answer each API an agent there speaks, each request
-// passed to the other magpie once. The fake plugin serves Chat alone, as
+// passed to the other eipgam once. The fake plugin serves Chat alone, as
 // Tabbit and most plugins do, so Responses and Messages are translated.
 func TestRemoteMagpieServesPluginModels(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	var mu sync.Mutex
 	var got []string

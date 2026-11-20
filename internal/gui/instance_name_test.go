@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// A magpie is named for its browser tab's title (starballl on X: several
-// deployed, every tab titled "magpie"): MAGPIE_NAME names it until a name
+// A eipgam is named for its browser tab's title (starballl on X: several
+// deployed, every tab titled "eipgam"): EIPGAM_NAME names it until a name
 // is set in Settings, which then wins and is never written over by the
 // variable; boot.js hands the page the name in use and the variable's,
 // and titles a browser tab from the first paint; a
@@ -58,7 +58,7 @@ func TestInstanceName(t *testing.T) {
 	// a browser tab is titled from the first paint; the app's window isn't
 	tab := httptest.NewRecorder()
 	Handler(webTab{}, nil).ServeHTTP(tab, httptest.NewRequest("GET", "/boot.js", nil))
-	if !strings.Contains(tab.Body.String(), "\ndocument.title = \"Tokyo box · magpie\";\n") {
+	if !strings.Contains(tab.Body.String(), "\ndocument.title = \"Tokyo box · eipgam\";\n") {
 		t.Fatalf("a browser tab's boot.js sets no title: %.300s", tab.Body)
 	}
 	app := httptest.NewRecorder()

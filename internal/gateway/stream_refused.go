@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A backend that only streams (claude-relay-service's Responses endpoint,

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // AccountGroup is a named set of accounts and keys, of any providers
@@ -29,7 +29,7 @@ type AccountGroup struct {
 
 // GroupMark starts an entry of a key's account list that names an
 // account group by its id: "@<id>", or "!@<id>" (ExcludeMark) to keep
-// the group's accounts out. A magpie older than the mark reads it as an
+// the group's accounts out. A eipgam older than the mark reads it as an
 // entry naming no provider, a key that names no model holding it to no
 // model (HeldModels): it fails closed.
 const GroupMark = "@"

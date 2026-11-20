@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Antigravity's app reads /v1/models by id alone and gives a model its
 // catalog doesn't know a window of 200K tokens (YujunT46308 on X); its
-// models.listSource catalog takes one per model. magpie's, at
+// models.listSource catalog takes one per model. eipgam's, at
 // /v1/models?format=antigravity, is {"list": [...]} in the app's own
 // fields, the models the key may use, each with its window and name.
 func TestAntigravityCatalog(t *testing.T) {
@@ -74,7 +74,7 @@ func TestAntigravityCatalog(t *testing.T) {
 	if n, _ := big["displayName"].(string); n == "" {
 		t.Errorf("ds/big has no name: %v", big)
 	}
-	// a window magpie doesn't know is left to the app's default
+	// a window eipgam doesn't know is left to the app's default
 	if p := by["ds/plain"]; p == nil {
 		t.Fatalf("ds/plain not listed: %s", body)
 	} else if _, ok := p["maxTokens"]; ok {

@@ -14,10 +14,10 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/steady"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/steady"
 )
 
 // Read returns the file contents, or (nil, nil) when the file does not exist.
@@ -308,13 +308,13 @@ func IsLink(path string) bool {
 	return err == nil && fi.Mode()&fs.ModeSymlink != 0
 }
 
-// Remove takes away a file magpie has emptied. A symlink stays and the
+// Remove takes away a file eipgam has emptied. A symlink stays and the
 // file it points at is emptied instead, when there is one: deleting the
 // link would leave the old text in its target. A file with other hard
 // links is emptied and kept for the same reason, so every name comes out
 // empty: with AGENTS.md and CLAUDE.md one file under two names, clearing
 // AGENTS.md empties CLAUDE.md too, where deleting the one name would leave
-// the text magpie is taking back under the other.
+// the text eipgam is taking back under the other.
 func Remove(path string) error {
 	if !IsLink(path) && !hardLinked(path) {
 		return os.Remove(path)

@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 func (s *Server) drawMuse(ctx context.Context, p provider.Provider, model string, d drawing) (drawn, int, error) {

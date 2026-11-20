@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/pii"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/pii"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Fingerprint names what st has a request masked by: every setting that
@@ -15,7 +15,7 @@ import (
 // a hash, so two magpies can tell they mask alike without either telling
 // the other its words. "" when st masks nothing.
 //
-// A magpie that passes a request on to another (a Remote magpie) after
+// A eipgam that passes a request on to another (a Remote eipgam) after
 // masking it says so with this; the other masks it again only when its
 // own fingerprint differs: masked twice by the same settings, the second
 // pass finds nothing the first left, and costs the request another run of

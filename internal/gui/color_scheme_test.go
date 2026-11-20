@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// Every page magpie draws says it has a dark theme of its own, so a
+// Every page eipgam draws says it has a dark theme of its own, so a
 // browser that repaints light pages dark (Chrome's Auto Dark Theme,
 // Safari's Adaptive Dark Mode) leaves it alone (xjp on X).
 func TestPagesDeclareBothColorSchemes(t *testing.T) {
@@ -29,6 +29,6 @@ func TestPagesDeclareBothColorSchemes(t *testing.T) {
 	rec := httptest.NewRecorder()
 	webTurnedAway(rec, httptest.NewRequest("GET", "/", nil), "/", "why")
 	if !strings.Contains(rec.Body.String(), meta) {
-		t.Errorf("magpie web's sign-in page has no %s:\n%s", meta, rec.Body.String())
+		t.Errorf("eipgam web's sign-in page has no %s:\n%s", meta, rec.Body.String())
 	}
 }

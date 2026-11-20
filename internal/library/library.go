@@ -1,6 +1,6 @@
 // Package library keeps what every agent should know, once: the
 // instructions each reads before a conversation, the MCP servers it can
-// call and the skills it can load. magpie writes them into each agent's own
+// call and the skills it can load. eipgam writes them into each agent's own
 // files in that agent's own format, and takes back only what it wrote —
 // whatever else is in those files stays as it was.
 package library
@@ -14,12 +14,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/capre"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/capre"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Library is library.json: what magpie keeps, and which agents get it.
+// Library is library.json: what eipgam keeps, and which agents get it.
 type Library struct {
 	Instructions Instructions `json:"instructions"`
 	MCP          []*Server    `json:"mcp"`
@@ -42,7 +42,7 @@ type Library struct {
 	// skills, servers, hooks and subagents are the items above marked
 	// with its name (plugin.go)
 	Plugins []*Plugin `json:"plugins,omitempty"`
-	// Applied is what magpie wrote into each agent, so that what it takes
+	// Applied is what eipgam wrote into each agent, so that what it takes
 	// away is only ever its own.
 	Applied map[string]*Applied `json:"applied,omitempty"`
 	// Away are other computers' servers by the name of one kept to this
@@ -62,7 +62,7 @@ type Library struct {
 	CopySkills bool              `json:"copySkills,omitempty"`
 	SkillHow   map[string]string `json:"skillHow,omitempty"`
 	// SharedSkills puts every skill on here in ~/.agents/skills too, as
-	// magpie's link to the library's folder, for every agent and tool
+	// eipgam's link to the library's folder, for every agent and tool
 	// that reads it (usrname1833, skills_shared.go). This computer's
 	// own: Collect doesn't carry it
 	SharedSkills bool `json:"sharedSkills,omitempty"`
@@ -70,12 +70,12 @@ type Library struct {
 	// git repository has changed (0xYaCo on X, skill_autoupdate.go). This
 	// computer's own: Collect doesn't carry it
 	AutoUpdateSkills bool `json:"autoUpdateSkills,omitempty"`
-	// MCPHub gives each agent that can reach it magpie's one MCP server,
+	// MCPHub gives each agent that can reach it eipgam's one MCP server,
 	// which hands each call on to the library's servers ticked for it, in
 	// place of their own entries (#2679, mcp_hub.go)
 	MCPHub bool `json:"mcpHub,omitempty"`
-	// SkillRouter gives each agent that can take it magpie's one skill,
-	// magpie-skills, listing the library's skills ticked for it, in place
+	// SkillRouter gives each agent that can take it eipgam's one skill,
+	// eipgam-skills, listing the library's skills ticked for it, in place
 	// of a link of each (skill_router.go). This computer's own: Collect
 	// doesn't carry it
 	SkillRouter bool `json:"skillRouter,omitempty"`
@@ -108,7 +108,7 @@ type Library struct {
 	// (libHash); one taken from an agent's edit is read again
 	hashes map[string]string
 	// untouched are the agents' copies takeEdits found unchanged since
-	// magpie made them, for the sync not to look through them again
+	// eipgam made them, for the sync not to look through them again
 	untouched map[string]bool
 	// blockedSkills are copies takeEdits couldn't scan, kept in place for
 	// this sync rather than replaced or removed. Keys are physical paths.
@@ -124,7 +124,7 @@ type Library struct {
 type Instructions struct {
 	Agents []string `json:"agents"` // the agents the shared text is written to
 	// Sets are the named texts to pick the shared one from; with none kept
-	// there is the one magpie always had, "default"
+	// there is the one eipgam always had, "default"
 	Sets   []InstrSet `json:"sets,omitempty"`
 	Active string     `json:"active,omitempty"` // the set agents get; "" is "default"
 	// NoMemory leaves memory's digest (memory.Digest) out of what the
@@ -142,50 +142,50 @@ type InstrSet struct {
 	File string `json:"file,omitempty"`
 }
 
-// Applied is what magpie last wrote into one agent.
+// Applied is what eipgam last wrote into one agent.
 type Applied struct {
 	Instructions bool     `json:"instructions,omitempty"`
 	InstrHash    string   `json:"instrHash,omitempty"` // of the part last written
 	MCP          []string `json:"mcp,omitempty"`
 	Skills       []string `json:"skills,omitempty"`
-	// ToolsOff are, for each server, the tools magpie put in the list its
+	// ToolsOff are, for each server, the tools eipgam put in the list its
 	// entry has of those the agent leaves out; ToolRules the rules beside
-	// the servers magpie added to leave tools out (Claude Code's deny
+	// the servers eipgam added to leave tools out (Claude Code's deny
 	// rules, OpenCode's tools keys). Neither holds one the user had.
 	ToolsOff  map[string][]string `json:"toolsOff,omitempty"`
 	ToolRules []string            `json:"toolRules,omitempty"`
-	// Hooks are the entries magpie wrote into the agent's hooks, each
+	// Hooks are the entries eipgam wrote into the agent's hooks, each
 	// exactly as written: one changed since is the user's (hooks.go)
 	Hooks []HookEntry `json:"hooks,omitempty"`
-	// Env are the variables magpie wrote into the agent's settings, with
+	// Env are the variables eipgam wrote into the agent's settings, with
 	// their values: one there with another value since is the user's
 	Env []EnvEntry `json:"env,omitempty"`
-	// Subagents are the files magpie wrote for the subagents, each with
+	// Subagents are the files eipgam wrote for the subagents, each with
 	// the hash of what it wrote: one changed since is the user's
 	Subagents []SubagentFile `json:"subagents,omitempty"`
-	// Commands are the files magpie wrote for the slash commands, kept as
+	// Commands are the files eipgam wrote for the slash commands, kept as
 	// Subagents are
 	Commands []SubagentFile `json:"commands,omitempty"`
-	// Startup is, for each server, the startup timeout magpie wrote in its
+	// Startup is, for each server, the startup timeout eipgam wrote in its
 	// entry (Codex's startup_timeout_sec): one there other than this is
 	// the user's
 	Startup map[string]float64 `json:"startup,omitempty"`
-	// Picked are the skills magpie picked in the agent's own list of
+	// Picked are the skills eipgam picked in the agent's own list of
 	// those it uses (LiveAgent's skills-settings.json, liveagent.go): one
 	// the user unpicked since stays unpicked
 	Picked []string `json:"picked,omitempty"`
-	// Router: magpie put the skill router's entry, magpie-skills, in the
+	// Router: eipgam put the skill router's entry, eipgam-skills, in the
 	// agent's skills folder
 	Router bool `json:"router,omitempty"`
-	// RouterRules are the rules magpie put in Claude Code's
+	// RouterRules are the rules eipgam put in Claude Code's
 	// permissions.allow so it reads a listed skill without asking.
 	RouterRules []string `json:"routerRules,omitempty"`
-	// RouterCommands are the slash commands magpie wrote for the skills
+	// RouterCommands are the slash commands eipgam wrote for the skills
 	// the router lists (routerCommands), kept as Commands are
 	RouterCommands []SubagentFile `json:"routerCommands,omitempty"`
 }
 
-// empty is whether a holds nothing magpie wrote: a sync that only looked
+// empty is whether a holds nothing eipgam wrote: a sync that only looked
 // at an agent — its hooks, its subagents, its MCP file, with nothing of
 // the library's to give it — makes no record, and a save drops the entry
 // it looked at the agent through (#4247).
@@ -228,8 +228,8 @@ func load() (*Library, error) {
 	if l.Applied == nil {
 		l.Applied = map[string]*Applied{}
 	}
-	l.heal()           // magpie's own servers run this computer's magpie (self_here.go)
-	l.carryTwin()      // Claude Magpie keeps what it was given as Claude Desktop (desktop_twin.go)
+	l.heal()           // eipgam's own servers run this computer's eipgam (self_here.go)
+	l.carryTwin()      // Claude eipgam keeps what it was given as Claude Desktop (desktop_twin.go)
 	l.healPluginRefs() // a plugin's parts that still name its variables (plugin_env.go)
 	return l, nil
 }
@@ -260,7 +260,7 @@ func (l *Library) save() error {
 	for _, c := range l.Commands {
 		c.Agents = orNone(c.Agents)
 	}
-	// an entry with nothing in it is no record of what magpie wrote, and
+	// an entry with nothing in it is no record of what eipgam wrote, and
 	// is not kept: a sync that only looked at an agent used to leave one
 	// behind, one per agent, and the write its save brought into a file
 	// otherwise unchanged was caught red by a test of the CLI's (#4247)
@@ -329,11 +329,11 @@ func checkName(kind, name string) error {
 
 // An agent's id is a name, or one in a WSL distro's
 // (codex@wsl:Ubuntu-24.04): distroRe is the distro's name. Either can be
-// one of the agent's profiles, agent#profile (claude#magpie-desktop, a
+// one of the agent's profiles, agent#profile (claude#eipgam-desktop, a
 // Claude Code config folder; hermes#work, omp#work): the Library's pages
 // show those as agents of their own, so every route that takes an agent
 // takes them (@AXmake110 on X: a plugin couldn't be turned off for
-// claude#magpie-desktop). distroRe is the profile's name too: a plain
+// claude#eipgam-desktop). distroRe is the profile's name too: a plain
 // file name, as the id names files of the agent's (fileName).
 var distroRe = capre.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*$`, 64)
 

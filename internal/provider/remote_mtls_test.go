@@ -14,11 +14,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/mtls"
 )
 
-// mtlsPeer is a magpie behind mTLS that answers what magpie asks of a
-// Remote magpie besides its model calls: its cards, its quota history,
+// mtlsPeer is a eipgam behind mTLS that answers what eipgam asks of a
+// Remote eipgam besides its model calls: its cards, its quota history,
 // a key's limit, its root and its model list's wait. It answers only a
 // client that showed a certificate st issued, with the key.
 func mtlsPeer(t *testing.T, st mtls.Store) *httptest.Server {
@@ -37,12 +37,12 @@ func mtlsPeer(t *testing.T, st mtls.Store) *httptest.Server {
 		switch r.URL.Path {
 		case RemoteCardsPath:
 			json.NewEncoder(w).Encode(map[string]any{"object": "list", "data": []SubscriptionQuota{{Provider: "codex", Name: "Codex", Kind: "subscription", User: "a@x.com"}}})
-		case "/v1/magpie/quotas/history":
+		case "/v1/eipgam/quotas/history":
 			json.NewEncoder(w).Encode(map[string]any{"object": "list", "data": []QuotaHistory{{Provider: "codex"}}})
 		case RemoteKeyLimitPath:
 			io.WriteString(w, `{"limited":false,"key":"k"}`)
 		case "/v1":
-			io.WriteString(w, `{"name":"magpie","mcp_hub":true}`)
+			io.WriteString(w, `{"name":"eipgam","mcp_hub":true}`)
 		case "/v1/models":
 			w.Header().Set("ETag", `"l1"`)
 			io.WriteString(w, `{"object":"list","data":[{"id":"gpt-6","object":"model"}]}`)
@@ -57,11 +57,11 @@ func mtlsPeer(t *testing.T, st mtls.Store) *httptest.Server {
 	return s
 }
 
-// hhdaxia on X (0.1.4258): a Remote magpie behind mTLS, with the client
+// hhdaxia on X (0.1.4258): a Remote eipgam behind mTLS, with the client
 // certificate set on the provider, answered its model calls, but the
 // Usage page's read of its cards went without the certificate and said
-// the remote "isn't shared". Every request magpie makes of a Remote
-// magpie goes through the provider's transport now: the cards, the
+// the remote "isn't shared". Every request eipgam makes of a Remote
+// eipgam goes through the provider's transport now: the cards, the
 // quota history, a key's limit, the root (its MCP router, an update) and
 // the model list's wait.
 func TestRemoteMagpieOwnRequestsShowClientCert(t *testing.T) {
@@ -110,8 +110,8 @@ func TestRemoteMagpieOwnRequestsShowClientCert(t *testing.T) {
 	}
 }
 
-// A 403 is "isn't shared" only when the magpie there says so. A client
-// certificate check's refusal — magpie's own, or a proxy's page in front
+// A 403 is "isn't shared" only when the eipgam there says so. A client
+// certificate check's refusal — eipgam's own, or a proxy's page in front
 // of it — is said as it came, never as sharing to turn on.
 func TestRemoteForbiddenSaysWhatRefused(t *testing.T) {
 	for name, c := range map[string]struct {
@@ -119,9 +119,9 @@ func TestRemoteForbiddenSaysWhatRefused(t *testing.T) {
 		shared      bool
 		has         string
 	}{
-		"not shared (quotas)": {"application/json", `{"error":{"message":"magpie's quotas are told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key"}}`, true, ""},
-		"not shared (guard)":  {"text/plain", "magpie isn't shared on the local network\n", true, ""},
-		"no client cert":      {"text/plain", "magpie asks other computers for a client certificate it issued (Settings → Network and sharing → Require a client certificate), and this request came without a good one\n", false, "client certificate"},
+		"not shared (quotas)": {"application/json", `{"error":{"message":"eipgam's quotas are told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key"}}`, true, ""},
+		"not shared (guard)":  {"text/plain", "eipgam isn't shared on the local network\n", true, ""},
+		"no client cert":      {"text/plain", "eipgam asks other computers for a client certificate it issued (Settings → Network and sharing → Require a client certificate), and this request came without a good one\n", false, "client certificate"},
 		"a proxy's page":      {"text/html", "<html><head><title>403 Forbidden</title></head><body><center><h1>403 Forbidden</h1></center><hr><center>nginx</center></body></html>", false, "client certificate"},
 		"empty":               {"text/plain", "", false, "403"},
 	} {

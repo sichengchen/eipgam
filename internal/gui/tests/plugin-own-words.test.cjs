@@ -17,13 +17,13 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const base = { owner: "someone", stars: 3, license: "MIT", pushed: "2026-10-01T00:00:00Z" };
 const repos = [
-  { ...base, spec: "github:someone/magpie-officeace", repo: "someone/magpie-officeace", url: "https://github.com/someone/magpie-officeace",
-    description: "the repository's description", package: "magpie-officeace", version: "0.3.0",
+  { ...base, spec: "github:someone/eipgam-officeace", repo: "someone/eipgam-officeace", url: "https://github.com/someone/eipgam-officeace",
+    description: "the repository's description", package: "eipgam-officeace", version: "0.3.0",
     name: "OfficeAce", summary: { en: "Unofficial: OfficeAce", zh: "非官方：OfficeAce" } },
-  { ...base, spec: "github:someone/magpie-plain", repo: "someone/magpie-plain", url: "https://github.com/someone/magpie-plain",
-    description: "a repository description", package: "magpie-plain", version: "1.0.0" },
-  { ...base, spec: "github:someone/magpie-zhonly", repo: "someone/magpie-zhonly", url: "https://github.com/someone/magpie-zhonly",
-    description: "zh-only's description", package: "magpie-zhonly", version: "1.0.0", summary: { zh: "只有中文" } },
+  { ...base, spec: "github:someone/eipgam-plain", repo: "someone/eipgam-plain", url: "https://github.com/someone/eipgam-plain",
+    description: "a repository description", package: "eipgam-plain", version: "1.0.0" },
+  { ...base, spec: "github:someone/eipgam-zhonly", repo: "someone/eipgam-zhonly", url: "https://github.com/someone/eipgam-zhonly",
+    description: "zh-only's description", package: "eipgam-zhonly", version: "1.0.0", summary: { zh: "只有中文" } },
 ];
 
 function server(lang) {
@@ -43,7 +43,7 @@ function server(lang) {
       return json({ listings: [], state: { bun: true, bunVersion: "1.3.0", plugins: [] } });
     }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -65,12 +65,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const [own, tip] = await page.evaluate(([l, a, b]) => l === "en" ? [a, b] : [I18N[l][a], I18N[l][b]], [lang, OWN, TIP]);
         assert.ok(own && tip, "both words are translated");
         const card = (repo) => page.locator(`#view-plugins .pm-card[data-pkg="github:someone/${repo}"]`).first();
 
-        const office = card("magpie-officeace");
+        const office = card("eipgam-officeace");
         await office.waitFor();
         assert.equal((await office.locator(".pm-name b").textContent()).trim(), "OfficeAce");
         assert.equal((await office.locator(".pm-sum").textContent()).trim(), lang.startsWith("zh") ? "非官方：OfficeAce" : "Unofficial: OfficeAce");
@@ -83,13 +83,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(box.x >= 0 && box.x + box.width <= width, `the card fits: ${JSON.stringify(box)}`);
 
         // a package that says nothing of itself keeps the card it had
-        const plain = card("magpie-plain");
-        assert.equal((await plain.locator(".pm-name b").textContent()).trim(), "magpie-plain");
+        const plain = card("eipgam-plain");
+        assert.equal((await plain.locator(".pm-name b").textContent()).trim(), "eipgam-plain");
         assert.equal((await plain.locator(".pm-sum").textContent()).trim(), "a repository description");
         assert.equal(await plain.locator(".pm-chip", { hasText: own }).count(), 0);
 
         // a summary with no English keeps GitHub's description in English
-        const zh = card("magpie-zhonly");
+        const zh = card("eipgam-zhonly");
         assert.equal((await zh.locator(".pm-sum").textContent()).trim(), lang.startsWith("zh") ? "只有中文" : "zh-only's description");
         assert.deepEqual(errors, []);
         await page.context().close();

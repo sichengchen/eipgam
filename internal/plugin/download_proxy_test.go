@@ -11,15 +11,15 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // JonahFu on X: GitHub is reached only through a proxy, the vendors
 // without one. Plugin downloads (the list, npm's registry, GitHub, the
 // dist branch, Bun, bun add and git) go through the proxy Settings sets for
 // them, while the host — the plugins' requests to their vendors — keeps
-// magpie's own. Left unset, downloads follow the global proxy as before.
+// eipgam's own. Left unset, downloads follow the global proxy as before.
 func TestPluginDownloadsTakeTheirOwnProxy(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("HOME", dir)
@@ -47,7 +47,7 @@ func TestPluginDownloadsTakeTheirOwnProxy(t *testing.T) {
 		return slices.Clone(asked)
 	}
 
-	// magpie's own transport, as the app installs it, put back after
+	// eipgam's own transport, as the app installs it, put back after
 	tr := http.DefaultTransport.(*http.Transport)
 	wasProxy, wasClient := tr.Proxy, http.DefaultClient.Transport
 	t.Cleanup(func() { tr.Proxy, http.DefaultClient.Transport = wasProxy, wasClient })
@@ -99,7 +99,7 @@ func TestPluginDownloadsTakeTheirOwnProxy(t *testing.T) {
 		t.Fatal(err)
 	}
 	if p := proxyOf(bunCommand(ctx, "bun", dir, "run", "host.js").Env); p != proxy.URL {
-		t.Fatalf("the host's HTTPS_PROXY %q, want magpie's %q", p, proxy.URL)
+		t.Fatalf("the host's HTTPS_PROXY %q, want eipgam's %q", p, proxy.URL)
 	}
 	if p := proxyOf(bunCommand(ctx, "bun", dir, "add", "x").Env); p != "" {
 		t.Fatalf("bun add went through %q with plugin downloads set direct", p)

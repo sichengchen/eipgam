@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // #5275 (hayden4608): Codex Desktop compacting on a Volcengine model, its
 // ~3MB history still going up a slow uplink when Codex gave up at 300s.
-// magpie made its own summary only after that, for nobody, and counted
+// eipgam made its own summary only after that, for nobody, and counted
 // the compaction a success; Codex sent the same history again, another
 // 300s, and the conversation never got shorter.
 
@@ -54,7 +54,7 @@ func withCompactWithin(t *testing.T, d time.Duration) {
 	t.Cleanup(func() { compactWithin = was })
 }
 
-// A summary that hasn't come by compactWithin is magpie's own, sent while
+// A summary that hasn't come by compactWithin is eipgam's own, sent while
 // Codex still waits: the compaction completes, saying why, and the vendor
 // is no longer waited on.
 func TestCodexCompactLateSummaryCompactsLocallyInTime(t *testing.T) {

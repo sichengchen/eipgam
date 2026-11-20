@@ -82,6 +82,6 @@ func TestModelSystemOneNeedsItsURL(t *testing.T) {
 		t.Fatal("an account takes it")
 	}
 	if (Provider{Decide: "https://x/v1", Chat: "https://x/v1", Preset: RemoteMagpiePreset}).TakesDecideAPI() {
-		t.Fatal("a remote magpie takes it")
+		t.Fatal("a remote eipgam takes it")
 	}
 }

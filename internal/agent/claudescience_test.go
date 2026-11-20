@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // fakeScience is claude-science's daemon as its CLI tells it: status,
@@ -78,7 +78,7 @@ func (f *fakeScience) base() (string, bool) {
 // Claude Science is connected by restarting its daemon with
 // ANTHROPIC_BASE_URL set to the gateway, on the port it was on, and by
 // nothing else; disconnected by restarting it without the variable, one
-// set in magpie's own environment too. A daemon magpie didn't start is
+// set in eipgam's own environment too. A daemon eipgam didn't start is
 // drift, never stopped while a session runs in it; one not running is
 // started while it is connected.
 func TestClaudeScienceRestartsItsDaemon(t *testing.T) {
@@ -126,8 +126,8 @@ func TestClaudeScienceRestartsItsDaemon(t *testing.T) {
 	f.pid, f.env, f.calls = 77, nil, nil
 	f.daemon = map[string]any{"active_frames": 1, "active_conversations": 1, "launch_context": "app-child"}
 	f.lock()
-	if d := a.Check(); !strings.Contains(d, "without magpie's gateway") {
-		t.Errorf("a daemon magpie didn't start: check %q", d)
+	if d := a.Check(); !strings.Contains(d, "without eipgam's gateway") {
+		t.Errorf("a daemon eipgam didn't start: check %q", d)
 	}
 	f.calls = nil
 	keepScienceOnce()
@@ -146,7 +146,7 @@ func TestClaudeScienceRestartsItsDaemon(t *testing.T) {
 	}
 
 	// disconnected: running again, without the variable even where
-	// magpie's own environment has it
+	// eipgam's own environment has it
 	f.calls = nil
 	if err := field.Set(""); err != nil {
 		t.Fatal(err)
@@ -213,11 +213,11 @@ func resetScienceKeep(t *testing.T) {
 	})
 }
 
-// shuitunlulu_ on Discord: Claude Science went back off magpie after it
+// shuitunlulu_ on Discord: Claude Science went back off eipgam after it
 // was connected. Its app (0.1.72) attaches its window to a daemon running,
 // and with none starts its own (launch_context app-child) without
 // ANTHROPIC_BASE_URL; its "let the app run it instead", and its offer once
-// the app updated past the daemon, do the same. The keeper puts magpie's
+// the app updated past the daemon, do the same. The keeper puts eipgam's
 // daemon back, on the port the other was on, once no session runs in it:
 // never a busy one, one whose status doesn't say, or one a service
 // manager would start again; and stops after a few in an hour.
@@ -270,7 +270,7 @@ func TestClaudeScienceTakesBackFromItsApp(t *testing.T) {
 	}
 	idle := map[string]any{"active_frames": 0, "active_conversations": 0, "launch_context": "app-child"}
 	app(idle)
-	if d := scienceCheck(); !strings.Contains(d, "without magpie's gateway") {
+	if d := scienceCheck(); !strings.Contains(d, "without eipgam's gateway") {
 		t.Errorf("check %q", d)
 	}
 	// the lock's pid changed: asked at once, not a minute later
@@ -291,13 +291,13 @@ func TestClaudeScienceTakesBackFromItsApp(t *testing.T) {
 		t.Errorf("asked again with the lock unchanged: %q", f.calls)
 	}
 
-	// the app updated: its program is newer than magpie's daemon
+	// the app updated: its program is newer than eipgam's daemon
 	f.installed = "0.1.73"
 	os.WriteFile(bin, []byte("0.1.73 build"), 0o755)
 	before := f.pid
 	keep()
 	if f.pid == before || f.version != "0.1.73" {
-		t.Errorf("an older daemon of magpie's was left after the app updated: %q", f.calls)
+		t.Errorf("an older daemon of eipgam's was left after the app updated: %q", f.calls)
 	}
 	keep()
 	if slices.Contains(f.calls, "--version") {

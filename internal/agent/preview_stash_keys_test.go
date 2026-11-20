@@ -41,17 +41,17 @@ func previewSays(changes []FileChange, op, s string) bool {
 }
 
 // mmdSrc is MiniMax Design's agent as plugins#799 has it: a connect-only
-// agent whose file is under %APPDATA%, one key holding magpie's entry.
+// agent whose file is under %APPDATA%, one key holding eipgam's entry.
 const mmdSrc = `
 export const agent = { id: "minimax-design", name: "MiniMax Design", config: "$APPDATA/@hilo/desktop/hub-config.json", format: "json" };
 export function connect({ gateway, models }) {
-  return { "config.customModels.user-custom-magpie": { protocol: "openai-compatible", providerName: "Magpie", baseUrl: gateway.v1, apiKey: gateway.key, models: (models || []).map(m => ({ id: m.id })) } };
+  return { "config.customModels.user-custom-eipgam": { protocol: "openai-compatible", providerName: "eipgam", baseUrl: gateway.v1, apiKey: gateway.key, models: (models || []).map(m => ({ id: m.id })) } };
 }
 `
 
 // A plugin's agent keys its stash by its file's whole path, under home;
 // the preview's dry run moves home, so the stash it copied must name the
-// file there too, or the dry run finds nothing magpie wrote and the dialog
+// file there too, or the dry run finds nothing eipgam wrote and the dialog
 // shows no change (Purfeather, plugins#799).
 func TestDisconnectPreviewOfAPluginAgent(t *testing.T) {
 	home := pluggedHome(t, mmdSrc)
@@ -71,8 +71,8 @@ func TestDisconnectPreviewOfAPluginAgent(t *testing.T) {
 	wired, _ := os.ReadFile(path)
 	stashBefore, _ := os.ReadFile(stashPath())
 	changes := previewOf(t, a)
-	if !previewSays(changes, "-", "user-custom-magpie") || !previewSays(changes, "-", "openai-compatible") {
-		t.Fatalf("the preview doesn't take magpie's entry out: %+v", changes)
+	if !previewSays(changes, "-", "user-custom-eipgam") || !previewSays(changes, "-", "openai-compatible") {
+		t.Fatalf("the preview doesn't take eipgam's entry out: %+v", changes)
 	}
 	if previewSays(changes, "-", `"mine"`) || previewSays(changes, "-", "homeAgentModelId") {
 		t.Fatalf("the preview takes the user's own out: %+v", changes)
@@ -88,13 +88,13 @@ func TestDisconnectPreviewOfAPluginAgent(t *testing.T) {
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
-	if b, _ := os.ReadFile(path); strings.Contains(string(b), "user-custom-magpie") || !strings.Contains(string(b), "homeAgentModelId") {
+	if b, _ := os.ReadFile(path); strings.Contains(string(b), "user-custom-eipgam") || !strings.Contains(string(b), "homeAgentModelId") {
 		t.Fatalf("disconnected:\n%s", b)
 	}
 }
 
 // One with a model field: the preview puts the user's own model back, as
-// the stash has it, not only takes magpie's out.
+// the stash has it, not only takes eipgam's out.
 func TestDisconnectPreviewOfAPluginAgentsModel(t *testing.T) {
 	path, _ := kiloWired(t)
 	a, err := Find("kilo")

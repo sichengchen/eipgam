@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
 // Helpers the kept agents share, moved here from the files of agents that
@@ -150,9 +150,9 @@ func desktopArgs(entry, link string) []string {
 	return argv
 }
 
-// keptEffort is the default effort a sync leaves on one of magpie's models:
+// keptEffort is the default effort a sync leaves on one of eipgam's models:
 // the one the user set (in the agent's own settings, or by hand) while the
-// model still offers it, else magpie's def. magpie's default never
+// model still offers it, else eipgam's def. eipgam's default never
 // overrides the user's own.
 func keptEffort(was string, levels []string, def string) string {
 	if was != "" && slices.Contains(levels, was) {
@@ -162,7 +162,7 @@ func keptEffort(was string, levels []string, def string) string {
 }
 
 // dshAPIs are the wire protocols of llm-pi-ai's (pi-ai's api names) a route
-// of magpie's may speak, the gateway serving each: openai-completions at
+// of eipgam's may speak, the gateway serving each: openai-completions at
 // /v1/chat/completions, openai-responses at /v1/responses and
 // anthropic-messages at /v1/messages. dsh's Models page offers them as
 // OpenAI Chat Completions, OpenAI Responses and Anthropic Messages, set for

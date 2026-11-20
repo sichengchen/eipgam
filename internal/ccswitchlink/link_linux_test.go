@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 const link = "ccswitch://v1/import?resource=provider&app=claude&name=Relay&apiKey=sk-x"
@@ -57,7 +57,7 @@ type setup struct {
 	started   *[][]string
 }
 
-func linuxSetup(t *testing.T, def string, handler, pkg, magpie bool) setup {
+func linuxSetup(t *testing.T, def string, handler, pkg, eipgam bool) setup {
 	t.Helper()
 	root := t.TempDir()
 	s := setup{data: filepath.Join(root, "data")}
@@ -65,7 +65,7 @@ func linuxSetup(t *testing.T, def string, handler, pkg, magpie bool) setup {
 	t.Setenv("XDG_DATA_HOME", s.data)
 	t.Setenv("XDG_DATA_DIRS", sys)
 	s.def = fakeTools(t, root, def)
-	self := filepath.Join(root, "magpie")
+	self := filepath.Join(root, "eipgam")
 	write(t, self, "")
 	e, st := executable, start
 	t.Cleanup(func() { executable, start = e, st })
@@ -79,9 +79,9 @@ func linuxSetup(t *testing.T, def string, handler, pkg, magpie bool) setup {
 	if pkg {
 		write(t, filepath.Join(sys, "applications", "CC Switch.desktop"), pkgEntry)
 	}
-	if magpie {
-		// as magpie v0.1.3981 to v0.1.4454 wrote it
-		write(t, filepath.Join(s.data, "applications", magpieEntry), "[Desktop Entry]\nType=Application\nName=magpie (ccswitch:// links)\nExec="+self+" %u\nNoDisplay=true\nMimeType=x-scheme-handler/ccswitch;\nTerminal=false\n")
+	if eipgam {
+		// as eipgam v0.1.3981 to v0.1.4454 wrote it
+		write(t, filepath.Join(s.data, "applications", magpieEntry), "[Desktop Entry]\nType=Application\nName=eipgam (ccswitch:// links)\nExec="+self+" %u\nNoDisplay=true\nMimeType=x-scheme-handler/ccswitch;\nTerminal=false\n")
 	}
 	return s
 }
@@ -96,8 +96,8 @@ func (s setup) magpieEntry() bool {
 	return err == nil
 }
 
-// The default an older magpie took goes to CC Switch's handler, which gets
-// the link, and magpie's entry goes.
+// The default an older eipgam took goes to CC Switch's handler, which gets
+// the link, and eipgam's entry goes.
 func TestForwardHandsTheDefaultBack(t *testing.T) {
 	s := linuxSetup(t, magpieEntry, true, true, true)
 	if err := Forward(link); err != nil {
@@ -110,7 +110,7 @@ func TestForwardHandsTheDefaultBack(t *testing.T) {
 		t.Fatalf("default %q", got)
 	}
 	if s.magpieEntry() {
-		t.Fatal("magpie's ccswitch entry stayed")
+		t.Fatal("eipgam's ccswitch entry stayed")
 	}
 }
 
@@ -129,8 +129,8 @@ func TestForwardToThePackagesEntry(t *testing.T) {
 	}
 }
 
-// A default that isn't magpie's is the user's or CC Switch's: left alone,
-// and so is magpie's entry.
+// A default that isn't eipgam's is the user's or CC Switch's: left alone,
+// and so is eipgam's entry.
 func TestForwardLeavesAnotherDefault(t *testing.T) {
 	s := linuxSetup(t, "other.desktop", true, false, true)
 	if err := Forward(link); err != nil {
@@ -143,7 +143,7 @@ func TestForwardLeavesAnotherDefault(t *testing.T) {
 		t.Fatalf("default %q", got)
 	}
 	if !s.magpieEntry() {
-		t.Fatal("magpie's entry went")
+		t.Fatal("eipgam's entry went")
 	}
 }
 

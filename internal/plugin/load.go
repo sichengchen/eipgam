@@ -92,7 +92,7 @@ func ModelLoad(provider, model string, now time.Time) (pct float64, at time.Time
 
 // FreshLoads is every load reported less than LoadFresh before now, by
 // plugin provider id and then the model id lowercased, as ModelLoad
-// answers each: nil when none is (a magpie with no plugin reporting).
+// answers each: nil when none is (a eipgam with no plugin reporting).
 func FreshLoads(now time.Time) map[string]map[string]float64 {
 	loads.Lock()
 	defer loads.Unlock()

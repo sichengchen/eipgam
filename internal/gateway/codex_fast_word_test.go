@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // Archivemylife on X: a Responses request for a Codex account's model with

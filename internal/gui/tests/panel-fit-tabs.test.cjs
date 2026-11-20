@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const s = serve(page, lang, agents, held);
         await page.route("**/*", s.handler);
-        await page.goto("http://magpie.test/?mode=panel");
+        await page.goto("http://eipgam.test/?mode=panel");
         return { page, fits: s.fits };
       };
 
@@ -168,7 +168,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const s = serve(page, lang, 2);
         await page.route("**/*", s.handler);
-        await page.goto("http://magpie.test/?mode=panel");
+        await page.goto("http://eipgam.test/?mode=panel");
         await page.locator("#panelRouting .pr-req").first().waitFor({ state: "attached" });
         await page.locator("#agents .row.agent").nth(1).waitFor();
         const short = await settled(page, s.fits);

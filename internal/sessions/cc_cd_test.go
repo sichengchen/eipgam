@@ -70,7 +70,7 @@ func ccCdBefore(t *testing.T) []byte {
 }
 
 // usrname1833 on Discord: after /cd the file is in the new folder, and
-// magpie listed the session under the folder it was started in.
+// eipgam listed the session under the folder it was started in.
 func TestClaudeCdListedUnderNewFolder(t *testing.T) {
 	claude, _ := setup(t)
 	old := ccCdWrite(t, claude, "-w-projA", ccCdBefore(t))
@@ -115,7 +115,7 @@ func TestClaudeCdLastMoveWins(t *testing.T) {
 	}
 }
 
-// A file a magpie before this one read is kept parsed with the folder its
+// A file a eipgam before this one read is kept parsed with the folder its
 // first line names. Its size and time don't change, so only knowing the
 // parse is from before relocated lines were read makes it read again.
 func TestClaudeCdKeptParseReadAgain(t *testing.T) {
@@ -156,13 +156,13 @@ func TestClaudeCdKeptParseReadAgain(t *testing.T) {
 		t.Error("the kept parse isn't marked as checked")
 	}
 
-	// one this magpie made is kept: a session in a folder that isn't its
+	// one this eipgam made is kept: a session in a folder that isn't its
 	// cwd's for another reason (a project folder named by hand) is read once
 	mu.Lock()
 	cache[p].Cwd = "/w/elsewhere"
 	mu.Unlock()
 	if rows := ccCdRows(t); len(rows) != 1 || rows[0].Cwd != "/w/elsewhere" {
-		t.Fatalf("a parse this magpie made was read again: %+v", rows)
+		t.Fatalf("a parse this eipgam made was read again: %+v", rows)
 	}
 }
 
@@ -181,7 +181,7 @@ func TestClaudeCdLongFolder(t *testing.T) {
 	}
 }
 
-// magpie's own project move of a session /cd brought here: its first lines
+// eipgam's own project move of a session /cd brought here: its first lines
 // name the folder it came from, and only what is after the move is in the
 // folder being moved.
 func TestClaudeRelocationAfterCd(t *testing.T) {

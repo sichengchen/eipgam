@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A web page the user listed in Settings (#1051, SkyAerope: a preflight
@@ -90,7 +90,7 @@ func TestCORSOrigins(t *testing.T) {
 	}
 	// without one, or with a key that isn't a gateway key, it is refused —
 	// readably, so the page can say why
-	for _, key := range []string{"", "magpie", "sk-magpie-not-a-key"} {
+	for _, key := range []string{"", "eipgam", "sk-eipgam-not-a-key"} {
 		w := do("POST", "/v1/chat/completions", "http://localhost:3000", key, nil)
 		if w.Code != http.StatusUnauthorized || w.Header().Get("Access-Control-Allow-Origin") != "http://localhost:3000" || !strings.Contains(w.Body.String(), "gateway key") {
 			t.Errorf("key %q: %d %v %s", key, w.Code, w.Header(), w.Body)
@@ -121,7 +121,7 @@ func TestCORSOrigins(t *testing.T) {
 }
 
 // On the real server lanGuard sits in front of Handler and, for a gateway
-// key sent from this computer, records who called and puts magpie's own
+// key sent from this computer, records who called and puts eipgam's own
 // token in the key's place; a listed page's keyed call is still answered.
 func TestCORSKeyThroughTheServer(t *testing.T) {
 	fresh(t)
@@ -246,11 +246,11 @@ func TestForeignPagesRefused(t *testing.T) {
 		{"POST", "/v1/videos", `{"model":"plan/m1","prompt":"hi"}`},
 		{"POST", CodexPath + "/responses", `{"model":"plan/m1","input":"hi"}`},
 		{"POST", "/mcp/notes", `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`},
-		{"POST", "/_magpie/claude-mcp/tok", `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`},
+		{"POST", "/_eipgam/claude-mcp/tok", `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`},
 		{"POST", provider.RemoteRefreshPath, ""},
 		{"POST", provider.RemoteCodexResetPath + "?user=me@example.com", ""},
 		{"POST", provider.RemoteUpdatePath + "?version=v0.1.9999", ""},
-		{"GET", "/v1/magpie/quotas", ""},
+		{"GET", "/v1/eipgam/quotas", ""},
 		{"GET", "/v1/models", ""},
 		{"OPTIONS", "/v1/chat/completions", ""},
 	}
@@ -284,7 +284,7 @@ func TestForeignPagesRefused(t *testing.T) {
 		{"http://tauri.localhost", "127.0.0.1:3425", loop, secret},                   // a localhost subdomain, with a key (keyless on Windows: TestLocalhostSubdomainNeedsAKey)
 		{"https://app.example.com", "127.0.0.1:3425", loop, secret},                  // listed, with its key
 		{"http://192.168.1.5:3425", "192.168.1.5:3425", "192.168.1.9:50123", secret}, // the gateway's own origin, shared on the LAN
-		{"https://magpie.example.com", "magpie.example.com", loop, secret},           // its own origin behind a port-443 name, with a key (without one, a rebound page: TestReboundPageRefused)
+		{"https://eipgam.example.com", "eipgam.example.com", loop, secret},           // its own origin behind a port-443 name, with a key (without one, a rebound page: TestReboundPageRefused)
 		{"null", "127.0.0.1:3425", loop, secret},                                     // a sandboxed frame or a file:// page, with its key
 		{"app://cherry", "127.0.0.1:3425", loop, ""},                                 // an Electron renderer
 		{"file://", "127.0.0.1:3425", loop, ""},
@@ -296,9 +296,9 @@ func TestForeignPagesRefused(t *testing.T) {
 			t.Errorf("%q to %s: %d %s", c.origin, c.host, w.Code, w.Body)
 		}
 	}
-	// usemagpie.ai still reads the Omarchy theme, and only that
-	if w := do(call{"GET", "/v1/magpie/omarchy", ""}, "https://usemagpie.ai", "127.0.0.1:3425", loop, ""); w.Code == http.StatusForbidden {
-		t.Errorf("usemagpie.ai's Omarchy theme: %d %s", w.Code, w.Body)
+	// The former upstream website has no access to the local theme.
+	if w := do(call{"GET", "/v1/eipgam/omarchy", ""}, "https://usemagpie.ai", "127.0.0.1:3425", loop, ""); w.Code != http.StatusForbidden {
+		t.Errorf("former upstream site's Omarchy theme: %d %s", w.Code, w.Body)
 	}
 }
 
@@ -405,8 +405,8 @@ func TestOpaqueOriginNeedsAKey(t *testing.T) {
 // Wails' webviews serve themselves and no browser asks the DNS for them.
 func TestLocalhostSubdomainNeedsAKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	var hits atomic.Int64
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hits.Add(1)
@@ -453,7 +453,7 @@ func TestLocalhostSubdomainNeedsAKey(t *testing.T) {
 		{"POST", "/v1/responses"},
 		{"POST", "/v1/embeddings"},
 		{"GET", "/v1/models"},
-		{"GET", "/v1/magpie/quotas"},
+		{"GET", "/v1/eipgam/quotas"},
 	}
 	const gw = "127.0.0.1:3425"
 	for _, os := range []string{"darwin", "linux", "windows"} {
@@ -673,7 +673,7 @@ func TestCORSPreflightFromLAN(t *testing.T) {
 		t.Errorf("LAN preflight: %d %v", w.Code, w.Header())
 	}
 	// behind a reverse proxy that forwards with a header (nginx): was 401
-	if w := do("127.0.0.1:50123", "magpie.example.com", "OPTIONS", trancy, "",
+	if w := do("127.0.0.1:50123", "eipgam.example.com", "OPTIONS", trancy, "",
 		map[string]string{"Access-Control-Request-Method": "GET", "Access-Control-Request-Headers": "authorization", "X-Forwarded-For": "203.0.113.7"}); w.Code != http.StatusNoContent ||
 		w.Header().Get("Access-Control-Allow-Origin") != trancy {
 		t.Errorf("proxied preflight: %d %v", w.Code, w.Header())
@@ -691,7 +691,7 @@ func TestCORSPreflightFromLAN(t *testing.T) {
 	if w := do(lan, lanHost, "OPTIONS", trancy, "", nil); w.Code != http.StatusUnauthorized {
 		t.Errorf("plain OPTIONS from the LAN: %d", w.Code)
 	}
-	// and while magpie isn't shared, the network's rules refuse a
+	// and while eipgam isn't shared, the network's rules refuse a
 	// preflight as they refuse everything else from another machine
 	s.LAN = false
 	if err := settings.Save(s); err != nil {

@@ -15,7 +15,7 @@ import (
 
 // pagedPackedSetup is @xMopf7RF's case (X, 11-14): a packed, paginated
 // rollout from months ago whose session_meta names a provider shorter
-// than magpie, with Codex on magpie now. It gives the rollout's path and
+// than eipgam, with Codex on eipgam now. It gives the rollout's path and
 // its bytes, and with row, the state database Codex keeps its row in.
 func pagedPackedSetup(t *testing.T, row bool) (path string, b []byte, db *sql.DB) {
 	t.Helper()
@@ -36,7 +36,7 @@ func pagedPackedSetup(t *testing.T, row bool) (path string, b []byte, db *sql.DB
 	}
 	old := time.Now().Add(-200 * 24 * time.Hour).Truncate(time.Second)
 	os.Chtimes(path, old, old)
-	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model_provider = \"magpie\"\n\n[model_providers.magpie]\nname = \"magpie\"\n"), 0o644)
+	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model_provider = \"eipgam\"\n\n[model_providers.eipgam]\nname = \"eipgam\"\n"), 0o644)
 	if !row {
 		return path, b, nil
 	}
@@ -52,9 +52,9 @@ func pagedPackedSetup(t *testing.T, row bool) (path string, b []byte, db *sql.DB
 	return path, b, db
 }
 
-// A paginated rollout keeps its history by byte, so "magpie" can't be
+// A paginated rollout keeps its history by byte, so "eipgam" can't be
 // written in place of a shorter id in it. The move was refused for it
-// ("keeps its history by byte, and "magpie" is longer than the provider
+// ("keeps its history by byte, and "eipgam" is longer than the provider
 // it names: Codex couldn't open it moved", @xMopf7RF on X), though Codex
 // reads such a thread's provider from its row, never from its file: it
 // moves by its row, its file as it was, and moves back the same way.
@@ -67,20 +67,20 @@ func TestMoveCodexProviderPagedByRow(t *testing.T) {
 		}
 		return s
 	}
-	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "zai" || m.UsesProvider != "magpie" {
+	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "zai" || m.UsesProvider != "eipgam" {
 		t.Fatalf("listed %q, uses %q", m.Provider, m.UsesProvider)
 	}
-	mv, err := MoveCodexProvider(mgCX, "magpie")
+	mv, err := MoveCodexProvider(mgCX, "eipgam")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if row() != "magpie" || len(mv.DB) != 1 || len(mv.Files) != 0 || mv.From != "zai" {
+	if row() != "eipgam" || len(mv.DB) != 1 || len(mv.Files) != 0 || mv.From != "zai" {
 		t.Fatalf("row %q, moved %+v", row(), mv)
 	}
 	if now, _ := os.ReadFile(path); !bytes.Equal(now, b) {
 		t.Fatal("the paginated rollout was written")
 	}
-	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "magpie" {
+	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "eipgam" {
 		t.Fatalf("listed on %q after the move", m.Provider)
 	}
 	if _, err := MoveCodexProvider(mgCX, "zai"); err != nil || row() != "zai" {
@@ -93,12 +93,12 @@ func TestMoveCodexProviderPagedByRow(t *testing.T) {
 
 // With no row in Codex's database to move it by, such a thread can't be
 // moved: the error says why and what can be done, and nothing is left
-// changed, not even a copy in magpie's trash.
+// changed, not even a copy in eipgam's trash.
 func TestMoveCodexProviderPagedNoRow(t *testing.T) {
 	path, b, _ := pagedPackedSetup(t, false)
-	_, err := MoveCodexProvider(mgCX, "magpie")
+	_, err := MoveCodexProvider(mgCX, "eipgam")
 	var stuck *StuckError
-	if !errors.As(err, &stuck) || stuck.From != "zai" || stuck.To != "magpie" {
+	if !errors.As(err, &stuck) || stuck.From != "zai" || stuck.To != "eipgam" {
 		t.Fatalf("err %v", err)
 	}
 	for _, want := range []string{"history by byte", "no row", "stays on zai", "Delete"} {

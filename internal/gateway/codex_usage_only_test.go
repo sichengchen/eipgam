@@ -10,7 +10,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Usage only keeps the ChatGPT account's visible models out of Codex's own

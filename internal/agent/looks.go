@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/agentplug"
 )
 
 // Look is how an agent of Clients() is named and drawn.

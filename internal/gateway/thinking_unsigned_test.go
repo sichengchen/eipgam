@@ -12,13 +12,13 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// citricdu on Discord (magpie 0.1.3356): Claude Code auto-compacted a
+// citricdu on Discord (eipgam 0.1.3356): Claude Code auto-compacted a
 // session on a Smart group that had moved to Cursor's Grok 4.7, then the
 // group went back to Kiro's Claude Opus 5.5. The compacted history kept a
-// thinking block Grok made, which magpie had handed Claude Code signed
+// thinking block Grok made, which eipgam had handed Claude Code signed
 // empty, and Kiro turned the session away 13 times in a row with a bare
 // invalid_request_error. The same request without the block was answered.
 

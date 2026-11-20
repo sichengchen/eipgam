@@ -5,7 +5,7 @@
 // The sections a page's list is cut into, by tab id: a section none of whose
 // tabs shows has no name (app.js navSubs), as does a list of one section.
 window.NAV_SUB_GROUPS = {
-  library: { instructions: "Every agent", memory: "Every agent", mcp: "Every agent", skills: "Every agent", hooks: "Every agent", env: "Every agent", subagents: "Every agent", commands: "Every agent", plugins: "One agent", pi: "One agent", rtk: "magpie", bili: "magpie" },
+  library: { instructions: "Every agent", memory: "Every agent", mcp: "Every agent", skills: "Every agent", hooks: "Every agent", env: "Every agent", subagents: "Every agent", commands: "Every agent", plugins: "One agent", pi: "One agent", rtk: "eipgam", bili: "eipgam" },
 };
 // the tabs [tab, its place in the strip, its section's name where one starts],
 // in sections in order, each in the strip's order
@@ -40,14 +40,14 @@ window.navFold = (v) => {
   if (v !== view || !r?.classList.contains("can-fold")) return false;
   const f = navList("Folded").filter((x) => x !== v);
   if (r.getAttribute("aria-expanded") === "true") f.push(v);
-  try { localStorage.setItem("magpie.navFolded", JSON.stringify(f)); } catch { /* this time only */ }
+  try { localStorage.setItem("eipgam.navFolded", JSON.stringify(f)); } catch { /* this time only */ }
   navSubs();
   return true;
 };
 window.NAV_SUB_IC = {
   library: {
     instructions: "M4 2.5h5.5L12 5v8.5H4z M9.5 2.5V5H12 M6 8h4 M6 10.5h3",
-    // a brain: Magpie Memory, the same mark its requests carry (agent.others)
+    // a brain: eipgam Memory, the same mark its requests carry (agent.others)
     memory: "M8 3.4C7.3 2.5 5.6 2.6 5.2 3.8 4 3.8 3.2 4.9 3.6 6 2.6 6.6 2.6 8.2 3.5 8.8 3 10 3.8 11.3 5 11.2 5.3 12.5 7 13 8 12.1 9 13 10.7 12.5 11 11.2 12.2 11.3 13 10 12.5 8.8 13.4 8.2 13.4 6.6 12.4 6 12.8 4.9 12 3.8 10.8 3.8 10.4 2.6 8.7 2.5 8 3.4zM8 3.4v8.7M5.6 6.3c.8 0 1.4.5 1.6 1.2M10.4 6.3c-.8 0-1.4.5-1.6 1.2M5.3 9.2c.7-.1 1.3.2 1.6.8M10.7 9.2c-.7-.1-1.3.2-1.6.8",
     mcp: "M6 2.5v3 M10 2.5v3 M4.5 5.5h7v2a3.5 3.5 0 0 1-7 0z M8 11v2.5",
     skills: "M8 2.5l1.4 3.6 3.6 1.4-3.6 1.4L8 12.5 6.6 8.9 3 7.5l3.6-1.4z",

@@ -58,7 +58,7 @@ import "unsafe"
 // canDragFile: the page may hand a file to the system's drag here.
 const canDragFile = true
 
-// dragFile drags the file or folder at path out of magpie's window, onto
+// dragFile drags the file or folder at path out of eipgam's window, onto
 // whatever takes a file from Finder (a browser's extensions page).
 func dragFile(path string) bool {
 	p := C.CString(path)

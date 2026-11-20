@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// whysugarsweet on X: Claude Desktop narrowed to some providers (magpie
+// whysugarsweet on X: Claude Desktop narrowed to some providers (eipgam
 // visible, from the terminal) never listed OpenCode Go, added after, while
 // Pi listed it, and Desktop's model list had no way to it. The models its
 // visibility keeps come in the list, off, under their provider; ticking one
@@ -34,7 +34,7 @@ function fixture(lang) {
     agents: [{
       id: "claude-desktop", name: "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired: true,
       fields: [
-        { key: "provider", label: "provider", value: "magpie", options: [{ value: "magpie", label: "magpie", icon: "magpie" }] },
+        { key: "provider", label: "provider", value: "eipgam", options: [{ value: "eipgam", label: "eipgam", icon: "eipgam" }] },
         ...tiers.map((tier) => ({ key: tier, label: tier, value: "", options })),
       ],
       models: count(),
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://magpie.test/" + (where === "panel" ? "?mode=panel" : ""));
+        await page.goto("http://eipgam.test/" + (where === "panel" ? "?mode=panel" : ""));
         await page.locator(cd).waitFor();
         let menu;
         if (where === "window") menu = page.locator(`${cd} > .ag-menu`);

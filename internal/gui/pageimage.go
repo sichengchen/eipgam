@@ -14,15 +14,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-// A plugin's page shares a picture it drew (magpie.image.copy and
-// magpie.image.save in pagebridge.js): its frame is sandboxed to scripts
+// A plugin's page shares a picture it drew (eipgam.image.copy and
+// eipgam.image.save in pagebridge.js): its frame is sandboxed to scripts
 // alone, so it can neither download a file nor reach the clipboard, and the
 // app's window can't put a picture on the clipboard either. The window
 // hands the page's PNG to POST /api/plugin-pages/image, which puts it on
-// the system's clipboard or saves it in Downloads. In magpie web the
+// the system's clipboard or saves it in Downloads. In eipgam web the
 // browser's window does both itself (pluginpages.js): this server's
 // clipboard and Downloads are another computer's.
 
@@ -67,7 +67,7 @@ func pageImageName(asked string) string {
 		name = strings.TrimRight(string(r[:80]), " .-")
 	}
 	if name == "" {
-		name = "magpie"
+		name = "eipgam"
 	}
 	return name
 }

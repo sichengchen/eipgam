@@ -8,11 +8,11 @@ import (
 )
 
 // Claude Code on Windows rewrites ~/.claude/.credentials.json and
-// ~/.claude.json in place when magpie has the file open (its rename gets
+// ~/.claude.json in place when eipgam has the file open (its rename gets
 // EPERM, and it truncates and writes the file instead), so a read can find
 // it empty or cut short. That is no sign-out: the account Claude Code holds
 // stays its own and in use, never marked "Sign-in required", and its
-// sign-in is never put in a config directory of magpie's, where a second
+// sign-in is never put in a config directory of eipgam's, where a second
 // Claude Code would refresh the same refresh token and sign the first out
 // (xbpb6 on X: signed out again and again on Windows). One unreadable for
 // longer than a write takes is gone after all.

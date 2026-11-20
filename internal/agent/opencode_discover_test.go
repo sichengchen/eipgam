@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 func TestOpenCodeDiscoversFrom(t *testing.T) {
@@ -24,7 +24,7 @@ func TestOpenCodeDiscoversFrom(t *testing.T) {
 	}
 }
 
-// pluginOf is magpie's plugin beside the OpenCode config at path, "" with
+// pluginOf is eipgam's plugin beside the OpenCode config at path, "" with
 // none.
 func pluginOf(path string) string {
 	b, _ := os.ReadFile(openCodePluginPath(path))
@@ -45,11 +45,11 @@ func modelsUnder(t *testing.T, path, key string) map[string]any {
 	return m
 }
 
-// chawyehsu on X: OpenCode finds magpie's models itself, as
+// chawyehsu on X: OpenCode finds eipgam's models itself, as
 // yuhp/opencode-models-discovery does, so opencode.json has no list of
-// them. For an OpenCode that loads plugins so, magpie's provider is in
-// the file without models, and magpie's plugin, with the list it falls
-// back on, beside it; both go when magpie's provider does.
+// them. For an OpenCode that loads plugins so, eipgam's provider is in
+// the file without models, and eipgam's plugin, with the list it falls
+// back on, beside it; both go when eipgam's provider does.
 func TestOpenCodeFindsMagpiesModels(t *testing.T) {
 	for _, c := range []struct{ version, key string }{{"1.19.6", "provider." + magpieID}, {"2.3.2", openCodeNativeKey}} {
 		t.Run(c.version, func(t *testing.T) {
@@ -57,7 +57,7 @@ func TestOpenCodeFindsMagpiesModels(t *testing.T) {
 			reasonCatalog(t)
 			openCodeAt(t, c.version)
 			oc := opencode(home, filepath.Join(home, ".config"))
-			if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+			if err := oc.Apply("model", "eipgam/think/deep"); err != nil {
 				t.Fatal(err)
 			}
 			raw := readFile(oc.Path)
@@ -69,7 +69,7 @@ func TestOpenCodeFindsMagpiesModels(t *testing.T) {
 			}
 			p := pluginOf(oc.Path)
 			if !strings.HasPrefix(p, openCodePluginMark) {
-				t.Fatalf("no plugin of magpie's: %q", p)
+				t.Fatalf("no plugin of eipgam's: %q", p)
 			}
 			for _, w := range []string{`"think/deep"`, `"think/new"`, `"rsn/plan"`, gatewayV1(), `"v1":`, `"v2":`} {
 				if !strings.Contains(p, w) {
@@ -96,16 +96,16 @@ func TestOpenCodeFindsMagpiesModels(t *testing.T) {
 				t.Fatalf("%s left: %s", c.key, v)
 			}
 			if _, err := os.Stat(openCodePluginPath(oc.Path)); !os.IsNotExist(err) {
-				t.Fatalf("the plugin outlived magpie's provider: %v", err)
+				t.Fatalf("the plugin outlived eipgam's provider: %v", err)
 			}
 		})
 	}
 }
 
 // An OpenCode that doesn't load such a plugin (before 1.4, 2.0.0 to
-// 2.0.4), or of a version magpie can't tell, has the list in the file as
+// 2.0.4), or of a version eipgam can't tell, has the list in the file as
 // before; and one moving back to such an OpenCode gets the list back and
-// magpie's plugin taken away.
+// eipgam's plugin taken away.
 func TestOpenCodeBeforePluginsKeepsTheList(t *testing.T) {
 	for _, v := range []string{"", "1.3.9", "2.0.4"} {
 		t.Run("v"+v, func(t *testing.T) {
@@ -113,7 +113,7 @@ func TestOpenCodeBeforePluginsKeepsTheList(t *testing.T) {
 			reasonCatalog(t)
 			openCodeAt(t, "2.3.2")
 			oc := opencode(home, filepath.Join(home, ".config"))
-			if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+			if err := oc.Apply("model", "eipgam/think/deep"); err != nil {
 				t.Fatal(err)
 			}
 			if pluginOf(oc.Path) == "" {
@@ -140,7 +140,7 @@ func TestOpenCodeBeforePluginsKeepsTheList(t *testing.T) {
 	}
 }
 
-// A file at the plugin's path magpie didn't write is the user's: never
+// A file at the plugin's path eipgam didn't write is the user's: never
 // written over, and never removed.
 func TestOpenCodeUsersOwnPluginStays(t *testing.T) {
 	home, _ := codexHome(t, "", "")
@@ -153,7 +153,7 @@ func TestOpenCodeUsersOwnPluginStays(t *testing.T) {
 	if err := os.WriteFile(path, []byte(own), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+	if err := oc.Apply("model", "eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	if got := pluginOf(oc.Path); got != own {
@@ -168,8 +168,8 @@ func TestOpenCodeUsersOwnPluginStays(t *testing.T) {
 }
 
 // The plugin as OpenCode runs it (opencode_models.js, under node): for
-// OpenCode 1 its config hook fills magpie's provider from the gateway,
-// the user's fields over magpie's and a model of theirs kept; for OpenCode
+// OpenCode 1 its config hook fills eipgam's provider from the gateway,
+// the user's fields over eipgam's and a model of theirs kept; for OpenCode
 // 2 its transform does, every model with variants; with the gateway down,
 // both fall back on the list in the file.
 func TestOpenCodePluginRuns(t *testing.T) {
@@ -180,7 +180,7 @@ func TestOpenCodePluginRuns(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	reasonCatalog(t)
 	src := openCodePluginFor(magpieProviderJSONAt("opencode", "opencode", "http://127.0.0.1:1"))
-	plugin := filepath.Join(home, "magpie-models.mjs")
+	plugin := filepath.Join(home, "eipgam-models.mjs")
 	if err := os.WriteFile(plugin, []byte(src), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +193,7 @@ func TestOpenCodePluginRuns(t *testing.T) {
 		t.Helper()
 		abs, _ := filepath.Abs(filepath.Join("testdata", "opencode", "drive-plugin.mjs"))
 		cmd := exec.Command(node, abs, plugin, mode)
-		cmd.Env = append(os.Environ(), "MAGPIE_SERVED="+string(served))
+		cmd.Env = append(os.Environ(), "EIPGAM_SERVED="+string(served))
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			t.Fatalf("%s: %v\n%s", mode, err, out)
@@ -216,32 +216,32 @@ func TestOpenCodePluginRuns(t *testing.T) {
 	if get(r, "live/one", "name") != "One" || get(r, "live/one", "limit", "output") != float64(4321) ||
 		get(r, "live/one", "limit", "context") != float64(1000) || get(r, "live/one", "variants", "high", "reasoningEffort") != "high" ||
 		get(r, "live/one", "variants", "mine", "temperature") != 0.5 || get(r, "local/own", "name") != "own" || r["think/deep"] != nil {
-		t.Fatalf("OpenCode 1, magpie up: %v", r)
+		t.Fatalf("OpenCode 1, eipgam up: %v", r)
 	}
 	// down: the list the file has
 	r = run("v1-down")
 	if get(r, "think/deep", "name") == nil || get(r, "rsn/plan", "name") == nil || get(r, "local/own", "name") != "own" || get(r, "live/one", "name") != nil {
-		t.Fatalf("OpenCode 1, magpie down: %v", r)
+		t.Fatalf("OpenCode 1, eipgam down: %v", r)
 	}
 	r = run("v2-up")
 	if get(r, "live/one", "name") != "One" || get(r, "live/one", "limit", "context") != float64(1000) || r["think/deep"] != nil {
-		t.Fatalf("OpenCode 2, magpie up: %v", r)
+		t.Fatalf("OpenCode 2, eipgam up: %v", r)
 	}
 	if vs, ok := get(r, "live/one", "variants").([]any); !ok || len(vs) != 0 {
 		t.Fatalf("OpenCode 2's variants: %v", r)
 	}
 	r = run("v2-down")
 	if get(r, "think/deep", "name") == nil || get(r, "rsn/plan", "name") == nil {
-		t.Fatalf("OpenCode 2, magpie down: %v", r)
+		t.Fatalf("OpenCode 2, eipgam down: %v", r)
 	}
 	if vs, ok := get(r, "think/deep", "variants").([]any); !ok || len(vs) == 0 {
 		t.Fatalf("OpenCode 2's think/deep has no variants: %v", r)
 	}
 }
 
-// A config magpie wrote the list into moves: magpie's models go, and of
+// A config eipgam wrote the list into moves: eipgam's models go, and of
 // them only what the user said stays (a variant of theirs, a reply limit
-// they typed, with the rest of that limit), with a model magpie no
+// they typed, with the rest of that limit), with a model eipgam no
 // longer lists gone, the user's other providers and options untouched. A
 // model the user adds afterwards is theirs.
 func TestOpenCodeListMovesToThePlugin(t *testing.T) {
@@ -255,11 +255,11 @@ func TestOpenCodeListMovesToThePlugin(t *testing.T) {
 			}
 			openCodeAt(t, old)
 			oc := opencode(home, filepath.Join(home, ".config"))
-			if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+			if err := oc.Apply("model", "eipgam/think/deep"); err != nil {
 				t.Fatal(err)
 			}
 			// the user's own: a provider, a timeout, a variant, a reply
-			// limit; and a model of magpie's from before
+			// limit; and a model of eipgam's from before
 			mine := map[string]any{"reasoningEffort": "low", "temperature": 0.3}
 			var variant any = mine
 			if strings.HasPrefix(c.version, "2.") {
@@ -292,11 +292,11 @@ func TestOpenCodeListMovesToThePlugin(t *testing.T) {
 			raw := readFile(oc.Path)
 			ms := modelsUnder(t, oc.Path, c.key)
 			if ms["gone/old"] != nil || ms["think/new"] != nil {
-				t.Fatalf("magpie's models stayed:\n%s", raw)
+				t.Fatalf("eipgam's models stayed:\n%s", raw)
 			}
 			deep, _ := ms["think/deep"].(map[string]any)
 			if _, has := deep["name"]; has {
-				t.Fatalf("magpie's fields stayed on think/deep:\n%s", raw)
+				t.Fatalf("eipgam's fields stayed on think/deep:\n%s", raw)
 			}
 			if strings.HasPrefix(c.version, "2.") {
 				vs, _ := deep["variants"].([]any)

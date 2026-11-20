@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator("#nav").getByRole("button", { name: nav[lang], exact: true }).click();
       const row = page.locator('.row.sm-sess[data-id="p-1"]');
       await row.locator(".who").click();

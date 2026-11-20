@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// When the system blocks magpie's notifications, or can't show them, every
+// When the system blocks eipgam's notifications, or can't show them, every
 // row that sets an alert says so beside it: Settings › Usage's alerts did,
 // the Masking alert in Settings › Privacy didn't, and on a computer with
 // a pointer both were held out of sight with the line explaining the row,
 // for the card the pointer brings. And Bark's row says it gets every
-// notification magpie shows, even while the system's are off, since
+// notification eipgam shows, even while the system's are off, since
 // sendAs pushes to Bark whatever the system does with it. Every
 // language, wide and narrow, both engines; the API is faked here.
 const assert = require("node:assert/strict");
@@ -20,7 +20,7 @@ function server(lang, notifyProblem) {
   const cur = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", dock: false, dockWindow: false, proxy: "",
     redact: true, redactPersonal: false, redactWords: [], codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "",
-    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/magpie",
+    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/eipgam",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, turnDoneAlert: 0, featuresOff: [],
     maskAlert: true, usageAlert: 80, notifyProblem,
@@ -43,13 +43,13 @@ function server(lang, notifyProblem) {
 }
 
 const words = {
-  en: { denied: "Notifications are turned off for magpie in the system's settings", unavailable: "Notifications can't be shown on this system",
-    bark: "Every notification magpie shows goes here too, even while the system's notifications are off" },
-  zh: { denied: "系统设置里关闭了 magpie 的通知", bark: "magpie 显示的每条通知也会发到这里，系统通知关闭时也照发" },
-  "zh-TW": { denied: "系統設定裡關閉了 magpie 的通知", bark: "magpie 顯示的每則通知也會發到這裡，系統通知關閉時也照發" },
-  ja: { denied: "システム設定で magpie の通知がオフになっています", bark: "magpie が表示する通知はすべてここにも届きます。システムの通知がオフでも届きます" },
-  de: { denied: "Benachrichtigungen für magpie sind in den Systemeinstellungen ausgeschaltet",
-    bark: "Jede Benachrichtigung von magpie kommt auch hierher, auch wenn die des Systems aus sind" },
+  en: { denied: "Notifications are turned off for eipgam in the system's settings", unavailable: "Notifications can't be shown on this system",
+    bark: "Every notification eipgam shows goes here too, even while the system's notifications are off" },
+  zh: { denied: "系统设置里关闭了 eipgam 的通知", bark: "eipgam 显示的每条通知也会发到这里，系统通知关闭时也照发" },
+  "zh-TW": { denied: "系統設定裡關閉了 eipgam 的通知", bark: "eipgam 顯示的每則通知也會發到這裡，系統通知關閉時也照發" },
+  ja: { denied: "システム設定で eipgam の通知がオフになっています", bark: "eipgam が表示する通知はすべてここにも届きます。システムの通知がオフでも届きます" },
+  de: { denied: "Benachrichtigungen für eipgam sind in den Systemeinstellungen ausgeschaltet",
+    bark: "Jede Benachrichtigung von eipgam kommt auch hierher, auch wenn die des Systems aus sind" },
 };
 
 // shown on the page: a line held out of sight for the hover card is 1px
@@ -67,7 +67,7 @@ async function open(browser, width, lang, problem, tab) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, problem));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings&tab=" + tab);
+  await page.goto("http://eipgam.test/?view=settings&tab=" + tab);
   await settingsDrawn(page);
   return { page, errors, context };
 }

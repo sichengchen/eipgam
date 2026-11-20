@@ -3,7 +3,7 @@ package gui
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A sign-in asked to keep to its link opens nothing here (Wing8Aqua on X),

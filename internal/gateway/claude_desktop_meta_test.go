@@ -7,7 +7,7 @@ import (
 
 // #5403 (miroku9): Claude Desktop appends its own annotations to what the
 // run reads as tool results — the image-scaling note a >2000px read gets,
-// a skill's base directory, ToolSearch's "Tool loaded." — and magpie took
+// a skill's base directory, ToolSearch's "Tool loaded." — and eipgam took
 // each for words the user sent mid-turn: the model was told "The user sent
 // a new message while you were working: [Image: original 2200x680 …]"
 // though the user had sent nothing, and answered the phantom message. The

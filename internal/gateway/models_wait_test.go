@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // listAsk asks srv's list, waiting wait seconds at the list tag names when
@@ -50,7 +50,7 @@ func listHeld(t *testing.T, url, wait, tag string) string {
 }
 
 // A client polling the list with If-None-Match (clyzhicore on Discord: a
-// magpie or a script following another's list) is answered 304 with no
+// eipgam or a script following another's list) is answered 304 with no
 // body, at once, while the list is the one it names, and the new list
 // with its new tag once it changed. A tag it doesn't name, or none, is
 // answered the list.
@@ -97,7 +97,7 @@ func TestModelsListConditional(t *testing.T) {
 	}
 }
 
-// Another magpie waiting at the list (KaCli) is answered the list's ETag;
+// Another eipgam waiting at the list (KaCli) is answered the list's ETag;
 // the same list is held to the end of the wait and answered 304. A list
 // asked without the header is answered the same bytes with the same ETag
 // (clyzhicore), and only a wait's answer says how long it held.
@@ -133,7 +133,7 @@ func TestModelsWaitTagged(t *testing.T) {
 	}
 }
 
-// A change saved while another magpie waits answers it the new list at
+// A change saved while another eipgam waits answers it the new list at
 // once, not at the end of its wait.
 func TestModelsWaitAnswersAChange(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
@@ -160,7 +160,7 @@ func TestModelsWaitAnswersAChange(t *testing.T) {
 	}
 }
 
-// A gateway stopping ends every wait with 304: the other magpie keeps its
+// A gateway stopping ends every wait with 304: the other eipgam keeps its
 // tag and asks the next gateway.
 func TestModelsWaitEndsWithTheGateway(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
@@ -187,7 +187,7 @@ func TestModelsWaitEndsWithTheGateway(t *testing.T) {
 // header, before anything waits.
 func TestModelsWaitGuardedAsTheList(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	setup(t, provider.Chat, &fake{t: t})
 	newCaller(t, "LAN client")
 	h := New().Front()
@@ -230,7 +230,7 @@ func TestModelsWaitGuardedAsTheList(t *testing.T) {
 // A proxy that compresses the list (Cloudflare's) makes its ETag weak and
 // sends it back so in If-None-Match. The wait still names the list it
 // has: held to the end and answered 304, not answered at once (y0ngb1n on
-// X: a magpie behind Cloudflare was asked for /v1/models once a second).
+// X: a eipgam behind Cloudflare was asked for /v1/models once a second).
 func TestModelsWaitNamedByAWeakTag(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
 	srv := httptest.NewServer(New().Handler())

@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-// The protocol Pi asks magpie's models on, picked in Pi's row
+// The protocol Pi asks eipgam's models on, picked in Pi's row
 // (xiaomanweiman on X): T3 Code's Pi puts all 71 of its tools in the
 // context on openai-completions and 3 on openai-responses, loading the
-// rest when asked, and they had to set providers.magpie.api by hand
+// rest when asked, and they had to set providers.eipgam.api by hand
 // (pi_api_kept.go keeps that). The gateway serves each of pi-ai's APIs
 // below, every model on each, so any of them can be asked for all of
-// magpie's models. Unpicked, it is as before: the provider on
+// eipgam's models. Unpicked, it is as before: the provider on
 // openai-completions, each model on the API its provider serves natively
 // (piModelJSON). An api the user typed in models.json still wins, and the
 // row shows it; a pick made after it is the newer word and replaces it.
@@ -46,7 +46,7 @@ func piProtocol(at place) string {
 	return v
 }
 
-// piProviderOn is magpie's provider block for Pi's models.json, every
+// piProviderOn is eipgam's provider block for Pi's models.json, every
 // model asked on the api on, or each on its own for "".
 func piProviderOn(agentID string, models []catalog.Model, gw, on string) map[string]any {
 	ms := []map[string]any{}
@@ -64,28 +64,26 @@ func piProviderOn(agentID string, models []catalog.Model, gw, on string) map[str
 	// Without it a turn of Pi's on Chat or Messages reached the gateway
 	// with no session: its usage had none and "Record gateway
 	// conversations" kept none of it (akic404 on Discord).
-	return map[string]any{"name": "magpie", "baseUrl": gw + "/v1", "api": api, "apiKey": keyAt(gw),
+	return map[string]any{"name": "eipgam", "baseUrl": gw + "/v1", "api": api, "apiKey": keyAt(gw),
 		"compat": map[string]any{"sendSessionAffinityHeaders": true}, "models": ms}
 }
 
-// piProtocolField is Pi's protocol, the api magpie's provider has in the
-// models.json at modelsPath; write rewrites the block when it is there,
-// and off says magpie doesn't write the block (the pi-magpie extension
-// serves the provider), so there is nothing to pick.
-func piProtocolField(at place, modelsPath string, write func() error, off func() bool) Field {
+// piProtocolField is Pi's protocol, the api eipgam's provider has in the
+// models.json at modelsPath; write rewrites the block when it is there.
+func piProtocolField(at place, modelsPath string, write func() error) Field {
 	return protocolField(at, piProtocolKey(at), modelsPath, func() (string, bool) {
 		v, has := edit.GetJSON(modelsPath, "providers."+magpieID+".api")
 		if _, block := edit.GetJSON(modelsPath, "providers."+magpieID); !block {
 			has = false
 		}
 		return v, has
-	}, write, off)
+	}, write, func() bool { return false })
 }
 
 // protocolField is an agent's protocol, picked in its row and kept in the
-// stash at key: the api magpie's provider has in the models file at
-// modelsPath, which fileAPI reads (has: magpie's provider is in the file).
-// write rewrites the provider when it is there, and off says magpie
+// stash at key: the api eipgam's provider has in the models file at
+// modelsPath, which fileAPI reads (has: eipgam's provider is in the file).
+// write rewrites the provider when it is there, and off says eipgam
 // doesn't write it, so there is nothing to pick. Pi's (piProtocolField)
 // and omp's (omp_protocol.go).
 func protocolField(at place, key, modelsPath string, fileAPI func() (string, bool), write func() error, off func() bool) Field {
@@ -146,7 +144,7 @@ func protocolField(at place, key, modelsPath string, fileAPI func() (string, boo
 	}
 }
 
-// piAPIsWanted are the APIs magpie has handed its provider in the Pi
+// piAPIsWanted are the APIs eipgam has handed its provider in the Pi
 // models.json at path (piAPIsKept's record).
 func piAPIsWanted(path string) []string {
 	rec := map[string][]string{}
@@ -160,8 +158,8 @@ func piAPIsWanted(path string) []string {
 }
 
 // piAPIWanted takes api, the provider's in the Pi models.json at path
-// as a pick is made, for magpie's alone: the pick replaces it, the
-// user's own included, and an older value magpie wrote that the user
+// as a pick is made, for eipgam's alone: the pick replaces it, the
+// user's own included, and an older value eipgam wrote that the user
 // types there later is theirs again.
 func piAPIWanted(path, api string) {
 	stashMu.Lock()

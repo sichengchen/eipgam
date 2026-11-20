@@ -1,7 +1,7 @@
 // Caller keys use the same account list and edit controls as provider keys.
 let gatewayKeys = null, gatewayKeyDraft = null, gatewayKeysBusy = false;
 // gatewayOwnDraft is the value typed for a new key of the user's own (one
-// its clients already send, love1sbug on X); "" lets magpie make one
+// its clients already send, love1sbug on X); "" lets eipgam make one
 let gatewayOwnDraft = "";
 // gatewayAccountNames maps a key's stored account entry ("<provider>/<id>",
 // #905) to how it is shown; what no provider has now is shown as it is kept
@@ -23,8 +23,8 @@ let connectURL = "", connectKeyID = "", connectSecret = null;
 // computer
 let connectWant = "", connectKeyWant = "";
 try {
-  connectWant = localStorage.getItem("magpie.connectAddress") || "";
-  connectKeyWant = localStorage.getItem("magpie.connectKey") || "";
+  connectWant = localStorage.getItem("eipgam.connectAddress") || "";
+  connectKeyWant = localStorage.getItem("eipgam.connectKey") || "";
 } catch {}
 function keepPick(name, v) {
   try { localStorage.setItem(name, v); } catch {}
@@ -164,7 +164,7 @@ function gatewayKeyForm() {
   name.oninput = () => { gatewayKeyDraft = name.value; };
   const own = input(gatewayOwnDraft, t("Your own key (optional)"), "password");
   own.setAttribute("aria-label", t("Gateway key value"));
-  own.title = t("Leave empty and magpie makes a key. Or enter one your clients already send, from another gateway, so they keep working.");
+  own.title = t("Leave empty and eipgam makes a key. Or enter one your clients already send, from another gateway, so they keep working.");
   own.autocomplete = "off";
   own.oninput = () => { gatewayOwnDraft = own.value; };
   const add = el("button", "text primary", t("Create"));
@@ -174,7 +174,7 @@ function gatewayKeyForm() {
     const out = await gatewayKeyAction("add-key", mine ? { name: name.value, secret: own.value } : { name: name.value });
     if (!out) { add.disabled = false; return; }
     gatewayOwnDraft = "";
-    status(t(mine ? "Gateway key created. Clients that send this key reach magpie now." : "Gateway key created. Use Copy on its row to connect a client."), "ok");
+    status(t(mine ? "Gateway key created. Clients that send this key reach eipgam now." : "Gateway key created. Use Copy on its row to connect a client."), "ok");
   };
   add.onclick = go;
   const cancelled = () => { gatewayKeyDraft = null; gatewayOwnDraft = ""; renderGatewayKeys(); };
@@ -251,7 +251,7 @@ function renderGatewayKeys() {
 // in (alextjy on Discord), dragged by a row anywhere off its buttons, or
 // moved with Alt+↑/↓ on it, as the search APIs are (searchArrange); the
 // grip that says so shows on the row under the pointer. The order is kept
-// with the keys (move-key), so `magpie gateway-key list`, Connect's key
+// with the keys (move-key), so `eipgam gateway-key list`, Connect's key
 // picker and the Requests page's key filter list them the same way. The
 // new order shows at once, and the list is read again when it can't be
 // saved.
@@ -302,7 +302,7 @@ function gatewayKeysArrange(list, rows) {
 
 // the key page (the gateway's /me): where a key's holder, with their key
 // alone, sees what it has used and may use and the setup for their agents
-// (zytszone on X: a department shares one magpie, whose app its people
+// (zytszone on X: a department shares one eipgam, whose app its people
 // can't be given). Its address is the one other machines reach.
 function gatewayKeyPage() {
   const g = providers?.gateway, lan = gwFar(g);
@@ -336,7 +336,7 @@ function gatewayKeyMore(k) {
       { name: k.off ? "Enable key" : "Disable key", icon: POWER_GLYPH, run: () => gatewayKeyAction(k.off ? "on-key" : "off-key", { key: k.id }) },
       // read-only (Steven on Discord: a desk display's key reads quotas
       // and usage, and uses nothing); the sharing key is given to agents.
-      // Magpie Browser's key connects the extension alone, and stays so:
+      // eipgam Browser's key connects the extension alone, and stays so:
       // it is in a zip in Downloads
       ...(k.browser ? [] : [k.readOnly
         ? { name: "Give full access", icon: EYE_GLYPH, run: () => gatewayKeyAccess(k, false) }
@@ -367,7 +367,7 @@ function gatewayKeyCanAdmin(k) {
   return !k.lan && !k.browser && !k.readOnly && !k.issuer && !k.expires;
 }
 // gatewayAdminPick sets how the key may use the management API
-// (/v1/magpie/admin/): not at all, from this computer, or from any
+// (/v1/eipgam/admin/): not at all, from this computer, or from any
 async function gatewayAdminPick(k, anchor) {
   const opts = [
     { v: "", name: "Off" },
@@ -377,13 +377,13 @@ async function gatewayAdminPick(k, anchor) {
   openProtoMenu(anchor, opts, k.admin || "", async (v) => {
     if (v === (k.admin || "")) return;
     const out = await gatewayKeyAction("admin-key", { key: k.id, admin: v });
-    if (out) status(t(v === "any" ? "{name} can manage magpie from any computer" : v ? "{name} can manage magpie from this computer" : "{name} can't manage magpie", { name: k.name }), "ok");
+    if (out) status(t(v === "any" ? "{name} can manage eipgam from any computer" : v ? "{name} can manage eipgam from this computer" : "{name} can't manage eipgam", { name: k.name }), "ok");
   }, "Management API", "sess-menu");
 }
-// a key that can manage magpie says so in its row, always
+// a key that can manage eipgam says so in its row, always
 function gatewayAdminTag(k) {
-  const tag = el("span", "amodels key-readonly key-admin set", t("Manages magpie"));
-  tag.title = t(k.admin === "any" ? "This key can change magpie's providers, keys and routing groups, from any computer" : "This key can change magpie's providers, keys and routing groups, from this computer");
+  const tag = el("span", "amodels key-readonly key-admin set", t("Manages eipgam"));
+  tag.title = t(k.admin === "any" ? "This key can change eipgam's providers, keys and routing groups, from any computer" : "This key can change eipgam's providers, keys and routing groups, from this computer");
   return tag;
 }
 
@@ -400,11 +400,11 @@ function gatewayReadOnlyTag() {
   return tag;
 }
 
-// Magpie Browser's key (the one the extension's zip was given) says so in
+// eipgam Browser's key (the one the extension's zip was given) says so in
 // its row: it connects the extension and nothing else
 function gatewayBrowserTag() {
   const tag = el("span", "amodels key-readonly key-browser set", t("Browser only"));
-  tag.title = t("This key connects the Magpie Browser extension and nothing else. It can't use models, MCP servers or stats.");
+  tag.title = t("This key connects the eipgam Browser extension and nothing else. It can't use models, MCP servers or stats.");
   return tag;
 }
 
@@ -499,13 +499,13 @@ function askGatewayKey(k, rotate) {
   ed.append(head, el("p", "lib-confirm", t(rotate
     ? "Clients using {name} will need the new key. Its name and usage history stay the same."
     : "Clients using {name} will lose access from other computers. Its usage history is kept.", { name: k.name })));
-  // a value of one's own in place of the one magpie makes (isaac_bai on
+  // a value of one's own in place of the one eipgam makes (isaac_bai on
   // Discord: one easy to remember and pass on)
   let own = null;
   if (rotate) {
     own = input("", t("Your own key (optional)"), "password");
     own.setAttribute("aria-label", t("Gateway key value"));
-    own.title = t("Leave empty and magpie makes a key. Or enter one your clients already send, from another gateway, so they keep working.");
+    own.title = t("Leave empty and eipgam makes a key. Or enter one your clients already send, from another gateway, so they keep working.");
     own.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") go.click(); else if (e.key === "Escape") closeConfirmAsk(); };
     ed.append(el("label", "", t("Gateway key")), own);
   }
@@ -521,7 +521,7 @@ function askGatewayKey(k, rotate) {
     const out = await gatewayKeyAction(rotate ? "rotate-key" : "remove-key", mine ? { key: k.id, secret: own.value } : { key: k.id });
     if (!out) { go.disabled = false; return; }
     closeConfirmAsk();
-    if (rotate) status(t(mine ? "Gateway key changed. Clients that send this key reach magpie now." : "Gateway key rotated. Update clients on other computers."), "ok");
+    if (rotate) status(t(mine ? "Gateway key changed. Clients that send this key reach eipgam now." : "Gateway key rotated. Update clients on other computers."), "ok");
   };
   bar.append(el("span", "grow"), cancel, go);
   ed.append(bar);
@@ -741,7 +741,7 @@ function gatewayModelsBadge(k) {
       }
       // a decision model (Jev, Clef…) no agent lists: a routing group
       // asks it whatever the key may use, and the key may ask it itself
-      // (/v1/systemone, another magpie's list) only when it is picked
+      // (/v1/systemone, another eipgam's list) only when it is picked
       // (Kautism on Discord)
       opts.push({ v: m.id, find: m.id, name: m.name, note: m.decides ? m.id + " · " + t("Decision model: a routing group asks it whatever this key may use; pick it so the key may ask it itself") : m.id, literalName: true });
     }
@@ -927,7 +927,7 @@ function gatewayMCPBadge(k) {
 
 // gatewayQuotasBadge turns on or off a key's being told the quotas of what
 // it may use: a key held to a budget, models or accounts is told none of
-// this magpie's quotas (#1981) unless it is on, and then only the cards of
+// this eipgam's quotas (#1981) unless it is on, and then only the cards of
 // the providers whose every model it may use, of the accounts it may use.
 // "Quotas" on hover when off, "Quotas shown" always when on.
 function gatewayQuotasBadge(k) {

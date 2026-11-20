@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// nnlrl_75403 on Discord: once magpie updates, the Remote magpies it uses
-// are asked to update too. A Remote magpie's row says what came of it:
+// nnlrl_75403 on Discord: once eipgam updates, the Remote magpies it uses
+// are asked to update too. A Remote eipgam's row says what came of it:
 // updating to the version, or, where it can't, why, with what to run
 // there over it (a container's image, a package manager's command). A row
 // with nothing to say says nothing. In English, Chinese, Japanese and
@@ -13,7 +13,7 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const remote = (id, name, more = {}) => ({
-  id, name, preset: "remote-magpie", icon: "magpie", host: "192.168.1.20:3425", chat: "http://192.168.1.20:3425/v1", responses: "", anthropic: "", catalog: "", routing: "",
+  id, name, preset: "remote-eipgam", icon: "eipgam", host: "192.168.1.20:3425", chat: "http://192.168.1.20:3425/v1", responses: "", anthropic: "", catalog: "", routing: "",
   models: [{ id: "own/m1", name: "m1", on: true }], agents: [], fallback: [], headers: {}, keyList: [], key: { set: true, masked: "mg-…a1b2" }, ready: true, ...more,
 });
 
@@ -45,23 +45,23 @@ const said = {
 const strings = [
   "can't update itself",
   "updating to {v}",
-  "This magpie updated, so that one was asked to update to {v} too. It restarts into it once nothing is in flight.",
+  "This eipgam updated, so that one was asked to update to {v} too. It restarts into it once nothing is in flight.",
   "automatic updates off",
   "Automatic updates are turned off on that computer, so it stays on its version.",
   "update it there",
-  "That magpie is too old to be updated from here: update it on that computer once.",
+  "That eipgam is too old to be updated from here: update it on that computer once.",
   "Updating it from here takes a gateway key with full access there; this provider's key is read-only or held.",
-  "It runs in a container: pull the new image (docker pull ghcr.io/yetone/magpie:latest) and recreate the container.",
+  "It runs in a container: rebuild the image with the latest eipgam source and recreate the container.",
   "{manager} installed it there: update it with {manager}.",
   "{manager} installed it there: update it with {cmd}",
   "It was built from source: update it the way it was built.",
-  "magpie can't replace itself where it runs on that computer: update it there.",
+  "eipgam can't replace itself where it runs on that computer: update it there.",
 ];
 
 const rows = [
   remote("home", "Home", { remoteUpdate: { say: "updating to {v}", tip: strings[2], v: "v0.1.200" } }),
   remote("nas", "NAS", { remoteUpdate: { say: "can't update itself", tip: strings[8] } }),
-  remote("arch", "Arch", { remoteUpdate: { say: "can't update itself", tip: strings[10], manager: "pacman", cmd: "yay -S magpie-bin" } }),
+  remote("arch", "Arch", { remoteUpdate: { say: "can't update itself", tip: strings[10], manager: "pacman", cmd: "yay -S eipgam-bin" } }),
   remote("lab", "Lab", { remoteUpdate: { say: "automatic updates off", tip: strings[4] } }),
   remote("old", "Old", { remoteUpdate: { say: "update it there", tip: strings[6] } }),
   remote("office", "Office"),
@@ -70,7 +70,7 @@ const rows = [
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const width of [1100, 420]) {
     for (const lang of Object.keys(said)) {
-      test(`${engine} ${width} ${lang}: a Remote magpie's row says what came of asking it to update`, async (t) => {
+      test(`${engine} ${width} ${lang}: a Remote eipgam's row says what came of asking it to update`, async (t) => {
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
         const page = await (await browser.newContext({ viewport: { width, height: 760 }, reducedMotion: "reduce" })).newPage();
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, rows));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider").first().waitFor();
         const rup = (name) => page.locator(".row.provider", { hasText: name }).first().locator(".sub .rup");
         const s = said[lang];
@@ -89,8 +89,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const tip = await rup(name).getAttribute("title");
           assert.ok(tip.length > 20, `${name}'s tip says why: ${tip}`);
         }
-        assert.match(await rup("NAS").getAttribute("title"), /docker pull ghcr\.io\/yetone\/magpie:latest/);
-        assert.match(await rup("Arch").getAttribute("title"), /yay -S magpie-bin/);
+        assert.match(await rup("NAS").getAttribute("title"), /docker pull ghcr\.io\/yetone\/eipgam:latest/);
+        assert.match(await rup("Arch").getAttribute("title"), /yay -S eipgam-bin/);
         assert.match(await rup("Arch").getAttribute("title"), /pacman/);
         assert.match(await rup("Home").getAttribute("title"), /v0\.1\.200/);
         assert.doesNotMatch(await rup("Arch").getAttribute("title"), /\{(manager|cmd)\}/);

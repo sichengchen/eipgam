@@ -6,24 +6,24 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // advisorTools fits Claude Code's advisor (/advisor, --advisor) to the
 // upstream a Messages request goes to as it is (passthrough). Claude Code
 // declares it as Anthropic's server tool, {"type": "advisor_20260301",
 // "name": "advisor", "model": …}, and names the advisor's model as it
-// names its own: on magpie, by magpie's id ("anthropic/claude-opus-5-5",
+// names its own: on eipgam, by eipgam's id ("anthropic/claude-opus-5-5",
 // or the tier an alias like opus is on), which no vendor knows, so the
 // whole request was turned away (JackChou on Discord).
 //
 // The advisor runs at the vendor, on the same account: its model goes as
 // that upstream's own name for it when it is p's, as the request's own
-// model does (wires). An advisor magpie can't give that upstream (another
+// model does (wires). An advisor eipgam can't give that upstream (another
 // provider's model, or not a Claude model) is left out, and so is every
 // advisor when the request's model is not Claude's (a vendor's Messages
 // API knows no such tool): the turn is answered without one, as a model
-// that isn't on magpie would be. What Claude Code put in the conversation
+// that isn't on eipgam would be. What Claude Code put in the conversation
 // for an advisor left out goes with it (withoutAdvisor). allowed says
 // whether the calling key may use one of p's models (keyAllows): the
 // advisor's model is the client's to name, and the vendor runs it on the
@@ -89,7 +89,7 @@ func advisorTools(body []byte, p provider.Provider, upstream string, wires map[s
 	return out
 }
 
-// advisorID is the advisor model Claude Code names, taken to the id magpie
+// advisorID is the advisor model Claude Code names, taken to the id eipgam
 // serves as a request's own model is (validateModel): Claude Code is given
 // a dotted Claude id with dashes (provider.ClaudeSpelled) and writes
 // settings.json's advisorModel so, and it sends that id as written, its
@@ -110,7 +110,7 @@ func advisorID(model string) string {
 }
 
 // advisorKeyModel is the model id a key's models are checked against for
-// an advisor named model: magpie's model id when it names one, else the
+// an advisor named model: eipgam's model id when it names one, else the
 // bare id as it was sent.
 func advisorKeyModel(model string) string {
 	model = advisorID(model)
@@ -121,7 +121,7 @@ func advisorKeyModel(model string) string {
 }
 
 // advisorModel is the name p's upstream knows the advisor model by, and
-// whether p can run it: one of p's models, by magpie's id, or a Claude
+// whether p can run it: one of p's models, by eipgam's id, or a Claude
 // model's own id that names no provider.
 func advisorModel(p provider.Provider, model string, wires map[string]string) (string, bool) {
 	model = advisorID(model)

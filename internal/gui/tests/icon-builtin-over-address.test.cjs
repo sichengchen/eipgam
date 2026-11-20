@@ -11,7 +11,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, process.env.MAGPIE_ICON_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.EIPGAM_ICON_ASSETS || "../assets");
 const BASE = "https://relay.example.com/v1", SITE = "file:00000000000000ee.png", LETTER = "file:00000000000000cc.svg";
 
 function serve(lang, posts) {
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
 
         const w = await page.evaluate(([lang, keys]) => Object.fromEntries(keys.map((k) => [k, lang === "en" ? k : I18N[lang]?.[k]])), [lang, KEYS]);
         assert.deepEqual(KEYS.filter((k) => !w[k]), [], `${lang} lacks these`);

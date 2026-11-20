@@ -22,22 +22,22 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/claudeseal"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/codexsummary"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/claudeseal"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/codexsummary"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// CodexPath is where Codex's built-in OpenAI provider reaches magpie, as its
+// CodexPath is where Codex's built-in OpenAI provider reaches eipgam, as its
 // `openai_base_url`. Codex keeps its own sign-in and sends what it would send
 // the ChatGPT backend: a request for one of its own models goes on there as
-// it came, one for a magpie model (a catalog id, provider/model) is served
-// like any other, and the model list is OpenAI's with magpie's added. Ending
+// it came, one for a eipgam model (a catalog id, provider/model) is served
+// like any other, and the model list is OpenAI's with eipgam's added. Ending
 // in /backend-api/codex keeps Codex treating it as that backend.
 const CodexPath = "/backend-api/codex"
 
@@ -46,8 +46,8 @@ const CodexPath = "/backend-api/codex"
 // point it elsewhere.
 var codexAPIBase = "https://api.openai.com/v1"
 
-// magpieCompaction marks a compaction item magpie made: its summary, which
-// only magpie reads back (codexsummary).
+// magpieCompaction marks a compaction item eipgam made: its summary, which
+// only eipgam reads back (codexsummary).
 const magpieCompaction = codexsummary.Mark
 
 var nativeSealedAgentPayload = lazyre.New(`^gAAAAA[A-Za-z0-9_-]+={0,2}$`)
@@ -74,14 +74,14 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		if strings.TrimPrefix(r.URL.Path, CodexPath) == "/responses" && s.serveResponsesSocket(w, r) {
 			return
 		}
-		http.Error(w, "magpie serves a WebSocket on "+CodexPath+"/responses alone", http.StatusUpgradeRequired)
+		http.Error(w, "eipgam serves a WebSocket on "+CodexPath+"/responses alone", http.StatusUpgradeRequired)
 		return
 	}
 	// the pool's accounts and their model lists say they are this Codex, or
 	// newer: the backend serves a model only to a client that knows it
 	provider.SawCodexClient(r.Header)
 	rest := strings.TrimPrefix(r.URL.Path, CodexPath)
-	// a turn of Codex's own is read to codexBodyLimit, one for a magpie
+	// a turn of Codex's own is read to codexBodyLimit, one for a eipgam
 	// model held to the limit of every other route once it is named
 	body, ok := s.readRequestBody(w, r, provider.Responses, s.codexLimitOf())
 	if !ok {
@@ -95,9 +95,9 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodPost && (rest == "/images/generations" || rest == "/images/edits") && s.codexDrawsOnPool(w, r, rest, body):
 		return
 	case r.Method == http.MethodPost && rest == AlphaSearchPath:
-		// web.run on a magpie model is searched where the model is
+		// web.run on a eipgam model is searched where the model is
 		// served, never relayed on Codex's own sign-in; one of Codex's
-		// own models goes through magpie's accounts when its turns do
+		// own models goes through eipgam's accounts when its turns do
 		// (codexAccounts), else on as it came
 		model := modelOf(body)
 		if !strings.Contains(model, "/") {
@@ -118,7 +118,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		}
 		// the route that shows it while it is held before routing names
 		// it, as handle's and gemini's do (Jason on Discord: a held Codex
-		// turn showed as no model, "magpie · 0 on")
+		// turn showed as no model, "eipgam · 0 on")
 		noteAsked(r.Context(), model)
 		// the service tier set for Codex, in place of the one it asked
 		body = codexTiered(r, body, model)
@@ -165,12 +165,12 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 				body, model = withModel(body, to), to
 			}
 			// a subagent on one of Codex's own models, put on the model
-			// set for Codex's subagents, a ChatGPT account's in magpie;
+			// set for Codex's subagents, a ChatGPT account's in eipgam;
 			// the request on the model asked for when it can't be, the
 			// trace saying why (codexUpstreamOn, serve). With none set,
 			// it stays on the model it was named (codexFollowTo). A
 			// memory call with nothing set for it goes on the model its
-			// conversation is on when that is one of magpie's, not on
+			// conversation is on when that is one of eipgam's, not on
 			// the ChatGPT sign-in (codexFollowTo). Set to the lead's model,
 			// a subagent asking for any model goes on the lead's, one of
 			// Codex's own through its sign-in too (codexSubagentPick)
@@ -189,7 +189,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			body = spawnAgentModels(r, body, model, true)
 		}
 		// one of Codex's own models the user disabled (#1867) is refused
-		// here, never relayed to the ChatGPT backend; a magpie model is
+		// here, never relayed to the ChatGPT backend; a eipgam model is
 		// refused by serve
 		if !strings.Contains(model, "/") {
 			if msg, off := codexNativeOff(model); off {
@@ -202,11 +202,11 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(model, "/") {
 			if most := s.bodyLimitOf(); int64(len(body)) > most {
 				writeError(w, provider.Responses, http.StatusRequestEntityTooLarge, overLimit(most).Error()+
-					"; this limit is for a magpie model, and one of Codex's own models takes up to "+sizeWord(s.codexLimitOf()))
+					"; this limit is for a eipgam model, and one of Codex's own models takes up to "+sizeWord(s.codexLimitOf()))
 				return
 			}
 			if rest == "/responses/compact" {
-				writeError(w, provider.Responses, 400, "/responses/compact is not supported for Magpie models; use a compaction_trigger on /responses")
+				writeError(w, provider.Responses, 400, "/responses/compact is not supported for eipgam models; use a compaction_trigger on /responses")
 				return
 			}
 			if kind == "guardian" || isMemoryKind(kind) {
@@ -221,7 +221,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			native := s.nativeCompactionFor(model)
 			body, compact := codexInputAs(body, true, native)
 			if compact {
-				// a compaction magpie makes goes on the model set for it
+				// a compaction eipgam makes goes on the model set for it
 				if to := codexCompactTo(r, model, native, s.nativeCompactionFor); to != "" {
 					body = withModel(body, to)
 				}
@@ -239,7 +239,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			// goes, as it does from a turn: with its text in it, the
 			// backend refuses the whole compaction over "input[n].content:
 			// array too long", and Codex shows it as the turn's error
-			// (jue on Discord). A summary magpie made goes as its text.
+			// (jue on Discord). A summary eipgam made goes as its text.
 			body, _ = codexInput(body, false)
 			// a compaction another provider sealed: the sign-in can't
 			// read it, and nothing here can compact it but its writer
@@ -253,8 +253,8 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			// can't be shown to be the key's, switched off or gone
 			on := compactOn(r, model)
 			// a seal only its writer reads (#1099, #2271): a compact
-			// carrying one magpie recorded the writer of is judged here —
-			// the writer on in magpie answers it signed as the writer, a
+			// carrying one eipgam recorded the writer of is judged here —
+			// the writer on in eipgam answers it signed as the writer, a
 			// gone writer is refused with the reason — not relayed to be
 			// refused there (#2727)
 			writer, gone, _ := sealedCompact(r, model, body)
@@ -286,13 +286,13 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			id, ok = codexSealedFor(r, model, body)
 		}
 		if ok {
-			// the codex/ in it is magpie's, not Codex's: Codex asked its
+			// the codex/ in it is eipgam's, not Codex's: Codex asked its
 			// own model bare (providerPicked)
 			r = providerPicked(r)
-			// through magpie's accounts, Codex's compaction is the codex
-			// provider's to decide as a magpie model's is: sealed natively
+			// through eipgam's accounts, Codex's compaction is the codex
+			// provider's to decide as a eipgam model's is: sealed natively
 			// only with its native compaction on, as only the account that
-			// sealed it can read it; off, magpie's summary, which any of
+			// sealed it can read it; off, eipgam's summary, which any of
 			// them reads (#2582, #2642: one of Codex's own models compacted
 			// natively whatever the setting, and the conversation was held
 			// to that account)
@@ -306,7 +306,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		}
 		// a turn on Codex's own sign-in that masking would change goes
 		// to the model the user set for that, as written, as one through
-		// magpie's accounts does in serve (maskRouteFor)
+		// eipgam's accounts does in serve (maskRouteFor)
 		if to := codexMaskRoute(r, rest, body); to != "" {
 			body, compact := codexInputAs(withModel(body, to), true, s.nativeCompactionFor(to))
 			if compact {
@@ -333,7 +333,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		}
 		if r.Header.Get(AccountHeader) != "" {
 			// relayed as it came, it would go to Codex's own sign-in only
-			writeError(w, provider.Responses, 400, AccountHeader+" names one of magpie's Codex accounts, and Codex isn't signed in to ChatGPT here with any on in magpie")
+			writeError(w, provider.Responses, 400, AccountHeader+" names one of eipgam's Codex accounts, and Codex isn't signed in to ChatGPT here with any on in eipgam")
 			return
 		}
 	}
@@ -343,7 +343,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		w, recorded = recordConversation(w, r, provider.Responses, body)
 		defer recorded()
 		// and the tool loop it may be stuck in spends that sign-in's
-		// allowance as it would a magpie model's
+		// allowance as it would a eipgam model's
 		if s.stoppedToolLoop(w, r, provider.Responses, body) {
 			return
 		}
@@ -356,22 +356,22 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 
 // sealedTaskError is what a subagent is told whose task its lead sealed
 // when nothing model names can read it. lead is the provider that
-// answered the lead, "" when magpie didn't (the lead was one of Codex's
+// answered the lead, "" when eipgam didn't (the lead was one of Codex's
 // own models) or has no record of it in the last sealerKeep. A task
 // already sealed opens only where it was sealed, so the way on with it
 // is said too (#1367). earlier is a provider that answered the lead's
 // earlier turns but can't have sealed the task (canSeal): the lead moved
-// on to Codex's own model, whose turns magpie keeps no record of, and the
+// on to Codex's own model, whose turns eipgam keeps no record of, and the
 // task was sealed there (plugins#70). Each says what is sealed: the task
 // itself, which fork_turns="none" doesn't change (#1855).
 func sealedTaskError(model, lead, earlier string) string {
 	if earlier != "" {
-		return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend, which answered the agent that sent it on one of Codex's own models (a subagent of this thread put there, or the lead after a switch), and only a ChatGPT account can open it. %s can't. %s answered the lead's earlier turns, but it neither seals a task nor opens one. "+sealedTaskItself+" Set Codex's subagent model on magpie's Agents page to a model of a ChatGPT account added in magpie, or to one that isn't served by the ChatGPT backend, so subagents get tasks they can read. To go on with this task, have it spawned again from an agent that isn't on Codex's own models."+sealedWayOut(), model, earlier)
+		return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend, which answered the agent that sent it on one of Codex's own models (a subagent of this thread put there, or the lead after a switch), and only a ChatGPT account can open it. %s can't. %s answered the lead's earlier turns, but it neither seals a task nor opens one. "+sealedTaskItself+" Set Codex's subagent model on eipgam's Agents page to a model of a ChatGPT account added in eipgam, or to one that isn't served by the ChatGPT backend, so subagents get tasks they can read. To go on with this task, have it spawned again from an agent that isn't on Codex's own models."+sealedWayOut(), model, earlier)
 	}
 	if lead != "" {
 		return fmt.Sprintf("This subagent's task was sealed by the server that answered its lead (%s), and only that server can open it; %s can't. "+sealedTaskItself+" Give the subagent the lead's model, or a lead model that isn't served by the ChatGPT backend, so its subagents get a task they can read. To go on with this task, use a model on %s for the lead and the subagent, or have the lead spawn the subagent again."+sealedWayOut(), lead, model, lead)
 	}
-	return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend that answered its lead, and only that backend can open it: a ChatGPT account, or the Responses API provider that answered the lead. %s is neither: magpie has no record of it answering the lead in the last 30 days. "+sealedTaskItself+" Give the subagent the lead's model, or a lead model that isn't served by the ChatGPT backend, so its subagents get a task they can read. To go on with this task, use the lead's model, or have the lead spawn the subagent again."+sealedWayOut(), model)
+	return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend that answered its lead, and only that backend can open it: a ChatGPT account, or the Responses API provider that answered the lead. %s is neither: eipgam has no record of it answering the lead in the last 30 days. "+sealedTaskItself+" Give the subagent the lead's model, or a lead model that isn't served by the ChatGPT backend, so its subagents get a task they can read. To go on with this task, use the lead's model, or have the lead spawn the subagent again."+sealedWayOut(), model)
 }
 
 // sealedWayOut is the way to subagents on any model from a lead on
@@ -382,9 +382,9 @@ func sealedTaskError(model, lead, earlier string) string {
 // before it was on, or held there by Codex's own features.multi_agent_v2.
 func sealedWayOut() string {
 	if settings.Load().CodexAgentsV1 {
-		return ` "Codex subagents on any model" is on in Codex's settings on magpie's Agents page, but this thread runs Codex's multi-agent V2, whose tasks are sealed: it began before the setting was turned on, or Codex's own features.multi_agent_v2 is on in its config. Start a new thread, with features.multi_agent_v2 off.`
+		return ` "Codex subagents on any model" is on in Codex's settings on eipgam's Agents page, but this thread runs Codex's multi-agent V2, whose tasks are sealed: it began before the setting was turned on, or Codex's own features.multi_agent_v2 is on in its config. Start a new thread, with features.multi_agent_v2 off.`
 	}
-	return ` For subagents on any model while the lead is on a ChatGPT model, turn on "Codex subagents on any model" in Codex's settings on magpie's Agents page and start a new thread: the lead then hands its subagents their tasks as text.`
+	return ` For subagents on any model while the lead is on a ChatGPT model, turn on "Codex subagents on any model" in Codex's settings on eipgam's Agents page and start a new thread: the lead then hands its subagents their tasks as text.`
 }
 
 // sealedTaskItself says what a sealed task is (#1855): spawn_agent's
@@ -398,7 +398,7 @@ const sealedTaskItself = `What is sealed is the task itself: the message the age
 // canSeal says whether the provider id names could have sealed a
 // subagent's task, as sealedReader has who can open one: a ChatGPT
 // account, or a provider of no sign-in serving the Responses API (a relay
-// of the ChatGPT backend, #1109). One magpie can't find is taken as one
+// of the ChatGPT backend, #1109). One eipgam can't find is taken as one
 // that could.
 func canSeal(id string) bool {
 	p, err := provider.Find(id)
@@ -459,7 +459,7 @@ func (s *Server) sealedReaders(cands []candidate, pl planned, sealers []string) 
 }
 
 // leadProvider is the provider that answered a subagent's lead, the
-// thread parent names, in any scope magpie routed it in: "" when it
+// thread parent names, in any scope eipgam routed it in: "" when it
 // answered none of the lead's turns, or so long ago it no longer counts.
 // Given a lead's own conversation, it is the provider that answered the
 // lead.
@@ -526,7 +526,7 @@ func loggedAnswers(convs ...string) []loggedAnswer {
 		// the provider that answered, not one a deleted provider's
 		// calls were merged into on the Usage page (Renames.Own)
 		r.Provider = renamed.Own(r.Provider, r.Time)
-		if r.Provider == "" || r.Provider == "magpie" || r.IsRejected() || r.IsReported() || r.Status <= 0 || r.Status >= 400 || r.Computer != "" || isTitleKind(r.Kind) {
+		if r.Provider == "" || r.Provider == "eipgam" || r.IsRejected() || r.IsReported() || r.Status <= 0 || r.Status >= 400 || r.Computer != "" || isTitleKind(r.Kind) {
 			return
 		}
 		// ponytail: host " as " is provider.Where. A relay that starts
@@ -689,7 +689,7 @@ func withoutSealedMessages(body []byte) ([]byte, bool) {
 		if from == "" {
 			from = "another agent"
 		}
-		note := "[magpie: this message from " + from + " was sealed by the ChatGPT backend, which answered that agent on one of Codex's own models, and only it can open it; this model can't, so it was left out. An agent's final result still reaches the agent that spawned it as text.]"
+		note := "[eipgam: this message from " + from + " was sealed by the ChatGPT backend, which answered that agent on one of Codex's own models, and only it can open it; this model can't, so it was left out. An agent's final result still reaches the agent that spawned it as text.]"
 		for j, p := range parts {
 			if c, _ := p["encrypted_content"].(string); p["type"] == "encrypted_content" && nativeSealedAgentPayload.MatchString(c) {
 				parts[j] = map[string]any{"type": "input_text", "text": note}
@@ -725,8 +725,8 @@ func withoutSealedMessages(body []byte) ([]byte, bool) {
 // the ChatGPT backend that sealed it), so it spends that sign-in with
 // nothing of the key asked — and the gate fails closed: a held key may
 // compact only where the sign-in can be shown to be one of the key's
-// accounts (AllowsAccount), so a Codex switched off in magpie, or
-// signed in to ChatGPT nowhere magpie can resolve, is refused as an
+// accounts (AllowsAccount), so a Codex switched off in eipgam, or
+// signed in to ChatGPT nowhere eipgam can resolve, is refused as an
 // account the key may not use is, the relay reaching the sign-in all
 // the same. Codex signed in with its own API key (auth.json's
 // auth_mode) spends no account the key's list governs, and is the one
@@ -755,20 +755,20 @@ func compactSigninHeld(r *http.Request, model string, on *provider.Provider) (ac
 // request is bound to that account — so the message says the two ways
 // out, not the accounts alone.
 func compactHeldError(who access.Identity, model string) string {
-	return fmt.Sprintf("Native compaction for %s goes through the account Codex is signed in to, which the gateway key %q may not use; it may use %s. Native compaction has no other route: add the signed-in account to the key in magpie's Gateway page, or use one of magpie's models, whose compaction goes through a compaction_trigger on /responses and the key's accounts.",
+	return fmt.Sprintf("Native compaction for %s goes through the account Codex is signed in to, which the gateway key %q may not use; it may use %s. Native compaction has no other route: add the signed-in account to the key in eipgam's Gateway page, or use one of eipgam's models, whose compaction goes through a compaction_trigger on /responses and the key's accounts.",
 		model, who.KeyName, keyAccountNames(who))
 }
 
 // sealedCompactHeldError is compactHeldError for a compact sealed by
 // writer, another of Codex's accounts, which only it can read (#2727).
 func sealedCompactHeldError(who access.Identity, model string, writer *provider.Provider) string {
-	return fmt.Sprintf("This conversation's native compaction for %s was sealed by %s, and only that account can read it; the gateway key %q may not use it; it may use %s. Add %s to the key in magpie's Gateway page, or start a new conversation.",
+	return fmt.Sprintf("This conversation's native compaction for %s was sealed by %s, and only that account can read it; the gateway key %q may not use it; it may use %s. Add %s to the key in eipgam's Gateway page, or start a new conversation.",
 		model, writer.Account.User, who.KeyName, keyAccountNames(who), writer.Account.User)
 }
 
 // compactOn is the account a native compaction of one of Codex's own
 // models goes to in place of the ChatGPT sign-in it would relay on: one of
-// Codex's other accounts on in magpie while the sign-in is paused there
+// Codex's other accounts on in eipgam while the sign-in is paused there
 // (#263, the user's own account kept for Codex's remote control, Computer
 // Use and the like, another doing the work). Its turns already go to the
 // others (codexAccounts, routing passing the paused one over); relayed as
@@ -805,7 +805,7 @@ func compactOn(r *http.Request, model string) *provider.Provider {
 
 // codexAccounts is what a request for one of Codex's own models is served
 // as when Codex is signed in to ChatGPT and more of its accounts are on in
-// magpie: the codex subscription's model (codex/<model>), which goes to the
+// eipgam: the codex subscription's model (codex/<model>), which goes to the
 // account Codex is signed in to and, when that one is out of its allowance
 // or rate limited, on to the next — as it can't when relayed as it came.
 // A gateway key held to some models or accounts (#882, #905) is served
@@ -842,12 +842,12 @@ func codexAccounts(r *http.Request, model string) (string, bool) {
 		return id, true
 	}
 	// Codex's sign-in known to be out (of its allowance, no credits): a
-	// Codex started before magpie took its turns over (codex.out) still
+	// Codex started before eipgam took its turns over (codex.out) still
 	// sends them to its built-in provider, and relayed as they came each
 	// one met the same refusal until Codex was restarted, which then sent
-	// them to magpie as codex/<model> (unsplashz on Discord). Served as
+	// them to eipgam as codex/<model> (unsplashz on Discord). Served as
 	// that restarted Codex's are, they go where routing sends them, with
-	// no restart. A request signed by an account magpie doesn't have (a
+	// no restart. A request signed by an account eipgam doesn't have (a
 	// Codex in WSL) goes as it came
 	if ok && p.Account != nil && p.Account.Agent == "codex" && codexHeldKnown() {
 		if acct := h.Get("chatgpt-account-id"); acct == "" || acct == provider.CodexSignedInAccount() {
@@ -860,9 +860,9 @@ func codexAccounts(r *http.Request, model string) (string, bool) {
 	return id, true
 }
 
-// codexSealedFor is codexAccounts for a request magpie would relay as it
+// codexSealedFor is codexAccounts for a request eipgam would relay as it
 // came to Codex's own sign-in, the one account on, that carries a native
-// compaction magpie recorded the writer of: it goes through routing,
+// compaction eipgam recorded the writer of: it goes through routing,
 // which sends it only to that writer or answers why not
 // (checkpointReaders, checkpointError). Relayed, it reached the sign-in
 // whoever sealed it, and was refused there (#2642: the account that
@@ -881,18 +881,18 @@ func codexSealedFor(r *http.Request, model string, body []byte) (string, bool) {
 	return id, true
 }
 
-// sealedCompact judges a legacy compact whose input carries a seal magpie
-// recorded the writer of (#2727): the writer on in magpie answers it,
+// sealedCompact judges a legacy compact whose input carries a seal eipgam
+// recorded the writer of (#2727): the writer on in eipgam answers it,
 // signed as the writer — a seal only its writer reads (#1099, #2271), and
 // relayed as it came the compact reaches the sign-in, which another
 // account's seal refuses, its reason unread. A writer gone (signed out,
 // lapsed, paused, switched off, kept from the model) is refused here with
 // the same words the same request on /responses gets (checkpointError,
 // #2642). The sign-in's pause (compactOn) changes the signature, not the
-// judgment. judged is false for what goes as it came: a seal a magpie
+// judgment. judged is false for what goes as it came: a seal a eipgam
 // key's candidate wrote, a request signing with its own
 // chatgpt-account-id (a Codex on WSL or another CODEX_HOME — codexServed's
-// caution), a provider or sign-in state magpie cannot read, and the
+// caution), a provider or sign-in state eipgam cannot read, and the
 // sign-in's own seal while the sign-in can still be asked (the backend
 // takes its own).
 func sealedCompact(r *http.Request, model string, body []byte) (writer *provider.Provider, gone string, judged bool) {
@@ -1002,8 +1002,8 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	// row written below sums this call's tries in its own context (#4456)
 	r = r.WithContext(s.countBytes(r.Context()))
 	w0, body0 := w, body // as they came, for the fallbacks (codexFallBack)
-	// Claude's blocks magpie gave Codex (claudeseal) are Claude's alone:
-	// to OpenAI each item is its summary, as before magpie carried them
+	// Claude's blocks eipgam gave Codex (claudeseal) are Claude's alone:
+	// to OpenAI each item is its summary, as before eipgam carried them
 	body = withoutClaudeSeals(body)
 	base := provider.CodexBase
 	if apiKey(r.Header) && rest != "/models" {
@@ -1031,7 +1031,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	var maskedHits maskHits
 	// the ChatGPT sign-in the user set to go unmasked, and its fallbacks
 	// (codexFallBack masks for its own route), gets the turn as written
-	// (isee1_1 on Discord); Codex's own API key is no account of magpie's
+	// (isee1_1 on Discord); Codex's own API key is no account of eipgam's
 	sentWhole := base == provider.CodexBase && codexRouteUnmasked(on)
 	if r.Method == http.MethodPost && !sentWhole {
 		var unmask func()
@@ -1083,7 +1083,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	// the one it can go to: Codex's own sign-in, or its key
 	var tr *Route
 	// where the try now going spent its time (TryNet): the request goes
-	// out through magpie's own client, as a routed try's does, so the
+	// out through eipgam's own client, as a routed try's does, so the
 	// Routing page says whose time a slow turn was here too
 	nt := &netTrace{}
 	first := firstToken{start: start} // the reply's first tokens (#196), counted as ms are
@@ -1152,7 +1152,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			prompt := promptRead() // outside the trace's lock, which reading it takes
 			sentPrompt = prompt
 			s.trace.update(tr, func(t *Route) {
-				// what masking took: magpie's own time isn't split here
+				// what masking took: eipgam's own time isn't split here
 				t.Masking = maskingMs(r.Context(), 0)
 				// the last try: the turn asked again for an overload has one each
 				try := &t.Tries[len(t.Tries)-1]
@@ -1261,7 +1261,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	// the client that did, and the bytes it was passed
 	var readErr, writeErr error
 	var passed int64
-	relayedAcct := "" // magpie's ChatGPT account the turn went out on, if any
+	relayedAcct := "" // eipgam's ChatGPT account the turn went out on, if any
 	if rest == "/responses" && base != codexAPIBase {
 		// the account goes on its credits, its week used up: a reset it
 		// spends by itself when the week runs out goes first
@@ -1317,7 +1317,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			// left to the transport, the reply comes back plain for the usage in it
 			req.Header.Del("Accept-Encoding")
 			// a turn to ChatGPT goes zstd-compressed again, as Codex sent it
-			// before magpie read it (ylorn on X); an API key's goes plain
+			// before eipgam read it (ylorn on X); an API key's goes plain
 			sent = provider.CodexCompressed(req, body)
 			// counted for the request's ledger row, as forwardOnce's are (#4456)
 			sentUp(r.Context(), sent, len(body))
@@ -1346,7 +1346,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 				return
 			}
 			if on != nil {
-				// one of magpie's accounts: a revoked sign-in shows on its
+				// one of eipgam's accounts: a revoked sign-in shows on its
 				// row, to sign in again (#1793)
 				noteSignIn(ctx, on.Account, req, res)
 			}
@@ -1447,7 +1447,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			if acct, ok := codexRelayedAccount(base, r.Header, on); ok {
 				// the windows the reply tells of the account it went out on
 				// are kept as its usage, and a full one has it read again at
-				// once, as a turn served through magpie's accounts has: with
+				// once, as a turn served through eipgam's accounts has: with
 				// Codex's sign-in the only account, every turn comes this way,
 				// and the Codex app was moved off a used-up account only at
 				// the next look, minutes on, Send greyed until it was
@@ -1494,7 +1494,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			if overload && codexAccountOut(res.StatusCode, msg) && s.codexFallsBack(r, body) {
 				// the account out of its allowance (its credits and resets
 				// looked at above): the fallbacks answer, as they do for a
-				// turn through magpie's accounts, rather than Codex handed
+				// turn through eipgam's accounts, rather than Codex handed
 				// the refusal (adorable_piglet on Discord)
 				said := provider.APIError(msg, res.Status)
 				handOut(res.StatusCode, said, msg)
@@ -1650,7 +1650,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 		errType = provider.ErrorType(refusal)
 		if relayedAcct != "" && failure(res.StatusCode, refusal) == failQuota {
 			// the account it went out on refused the turn as out of its
-			// allowance: read again now, so magpie takes the turns over
+			// allowance: read again now, so eipgam takes the turns over
 			// (codex.out) and the Codex app is told without a restart
 			codexMayBeUsedUp(relayedAcct)
 		}
@@ -1732,7 +1732,7 @@ func codexRouteUnmasked(on *provider.Provider) bool {
 // codexAccountOut says the ChatGPT backend turned away a turn on Codex's
 // own sign-in for the account, not the request: out of its allowance
 // (usage_limit_reached, a plan without Codex), of its credits, or rate
-// limited — what a turn through magpie's accounts goes on past to the
+// limited — what a turn through eipgam's accounts goes on past to the
 // next. A 401 is never one: Codex renews its own sign-in on it.
 func codexAccountOut(status int, body []byte) bool {
 	if status == http.StatusUnauthorized {
@@ -1749,7 +1749,7 @@ func codexAccountOut(status int, body []byte) bool {
 }
 
 // codexFallsBack says Codex's turn on one of its own models has fallbacks
-// to go on to (codexFallBack): the Codex subscription's, set in magpie, at
+// to go on to (codexFallBack): the Codex subscription's, set in eipgam, at
 // least one of them found, or a routing group the user built with the
 // model in it (provider.GroupsAfter). A turn compacting natively is the backend's to
 // answer, and goes nowhere else.
@@ -1776,8 +1776,8 @@ func (s *Server) codexFallsBack(r *http.Request, body []byte) bool {
 // on to when the Codex subscription can't take it (the account out of its
 // allowance, every account held at its cap), after the subscription's own
 // fallbacks: where the turns of the conversation it reviews go on to.
-// That conversation on one of magpie's models, the model itself, when
-// magpie serves it to this caller (servedSession); on one of Codex's own,
+// That conversation on one of eipgam's models, the model itself, when
+// eipgam serves it to this caller (servedSession); on one of Codex's own,
 // the routing groups the user built with that model in them
 // (provider.GroupsAfter), which a turn on it goes on to. Codex asks its
 // reviewer by OpenAI's name whatever the conversation is on (codex-rs
@@ -1804,8 +1804,8 @@ func (s *Server) codexReviewAfter(r *http.Request, p provider.Provider, model st
 
 // codexReviewLead is the model the conversation Codex's auto-review on
 // codex-auto-review through p, the Codex subscription, reviews is on: one
-// of Codex's own by its bare name, or one of magpie's ids; "" for any
-// other request, or a conversation magpie has seen no turn of.
+// of Codex's own by its bare name, or one of eipgam's ids; "" for any
+// other request, or a conversation eipgam has seen no turn of.
 func (s *Server) codexReviewLead(r *http.Request, p provider.Provider, model string, body []byte) string {
 	if p.ID != "codex" || p.Account == nil || p.Account.Agent != "codex" || !strings.EqualFold(strings.TrimSpace(model), provider.CodexAutoReview) {
 		return ""
@@ -1821,7 +1821,7 @@ func (s *Server) codexReviewLead(r *http.Request, p provider.Provider, model str
 // codexFallBack serves Codex's turn on its own sign-in, which the backend
 // was too busy for however often it was asked again, from the Codex
 // subscription's fallbacks, as serve goes on to them for a turn through
-// magpie's accounts; the account itself is not asked again (handedOnOf).
+// eipgam's accounts; the account itself is not asked again (handedOnOf).
 // kept is what Codex was sent while it waited: the stream's headers, once
 // it had them, which the fallback's reply follows.
 func (s *Server) codexFallBack(w http.ResponseWriter, r *http.Request, body []byte, kept *keptAlive) {
@@ -1836,7 +1836,7 @@ type handedOnKey struct{}
 
 // handedOnOf is what the agent of a request codexFallBack handed on was
 // sent while it waited, nil for any other request.
-// pickedKey marks a request whose model magpie put a provider on
+// pickedKey marks a request whose model eipgam put a provider on
 // (codexAccounts' codex/<model>), the client having asked it bare.
 type pickedKey struct{}
 
@@ -1846,7 +1846,7 @@ func providerPicked(r *http.Request) *http.Request {
 
 // namedProvider is whether the client named the provider of the model it
 // asked for ("claude/claude-opus-5-5", a flat or aliased spelling of one),
-// rather than a bare model magpie put on a provider. A provider named so
+// rather than a bare model eipgam put on a provider. A provider named so
 // is the one asked: past its usage cap it goes on to its own fallbacks
 // only, never to a routing group that merely has the model in it
 // (Anotiaww on X).
@@ -1904,10 +1904,10 @@ func codexServed(base string, h http.Header, on *provider.Provider) (id, account
 	return p.ID, p.Account.User
 }
 
-// codexRelayedAccount is the ChatGPT account of magpie's that a relay
+// codexRelayedAccount is the ChatGPT account of eipgam's that a relay
 // through codexUpstreamOn went out on: the one it was signed with (on),
 // or Codex's own sign-in when the request names it; false for a call to
-// OpenAI's API, or one signed by an account magpie doesn't have.
+// OpenAI's API, or one signed by an account eipgam doesn't have.
 func codexRelayedAccount(base string, h http.Header, on *provider.Provider) (provider.Provider, bool) {
 	if base != provider.CodexBase || apiKey(h) {
 		return provider.Provider{}, false
@@ -1915,7 +1915,7 @@ func codexRelayedAccount(base string, h http.Header, on *provider.Provider) (pro
 	if on != nil && on.Account != nil && on.Account.User != "" {
 		return *on, true
 	}
-	// the token went out as Codex sent it: it is the sign-in magpie reads
+	// the token went out as Codex sent it: it is the sign-in eipgam reads
 	// only when it names the same ChatGPT account. A Codex in WSL, or
 	// under another CODEX_HOME, signs with its own, which isn't named here
 	if acct := h.Get("chatgpt-account-id"); acct != "" && acct != provider.CodexSignedInAccount() {
@@ -1960,7 +1960,7 @@ func withoutUnreadable(body, msg []byte) ([]byte, bool) {
 }
 
 // withoutItem is a Responses request without the input item of this id.
-// A compaction of magpie's own (cmp_magpie_…, hey_boyce on X: one that
+// A compaction of eipgam's own (cmp_magpie_…, hey_boyce on X: one that
 // reached OpenAI as it was written) goes as the summary it holds, so
 // the turn keeps what came before.
 func withoutItem(body []byte, id string) ([]byte, bool) {
@@ -2014,7 +2014,7 @@ func codexKeyRefused(msg []byte) string {
 	}
 	return "OpenAI refused the API key Codex is signed in with (" + said + "). " +
 		"This is one of Codex's own models, which goes to OpenAI with Codex's own sign-in: " +
-		"pick one of magpie's models in Codex (provider/model, or set it in magpie's Agents view), " +
+		"pick one of eipgam's models in Codex (provider/model, or set it in eipgam's Agents view), " +
 		"or sign Codex in with ChatGPT, or with an OpenAI API key"
 }
 
@@ -2037,22 +2037,22 @@ func droppedUnanswered(ctx context.Context, err error) bool {
 // lists (#322) — and what to do about it.
 func codexUnreached(model string, err error) string {
 	return "OpenAI can't be reached (" + err.Error() + "). " + model + " is one of Codex's own models, " +
-		"which goes to OpenAI with Codex's own sign-in: pick one of magpie's models in Codex " +
-		"(provider/model, or set it in magpie's Agents view), or let Codex reach OpenAI"
+		"which goes to OpenAI with Codex's own sign-in: pick one of eipgam's models in Codex " +
+		"(provider/model, or set it in eipgam's Agents view), or let Codex reach OpenAI"
 }
 
 // codexFailedEmpty says why a model of Codex's own failed when OpenAI gave
 // an error status and nothing else: where it went, and what to do — a
-// Codex left on its own model while magpie's Agents view picked another
+// Codex left on its own model while eipgam's Agents view picked another
 // for it sends the turn to OpenAI, not to that one (#409).
 func codexFailedEmpty(model, status string) string {
 	return "OpenAI answered " + status + " and said nothing more. " + model + " is one of Codex's own models, " +
-		"which goes to OpenAI with Codex's own sign-in, not to a provider in magpie: pick one of magpie's models in Codex " +
-		"(provider/model, or set it in magpie's Agents view), or try again later"
+		"which goes to OpenAI with Codex's own sign-in, not to a provider in eipgam: pick one of eipgam's models in Codex " +
+		"(provider/model, or set it in eipgam's Agents view), or try again later"
 }
 
 // codexWho names who a request relayed to OpenAI went to: Codex's own
-// sign-in, its API key, or one of magpie's ChatGPT accounts (on).
+// sign-in, its API key, or one of eipgam's ChatGPT accounts (on).
 func codexWho(base string, on *provider.Provider) string {
 	switch {
 	case on != nil && on.Account != nil && on.Account.User != "":
@@ -2090,8 +2090,8 @@ func codexSaidNothing(rest, model, who string, res *http.Response, msg []byte) (
 		}
 	}
 	return who + " answered " + what + " for " + model + " " + res.Status + said +
-		". " + model + " is one of Codex's own models, which goes to OpenAI, not to a provider in magpie; try again later, " +
-		"or pick one of magpie's models in Codex (provider/model, or set it in magpie's Agents view)", true
+		". " + model + " is one of Codex's own models, which goes to OpenAI, not to a provider in eipgam; try again later, " +
+		"or pick one of eipgam's models in Codex (provider/model, or set it in eipgam's Agents view)", true
 }
 
 // codexStreamCut says when a relayed stream was cut mid-reply: an SSE reply
@@ -2211,7 +2211,7 @@ func codexHeader(k string) bool {
 // makes on a hidden thread of its own goes without x-openai-subagent: its
 // x-codex-turn-metadata names the thread's source instead — "thread_title"
 // for the title of a new chat (#314), "guardian_review". A web search
-// magpie runs for a model that can't search is "web_search". DSH marks its
+// eipgam runs for a model that can't search is "web_search". DSH marks its
 // compaction with x-deepseek-harness-compact: "compact" too.
 func callKind(h http.Header) string {
 	v := strings.TrimSpace(h.Get("x-openai-subagent"))
@@ -2267,7 +2267,7 @@ func threadSource(meta string) string {
 
 func copyHeaders(dst, src http.Header) {
 	for k, vs := range src {
-		// what a proxy in front of magpie says of the caller isn't the
+		// what a proxy in front of eipgam says of the caller isn't the
 		// ChatGPT backend's (proxyIdentity)
 		if !hopHeader(k) && !proxyIdentity(k) && http.CanonicalHeaderKey(k) != "Host" && http.CanonicalHeaderKey(k) != AccountHeader {
 			dst[k] = vs
@@ -2277,10 +2277,10 @@ func copyHeaders(dst, src http.Header) {
 
 // codexModelsWait is how long the ChatGPT backend is given for its model
 // list. Codex gives the whole request 5 s (MODELS_REFRESH_TIMEOUT in its
-// models endpoint) and then keeps the list it was built with, magpie's
+// models endpoint) and then keeps the list it was built with, eipgam's
 // models nowhere in it; a backend slow to answer, or not reachable at all
 // on a network that drops chatgpt.com's packets rather than refusing
-// them, held magpie's answer past that (#539). A var so tests can say.
+// them, held eipgam's answer past that (#539). A var so tests can say.
 var codexModelsWait = 3 * time.Second
 
 // codexListFor is how long the backend's list is handed out again without
@@ -2296,7 +2296,7 @@ const codexListFetch = 30 * time.Second
 // app-servers asked it at once, each on its own and each given up at
 // codexModelsWait, so a backend slower than that never got a list through
 // and Codex fell back to its own metadata, without tool_search for
-// magpie's groups, and inlined every Apps tool: ~500K tokens a turn
+// eipgam's groups, and inlined every Apps tool: ~500K tokens a turn
 // (#3734, 1,906 timeouts in a day).
 var codexLists = struct {
 	sync.Mutex
@@ -2444,7 +2444,7 @@ func keepCodexListAuth(r *http.Request, identified bool) *http.Request {
 }
 
 // codexModels is the ChatGPT backend's model list for this sign-in, with
-// magpie's models after it. Should the backend not answer, or not in
+// eipgam's models after it. Should the backend not answer, or not in
 // time, Codex's last list of its own stands in.
 func (s *Server) codexModels(w http.ResponseWriter, r *http.Request) {
 	if auth, kept := r.Context().Value(codexListAuth{}).(string); kept {
@@ -2469,11 +2469,11 @@ func (s *Server) codexModels(w http.ResponseWriter, r *http.Request) {
 	body, etag, deny, denyBody := s.codexBackendList(r)
 	// A sign-in the backend calls revoked (401 token_revoked, "Encountered
 	// invalidated oauth token", provider.SignInRevoked) is answered as a
-	// backend that didn't answer: Codex's last list of its own, magpie's
+	// backend that didn't answer: Codex's last list of its own, eipgam's
 	// models after it. Passed through, Codex tried one refresh, which
 	// fails for good for such a sign-in (openai/codex login/src/auth/
 	// manager.rs: refresh_token_expired, _reused, _invalidated), and kept
-	// its bundled list, so magpie's models were gone from the picker until
+	// its bundled list, so eipgam's models were gone from the picker until
 	// the user signed in again (jjt on Discord, #4308). Nothing is kept of
 	// it: the next ask goes to the backend again, so a sign-in made again
 	// has its list at once, and Codex still learns of the dead sign-in on
@@ -2509,19 +2509,19 @@ func (s *Server) codexModels(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	all := codexMerged(own, cached)
-	// the list is the backend's and magpie's, and so is its ETag
+	// the list is the backend's and eipgam's, and so is its ETag
 	w.Header().Set("ETag", codexcat.WithTag(etag, codexListTag()))
 	writeJSON(w, 200, map[string]any{"models": all})
 }
 
-// codexMerged is the list magpie hands a Codex beside its ChatGPT sign-in:
+// codexMerged is the list eipgam hands a Codex beside its ChatGPT sign-in:
 // own, the backend's entries (cached when they are Codex's last list, not
 // the backend's answer), as the user narrowed and set them on the codex
-// provider, with magpie's models after them. The entries are written into.
+// provider, with eipgam's models after them. The entries are written into.
 func codexMerged(own []any, cached bool) []any {
 	defer provider.Hold()()
 	// the slugs the sign-in's list has, before the user's narrowing: a
-	// ChatGPT account's model it lacks is listed by magpie's id after it
+	// ChatGPT account's model it lacks is listed by eipgam's id after it
 	// (provider.CodexListedBeside)
 	backend := make(map[string]bool, len(own))
 	for _, m := range own {
@@ -2532,7 +2532,7 @@ func codexMerged(own []any, cached bool) []any {
 		}
 	}
 	// the windows the user set on the codex provider, as /v1/models says
-	// them (#674); a cached entry, which keeps what magpie handed Codex
+	// them (#674); a cached entry, which keeps what eipgam handed Codex
 	// last, takes the account's own list's back when none is set
 	window, capAt := provider.CodexNativeWindow(cached), settings.Shared().ContextCap
 	for _, m := range own {
@@ -2549,8 +2549,8 @@ func codexMerged(own []any, cached bool) []any {
 	}
 	// The backend lists every model the ChatGPT account can reach. When the
 	// user picked among them on the codex provider, keep the list to those:
-	// their pick governs Codex's own models, not just magpie's added ones.
-	// A hidden one stays: it is never in a picker, magpie's included
+	// their pick governs Codex's own models, not just eipgam's added ones.
+	// A hidden one stays: it is never in a picker, eipgam's included
 	// (parseCodexModels), and Codex uses it for jobs of its own. One of them
 	// is codex-auto-review. Without it in the list, Codex's auto-review runs
 	// on the conversation's own model at low effort
@@ -2584,7 +2584,7 @@ func codexMerged(own []any, cached bool) []any {
 		own = kept
 	}
 	// and all of them with Show Codex's own models off: the picker offers
-	// magpie's alone. The model Codex is set to and the ones magpie serves
+	// eipgam's alone. The model Codex is set to and the ones eipgam serves
 	// stay; a hidden job (codex-auto-review) stays as it does above
 	// (iiiiiimone on X: the switch left Codex's picker as it was)
 	if out := provider.CodexOwnLeftOut(codexModelNow()); out != nil {
@@ -2629,8 +2629,8 @@ func codexMerged(own []any, cached bool) []any {
 			codexcat.AutoReview(o, autoReview)
 		}
 	}
-	// a Codex here for account failover alone, not connected to magpie,
-	// keeps to its own models (#1385: 62 of magpie's were in its list)
+	// a Codex here for account failover alone, not connected to eipgam,
+	// keeps to its own models (#1385: 62 of eipgam's were in its list)
 	var ms []catalog.Model
 	if !codexOwnOnly() {
 		ms = provider.CodexListedBeside(backend)
@@ -2662,7 +2662,7 @@ func codexMerged(own []any, cached bool) []any {
 }
 
 // modelsEtag is the X-Models-Etag of a backend reply as Codex should read
-// it: with magpie's models in it, as the list's own ETag has them, so a
+// it: with eipgam's models in it, as the list's own ETag has them, so a
 // change to either has Codex ask for the list again.
 func modelsEtag(h http.Header) {
 	if v := h.Get("X-Models-Etag"); v != "" {
@@ -2671,9 +2671,9 @@ func modelsEtag(h http.Header) {
 }
 
 // CodexOwnOnly reports whether the Codex asking for its model list at
-// CodexPath reaches magpie for account failover alone, not connected to
+// CodexPath reaches eipgam for account failover alone, not connected to
 // it (agent.CodexOwnOnly): it is then handed only its own models (#1385).
-// Set by main; nil, every Codex gets magpie's models too.
+// Set by main; nil, every Codex gets eipgam's models too.
 var CodexOwnOnly func() bool
 
 // CodexModelNow is the model this machine's Codex is set to
@@ -2702,16 +2702,16 @@ func codexListTag() string {
 	return tag
 }
 
-// codexInput restores summaries magpie made. For a magpie model, it also
+// codexInput restores summaries eipgam made. For a eipgam model, it also
 // replaces Codex's compaction trigger with a request to summarise the input.
 // OpenAI's own models keep the trigger for their backend to handle.
 func codexInput(body []byte, magpieModel bool) (_ []byte, compact bool) {
 	return codexInputAs(body, magpieModel, false)
 }
 
-// codexInputAs is codexInput, the trigger kept for a magpie model too
+// codexInputAs is codexInput, the trigger kept for a eipgam model too
 // when native says its provider compacts natively (NativeCompaction,
-// #1099): the summaries magpie made before are still restored.
+// #1099): the summaries eipgam made before are still restored.
 func codexInputAs(body []byte, magpieModel, native bool) (_ []byte, compact bool) {
 	if !anyInputItem(body, func(it []byte) bool { return codexInputItemChanges(it, magpieModel, native) }) {
 		return body, false
@@ -2760,9 +2760,9 @@ func codexInputAs(body []byte, magpieModel, native bool) (_ []byte, compact bool
 				// Nor reasoning with nothing sealed in it — another vendor's,
 				// only an id (rs_…): OpenAI, which keeps nothing (store is
 				// false), looks the id up and answers 404 "Item … not found".
-				// Nor Claude's block magpie carried in one (claudeseal),
+				// Nor Claude's block eipgam carried in one (claudeseal),
 				// which OpenAI would refuse as invalid_encrypted_content:
-				// before magpie carried it, the item had nothing sealed
+				// before eipgam carried it, the item had nothing sealed
 				if enc, _ := it["encrypted_content"].(string); enc == "" || claudeseal.Is(enc) {
 					changed = true
 					continue
@@ -2849,14 +2849,14 @@ func codexInputItemChanges(it []byte, magpieModel, native bool) bool {
 // in client_metadata's x-codex-turn-metadata too.
 const turnMetadataHeader = "X-Codex-Turn-Metadata"
 
-// localCompactionTurn is Codex's turn metadata for a compaction magpie
+// localCompactionTurn is Codex's turn metadata for a compaction eipgam
 // summarises itself, as Codex says it of the summary it asks a provider
 // for: compaction.implementation "responses", not the remote
 // "responses_compaction_v2" Codex named when it sent a compaction_trigger
 // (Codex 0.162.1 under a provider named "OpenAI" and under another, both
-// captured). The trigger is gone from what magpie sends, so the request
+// captured). The trigger is gone from what eipgam sends, so the request
 // said remote compaction and carried none, a shape Codex itself never
-// sends. A relay that only takes Codex's own requests refused magpie's
+// sends. A relay that only takes Codex's own requests refused eipgam's
 // compaction with "invalid codex request" (#2352, #1171). Everything
 // else stays byte for byte; false when there's nothing to change.
 func localCompactionTurn(meta string) (string, bool) {
@@ -2890,7 +2890,7 @@ func localCompactionTurn(meta string) (string, bool) {
 // the only places Codex names either (codex-rs core/src/session/turn.rs,
 // maybe_run_previous_model_inline_compact). When it fails Codex asks the
 // turn's own model instead, but only under its provider named "OpenAI"
-// (compact_model_fallback.rs); under magpie's, the provider Codex has
+// (compact_model_fallback.rs); under eipgam's, the provider Codex has
 // while its sign-in is used up (codex.out), the failure is the turn's,
 // and every turn of the thread asks the old model again.
 func previousModelCompaction(r *http.Request, body []byte) bool {
@@ -2955,7 +2955,7 @@ func refusesInput(status int, b []byte) bool {
 
 // withoutBareReasoning is a Responses request without the reasoning items
 // that have nothing sealed in them, where store isn't true: an id and a
-// summary only, as magpie gives Codex in a translated reply (rs_ and
+// summary only, as eipgam gives Codex in a translated reply (rs_ and
 // newID). OpenAI's API and Azure OpenAI's look such an item up among the
 // items they stored, and with store false they stored none, so the whole
 // request goes back 400 "Item with id 'rs_…' not found" (#1008); its
@@ -3172,7 +3172,7 @@ func refusesCitationOffsets(status int, b []byte) bool {
 // withoutOffsetlessCitations is a Responses request without the
 // output_text annotations that lack the offsets OpenAI's schema wants on
 // every one, as another vendor's Responses reply wrote them (Volcengine
-// Ark's url_citation, #4921): Codex stored the reply magpie relayed, and
+// Ark's url_citation, #4921): Codex stored the reply eipgam relayed, and
 // where that schema holds — the ChatGPT backend, OpenAI's API, a relay in
 // front of them — the replay was refused whole, every turn of the thread
 // with it. Such an annotation goes; the text, and a citation with its
@@ -3265,7 +3265,7 @@ func itemCitesWithoutOffsets(it []byte) bool {
 }
 
 // openaiItemPrefix is the id prefix OpenAI takes for each kind of call item
-// a vendor's reply may have handed Codex with another: magpie, or the
+// a vendor's reply may have handed Codex with another: eipgam, or the
 // vendor, gave a tool search's and a custom tool's call a function_call's
 // id (fc_…), and Codex hands the item back on every later turn. OpenAI's
 // own models and the ChatGPT backend turn the whole request away ("Invalid
@@ -3600,7 +3600,7 @@ var keepsSeal = map[string]bool{`"reasoning"`: true, `"compaction"`: true, `"com
 // output.encrypted_content in its include,
 // and the sealed output (encrypted_content) on a message or call that an
 // OpenAI model wrote earlier in the conversation; and, for a summary ask
-// of magpie's own (compaction, codexCompact), with its developer messages
+// of eipgam's own (compaction, codexCompact), with its developer messages
 // as the system ones they are (developerItemsAsSystem) — Codex's own turns
 // keep the role, which a relay may be checking them by (#350, #1758).
 // A relay that checks it is Codex's turned the lot away ("invalid codex
@@ -3695,12 +3695,12 @@ func forVendor(p provider.Provider, body []byte, compaction bool) []byte {
 
 // keepsAccessPrograms says a Responses request to p goes with its top-level
 // access_programs, the Cyber program a request asks the model under
-// (OpenAI's Daybreak, magpie-releases#18): to the ChatGPT backend, to
-// OpenAI's API, to another magpie (whose own upstream decides), and to a
+// (OpenAI's Daybreak, eipgam-releases#18): to the ChatGPT backend, to
+// OpenAI's API, to another eipgam (whose own upstream decides), and to a
 // relay that takes Codex's requests as Codex sent them (CodexAsSent). Codex
 // itself sends the field to nobody else: only with a ChatGPT sign-in, or an
 // API key on its provider named "openai" (codex-rs cyber_access_program.rs,
-// for_auth and for_provider), which is how it comes to magpie. OpenCode Go
+// for_auth and for_provider), which is how it comes to eipgam. OpenCode Go
 // answers it, for DeepSeek and GLM, with a 503 "Endpoint is unavailable"
 // that says nothing of the field (#3172), and no other vendor has a program
 // to read in it.
@@ -3807,7 +3807,7 @@ func developerItemsAsSystem(body []byte) []byte {
 func userMessage(text string) map[string]any { return codexsummary.UserMessage(text) }
 
 // compactWithin is how long a compaction's summary is waited for before
-// magpie's own goes in its place. Codex hears nothing while the summary is
+// eipgam's own goes in its place. Codex hears nothing while the summary is
 // made, and gives up on a stream that says nothing for 300s
 // (stream_idle_timeout_ms; agentQuietMost): a summary later than that is
 // never read, and the local one written after it reached nobody, so Codex
@@ -3816,9 +3816,9 @@ func userMessage(text string) map[string]any { return codexsummary.UserMessage(t
 // it, as agentQuietMost.
 var compactWithin = 4 * time.Minute
 
-// codexCompact compacts a conversation held by a magpie model: the model
+// codexCompact compacts a conversation held by a eipgam model: the model
 // summarises it, and the summary goes back to Codex as the compaction item
-// the backend would have made, marked as magpie's so magpie reads it back
+// the backend would have made, marked as eipgam's so eipgam reads it back
 // in later requests.
 //
 // A provider that answers the summary 404 — a relay that serves the
@@ -3828,7 +3828,7 @@ var compactWithin = 4 * time.Minute
 // "unsupported_input_item", #5181, #5259) is
 // asked once more with the conversation as plain text, none of its items'
 // ids or sealed reasoning in it; when that fails too the summary is
-// magpie's own, the conversation's user messages and last reply,
+// eipgam's own, the conversation's user messages and last reply,
 // so the compaction still completes and Codex goes on. So is one the
 // ChatGPT backend answers 502 "response protection is unavailable" (vs on
 // Discord): the same long history failed so on every account and model,
@@ -3841,18 +3841,18 @@ var compactWithin = 4 * time.Minute
 // ends incomplete, is a failure the next account or member answers, as
 // one that fails before it begins, and is never taken for the summary.
 // When none is left and the last one's stream broke off, the summary is
-// magpie's own (#3526): Codex, told a 502, asked the same huge summary
+// eipgam's own (#3526): Codex, told a 502, asked the same huge summary
 // over until the guard held it, and the conversation could neither compact
 // nor go on. One that ended incomplete is still told so. One conversation's
 // compaction that keeps failing stops being asked for a while
 // (compactFails, #2274).
 func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byte) {
 	key, model := compactKey(body), modelOf(body)
-	// Codex's compaction on the model a thread is leaving, under magpie's
+	// Codex's compaction on the model a thread is leaving, under eipgam's
 	// provider: one that fails is compacted locally, as Codex would have
 	// the turn's own model do it (previousModelCompaction), never the
 	// turn's failure. On CodexPath Codex's provider is its own "OpenAI",
-	// which asks the turn's model itself, a summary where magpie's local
+	// which asks the turn's model itself, a summary where eipgam's local
 	// one is only what was asked and the last reply
 	prev := !strings.HasPrefix(r.URL.Path, CodexPath+"/") && previousModelCompaction(r, body)
 	if msg, held := s.compactFails.held(key, model); held && !prev {
@@ -3865,7 +3865,7 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 		r.Header.Set(turnMetadataHeader, turn)
 	}
 	// the summary has compactWithin, Codex hearing nothing meanwhile: past
-	// it, the summary is magpie's own, which Codex still takes (#5275)
+	// it, the summary is eipgam's own, which Codex still takes (#5275)
 	client := r.Context()
 	budget, stop := context.WithCancelCause(client)
 	timer := time.AfterFunc(compactWithin, func() { stop(sideTimedOut{"compaction summary", compactWithin}) })
@@ -3964,7 +3964,7 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 		// the guard held it and the conversation could neither compact nor
 		// go on (#3526). A translated reply that stopped short comes as a
 		// 502 saying so (summaryEndedShort), the same cut. The summary is
-		// magpie's own, as when no model can be asked at all; the summary
+		// eipgam's own, as when no model can be asked at all; the summary
 		// as text isn't tried, the cut was in what the model wrote, not in
 		// what it was asked
 		who, _ := compactFailure(body, rec)
@@ -4023,7 +4023,7 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 		// tools offered, a history tool declared as a stub that it calls
 		// anyway — the history's calls are what it follows. Asked again
 		// with the conversation as text, there's no exchange of calls to
-		// go on with; when it still writes no summary, magpie compacts
+		// go on with; when it still writes no summary, eipgam compacts
 		// without a model, so Codex goes on rather than failing over and
 		// over
 		who, _ := compactFailure(body, rec)
@@ -4068,7 +4068,7 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 		// asks the same huge summary again (#5275)
 		why := "Codex left before the summary reached it"
 		if local != "" {
-			why += " (magpie's own)"
+			why += " (eipgam's own)"
 		}
 		log.Printf("codex compaction: %s: %s", model, why)
 		s.compactFails.failed(key, 499, why)
@@ -4192,7 +4192,7 @@ func itemNotFound(rec *recorder) bool {
 // agent_message 422 "unknown item type", and a local Qwen server's
 // Responses API 400 "Unsupported input item: agent_message" (cyberestro
 // on X). It comes as that status, as
-// another magpie's message in front of it ("Remote magpie: Command Code:
+// another eipgam's message in front of it ("Remote eipgam: Command Code:
 // {…}", a 400 or its 502), or as an error event in the summary's stream.
 // The conversation as text is messages alone, which it takes. A refusal
 // of the key or account (401, 403, 429) is no such answer.
@@ -4338,7 +4338,7 @@ func localSummary(body []byte, why string) string {
 		n += len(asked[from])
 	}
 	var b strings.Builder
-	b.WriteString("magpie compacted this conversation without a model (" + why + "), so this is no summary: it is what the user asked")
+	b.WriteString("eipgam compacted this conversation without a model (" + why + "), so this is no summary: it is what the user asked")
 	if from > 0 {
 		fmt.Fprintf(&b, " (the latest %d of %d messages)", len(asked)-from, len(asked))
 	}

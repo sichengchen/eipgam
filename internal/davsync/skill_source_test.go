@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
 // #5715 (JJasonsun on Discord): a library past a sync's size limit is

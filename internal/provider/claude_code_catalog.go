@@ -22,8 +22,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // claudeCatalog is what one model-catalog file says of an account's models.

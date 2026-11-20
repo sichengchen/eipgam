@@ -13,13 +13,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The gateway's request archive goes to the bucket sync keeps its backup
-// in, signed as the backup is, at <prefix>/magpie/archive/<date>/<id>.json,
+// in, signed as the backup is, at <prefix>/eipgam/archive/<date>/<id>.json,
 // and reads back from there — and while it's off, nothing is sent at all.
 func TestRequestArchiveToS3(t *testing.T) {
 	newComputer(t).use(t)
@@ -60,7 +60,7 @@ func TestRequestArchiveToS3(t *testing.T) {
 		f.mu.Lock()
 		defer f.mu.Unlock()
 		for k := range f.objects {
-			if strings.HasPrefix(k, "team x+y/magpie/archive/") {
+			if strings.HasPrefix(k, "team x+y/eipgam/archive/") {
 				n++
 			}
 		}
@@ -85,7 +85,7 @@ func TestRequestArchiveToS3(t *testing.T) {
 	// the date is the one the call carries, in UTC, not the clock read
 	// again here, which a UTC midnight can fall between
 	date := s.Recent()[0].Time.UTC().Format("2006-01-02")
-	key := "team x+y/magpie/archive/" + date + "/" + id + ".json"
+	key := "team x+y/eipgam/archive/" + date + "/" + id + ".json"
 	deadline := time.Now().Add(5 * time.Second)
 	for archived() == 0 && time.Now().Before(deadline) {
 		time.Sleep(20 * time.Millisecond)
@@ -151,7 +151,7 @@ func TestRequestArchiveKeptUnderItsSize(t *testing.T) {
 	}
 	settings.Save(settings.Settings{RequestArchive: true, RequestArchiveMB: 1})
 	const most = 1 << 20
-	const archive = "team x+y/magpie/archive/"
+	const archive = "team x+y/eipgam/archive/"
 
 	// what the bucket had before: 3 MiB of calls from 2020, and what
 	// isn't the archive's, a MiB each
@@ -164,13 +164,13 @@ func TestRequestArchiveKeptUnderItsSize(t *testing.T) {
 		old = append(old, k)
 	}
 	foreign := []string{
-		"team x+y/magpie/magpie.magpie-backup",
-		"team x+y/magpie/usage/a.magpie-usage",
+		"team x+y/eipgam/eipgam.eipgam-backup",
+		"team x+y/eipgam/usage/a.eipgam-usage",
 		archive + "notes.txt",
 		archive + "2020-01-01/README.md",
 		archive + "2020-01-01/UPPER-0000000000000000.json",
 		"team x+y/other/archive/2020-01-01/000000-0000000000000001.json",
-		"elsewhere/magpie/archive/2020-01-01/000000-0000000000000002.json",
+		"elsewhere/eipgam/archive/2020-01-01/000000-0000000000000002.json",
 	}
 	for _, k := range foreign {
 		f.store(k, []byte(mib))

@@ -230,7 +230,7 @@ static void insetLights(void *p) {
 // lights (AlanWang1027713 on X). macOS 15 and later have a switch for it
 // (allowsDisplayModeCustomization); earlier ones, back to macOS 12, are
 // asked through AppKit's own, which the newer ones still answer. Each is
-// looked up at run time, as the SDK that builds magpie may be older than
+// looked up at run time, as the SDK that builds eipgam may be older than
 // the system it runs on.
 static void quietToolbar(void *p) {
 	NSToolbar *t = ((NSWindow *)p).toolbar;

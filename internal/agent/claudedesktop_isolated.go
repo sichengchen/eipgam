@@ -9,18 +9,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/desktopdir"
-	"github.com/yetone/magpie/internal/desktopiso"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/desktopdir"
+	"github.com/sichengchen/eipgam/internal/desktopiso"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// The isolated Claude Desktop (#5671, baranwang on X): on a Mac magpie can
+// The isolated Claude Desktop (#5671, baranwang on X): on a Mac eipgam can
 // run its 3p mode in a folder of its own, desktopdir.Isolated
-// (~/Library/Application Support/Claude-Magpie-3p), started by
-// ~/Applications/Claude Magpie.app (desktopiso), so the user's own
+// (~/Library/Application Support/Claude-eipgam-3p), started by
+// ~/Applications/Claude eipgam.app (desktopiso), so the user's own
 // Claude.app stays signed in with Anthropic and both run side by side.
-// Off by default (settings.DesktopIsolated): a Desktop on magpie stays as
+// Off by default (settings.DesktopIsolated): a Desktop on eipgam stays as
 // it was for everyone who doesn't turn it on.
 
 // desktopIsolatedKey ends the isolated Desktop's stash keys, beside the
@@ -32,7 +32,7 @@ const desktopIsolatedKey = ".isolated"
 var desktopIsolatedOn = func() bool { return settings.Shared().DesktopIsolated }
 
 // desktopIsolatedSet is the isolated Desktop's folders on goos: its
-// userData and its 3p folder are one, Claude-Magpie-3p. The language and
+// userData and its 3p folder are one, Claude-eipgam-3p. The language and
 // the MCP servers it is given are those of the user's own Desktop (Find's
 // Data), as for Claude-3p. false where Desktop can't run so (desktopdir.
 // Isolated: only macOS).
@@ -51,16 +51,16 @@ func desktopIsolatedSet(goos, home string, getenv func(string) string) (desktopP
 
 // The isolated Desktop's Code tab runs Claude Code, on ~/.claude like
 // any other unless the user gives it a folder of its own (#6459, xMopf7RF
-// on X): then Claude Magpie.app starts Desktop with CLAUDE_CONFIG_DIR set
+// on X): then Claude eipgam.app starts Desktop with CLAUDE_CONFIG_DIR set
 // to desktopIsolatedClaudeDir (desktopiso.Script), which Desktop hands its
 // sessions when its own Settings set no such variable (4.23118, 2.7032:
 // its bundled Claude Code wrote .claude.json, backups, plugins and
 // sessions there, ~/.claude untouched). The windows and capabilities of
-// Desktop's models, which magpie writes into the settings.json of the
+// Desktop's models, which eipgam writes into the settings.json of the
 // Claude Code the Code tab runs (desktopOn in claude.go), go there too,
 // and ~/.claude/settings.json gets none of them. The folder starts with
 // none of ~/.claude's CLAUDE.md, skills, plugins or history. A Claude
-// Magpie made new gets it unless the user chose otherwise
+// eipgam made new gets it unless the user chose otherwise
 // (desktopIsoClaudeDefault); one made before keeps what it had.
 
 // desktopIsolatedClaudeOn says the user gave the isolated Desktop's Code
@@ -85,10 +85,10 @@ var saveDesktopIsolatedClaude = func(on, chosen bool) error {
 	return settings.Save(s)
 }
 
-// desktopIsoClaudeDefault gives a Claude Magpie made new a Claude Code
+// desktopIsoClaudeDefault gives a Claude eipgam made new a Claude Code
 // folder of its own, like a phone's app twin (xMopf7RF on X): its Code
 // tab then reads and writes nothing of ~/.claude. Made new is the app
-// off and no Claude-Magpie-3p yet; one made before, with chats in that
+// off and no Claude-eipgam-3p yet; one made before, with chats in that
 // folder, keeps the ~/.claude its Code tab had, and a choice the user
 // made either way stays theirs.
 func desktopIsoClaudeDefault(iso desktopPaths) error {
@@ -98,17 +98,17 @@ func desktopIsoClaudeDefault(iso desktopPaths) error {
 	return saveDesktopIsolatedClaude(true, false)
 }
 
-// desktopIsolatedFrom marks a Claude Magpie that the user's own Desktop's
+// desktopIsolatedFrom marks a Claude eipgam that the user's own Desktop's
 // wiring moved into when it was turned on: turning it off moves that
-// back. One made beside a Desktop not on magpie (the twin) leaves the
-// user's own Desktop off magpie when it goes.
+// back. One made beside a Desktop not on eipgam (the twin) leaves the
+// user's own Desktop off eipgam when it goes.
 const desktopIsolatedFrom = "claude-desktop.isolated-from-own"
 
-// desktopIsolatedClaudeDir is that folder: ~/.claude-magpie-desktop,
+// desktopIsolatedClaudeDir is that folder: ~/.claude-eipgam-desktop,
 // beside ~/.claude, so it is a Claude Code row of its own on the Agents
 // page (claudeDirAgents) once it holds a settings.json.
 func desktopIsolatedClaudeDir(home string) string {
-	return filepath.Join(home, ".claude-magpie-desktop")
+	return filepath.Join(home, ".claude-eipgam-desktop")
 }
 
 // desktopCodeDir is the Claude Code folder Desktop's Code tab runs on
@@ -121,13 +121,13 @@ func desktopCodeDir(home string) string {
 	return desktopIsolatedClaudeDir(home)
 }
 
-// DesktopTwinCode says a is the Claude Code row of Claude Magpie's Code
-// tab folder (#6459) while Claude Magpie is on magpie. That tab runs its
+// DesktopTwinCode says a is the Claude Code row of Claude eipgam's Code
+// tab folder (#6459) while Claude eipgam is on eipgam. That tab runs its
 // Claude Code with the provider managed by the host, so its requests go
-// to magpie through Claude Magpie's own gateway whatever the row's
+// to eipgam through Claude eipgam's own gateway whatever the row's
 // settings.json says: the row isn't "not connected, on its own settings"
-// then (xMopf7RF on X, 0.1.4111: right after Use Claude Magpie it read so,
-// as if Claude Magpie had been left off).
+// then (xMopf7RF on X, 0.1.4111: right after Use Claude eipgam it read so,
+// as if Claude eipgam had been left off).
 func DesktopTwinCode(a *Agent) bool {
 	// the settings read only for a claude# row: asked of every row
 	if a.WSL != "" || !strings.HasPrefix(a.ID, "claude#") {
@@ -142,7 +142,7 @@ func DesktopTwinCode(a *Agent) bool {
 	return ok && desktopWired(iso)
 }
 
-// desktopIsoClaudeArg is the folder Claude Magpie.app is made with: its
+// desktopIsoClaudeArg is the folder Claude eipgam.app is made with: its
 // own while the user turned it on, "" for ~/.claude.
 func desktopIsoClaudeArg(home string) string {
 	if desktopIsolatedClaudeOn() {
@@ -171,7 +171,7 @@ func desktopClaudeSync(home string) {
 
 // desktopIsoClaudeMake makes the isolated Desktop's Claude Code folder,
 // with an empty settings.json, which makes it a Claude Code's folder to
-// the Agents page and gives magpie the file to write; one there already
+// the Agents page and gives eipgam the file to write; one there already
 // is left as it is.
 func desktopIsoClaudeMake(home string) error {
 	dir := desktopIsolatedClaudeDir(home)
@@ -187,7 +187,7 @@ func desktopIsoClaudeMake(home string) error {
 
 // DesktopIsolated is the isolated Desktop as it is here: whether it can
 // be (only on a Mac), whether it is on, and the app that starts it, ""
-// while magpie hasn't made it. Claude is whether its Code tab has a
+// while eipgam hasn't made it. Claude is whether its Code tab has a
 // Claude Code folder of its own, ClaudeDir that folder.
 type DesktopIsolated struct {
 	On        bool   `json:"on"`
@@ -208,8 +208,8 @@ func DesktopIsolatedHere() (DesktopIsolated, bool) {
 
 // SetDesktopIsolatedClaude gives the isolated Desktop's Code tab a Claude
 // Code folder of its own, or takes it back to ~/.claude. On, the folder
-// is made with a settings.json, so magpie writes Desktop's model windows
-// there and the Agents page lists it. Claude Magpie.app, when magpie has
+// is made with a settings.json, so eipgam writes Desktop's model windows
+// there and the Agents page lists it. Claude eipgam.app, when eipgam has
 // made it, is made again with the new folder (or none); a Desktop running
 // from it keeps the one it started with until it is quit and opened
 // again. The folder itself, with what Claude Code keeps in it, stays when
@@ -272,14 +272,14 @@ var saveDesktopIsolated = func(on bool) error {
 }
 
 // SetDesktopIsolated turns the isolated Desktop on or off for home. On:
-// Claude Magpie.app is made (made new, with a Claude Code folder of its
-// own: desktopIsoClaudeDefault), and a Desktop on magpie moves there: the
-// user's own Desktop is put back as it was before magpie (desktopOff),
-// and Claude-Magpie-3p gets magpie's 3p mode. Off: the app is taken away,
-// and Claude-Magpie-3p goes off magpie; the wiring goes back to the
+// Claude eipgam.app is made (made new, with a Claude Code folder of its
+// own: desktopIsoClaudeDefault), and a Desktop on eipgam moves there: the
+// user's own Desktop is put back as it was before eipgam (desktopOff),
+// and Claude-eipgam-3p gets eipgam's 3p mode. Off: the app is taken away,
+// and Claude-eipgam-3p goes off eipgam; the wiring goes back to the
 // user's own Desktop only if it came from there (desktopIsolatedFrom), so
-// a twin made beside a Desktop not on magpie never puts that one on it.
-// Claude-Magpie-3p itself, with the chats in it, stays. It returns the
+// a twin made beside a Desktop not on eipgam never puts that one on it.
+// Claude-eipgam-3p itself, with the chats in it, stays. It returns the
 // app's path when on.
 func SetDesktopIsolated(home string, on bool) (string, error) {
 	iso, ok := desktopIsolatedSet(desktopdir.OS, home, os.Getenv)
@@ -357,9 +357,9 @@ func SetDesktopIsolated(home string, on bool) (string, error) {
 }
 
 // desktopInstance says whether a Claude.app process's command line is the
-// Desktop magpie wires: the isolated one's (--user-data-dir on
-// Claude-Magpie-3p) while it is on, else one on its own folders (no
-// --user-data-dir at all). The other runs too, and isn't magpie's to
+// Desktop eipgam wires: the isolated one's (--user-data-dir on
+// Claude-eipgam-3p) while it is on, else one on its own folders (no
+// --user-data-dir at all). The other runs too, and isn't eipgam's to
 // restart.
 func desktopInstance(cmd string) bool {
 	home, _ := os.UserHomeDir()
@@ -390,7 +390,7 @@ var desktopIsoQuit = func(ctx context.Context, exe, dir string) error {
 	return proc.CommandContext(ctx, "/usr/bin/pkill", "-TERM", "-f", pat).Run()
 }
 
-// reopenIsolated quits the isolated Desktop and opens Claude Magpie.app
+// reopenIsolated quits the isolated Desktop and opens Claude eipgam.app
 // again, which starts it on its folder.
 func reopenIsolated(ctx context.Context, a *Agent, r restartable, exe string) error {
 	home, _ := os.UserHomeDir()
@@ -421,13 +421,13 @@ func reopenIsolated(ctx context.Context, a *Agent, r restartable, exe string) er
 	return nil
 }
 
-// DesktopTwinID is the id the library knows Claude Magpie, the isolated
+// DesktopTwinID is the id the library knows Claude eipgam, the isolated
 // Desktop, by.
-const DesktopTwinID = "claude-desktop#magpie"
+const DesktopTwinID = "claude-desktop#eipgam"
 
-// DesktopTwinApp is Claude Magpie, the isolated Desktop (desktopiso), as
+// DesktopTwinApp is Claude eipgam, the isolated Desktop (desktopiso), as
 // an app of its own to the library, as an Android app's twin is (xMopf7RF
-// on X): its MCP servers in Claude-Magpie-3p's claude_desktop_config.json,
+// on X): its MCP servers in Claude-eipgam-3p's claude_desktop_config.json,
 // the only file it reads them from, and its Cowork skills in that folder's
 // skills-plugin, neither shared with the user's own Desktop. nil where it
 // can't be (only on a Mac); here only while it is on and its folder there.

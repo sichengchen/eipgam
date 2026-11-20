@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // #5315 (cherish_onlyy): Hermes with prompt_caching.cache_ttl: 1h, on
@@ -12,8 +12,8 @@ import (
 // itself (agent/prompt_caching.py's system_and_3, each
 // {"type":"ephemeral","ttl":"1h"}). Those marks reach the vendor as sent,
 // every one at an hour. On chat completions Hermes sends no marks, and
-// the ones magpie adds for a Chat client last five minutes, which is why
-// magpie now connects a Claude model to Hermes on Messages.
+// the ones eipgam adds for a Chat client last five minutes, which is why
+// eipgam now connects a Claude model to Hermes on Messages.
 func TestHermesHourMarksReachTheVendor(t *testing.T) {
 	f := &fake{t: t, reply: anthropicAnswer}
 	up := setup(t, provider.Anthropic, f)
@@ -44,8 +44,8 @@ func TestHermesHourMarksReachTheVendor(t *testing.T) {
 		}
 	}
 
-	// the same turn on chat completions, as magpie connected Hermes before:
-	// no marks from Hermes, and magpie's last five minutes
+	// the same turn on chat completions, as eipgam connected Hermes before:
+	// no marks from Hermes, and eipgam's last five minutes
 	code, body = postTo(t, srv, "/v1/chat/completions", `{"model":"fake/claude-sonnet-5","max_tokens":64,"stream":false,
 	  "tools":[{"type":"function","function":{"name":"terminal","parameters":{"type":"object"}}}],
 	  "messages":[{"role":"system","content":"You are Hermes Agent."},{"role":"user","content":"list files"}]}`)

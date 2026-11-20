@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // A plugin's page is framed with sandbox="allow-scripts", so its origin is

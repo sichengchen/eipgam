@@ -1,5 +1,5 @@
 // The pages in the reader's order (chet030714 on X), kept in localStorage
-// magpie.navOrder by Settings › General › Sidebar pages (navpages.js).
+// eipgam.navOrder by Settings › General › Sidebar pages (navpages.js).
 // app.js navHides imports this once an order is kept, so a reader who never
 // reorders loads none of it.
 

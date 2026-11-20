@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// TestLongRunningCommandsReap: `magpie serve` and `magpie web` are what a
+// TestLongRunningCommandsReap: `eipgam serve` and `eipgam web` are what a
 // container runs as its PID 1 (the Dockerfile's CMD and the Docker docs'
 // `web --addr 0.0.0.0:3430 --no-open`), and PID 1 is left every orphan to
 // reap. `web` didn't call proc.KeepReaping, so an aistudio2api whose

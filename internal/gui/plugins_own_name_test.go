@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // #4558 (MYCF711): a plugin installed from git whose package.json says
 // magpie.name ("华为云 HUAWEI") read as its dependency key
-// (magpie-officeace) in the Plugins page. Bun takes no non-ASCII key, so
+// (eipgam-officeace) in the Plugins page. Bun takes no non-ASCII key, so
 // the package's own name is the only readable one it has. The row is told
 // it (ownName), as is the sidebar's title for a page that names none; a
 // package that gives none is told none, and the community's list still
@@ -24,7 +24,7 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 	t.Setenv("USERPROFILE", h)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	t.Setenv("PATH", "")
 	write := func(path string, v any) {
 		t.Helper()
@@ -37,29 +37,29 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 		}
 	}
 	const (
-		office = "github:example/magpie-officeace"
-		plain  = "github:example/magpie-loomy-auth"
-		bidi   = "github:example/magpie-bidi"
+		office = "github:example/eipgam-officeace"
+		plain  = "github:example/eipgam-loomy-auth"
+		bidi   = "github:example/eipgam-bidi"
 	)
 	dir := plugin.Dir()
 	// the reporter's: the dependency key bun installed it under, and the
 	// installed copy's package.json carrying the field
 	write(filepath.Join(dir, "package.json"), map[string]any{"dependencies": map[string]string{
-		"magpie-officeace": office, "magpie-loomy-auth": plain, "magpie-bidi": bidi,
+		"eipgam-officeace": office, "eipgam-loomy-auth": plain, "eipgam-bidi": bidi,
 	}})
-	write(filepath.Join(dir, "node_modules", "magpie-officeace", "package.json"), map[string]any{
-		"name": "magpie-officeace", "version": "0.2.4", "main": "index.js",
-		"magpie": map[string]any{"name": "华为云 HUAWEI", "summary": "…", "page": map[string]any{"file": "page.html"}},
+	write(filepath.Join(dir, "node_modules", "eipgam-officeace", "package.json"), map[string]any{
+		"name": "eipgam-officeace", "version": "0.2.4", "main": "index.js",
+		"eipgam": map[string]any{"name": "华为云 HUAWEI", "summary": "…", "page": map[string]any{"file": "page.html"}},
 	})
-	if err := os.WriteFile(filepath.Join(dir, "node_modules", "magpie-officeace", "page.html"), []byte("<p>hi</p>"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "node_modules", "eipgam-officeace", "page.html"), []byte("<p>hi</p>"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	write(filepath.Join(dir, "node_modules", "magpie-loomy-auth", "package.json"), map[string]any{
-		"name": "magpie-loomy-auth", "version": "0.1.0", "main": "index.js",
+	write(filepath.Join(dir, "node_modules", "eipgam-loomy-auth", "package.json"), map[string]any{
+		"name": "eipgam-loomy-auth", "version": "0.1.0", "main": "index.js",
 	})
 	// a right-to-left override would show it as another name
-	write(filepath.Join(dir, "node_modules", "magpie-bidi", "package.json"), map[string]any{
-		"name": "magpie-bidi", "version": "0.1.0", "main": "index.js", "magpie": map[string]any{"name": "Qoder‮"},
+	write(filepath.Join(dir, "node_modules", "eipgam-bidi", "package.json"), map[string]any{
+		"name": "eipgam-bidi", "version": "0.1.0", "main": "index.js", "eipgam": map[string]any{"name": "Qoder‮"},
 	})
 	write(filepath.Join(settings.Dir(), "plugins.json"), map[string]any{"plugins": []map[string]any{{"spec": office}, {"spec": plain}, {"spec": bidi}}})
 
@@ -70,8 +70,8 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 	if len(got) != 3 {
 		t.Fatalf("plugins: %v", got)
 	}
-	if o := got[office]; o.OwnName != "华为云 HUAWEI" || o.Package != "magpie-officeace" {
-		t.Errorf("the reporter's: ownName %q, package %q; want 华为云 HUAWEI, magpie-officeace", o.OwnName, o.Package)
+	if o := got[office]; o.OwnName != "华为云 HUAWEI" || o.Package != "eipgam-officeace" {
+		t.Errorf("the reporter's: ownName %q, package %q; want 华为云 HUAWEI, eipgam-officeace", o.OwnName, o.Package)
 	}
 	if n := got[plain].OwnName; n != "" {
 		t.Errorf("one that gives no name: ownName %q, want none", n)

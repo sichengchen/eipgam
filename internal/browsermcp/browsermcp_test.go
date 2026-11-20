@@ -13,7 +13,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // Each line goes to the gateway's browser server with this process's
@@ -63,14 +63,14 @@ func TestBridgePassesLinesWithItsSession(t *testing.T) {
 	if err := serve(strings.NewReader(`{"jsonrpc":"2.0","id":7,"method":"tools/list"}`+"\n"), &out, srv.URL); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "magpie isn't running") {
+	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "eipgam isn't running") {
 		t.Fatalf("gateway gone: %q", out.String())
 	}
 }
 
-// `magpie mcp search` passes each line to the gateway's web search server,
+// `eipgam mcp search` passes each line to the gateway's web search server,
 // with no browser session, and a gateway that can't be reached names
-// Magpie Web Search.
+// eipgam Web Search.
 func TestSearchBridgePassesLines(t *testing.T) {
 	var mu sync.Mutex
 	var paths, sessions []string
@@ -98,7 +98,7 @@ func TestSearchBridgePassesLines(t *testing.T) {
 	defer srv.Close()
 	in := strings.NewReader(`{"jsonrpc":"2.0","id":1,"method":"initialize"}` + "\n" +
 		`{"jsonrpc":"2.0","method":"notifications/initialized"}` + "\n" +
-		`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"web_search","arguments":{"query":"magpie"}}}` + "\n")
+		`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"web_search","arguments":{"query":"eipgam"}}}` + "\n")
 	var out bytes.Buffer
 	if err := serveSearch(in, &out, srv.URL); err != nil {
 		t.Fatal(err)
@@ -115,12 +115,12 @@ func TestSearchBridgePassesLines(t *testing.T) {
 	if err := serveSearch(strings.NewReader(`{"jsonrpc":"2.0","id":7,"method":"tools/list"}`+"\n"), &out, srv.URL); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "Magpie Web Search can't be reached") {
+	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "eipgam Web Search can't be reached") {
 		t.Fatalf("gateway gone: %q", out.String())
 	}
 }
 
-// magpie mcp vision relays each line to the gateway's image recognition
+// eipgam mcp vision relays each line to the gateway's image recognition
 // server, a relative image path made the agent's folder's on the way
 // (the gateway can't know where the agent runs), and says so by id when
 // the gateway can't be reached (matrix0487 on Discord).
@@ -178,7 +178,7 @@ func TestVisionBridgePassesLines(t *testing.T) {
 	if err := serveVision(strings.NewReader(`{"jsonrpc":"2.0","id":7,"method":"tools/list"}`+"\n"), &out, srv.URL); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "Magpie Image Recognition can't be reached") {
+	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "eipgam Image Recognition can't be reached") {
 		t.Fatalf("gateway gone: %q", out.String())
 	}
 	if err := RunVision([]string{"extra"}); err == nil {
@@ -223,17 +223,17 @@ func TestImageFromLeavesTheRest(t *testing.T) {
 	}
 }
 
-// Behind magpie's MCP router this one process serves every agent, so a
+// Behind eipgam's MCP router this one process serves every agent, so a
 // call that names its caller's session in _meta goes on in that session,
 // each caller in a tab of its own; every other message, and a call with
 // no such session, goes in this process's own.
 func TestBridgeTakesTheRoutersCaller(t *testing.T) {
 	own := "stdio-abc"
 	for _, c := range []struct{ body, want string }{
-		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"magpie/session":"hub-claude-1"}}}`, "hub:hub-claude-1"},
-		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"magpie/session":" "}}}`, own},
+		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"eipgam/session":"hub-claude-1"}}}`, "hub:hub-claude-1"},
+		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"eipgam/session":" "}}}`, own},
 		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs"}}`, own},
-		{`{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"magpie/session":"hub-claude-1"}}}`, own},
+		{`{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"eipgam/session":"hub-claude-1"}}}`, own},
 		{`not json`, own},
 	} {
 		if got := callerSession([]byte(c.body), own); got != c.want {
@@ -242,7 +242,7 @@ func TestBridgeTakesTheRoutersCaller(t *testing.T) {
 	}
 }
 
-// magpie mcp memory relays each line to the gateway's memory server with
+// eipgam mcp memory relays each line to the gateway's memory server with
 // the folder the agent started it in, and, from initialize on, the client
 // name the agent gave, so the gateway knows the project and the agent.
 func TestMemoryBridgeSendsFolderAndClient(t *testing.T) {
@@ -301,7 +301,7 @@ func TestClientName(t *testing.T) {
 
 // Over stdio, as over HTTP, memory_context says who the server takes the
 // agent for and which project, and a save names another project's folder
-// (#6392, Norethcy on X): the real gateway, behind magpie mcp memory.
+// (#6392, Norethcy on X): the real gateway, behind eipgam mcp memory.
 func TestMemoryBridgeContextAndProject(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -344,7 +344,7 @@ func TestMemoryBridgeContextAndProject(t *testing.T) {
 		}
 	}
 	for id, want := range map[string]string{
-		"2": `Agent: codex (from the client named at magpie mcp memory's initialize)`,
+		"2": `Agent: codex (from the client named at eipgam mcp memory's initialize)`,
 		"3": `this project (github.com/someone/target)`,
 		"4": `(looked in: project github.com/someone/target)`,
 	} {

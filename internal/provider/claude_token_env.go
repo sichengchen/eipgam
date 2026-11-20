@@ -11,12 +11,12 @@ package provider
 // switch to a signed-in account takes it out again.
 //
 // Claude Code's stored sign-in is left as it is meanwhile: it is still
-// the account magpie's own runs of Claude Code are on, since those read
+// the account eipgam's own runs of Claude Code are on, since those read
 // no settings of the user's (--setting-sources ""), and the account
 // Logins calls Active. A setup-token in use is said beside it (Login.Uses).
 //
-// A token the user set there is theirs: magpie writes none over it and
-// never takes it out. magpie keeps the hash of the token it wrote
+// A token the user set there is theirs: eipgam writes none over it and
+// never takes it out. eipgam keeps the hash of the token it wrote
 // (claude-token-env.json), and the value counts as its own only while it
 // still has that hash. Claude Code reads its env as it starts, so it is
 // the sessions started after a switch that are on the new account.
@@ -32,9 +32,9 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/sichengchen/eipgam/internal/edit"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/edit"
 )
 
 const claudeTokenEnvKey = "CLAUDE_CODE_OAUTH_TOKEN"
@@ -45,7 +45,7 @@ func claudeTokenRecordPath() string {
 	return filepath.Join(filepath.Dir(Path()), "claude-token-env.json")
 }
 
-// claudeTokenRecord is what magpie last wrote to Claude Code's env: the
+// claudeTokenRecord is what eipgam last wrote to Claude Code's env: the
 // token's hash, never the token.
 type claudeTokenRecord struct {
 	Hash string `json:"hash"`
@@ -56,9 +56,9 @@ func claudeTokenHash(token string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// readClaudeTokenRecord is the hash magpie wrote, "" for none. One that
+// readClaudeTokenRecord is the hash eipgam wrote, "" for none. One that
 // can't be read is an error, never "nothing written": that would make
-// magpie's own token look like the user's for good.
+// eipgam's own token look like the user's for good.
 func readClaudeTokenRecord() (string, error) {
 	b, err := os.ReadFile(claudeTokenRecordPath())
 	if errors.Is(err, os.ErrNotExist) {
@@ -108,8 +108,8 @@ func claudeEnvToken() (string, bool, error) {
 	return v.String(), v.Exists(), nil
 }
 
-// claudeTokenInUse is the setup-token magpie has Claude Code use, ""
-// when there is none of magpie's in its settings.json (none, the user's
+// claudeTokenInUse is the setup-token eipgam has Claude Code use, ""
+// when there is none of eipgam's in its settings.json (none, the user's
 // own, or one that can't be read).
 func claudeTokenInUse() string {
 	claudeTokenEnvMu.Lock()
@@ -130,7 +130,7 @@ func claudeTokenOursLocked() string {
 }
 
 // ClaudeTokenUser is the saved setup-token account Claude Code itself
-// uses now (magpie's token in its settings.json), "" for none.
+// uses now (eipgam's token in its settings.json), "" for none.
 func ClaudeTokenUser() string {
 	tok := claudeTokenInUse()
 	if tok == "" {
@@ -155,11 +155,11 @@ func claudeTokenUserIn(ls []savedLogin, tok string) string {
 
 // errClaudeOwnToken: the user set CLAUDE_CODE_OAUTH_TOKEN in Claude
 // Code's settings.json themselves.
-const errClaudeOwnToken = "Claude Code's %s sets CLAUDE_CODE_OAUTH_TOKEN of your own, which Claude Code uses over any account magpie switches it to; magpie leaves it as it is. Take it out there to switch Claude Code here."
+const errClaudeOwnToken = "Claude Code's %s sets CLAUDE_CODE_OAUTH_TOKEN of your own, which Claude Code uses over any account eipgam switches it to; eipgam leaves it as it is. Take it out there to switch Claude Code here."
 
 // setClaudeEnvToken has Claude Code use token (setClaudeEnvToken("")
-// takes magpie's out again), leaving a value the user set alone: putting
-// one in over it is an error, taking magpie's out leaves it.
+// takes eipgam's out again), leaving a value the user set alone: putting
+// one in over it is an error, taking eipgam's out leaves it.
 func setClaudeEnvToken(token string) error {
 	claudeTokenEnvMu.Lock()
 	defer claudeTokenEnvMu.Unlock()
@@ -172,13 +172,13 @@ func setClaudeEnvTokenLocked(token string) error {
 		return err
 	}
 	if token == "" && hash == "" {
-		return nil // nothing of magpie's there, nor to be
+		return nil // nothing of eipgam's there, nor to be
 	}
 	path := claudeSettingsFile()
 	cur, has, err := claudeEnvToken()
 	if err != nil {
 		if token == "" {
-			// what it holds is unknown: magpie's token may be there yet,
+			// what it holds is unknown: eipgam's token may be there yet,
 			// and the record is kept to take it out once it can be read
 			return err
 		}
@@ -198,7 +198,7 @@ func setClaudeEnvTokenLocked(token string) error {
 	}
 	// what is about to be written is kept first: a crash between the two
 	// then leaves a record of a value that isn't there, never a value of
-	// magpie's that looks like the user's
+	// eipgam's that looks like the user's
 	if err := writeClaudeTokenRecord(claudeTokenHash(token)); err != nil {
 		return err
 	}
@@ -247,7 +247,7 @@ func claudeSettingsPrivate(path string) error {
 	return nil
 }
 
-// claudeTokenGone takes magpie's token for the removed account l out of
+// claudeTokenGone takes eipgam's token for the removed account l out of
 // Claude Code's settings.json, so Claude Code goes back to its own
 // sign-in; another account's, or the user's own, stays.
 func claudeTokenGone(l savedLogin) error {

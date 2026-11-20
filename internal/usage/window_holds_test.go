@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // holdsHome is a home whose models.dev copy prices a Claude and an OpenAI
@@ -30,7 +30,7 @@ func holdsHome(t *testing.T) {
 
 func near(a, b float64) bool { return math.Abs(a-b) <= 1e-9*max(1, math.Abs(b)) }
 
-// Chiao on Discord: each window's whole, reckoned from the calls magpie
+// Chiao on Discord: each window's whole, reckoned from the calls eipgam
 // routed through the account in it over the share used, at API prices —
 // for Claude's 5 hours, its week and its Opus-only week, Codex's 5 hours,
 // and a moved plugin's window told in seconds to its reset; and nothing
@@ -144,8 +144,8 @@ func TestWindowHoldsReckonsWhatMagpieRouted(t *testing.T) {
 	}
 }
 
-// A window begun before magpie's log has calls magpie never saw: its whole
-// isn't reckoned, nor one of an account magpie routed nothing for in it.
+// A window begun before eipgam's log has calls eipgam never saw: its whole
+// isn't reckoned, nor one of an account eipgam routed nothing for in it.
 func TestWindowHoldsNeedsTheWholeWindowLogged(t *testing.T) {
 	now := time.Date(2026, 10, 8, 12, 0, 0, 0, time.UTC)
 	reset := now.Add(3 * 24 * time.Hour)
@@ -390,7 +390,7 @@ func TestWindowHoldsDryAgainAfterReset(t *testing.T) {
 	}
 }
 
-// #2333: magpie quota --json and GET /v1/magpie/quotas reckon a window's
+// #2333: eipgam quota --json and GET /v1/eipgam/quotas reckon a window's
 // whole by the same WithWindowHolds the Usage page does, which usage hands
 // provider (ReckonHolds) since provider can't read the log itself.
 func TestQuotaReportsReckonByTheLog(t *testing.T) {
@@ -550,7 +550,7 @@ func TestHoldsPriceTheModelTheReplyNamed(t *testing.T) {
 }
 
 // A wallet's window (#5770) tells what is left and no whole; on a capped
-// account its Used is what magpie counted it spending in the cap's
+// account its Used is what eipgam counted it spending in the cap's
 // period, and nothing is reckoned from that as the window's whole.
 func TestWindowHoldsLeavesAWalletOut(t *testing.T) {
 	now := time.Date(2026, 11, 9, 12, 0, 0, 0, time.UTC)

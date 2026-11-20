@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const installed = await page.evaluate((l) => l === "en" ? "Installed" : I18N[l]["Installed"], lang);
         await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: installed }).click();

@@ -62,7 +62,7 @@ async function open(browser, lang, width, routes, live) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, routes, live));
-  await page.goto("http://magpie.test/?view=routing");
+  await page.goto("http://eipgam.test/?view=routing");
   return { context, page, errors };
 }
 

@@ -33,12 +33,12 @@ const tr = (lang, k, vars = {}) => {
 
 const hourAgo = new Date(Date.now() - 3600e3).toISOString();
 const base = { on: true, kind: "webdav", url: "https://dav.example.invalid/dav/", user: "me", passwordSet: true, passphraseSet: true, keys: true, agents: true, library: true, last: new Date(Date.now() - 60000).toISOString() };
-const backups = [{ name: "magpie-20261102-010000-auto.json", made: hourAgo, reason: "auto", providers: 3, size: 900, signIns: true }];
+const backups = [{ name: "eipgam-20261102-010000-auto.json", made: hourAgo, reason: "auto", providers: 3, size: 900, signIns: true }];
 const signInsResult = { added: 2, updated: 1, kept: 1, codex: true };
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/eipgam",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -62,7 +62,7 @@ function serve(lang, posts) {
       sync = { ...sync, signIns: !!b.signIns };
       return json(sync);
     }
-    if (pathname === "/api/backup/export") { post(); return json({ path: "/home/me/magpie.magpie-backup", signIns: 3 }); }
+    if (pathname === "/api/backup/export") { post(); return json({ path: "/home/me/eipgam.eipgam-backup", signIns: 3 }); }
     if (pathname === "/api/backup/import") { post(); return json({ Added: 1, Replaced: 0, Profiles: 0, Agents: 0, SignIns: signInsResult, Usage: 12 }); }
     if (pathname === "/api/autobackup") return json(auto);
     if (pathname.startsWith("/api/autobackup/")) {
@@ -117,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         const click = async (loc) => { await reach(page, loc); await loc.click(); };
 
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator("#prefs").click();
         await openPart(page, "sync");
         const list = page.locator("#syncList");
@@ -179,8 +179,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const imTick = form.locator("label.tick", { hasText: w("Bring in the sign-ins too, when the file has them") }).locator("input");
         assert.equal(await imTick.isChecked(), true);
         assert.equal(await form.locator("label.tick", { hasText: w("Bring in the usage history too, merged with the one here") }).locator("input").isChecked(), true);
-        await form.locator("input[type=file]").setInputFiles({ name: "magpie.magpie-backup", mimeType: "application/octet-stream", buffer: Buffer.from("sealed") });
-        await form.locator(".fname", { hasText: "magpie.magpie-backup" }).waitFor();
+        await form.locator("input[type=file]").setInputFiles({ name: "eipgam.eipgam-backup", mimeType: "application/octet-stream", buffer: Buffer.from("sealed") });
+        await form.locator(".fname", { hasText: "eipgam.eipgam-backup" }).waitFor();
         await form.locator("input[type=password]").fill("correct horse");
         await click(form.locator("button.primary"));
         const imported = await waitPost("/api/backup/import");

@@ -7,18 +7,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // CLJY (Discord): npm couldn't remove claude.exe while a Claude Code run
-// magpie kept for a conversation's next turn still ran it (EPERM), so an
+// eipgam kept for a conversation's next turn still ran it (EPERM), so an
 // update stopped partway and left %APPDATA%\npm with the sh shim alone.
 // LetGoIdleClaudeCode, which an npm update on Windows asks first, ends
 // every waiting run and returns once its process has exited: the exe it
 // ran can then be removed. Its conversation is shelved for its next turn;
 // a run in a turn is left to finish it.
 func TestLetGoIdleClaudeCodeFreesTheExe(t *testing.T) {
-	const child = "MAGPIE_TEST_LETGO_CHILD"
+	const child = "EIPGAM_TEST_LETGO_CHILD"
 	if os.Getenv(child) != "" {
 		time.Sleep(2 * time.Minute) // a Claude Code waiting for its next turn
 		return

@@ -3,7 +3,7 @@ package gateway
 import (
 	"net/http"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // desktopSubagentPick is what is done with the model of a Claude Desktop
@@ -34,7 +34,7 @@ func desktopSubagentPick(r *http.Request, agent, named, resolved string, body []
 	}
 	pick := &SubagentPick{Asked: named, To: to}
 	if _, off := idOff(to); off {
-		pick.Kept = "it is disabled in magpie"
+		pick.Kept = "it is disabled in eipgam"
 		return pick
 	}
 	if why := provider.DesktopSubagentUnserved(to); why != "" {

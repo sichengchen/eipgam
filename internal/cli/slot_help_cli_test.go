@@ -4,13 +4,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
-// `magpie claude --help` names the form that gives a tier a model of its
-// own, which only the field list hinted at (KoiLx0 on X: "magpie claude
+// `eipgam claude --help` names the form that gives a tier a model of its
+// own, which only the field list hinted at (KoiLx0 on X: "eipgam claude
 // opus xxxx" was tried as if it did not exist). A tier takes a model, a
-// flag is refused, and so is a model magpie does not serve.
+// flag is refused, and so is a model eipgam does not serve.
 func TestAgentHelpNamesTheTierForm(t *testing.T) {
 	groupsHome(t)
 	t.Setenv("CLAUDE_CONFIG_DIR", "")
@@ -19,7 +19,7 @@ func TestAgentHelpNamesTheTierForm(t *testing.T) {
 		t.Fatal(err)
 	}
 	h := agentHelp(a)
-	if !strings.Contains(h, "magpie claude opus <model>") || !strings.Contains(h, "opus, sonnet, haiku, fable") {
+	if !strings.Contains(h, "eipgam claude opus <model>") || !strings.Contains(h, "opus, sonnet, haiku, fable") {
 		t.Fatalf("help lacks the tier form:\n%s", h)
 	}
 	if err := run([]string{"claude", "a/m"}); err != nil {
@@ -31,7 +31,7 @@ func TestAgentHelpNamesTheTierForm(t *testing.T) {
 	if err := run([]string{"claude", "--haiku", "a/only-a"}); err == nil || !strings.Contains(err.Error(), "unknown flag") {
 		t.Fatalf("a flag: %v", err)
 	}
-	if err := run([]string{"claude", "haiku", "nope/zzz"}); err == nil || !strings.Contains(err.Error(), "not a model magpie serves") {
+	if err := run([]string{"claude", "haiku", "nope/zzz"}); err == nil || !strings.Contains(err.Error(), "not a model eipgam serves") {
 		t.Fatalf("an unknown model: %v", err)
 	}
 }

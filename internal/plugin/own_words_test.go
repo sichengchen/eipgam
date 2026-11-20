@@ -36,7 +36,7 @@ func TestReadTaggedOwnWords(t *testing.T) {
 		raw, reg := githubRaw, npmRegistry
 		githubRaw, npmRegistry = srv.URL+"/raw", srv.URL+"/npm"
 		defer func() { githubRaw, npmRegistry = raw, reg }()
-		got, keep, known, err := readTagged(context.Background(), Tagged{Spec: "github:someone/magpie-officeace", Repo: "someone/magpie-officeace"}, "main")
+		got, keep, known, err := readTagged(context.Background(), Tagged{Spec: "github:someone/eipgam-officeace", Repo: "someone/eipgam-officeace"}, "main")
 		if err != nil || !keep || !known {
 			t.Fatalf("read %s: %v kept %v known %v", pkg, err, keep, known)
 		}
@@ -44,33 +44,33 @@ func TestReadTaggedOwnWords(t *testing.T) {
 	}
 	both := map[string]string{"en": "Unofficial: OfficeAce", "zh": "非官方：OfficeAce"}
 
-	got := read(`{"name":"magpie-officeace","version":"0.3.0","main":"index.js","magpie":{"name":"OfficeAce","summary":{"en":"Unofficial: OfficeAce","zh":"非官方：OfficeAce"}}}`, "")
+	got := read(`{"name":"eipgam-officeace","version":"0.3.0","main":"index.js","magpie":{"name":"OfficeAce","summary":{"en":"Unofficial: OfficeAce","zh":"非官方：OfficeAce"}}}`, "")
 	if got.Name != "OfficeAce" || !reflect.DeepEqual(got.Summary, both) {
 		t.Errorf("repository's words: name %q summary %v", got.Name, got.Summary)
 	}
 
 	// published from this repository: npm's copy is installed, and its
 	// words are the card's
-	got = read(`{"name":"magpie-officeace","version":"0.3.0","main":"index.js","magpie":{"name":"OfficeAce dev","summary":{"en":"dev"}}}`,
-		`{"version":"0.2.0","main":"index.js","repository":"github:someone/magpie-officeace","magpie":{"name":"OfficeAce","summary":{"en":"Unofficial: OfficeAce","zh":"非官方：OfficeAce"}}}`)
-	if got.Spec != "magpie-officeace" || got.Name != "OfficeAce" || !reflect.DeepEqual(got.Summary, both) {
+	got = read(`{"name":"eipgam-officeace","version":"0.3.0","main":"index.js","magpie":{"name":"OfficeAce dev","summary":{"en":"dev"}}}`,
+		`{"version":"0.2.0","main":"index.js","repository":"github:someone/eipgam-officeace","magpie":{"name":"OfficeAce","summary":{"en":"Unofficial: OfficeAce","zh":"非官方：OfficeAce"}}}`)
+	if got.Spec != "eipgam-officeace" || got.Name != "OfficeAce" || !reflect.DeepEqual(got.Summary, both) {
 		t.Errorf("npm's words: spec %q name %q summary %v", got.Spec, got.Name, got.Summary)
 	}
 	// npm's copy saying nothing of itself leaves the repository's
-	got = read(`{"name":"magpie-officeace","version":"0.3.0","main":"index.js","magpie":{"name":"OfficeAce","summary":{"en":"Unofficial: OfficeAce","zh":"非官方：OfficeAce"}}}`,
-		`{"version":"0.2.0","main":"index.js","repository":"github:someone/magpie-officeace"}`)
-	if got.Spec != "magpie-officeace" || got.Name != "OfficeAce" || !reflect.DeepEqual(got.Summary, both) {
+	got = read(`{"name":"eipgam-officeace","version":"0.3.0","main":"index.js","magpie":{"name":"OfficeAce","summary":{"en":"Unofficial: OfficeAce","zh":"非官方：OfficeAce"}}}`,
+		`{"version":"0.2.0","main":"index.js","repository":"github:someone/eipgam-officeace"}`)
+	if got.Spec != "eipgam-officeace" || got.Name != "OfficeAce" || !reflect.DeepEqual(got.Summary, both) {
 		t.Errorf("npm silent: spec %q name %q summary %v", got.Spec, got.Name, got.Summary)
 	}
 
 	// a package.json that says nothing of itself keeps the card it had
-	got = read(`{"name":"magpie-officeace","version":"1.0.0","main":"index.js"}`, "")
+	got = read(`{"name":"eipgam-officeace","version":"1.0.0","main":"index.js"}`, "")
 	if got.Name != "" || got.Summary != nil {
 		t.Errorf("saying nothing: name %q summary %v", got.Name, got.Summary)
 	}
 	// a summary that isn't a map of strings is none, and the package is
 	// still listed: never a failed read of the whole package.json
-	got = read(`{"name":"magpie-officeace","version":"1.0.0","main":"index.js","magpie":{"name":"OfficeAce","summary":"one sentence"}}`, "")
+	got = read(`{"name":"eipgam-officeace","version":"1.0.0","main":"index.js","magpie":{"name":"OfficeAce","summary":"one sentence"}}`, "")
 	if got.Name != "OfficeAce" || got.Summary != nil {
 		t.Errorf("summary a string: name %q summary %v", got.Name, got.Summary)
 	}

@@ -17,11 +17,11 @@ const at = (min) => new Date(Date.now() - min * 60e3).toISOString();
 const sess = (id, title, provider, min) => ({
   agent: "codex", id, title, cwd: "/work/app", start: at(min + 30), last: at(min), models: [], cost: 0, unpriced: 0,
   resume: "codex resume " + id, path: "~/.codex/sessions/x/" + id + ".jsonl", size: 2048, messages: 4, files: 1, deletable: true,
-  provider, uses_provider: "magpie",
+  provider, uses_provider: "eipgam",
 });
 
 function serve(lang, calls) {
-  const sessions = [sess("a1", "fix the login form", "custom", 5), sess("b2", "write the post", "custom", 10), sess("c3", "plan the trip", "custom", 15), sess("d4", "new work", "magpie", 1)];
+  const sessions = [sess("a1", "fix the login form", "custom", 5), sess("b2", "write the post", "custom", 10), sess("c3", "plan the trip", "custom", 15), sess("d4", "new work", "eipgam", 1)];
   return async (route) => {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
@@ -34,7 +34,7 @@ function serve(lang, calls) {
     if (url.pathname === "/api/sessions/manage") {
       return json({
         agents: [{ agent: "codex", count: sessions.length, deletable: true, name: "Codex", icon: "codex-color" }],
-        agent: "codex", sessions, terminal: false, trash: [], trashDir: "~/Library/Application Support/magpie/trash/sessions",
+        agent: "codex", sessions, terminal: false, trash: [], trashDir: "~/Library/Application Support/eipgam/trash/sessions",
       });
     }
     if (url.pathname === "/api/sessions/codex-provider") {
@@ -50,11 +50,11 @@ function serve(lang, calls) {
 }
 
 const words = {
-  en: { nav: "Sessions", button: "Move to magpie…", move: "Move", all: "Select all", none: "Deselect all", invert: "Invert selection", n: (n) => `${n} selected` },
-  zh: { nav: "会话", button: "迁移到 magpie…", move: "迁移", all: "全选", none: "取消全选", invert: "反选", n: (n) => `已选 ${n} 个` },
-  "zh-TW": { nav: "會話", button: "遷移到 magpie…", move: "遷移", all: "全選", none: "取消全選", invert: "反選", n: (n) => `已選 ${n} 個` },
-  ja: { nav: "セッション", button: "magpie に移行…", move: "移行", all: "すべて選択", none: "すべての選択を解除", invert: "選択を反転", n: (n) => `${n} 件選択中` },
-  de: { nav: "Sitzungen", button: "Zu magpie umziehen…", move: "Umziehen", all: "Alle auswählen", none: "Alle abwählen", invert: "Auswahl umkehren", n: (n) => `${n} ausgewählt` },
+  en: { nav: "Sessions", button: "Move to eipgam…", move: "Move", all: "Select all", none: "Deselect all", invert: "Invert selection", n: (n) => `${n} selected` },
+  zh: { nav: "会话", button: "迁移到 eipgam…", move: "迁移", all: "全选", none: "取消全选", invert: "反选", n: (n) => `已选 ${n} 个` },
+  "zh-TW": { nav: "會話", button: "遷移到 eipgam…", move: "遷移", all: "全選", none: "取消全選", invert: "反選", n: (n) => `已選 ${n} 個` },
+  ja: { nav: "セッション", button: "eipgam に移行…", move: "移行", all: "すべて選択", none: "すべての選択を解除", invert: "選択を反転", n: (n) => `${n} 件選択中` },
+  de: { nav: "Sitzungen", button: "Zu eipgam umziehen…", move: "Umziehen", all: "Alle auswählen", none: "Alle abwählen", invert: "Auswahl umkehren", n: (n) => `${n} ausgewählt` },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
       const calls = [];
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator("#nav").getByRole("button", { name: w.nav, exact: true }).click();
       const view = page.locator("#view-sessions");
       await view.locator(".sm-provider").waitFor();
@@ -123,7 +123,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(calls.length, 0, "picking moves nothing");
       await move.click();
       await ask.waitFor({ state: "detached" });
-      assert.deepEqual(calls, [{ moves: [{ id: "a1", to: "magpie" }, { id: "c3", to: "magpie" }] }]);
+      assert.deepEqual(calls, [{ moves: [{ id: "a1", to: "eipgam" }, { id: "c3", to: "eipgam" }] }]);
       assert.deepEqual(errors, []);
     });
   }

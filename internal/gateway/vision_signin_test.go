@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Image recognition left to magpie doesn't pick a describer whose every
+// Image recognition left to eipgam doesn't pick a describer whose every
 // account has to be signed in again (@freefcw on X: images went to Claude
 // Haiku, its sign-in expired, and the request failed): a key's model that
 // sees goes first, and the Claude account is picked again once it is

@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_SPEED_ALL_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_SPEED_ALL_ASSETS || path.resolve(__dirname, "../assets");
 const D = 86400e3, H = 3600e3, now = Date.now();
 const today0 = new Date(new Date(now).setHours(0, 0, 0, 0)).getTime();
 
@@ -89,10 +89,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultTimeout(5000);
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
-        await p.addInitScript(() => { try { localStorage.setItem("magpie.ledMetric", "speed"); } catch {} });
+        await p.addInitScript(() => { try { localStorage.setItem("eipgam.ledMetric", "speed"); } catch {} });
         const answered = [];
         await p.route("**/*", server(lang, answered));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://eipgam.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledChart .plot svg").waitFor();

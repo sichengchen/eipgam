@@ -3,14 +3,14 @@
 // automatic switch (11-11, it was a "Keep Codex signed in to" tick) keeps
 // Codex signed in to the first account; it posts provider/keeplogin, and
 // the Routing note then says Codex stays on the first. #530: In order, the
-// note says magpie moves Codex on once the account is used up, not at 98%.
+// note says eipgam moves Codex on once the account is used up, not at 98%.
 // With one account there is nothing to switch, so no switch. With it off, a
 // pick keeps Codex signed in to an account of the user's choosing
 // (keepLoginAs) while the first stays first: that row says Signed in, the
 // first says First, and Make first on it arranges the order rather than
-// signing Codex in. The page doesn't move. #1907: while magpie only
+// signing Codex in. The page doesn't move. #1907: while eipgam only
 // switches Codex's sign-in, it always moves it: the switch is held on, and
-// the notes say magpie moves it. In English and Chinese, Chromium and
+// the notes say eipgam moves it. In English and Chinese, Chromium and
 // WebKit.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -64,8 +64,8 @@ function serve(lang, first, posts) {
 }
 
 const words = {
-  en: { switchOnly: "Only switch Codex's sign-in", magpieMoves: /Tick more and magpie moves on to the next/, keep: "Keep Codex signed in to", first: "the first account", pickHead: "Account to stay signed in to", signed: "Signed in", firstLabel: "First", makeFirst: "Make first", keptAs: /Codex on its own stays signed in to spare@example.com/, kept: /Codex on its own stays signed in to the first account/, moves: /once it is 98% used/, usedUp: /once it is used up/ },
-  zh: { switchOnly: "只切换 Codex 的登录", magpieMoves: /前一个额度用完 magpie 自动换下一个/, keep: "Codex 始终登录", first: "首选账号", pickHead: "始终登录的账号", signed: "已登录", firstLabel: "首选", makeFirst: "设为首选", keptAs: /Codex 直连时始终登录 spare@example.com/, kept: /Codex 直连时始终登录首选账号/, moves: /用到 98% 时/, usedUp: /额度用完时/ },
+  en: { switchOnly: "Only switch Codex's sign-in", magpieMoves: /Tick more and eipgam moves on to the next/, keep: "Keep Codex signed in to", first: "the first account", pickHead: "Account to stay signed in to", signed: "Signed in", firstLabel: "First", makeFirst: "Make first", keptAs: /Codex on its own stays signed in to spare@example.com/, kept: /Codex on its own stays signed in to the first account/, moves: /once it is 98% used/, usedUp: /once it is used up/ },
+  zh: { switchOnly: "只切换 Codex 的登录", magpieMoves: /前一个额度用完 eipgam 自动换下一个/, keep: "Codex 始终登录", first: "首选账号", pickHead: "始终登录的账号", signed: "已登录", firstLabel: "首选", makeFirst: "设为首选", keptAs: /Codex 直连时始终登录 spare@example.com/, kept: /Codex 直连时始终登录首选账号/, moves: /用到 98% 时/, usedUp: /额度用完时/ },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, codex(opts), posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Codex" }).first().click();
       await page.locator(".editor .acc").first().waitFor();
       return { page, errors, posts };
@@ -99,14 +99,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         "Account to stay signed in to",
         "The account {agent} stays signed in to",
         "{agent} stays signed in to {user}",
-        "{agent} is kept signed in to this account; requests through magpie go to the accounts in their order",
+        "{agent} is kept signed in to this account; requests through eipgam go to the accounts in their order",
         "The gateway uses this account first; {agent} stays signed in to {user}",
-        "Routing picks the account for each request through magpie, in the accounts' order; {agent} on its own stays signed in to {user}, whatever it has left.",
-        "{agent} stays on this account even when it runs low. Requests through magpie still follow Routing.",
+        "Routing picks the account for each request through eipgam, in the accounts' order; {agent} on its own stays signed in to {user}, whatever it has left.",
+        "{agent} stays on this account even when it runs low. Requests through eipgam still follow Routing.",
         "{agent} stays signed in to the first account",
-        "magpie moves {agent} to an account with room again",
-        "Routing picks the account for each request through magpie; {agent} on its own stays signed in to the first account, whatever it has left.",
-        "Routing picks the account for each request through magpie; {agent} on its own uses the one it is signed in to, which magpie moves to the next ticked account with room once it is used up, and back to the first once that has room again.",
+        "eipgam moves {agent} to an account with room again",
+        "Routing picks the account for each request through eipgam; {agent} on its own stays signed in to the first account, whatever it has left.",
+        "Routing picks the account for each request through eipgam; {agent} on its own uses the one it is signed in to, which eipgam moves to the next ticked account with room once it is used up, and back to the first once that has room again.",
       ].filter((k) => !I18N.zh[k]));
       assert.deepEqual(missing, [], "every string has its Chinese");
       const top = await page.evaluate(() => document.scrollingElement.scrollTop);
@@ -197,7 +197,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.doesNotMatch(text, w.kept);
         assert.doesNotMatch(text, w.keptAs);
         assert.match(text, w.magpieMoves);
-        assert.equal(await page.evaluate(() => I18N.zh["{agent} signs in to the first. Tick more and magpie moves on to the next when the one before it is out of quota. Sessions already running keep theirs until restarted."] ? "" : "missing"), "");
+        assert.equal(await page.evaluate(() => I18N.zh["{agent} signs in to the first. Tick more and eipgam moves on to the next when the one before it is out of quota. Sessions already running keep theirs until restarted."] ? "" : "missing"), "");
         assert.deepEqual(errors, []);
       });
     }

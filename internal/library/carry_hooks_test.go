@@ -8,9 +8,9 @@ import (
 )
 
 // A hook goes with the library to another computer, which writes it into
-// its agents beside the user's own hooks there; what magpie wrote into the
+// its agents beside the user's own hooks there; what eipgam wrote into the
 // first computer's agents stays out of the bundle; taking it out on one
-// takes magpie's entry out on the other and leaves the user's.
+// takes eipgam's entry out on the other and leaves the user's.
 func TestCarryHooks(t *testing.T) {
 	sandbox(t)
 	ok(t)(SaveHook("", Hook{Name: "bark", Description: "Ping my phone", Event: "turn-end", Command: "curl -s https://api.day.app/KEY/done",
@@ -32,7 +32,7 @@ func TestCarryHooks(t *testing.T) {
 		t.Errorf("the hook carried: %v", got)
 	}
 	if strings.Contains(carried, "applied") || strings.Contains(carried, `"entry"`) {
-		t.Errorf("what magpie wrote here is carried:\n%s", carried)
+		t.Errorf("what eipgam wrote here is carried:\n%s", carried)
 	}
 
 	h2 := sandbox(t)
@@ -63,7 +63,7 @@ func TestCarryHooks(t *testing.T) {
 	}
 }
 
-// A bundle from a magpie before hooks were carried has none, and knew
+// A bundle from a eipgam before hooks were carried has none, and knew
 // nothing of this computer's: they stay.
 func TestCarryOldBundleKeepsHooks(t *testing.T) {
 	sandbox(t)
@@ -75,7 +75,7 @@ func TestCarryOldBundleKeepsHooks(t *testing.T) {
 	b.Hooks = nil
 	old := mustJSON(t, b)
 	if strings.Contains(old, `"hooks"`) {
-		t.Fatalf("not as an older magpie wrote it: %s", old)
+		t.Fatalf("not as an older eipgam wrote it: %s", old)
 	}
 	h := sandbox(t)
 	ok(t)(SaveHook("", Hook{Name: "mine", Event: "turn-end", Command: "say mine", Agents: []string{"claude"}}))
@@ -92,7 +92,7 @@ func TestCarryOldBundleKeepsHooks(t *testing.T) {
 	}
 }
 
-// A hook on an event a newer magpie knows and this one doesn't is carried
+// A hook on an event a newer eipgam knows and this one doesn't is carried
 // as it comes: the agent it is given to has a problem, and the rest of the
 // library comes in. A hook with no name or command, or one named twice,
 // refuses the bundle.
@@ -118,7 +118,7 @@ func TestCarryNewerHooks(t *testing.T) {
 		found = found || p.What == "hook:later"
 	}
 	if !found {
-		t.Errorf("no problem for the event this magpie doesn't know: %+v", r.Problems)
+		t.Errorf("no problem for the event this eipgam doesn't know: %+v", r.Problems)
 	}
 	l, _ := Collect()
 	if len(*l.Hooks) != 2 || (*l.Hooks)[1].Name != "later" || mustJSON(t, (*l.Hooks)[1].Agents) != `["claude","newagent"]` {

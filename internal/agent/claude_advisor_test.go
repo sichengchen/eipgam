@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Claude Code's advisor for magpie's models (Awad_Yoo on X): Claude Code
+// Claude Code's advisor for eipgam's models (Awad_Yoo on X): Claude Code
 // sends it only for Anthropic's own models unless
 // CLAUDE_CODE_ENABLE_EXPERIMENTAL_ADVISOR_TOOL is set (2.1.316). The
 // advisor field writes advisorModel, as /advisor does, with that switch,
-// only while magpie routes Claude Code and only for a model magpie serves;
-// clearing it, or magpie stepping out, takes both away, but never a switch
+// only while eipgam routes Claude Code and only for a model eipgam serves;
+// clearing it, or eipgam stepping out, takes both away, but never a switch
 // the user wrote.
 func TestClaudeAdvisorModel(t *testing.T) {
 	a, path, env := claudeAutoModeHome(t, `{}`)
@@ -34,10 +34,10 @@ func TestClaudeAdvisorModel(t *testing.T) {
 		t.Fatalf("advisor on by default: %q %q", get(), env(claudeAdvisorEnv))
 	}
 	if !containsOption(f.Options(nil), "relay/claude-opus-5-5") {
-		t.Fatalf("options miss magpie's models: %v", f.Options(nil))
+		t.Fatalf("options miss eipgam's models: %v", f.Options(nil))
 	}
 	if err := f.Set("claude-opus-5-5"); err == nil || get() != "" {
-		t.Fatalf("a model magpie doesn't serve taken: %v %q", err, get())
+		t.Fatalf("a model eipgam doesn't serve taken: %v %q", err, get())
 	}
 	if err := f.Set("relay/claude-opus-5-5"); err != nil {
 		t.Fatal(err)
@@ -54,7 +54,7 @@ func TestClaudeAdvisorModel(t *testing.T) {
 	if get() != "" || env(claudeAdvisorEnv) != "" {
 		t.Fatalf("clearing left %q %q", get(), env(claudeAdvisorEnv))
 	}
-	// magpie stepping out takes its advisor away
+	// eipgam stepping out takes its advisor away
 	if err := f.Set("relay/deepseek-pro"); err != nil {
 		t.Fatal(err)
 	}
@@ -67,8 +67,8 @@ func TestClaudeAdvisorModel(t *testing.T) {
 	}
 }
 
-// A switch the user turned on themselves stays theirs: clearing magpie's
-// advisor, or magpie stepping out, leaves it.
+// A switch the user turned on themselves stays theirs: clearing eipgam's
+// advisor, or eipgam stepping out, leaves it.
 func TestClaudeAdvisorUserSwitch(t *testing.T) {
 	a, path, env := claudeAutoModeHome(t, `{"env":{"CLAUDE_CODE_ENABLE_EXPERIMENTAL_ADVISOR_TOOL":"1"},"advisorModel":"opus"}`)
 	if err := a.Field("model").Set("relay/deepseek-pro"); err != nil {

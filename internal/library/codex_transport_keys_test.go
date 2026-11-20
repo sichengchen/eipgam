@@ -90,7 +90,7 @@ func TestCodexServerMadeLocalLeavesURLKeys(t *testing.T) {
 	}
 }
 
-// An entry magpie wrote before with a command's keys beside its URL, the
+// An entry eipgam wrote before with a command's keys beside its URL, the
 // reporter's shape, is written again on the next sync, though the server
 // itself reads as unchanged; one of a project's .codex/config.toml too.
 // A stdio entry's own env_vars, which the user gave it, stays.

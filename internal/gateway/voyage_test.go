@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // fakeVoyage answers as api.voyageai.com does, in the shapes its API
@@ -47,7 +47,7 @@ func (f *fakeVoyage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		io.WriteString(w, `{"object":"list","data":[{"object":"embedding","embedding":[-0.016709786,0.026996311],"index":0},{"object":"embedding","embedding":[0.003613521,0.026428301],"index":1}],"model":"voyage-4-large","usage":{"total_tokens":8}}`)
 	case "POST /v1/rerank":
-		io.WriteString(w, `{"object":"list","data":[{"relevance_score":0.455078125,"index":1,"document":"a magpie"},{"relevance_score":0.439453125,"index":0,"document":"a crow"}],"model":"rerank-3","usage":{"total_tokens":11}}`)
+		io.WriteString(w, `{"object":"list","data":[{"relevance_score":0.455078125,"index":1,"document":"a eipgam"},{"relevance_score":0.439453125,"index":0,"document":"a crow"}],"model":"rerank-3","usage":{"total_tokens":11}}`)
 	default:
 		w.WriteHeader(404)
 		io.WriteString(w, `{"detail":"Not Found"}`)
@@ -97,8 +97,8 @@ func TestVoyageEmbeddingsAndRerank(t *testing.T) {
 	if code, raw := postRetrieval(t, s, "/v1/embeddings", `{"model":"voyage/voyage-code-3","input":"func main() {}"}`); code != 200 {
 		t.Fatalf("by the provider's id: %d %s", code, raw)
 	}
-	code, raw = postRetrieval(t, s, "/v1/rerank", `{"model":"rerank-3","query":"magpie","documents":["a crow","a magpie"],"top_k":1,"return_documents":true}`)
-	if code != 200 || !strings.Contains(raw, `"relevance_score":0.455078125`) || !strings.Contains(raw, `"document":"a magpie"`) {
+	code, raw = postRetrieval(t, s, "/v1/rerank", `{"model":"rerank-3","query":"eipgam","documents":["a crow","a eipgam"],"top_k":1,"return_documents":true}`)
+	if code != 200 || !strings.Contains(raw, `"relevance_score":0.455078125`) || !strings.Contains(raw, `"document":"a eipgam"`) {
 		t.Fatalf("rerank: %d %s", code, raw)
 	}
 	sent = f.got("POST /v1/rerank")

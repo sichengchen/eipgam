@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 const fetched = new Date(Date.now() - 3600e3).toISOString();
 const ark = (listOff) => ({
   id: "volcengine", name: "Volcengine Ark", icon: "generic", preset: "volcengine", host: "ark.cn-beijing.volces.com", chat: "https://ark.cn-beijing.volces.com/api/v3", responses: "", anthropic: "", catalog: "",
@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           const saves = [];
           await page.route("**/*", serve(lang, [p, account], saves));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           const label = await say(page, lang, "Fetch the model list");
           assert.ok(label, `Fetch the model list has its ${lang}`);
           await page.locator(".row.provider", { hasText: "Volcengine Ark" }).click();

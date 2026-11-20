@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // seedKeptPlan saves provider alpha (model m1, answering from up; its
@@ -42,13 +42,13 @@ func seedKeptPlan(t *testing.T, up string) {
 	provider.ForgetPlanQuotas()
 }
 
-// Claude Code on another computer than the gateway (steven_4422: magpie in
+// Claude Code on another computer than the gateway (steven_4422: eipgam in
 // Docker, Claude Code on the Linux host) runs curl for its status line.
 // The line is the CLI's own, the model of the session sent in the body
 // first, and another machine is told it only with a gateway key.
 func TestStatuslineEndpoint(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, `{"id":"ok","model":"m1","choices":[{"message":{"role":"assistant","content":"hi"}}]}`)
@@ -159,14 +159,14 @@ func seedKeptPlans(t *testing.T) {
 }
 
 // steven_4422 (Discord): a key held to Claude's models got 403 from the
-// status line while /v1/magpie/limit said {"limited":false}. A held key
+// status line while /v1/eipgam/limit said {"limited":false}. A held key
 // its owner lets see quotas gets the line of what it may use and of
 // nothing else, as text and as JSON; one whose owner hasn't is told how
-// to; /v1/magpie/limit says what holds a key and which providers it is
+// to; /v1/eipgam/limit says what holds a key and which providers it is
 // told; a key held to nothing, and this computer, see every account.
 func TestStatuslineHeldKeyScope(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	seedKeptPlans(t)
 	p, err := provider.Find("alpha")
 	if err != nil {
@@ -275,10 +275,10 @@ func TestStatuslineHeldKeyScope(t *testing.T) {
 		}
 	}
 
-	// /v1/magpie/limit agrees
+	// /v1/eipgam/limit agrees
 	limit := func(secret string) map[string]any {
 		t.Helper()
-		code, b := do("/v1/magpie/limit", host, secret)
+		code, b := do("/v1/eipgam/limit", host, secret)
 		var out map[string]any
 		if code != 200 || json.Unmarshal([]byte(b), &out) != nil {
 			t.Fatalf("limit: %d %s", code, b)

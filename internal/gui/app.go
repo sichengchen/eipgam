@@ -20,18 +20,18 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/autostart"
-	"github.com/yetone/magpie/internal/ccswitchlink"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/omarchy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/shortcut"
-	"github.com/yetone/magpie/internal/update"
-	"github.com/yetone/magpie/internal/webview2env"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/autostart"
+	"github.com/sichengchen/eipgam/internal/ccswitchlink"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/omarchy"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/shortcut"
+	"github.com/sichengchen/eipgam/internal/update"
+	"github.com/sichengchen/eipgam/internal/webview2env"
 )
 
 //go:embed tray.png
@@ -77,7 +77,7 @@ type host struct {
 	panel *application.WebviewWindow
 	main  *application.WebviewWindow
 	tray  *application.SystemTray
-	// remote shows another magpie's page (remote_app.go); main thread only
+	// remote shows another eipgam's page (remote_app.go); main thread only
 	remote *application.WebviewWindow
 	// flapping is set while the tray bird plays its flap, so a second
 	// click in it doesn't start another over it
@@ -156,12 +156,12 @@ func (h *host) Import(link string) {
 	})
 }
 
-// dock puts magpie in the Dock or takes it out as s says, with the window
+// dock puts eipgam in the Dock or takes it out as s says, with the window
 // shown or not, full screen or not.
 func (h *host) dock(s settings.Settings, shown bool) { h.dockFront(s, shown, shown) }
 
 // dockFront is dock, with front saying whether joining the Dock activates
-// magpie: not for the window a restart by itself brings back.
+// eipgam: not for the window a restart by itself brings back.
 func (h *host) dockFront(s settings.Settings, shown, front bool) {
 	full := application.InvokeSyncWithResult(func() bool { return h.main != nil && h.main.IsFullscreen() })
 	setDock(inDock(s, shown, full), front)
@@ -198,8 +198,8 @@ func (h *host) ChooseFolder(title string) (string, error) {
 }
 
 // panelTitle names the panel for Hyprland's rule, which places it, and
-// for niri, which finds it by it (the main window is "magpie")
-const panelTitle = "magpie panel"
+// for niri, which finds it by it (the main window is "eipgam")
+const panelTitle = "eipgam panel"
 
 // FitPanel grows or shrinks the panel to its content and keeps it anchored
 // under the tray icon; a shown panel glides there when g says how. height
@@ -301,12 +301,12 @@ func (h *host) zoomWindows() {
 }
 
 // windowsOptions are the app's Windows options. Portable, WebView2 keeps
-// its profile in data\webview2: left to Wails it is %APPDATA%\magpie.exe,
-// a folder a portable magpie must not leave behind (#508). Installed, it
+// its profile in data\webview2: left to Wails it is %APPDATA%\eipgam.exe,
+// a folder a portable eipgam must not leave behind (#508). Installed, it
 // stays there, so what the pages kept isn't lost. The browser arguments
 // the user set in WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS, which Wails' loader
 // blanks before WebView2 can read them, are merged into Wails' own (#2753),
-// after magpie's own (sharedFrameProcess).
+// after eipgam's own (sharedFrameProcess).
 // Display changes are read with a callback made once (screens_windows.go).
 // Chromium's occlusion tracking is off (occlusionOff).
 func windowsOptions() application.WindowsOptions {
@@ -329,7 +329,7 @@ const panelStart = 520
 // Run starts the desktop app: a menu bar icon whose click drops down a compact
 // panel, plus a regular window for when you want it to stay around.
 // showMain opens the window immediately; otherwise only the tray icon appears.
-// link is a magpie:// link the app was started with, to confirm and import.
+// link is a eipgam:// link the app was started with, to confirm and import.
 func Run(version string, showMain bool, link string) error {
 	Version = version
 	webkitDefaults()
@@ -354,7 +354,7 @@ func Run(version string, showMain bool, link string) error {
 		log.Println("install:", err)
 	}
 	// A restart to update on a Mac or Linux started this one beside the
-	// magpie before, which hands it the gateway (handover.go).
+	// eipgam before, which hands it the gateway (handover.go).
 	startExe, _ = update.Executable()
 	handoverHost.Store(true)
 	pausable.Store(true) // the gateway paused from its menu (gatewaypause.go)
@@ -365,13 +365,13 @@ func Run(version string, showMain bool, link string) error {
 	// After an update off the Mac, the old process starts this one and then
 	// quits; let it go before looking for the gateway.
 	update.AwaitPredecessor()
-	// installed from a download just now: what magpie left beside it goes
+	// installed from a download just now: what eipgam left beside it goes
 	update.Settled()
-	// the Mac's second launch hands over to the magpie already running
+	// the Mac's second launch hands over to the eipgam already running
 	if runningAlready(showMain || OpenPanel, link) {
 		return nil
 	}
-	// a restart magpie made by itself: back as it was, taking no focus
+	// a restart eipgam made by itself: back as it was, taking no focus
 	// (quiet_restart.go)
 	quiet, minimised := takeQuietRestart()
 	quietShow.Store(quiet && showMain)
@@ -380,19 +380,19 @@ func Run(version string, showMain bool, link string) error {
 	keepWebData()
 	go func() {
 		if err := registerScheme(); err != nil {
-			log.Println("magpie:// links:", err)
+			log.Println("eipgam:// links:", err)
 		}
-		// Windows has no installer to put magpie in the Start menu
+		// Windows has no installer to put eipgam in the Start menu
 		shortcut.Ensure()
 		// Open at login as this version writes it (the Mac's, so a restart
-		// to update from a magpie opened at login comes back)
+		// to update from a eipgam opened at login comes back)
 		if err := autostart.Refresh(); err != nil {
 			log.Println("open at login:", err)
 		}
 	}()
-	// MAGPIE_THEME=light|dark forces the palette; handy for screenshots.
+	// EIPGAM_THEME=light|dark forces the palette; handy for screenshots.
 	theme := ""
-	if t := os.Getenv("MAGPIE_THEME"); t != "" {
+	if t := os.Getenv("EIPGAM_THEME"); t != "" {
 		theme = "&theme=" + t
 	}
 	h := &host{query: theme, ready: make(chan struct{})}
@@ -409,7 +409,7 @@ func Run(version string, showMain bool, link string) error {
 		go rewireAgentsOnStart()
 		handler = Handler(h, gw)
 	}
-	// Linux: the magpie before holds the app's D-Bus name until it quits,
+	// Linux: the eipgam before holds the app's D-Bus name until it quits,
 	// once it has finished its requests; this one serves the gateway
 	// meanwhile, and puts its tray icon up after
 	if before != 0 && runtime.GOOS == "linux" {
@@ -420,11 +420,11 @@ func Run(version string, showMain bool, link string) error {
 	policy := dockPolicy(settings.Shared().Dock && !quiet)
 	webView2Prepare()
 	h.app = application.New(application.Options{
-		// Windows and Linux start a new process for a magpie:// link (or a
+		// Windows and Linux start a new process for a eipgam:// link (or a
 		// second launch); it hands its arguments to the running one and quits.
 		// The Mac sends the link to the running app itself.
 		SingleInstance: singleInstance(h),
-		Name:           "magpie",
+		Name:           "eipgam",
 		Description:    "one place to pick every agent's model",
 		Icon:           appIconFor(),
 		Assets:         application.AssetOptions{Handler: ownWindow(handler)},
@@ -435,11 +435,11 @@ func Run(version string, showMain bool, link string) error {
 		// way out, so the next launch is the new one.
 		// Quitting doesn't come back to main on a Mac (NSApp terminate:
 		// exits), so the CLIs still being asked something end here.
-		// Account failover magpie wrote into Codex goes with the gateway
+		// Account failover eipgam wrote into Codex goes with the gateway
 		// this process serves: Codex left pointed at it would retry till
-		// magpie is open again (Leon920717 on X). The next start writes it
+		// eipgam is open again (Leon920717 on X). The next start writes it
 		// again (Sync).
-		// A magpie that handed the gateway to the new version (handover.go)
+		// A eipgam that handed the gateway to the new version (handover.go)
 		// leaves both to it: the failover goes on through the new one, and
 		// so do the threads.
 		OnShutdown: func() {
@@ -457,15 +457,15 @@ func Run(version string, showMain bool, link string) error {
 				// the threads Codex has open keep the gateway's address
 				// they began with: a relay serves them there on Codex's
 				// own sign-in once the gateway has let go (codexrelay;
-				// idkatbro on X: 503 "Unknown error" till magpie reopened)
+				// idkatbro on X: 503 "Unknown error" till eipgam reopened)
 				if ended {
 					if err := agent.RelayOpenCodex(); err != nil {
 						log.Println("codex relay:", err)
 					}
 				}
 			}
-			// the compactions magpie made in Codex's threads written as
-			// Codex's own, for the threads no Codex has open: with magpie
+			// the compactions eipgam made in Codex's threads written as
+			// Codex's own, for the threads no Codex has open: with eipgam
 			// gone they still go on (LukeMa on X)
 			agent.PortCodexRollouts(3 * time.Second)
 			restoreAgentsOnQuit()
@@ -482,18 +482,18 @@ func Run(version string, showMain bool, link string) error {
 	}
 	var appQuit *application.MenuItem // the Mac's app menu's Quit
 	// Wails' default Learn More replaces the current window with wails.io.
-	// Keep the native menus, but open magpie's help in the system browser.
+	// Keep the native menus, but open eipgam's help in the system browser.
 	// macOS only: it is the one that shows a menu bar unasked; on Linux a
 	// set menu becomes a menu bar in every window, the panel's too.
 	if runtime.GOOS == "darwin" {
 		appMenu := application.DefaultApplicationMenu()
 		help := appMenu.FindByRole(application.HelpMenu).GetSubmenu()
 		help.Clear()
-		help.Add("Learn More").OnClick(func(*application.Context) { _ = h.OpenURL("https://usemagpie.ai") })
+		help.Add("Learn More").OnClick(func(*application.Context) { _ = h.OpenURL(update.Repository + "/blob/main/docs/reference.md") })
 		// Command-Q asks first while agents are connected (quitask.go). The
 		// role's item sends terminate:, which logging out and shutting down
 		// send too, so it is replaced rather than the app's ShouldQuit set
-		appQuit = askingQuit(appMenu, trayText(trayLang(settings.Shared().Lang, systemLang), "Quit magpie"), func() { go h.AskQuit() })
+		appQuit = askingQuit(appMenu, trayText(trayLang(settings.Shared().Lang, systemLang), "Quit eipgam"), func() { go h.AskQuit() })
 		h.app.Menu.Set(appMenu)
 	}
 	if Started != nil {
@@ -514,13 +514,13 @@ func Run(version string, showMain bool, link string) error {
 
 	// The Mac's panel is made the first time it is opened (panelWin): made
 	// here, its page and WebContent process (~67 MB) sat hidden for as long
-	// as magpie ran, for a user who never opens it too. Elsewhere it is made
+	// as eipgam ran, for a user who never opens it too. Elsewhere it is made
 	// now, as the made-again path hasn't been run in a real window there.
 	if !panelOnFirstOpen(runtime.GOOS) {
 		h.panel = h.makePanel()
 	}
-	// So is its main window, when magpie starts without it (at login,
-	// `magpie tray`, or for the panel): it is made by openMain when first
+	// So is its main window, when eipgam starts without it (at login,
+	// `eipgam tray`, or for the panel): it is made by openMain when first
 	// shown, the way lightweight mode makes one again, and its page's
 	// WebContent process (~69 MB) isn't kept until then.
 	if !mainOnFirstOpen(runtime.GOOS, showMain) {
@@ -556,7 +556,7 @@ func Run(version string, showMain bool, link string) error {
 	restart.OnClick(func(*application.Context) {
 		// the window comes back if it was open; the tray alone if not
 		if updates.json().State != "ready" {
-			// no update: magpie as it is (restart.go), its requests
+			// no update: eipgam as it is (restart.go), its requests
 			// handed over where the gateway can be
 			go func() {
 				if restartSelfNow(false, h.MainShown(), "") {
@@ -621,7 +621,7 @@ func Run(version string, showMain bool, link string) error {
 			}
 		}
 		// a set kept in a file of the user's (~/.agents/AGENTS.md) is
-		// edited outside magpie: the agents get each change, until this
+		// edited outside eipgam: the agents get each change, until this
 		// one has handed the gateway to the new version (#4938)
 		library.KeepLinked(backendCtx, 30*time.Second)
 	}()
@@ -643,10 +643,10 @@ func Run(version string, showMain bool, link string) error {
 	if runtime.GOOS == "linux" {
 		// set before the tray starts, it is the item's id too, which
 		// Omarchy's bar pins it by (Wails calls it "Wails" otherwise)
-		h.tray.SetLabel("magpie")
+		h.tray.SetLabel("eipgam")
 		go dropTrayName()
 	}
-	h.tray.SetTooltip("magpie")
+	h.tray.SetTooltip("eipgam")
 	if icon, template := trayIconFor(runtime.GOOS, traySchemeLight()); template {
 		h.tray.SetTemplateIcon(icon)
 	} else {
@@ -669,14 +669,14 @@ func Run(version string, showMain bool, link string) error {
 	// leaves the menu bar to it while it finishes its requests: one bird
 	if runtime.GOOS == "darwin" {
 		onHandedOver = h.leaveMenuBar
-		// a magpie before this fix hid its item for good as it handed
+		// a eipgam before this fix hid its item for good as it handed
 		// over (leaveMenuBar): once it has quit, bring the icon back
 		if before != 0 && !hiddenAtStart {
 			go func() {
 				awaitExit(before, handedOffWait)
 				<-h.ready
 				if forgetTrayHidden() > 0 {
-					log.Println("tray: brought back the menu bar icon the magpie before hid")
+					log.Println("tray: brought back the menu bar icon the eipgam before hid")
 				}
 				h.tray.Show()
 			}()
@@ -684,7 +684,7 @@ func Run(version string, showMain bool, link string) error {
 	}
 	h.watchTrayUsage()
 	h.startPanelKey(before)
-	// Omarchy's bar shows magpie once: as its widget (Settings → Bar
+	// Omarchy's bar shows eipgam once: as its widget (Settings → Bar
 	// icon) or as the tray's item, not both
 	onBarIcon = h.setTrayInBar
 	h.setTrayInBar(barIcon(h)["on"])
@@ -775,7 +775,7 @@ func Run(version string, showMain bool, link string) error {
 	var skip sync.Once
 	h.app.Event.OnApplicationEvent(events.Common.ApplicationLaunchedWithUrl, func(e *application.ApplicationEvent) {
 		// a ccswitch:// link the Mac's Launch Services still sends here, from
-		// an older magpie's claim: CC Switch opens it and has its scheme back
+		// an older eipgam's claim: CC Switch opens it and has its scheme back
 		if l := e.Context().URL(); ccswitchlink.Is(l) {
 			go func() {
 				if err := ccswitchlink.Forward(l); err != nil {
@@ -813,7 +813,7 @@ func linuxOptions() application.LinuxOptions {
 
 // singleInstance makes a second launch hand over to this one, off the Mac.
 // The id covers the config dir, so a sandboxed HOME runs on its own, but
-// not the executable: two copies of magpie on one config (one autostarted
+// not the executable: two copies of eipgam on one config (one autostarted
 // from where it was first run, another from where it was put later) would
 // share the gateway's port and put two icons in the tray.
 func singleInstance(h *host) *application.SingleInstanceOptions {
@@ -847,7 +847,7 @@ func singleInstance(h *host) *application.SingleInstanceOptions {
 // instanceID is the single instance's id, the config dir's.
 func instanceID() string {
 	sum := sha256.Sum256([]byte(settings.Dir()))
-	return "ai.usemagpie.app.i" + hex.EncodeToString(sum[:6])
+	return "com.sichengchen.eipgam.app.i" + hex.EncodeToString(sum[:6])
 }
 
 // flap plays trayFlap on the tray icon, a frame every 30ms as they were
@@ -898,7 +898,7 @@ func (h *host) setBird(b []byte) {
 func panelOptions(goos, theme string) application.WebviewWindowOptions {
 	o := application.WebviewWindowOptions{
 		Name:            "panel",
-		Title:           "magpie",
+		Title:           "eipgam",
 		URL:             "/?mode=panel" + theme,
 		Width:           panelWidth,
 		Height:          520,
@@ -919,9 +919,9 @@ func panelOptions(goos, theme string) application.WebviewWindowOptions {
 			// out of sight, until the user swiped back (#2141).
 			CollectionBehavior: application.MacWindowCollectionBehaviorCanJoinAllSpaces |
 				application.MacWindowCollectionBehaviorFullScreenAuxiliary,
-			// and shown without activating magpie, as a menu bar extra's
+			// and shown without activating eipgam, as a menu bar extra's
 			// panel is: an ordinary window's Focus activated the app, and
-			// the Mac then took the user to the Space of magpie's other
+			// the Mac then took the user to the Space of eipgam's other
 			// windows (the desktop the main window is on), off the
 			// full-screen app's, panel and all (#2141, witt-bit, on
 			// v0.1.1246). A non-activating panel still takes the keyboard.
@@ -941,29 +941,29 @@ func panelOptions(goos, theme string) application.WebviewWindowOptions {
 	return o
 }
 
-// OpenPanel has Run open the quick panel once it starts, as `magpie panel`
-// does; a second `magpie panel` toggles it in the running one. Omarchy's bar
+// OpenPanel has Run open the quick panel once it starts, as `eipgam panel`
+// does; a second `eipgam panel` toggles it in the running one. Omarchy's bar
 // icon runs it (see omarchy.AddWidget).
 var OpenPanel bool
 
-// OpenUninstall opens the window on Settings › Uninstall magpie, asking
+// OpenUninstall opens the window on Settings › Uninstall eipgam, asking
 // (Windows' Installed apps, shortcut.UninstallArgs).
 var OpenUninstall bool
 
-// uninstallView is Settings' About part with Uninstall magpie's question
+// uninstallView is Settings' About part with Uninstall eipgam's question
 // open (uninstallMagpie in app.js).
 const uninstallView = "settings&tab=about&uninstall=1"
 
-// OpenView is the tab the window opens on, as `magpie gui settings` asks:
+// OpenView is the tab the window opens on, as `eipgam gui settings` asks:
 // a restart to update comes back where it was asked for.
 var OpenView string
 
 // Started is called once the app has started, by when Wails handles SIGINT
 // and SIGTERM itself (it starts listening as it runs, before the app is
-// said to have started); until then a signal is magpie's to handle.
+// said to have started); until then a signal is eipgam's to handle.
 var Started func()
 
-// leaveMenuBar is a Mac's magpie that handed the gateway to the new
+// leaveMenuBar is a Mac's eipgam that handed the gateway to the new
 // version leaving the menu bar, panel, window and Dock to it while it
 // finishes its requests: one bird. Hidden, the item's visibility is kept by
 // AppKit for the app, the new version's item and every later one too, so it
@@ -985,7 +985,7 @@ func (h *host) leaveMenuBar() {
 	})
 }
 
-// setTrayInBar has the tray's item leave the bar's tray while magpie's icon
+// setTrayInBar has the tray's item leave the bar's tray while eipgam's icon
 // is in Omarchy's bar as its widget, and come back once it isn't. The item
 // is there to be set a moment after the app has started; the newest call
 // wins.

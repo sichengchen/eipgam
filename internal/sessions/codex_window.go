@@ -11,7 +11,7 @@ import (
 )
 
 // A Codex rollout's summary window (state.Codex) lived in memory alone, as
-// its calls' (cxRun) did, so once magpie started again the first line a
+// its calls' (cxRun) did, so once eipgam started again the first line a
 // live rollout added had it read again from its first line, for the
 // summary and for the calls: a 100 MB rollout took 2.2 s of the first
 // Sessions list after it grew on an M5, and over ten seconds on a slower
@@ -22,7 +22,7 @@ import (
 
 // codexWindowVersion is the shape of a kept window: raised whenever
 // codexUsageState or cxRun changes what its fields mean, so a window an
-// older magpie kept is read again from the source rather than taken in.
+// older eipgam kept is read again from the source rather than taken in.
 const codexWindowVersion = 1
 
 // codexWindowHead says which read a kept summary window is of. It is

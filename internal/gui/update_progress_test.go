@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // esir_tech on Discord: after Update, the pill said 17% and sat there.
@@ -46,7 +46,7 @@ func TestUpdateDownloadSaysStepAndSpeed(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.10"
 	defer func() { Version = oldV }()
@@ -162,7 +162,7 @@ func TestUpdateSlowDownloadOutlastsTheCheckBound(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.10"
 	defer func() { Version = oldV }()

@@ -93,8 +93,8 @@ func TestSkillBodyRealClaudeCode(t *testing.T) {
 		}
 	}
 	got := withTaskNotices(withSkillBodies(results, r.Messages), r.Messages)
-	if len(got) != 1 || !strings.HasPrefix(got[0].Text, "Launching skill: magpie-skills\n\nBase directory for this skill: ") ||
-		!strings.Contains(got[0].Text, "/Users/u/.claude/skills/magpie-skills/.skills/greet-user/SKILL.md") {
+	if len(got) != 1 || !strings.HasPrefix(got[0].Text, "Launching skill: eipgam-skills\n\nBase directory for this skill: ") ||
+		!strings.Contains(got[0].Text, "/Users/u/.claude/skills/eipgam-skills/.skills/greet-user/SKILL.md") {
 		t.Fatalf("the run is handed: %+v", got)
 	}
 	if said := saidWithResults(r.Messages); said != "" {

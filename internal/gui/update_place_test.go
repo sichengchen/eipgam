@@ -8,19 +8,19 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// The terminal build on a Mac (magpie-cli-darwin, which `magpie web` runs
-// from) is a bare binary, in no .app. `magpie update` replaces it, but the
+// The terminal build on a Mac (eipgam-cli-darwin, which `eipgam web` runs
+// from) is a bare binary, in no .app. `eipgam update` replaces it, but the
 // page's updater only ever took a binary off the Mac, so its Update and
 // Download opened the release page and nothing was downloaded. It now takes
 // the binary as it does elsewhere; the desktop app's own binary copied out
 // of its .app still isn't replaced by the terminal build.
 func TestUpdateTakesTheMacTerminalBuild(t *testing.T) {
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "magpie")
-	if err := os.WriteFile(exe, []byte("magpie"), 0o755); err != nil {
+	exe := filepath.Join(dir, "eipgam")
+	if err := os.WriteFile(exe, []byte("eipgam"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	wasB, wasE, wasGUI := bundleOf, executable, update.GUI
@@ -46,7 +46,7 @@ func TestUpdateTakesTheMacTerminalBuild(t *testing.T) {
 				update.BinaryAsset(): {URL: "http://" + r.Host + "/asset"}}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()
@@ -63,7 +63,7 @@ func TestUpdateTakesTheMacTerminalBuild(t *testing.T) {
 		t.Fatalf("the app's binary out of its .app: exe %q, bundle %q", u.exe, u.bundle)
 	}
 	// in its .app, the .app is what is replaced
-	bundleOf = func() string { return filepath.Join(dir, "magpie.app") }
+	bundleOf = func() string { return filepath.Join(dir, "eipgam.app") }
 	u = &updater{}
 	u.place("darwin", true)
 	if u.bundle == "" || u.exe != "" {

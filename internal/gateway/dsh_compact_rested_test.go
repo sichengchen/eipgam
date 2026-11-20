@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // wbLimited is WorkBuddy's refusal in qtwaiter's screenshot, as its
@@ -80,9 +80,9 @@ func dshSend(s *Server, model, last string) (int, string) {
 
 // qtwaiter on X: DSH on WorkBuddy's deepseek-v4.1-flash, out of its rate,
 // switched to Trae CN's, and every try said "Cannot switch to
-// magpie/trae-cn/deepseek-v4.1-flash: context compaction failed: 429 ...
+// eipgam/trae-cn/deepseek-v4.1-flash: context compaction failed: 429 ...
 // WorkBuddy: 您的使用量已超出频率限制". DSH compacts on the model it
-// switches away from, and magpie answered that compaction with
+// switches away from, and eipgam answered that compaction with
 // WorkBuddy's held refusal. Now it goes to the same model on Trae CN; the
 // session's own turns on WorkBuddy are still refused as they were, and
 // the Routing page says why the compaction moved.

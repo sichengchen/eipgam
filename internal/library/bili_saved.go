@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // What billion-context saved, as bili counts it itself. bili has no
@@ -29,7 +29,7 @@ import (
 // runs (bili start, a lane's proxy) registers itself in
 // <state>/instances/<id>.json, <state> being $XDG_STATE_HOME or
 // ~/.local/state, then billion-context, on every system; a crashed one
-// can leave its file behind, so a file is only where to ask. magpie asks
+// can leave its file behind, so a file is only where to ask. eipgam asks
 // the newest that answers, on loopback only, and keeps the last answer
 // (bili-saved.json) for when none runs: it never starts a bili to ask.
 
@@ -53,12 +53,12 @@ type BiliSaved struct {
 	// At is when bili said so (RFC 3339).
 	At string `json:"at"`
 	// Live is whether a running bili said so just now; false is the
-	// last answer magpie kept.
+	// last answer eipgam kept.
 	Live    bool   `json:"live"`
 	Version string `json:"version,omitempty"`
 }
 
-// biliOverview is the part of /__bili/overview magpie reads.
+// biliOverview is the part of /__bili/overview eipgam reads.
 type biliOverview struct {
 	Overview *struct {
 		Sessions        float64 `json:"sessions"`
@@ -92,7 +92,7 @@ func biliStateDir() string {
 func biliSavedFile() string { return filepath.Join(settings.Dir(), "bili-saved.json") }
 
 // biliLoopback is whether origin is http on this computer: the only
-// place magpie asks, as bili answers /__bili/ on loopback alone.
+// place eipgam asks, as bili answers /__bili/ on loopback alone.
 func biliLoopback(origin string) bool {
 	u, err := url.Parse(origin)
 	if err != nil || u.Scheme != "http" || u.Port() == "" || u.Path != "" && u.Path != "/" {
@@ -165,7 +165,7 @@ var biliFetch = func(ctx context.Context, origin string) (*biliOverview, error) 
 	return &o, nil
 }
 
-// biliAsk is how long magpie waits for the bilis it asks, all told.
+// biliAsk is how long eipgam waits for the bilis it asks, all told.
 var biliAsk = 3 * time.Second
 
 // biliNow is the clock; a var for tests.

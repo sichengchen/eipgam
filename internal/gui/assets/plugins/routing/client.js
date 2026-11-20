@@ -1,7 +1,7 @@
 // Routing, live: the gateway's own trace of each request, played as it
-// happens. A magpie carries each request from its agent through magpie to
+// happens. A eipgam carries each request from its agent through eipgam to
 // the account routing put first; another brings the answer back — or,
-// from one that can't answer, the failure back to magpie, and the first
+// from one that can't answer, the failure back to eipgam, and the first
 // takes the request on to the next. Every agent sending at once plays at
 // once, each from its own place on the left. Every row, number and sentence comes from what the gateway
 // recorded while deciding (see internal/gateway/trace.go) — the order it
@@ -11,11 +11,11 @@
 // A page the Routing plugin adds to the window (kernel.js), its words in
 // i18n.js beside this file. Classic script, loaded before app.js: what
 // runs as it loads touches neither the page nor app.js. Its markup is the
-// html below; mount, at magpie.start, draws the stage and starts reading
+// html below; mount, at eipgam.start, draws the stage and starts reading
 // the gateway's trace, and from then on the page keeps itself (it watches
 // its own hidden, the language and the window). dirty and discard are a
 // routing group being edited, asked of it before the reader leaves.
-magpie.plugin("routing", (ctx) => {
+eipgam.plugin("routing", (ctx) => {
   ctx.slots.add("page", {
     key: "routing",
     title: "Routing",
@@ -109,7 +109,7 @@ function routingPage(part) {
   logo.setAttribute("class", "rt-bird");
   logo.innerHTML = '<use href="#bird"/>';
   const hubSub = el("small"), chip = el("i");
-  hub.append(logo, el("b", "", "magpie"), hubSub, chip);
+  hub.append(logo, el("b", "", "eipgam"), hubSub, chip);
   const list = el("ol", "rt-accts");
   // the magpies fly over the nodes, the wires run under them
   const sky = document.createElementNS(NS, "svg");
@@ -215,14 +215,14 @@ function routingPage(part) {
   // once there is a key (callerKeys, from Gateway keys)
   const groupBar = el("div", "rt-group-by");
   let groupBy = "request", callerKeys = [];
-  try { groupBy = localStorage.getItem("magpie.routingGroupBy") === "key" ? "key" : localStorage.getItem("magpie.routingBySession") === "1" ? "session" : "request"; } catch {}
+  try { groupBy = localStorage.getItem("eipgam.routingGroupBy") === "key" ? "key" : localStorage.getItem("eipgam.routingBySession") === "1" ? "session" : "request"; } catch {}
   const groupButtons = [["request", "By request"], ["session", "By session"], ["key", "By key"]].map(([on, label]) => {
     const b = el("button", "rt-day");
     b.dataset.label = label;
     b.dataset.by = on;
     b.onclick = () => {
       groupBy = on;
-      try { localStorage.setItem("magpie.routingBySession", on === "session" ? "1" : "0"); localStorage.setItem("magpie.routingGroupBy", on); } catch {}
+      try { localStorage.setItem("eipgam.routingBySession", on === "session" ? "1" : "0"); localStorage.setItem("eipgam.routingGroupBy", on); } catch {}
       steady(renderHist);
     };
     groupBar.append(b);
@@ -253,17 +253,17 @@ function routingPage(part) {
   };
   actHead.append(actLabel, actRead, el("span", "grow"), actNote);
   // under the list: the rest of a long one, behind Show N more (kept
-  // across a reload, magpie.routingActsAll), and the way to each
+  // across a reload, eipgam.routingActsAll), and the way to each
   // account's allowances in full, the Usage page's Overview
   // (ferock4669, iyou00 on Discord: many keys ran the list on and on)
   const actFoot = el("div", "rt-acts-foot");
   const actMore = el("button", "text rt-acts-more");
   actMore.type = "button";
   let actsAll = false;
-  try { actsAll = localStorage.getItem("magpie.routingActsAll") === "1"; } catch {}
+  try { actsAll = localStorage.getItem("eipgam.routingActsAll") === "1"; } catch {}
   actMore.onclick = () => {
     actsAll = !actsAll;
-    try { localStorage.setItem("magpie.routingActsAll", actsAll ? "1" : "0"); } catch {}
+    try { localStorage.setItem("eipgam.routingActsAll", actsAll ? "1" : "0"); } catch {}
     // the button clicked stays where it is on the screen, the rows coming
     // in (or going) above it: neither engine's scroll anchoring does it
     // for every place the page can be scrolled to
@@ -296,7 +296,7 @@ function routingPage(part) {
     ["cache", "Cache hit rate"], ["speed", "Output speed"], ["cost", "Cost"]];
   let visibleMetrics = metricOptions.map(([key]) => key);
   try {
-    const saved = JSON.parse(localStorage.getItem("magpie.routingMetrics"));
+    const saved = JSON.parse(localStorage.getItem("eipgam.routingMetrics"));
     if (Array.isArray(saved)) visibleMetrics = metricOptions.map(([key]) => key).filter((key) => saved.includes(key));
   } catch {}
   const metricPick = el("button", "text rt-metric-pick"), metricLabel = el("span");
@@ -310,7 +310,7 @@ function routingPage(part) {
     if (metricPick.classList.contains("open")) return closeProtoMenu();
     openProtoMenu(metricPick, metricOptions.map(([v, name]) => ({ v, name, note: "" })), visibleMetrics, (keys) => {
       visibleMetrics = keys;
-      try { localStorage.setItem("magpie.routingMetrics", JSON.stringify(keys)); } catch {}
+      try { localStorage.setItem("eipgam.routingMetrics", JSON.stringify(keys)); } catch {}
       steady(renderHist);
     }, "Metrics to show", "rt-metric-menu", "right", true);
   };
@@ -787,8 +787,8 @@ function routingPage(part) {
     drain: ["Until used up", "Until used up: one answers everything until its quota is used up; then the next, which keeps them even after the one before renews."],
     // the unit that goes round is the user's message (Wing8Aqua on X)
     rotate: ["In turn", "In turn: each message you send goes to the next account, round the list; the agent's tool calls for it stay on the same one. With Stays on Session, a whole conversation stays on one instead."],
-    usage: ["Least used first", "Least used first: the account with the most of its allowance left goes first; a key by the tokens magpie sent it lately."],
-    pace: ["Use before expiry", "Use before expiry: the account with the most left per hour until it is lost goes first — at its reset, or, when credits in it expire sooner, by those that expire first; an account with five hours and no week by what its five hours have left per hour. One at 90% or more waits until the others can't answer; a key by the tokens magpie sent it lately."],
+    usage: ["Least used first", "Least used first: the account with the most of its allowance left goes first; a key by the tokens eipgam sent it lately."],
+    pace: ["Use before expiry", "Use before expiry: the account with the most left per hour until it is lost goes first — at its reset, or, when credits in it expire sooner, by those that expire first; an account with five hours and no week by what its five hours have left per hour. One at 90% or more waits until the others can't answer; a key by the tokens eipgam sent it lately."],
     manual: ["Manual", "Manual: every request goes to the model picked on the group's card, over its own accounts or keys."],
     // a provider's keys or a subscription's accounts by weight (#841,
     // rubbzha on X); both strings as the provider editor's routing options
@@ -825,9 +825,9 @@ function routingPage(part) {
   // a script's key read "Python-urllib"). srcOf is the stage's node for
   // it: each key's its own, two keys' scripts saying one User-Agent too.
   // Never the key's secret: a route carries its id and name alone.
-  // An agent magpie knows keeps its name beside the key's, as Usage's
-  // rows read ("DimCode · Server"): DimCode calling a Docker magpie by a
-  // key named "Magpie" read as that alone (Yayoi_no_yume on X).
+  // An agent eipgam knows keeps its name beside the key's, as Usage's
+  // rows read ("DimCode · Server"): DimCode calling a Docker eipgam by a
+  // key named "eipgam" read as that alone (Yayoi_no_yume on X).
   function callerName(r) {
     const k = r.callerKey && (callerKeys.find((x) => x.id === r.callerKey)?.name || r.callerKeyName);
     if (!k) return agentName(r.agent);
@@ -841,7 +841,7 @@ function routingPage(part) {
     return c === a || c.startsWith(a + " · ") ? [c] : [c, a];
   };
   const srcOf = (r) => r.callerKey ? r.agent + "\u0001" + r.callerKey : r.agent;
-  // userShown is an account of provider as the user named it in magpie
+  // userShown is an account of provider as the user named it in eipgam
   // (provider.AccountNames, #1515), else as its plugin's usage names it
   // (accountUsers, #4416), else as its vendor names it. The name
   // is looked up as the page is drawn, by the account a request kept (its
@@ -945,7 +945,7 @@ function routingPage(part) {
       case "credits": return t("It holds credits, so it rests only {d} and its usage is read again, not until its allowance renews", { d });
       case "verify": return t("The vendor wants the account verified first: it rests half an hour, or until you say it's verified");
       // its provider set never to rest after an unknown failure
-      // (`magpie provider rest-cap <id> off`): asked again next time
+      // (`eipgam provider rest-cap <id> off`): asked again next time
       case "off": return t("It doesn't rest: its provider is set to ask it again after an error like this");
       // the vendor restricted the account itself (#1849): only its lifting,
       // which the vendor's appeal asks for, brings it back
@@ -965,7 +965,7 @@ function routingPage(part) {
   }
 
   // the model a request went on: the one asked for, or the one set for
-  // an agent's subagents that magpie put a subagent on in its place
+  // an agent's subagents that eipgam put a subagent on in its place
   const wentOn = (r) => (r.subagent && !r.subagent.kept ? r.subagent.to : r.model);
 
   // the routing of the group x's place is in: the innermost group in the
@@ -999,14 +999,14 @@ function routingPage(part) {
       ? t("{who} goes first: of those alike, its wallet has the most left — {n}, where {other} has {m}.", { who: who(f), n: balText(f), other: who(o), m: balText(o) }) : null;
   }
 
-  // why a request has no one weighed for it: magpie holds it before
+  // why a request has no one weighed for it: eipgam holds it before
   // routing (masking it, or still reading it), or nothing took it
   function noneWhy(r) {
     if (!r.done) return r.phase === "redact"
-      ? t("magpie is masking this request before routing it (Settings › Privacy), so who takes it isn't picked yet.")
+      ? t("eipgam is masking this request before routing it (Settings › Privacy), so who takes it isn't picked yet.")
       : r.phase === "queue"
       ? t("This request waits for the turn before it on an account near its usage cap, so it goes out when that one is done.")
-      : t("magpie hasn't routed this request yet, so who takes it isn't picked yet.");
+      : t("eipgam hasn't routed this request yet, so who takes it isn't picked yet.");
     if (r.error) return t("Nothing took this request: {error}", { error: r.error });
     return t("Nothing could take {model}.", { model: r.model });
   }
@@ -1361,7 +1361,7 @@ function routingPage(part) {
     if (x.use && x.instead) return lead ? t("Rule {n} matches, but {use} has no account or key that can take this request, so a later matching rule puts {instead} first.", { n: x.n, use: x.use, instead: useName(r, x.instead) }) : null;
     if (lead) return null;
     if (x.use) return t("Rule {n} matches, but {use} has no account or key that can take this request, so the group's order stands.", { n: x.n, use: x.use });
-    if (x.waits) return t("This turn began before magpie saw it, so the rules wait for the next one.");
+    if (x.waits) return t("This turn began before eipgam saw it, so the rules wait for the next one.");
     if (x.held) return null;
     return t("No rule matches turn {turn} (about {n} tokens{img}).", { turn: x.turn, n: tokens(x.tokens), img: x.images ? t(", with an image") : "" }) + dir;
   }
@@ -1388,7 +1388,7 @@ function routingPage(part) {
   const rUses = (r) => [r.use, ...(r.more || [])].filter(Boolean);
   const setUses = (r, ids) => { const u = [...new Set(ids.filter(Boolean))]; r.use = u[0] || ""; if (u.length > 1) r.more = u.slice(1); else delete r.more; };
   // useName is what a rule sends to: a model, or a group in the group
-  // a group magpie found goes by the id agents pick it by (auto/<model>), not its internal group/auto-…
+  // a group eipgam found goes by the id agents pick it by (auto/<model>), not its internal group/auto-…
   const useName = (r, id) => {
     if (!id?.startsWith("group/")) return id;
     const s = r.group?.subs?.find((s) => "group/" + s.id === id);
@@ -1523,7 +1523,7 @@ function routingPage(part) {
     return zone ? t("{hours} ({zone})", { hours: text, zone }) : text;
   }
   // A rule's hours are in the zone they were set in (provider.TimeWindow
-  // Zone): the browser's, saved with them. magpie on a server in another
+  // Zone): the browser's, saved with them. eipgam on a server in another
   // zone (gaubeebangeel on X: a cloud box in UTC, its user in Beijing)
   // reads them there, and the zone is told beside them; hours set before
   // zones were kept are on the server's clock, told with its offset. When
@@ -1632,19 +1632,19 @@ function routingPage(part) {
   }
 
   // where a try's time went (gateway.TryNet, Discord Magic_zero: the
-  // gateway looked slow): magpie's own, the network's on the way out, and
+  // gateway looked slow): eipgam's own, the network's on the way out, and
   // the vendor's, from the try's start to its end, the parts that took
-  // none left out. Only a try whose request magpie sent itself has it: one
+  // none left out. Only a try whose request eipgam sent itself has it: one
   // that went out some other way (a plugin's own fetch), or a trace from
-  // before magpie measured it, says nothing more than the time it took.
+  // before eipgam measured it, says nothing more than the time it took.
   const ms1 = (n) => n < 10 ? t("{n} ms", { n: (Math.round(n * 10) / 10).toString() }) : took(Math.round(n));
   function timeParts(tr) {
     const n = tr.net, out = [], add = (who, label, v) => { if (v >= 0.1) out.push({ who, label, v }); };
     // the request's masking, before its first try (Route.masking)
-    add("magpie", "Masking", tr.masking || 0);
+    add("eipgam", "Masking", tr.masking || 0);
     if (!n) return out;
-    add("magpie", "Waiting for a slot", tr.queued || 0);
-    add("magpie", "In magpie", n.own || 0);
+    add("eipgam", "Waiting for a slot", tr.queued || 0);
+    add("eipgam", "In eipgam", n.own || 0);
     add("net", "Requests before it", n.before || 0);
     // what's left of the pool's wait once a dial is out is a rounding
     if ((n.pool || 0) >= 1) add("net", "Waiting for a connection", n.pool);
@@ -1677,11 +1677,11 @@ function routingPage(part) {
     const why = ENTRY_WHY[tr.entryWhy];
     return t("Claude Code ran this request as claude -p") + (why ? ": " + t(why) : "");
   }
-  const WHO = { magpie: "magpie {ms}", net: "network {ms}", vendor: "vendor {ms}" };
+  const WHO = { eipgam: "eipgam {ms}", net: "network {ms}", vendor: "vendor {ms}" };
   // why a try that went out some other way has no split (gateway.sentBy)
   const SENT_BY = {
-    plugin: "Its plugin sent this request itself, so magpie can't split its time",
-    claude: "Claude Code sent this request itself, so magpie can't split its time",
+    plugin: "Its plugin sent this request itself, so eipgam can't split its time",
+    claude: "Claude Code sent this request itself, so eipgam can't split its time",
   };
   function timeSaid(tr) {
     const parts = timeParts(tr);
@@ -1732,17 +1732,17 @@ function routingPage(part) {
   const AG_CODEX = "Antigravity answers this 429 to Codex's own system prompt for GPT-5 models whatever quota is left, so it is not a quota and waiting won't help; a Codex chat begun on a GPT model keeps that prompt after a model switch or a fork, so start a new chat on this model";
   // what it adds to the same 429 for Hermes Agent's persona, today's or the
   // earlier one (antigravityHermesHint)
-  const AG_HERMES = "Antigravity answers this 429 to Hermes Agent's default persona (\"You are Hermes Agent, …\" in its SOUL.md), the current one and the earlier one alike, whatever quota is left, so it is not a quota and waiting won't help; magpie sends it as \"You're Hermes Agent, …\", which goes through, so start SOUL.md another way, or use another provider for these chats";
+  const AG_HERMES = "Antigravity answers this 429 to Hermes Agent's default persona (\"You are Hermes Agent, …\" in its SOUL.md), the current one and the earlier one alike, whatever quota is left, so it is not a quota and waiting won't help; eipgam sends it as \"You're Hermes Agent, …\", which goes through, so start SOUL.md another way, or use another provider for these chats";
   // ... for OpenCode's prompts (antigravityOpenCodeHint)
-  const AG_OPENCODE = "Antigravity answers this 429 to OpenCode's system prompt (\"You are OpenCode, …\") whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"You're OpenCode, …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group";
+  const AG_OPENCODE = "Antigravity answers this 429 to OpenCode's system prompt (\"You are OpenCode, …\") whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"You're OpenCode, …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group";
   // ... for Codex's prompt for a model it has none of its own for
   // (antigravityCodexCLIHint)
-  const AG_CODEX_CLI = "Antigravity answers this 429 to Codex's prompt for a model it has none of its own for (\"You are a coding agent running in the Codex CLI\") whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"You're …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group";
+  const AG_CODEX_CLI = "Antigravity answers this 429 to Codex's prompt for a model it has none of its own for (\"You are a coding agent running in the Codex CLI\") whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"You're …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group";
   // ... for pi's default prompt (antigravityPiHint)
-  const AG_PI = "Antigravity answers this 429 to pi's default system prompt (\"You are a coding assistant running inside pi\") whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"running within pi\", which goes through, so give pi a system prompt of your own (--system-prompt) or use another provider for these chats";
+  const AG_PI = "Antigravity answers this 429 to pi's default system prompt (\"You are a coding assistant running inside pi\") whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"running within pi\", which goes through, so give pi a system prompt of your own (--system-prompt) or use another provider for these chats";
   // what it adds to the same 429 for oh-my-pi's RFC 2119 line
   // (antigravityRFCHint)
-  const AG_RFC = "Antigravity answers this 429 to the line \"RFC 2119 keywords: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL.\" that starts oh-my-pi (omp)'s system prompt, and to any prompt that has it, whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"RFC 2119 key words: …\", which goes through, so this one came from a copy of it that was worded another way";
+  const AG_RFC = "Antigravity answers this 429 to the line \"RFC 2119 keywords: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL.\" that starts oh-my-pi (omp)'s system prompt, and to any prompt that has it, whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"RFC 2119 key words: …\", which goes through, so this one came from a copy of it that was worded another way";
   // what it adds to WorkBuddy's 403 11140 for an account it restricted
   // (provider.WBRestrictedHint, #1849)
   const WB_RESTRICTED = "WorkBuddy restricted this account for unusual activity; it stays out until WorkBuddy lifts that, which an appeal (Submit feedback in WorkBuddy) asks for";
@@ -1791,8 +1791,8 @@ function routingPage(part) {
       return t("{agent} canceled the request while {who} was answering: nobody failed, so nobody rests and nobody else is asked.", { who: name, agent });
     if (tr.fail === "auth")
       return next
-        ? t("{who} could not authenticate. Sign in again in magpie; this login is not retried. The request went to {next}.", { who: name, next: nw ? who(nw) : t("the next") })
-        : t("{who} could not authenticate. Sign in again in magpie; this login is not retried. No other account could answer.", { who: name });
+        ? t("{who} could not authenticate. Sign in again in eipgam; this login is not retried. The request went to {next}.", { who: name, next: nw ? who(nw) : t("the next") })
+        : t("{who} could not authenticate. Sign in again in eipgam; this login is not retried. No other account could answer.", { who: name });
     if (tr.fail === "foreign")
       return t("{who} couldn't read the reasoning another account wrote earlier in this conversation, so it is asked again without it, before any of the reply reaches {agent}.", { who: name, agent });
     if (tr.fail === "floor")
@@ -1832,9 +1832,9 @@ function routingPage(part) {
         : t("{who}: this computer had no network, so the request never reached the vendor, and nobody is left to try: {agent} gets the error. Nothing is wrong with {who}, so it doesn't rest.", { who: name, agent });
     if (tr.fail === "proxy")
       return r.tries[i + 1]
-        ? t("{who}: the proxy magpie goes through didn't take the connection, so the request never reached the vendor and goes on to the next. Nothing is wrong with {who}, so it doesn't rest: once the proxy is up it is asked first again.", { who: name })
-        : t("{who}: the proxy magpie goes through didn't take the connection, so the request never reached the vendor, and nobody is left to try: {agent} gets the error. Start the proxy, or change it in Settings.", { who: name, agent });
-    // the agent left while magpie waited to ask again (#1894): the
+        ? t("{who}: the proxy eipgam goes through didn't take the connection, so the request never reached the vendor and goes on to the next. Nothing is wrong with {who}, so it doesn't rest: once the proxy is up it is asked first again.", { who: name })
+        : t("{who}: the proxy eipgam goes through didn't take the connection, so the request never reached the vendor, and nobody is left to try: {agent} gets the error. Start the proxy, or change it in Settings.", { who: name, agent });
+    // the agent left while eipgam waited to ask again (#1894): the
     // story ends there, not on a retry that never came
     if (tr.gone)
       return t("{who} answered {status} · {fail}, and was to be asked again in {d}, but {agent} canceled the request before then, so nobody is asked again.",
@@ -1890,7 +1890,7 @@ function routingPage(part) {
   const groupSession = (r) => r.parentSession || r.session || "";
   const sessionKey = (r) => groupSession(r) ? JSON.stringify([r.agent || "other", groupSession(r)]) : "";
   // Other agents' sessions are named from their own files, by the id the
-  // agent gave (magpie's X-Magpie-Session can stand in front of it), so a
+  // agent gave (eipgam's X-Magpie-Session can stand in front of it), so a
   // Claude Code session heads its group with its title, not its UUID
   // (#1293). Kept here by agent:id, as each trace update brings its rows
   // anew; a key not asked about yet is asked about at once. Codex's are
@@ -1930,8 +1930,8 @@ function routingPage(part) {
   const ACTS_SHOWN = 8;
   const folds = new Map();  // foldKey → { li, wire, st, tg, n, w, ids, up, open, pk }
   let keysOpen = new Set(), keysShut = new Set();
-  try { keysOpen = new Set(JSON.parse(localStorage.getItem("magpie.routingKeysOpen") || "[]")); } catch {}
-  try { keysShut = new Set(JSON.parse(localStorage.getItem("magpie.routingFolded") || "[]")); } catch {}
+  try { keysOpen = new Set(JSON.parse(localStorage.getItem("eipgam.routingKeysOpen") || "[]")); } catch {}
+  try { keysShut = new Set(JSON.parse(localStorage.getItem("eipgam.routingFolded") || "[]")); } catch {}
   const isOpen = (k, dflt) => keysShut.has(k) ? false : keysOpen.has(k) ? true : dflt;
   function keepOpen(k, open) {
     if (open) { keysOpen.add(k); keysShut.delete(k); } else { keysOpen.delete(k); keysShut.add(k); }
@@ -1939,8 +1939,8 @@ function routingPage(part) {
   }
   function keepFolds() {
     try {
-      localStorage.setItem("magpie.routingKeysOpen", JSON.stringify([...keysOpen]));
-      localStorage.setItem("magpie.routingFolded", JSON.stringify([...keysShut]));
+      localStorage.setItem("eipgam.routingKeysOpen", JSON.stringify([...keysOpen]));
+      localStorage.setItem("eipgam.routingFolded", JSON.stringify([...keysShut]));
     } catch {}
   }
   // How far the stage opens (ipsikent on X: often only which model a
@@ -1948,14 +1948,14 @@ function routingPage(part) {
   // lists folded; "models" folds every provider's accounts and keys, two
   // or more, into their one row; "accounts" opens each. Both open every
   // group in the group. Picked from the
-  // stage head's Expand, kept in localStorage magpie.routingDepth. Picking
+  // stage head's Expand, kept in localStorage eipgam.routingDepth. Picking
   // one forgets what the reader opened or folded on the stage, so every
   // row follows it at once; a row clicked after is kept as before.
   const DEPTHS = [["", "Automatic", "Long lists start folded, short ones open"],
     ["models", "Models", "A row for each provider's model, its accounts and keys folded into it"],
     ["accounts", "Accounts", "A row for each account and key"]];
   let openTo = "";
-  try { openTo = localStorage.getItem("magpie.routingDepth") || ""; } catch {}
+  try { openTo = localStorage.getItem("eipgam.routingDepth") || ""; } catch {}
   if (!DEPTHS.some(([v]) => v === openTo)) openTo = "";
   // a stage fold of n accounts (acct) or keys starts open?
   const foldStartsOpen = (acct, n) => openTo === "accounts" || !openTo && acct && n < LONG;
@@ -1967,7 +1967,7 @@ function routingPage(part) {
       if (depthPick.classList.contains("open")) return closeProtoMenu();
       openProtoMenu(depthPick, DEPTHS.map(([v, name, title]) => ({ v, name, note: "", title: t(title) })), openTo, (v) => {
         openTo = v;
-        try { if (v) localStorage.setItem("magpie.routingDepth", v); else localStorage.removeItem("magpie.routingDepth"); } catch {}
+        try { if (v) localStorage.setItem("eipgam.routingDepth", v); else localStorage.removeItem("eipgam.routingDepth"); } catch {}
         // the stage's own: Accounts and keys' sums (provider/@, provider/*) stay
         const own = (k) => !/\/[@*]$/.test(k);
         keysOpen = new Set([...keysOpen].filter((k) => !own(k)));
@@ -2014,7 +2014,7 @@ function routingPage(part) {
   }
 
   // fly carries a dot along paths one after another, as one flight — and
-  // the magpie holding it in its beak, if there is one
+  // the eipgam holding it in its beak, if there is one
   const fly = (dot, bird, legs, ms) => new Promise((res) => {
     if (!shown()) { res(); return; } // no hidden frame is needed to finish it
     const tr = { dot, bird, legs, t0: performance.now(), ms: still() ? 0 : ms, res, g: gen };
@@ -2029,7 +2029,7 @@ function routingPage(part) {
   // three agents sending at once, ~10 s of a 40 s look at the page went to
   // getTotalLength and getPointAtLength alone, and the page lagged
   // (yg6888 on X: "打开页面很卡").
-  // Neither is asked of the browser for a d of magpie's own: its length is
+  // Neither is asked of the browser for a d of eipgam's own: its length is
   // that of its points (flat) and the wire ends a flight meets are read
   // from it (wireEnds). While rows slide every wire's d is new each frame,
   // and getTotalLength on each was a quarter of a busy page's time
@@ -2139,7 +2139,7 @@ function routingPage(part) {
   // wireEnds are a d's start and end, each with the way it heads there (along
   // the path at its end, into it at its start), read off its first and
   // last pieces: the line or control point next to each end that isn't
-  // the end itself. Only for magpie's own absolute M, L, Q and C, and
+  // the end itself. Only for eipgam's own absolute M, L, Q and C, and
   // null for any other d, or one with no way at all, which the browser
   // measures instead.
   function wireEnds(d) {
@@ -2168,7 +2168,7 @@ function routingPage(part) {
     const s = way(0, 1), e = way(pts.length - 1, -1);
     return s && e ? [s, e] : null;
   }
-  // via is the way through magpie from one wire to the next: an arc along
+  // via is the way through eipgam from one wire to the next: an arc along
   // its edge, carrying on the way the flight came in and leaving the way
   // the next wire goes — or, out the side it came in, a loop round inside.
   // It follows the wires as they move.
@@ -2192,8 +2192,8 @@ function routingPage(part) {
         c1 = [a.x + a.tx * k - nx * m, a.y + a.ty * k - ny * m];
         c2 = [b.x - b.tx * k + nx * m, b.y - b.ty * k + ny * m];
       } else {
-        // the sky is over the cards (the owner, 11-09): a magpie crossing
-        // magpie's box keeps to its edge, off its name and address. Side
+        // the sky is over the cards (the owner, 11-09): a eipgam crossing
+        // eipgam's box keeps to its edge, off its name and address. Side
         // to side it goes along the top edge; round a corner, by it.
         // the box layout read with the wires, not read again: a read here
         // laid the stage out again mid-flight
@@ -2203,7 +2203,7 @@ function routingPage(part) {
         if (wide && sa % 2 === 0 && sb % 2 === 0 && sa !== sb) {
           // up the side it came in, over the top a little above the edge
           // ((a.y + 3cy + 3cy + b.y) / 8 = T - 8) and down the side it
-          // leaves by: the magpie trails its dot, and anywhere lower its
+          // leaves by: the eipgam trails its dot, and anywhere lower its
           // tail swept the name
           const cy = (8 * (T - 8) - a.y - b.y) / 6;
           c1 = [a.x, cy];
@@ -2248,7 +2248,7 @@ function routingPage(part) {
   // curve is a wire's S from (x0, y0) to (x3, y3), its bends at mx: one
   // cubic, cut into exact pieces of it about 1000 px tall (the middle ones
   // up to 1.5 times that). WebKit dashes a cubic at a cost that grows faster
-  // than its length, and a key's fold hundreds of rows from magpie (#3164)
+  // than its length, and a key's fold hundreds of rows from eipgam (#3164)
   // had its flowing wire as one 18,000 px cubic: ~75 ms of each frame. The
   // pieces trace the same curve.
   function curve(x0, y0, mx, x3, y3) {
@@ -2344,7 +2344,7 @@ function routingPage(part) {
     slowMove();
   }
   // dashFor is a wire's dashes from top to bottom, measured from its d,
-  // which is magpie's own M, L, Q and C: WebKit's getPointAtLength took
+  // which is eipgam's own M, L, Q and C: WebKit's getPointAtLength took
   // milliseconds a wire, and a wire's d changes with most updates. Each
   // bend is walked in 16 straight steps, a little shorter than the bend,
   // so its ends are moved out by 64px each way, more than that is off
@@ -2457,7 +2457,7 @@ function routingPage(part) {
     layout();
   }); };
 
-  // hubBox is magpie's box as layout last read it, on the stage, for via
+  // hubBox is eipgam's box as layout last read it, on the stage, for via
   let hubBox = null;
   function layout() {
     const r = stage.getBoundingClientRect();
@@ -2492,7 +2492,7 @@ function routingPage(part) {
         const mx = (h.r + a.l) / 2;
         return curve(h.r, h.cy, mx, a.l, a.cy);
       }
-      // the accounts sit under magpie: a lane down their left, from below the agents too
+      // the accounts sit under eipgam: a lane down their left, from below the agents too
       const x = a.l - 12, y = Math.max(h.b, low - 8);
       return `M${h.cx} ${h.b} L${h.cx} ${y} C${h.cx} ${y + 22} ${x} ${y + 2} ${x} ${y + 24} L${x} ${a.cy - 10} Q${x} ${a.cy} ${a.l} ${a.cy}`;
     };
@@ -2709,7 +2709,7 @@ function routingPage(part) {
   }
 
   // foldersOf: the folders routes say, each once, in their order;
-  // lastLevel, a folder's last level ("workspace/magpie" → "magpie")
+  // lastLevel, a folder's last level ("workspace/eipgam" → "eipgam")
   const foldersOf = (rs) => [...new Set(rs.map((r) => r.folder).filter(Boolean))];
   const lastLevel = (f) => f.split("/").pop();
   function agentNode(id) {
@@ -2769,7 +2769,7 @@ function routingPage(part) {
     if (rs.length) steady(() => rebuild(rs, false));
     render();
   }
-  // wiresTo is the way from magpie to a row: through the headings of the
+  // wiresTo is the way from eipgam to a row: through the headings of the
   // groups it is in, then its own wire
   function wiresTo(row) {
     const out = [];
@@ -3102,10 +3102,10 @@ function routingPage(part) {
     // to that one alone is the first line's to say
     const on = g?.members?.length || r.order.filter((x) => !x.fallback).length;
     const pool = !g && f ? poolOf(f.provider) : null;
-    // none weighed: a request magpie holds before routing it (masked
+    // none weighed: a request eipgam holds before routing it (masked
     // first, or still read), or one nothing took. It says so, not "0 on"
     // over the one-account hint (Jason on Discord: a held Codex turn read
-    // "magpie · 0 on" and "only one account is on")
+    // "eipgam · 0 on" and "only one account is on")
     const none = !r.order.length;
     const lone = !g && on === 1 && !pool;
     // the head is told again every second: a chip whose text node is
@@ -3225,7 +3225,7 @@ function routingPage(part) {
     const trying = new Map(), busy = new Set(); // a seat → the request it answers now
     for (const r of rs) for (const tr of r.tries) if (!tr.done) { trying.set(tryseat(r, tr), r); busy.add(srcOf(r)); }
     askUnnamed(rs);
-    const onWire = new Map(); // a seat → the agent whose magpie is at it
+    const onWire = new Map(); // a seat → the agent whose eipgam is at it
     for (const f of flying.values()) { onWire.set(f.id, f.agent); busy.add(f.agent); }
     // what each request found, read once a pass: hundreds of a route's
     // keys each read their route's whole list again (#3164)
@@ -3357,7 +3357,7 @@ function routingPage(part) {
       row.li.classList.toggle("rest", !!resting || gave.has(id));
       row.li.classList.toggle("left", !!w.unlisted || !!w.window);
       // in the colour of the agent whose request is on it: the one it
-      // answers now, the one whose magpie is at it, else the request it
+      // answers now, the one whose eipgam is at it, else the request it
       // answered, and none once it is off, so a row kept from before
       // never shows the last agent's colour (Pkh on Discord)
       const by = trying.has(id) ? srcOf(trying.get(id)) : onWire.get(id) ?? srcOf(r);
@@ -3526,8 +3526,8 @@ function routingPage(part) {
       // it was off, or not saved): saying to turn it on read as if it were
       // off (wangb on Discord)
       bodies.replaceChildren(el("p", "rt-bodies-gone", providers?.gateway?.archive?.on
-        ? t("magpie keeps the request and response of only the last 40 requests, until it quits. Request archive is on, but this request isn't in it: it was made while the archive was off, or it couldn't be saved.")
-        : t("magpie keeps the request and response of only the last 40 requests, until it quits. To keep every request's, turn on Request archive at the top of Usage › Requests.")));
+        ? t("eipgam keeps the request and response of only the last 40 requests, until it quits. Request archive is on, but this request isn't in it: it was made while the archive was off, or it couldn't be saved.")
+        : t("eipgam keeps the request and response of only the last 40 requests, until it quits. To keep every request's, turn on Request archive at the top of Usage › Requests.")));
       return;
     }
     const grid = el("div", "call-details");
@@ -3558,7 +3558,7 @@ function routingPage(part) {
   // under way, at the height it has now: on a busy gateway a request is
   // answered as the next starts, the two come in one trace, and the
   // newest is always under way, so counting only those told answered
-  // held the long one for good (shensmart on Discord, a remote magpie in
+  // held the long one for good (shensmart on Discord, a remote eipgam in
   // a local browser: the room grew with use). A request picked, a replay
   // or a past day is drawn at its own height. A change of width measures it again at
   // once, as it is then (the list coming in under it can take a
@@ -3667,7 +3667,7 @@ function routingPage(part) {
   }
   // renderCtxSessions: each session sending now, its own small block with
   // its newest context reading, named as its agent named it (tjhhhh on
-  // Discord: with several sessions through magpie at once the card went
+  // Discord: with several sessions through eipgam at once the card went
   // from one's context to the other's, and which was which couldn't be
   // told). A reading is kept by the session the request is of, as the
   // card's own line of prompts is (renderCtx's same). A session is live
@@ -3788,7 +3788,7 @@ function routingPage(part) {
     if (tagKind(r)) items.push([kindWhy(r), "aside kind"]);
     else if (r.subagent) items.push([subagentWhy(r), "aside"]);
     if (movedSays(r)) items.push([movedWhy(r), tagKind(r) ? "aside" : "aside stood"]);
-    if (r.subagentEffort) items.push([t("The subagent effort set in magpie is {effort}; the model's supported levels and a routing group's fixed member effort still apply.", { effort: t(r.subagentEffort) }), "aside"]);
+    if (r.subagentEffort) items.push([t("The subagent effort set in eipgam is {effort}; the model's supported levels and a routing group's fixed member effort still apply.", { effort: t(r.subagentEffort) }), "aside"]);
     if (r.sealedTask) items.push([t(r.group
       ? "This subagent task is encrypted. Only ChatGPT accounts can read it; other providers (such as Claude) are excluded regardless of quota."
       : "This subagent task is encrypted. Only ChatGPT accounts can read it."), "aside"]);
@@ -3805,7 +3805,7 @@ function routingPage(part) {
       const timed = i === 0 && r.masking > 0 ? { ...tr, masking: r.masking } : tr;
       const when = tr.done && timeSaid(timed);
       if (when) items.push([when, "aside time", timed]);
-      // a plugin or Claude Code sent it, out of magpie's sight: said, so
+      // a plugin or Claude Code sent it, out of eipgam's sight: said, so
       // its missing split doesn't read as a request that lost it (lute)
       if (tr.done && !tr.net && tryOk(tr) && SENT_BY[tr.sentBy]) items.push([t(SENT_BY[tr.sentBy]), "aside"]);
       // each model Copilot's Auto picked for it, where from, and whether
@@ -3818,7 +3818,7 @@ function routingPage(part) {
         if (p.refused) s += " · " + t("Copilot refused it: {error}", { error: p.refused });
         items.push([s, "aside"]);
       }
-      // what the vendor said, word for word: the why above is magpie's reading of it
+      // what the vendor said, word for word: the why above is eipgam's reading of it
       if (tr.done && !tryOk(tr) && tr.error) {
         const hint = HINTS.find((h) => tr.error.endsWith(" — " + h));
         const said = hint ? tr.error.slice(0, -(hint.length + 3)) : tr.error;
@@ -3827,16 +3827,16 @@ function routingPage(part) {
       }
       // the reply said another model answered it
       if (tr.done && tryOk(tr) && tr.swapped) items.push([swapWhy(tr), "swap", tr]);
-      // another magpie's routing group named the member it routed to
+      // another eipgam's routing group named the member it routed to
       else if (tr.done && tryOk(tr) && tr.routed) items.push([routedWhy(tr), "aside", tr]);
       if (tr.done && tryOk(tr) && tr.upstream) items.push([upstreamWhy(tr), "aside upstream-said", tr]);
     });
     if (r.done && !r.tries.length) items.push([t("Nothing was tried: {error}", { error: r.error || r.status }), "bad"]);
-    // one magpie held too long before routing it was stopped, and what
+    // one eipgam held too long before routing it was stopped, and what
     // held it saved to a report (the app's log goes only to stderr, which
     // its user can't reach): its line copies it. Its name rides as the
     // line's model, so another held request's line is drawn anew.
-    if (r.done && r.held) items.push([t("magpie saved a report of where it held this request. If it keeps happening, send the report with yours."), "aside held", { model: r.held }]);
+    if (r.done && r.held) items.push([t("eipgam saved a report of where it held this request. If it keeps happening, send the report with yours."), "aside held", { model: r.held }]);
     const aboutKey = (w) => w ? seat(w) : "";
     const logos = [...r.order, ...(r.left || [])].map(logoOf);
     const key = JSON.stringify([tagKind(r), items.map(([s, c, tr, w]) => [s, c, tr?.model, tr?.served, aboutKey(w)]), logos]);
@@ -3934,7 +3934,7 @@ function routingPage(part) {
   // Codex names it (x-openai-subagent): its own guardian review of an
   // approval, a thread's title, memories… — each on the model Codex picks
   // for it, so a list of Luna calls under a Sol composer reads as it is.
-  // A web search is magpie's own, run for a model that can't search on the
+  // A web search is eipgam's own, run for a model that can't search on the
   // model it searches with (a DeepSeek chat showing GPT calls, #314)
   const knownKind = (k) => Object.hasOwn(REQUEST_KINDS, k) ? REQUEST_KINDS[k] : null;
   const kindName = (k) => knownKind(k) ? t(knownKind(k).name) : k;
@@ -3984,7 +3984,7 @@ function routingPage(part) {
     return s + " " + t("No provider was asked for, and its reply didn't say which one answered.");
   }
   window.swapWhy = swapWhy; // the Usage page's Requests say it too
-  // a try that asked a remote magpie for one of its routing groups: the
+  // a try that asked a remote eipgam for one of its routing groups: the
   // reply names the member the group routed to, which is the group
   // picking, not a swap — shown plain, as a model that answered
   function routedTag(tr) {
@@ -3992,7 +3992,7 @@ function routingPage(part) {
     k.title = routedWhy(tr);
     return k;
   }
-  const routedWhy = (tr) => t("{sent} is a routing group of the remote magpie, and it routed the request to {served}: the group picking one of its models, not the vendor swapping the model.", { sent: tr.model, served: tr.served });
+  const routedWhy = (tr) => t("{sent} is a routing group of the remote eipgam, and it routed the request to {served}: the group picking one of its models, not the vendor swapping the model.", { sent: tr.model, served: tr.served });
   window.routedWhy = routedWhy;
   // the provider an aggregator (OpenRouter …) said answered behind it:
   // DeepInfra, Novita… (leslie_luo on Discord)
@@ -4010,15 +4010,15 @@ function routingPage(part) {
     // set to follow the lead (cleverpigo on X): To is the lead's model
     if (r.subagent.lead) return r.subagent.kept
       ? t("{agent} requested a subagent on {model} and it stayed there: its subagents follow their lead, on {to}, but {why}.", said)
-      : t("{agent} requested a subagent on {model}; magpie put it on {to}, the model its lead is on.", said);
+      : t("{agent} requested a subagent on {model}; eipgam put it on {to}, the model its lead is on.", said);
     return r.subagent.kept
       ? t("{agent} requested a subagent on {model} and it stayed there: its subagents are set to {to}, but {why}.", said)
-      : t("{agent} requested a subagent on {model}; magpie put it on {to}, the model set for its subagents.", said);
+      : t("{agent} requested a subagent on {model}; eipgam put it on {to}, the model set for its subagents.", said);
   }
-  // a request a stand-in of magpie's put on another model than it named
+  // a request a stand-in of eipgam's put on another model than it named
   // (Route.Moved): why, on its row's tag, its title and its story. Neo on
   // Discord read "chatflowsai/claude-opus-5-5 → AgentRouter · gpt-6.1-sol"
-  // as magpie swapping the model, where it was Claude Desktop's title, on
+  // as eipgam swapping the model, where it was Claude Desktop's title, on
   // a model Desktop picked itself, kept on the chat's model
   // Desktop's connection check says where it went in its own story
   // (kindWhy), so its move isn't said again
@@ -4026,24 +4026,24 @@ function routingPage(part) {
   function movedWhy(r) {
     const agent = agentName(r.agent), v = { agent, model: r.model, to: r.moved.to };
     switch (r.moved.why) {
-      case "desktop-title": return t("{agent} picked {model} by itself for a short request without tools, such as a chat's title; magpie served it on {to}, the model of its latest chat turn, so it stays with the provider the chat is on.", v);
-      case "desktop-title-first": return t("{agent} picked {model} by itself for a short request without tools, such as a chat's title; magpie served it on {to}, the first model it lists, as it has had no chat turn yet.", v);
-      case "desktop-gone": return t("{agent} asked for {model}, which magpie doesn't serve; magpie served it on {to}, the model of its latest chat turn.", v);
-      case "desktop-gone-first": return t("{agent} asked for {model}, which magpie doesn't serve; magpie served it on {to}, the first model it lists.", v);
-      case "desktop-tier": return t("Claude Code in {agent} asked for {model}, its own id for a Claude tier; magpie served it on {to}, the model picked for that tier.", v);
-      case "desktop-search": return t("Claude Code in {agent} asked for {model} for WebSearch; magpie served it on {to}, the model picked for haiku.", v);
-      case "desktop-beside": return t("Claude Code in {agent} asked for {model} for a call of its own; magpie served it on {to}, that tier's model on the provider the chat is on.", v);
-      case "desktop-aside": return t("Claude Code in {agent} asked for {model} for a call of its own; magpie served it on {to}, the chat's model, so it stays with the provider the chat is on.", v);
-      case "classifier": return t("{agent}'s auto mode classifier asked for {model}; magpie served it on {to}, the model /model moved its tier to.", v);
-      case "claude-tier": return t("{agent} asked for {model} by Claude's full id; magpie served it on {to}, the model set for that tier.", v);
-      case "stand-in": return t("{agent} asked for {model}, which magpie doesn't serve; magpie served it on {to}, the model its config names.", v);
-      case "codex-turn": return t("{agent} asked for {model} for a call of its own, which magpie doesn't serve; magpie served it on {to}, the model its last turn was answered on.", v);
-      case "codex-follow": return t("{agent} asked for {model}, one of its own default models, for its memories, and its config names no model for them; magpie served it on {to}, the model of its conversation.", v);
-      case "codex-suggestions": return t("{agent} asked for {model} to suggest prompts for its home page; magpie served it on {to}, the model set for Codex’s prompt suggestions.", v);
-      case "dsh-compact": return t("{agent} asked for {model} to compact its conversation; magpie served it on {to}, the model set for its compaction.", v);
-      case "dsh-compact-rested": return t("{agent} asked for {model} to compact its conversation, and its provider is out of its limit; magpie served it on {to}, the same model from another provider.", v);
-      case "privacy": return t("Masking would have changed this request, so magpie sent it as written to {to}, the model set for that in Settings › Privacy.", v);
-      default: return t("magpie served it on {to} in place of {model}.", v);
+      case "desktop-title": return t("{agent} picked {model} by itself for a short request without tools, such as a chat's title; eipgam served it on {to}, the model of its latest chat turn, so it stays with the provider the chat is on.", v);
+      case "desktop-title-first": return t("{agent} picked {model} by itself for a short request without tools, such as a chat's title; eipgam served it on {to}, the first model it lists, as it has had no chat turn yet.", v);
+      case "desktop-gone": return t("{agent} asked for {model}, which eipgam doesn't serve; eipgam served it on {to}, the model of its latest chat turn.", v);
+      case "desktop-gone-first": return t("{agent} asked for {model}, which eipgam doesn't serve; eipgam served it on {to}, the first model it lists.", v);
+      case "desktop-tier": return t("Claude Code in {agent} asked for {model}, its own id for a Claude tier; eipgam served it on {to}, the model picked for that tier.", v);
+      case "desktop-search": return t("Claude Code in {agent} asked for {model} for WebSearch; eipgam served it on {to}, the model picked for haiku.", v);
+      case "desktop-beside": return t("Claude Code in {agent} asked for {model} for a call of its own; eipgam served it on {to}, that tier's model on the provider the chat is on.", v);
+      case "desktop-aside": return t("Claude Code in {agent} asked for {model} for a call of its own; eipgam served it on {to}, the chat's model, so it stays with the provider the chat is on.", v);
+      case "classifier": return t("{agent}'s auto mode classifier asked for {model}; eipgam served it on {to}, the model /model moved its tier to.", v);
+      case "claude-tier": return t("{agent} asked for {model} by Claude's full id; eipgam served it on {to}, the model set for that tier.", v);
+      case "stand-in": return t("{agent} asked for {model}, which eipgam doesn't serve; eipgam served it on {to}, the model its config names.", v);
+      case "codex-turn": return t("{agent} asked for {model} for a call of its own, which eipgam doesn't serve; eipgam served it on {to}, the model its last turn was answered on.", v);
+      case "codex-follow": return t("{agent} asked for {model}, one of its own default models, for its memories, and its config names no model for them; eipgam served it on {to}, the model of its conversation.", v);
+      case "codex-suggestions": return t("{agent} asked for {model} to suggest prompts for its home page; eipgam served it on {to}, the model set for Codex’s prompt suggestions.", v);
+      case "dsh-compact": return t("{agent} asked for {model} to compact its conversation; eipgam served it on {to}, the model set for its compaction.", v);
+      case "dsh-compact-rested": return t("{agent} asked for {model} to compact its conversation, and its provider is out of its limit; eipgam served it on {to}, the same model from another provider.", v);
+      case "privacy": return t("Masking would have changed this request, so eipgam sent it as written to {to}, the model set for that in Settings › Privacy.", v);
+      default: return t("eipgam served it on {to} in place of {model}.", v);
     }
   }
   function movedTag(r) {
@@ -4052,65 +4052,65 @@ function routingPage(part) {
     k.title = movedWhy(r);
     return k;
   }
-  // the tag a request's row has: what the call was for, else why magpie
+  // the tag a request's row has: what the call was for, else why eipgam
   // put it on another model
   const rowTags = (r) => tagKind(r) ? [kindTag(r)] : movedSays(r) ? [movedTag(r)] : [];
   function kindWhy(r) {
     const agent = agentName(r.agent);
     if (purposeOf(tagKind(r)) === "kind:collab_spawn" && r.subagent) return subagentWhy(r);
     if (purposeOf(tagKind(r)) === "kind:collab_spawn") return r.group
-      ? t("{agent} requested a subagent; magpie selects its model within this routing group.", { agent })
+      ? t("{agent} requested a subagent; eipgam selects its model within this routing group.", { agent })
       : t("{agent} requested a subagent on {model}.", { agent, model: r.model });
     if (purposeOf(r.kind) === "kind:ambient_suggestions") return t("{agent} drafted the suggested prompts on its home page by itself, in the background, searching the project's files and connected apps, and checked them for safety. Not a turn of the conversation; Codex prompt suggestions, under Settings in Codex's row on the Agents page, picks its model, and Codex's Settings › Configuration › Homepage suggestions turns it off.", { agent });
     if (purposeOf(r.kind) === "kind:composer_predictions") return t("{agent} guessed your next message for its composer by itself, reading the whole conversation again. Not a turn of the conversation; Codex composer predictions, under Settings in Codex's row on the Agents page, picks its model, and Codex's Settings › General › Show predictions turns it off.", { agent });
-    // Claude Desktop's check that magpie answers names its model itself
+    // Claude Desktop's check that eipgam answers names its model itself
     // (cybercaius on Discord: "Desktop requested deepseek-flash" while
     // the chat was on another model)
-    if (r.kind === "connection_check") return t("{agent} checked that magpie answers, as it does when it starts and from its Test connection. It names this check's model itself, from the names in its model list ({model}), not the model chosen in the conversation, and only reads whether an answer comes back; magpie sends it to the model chosen in {agent}'s model menu, or to its first listed model when none is. Not a turn of the conversation.", { agent, model: r.model });
+    if (r.kind === "connection_check") return t("{agent} checked that eipgam answers, as it does when it starts and from its Test connection. It names this check's model itself, from the names in its model list ({model}), not the model chosen in the conversation, and only reads whether an answer comes back; eipgam sends it to the model chosen in {agent}'s model menu, or to its first listed model when none is. Not a turn of the conversation.", { agent, model: r.model });
     if (r.kind === "luna_reserve") return t("{agent} sent this turn on Luna Reserve, which it turns to once the plan's own allowance is used up; it picks the model itself.", { agent });
     // the searcher asked first failed or found nothing, and this one
     // searched in its place: say which and why, not just who searched
     // (Gearclickist on Discord: Grok picked, Codex's model searched)
     if (r.kind === "web_search" && r.for?.instead) {
       const f = r.for;
-      const whom = f.mcp ? t("{agent}'s call to magpie's web_search MCP tool", { agent: agentName(f.agent) })
+      const whom = f.mcp ? t("{agent}'s call to eipgam's web_search MCP tool", { agent: agentName(f.agent) })
         : f.model ? t("{agent}'s {model}", { agent: agentName(f.agent), model: f.model })
         : t("a model that can't search the web by itself");
       const why = f.notSearched ? t("it answered without searching the web, so its account or plan may not offer web search") : f.nothingFound ? t("its reply named no page it found") : f.why || t("it failed");
       return f.picked
-        ? t("{failed}, the searcher picked in Settings › Models › Web search, didn't search for {whom}: {why}. So magpie had {searcher}, the next searcher it can use, search in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, searcher: r.model })
-        : t("{failed}, the searcher magpie picked, didn't search for {whom}: {why}. So magpie had {searcher}, the next searcher it can use, search in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, searcher: r.model });
+        ? t("{failed}, the searcher picked in Settings › Models › Web search, didn't search for {whom}: {why}. So eipgam had {searcher}, the next searcher it can use, search in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, searcher: r.model })
+        : t("{failed}, the searcher eipgam picked, didn't search for {whom}: {why}. So eipgam had {searcher}, the next searcher it can use, search in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, searcher: r.model });
     }
-    // the agent called magpie's web search MCP server itself, for no model
-    if (r.kind === "web_search" && r.for?.mcp) return t("{agent} called magpie's web_search MCP tool: {searcher} searched for it. Not a turn of the conversation.", { agent: agentName(r.for.agent), searcher: r.model });
+    // the agent called eipgam's web search MCP server itself, for no model
+    if (r.kind === "web_search" && r.for?.mcp) return t("{agent} called eipgam's web_search MCP tool: {searcher} searched for it. Not a turn of the conversation.", { agent: agentName(r.for.agent), searcher: r.model });
     if (r.kind === "web_search") return r.for
-      ? t("magpie ran this web search for {agent}'s {model}, which can't search the web by itself: {searcher} searched, and {model} goes on answering once it has what was found. Not a turn of the conversation.", { agent: agentName(r.for.agent), model: r.for.model, searcher: r.model })
-      : t("magpie ran this web search for a model that can't search the web by itself: {searcher} searched, and that model goes on answering once it has what was found. Not a turn of the conversation.", { searcher: r.model });
+      ? t("eipgam ran this web search for {agent}'s {model}, which can't search the web by itself: {searcher} searched, and {model} goes on answering once it has what was found. Not a turn of the conversation.", { agent: agentName(r.for.agent), model: r.for.model, searcher: r.model })
+      : t("eipgam ran this web search for a model that can't search the web by itself: {searcher} searched, and that model goes on answering once it has what was found. Not a turn of the conversation.", { searcher: r.model });
     // why the model was counted as unable to see, and where the user says
     // otherwise or picks the describer (#1287: a DeepSeek model's images
     // went to Codex's GPT, and nothing said why or where to change it)
     // the Image recognition model the user picked is missing: the one
-    // magpie picks described in its place, and the row says so
+    // eipgam picks described in its place, and the row says so
     // the model asked first couldn't describe the image, and this one
     // did in its place: say which and why (kelvinjason11 on X: one
     // describer failing failed every turn with an image)
     if (r.kind === "vision" && r.for?.instead) {
       const f = r.for;
-      const whom = f.mcp ? t("{agent}'s call to magpie's analyze_image MCP tool", { agent: agentName(f.agent) })
+      const whom = f.mcp ? t("{agent}'s call to eipgam's analyze_image MCP tool", { agent: agentName(f.agent) })
         : f.model ? t("{agent}'s {model}", { agent: agentName(f.agent), model: f.model })
         : t("a model that can't see images");
       const why = f.why || t("it failed");
       return f.picked
-        ? t("{failed}, the Image recognition model picked in Settings › Models, couldn't describe an image for {whom}: {why}. So magpie had {describer}, the next model it can use that sees, describe it in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, describer: r.model })
-        : t("{failed}, the model magpie picked to describe images, couldn't describe an image for {whom}: {why}. So magpie had {describer}, the next model it can use that sees, describe it in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, describer: r.model });
+        ? t("{failed}, the Image recognition model picked in Settings › Models, couldn't describe an image for {whom}: {why}. So eipgam had {describer}, the next model it can use that sees, describe it in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, describer: r.model })
+        : t("{failed}, the model eipgam picked to describe images, couldn't describe an image for {whom}: {why}. So eipgam had {describer}, the next model it can use that sees, describe it in its place. Not a turn of the conversation.", { failed: f.instead, whom, why, describer: r.model });
     }
-    // the agent called magpie's image recognition MCP server itself
-    if (r.kind === "vision" && r.for?.mcp) return t("{agent} called magpie's analyze_image MCP tool: {describer} looked at the image for it. Not a turn of the conversation.", { agent: agentName(r.for.agent), describer: r.model });
-    if (r.kind === "vision" && r.for?.missing) return t("{picked}, the Image recognition model picked in Settings, isn't set up any more, so magpie had {describer}, its automatic choice, describe an image for {agent}'s {model} in its place. Pick another in Settings › Models › Image recognition. Not a turn of the conversation.", { picked: r.for.missing, agent: agentName(r.for.agent), model: r.for.model, describer: r.model });
-    if (r.kind === "vision" && r.for?.unknown) return t("magpie had {describer} describe an image for {agent}'s {model}: nothing magpie knows says {model} can see images, so it is counted as text-only and given the description in the image's place. If it does see them, tick “Accepts images” for it in its provider's models. Settings › Models › Image recognition picks the model that describes. Not a turn of the conversation.", { agent: agentName(r.for.agent), model: r.for.model, describer: r.model });
+    // the agent called eipgam's image recognition MCP server itself
+    if (r.kind === "vision" && r.for?.mcp) return t("{agent} called eipgam's analyze_image MCP tool: {describer} looked at the image for it. Not a turn of the conversation.", { agent: agentName(r.for.agent), describer: r.model });
+    if (r.kind === "vision" && r.for?.missing) return t("{picked}, the Image recognition model picked in Settings, isn't set up any more, so eipgam had {describer}, its automatic choice, describe an image for {agent}'s {model} in its place. Pick another in Settings › Models › Image recognition. Not a turn of the conversation.", { picked: r.for.missing, agent: agentName(r.for.agent), model: r.for.model, describer: r.model });
+    if (r.kind === "vision" && r.for?.unknown) return t("eipgam had {describer} describe an image for {agent}'s {model}: nothing eipgam knows says {model} can see images, so it is counted as text-only and given the description in the image's place. If it does see them, tick “Accepts images” for it in its provider's models. Settings › Models › Image recognition picks the model that describes. Not a turn of the conversation.", { agent: agentName(r.for.agent), model: r.for.model, describer: r.model });
     if (r.kind === "vision") return r.for
-      ? t("magpie had {describer} describe an image for {agent}'s {model}, which its provider's list or its own setting says takes text only: {model} is given the description in the image's place. Settings › Models › Image recognition picks the model that describes. Not a turn of the conversation.", { agent: agentName(r.for.agent), model: r.for.model, describer: r.model })
-      : t("magpie had {describer} describe an image for a model that can't see images, which is given the description in the image's place. Not a turn of the conversation.", { describer: r.model });
+      ? t("eipgam had {describer} describe an image for {agent}'s {model}, which its provider's list or its own setting says takes text only: {model} is given the description in the image's place. Settings › Models › Image recognition picks the model that describes. Not a turn of the conversation.", { agent: agentName(r.for.agent), model: r.for.model, describer: r.model })
+      : t("eipgam had {describer} describe an image for a model that can't see images, which is given the description in the image's place. Not a turn of the conversation.", { describer: r.model });
     return t("{agent} made this call itself ({kind}), not as a turn of the conversation, and picks its model itself.", { agent, kind: kindName(r.kind) });
   }
 
@@ -4447,7 +4447,7 @@ function routingPage(part) {
         setText(x.dir, ags);
         if (x.dir.hidden) x.dir.hidden = false;
         x.name.title = g.r.callerKey ? t("Gateway key") + ": " + keyName(g.r) + "\n" + ags
-          : t("These requests came with no gateway key: from this computer, or from before magpie noted the key.") + "\n" + ags;
+          : t("These requests came with no gateway key: from this computer, or from before eipgam noted the key.") + "\n" + ags;
       } else {
       setText(x.name, g.key ? [agentName(g.r.agent), name || folder || groupSession(g.r)].filter(Boolean).join(" · ") : t("No session ID"));
       setText(x.dir, name && folder ? folder : "");
@@ -4542,8 +4542,8 @@ function routingPage(part) {
     hist.classList.toggle("solo", none);
     if (none) {
       const p = el("div", "empty-state");
-      p.append(el("b", "", purpose.length ? t("No requests match these filters.") : day ? t("Nothing on {day}", { day: dayName(day) }) : t("No requests since magpie started")),
-        t("Each request an agent sends through magpie shows up here: who answered it, why, and each try."));
+      p.append(el("b", "", purpose.length ? t("No requests match these filters.") : day ? t("Nothing on {day}", { day: dayName(day) }) : t("No requests since eipgam started")),
+        t("Each request an agent sends through eipgam shows up here: who answered it, why, and each try."));
       if (!day && days.length) p.append(" " + t("Earlier ones are kept by day, in the bar above."));
       reqs.replaceChildren(p);
       reqs.classList.remove("win");
@@ -4925,8 +4925,8 @@ function routingPage(part) {
     // the reasoning the model was sent at — the turn's pick, or the
     // agent's fitted to the model's levels — after the one the agent
     // asked for when that was another (xhigh → max), so a level the
-    // agent didn't pick reads as the agent's or as magpie's at a glance
-    // (呆滞 on X: Pi 里面选择是 xhigh 但是 magpie 里面显示的是 max);
+    // agent didn't pick reads as the agent's or as eipgam's at a glance
+    // (呆滞 on X: Pi 里面选择是 xhigh 但是 eipgam 里面显示的是 max);
     // how it came to be is in its title and the request's story. Short of
     // room, where it went gives way first, then the level asked for, then
     // the one sent, each cut with an ellipsis in its own box (#435,
@@ -4994,7 +4994,7 @@ function routingPage(part) {
     if (w.kind !== "account" || !Array.isArray(quotas)) return null;
     const user = (w.who || "").trim().toLowerCase();
     // this computer's own cards come with no kind (SubscriptionQuota.Kind
-    // is "" here, only a remote magpie's are told one), so asking for
+    // is "" here, only a remote eipgam's are told one), so asking for
     // "subscription" matched none of them in the app (Sdsi134a on X: a
     // fold of three accounts on one plan said nothing of what was left)
     const mine = quotas.filter((q) => !q.from && (q.kind || "subscription") === "subscription" && (q.provider === w.agent || q.provider === w.provider));
@@ -5011,7 +5011,7 @@ function routingPage(part) {
   // plansHidden: the groups page's Hide plans was clicked (kept in
   // localStorage, so the Routing page's fold reads it too)
   function plansHidden() {
-    try { return localStorage.getItem("magpie.routingGroupPlans") === "hidden"; } catch { return false; }
+    try { return localStorage.getItem("eipgam.routingGroupPlans") === "hidden"; } catch { return false; }
   }
   // foldQuota: what a fold's accounts have left together, from the Usage
   // page's readings (mergeQuotas), as its strip of all of a provider's
@@ -5020,7 +5020,7 @@ function routingPage(part) {
   // have is left out (mergeQuotas). The tightest window that says a share
   // is the figure and the bar; the rest, and when the first of them
   // starts again, are on hover. Null when nothing adds up.
-  // Hide plans on the groups page (magpie.routingGroupPlans) folds these
+  // Hide plans on the groups page (eipgam.routingGroupPlans) folds these
   // away too: the user asked for no plans on this page
   function foldQuota(ms) {
     if (ms.length < 2 || ms.some((m) => m.w.free) || plansHidden()) return null;
@@ -5065,7 +5065,7 @@ function routingPage(part) {
   }
 
   // remoteWinsOf: the windows of the accounts signed in on another
-  // computer's magpie (a Remote magpie provider, joined over the network),
+  // computer's eipgam (a Remote eipgam provider, joined over the network),
   // as the Usage page has read them from there: its cards are app.js's
   // quotas with `from`, their provider id the remote's, a slash, and the
   // card's. The computer that holds the account tells its usage, and the
@@ -5074,7 +5074,7 @@ function routingPage(part) {
   // whose read failed says it is unknown, never 0 or nothing.
   const REMOTE_FAMILY = [[/^claude/i, "claude"], [/^(gpt|codex|o\d)/i, "codex"]];
   function remoteWinsOf(w) {
-    if (w.preset !== "remote-magpie" || w.kind === "account" || !Array.isArray(quotas)) return [];
+    if (w.preset !== "remote-eipgam" || w.kind === "account" || !Array.isArray(quotas)) return [];
     const fam = REMOTE_FAMILY.find(([re]) => re.test(w.model || ""))?.[1];
     const mine = quotas.filter((q) => q.from && q.kind === "subscription" && (q.provider === w.provider || q.provider.startsWith(w.provider + "/")));
     const cards = mine.filter((q) => q.provider !== w.provider && !q.error && q.windows?.length && (!fam || q.provider === w.provider + "/" + fam));
@@ -5586,7 +5586,7 @@ function routingPage(part) {
 
   const flying = new Map(); // packet → { id: the row it is at, agent }
 
-  // A magpie, drawn to fly: facing right, the dot it carries at the tip
+  // A eipgam, drawn to fly: facing right, the dot it carries at the tip
   // of its beak where the flight puts it; its wings beat from the shoulder.
   const FLIER = '<g class="rt-lift"><g transform="scale(1.2) translate(-6.5 3.2)">'
     + '<path class="wing far" d="M-14.5 -3.4C-16.5 -9.5 -14.2 -15 -8.6 -18.6C-9.4 -12.6 -9.6 -7.4 -9.2 -3.2Z"/>'
@@ -5622,10 +5622,10 @@ function routingPage(part) {
     return dot;
   }
 
-  // play: one magpie carries the request from the agent through magpie to
+  // play: one eipgam carries the request from the agent through eipgam to
   // who routing put first, and lets it go there while it answers; another
   // picks up the answer and brings it back — a failure only as far as
-  // magpie, where the first takes the request on to the next.
+  // eipgam, where the first takes the request on to the next.
   async function play(id, synced) {
     const routes = src(); // a replay's, if it is one
     let r = routes.get(id);
@@ -5649,14 +5649,14 @@ function routingPage(part) {
     }
     const dot = packet();
     dot.style.setProperty("--agent", hueOf(srcOf(r)));
-    // from: where in magpie the dot is, once it is — the way it came in
+    // from: where in eipgam the dot is, once it is — the way it came in
     let carrier = bird("req"), from = null, back = null;
     // rt: the route as the gateway has it now — or, dropped from what it
     // keeps, as it was last, over
     const rt = () => routes.get(id) || { ...r, done: true, tries: r.tries.map((x) => ({ ...x, done: true })) };
     try {
       tick(A.node);
-      if (!r.tries.length) { // routing hasn't picked yet: to magpie, to wait there
+      if (!r.tries.length) { // routing hasn't picked yet: to eipgam, to wait there
         await fly(dot, carrier, [{ p: A.wire }], 620);
         from = tip(A.wire, true);
         tick(hub);
@@ -5731,7 +5731,7 @@ function routingPage(part) {
           tick(A.node);
           break;
         }
-        // back to magpie, which hands the request on to the next
+        // back to eipgam, which hands the request on to the next
         await fly(dot, back, [...ws].reverse().map((p) => ({ p, rev: true })), 620);
         flying.delete(dot);
         away(back);
@@ -5750,7 +5750,7 @@ function routingPage(part) {
     }
   }
 
-  // home: from an account back through magpie to the agent
+  // home: from an account back through eipgam to the agent
   const home = (row, A) => {
     const ws = wiresTo(row);
     return [...[...ws].reverse().map((p) => ({ p, rev: true })), via(tip(ws[0], false, true), tip(A.wire, true, true)), { p: A.wire, rev: true }];
@@ -5915,7 +5915,7 @@ function routingPage(part) {
 
   // ---------- the loop ----------
 
-  // pose puts a flight's dot e of the way along, and its magpie with it,
+  // pose puts a flight's dot e of the way along, and its eipgam with it,
   // heading the way it flies — turned about to fly left, tilted no more
   // than a bird banks
   function pose(tr, e) {
@@ -5933,7 +5933,7 @@ function routingPage(part) {
     if (!total) return;
     // every wire ends at a card, and the sky is under the cards: a flight
     // starts and ends a dot clear of them, so a dot held at its seat or
-    // waiting at magpie is seen whole
+    // waiting at eipgam is seen whole
     const edge = Math.min(6, total / 4), d = edge + e * (total - 2 * edge), pt = point(d);
     setAttr(tr.dot, "cx", String(pt.x));
     setAttr(tr.dot, "cy", String(pt.y));
@@ -6066,7 +6066,7 @@ function routingPage(part) {
     if (!shown()) return; // resume() empties it in sight, as sync
     offline("");
     what.replaceChildren(el("b", "", t(purpose.length || day ? "No requests match these filters." : "Waiting for a request")));
-    mode.textContent = t("Send one from any agent routed through magpie and it plays here as it happens: who routing put first and why, each try, and what each answered.");
+    mode.textContent = t("Send one from any agent routed through eipgam and it plays here as it happens: who routing put first and why, each try, and what each answered.");
     for (const a of agents.values()) a.wire.remove();
     agents.clear();
     const a = agentNode("");
@@ -6128,7 +6128,7 @@ function routingPage(part) {
         noteLifted(d.lifted);
         skew = at(d.now) - Date.now();
         mine = d.mine;
-        // another magpie took the gateway over (#2606): its routes and seq
+        // another eipgam took the gateway over (#2606): its routes and seq
         // are its own, so the page starts again from its whole trace
         const fromOther = loaded && (d.by?.pid || 0) !== (by?.pid || 0);
         by = d.by || null;
@@ -6138,9 +6138,9 @@ function routingPage(part) {
         if (!mine) {
           const gw = providers?.gateway;
           offMsg = !gw?.running ? "The gateway isn't running, so nothing is routed."
-            : gw.window ? "Another magpie serves the gateway; its routing plays live in that magpie's window."
-            // magpie serve: its routing isn't shown anywhere
-            : "The gateway is served by a magpie without a window (magpie serve), so its routing can't be watched. Stop it and let this magpie serve the gateway to see routing live.";
+            : gw.window ? "Another eipgam serves the gateway; its routing plays live in that eipgam's window."
+            // eipgam serve: its routing isn't shown anywhere
+            : "The gateway is served by a eipgam without a window (eipgam serve), so its routing can't be watched. Stop it and let this eipgam serve the gateway to see routing live.";
           offline(pinned ? "" : t(offMsg));
           loaded = false;
           renderPanel();
@@ -6225,8 +6225,8 @@ function routingPage(part) {
 
   function hubText() {
     const g = providers?.gateway;
-    // which magpie is routing, when it isn't this one (#2606): this page plays
-    // that magpie's routing, and its window is the other place it shows. It
+    // which eipgam is routing, when it isn't this one (#2606): this page plays
+    // that eipgam's routing, and its window is the other place it shows. It
     // is named by the trace the page plays, so it goes with a takeover at once
     const who = mine && by?.serves
       ? t("{serves} (pid {pid}) is routing", { serves: by.serves, pid: by.pid }) + " · "
@@ -6246,12 +6246,12 @@ function routingPage(part) {
   }
   new MutationObserver(words).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   // a count follows Settings' number units, the panel's "today" with it
-  document.addEventListener("magpie-costs-changed", () => { steady(renderHist); renderPanel(); });
+  document.addEventListener("eipgam-costs-changed", () => { steady(renderHist); renderPanel(); });
 
   // ---------- routing groups ----------
   // The groups agents can pick as one model (group/<id>): the user's, and
-  // those magpie found — one model several providers serve. Each is made,
-  // changed or removed here; changing one magpie found makes it the user's.
+  // those eipgam found — one model several providers serve. Each is made,
+  // changed or removed here; changing one eipgam found makes it the user's.
   // Below them, each provider with several keys or accounts on, which
   // routes over them already: how, and how long a conversation stays.
   const gsec = el("div", "rt-gsec");
@@ -6289,7 +6289,7 @@ function routingPage(part) {
     e.preventDefault();
     groupsBack();
   });
-  // whether magpie finds groups on its own, by the list it fills (蓝猫 on
+  // whether eipgam finds groups on its own, by the list it fills (蓝猫 on
   // Discord: they could only be removed one at a time)
   const gFound = el("div", "rt-gfound hint-row");
   // how the agents' lists name every group, one setting for them all (and
@@ -6307,7 +6307,7 @@ function routingPage(part) {
   // and off (the Essentials preset leaves it off), where they were
   // the page says so and turns it on (bigbenniu on X: past the requests
   // there was nothing, and no word of where New group had gone). The
-  // groups magpie finds route all the same.
+  // groups eipgam finds route all the same.
   const gOff = el("div", "rt-goff");
   gOff.dataset.featureOff = "groups";
   const gOn = el("button", "text rt-goffon", t("Turn on routing groups"));
@@ -6329,7 +6329,7 @@ function routingPage(part) {
     }
   };
   const gOffBox = el("div", "list rt-goffbox");
-  gOffBox.append(el("div", "rt-goffwhy", t("Routing groups are off in Plugins › Built-in: the groups magpie finds, one model several providers serve, still route, but your own can't be made or changed here.")), gOn);
+  gOffBox.append(el("div", "rt-goffwhy", t("Routing groups are off in Plugins › Built-in: the groups eipgam finds, one model several providers serve, still route, but your own can't be made or changed here.")), gOn);
   // on Routing then (groupsHome), under its requests, named as before 11-06
   gOff.append(el("div", "row-head", el("span", "label", t("Routing groups"))), gOffBox);
   // the settings that hold for every group, under the list (11-06)
@@ -6370,7 +6370,7 @@ function routingPage(part) {
   };
   const SINK_HINT = {
     "": "One rate limited while it still has quota rests as long as the vendor asks, then takes its place in the order again.",
-    sink: "One rate limited (429) while it still has quota goes to the back of the order, behind every one not rate limited since, and comes round again once those ahead of it are rate limited in turn — so the load goes round rather than back to the first each time. Out of quota, it rests as usual. Kept until magpie restarts.",
+    sink: "One rate limited (429) while it still has quota goes to the back of the order, behind every one not rate limited since, and comes round again once those ahead of it are rate limited in turn — so the load goes round rather than back to the first each time. Out of quota, it rests as usual. Kept until eipgam restarts.",
   };
   // in turn goes round already, and a manual group sends to one member
   // how long a group's member may take to its first token, as the default
@@ -6416,7 +6416,7 @@ function routingPage(part) {
     drain: "Until used up: one account or key, across the members, takes every request until it is used up; then the next in the list, which keeps them even after an earlier one renews. One rate limited or failing is passed over only while it rests.",
     rotate: "In turn: each message you send goes to the next member's account or key, round the list; the agent's tool calls for it stay on the same one. A move costs some prompt cache; with Stays on Session, a whole conversation stays on one instead.",
     usage: "Least used first: the account or key with the most of its allowance left goes first.",
-    pace: "Use before expiry: the account with the most left per hour until it is lost goes first — its week at its reset, or credits in it that expire sooner — so less of each member's allowance is lost; an account with five hours and no week (Claude Enterprise) by what its five hours have left per hour until they renew, so almost always first; a key by the tokens magpie sent it lately.",
+    pace: "Use before expiry: the account with the most left per hour until it is lost goes first — its week at its reset, or credits in it that expire sooner — so less of each member's allowance is lost; an account with five hours and no week (Claude Enterprise) by what its five hours have left per hour until they renew, so almost always first; a key by the tokens eipgam sent it lately.",
     weight: GROUP_WEIGHT,
     free: "Free first: the members whose model its vendor serves at no cost to the subscription's allowance or credits go first, then the rest — each whole, over its own accounts or keys as its provider routes them. The free ones are tried before any that spends, so nothing that costs nothing is left unused.",
     fast: "Speed first: the member that answered fastest lately goes first, by its time to the first token and how fast it writes, each of its accounts or keys weighed on its own; those within a tenth keep their listed order, and one not measured lately gets one request in five, so it is measured again.",
@@ -6670,7 +6670,7 @@ function routingPage(part) {
     } catch { return null; }
   }
   // patternTest is the models a pattern takes, as provider.compileRule
-  // reads it; null when it is one magpie can't read
+  // reads it; null when it is one eipgam can't read
   function patternTest(p) {
     const free = p.startsWith("free:"), scope = free ? p.slice(5).trim() : p;
     if (free && (!scope || scope.startsWith("free:"))) return null;
@@ -6720,8 +6720,8 @@ function routingPage(part) {
     renderGroups();
     return true;
   };
-  // offIn: the members of a group magpie found whose provider is switched
-  // off (XYenon on Discord). magpie keeps them in the group so agents on it
+  // offIn: the members of a group eipgam found whose provider is switched
+  // off (XYenon on Discord). eipgam keeps them in the group so agents on it
   // aren't moved while one is off (#2671), but the gateway skips them, so a
   // found group's card and logos leave them out, as every model list leaves
   // a provider switched off out, and say how many in a tag; the editor still
@@ -6890,7 +6890,7 @@ function routingPage(part) {
     b.title = t("What is left of each provider's accounts, under every group");
     b.onclick = () => {
       gPlansHid = !gPlansHid;
-      try { localStorage.setItem("magpie.routingGroupPlans", gPlansHid ? "hidden" : "shown"); } catch {}
+      try { localStorage.setItem("eipgam.routingGroupPlans", gPlansHid ? "hidden" : "shown"); } catch {}
       b.textContent = t(gPlansHid ? "Show plans" : "Hide plans");
       gList.classList.toggle("rt-noplans", gPlansHid);
     };
@@ -6945,7 +6945,7 @@ function routingPage(part) {
         if (own && tpls.length) head.push(templateButton(tpls));
         const imp = el("button", "text rt-gimportbtn", t("Import"));
         imp.type = "button";
-        imp.title = t("Add a routing group someone shared from their magpie");
+        imp.title = t("Add a routing group someone shared from their eipgam");
         imp.setAttribute("aria-expanded", gImport ? "true" : "false");
         imp.onclick = () => gImport ? closeImport() : openImport();
         head.push(imp);
@@ -6982,7 +6982,7 @@ function routingPage(part) {
     if (!rows.length) rows.push(el("div", "none rt-gnone", groups.found === false
       ? t("No group yet. New group makes one of any models you like.")
       : t("No group yet. A model two of your providers serve becomes one on its own; New group makes one of any models you like.")));
-    // the found groups removed stay removed, magpie doesn't make them
+    // the found groups removed stay removed, eipgam doesn't make them
     // again: not listed, one line under the list says how many, and its
     // menu brings one back. With found groups off, none would be anyway.
     if (hidden.length && groups.found !== false) {
@@ -6991,7 +6991,7 @@ function routingPage(part) {
       b.type = "button";
       b.setAttribute("aria-haspopup", "menu");
       b.append(el("span", "", t(hidden.length === 1 ? "1 found group removed" : "{n} found groups removed", { n: hidden.length })), svg(CHEV, 11, 1.6));
-      b.title = t("magpie doesn't make them again. Click to bring one back.");
+      b.title = t("eipgam doesn't make them again. Click to bring one back.");
       b.onclick = (e) => {
         e.stopPropagation();
         const again = agentMenu?.anchor === b;
@@ -7111,11 +7111,11 @@ function routingPage(part) {
   }
   // Copy to share (laincatx on X): the group as text, its models, routing
   // and rules and no key (provider.ShareGroup), for anyone to paste into
-  // their magpie's Import
+  // their eipgam's Import
   async function shareGroup(g) {
     try {
       const st = await api("groups/share", { id: g.id });
-      await copy(st.shared, g.name, null, t("{name} copied: paste it into Import on another magpie's Routing page", { name: g.name }));
+      await copy(st.shared, g.name, null, t("{name} copied: paste it into Import on another eipgam's Routing page", { name: g.name }));
     } catch (e) { status(e.message, "err"); }
   }
   async function openImport() {
@@ -7132,18 +7132,18 @@ function routingPage(part) {
     renderGroups();
   }
   // importOver: the group of the user's own that pasted text would replace,
-  // by the id it carries (provider.ImportGroupOver): not one magpie found
+  // by the id it carries (provider.ImportGroupOver): not one eipgam found
   function importOver(text) {
     const a = text.indexOf("{"), b = text.lastIndexOf("}");
     if (a < 0 || b < a) return null;
     let x;
     try { x = JSON.parse(text.slice(a, b + 1)); } catch { return null; }
     const id = typeof x?.group?.id === "string" ? x.group.id.trim().toLowerCase() : "";
-    if (x?.magpie !== "routing-group" || !id) return null;
+    if (x?.eipgam !== "routing-group" || !id) return null;
     return groups.groups.find((g) => g.id === id && !g.auto && !g.hidden) || null;
   }
   // importBox: paste a shared group, Import adds it; then what was added,
-  // and what of it this magpie has none of, until Done
+  // and what of it this eipgam has none of, until Done
   let gImportBox = null;
   function importBox() {
     gImportBox ||= el("div", "rt-gimport");
@@ -7151,7 +7151,7 @@ function routingPage(part) {
     const parts = [];
     if (!res) {
       gImportText.placeholder = t("Paste a group copied with Copy to share");
-      gImportText.setAttribute("aria-label", t("A routing group shared from magpie"));
+      gImportText.setAttribute("aria-label", t("A routing group shared from eipgam"));
       const go = el("button", "text primary rt-gimport-go", t("Import"));
       go.type = "button";
       // a text whose group id is a group of the user's replaces that group:
@@ -7185,10 +7185,10 @@ function routingPage(part) {
       const acts = el("div", "acts");
       acts.append(go, no);
       sync();
-      parts.push(el("div", "rt-gtpl-head", t("Paste a routing group someone shared from their magpie: its models, routing and rules come with it, never a key")), gImportText, warn, acts);
+      parts.push(el("div", "rt-gtpl-head", t("Paste a routing group someone shared from their eipgam: its models, routing and rules come with it, never a key")), gImportText, warn, acts);
     } else {
       parts.push(el("div", "rt-gimport-done", t(res.replaced ? "Replaced {name}" : "Added {name}", { name: res.name })));
-      if (res.missing?.length) parts.push(el("div", "rt-gimport-missing", t("Not in your magpie, left out: {models}", { models: res.missing.join(", ") })));
+      if (res.missing?.length) parts.push(el("div", "rt-gimport-missing", t("Not in your eipgam, left out: {models}", { models: res.missing.join(", ") })));
       if (res.instead?.length) parts.push(el("div", "rt-gimport-note", t("The same model from your own provider: {models}", { models: res.instead.join(", ") })));
       if (res.rules) parts.push(el("div", "rt-gimport-note", t(res.rules === 1 ? "1 rule left out with them" : "{n} rules left out with them", { n: res.rules })));
       const done = el("button", "text", t("Done"));
@@ -7352,12 +7352,12 @@ function routingPage(part) {
     ics.append(stackIcon(groupIcons(g)));
     const main = el("div", "main"), nm = el("div", "nm");
     nm.append(el("b", "", g.name), el("code", "mdl", g.ref || "group/" + g.id));
-    if (g.auto) nm.append(el("small", "auto", t("found by magpie")));
+    if (g.auto) nm.append(el("small", "auto", t("found by eipgam")));
     main.append(nm, memberLine(g, shownMembers(g)));
     row.append(cb, ics, main);
     return row;
   }
-  // drawFound: the switch for the groups magpie finds on its own — a
+  // drawFound: the switch for the groups eipgam finds on its own — a
   // model two or more providers serve, as auto-<model> — all at once.
   // Off, none is listed or served: the groups the user made or changed
   // stay, and an agent set to a found one is moved to its model from one
@@ -7428,7 +7428,7 @@ function routingPage(part) {
     const row = (box, label, hint, opts, cur, key) => {
       const txt = el("div", "txt");
       txt.append(el("b", "", t(label)), el("small", "expl", hint));
-      // a value set elsewhere (magpie settings set) that no option names
+      // a value set elsewhere (eipgam settings set) that no option names
       if (!opts.some(([v]) => v === cur)) opts = [...opts, [cur, key === "firstToken" ? firstWord(cur) : patienceWord(cur)]];
       const pick = segs(opts.map(([v, n]) => [v, t(n)]), cur, (v) => setDefaults({ ...def, [key]: v }));
       pick.setAttribute("aria-label", t(label));
@@ -7494,7 +7494,7 @@ function routingPage(part) {
     const main = el("div", "main");
     const nm = el("div", "nm");
     nm.append(el("b", "", g.name), el("code", "mdl", g.ref || "group/" + g.id));
-    if (g.auto) nm.append(el("small", "auto", t("found by magpie")));
+    if (g.auto) nm.append(el("small", "auto", t("found by eipgam")));
     main.append(nm);
     // the user's own word on it (ConatusMoon2222 on X), one quiet line,
     // only when there is one; the whole of it on hover
@@ -7510,7 +7510,7 @@ function routingPage(part) {
     for (const p of g.patterns || []) {
       const line = el("div", "mem pat" + (p.models ? "" : " none"));
       line.append(el("code", "", p.pattern), document.createTextNode(" · " + patternWords(p.models)));
-      line.title = p.models ? t("Every model this pattern matches is in the group, as providers list them") : t("No model magpie serves matches this pattern now");
+      line.title = p.models ? t("Every model this pattern matches is in the group, as providers list them") : t("No model eipgam serves matches this pattern now");
       main.append(line);
     }
     // its classifier couldn't say the last time it was asked (#1929,
@@ -7538,7 +7538,7 @@ function routingPage(part) {
       tags.append(k);
     }
     // on a plan, pay as you go or both, as its members' providers bill
-    // (EV_John_Liu on X); said only when magpie knows of every one
+    // (EV_John_Liu on X); said only when eipgam knows of every one
     const bill = billTag(g);
     if (bill) tags.append(bill);
     if (g.firstToken > 0 && !manual) tags.append(el("span", "tag", t("Next after {n} without a first token", { n: took(g.firstToken * 1000) })));
@@ -7571,7 +7571,7 @@ function routingPage(part) {
     row.oncontextmenu = (e) => { e.preventDefault(); groupMenu(ics, g, { x: e.clientX, y: e.clientY }); };
     row.append(ics, main, tags, edit);
     // a group of the user's switches off as a whole, kept as it is (PAMI
-    // on Discord); one magpie found is removed rather (provider.SwitchGroup)
+    // on Discord); one eipgam found is removed rather (provider.SwitchGroup)
     if (!g.auto) {
       const sw = el("button", "lib-switch rt-gon" + (g.disabled ? "" : " on"));
       sw.type = "button";
@@ -7672,8 +7672,8 @@ function routingPage(part) {
       // change without touching the one agents use (lc on Discord)
       { name: "Duplicate", icon: COPY_ICON, sep: true, tip: t("A copy of {name} with its models, routing and rules, listed after it", { name: g.name }),
         run: async () => { if (!groupDirty() || await confirmDiscard()) groupAction("copy", { id: g.id, name: t("{name} copy", { name: g.name }) }, t("Duplicated {name}", { name: g.name })); } },
-      // the group as text for someone else's magpie (laincatx on X)
-      { name: "Copy to share", icon: OUT, tip: t("{name} as text to paste into another magpie: its models, routing and rules, no key", { name: g.name }),
+      // the group as text for someone else's eipgam (laincatx on X)
+      { name: "Copy to share", icon: OUT, tip: t("{name} as text to paste into another eipgam: its models, routing and rules, no key", { name: g.name }),
         run: () => shareGroup(g) },
       // the card's own Remove, with its own question first (jimlee0824v2 on X)
       { name: "Remove", icon: "M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5M7 7v4M9 7v4", sep: true,
@@ -7768,12 +7768,12 @@ function routingPage(part) {
     ed.dataset.gslot = g ? g.id : "";
     const h = el("div", "ehead");
     h.append(el("b", "", g ? g.name : t("New group")));
-    if (g?.auto) h.append(el("span", "note", t("found by magpie — saving a change makes it yours")));
+    if (g?.auto) h.append(el("span", "note", t("found by eipgam — saving a change makes it yours")));
     ed.append(h);
     const keys = (i) => { i.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Escape") { cancelGroup(); } else if (e.key === "Enter" && (i === name || i === noteIn)) saveBtn.onclick(); }; return i; };
     const name = keys(input(d.name, t("e.g. Opus anywhere")));
     const idHint = el("div", "hint");
-    // an existing group's id can change (an auto- one found by magpie too);
+    // an existing group's id can change (an auto- one found by eipgam too);
     // a new one's is made from its name
     if (g && d.id === undefined) d.id = g.id;
     // an open group folds back into its row from its heading, as it opened
@@ -7847,12 +7847,12 @@ function routingPage(part) {
     // More are picked with the model picker the agents use.
     const infoOf = (id) => g?.memberInfo?.find((x) => x.id === id);
     const pickFrom = (label, anchor, ev, options, onPick, value = "") => openPicker({ id: "", name: "", fields: [] }, { key: "rule", label, value, menu: true, options, onPick }, anchor, ev);
-    // the agents magpie heard from in the last 30 days that it doesn't
+    // the agents eipgam heard from in the last 30 days that it doesn't
     // know, by the names the gateway gave them (usage.AgentOf), asked for
     // once while the editor is open; none when usage can't be read
     let heardFrom = null;
     const heard = () => heardFrom || (heardFrom = api("usage?period=30d")
-      .then((u) => (u?.agents || []).map((a) => uaName(a.id)).filter((id) => id && id !== "other" && id !== "magpie"))
+      .then((u) => (u?.agents || []).map((a) => uaName(a.id)).filter((id) => id && id !== "other" && id !== "eipgam"))
       .catch(() => []));
     const box = el("div", "fallback");
     const list = el("div", "fbl");
@@ -7992,7 +7992,7 @@ function routingPage(part) {
         // that don't had nothing here to tell one from another, and which
         // member a picture would reach was only found out by sending one.
         // A member whose list says nothing of images is marked unknown rather
-        // than text-only: magpie counts it text-only for a describer
+        // than text-only: eipgam counts it text-only for a describer
         // (gateway.blindTo), which is not the same as its list saying so.
         if (chips) row.append(modelInfo({ ...chips, group: !!s, images: info?.images ?? chips.images, imagesUnknown: info?.imagesUnknown ?? chips.imagesUnknown }));
         // the reasoning the model is sent at in this group: the group's
@@ -8085,7 +8085,7 @@ function routingPage(part) {
             fb.type = "button";
             fb.setAttribute("aria-pressed", String(on));
             // on a provider the user added (provider.OwnFast, #1615) it is
-            // only asked for: magpie can't know the provider serves it
+            // only asked for: eipgam can't know the provider serves it
             fb.title = ultra ? t(m.ownFast ? "Asked for service_tier \"ultrafast\" whatever the agent asks, where your provider serves it. One that turns it away is asked without it. Click to send it at the usual speed" : "Sent Ultrafast where the account offers it, and fast where it doesn't, whatever the agent asks. Click to send it at the usual speed")
               : m.ownFast
               ? (on ? t("Asked for OpenAI's fast mode (service_tier \"priority\") whatever the agent asks: quicker, at a higher price, where your provider serves it. One that turns it away is asked without it") : t("Sent as the agent asks; click to ask your provider for OpenAI's fast mode (service_tier \"priority\")"))
@@ -8361,7 +8361,7 @@ function routingPage(part) {
       const p = pin.value.trim();
       if (!p) return "";
       if (!isPattern(p)) return status(t("A pattern has a * in it, or starts with re:"), "warn"), null;
-      if (!patternTest(p)) return status(t("{pattern} is not a regular expression magpie can read", { pattern: p }), "warn"), null;
+      if (!patternTest(p)) return status(t("{pattern} is not a regular expression eipgam can read", { pattern: p }), "warn"), null;
       if (!d.match.includes(p)) d.match.push(p);
       pin.value = "";
       rematch(); drawPats(); draw(); drawRules();
@@ -8898,7 +8898,7 @@ function routingPage(part) {
           wrap("compact", cp);
           if (mine === "compact") focus = () => cp.focus({ preventScroll: true });
         }
-        // agents: the ones magpie knows, the others it has heard from, and
+        // agents: the ones eipgam knows, the others it has heard from, and
         // any typed by the name the gateway gives a client it doesn't know
         // (raikyou on Discord: SillyTavern, one's own app)
         if (kinds.includes("agents")) {
@@ -9279,14 +9279,14 @@ function routingPage(part) {
       // pick was most of the editor's words
       const how = [...(sg ? [t("A routing group classifies as any request to it goes: if its first model fails, the next is asked.")] : []),
         t(isJev(d.classifier) && !intents
-          ? "Jev is asked once as each turn begins, with the message and what it said of the turn before. Its calls show in the usage as magpie’s own."
+          ? "Jev is asked once as each turn begins, with the message and what it said of the turn before. Its calls show in the usage as eipgam’s own."
           : isJev(d.classifier)
-          ? "As a turn begins, Jev is asked once which of the intents the message is, and how hard the turn is when it picks the effort. An intent it isn't sure of matches no rule. Its calls show in the usage as magpie’s own."
+          ? "As a turn begins, Jev is asked once which of the intents the message is, and how hard the turn is when it picks the effort. An intent it isn't sure of matches no rule. Its calls show in the usage as eipgam’s own."
           : auto && !intents
-          ? "As a turn begins, this model is asked how hard the turn is — once; a small, fast one without reasoning is best. If it fails or can't say, the turn reasons as the agent asked. Its calls show in the usage as magpie’s own."
+          ? "As a turn begins, this model is asked how hard the turn is — once; a small, fast one without reasoning is best. If it fails or can't say, the turn reasons as the agent asked. Its calls show in the usage as eipgam’s own."
           : auto
-          ? "As a turn begins, this model is asked which of the intents the message is and how hard the turn is, each once; a small, fast one without reasoning is best. If it can't say, no intent matches and the turn reasons as the agent asked. Its calls show in the usage as magpie’s own."
-          : "As a turn begins, this model is asked which of the intents the message is — once; a small, fast one without reasoning is best. If it fails or can't say, no intent matches. Its calls show in the usage as magpie’s own.")];
+          ? "As a turn begins, this model is asked which of the intents the message is and how hard the turn is, each once; a small, fast one without reasoning is best. If it can't say, no intent matches and the turn reasons as the agent asked. Its calls show in the usage as eipgam’s own."
+          : "As a turn begins, this model is asked which of the intents the message is — once; a small, fast one without reasoning is best. If it fails or can't say, no intent matches. Its calls show in the usage as eipgam’s own.")];
       const pickRow = el("div", "rt-pickrow");
       pickRow.append(cb, infoTip(how.join(" ")));
       cls.replaceChildren(pickRow);
@@ -9534,7 +9534,7 @@ function routingPage(part) {
   // account it went to, the model that answered (marked when the reply
   // names another), how it ended and when; today's calls and tokens over
   // them, from the Usage page's count, and between the two a small stage:
-  // the agents that asked lately, magpie, and where their requests went,
+  // the agents that asked lately, eipgam, and where their requests went,
   // each new request a dot flying there and back. A click opens the
   // window's Routing page on that request; nothing here moves the panel's
   // scroll.
@@ -9553,20 +9553,20 @@ function routingPage(part) {
   window.panelRoutingShown = () => {
     inSightAgain();
     if (pShown() && performance.now() - todayAt > 5e3) loadToday();
-    // a group switched on the Routing page or by `magpie group pick`
+    // a group switched on the Routing page or by `eipgam group pick`
     // since: the tab shows the model it goes to now
     if (pShown()) loadGroups(true);
     pDraw();
   };
 
-  // ---- the stage: agents → magpie → providers ----
+  // ---- the stage: agents → eipgam → providers ----
   // Three a side at most, each kept where it is while it stays: one that
   // comes takes the place of the one heard of longest ago. On the right a
   // place is a provider, naming the account its latest try went to: a place
   // an account let one provider, its requests trying account after account,
   // fill all three, and the providers other sessions used were left off
   // (#1389, Creat55). A request plays as a dot in its agent's colour: to
-  // magpie, on to the provider it was routed to, waiting there while that
+  // eipgam, on to the provider it was routed to, waiting there while that
   // answers; a try that failed turns red and comes back for the next, and
   // the answer flies home green (red when nobody could answer). Still,
   // with reduced motion or the tab hidden.
@@ -9663,7 +9663,7 @@ function routingPage(part) {
     }
     return n;
   }
-  // the wires from each agent into magpie, and out of it to each account
+  // the wires from each agent into eipgam, and out of it to each account
   function pLayout() {
     const r = pStage.getBoundingClientRect();
     if (!r.width) return;
@@ -9814,7 +9814,7 @@ function routingPage(part) {
     else if (!loaded) out.push(...pGhost());
     else if (!rs.length) {
       const p = el("div", "pr-none");
-      p.append(el("b", "", t("No request yet")), t("Every request an agent sends to magpie shows up here, routed for real."));
+      p.append(el("b", "", t("No request yet")), t("Every request an agent sends to eipgam shows up here, routed for real."));
       out.push(p);
     } else {
       const list = el("div", "pr-list");
@@ -9941,7 +9941,7 @@ function routingPage(part) {
   // sight change #rt's height a fraction of a pixel, which WebKit reports
   // as a ResizeObserver loop (#3164)
   let stageAsked = 0;
-  // The agents' and magpie's columns are as wide as their words (routing.css),
+  // The agents' and eipgam's columns are as wide as their words (routing.css),
   // so a new name or address can move the cards while the stage keeps its size
   const stageSeen = new ResizeObserver(() => { if (!stageAsked) stageAsked = requestAnimationFrame(() => { stageAsked = 0; layout(); }); });
   for (const e of [stage, srcs, hub]) stageSeen.observe(e);

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A group held to one ChatGPT account whose classifier is a model, not a
@@ -72,7 +72,7 @@ func TestClassifierModelHeldToItsGroupsAccount(t *testing.T) {
 }
 
 // A gateway key held to one account holds what the classifier is asked
-// for its turns too, as it holds magpie's other calls for the key (a web
+// for its turns too, as it holds eipgam's other calls for the key (a web
 // search, a title): a ruled group whose classifier is a Codex model asks
 // it on the key's account, as the turn itself is sent.
 func TestClassifierModelHeldToTheKeysAccount(t *testing.T) {

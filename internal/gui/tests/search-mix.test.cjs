@@ -4,7 +4,7 @@
 // The fold shows only with two or more APIs on, closed while none is mixed;
 // All at once names every API on (POST /api/settings/search-api {mix}), In
 // order names none, and the fold is open while some are mixed. A mix of
-// some of them (magpie search mix) has neither choice on, and its line
+// some of them (eipgam search mix) has neither choice on, and its line
 // names them. In every language, wide and narrow.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -65,7 +65,7 @@ async function open(engine, t, lang, apis, posts, width) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, apis, posts));
   await watchSettingsReads(page);
-  await page.goto(`http://magpie.test/?view=settings&tab=models&lang=${lang}`);
+  await page.goto(`http://eipgam.test/?view=settings&tab=models&lang=${lang}`);
   await settingsDrawn(page);
   return { page, errors };
 }

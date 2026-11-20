@@ -9,13 +9,13 @@ import (
 
 // A placeholder split between two pieces of a tool call's arguments comes
 // back whole when a keepalive event comes between the pieces: Anthropic's
-// ping, which the API and magpie's own encoder send while the model is
-// slow, and Responses' response.in_progress, magpie's keepalive on that
+// ping, which the API and eipgam's own encoder send while the model is
+// slow, and Responses' response.in_progress, eipgam's keepalive on that
 // protocol. The ping released the first piece as it was, and the agent
 // wrote {{SECRET_…}} into a file where the model had written German
 // (magpie-community/plugins#738, sensenova's prune_old_keys texts).
 func TestWriterHeldAcrossKeepalive(t *testing.T) {
-	const v = `Alte magpie-*-Keys dieses Kontos werden gelöscht; manuelle Keys und Keys anderer Konten bleiben „erhalten".`
+	const v = `Alte eipgam-*-Keys dieses Kontos werden gelöscht; manuelle Keys und Keys anderer Konten bleiben „erhalten".`
 	p := placeholder("SECRET", v)
 	anthropic := func(s string) string {
 		b, _ := json.Marshal(map[string]any{"type": "content_block_delta", "index": 1, "delta": map[string]any{"type": "input_json_delta", "partial_json": s}})

@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, theme, posts));
-        await page.goto("http://magpie.test/?view=groups");
+        await page.goto("http://eipgam.test/?view=groups");
         const on = page.locator(".rt-group", { hasText: "Lit" });
         const off = page.locator(".rt-group.disabled", { hasText: "Quiet" });
         await off.waitFor();

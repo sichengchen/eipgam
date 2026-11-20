@@ -12,13 +12,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
 // wslCheck is a Windows machine with WSL whose running distros are up;
 // probes are the distros a command was looked for in, and runs the
 // wsl.exe command line of each check started there. The check's run is
-// this test binary as the fake server, in mode (MAGPIE_FAKE_MCP: "exit"
+// this test binary as the fake server, in mode (EIPGAM_FAKE_MCP: "exit"
 // for one that fails), or as the server's own variables say for "".
 type wslCheck struct {
 	mu     sync.Mutex
@@ -53,7 +53,7 @@ func fakeWSLCheck(t *testing.T, up ...string) *wslCheck {
 		return nil, errors.New("unexpected wsl.exe " + strings.Join(args, " "))
 	}
 	wslCommand = func(ctx context.Context, tl wslrun.Tool, args ...string) *exec.Cmd {
-		// wsl.exe as magpie starts it, its program swapped for the fake
+		// wsl.exe as eipgam starts it, its program swapped for the fake
 		c := tl.Command(ctx, args...)
 		w.mu.Lock()
 		w.runs = append(w.runs, slices.Clone(c.Args))
@@ -90,7 +90,7 @@ func TestCheckWSLOnlyServerInItsDistro(t *testing.T) {
 	}
 	r := w.runs[0]
 	want := []string{"wsl.exe", "-d", "Ubuntu", "--exec", "/usr/bin/env", "PATH=/home/loong/.nvm/versions/node/v24.9.0/bin:/usr/bin"}
-	if len(r) != 9 || !slices.Equal(r[:6], want) || !strings.HasPrefix(r[6], "MAGPIE_WSL_RUN=") ||
+	if len(r) != 9 || !slices.Equal(r[:6], want) || !strings.HasPrefix(r[6], "EIPGAM_WSL_RUN=") ||
 		r[7] != "/home/loong/.nvm/versions/node/v24.9.0/bin/node" || r[8] != "/home/loong/tools/xxx.js" {
 		t.Fatalf("run %q", r)
 	}
@@ -114,15 +114,15 @@ func TestCheckWSLOnlyServerInItsDistro(t *testing.T) {
 		}
 		return old(d, args...)
 	}
-	s.Command, s.Agents = "magpie-no-such-node", []string{"claude@wsl:Debian"}
-	if h = CheckServer(context.Background(), s); h.Why != "notfound" || h.Detail != "magpie-no-such-node" || !slices.Equal(h.Checked, []string{"Debian"}) {
+	s.Command, s.Agents = "eipgam-no-such-node", []string{"claude@wsl:Debian"}
+	if h = CheckServer(context.Background(), s); h.Why != "notfound" || h.Detail != "eipgam-no-such-node" || !slices.Equal(h.Checked, []string{"Debian"}) {
 		t.Fatalf("got %+v, want notfound in Debian", h)
 	}
 }
 
 // A server only this machine's agents have is checked here as before,
 // WSL never asked; so is a Windows program given to agents in WSL
-// (magpie's own image server, which runs on Windows whoever starts it).
+// (eipgam's own image server, which runs on Windows whoever starts it).
 func TestCheckWindowsServerHere(t *testing.T) {
 	w := fakeWSLCheck(t, "Ubuntu")
 	s := fakeStdio(t, "ok", nil)
@@ -131,7 +131,7 @@ func TestCheckWindowsServerHere(t *testing.T) {
 	if h.State != "ok" || h.Tools != 3 || h.Checked != nil {
 		t.Fatalf("got %+v, want ok here with nothing named", h)
 	}
-	for _, c := range []string{`D:\tools\Magpie\magpie-windows-amd64.exe`, `C:/x/npx.cmd`} {
+	for _, c := range []string{`D:\tools\eipgam\eipgam-windows-amd64.exe`, `C:/x/npx.cmd`} {
 		if got := checkSides(&Server{Transport: "stdio", Command: c, Agents: []string{"claude@wsl:Ubuntu"}}); !slices.Equal(got, []string{""}) {
 			t.Errorf("%s: sides %q, want this machine", c, got)
 		}

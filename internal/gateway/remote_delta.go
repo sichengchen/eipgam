@@ -11,51 +11,51 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // Two magpies that share their gateways with each other (LotusDecoder on
 // X: one in China, one in the US, each the other's provider) sent the
 // leg between them the whole conversation every turn, over a slow link,
-// though Codex sends magpie only its new input on its WebSocket. Codex
+// though Codex sends eipgam only its new input on its WebSocket. Codex
 // says store false, so neither prevResponses nor prevDelta keep or cut
 // anything for it.
 //
-// So, on a Responses request to a remote magpie, this magpie asks the
+// So, on a Responses request to a remote eipgam, this eipgam asks the
 // other to keep the turn whatever store says (KeepTurnHeader), and a
-// magpie that does says so on its reply (KeptTurnHeader). This side keeps
+// eipgam that does says so on its reply (KeptTurnHeader). This side keeps
 // what it sent that route and scope: a digest of each input item as it
 // went (after masking and every translation), the reply's output items'
-// type and ids, and the other magpie's id for the reply (remoteSent). The
+// type and ids, and the other eipgam's id for the reply (remoteSent). The
 // next request whose input starts with exactly those items, then as many
 // items as the reply had of the same type and call_id or id, goes as the
 // items after them with previous_response_id, store as it was. Anything
 // else goes whole: another history, an edited one, a request that names
-// a previous response itself, a magpie that never said it keeps turns
-// (one from before this), or a route whose magpie refused the id within
+// a previous response itself, a eipgam that never said it keeps turns
+// (one from before this), or a route whose eipgam refused the id within
 // remoteRefusedWait (it lost it to a restart, or let it go under its own
 // cap), as prevRefused finds it.
 //
-// The other magpie keeps the turn under prevScope, in prevResponses,
+// The other eipgam keeps the turn under prevScope, in prevResponses,
 // bounded by prevCap and prevTTL like any other. It takes the header only
-// from another magpie (keepTurnAsks), and an id
-// a magpie asking so names that it doesn't hold is answered
+// from another eipgam (keepTurnAsks), and an id
+// a eipgam asking so names that it doesn't hold is answered
 // previous_response_not_found before anything is sent: relayed as
 // written, a vendor that ignores the field would answer without the
-// conversation. A client that sends magpie's User-Agent to make magpie
+// conversation. A client that sends eipgam's User-Agent to make eipgam
 // keep its turns is kept to its own scope and the caps, as store true
 // would have it, and the header comes off every request as it arrives,
 // so no provider is ever sent it (withCaller); it goes on only to a
-// remote magpie (forwardOnce).
+// remote eipgam (forwardOnce).
 
 const (
-	// KeepTurnHeader asks a remote magpie to keep the turn though the
+	// KeepTurnHeader asks a remote eipgam to keep the turn though the
 	// request says store false
 	KeepTurnHeader = "X-Magpie-Keep-Turn"
-	// KeptTurnHeader on a magpie's reply says it kept the turn when asked
+	// KeptTurnHeader on a eipgam's reply says it kept the turn when asked
 	KeptTurnHeader = "X-Magpie-Kept-Turn"
-	// remoteRefusedWait is how long a route whose magpie refused the id
+	// remoteRefusedWait is how long a route whose eipgam refused the id
 	// is sent whole before a delta is tried again
 	remoteRefusedWait = 30 * time.Minute
 	// remoteSentCap bounds the bytes of what is kept of turns sent
@@ -69,12 +69,12 @@ type itemSum [sha256.Size]byte
 // itemMark is what of a reply's output item its next request must match.
 type itemMark struct{ typ, id, callID string }
 
-// remoteSent is one turn sent a remote magpie and answered.
+// remoteSent is one turn sent a remote eipgam and answered.
 type remoteSent struct {
 	key    string // route and scope
 	input  []itemSum
 	output []itemMark
-	id     string // the other magpie's id for the reply
+	id     string // the other eipgam's id for the reply
 	at     time.Time
 	el     *list.Element
 }
@@ -86,7 +86,7 @@ type remoteSentStore struct {
 	m       map[string][]*remoteSent
 	order   list.List // front the newest
 	size    int
-	refused map[string]time.Time // route: when its magpie refused an id
+	refused map[string]time.Time // route: when its eipgam refused an id
 	now     func() time.Time
 }
 
@@ -223,7 +223,7 @@ func marksMatch(want []itemMark, items []json.RawMessage) bool {
 	return true
 }
 
-// remoteTurn is one Responses request to a remote magpie, as passthrough
+// remoteTurn is one Responses request to a remote eipgam, as passthrough
 // sends it: the whole input's digests, and the turn it continues if a
 // delta is sent.
 type remoteTurn struct {
@@ -234,7 +234,7 @@ type remoteTurn struct {
 
 type keepTurnKey struct{}
 
-// remoteTurnFor is the request's turn to a remote magpie, nil for one
+// remoteTurnFor is the request's turn to a remote eipgam, nil for one
 // whose body names a previous response itself or whose input isn't a
 // list of items: those go as they are, and aren't asked kept.
 func remoteTurnFor(r *http.Request, p provider.Provider, body []byte) *remoteTurn {
@@ -296,7 +296,7 @@ func (t *remoteTurn) delta(body []byte) ([]byte, bool) {
 	return nb, true
 }
 
-// refused notes that the route's magpie didn't hold the id: the turn is
+// refused notes that the route's eipgam didn't hold the id: the turn is
 // forgotten, and the route sent whole for remoteRefusedWait.
 func (t *remoteTurn) refused() {
 	if t.from != nil {
@@ -309,7 +309,7 @@ func (t *remoteTurn) refused() {
 // tee reads the reply as it is relayed; finish keeps the turn once it is
 // read, if it completed.
 func (t *remoteTurn) tee(rc io.ReadCloser, ctype string) (io.ReadCloser, func()) {
-	sp := &spool{limit: prevReplyMax, pattern: "magpie-remoteturn-*"}
+	sp := &spool{limit: prevReplyMax, pattern: "eipgam-remoteturn-*"}
 	tr := &teeBody{ReadCloser: rc, sp: sp, ctype: ctype}
 	return tr, func() {
 		defer sp.discard()
@@ -350,7 +350,7 @@ func (b *teeBody) Read(p []byte) (int, error) {
 }
 
 // withKeepTurn marks a request's context for forwardOnce to ask the
-// remote magpie to keep the turn.
+// remote eipgam to keep the turn.
 func withKeepTurn(ctx context.Context) context.Context {
 	return context.WithValue(ctx, keepTurnKey{}, true)
 }
@@ -360,11 +360,11 @@ func keepTurnAsked(ctx context.Context) bool {
 	return v
 }
 
-// keepsTurnFor is whether a request asks this magpie to keep its turn
-// though it says store false: only another magpie's (callerFrom).
+// keepsTurnFor is whether a request asks this eipgam to keep its turn
+// though it says store false: only another eipgam's (callerFrom).
 func keepsTurnFor(r *http.Request) bool { return callerOf(r).keepTurn }
 
-// keptTurnLost is the id a magpie asking its turns kept named that this
+// keptTurnLost is the id a eipgam asking its turns kept named that this
 // one doesn't hold: answered previous_response_not_found, never relayed.
 func keptTurnLost(r *http.Request) string {
 	if !keepsTurnFor(r) {
@@ -373,21 +373,21 @@ func keptTurnLost(r *http.Request) string {
 	return prevLost(r)
 }
 
-// keepTurnAsks is whether r is another magpie asking its turn kept: the
-// header names the magpie that asks (magpie/<version>), and the request
-// comes as a magpie's to another does, with magpie's User-Agent or, for a
+// keepTurnAsks is whether r is another eipgam asking its turn kept: the
+// header names the eipgam that asks (eipgam/<version>), and the request
+// comes as a eipgam's to another does, with eipgam's User-Agent or, for a
 // Codex turn, Codex's, which forwardOnce passes on as Codex sent it (a
 // relay that serves only Codex knows it by them). A plain client's header
 // is ignored. A client that copies both is kept to its own scope and the
 // caps, as store true would have it.
 func keepTurnAsks(r *http.Request) bool {
-	if !strings.HasPrefix(r.Header.Get(KeepTurnHeader), "magpie/") {
+	if !strings.HasPrefix(r.Header.Get(KeepTurnHeader), "eipgam/") {
 		return false
 	}
 	return magpieAsks(r) || fromCodex(r.Header)
 }
 
-// magpieAsks is whether r comes from another magpie, by its User-Agent.
+// magpieAsks is whether r comes from another eipgam, by its User-Agent.
 func magpieAsks(r *http.Request) bool {
-	return strings.HasPrefix(r.Header.Get("User-Agent"), "magpie/")
+	return strings.HasPrefix(r.Header.Get("User-Agent"), "eipgam/")
 }

@@ -63,7 +63,7 @@ func TestPluginOwnIconAndKeyHint(t *testing.T) {
 	if got := (Method{Type: "api"}).KeyTitle("Lime"); got != "Lime API key" {
 		t.Errorf("no label's key title = %q", got)
 	}
-	// kept for when magpie has only just started
+	// kept for when eipgam has only just started
 	for _, p := range Cached() {
 		if p.ID == "lemon" && p.Icon != lemon.Icon {
 			t.Errorf("cached icon = %.60q", p.Icon)

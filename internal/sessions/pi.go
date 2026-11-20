@@ -13,7 +13,7 @@ import (
 
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
 // Pi writes a file per session, <time>_<session id>.jsonl, in a folder per
@@ -273,7 +273,7 @@ func piLeadID(p string) string {
 // piSubagentFiles) in the session keyed id: their calls are counted there,
 // on the model and provider each ran, and not again on the result. Pi
 // writes the result with their usage summed, and it was counted on the
-// lead's model: a lead on magpie's entry took a DeepSeek subagent's calls
+// lead's model: a lead on eipgam's entry took a DeepSeek subagent's calls
 // for the gateway's, which left them out (nzvzbmz78932 on X).
 func piSubagentsRead(agent, id string, d *piSubResults) bool {
 	if agent == "omp" || d == nil || len(d.Results) == 0 {

@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/netproxy/sshtest"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/netproxy/sshtest"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func proxiesRig(t *testing.T) (call func(path, body string) (int, string), state func() settingsJSON) {
@@ -240,7 +240,7 @@ func TestSavedSSHProxyAPI(t *testing.T) {
 	}
 }
 
-// A server that lets magpie log in but won't forward says so about the
+// A server that lets eipgam log in but won't forward says so about the
 // server, not about the tunnel's local port: OpenSSH with
 // AllowTcpForwarding no refuses the channel, and macOS 27's sshd hangs up
 // the whole connection.

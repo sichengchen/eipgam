@@ -12,9 +12,9 @@
 //
 // Every session a bridge run writes gets an id New made: a version 4 UUID
 // whose last six bytes are a keyed hash of its first ten. The key is this
-// computer's own (a random file in magpie's config folder), so the id is as
+// computer's own (a random file in eipgam's config folder), so the id is as
 // random as any to anyone without it, Anthropic, which Claude Code tells
-// the session id, included, while magpie's readers check it with no list
+// the session id, included, while eipgam's readers check it with no list
 // to keep: Is.
 package bridgesid
 
@@ -31,10 +31,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
-// keyFile is the key's file in magpie's config folder.
+// keyFile is the key's file in eipgam's config folder.
 const keyFile = "claude-bridge-session-key"
 
 // recheck is how long a missing or unreadable key is believed missing
@@ -131,7 +131,7 @@ func mark(k []byte, head []byte) [sha256.Size]byte {
 }
 
 // New is a session id for a bridge run: a version 4 UUID that Is knows.
-// Without a key (magpie's config folder can't be written) it is a plain
+// Without a key (eipgam's config folder can't be written) it is a plain
 // random one, which the readers take for the user's.
 func New() string {
 	var b [16]byte

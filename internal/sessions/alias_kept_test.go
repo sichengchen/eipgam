@@ -7,7 +7,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The Sessions page reads its ranges again every 10 s. While no file and

@@ -106,12 +106,12 @@ func codexKeysCodexDoesntKnow(t *testing.T, root map[string]any, file string) []
 	return bad
 }
 
-// Every key magpie writes into Codex's config is one Codex knows: none it
+// Every key eipgam writes into Codex's config is one Codex knows: none it
 // has removed (disable_response_storage went in Codex 0.30, #6828), and
 // none it never had. Checked against Codex's own schema, for the config
-// magpie connects in place and for the magpie.config.toml profile, with a
+// eipgam connects in place and for the eipgam.config.toml profile, with a
 // model, an effort, subagents, memories and a sync. A key the user wrote
-// stays theirs: magpie neither adds one nor takes it out.
+// stays theirs: eipgam neither adds one nor takes it out.
 func TestCodexConfigHoldsOnlyKeysCodexKnows(t *testing.T) {
 	root := codexSchema(t)
 	// the schema itself closes the top level, and doesn't know the key

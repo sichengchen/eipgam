@@ -4,7 +4,7 @@ import (
 	"cmp"
 	"slices"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // What the app's Usage page hides from its Overview (onkashiko on X) is

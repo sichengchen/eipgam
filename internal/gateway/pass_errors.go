@@ -8,12 +8,12 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // passError answers a vendor's error for a provider whose errors the user
 // leaves to the client (errors=pass, ne9ko9 on Discord): nothing in it is
-// inferred or said in magpie's words. A vendor on the client's own API has
+// inferred or said in eipgam's words. A vendor on the client's own API has
 // its status, headers' Content-Type and body go as they came; one on
 // another API has its status, type, code (a number too), param and words
 // written in the client's shape. Retry-After and the rate-limit headers go

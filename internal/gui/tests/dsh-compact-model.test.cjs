@@ -21,8 +21,8 @@ const fresh = (wired = true) => ({
   agents: [{
     id: "dsh", name: "DeepSeek Harness", path: "/test/.dsh/profiles/web.json", icon: "deepseek-color", wired,
     fields: [
-      { key: "model", label: "model", value: wired ? "magpie/fake/m1" : "", options: wired ? models.map((m) => ({ ...m, value: "magpie/" + m.value })) : [] },
-      { key: "compact_model", label: "compaction model", value: "", options: wired ? models.map((m) => ({ ...m, value: "magpie/" + m.value })) : [] },
+      { key: "model", label: "model", value: wired ? "eipgam/fake/m1" : "", options: wired ? models.map((m) => ({ ...m, value: "eipgam/" + m.value })) : [] },
+      { key: "compact_model", label: "compaction model", value: "", options: wired ? models.map((m) => ({ ...m, value: "eipgam/" + m.value })) : [] },
     ],
   }],
   profiles: [],
@@ -74,20 +74,20 @@ function server(lang, fixture) {
 // Expected reader-facing words, independent of the translation lookup.
 const W = {
   en: { unset: "compaction model: the session's model", def: "Default", note: "each compaction on the session's model", set: "compaction model: M2",
-    moved: "DeepSeek Harness asked for fake/m1 to compact its conversation; magpie served it on fake/m2, the model set for its compaction.",
-    rested: "DeepSeek Harness asked for workbuddy/deepseek-v4.1-flash to compact its conversation, and its provider is out of its limit; magpie served it on trae-cn/deepseek-v4.1-flash, the same model from another provider." },
+    moved: "DeepSeek Harness asked for fake/m1 to compact its conversation; eipgam served it on fake/m2, the model set for its compaction.",
+    rested: "DeepSeek Harness asked for workbuddy/deepseek-v4.1-flash to compact its conversation, and its provider is out of its limit; eipgam served it on trae-cn/deepseek-v4.1-flash, the same model from another provider." },
   zh: { unset: "压缩模型：会话所用的模型", def: "默认", note: "每次压缩都用会话所用的模型", set: "压缩模型：M2",
-    moved: "DeepSeek Harness 请求用 fake/m1 压缩它的对话；magpie 让 fake/m2 来处理，即为它的压缩设定的模型。",
-    rested: "DeepSeek Harness 请求用 workbuddy/deepseek-v4.1-flash 压缩它的对话，而它的服务商已超出限额；magpie 让 trae-cn/deepseek-v4.1-flash 来处理，即另一家服务商的同一模型。" },
+    moved: "DeepSeek Harness 请求用 fake/m1 压缩它的对话；eipgam 让 fake/m2 来处理，即为它的压缩设定的模型。",
+    rested: "DeepSeek Harness 请求用 workbuddy/deepseek-v4.1-flash 压缩它的对话，而它的服务商已超出限额；eipgam 让 trae-cn/deepseek-v4.1-flash 来处理，即另一家服务商的同一模型。" },
   "zh-TW": { unset: "壓縮模型：工作階段所用的模型", def: "預設", note: "每次壓縮都用工作階段所用的模型", set: "壓縮模型：M2",
-    moved: "DeepSeek Harness 請求用 fake/m1 壓縮它的對話；magpie 讓 fake/m2 來處理，即為它的壓縮設定的模型。",
-    rested: "DeepSeek Harness 請求用 workbuddy/deepseek-v4.1-flash 壓縮它的對話，而它的服務商已超出限額；magpie 讓 trae-cn/deepseek-v4.1-flash 來處理，即另一家服務商的同一模型。" },
+    moved: "DeepSeek Harness 請求用 fake/m1 壓縮它的對話；eipgam 讓 fake/m2 來處理，即為它的壓縮設定的模型。",
+    rested: "DeepSeek Harness 請求用 workbuddy/deepseek-v4.1-flash 壓縮它的對話，而它的服務商已超出限額；eipgam 讓 trae-cn/deepseek-v4.1-flash 來處理，即另一家服務商的同一模型。" },
   ja: { unset: "圧縮モデル：セッションのモデル", def: "デフォルト", note: "圧縮はいつもセッションのモデルで行う", set: "圧縮モデル：M2",
-    moved: "DeepSeek Harness は会話の圧縮に fake/m1 をリクエストしました。magpie は fake/m2（圧縮用に設定されたモデル）で応答しました。",
-    rested: "DeepSeek Harness は会話の圧縮に workbuddy/deepseek-v4.1-flash をリクエストしましたが、そのプロバイダーは上限に達しています。magpie は trae-cn/deepseek-v4.1-flash（別のプロバイダーの同じモデル）で応答しました。" },
+    moved: "DeepSeek Harness は会話の圧縮に fake/m1 をリクエストしました。eipgam は fake/m2（圧縮用に設定されたモデル）で応答しました。",
+    rested: "DeepSeek Harness は会話の圧縮に workbuddy/deepseek-v4.1-flash をリクエストしましたが、そのプロバイダーは上限に達しています。eipgam は trae-cn/deepseek-v4.1-flash（別のプロバイダーの同じモデル）で応答しました。" },
   de: { unset: "Komprimierungsmodell: das Modell der Sitzung", def: "Standard", note: "jede Komprimierung auf dem Modell der Sitzung", set: "Komprimierungsmodell: M2",
-    moved: "DeepSeek Harness hat fake/m1 angefordert, um seine Unterhaltung zu komprimieren; magpie hat sie mit fake/m2 beantwortet, dem dafür eingestellten Modell.",
-    rested: "DeepSeek Harness hat workbuddy/deepseek-v4.1-flash angefordert, um seine Unterhaltung zu komprimieren, doch sein Anbieter ist über seinem Limit; magpie hat sie mit trae-cn/deepseek-v4.1-flash beantwortet, demselben Modell eines anderen Anbieters." },
+    moved: "DeepSeek Harness hat fake/m1 angefordert, um seine Unterhaltung zu komprimieren; eipgam hat sie mit fake/m2 beantwortet, dem dafür eingestellten Modell.",
+    rested: "DeepSeek Harness hat workbuddy/deepseek-v4.1-flash angefordert, um seine Unterhaltung zu komprimieren, doch sein Anbieter ist über seinem Limit; eipgam hat sie mit trae-cn/deepseek-v4.1-flash beantwortet, demselben Modell eines anderen Anbieters." },
 };
 
 const row = '.row.agent[data-id="dsh"]';
@@ -114,7 +114,7 @@ for (const engine of engines) {
           }
           await browser.close();
         });
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator(row).waitFor();
         await page.locator(`${row} .ag-link`).click();
         await page.locator(`${row} .ag-exp`).waitFor();
@@ -142,7 +142,7 @@ for (const engine of engines) {
         await page.locator("#pop #list li", { hasText: "M2" }).first().click();
         await wrote;
         await page.waitForFunction(() => document.querySelector('.row.agent[data-id="dsh"] .field.extra.set[data-key="compact_model"]'));
-        assert.deepEqual(fixture.sets, [{ agent: "dsh", field: "compact_model", value: "magpie/fake/m2" }], "the pick posts the model as the model field spells it");
+        assert.deepEqual(fixture.sets, [{ agent: "dsh", field: "compact_model", value: "eipgam/fake/m2" }], "the pick posts the model as the model field spells it");
         assert.equal(await square.getAttribute("title"), w.set);
         assert.equal(await page.evaluate(() => scrollY), y, "picking does not scroll");
 
@@ -156,12 +156,12 @@ for (const engine of engines) {
         assert.equal(await square.getAttribute("title"), w.unset);
 
         fixture.state = fresh(false);
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator(row).waitFor();
-        assert.equal(await page.locator(`${row} .field[data-key="compact_model"]`).count(), 0, "off magpie's route, no square");
+        assert.equal(await page.locator(`${row} .field[data-key="compact_model"]`).count(), 0, "off eipgam's route, no square");
 
         fixture.state = fresh();
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-req").nth(1).waitFor();
         for (const why of [w.moved, w.rested]) {
           const titles = await page.locator(".rt-req").evaluateAll((es) => es.map((e) => e.getAttribute("title") || ""));

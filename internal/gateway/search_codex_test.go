@@ -12,9 +12,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // fakeChatGPT stands in for the ChatGPT backend: its search answers with
@@ -113,8 +113,8 @@ func TestChatGPTAccountSearchesByItsWebSearch(t *testing.T) {
 		set["external_web_access"] != true || !slices.Equal(set["allowed_callers"].([]any), []any{"direct"}) {
 		t.Fatalf("body %v", q)
 	}
-	if strings.Contains(string(mustJSON(q)), "magpie") {
-		t.Fatalf("magpie's own words went to the vendor: %v", q)
+	if strings.Contains(string(mustJSON(q)), "eipgam") {
+		t.Fatalf("eipgam's own words went to the vendor: %v", q)
 	}
 	urls := []string{}
 	for _, h := range hits {
@@ -173,7 +173,7 @@ func TestChatGPTAccountSearchesByItsWebSearch(t *testing.T) {
 	}
 }
 
-// Codex's web_search tool's mode reaches the search magpie makes for a
+// Codex's web_search tool's mode reaches the search eipgam makes for a
 // model that can't (#5018).
 func TestResponsesWebSearchModeKept(t *testing.T) {
 	for _, c := range []struct{ tool, want string }{

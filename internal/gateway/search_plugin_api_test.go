@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // plugged has plugins.json list a plugin that gives one search API, as the
@@ -79,7 +79,7 @@ func TestPluginSearchAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !canSearch() {
-		t.Fatal("a plugin's search API alone doesn't let magpie search")
+		t.Fatal("a plugin's search API alone doesn't let eipgam search")
 	}
 
 	s := New()

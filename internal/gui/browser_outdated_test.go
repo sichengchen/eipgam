@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/browserext"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/browserext"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // The sheet says to reload the extension when the connected one is older
-// than this magpie's (the browser runs what it loaded until then), and not
+// than this eipgam's (the browser runs what it loaded until then), and not
 // when it is as new, or when none is connected.
 func TestBrowserStateOutdated(t *testing.T) {
 	sandboxHome(t)
@@ -26,7 +26,7 @@ func TestBrowserStateOutdated(t *testing.T) {
 		json.NewEncoder(w).Encode(st)
 	}))
 	t.Cleanup(srv.Close)
-	t.Setenv("MAGPIE_ADDR", strings.TrimPrefix(srv.URL, "http://"))
+	t.Setenv("EIPGAM_ADDR", strings.TrimPrefix(srv.URL, "http://"))
 	if gateway.URL() != srv.URL {
 		t.Fatalf("the gateway is at %s, not %s", gateway.URL(), srv.URL)
 	}

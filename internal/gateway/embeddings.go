@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // retrieveTimeout bounds an embeddings or rerank call: a vendor answers
@@ -41,7 +41,7 @@ func (s *Server) retrieve(path, operation string) http.HandlerFunc {
 		var asked string
 		json.Unmarshal(req["model"], &asked)
 		if asked == "" {
-			writeError(w, provider.Chat, 400, "name the model: \"model\" is a magpie model id, as /v1/models lists them")
+			writeError(w, provider.Chat, 400, "name the model: \"model\" is a eipgam model id, as /v1/models lists them")
 			return
 		}
 		s.serveRetrieval(w, r, path, operation, start, asked, &jsonRetrieval{req: req})
@@ -450,10 +450,10 @@ func (s *Server) retrieveOpen(ctx context.Context, p provider.Provider, proto pr
 	if accept != "" {
 		req.Header.Set("Accept", accept)
 	}
-	// magpie's, or the agent's own where the provider passes it on (#1851)
+	// eipgam's, or the agent's own where the provider passes it on (#1851)
 	stampUA(ctx, p, req.Header)
 	if p.IsRemoteMagpie() {
-		req.Header.Set("User-Agent", "magpie/"+Version)
+		req.Header.Set("User-Agent", "eipgam/"+Version)
 		passOnCaller(ctx, req)
 		passOnUA(req, callerUA(ctx))
 	}

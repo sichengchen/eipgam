@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // Qwen Cloud (judi0713 on Discord), Alibaba's international Qwen platform:
@@ -55,7 +55,7 @@ func TestQwenCloud(t *testing.T) {
 			t.Fatalf("%s imported as %q at %q", chat, im.Preset, im.Chat)
 		}
 	}
-	q, err := ParseImport("magpie://import?preset=qwencloud&region=us-east-1")
+	q, err := ParseImport("eipgam://import?preset=qwencloud&region=us-east-1")
 	if err != nil || q.Chat != "https://us-east-1.maas.qwencloudapi.com/compatible-mode/v1" {
 		t.Fatalf("import link: %+v (%v)", q, err)
 	}

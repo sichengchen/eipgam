@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// magpie web on a phone (geraldpppppp on X: 优化移动端 UI，为什么看不到agent
+// eipgam web on a phone (geraldpppppp on X: 优化移动端 UI，为什么看不到agent
 // 以及资源库之类的那些入口？). The pages were a strip that scrolled sideways
 // with nothing saying it did, and Agents and the Library lay past its edge.
 // Now they are a tab bar at the window's foot, as an iPhone app's: five tabs,
@@ -46,7 +46,7 @@ async function open(browser, lang, gateway, view) {
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));
   await page.route("**/*", serve(lang, gateway));
-  await page.goto("http://magpie.test/" + (view ? "?view=" + view : ""));
+  await page.goto("http://eipgam.test/" + (view ? "?view=" + view : ""));
   await page.waitForSelector("#nav", { state: "visible" });
   await page.waitForFunction(() => document.querySelector("#nav .nav-more") || document.querySelectorAll("#nav > button[data-view]").length);
   await page.waitForTimeout(300);
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce" });
     const page = await context.newPage();
     await page.route("**/*", serve("en", false));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     await page.waitForSelector("#view-providers", { state: "visible" });
     await page.waitForTimeout(300);
     assert.equal(await page.locator("#nav .nav-more").count(), 0);

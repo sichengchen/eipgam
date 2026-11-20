@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // #2096: with Settings' AutoRestart on, a downloaded update is restarted
@@ -146,12 +146,12 @@ func TestAutoRestartWaitsWhileTheWindowIsUsed(t *testing.T) {
 	eventually(t, "a restart asked for waited for the window", func() bool { return restarts.Load() == 2 })
 }
 
-// magpie update run in a terminal (an agent's) restarts the app as
+// eipgam update run in a terminal (an agent's) restarts the app as
 // AutoRestart does, so it waits for the user's window too.
 func TestTerminalUpdateWaitsWhileTheWindowIsUsed(t *testing.T) {
 	busy := &fakeBusy{}
 	busy.set(gateway.Busy{Last: time.Now().Add(-time.Hour)})
-	exe := filepath.Join(t.TempDir(), "magpie")
+	exe := filepath.Join(t.TempDir(), "eipgam")
 	if err := os.WriteFile(exe, []byte("v0.1.1"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -174,14 +174,14 @@ func TestTerminalUpdateWaitsWhileTheWindowIsUsed(t *testing.T) {
 	eventually(t, "never restarted once the window was left", func() bool { return restarts.Load() == 1 })
 }
 
-// A wait magpie update armed ends at restartDrain and restarts whatever is
+// A wait eipgam update armed ends at restartDrain and restarts whatever is
 // in flight; one the app's own look at the disk armed does not, and --force
 // restarts at once (ljlwlcz on X, Windows: long streams kept the old
 // version running for good).
 func TestTerminalUpdateWaitIsBoundedAndCanBeForced(t *testing.T) {
 	busy := &fakeBusy{}
 	busy.set(gateway.Busy{Requests: 1, Last: time.Now()})
-	exe := filepath.Join(t.TempDir(), "magpie")
+	exe := filepath.Join(t.TempDir(), "eipgam")
 	if err := os.WriteFile(exe, []byte("v0.1.1"), 0o755); err != nil {
 		t.Fatal(err)
 	}

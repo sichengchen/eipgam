@@ -4,12 +4,12 @@ package agent
 // ~/.gemini/antigravity-cli/settings.json. With "modelProvider": "gemini" it
 // asks a Gemini API endpoint rather than Google's own backend, and lists the
 // models of customModelsConfig.customModels, each {apiProvider, modelName},
-// the one picked being "model". magpie's gateway speaks the Gemini API, so
-// magpie adds one custom model per catalog model, keyed
-// "magpie/<provider>/<model>", and sets modelProvider and model; the user's
-// own are stashed and put back when magpie steps out. The endpoint and key
+// the one picked being "model". eipgam's gateway speaks the Gemini API, so
+// eipgam adds one custom model per catalog model, keyed
+// "eipgam/<provider>/<model>", and sets modelProvider and model; the user's
+// own are stashed and put back when eipgam steps out. The endpoint and key
 // agy takes only from its environment (GOOGLE_GEMINI_BASE_URL and
-// GEMINI_API_KEY; no .env file), so magpie can't set them: the agent's row
+// GEMINI_API_KEY; no .env file), so eipgam can't set them: the agent's row
 // gives the command that starts agy with them (see Agent.Launch). That
 // names the model with --model too: agy 1.2 asks for a custom model picked
 // in settings.json or its /model picker with no model name ("model is
@@ -19,24 +19,24 @@ package agent
 // "modelProvider": "gemini" in it every agy runs on an API key, with no
 // Google account, and remote control, which needs the sign-in, was gone;
 // a plain agy asked for GEMINI_API_KEY too). The model, the provider and
-// the custom models (the user's own and magpie's, since agy takes the key
-// whole) are in a file of magpie's beside it, magpie-settings.json, which
+// the custom models (the user's own and eipgam's, since agy takes the key
+// whole) are in a file of eipgam's beside it, eipgam-settings.json, which
 // the launch hands agy as --settings for that one session. settings.json
 // stays the user's, and a plain agy, and `agy remote-control` or
 // --remote-control through the function, run on their Google sign-in.
 //
 // A model that takes two or more of low, medium and high is listed once
-// more per level, "magpie/<ref>:<level>" with that thinkingLevel, the
+// more per level, "eipgam/<ref>:<level>" with that thinkingLevel, the
 // thinking depth picked in agy's /model (agyLevels).
 //
 // So that typing agy just works (bestony on Discord: the command was
-// copied at each start), magpie puts a function named agy in the profile
-// of each shell the user has, between "# >>> magpie agy >>>" and
-// "# <<< magpie agy <<<" (update.ShellFunction), while agy is on one of
-// magpie's models. It runs `magpie agy run`, which starts the real agy
+// copied at each start), eipgam puts a function named agy in the profile
+// of each shell the user has, between "# >>> eipgam agy >>>" and
+// "# <<< eipgam agy <<<" (update.ShellFunction), while agy is on one of
+// eipgam's models. It runs `eipgam agy run`, which starts the real agy
 // with the two variables and --model when settings.json's model is still
-// magpie's and as it is otherwise (cli/agy_cli.go); PowerShell's asks
-// `magpie agy env` for them, since the app it would run is a GUI program
+// eipgam's and as it is otherwise (cli/agy_cli.go); PowerShell's asks
+// `eipgam agy env` for them, since the app it would run is a GUI program
 // PowerShell doesn't wait for. A terminal open before takes the command
 // from the row.
 
@@ -53,28 +53,28 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 const agyModels = "customModelsConfig.customModels"
 
-// AgyLaunch is the command that starts agy on magpie's gateway and one of
+// AgyLaunch is the command that starts agy on eipgam's gateway and one of
 // its custom models, in the shell of this system. Its key names agy: its
 // requests go out as Google's Gemini SDK's (User-Agent google-genai-sdk/…),
 // with nothing of agy's own, so the gateway knows them by the key
 // (x-goog-api-key) alone. A command copied before, with the plain token,
-// still reaches magpie.
+// still reaches eipgam.
 func AgyLaunch(model string) string {
 	return agyLaunchAt(gateway.URL(), agentKey("agy"), agySettingsFile(), model, runtime.GOOS == "windows")
 }
 
-// agyOverride is the name of magpie's settings file in agy's folder.
-const agyOverride = "magpie-settings.json"
+// agyOverride is the name of eipgam's settings file in agy's folder.
+const agyOverride = "eipgam-settings.json"
 
-// agySettingsFile is magpie's settings file for agy on this machine.
+// agySettingsFile is eipgam's settings file for agy on this machine.
 func agySettingsFile() string {
 	home, _ := homes()
 	return filepath.Join(home, ".gemini", "antigravity-cli", agyOverride)
@@ -86,7 +86,7 @@ func agySettingsFile() string {
 var agyPlain = []string{"remote-control", "--remote-control", "-remote-control"}
 
 // agyLaunchAt is AgyLaunch for agy reaching the gateway at gw with key and
-// magpie's settings file, in PowerShell or a POSIX shell.
+// eipgam's settings file, in PowerShell or a POSIX shell.
 func agyLaunchAt(gw, key, settings, model string, powershell bool) string {
 	if powershell {
 		return `$env:GEMINI_API_KEY="` + key + `"; $env:GOOGLE_GEMINI_BASE_URL="` + gw + `"; agy --settings '` + strings.ReplaceAll(settings, "'", "''") + `' --model '` + strings.ReplaceAll(model, "'", "''") + `'`
@@ -109,7 +109,7 @@ func agyShell(home string, on bool) {
 }
 
 // agyFunction is the function agy in a shell of kind, which runs prog
-// (this magpie) to start it; the agy on PATH when prog is gone.
+// (this eipgam) to start it; the agy on PATH when prog is gone.
 func agyFunction(kind, prog string) string {
 	switch kind {
 	case "fish":
@@ -145,7 +145,7 @@ func agyFunction(kind, prog string) string {
 const agyPosixHead = "unalias agy 2>/dev/null || true\nagy() {\n"
 
 // agyDistroProfiles are the profiles of a WSL distro's shells the
-// function goes in, as magpie opens them: bash's ~/.bashrc (which the
+// function goes in, as eipgam opens them: bash's ~/.bashrc (which the
 // ~/.profile of a login bash reads on Debian and Ubuntu), zsh's ~/.zshrc
 // and fish's config.fish, each where it is already, and the one of the
 // user's login shell in the distro's /etc/passwd (bash when it says
@@ -181,17 +181,17 @@ func distroLoginShell(at place) string {
 	return "bash"
 }
 
-// agyDistroModel is the sed script that prints magpie's settings file's
-// model, for the function in a distro, where no magpie runs to read it.
-// Its model is a line of its own as magpie writes the file; one written on
+// agyDistroModel is the sed script that prints eipgam's settings file's
+// model, for the function in a distro, where no eipgam runs to read it.
+// Its model is a line of its own as eipgam writes the file; one written on
 // a single line is found too, so long as nothing after it is named
 // "model".
 const agyDistroModel = `s|^.*"model"[[:space:]]*:[[:space:]]*"\(` + magpieID + `/[^"]*\)".*$|\1|p`
 
 // agyDistroFunction is the function agy in a distro's shell of kind:
-// while settings.json's model is magpie's, the agy on PATH started with
+// while settings.json's model is eipgam's, the agy on PATH started with
 // the gateway at gw, its key and --model (none when one is given), as
-// `magpie agy run` does on this machine; as it is otherwise.
+// `eipgam agy run` does on this machine; as it is otherwise.
 func agyDistroFunction(kind, key, gw string) string {
 	q := func(v string) string { return "'" + strings.ReplaceAll(v, "'", `'\''`) + "'" }
 	settings := `"$HOME/.gemini/antigravity-cli/` + agyOverride + `"`
@@ -242,8 +242,8 @@ func agyIn(at place) *Agent {
 	over := filepath.Join(dir, agyOverride)
 	settingsModel, overModel := jsonGet(path, "model"), jsonGet(over, "model")
 	provider := jsonGet(over, "modelProvider")
-	// the model is magpie's while its own file names one; a settings.json
-	// still wired by an older magpie says so too, until migrate moves it.
+	// the model is eipgam's while its own file names one; a settings.json
+	// still wired by an older eipgam says so too, until migrate moves it.
 	// It is the custom model's key, a level's (agyLevelKey) too.
 	get := func() string {
 		if m := overModel(); usesMagpie(m) {
@@ -269,7 +269,7 @@ func agyIn(at place) *Agent {
 		}
 		return ms
 	}
-	// writeOver writes magpie's settings file: the provider, the model and
+	// writeOver writes eipgam's settings file: the provider, the model and
 	// every custom model, the user's own too, as agy takes the key whole
 	writeOver := func(model string) error {
 		ms := ownModels()
@@ -290,17 +290,17 @@ func agyIn(at place) *Agent {
 		}
 		return nil
 	}
-	// migrate takes what an older magpie wrote into settings.json out of
+	// migrate takes what an older eipgam wrote into settings.json out of
 	// it, the user's model and provider back; it returns the model that
-	// was magpie's there, "" when settings.json was never wired.
+	// was eipgam's there, "" when settings.json was never wired.
 	//
-	// While magpie's own file is on one of magpie's, a model of magpie's
-	// in settings.json is not an older magpie's: it is agy's /model, which
+	// While eipgam's own file is on one of eipgam's, a model of eipgam's
+	// in settings.json is not an older eipgam's: it is agy's /model, which
 	// writes the pick into settings.json, --settings or not. That pick is
-	// kept in magpie's file (it is what agy starts on next) and
-	// settings.json's model goes back to what it was when magpie was
+	// kept in eipgam's file (it is what agy starts on next) and
+	// settings.json's model goes back to what it was when eipgam was
 	// switched on (connect.was), or out of it. The old stash is never read
-	// for it: one left from an older magpie, or none, put a stale model and
+	// for it: one left from an older eipgam, or none, put a stale model and
 	// provider into settings.json or took the user's out of it
 	// (LolingVerse on X).
 	migrate := func() (string, error) {
@@ -416,7 +416,7 @@ func agyIn(at place) *Agent {
 				return ""
 			}
 			if _, ok := agyCustom(over)[v]; !ok {
-				return "Antigravity CLI's custom model " + v + " (" + agyOverride + ") is gone, so it no longer reaches magpie"
+				return "Antigravity CLI's custom model " + v + " (" + agyOverride + ") is gone, so it no longer reaches eipgam"
 			}
 			if p := provider(); p != "gemini" {
 				return "Antigravity CLI's modelProvider (" + agyOverride + ") is " + orDefault(p) + ", not gemini, so it asks Google directly"
@@ -426,7 +426,7 @@ func agyIn(at place) *Agent {
 			if distro {
 				for _, p := range shellIn() {
 					if b, err := os.ReadFile(p); err == nil && !strings.Contains(string(b), "GOOGLE_GEMINI_BASE_URL='"+gw()+"'") {
-						return "Antigravity CLI's function agy in " + at.native(p) + " names magpie at an address it no longer has"
+						return "Antigravity CLI's function agy in " + at.native(p) + " names eipgam at an address it no longer has"
 					}
 				}
 			}
@@ -462,7 +462,7 @@ func agyIn(at place) *Agent {
 			},
 			Options: func(cur map[string]string) []Option {
 				custom := agyCustom(path)
-				// its own say they go to their provider, not through magpie,
+				// its own say they go to their provider, not through eipgam,
 				// as every agent's own do (EZN7L2C3, #834)
 				var own []Option
 				for k := range custom {
@@ -526,7 +526,7 @@ func agyLevelOf(key string) string {
 	return key[:i]
 }
 
-// agyConnectWas is the model agy was on when magpie was switched on for
+// agyConnectWas is the model agy was on when eipgam was switched on for
 // it, when it was the user's own; "" otherwise.
 func agyConnectWas() string {
 	var was map[string]string
@@ -542,14 +542,14 @@ func agyEffortField(on func() bool) Field { return effortField("agy", on) }
 
 // effortField is how hard agy's models reason, picked in its row. agy
 // 1.5 has --effort (low, medium, high) and /effort for one session only;
-// /effort is turned away for magpie's models ("not adjustable", xyenon on
+// /effort is turned away for eipgam's models ("not adjustable", xyenon on
 // Discord) and works on the Google names agy knows, and either one's level
 // goes over the row's (agyLevelAsked). settings.json has no key for it
 // (--settings: unknown setting "effort"). Its request asks
 // thinkingBudget -1, the model's own choice. The gateway asks its
 // requests for the level picked here (provider.AgentEffort), as the
 // model takes it (withGeminiEffort); with none they go as agy asks.
-// Shown only while agy is on magpie's models, and never read at a
+// Shown only while agy is on eipgam's models, and never read at a
 // stopped distro (#3896). An agent a plugin adds that says effort has
 // one as well, under its id.
 func effortField(id string, on func() bool) Field {
@@ -568,6 +568,6 @@ func effortField(id string, on func() bool) Field {
 
 // what agy says after a change (notice.go)
 var (
-	noticeAgy      = newNotice("agy takes magpie's gateway and model only from how it is started — start it with {command}")
-	noticeAgyTyped = newNotice("Type agy in a new terminal: magpie added it to {profiles}, to start agy on magpie's gateway and model (in a terminal open now: {command}).")
+	noticeAgy      = newNotice("agy takes eipgam's gateway and model only from how it is started — start it with {command}")
+	noticeAgyTyped = newNotice("Type agy in a new terminal: eipgam added it to {profiles}, to start agy on eipgam's gateway and model (in a terminal open now: {command}).")
 )

@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // codexDeskReset forgets the backend's list for the Codex app, before the
@@ -56,7 +56,7 @@ func codexDeskAsked(t *testing.T) {
 // The list the Codex app reads from a file beside the ChatGPT sign-in
 // (laddieyao on Discord): the backend's entries as it sent them, its
 // base_instructions untouched, asked for with Codex's own sign-in, and
-// magpie's models after them. Not known until the backend has answered,
+// eipgam's models after them. Not known until the backend has answered,
 // and a failed ask after that keeps the last list it gave: unknown, never
 // an empty list.
 func TestCodexDesktopCatalog(t *testing.T) {
@@ -111,7 +111,7 @@ func TestCodexDesktopCatalog(t *testing.T) {
 		t.Fatalf("the backend's entry: %v", m)
 	}
 	if slugs["relay/claude-opus-5.5"] == nil {
-		t.Fatalf("magpie's models missing: %s", b)
+		t.Fatalf("eipgam's models missing: %s", b)
 	}
 
 	// an ask that fails keeps the list the backend gave last
@@ -177,7 +177,7 @@ func TestCodexDesktopCatalogFollowsTheSignIn(t *testing.T) {
 		t.Fatalf("the Plus account's list: %v\n%s", ok, b)
 	}
 
-	// Codex signed in to the Pro account now, as magpie's switch writes it
+	// Codex signed in to the Pro account now, as eipgam's switch writes it
 	claims := func(m map[string]any) string {
 		b, _ := json.Marshal(m)
 		return "h." + base64.RawURLEncoding.EncodeToString(b) + ".s"
@@ -207,10 +207,10 @@ func TestCodexDesktopCatalogFollowsTheSignIn(t *testing.T) {
 // A model the vendor lists after the picks were saved (OpenAI listed
 // GPT-6.1 Terra to ChatGPT accounts on 10-26) stays in the account's own
 // list: the picks it is narrowed by are the picks with those listed since
-// (provider.Picks), as magpie's catalog serves them — or the file and the
+// (provider.Picks), as eipgam's catalog serves them — or the file and the
 // list Codex reads froze at what was listed when the user picked, while
 // /v1/models had the model (wenzijie2002: codex/gpt-6.1-terra picked in
-// magpie, the Codex app's picker without it, the log "fetched its list
+// eipgam, the Codex app's picker without it, the log "fetched its list
 // again, 8 models" and 7 in the file).
 func TestCodexDesktopCatalogKeepsNewlyListedBesidePicks(t *testing.T) {
 	codexSignedIn(t)
@@ -270,7 +270,7 @@ func TestCodexDesktopCatalogKeepsNewlyListedBesidePicks(t *testing.T) {
 // leaves chatgpt.com out; not_4O4 on X, Windows) never gave a list, so the
 // file for the Codex app was never written and its picker had GPT alone
 // beside the sign-in. Once the ask has failed with no list from before,
-// Codex's own last list (models_cache.json) stands in, with magpie's
+// Codex's own last list (models_cache.json) stands in, with eipgam's
 // models after it; with no such cache the file stays as it was.
 func TestCodexDesktopCatalogBackendUnreachable(t *testing.T) {
 	codexSignedIn(t)
@@ -315,17 +315,17 @@ func TestCodexDesktopCatalogBackendUnreachable(t *testing.T) {
 		t.Fatal("the cached list does not stand in for a backend that can't be reached")
 	}
 	if !strings.Contains(string(b), `"gpt-5.5"`) || !strings.Contains(string(b), "relay/claude-opus-5.5") {
-		t.Fatalf("want Codex's cached GPT and magpie's models:\n%s", b)
+		t.Fatalf("want Codex's cached GPT and eipgam's models:\n%s", b)
 	}
 }
 
 // ANAGABRIELRLki on X: OpenAI listed GPT-6.2 Astra on 11-17, and the Codex
-// app beside magpie never showed it. With model_catalog_json named, Codex
-// asks for no list of its own, so magpie's file is all the app has. The
-// list was asked for again only when magpie wrote the agents' files and
-// found it an hour old, which nothing makes it do on a quiet magpie, and a
+// app beside eipgam never showed it. With model_catalog_json named, Codex
+// asks for no list of its own, so eipgam's file is all the app has. The
+// list was asked for again only when eipgam wrote the agents' files and
+// found it an hour old, which nothing makes it do on a quiet eipgam, and a
 // list asked for an older Codex, or older than the sign-in's own list
-// magpie keeps, stood its hour. Each of those asks again now, and the
+// eipgam keeps, stood its hour. Each of those asks again now, and the
 // gateway's loop asks with no sync to start it.
 func TestCodexDesktopCatalogAskedAgainForANewModel(t *testing.T) {
 	codexSignedIn(t)
@@ -398,7 +398,7 @@ func TestCodexDesktopCatalogAskedAgainForANewModel(t *testing.T) {
 		t.Fatalf("asked again with nothing newer: asks %d", asks.Load())
 	}
 
-	// magpie asks as a newer Codex now: the list asked as the older one
+	// eipgam asks as a newer Codex now: the list asked as the older one
 	// is asked for again
 	ver.Store("0.171.0")
 	allowRetry()
@@ -409,7 +409,7 @@ func TestCodexDesktopCatalogAskedAgainForANewModel(t *testing.T) {
 	}
 }
 
-// The loop of the magpie serving the gateway asks for the list once it is
+// The loop of the eipgam serving the gateway asks for the list once it is
 // due, with no sync to start it, and tells a change, so the file is written
 // again.
 func TestKeepCodexDeskFreshAsksWhenDue(t *testing.T) {

@@ -44,7 +44,7 @@ func TestClaudeInstructionsCachedApart(t *testing.T) {
 
 // A bridge run keeps its prompt cache as long as the user picked for
 // Claude Code's main conversation, in the Agents page (settings.json's
-// promptCacheTtl) or a variable, and the marks magpie puts in its first
+// promptCacheTtl) or a variable, and the marks eipgam puts in its first
 // message are as long, since Anthropic refuses a 1h mark after a 5m one.
 // With nothing picked it is an hour, as before. linkaww: 5m picked, the
 // run was given CLAUDE_CODE_PROMPT_CACHE_TTL=1h, and 237 of 241 relayed
@@ -53,12 +53,12 @@ func TestClaudeRunKeepsTheUsersCacheTTL(t *testing.T) {
 	for _, c := range []struct {
 		name, settings, env, force, marks, want string
 		// who the request is recorded as (claudeTTLOf): the pick another
-		// magpie named for its Claude Code, or this computer's Claude Code
+		// eipgam named for its Claude Code, or this computer's Claude Code
 		who *caller
 	}{
 		{name: "nothing picked", want: "1h"},
 		// the client's own marks: its Claude Code marks as its user
-		// picked, five minutes by default (Linka: a Docker magpie's
+		// picked, five minutes by default (Linka: a Docker eipgam's
 		// relay wrote an hour's cache for a Mac set to 5m)
 		{name: "client marks 5m", marks: `{"type":"ephemeral"}`, want: "5m"},
 		{name: "client marks 5m over this computer's 1h", marks: `{"type":"ephemeral","ttl":"5m"}`, settings: `{"promptCacheTtl":"1h"}`, want: "5m"},
@@ -67,11 +67,11 @@ func TestClaudeRunKeepsTheUsersCacheTTL(t *testing.T) {
 		{name: "agents page 5m", settings: `{"promptCacheTtl":"5m"}`, want: "5m"},
 		{name: "agents page 1h", settings: `{"promptCacheTtl":"1h"}`, want: "1h"},
 		{name: "settings env", settings: `{"env":{"CLAUDE_CODE_PROMPT_CACHE_TTL":"5m"},"promptCacheTtl":"1h"}`, want: "5m"},
-		{name: "magpie's env", env: "5m", want: "5m"},
+		{name: "eipgam's env", env: "5m", want: "5m"},
 		{name: "forced 5m", force: "1", settings: `{"promptCacheTtl":"1h"}`, want: "5m"},
-		// linkaww's Mac → Docker magpie: Claude Code marks five minutes
+		// linkaww's Mac → Docker eipgam: Claude Code marks five minutes
 		// with no ttl whether its user picked them or not, so the Mac's
-		// magpie names the pick (ClaudeCacheTTLHeader)
+		// eipgam names the pick (ClaudeCacheTTLHeader)
 		{name: "the Mac's 5m, a side call unmarked, this computer's 1h", who: &caller{agent: "claude", cacheTTL: "5m"}, settings: `{"promptCacheTtl":"1h"}`, want: "5m"},
 		{name: "the Mac's 5m, unmarked, nothing here", who: &caller{agent: "claude", cacheTTL: "5m"}, want: "5m"},
 		{name: "the Mac's 5m, marked", who: &caller{agent: "claude", cacheTTL: "5m"}, marks: `{"type":"ephemeral"}`, settings: `{"promptCacheTtl":"1h"}`, want: "5m"},
@@ -84,7 +84,7 @@ func TestClaudeRunKeepsTheUsersCacheTTL(t *testing.T) {
 		{name: "Claude Code here, nothing picked, marked", who: &caller{agent: "claude", claudeHere: true}, marks: `{"type":"ephemeral"}`, want: "1h"},
 		{name: "Claude Code here, 5m picked, unmarked", who: &caller{agent: "claude", claudeHere: true}, settings: `{"promptCacheTtl":"5m"}`, want: "5m"},
 		// a settings.json that can't be parsed says nothing of a pick: the
-		// marks decide, as without magpie's word
+		// marks decide, as without eipgam's word
 		{name: "Claude Code here, settings unreadable, marked", who: &caller{agent: "claude", claudeHere: true}, marks: `{"type":"ephemeral"}`, settings: `{"promptCacheTtl":`, want: "5m"},
 	} {
 		t.Run(c.name, func(t *testing.T) {

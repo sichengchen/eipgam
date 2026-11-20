@@ -1,6 +1,6 @@
-// Package browserext is Magpie Browser, the browser extension through which
-// the agents magpie serves use the user's own browser: their tabs, signed
-// in to the sites they use (gateway/browser.go relays the calls). magpie
+// Package browserext is eipgam Browser, the browser extension through which
+// the agents eipgam serves use the user's own browser: their tabs, signed
+// in to the sites they use (gateway/browser.go relays the calls). eipgam
 // writes it to a folder of its own, pointed at its gateway, for the user to
 // load in chrome://extensions.
 package browserext
@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // ID is the extension's ID in every Chromium browser, fixed by the public
@@ -41,11 +41,11 @@ func Version() string {
 	return string(v)
 }
 
-// File is one of the extension's files as magpie has it.
+// File is one of the extension's files as eipgam has it.
 func File(name string) ([]byte, error) { return files.ReadFile("ext/" + name) }
 
 // Write puts the extension in dir, pointed at the gateway at gatewayURL
-// (http://127.0.0.1:3425), replacing what an older magpie wrote there.
+// (http://127.0.0.1:3425), replacing what an older eipgam wrote there.
 // A file is written only when it changed, so a browser that has the folder
 // loaded sees no change it has to reload for.
 func Write(dir, gatewayURL string) error {
@@ -71,7 +71,7 @@ func Write(dir, gatewayURL string) error {
 
 // Zip is the extension as a zip of its folder, pointed at the gateway at
 // gatewayURL and taken there with key: for a browser on another computer
-// than magpie's, or outside the container magpie runs in, where magpie
+// than eipgam's, or outside the container eipgam runs in, where eipgam
 // can't write the folder.
 func Zip(gatewayURL, key string) ([]byte, error) {
 	cfg, err := config(gatewayURL, key)
@@ -95,7 +95,7 @@ func Zip(gatewayURL, key string) ([]byte, error) {
 }
 
 // Folder is the name of the extension's folder.
-const Folder = "Magpie Browser Extension"
+const Folder = "eipgam Browser Extension"
 
 // config is the extension's config.js for the gateway at gatewayURL
 // (http://127.0.0.1:3425) and key ("" for none, a gateway on this
@@ -105,7 +105,7 @@ func config(gatewayURL, key string) ([]byte, error) {
 	if !strings.HasPrefix(ws, "ws://") && !strings.HasPrefix(ws, "wss://") {
 		return nil, fmt.Errorf("the gateway's address %q isn't http", gatewayURL)
 	}
-	return fmt.Appendf(nil, "// The gateway this extension talks to, written by magpie.\nexport const GATEWAY = %q;\nexport const KEY = %q;\n", ws, key), nil
+	return fmt.Appendf(nil, "// The gateway this extension talks to, written by eipgam.\nexport const GATEWAY = %q;\nexport const KEY = %q;\n", ws, key), nil
 }
 
 // each calls put with each of the extension's files, config.js as cfg.
@@ -140,7 +140,7 @@ func Dir() string {
 // a browser that loaded it from there keeps it.
 func OldDir() string { return filepath.Join(settings.Dir(), "browser-extension") }
 
-// Refresh writes this magpie's extension over every folder an older one
+// Refresh writes this eipgam's extension over every folder an older one
 // was written to, so a browser that reloads it gets this version. A folder
 // never written stays unwritten. It says whether any folder has it.
 func Refresh(gatewayURL string) bool {
@@ -154,7 +154,7 @@ func Refresh(gatewayURL string) bool {
 }
 
 // Older says whether version a (0.1.3) is before b: a newer extension's
-// folder is never written over with an older magpie's.
+// folder is never written over with an older eipgam's.
 func Older(a, b string) bool {
 	as, bs := strings.Split(a, "."), strings.Split(b, ".")
 	for i := 0; i < len(as) || i < len(bs); i++ {

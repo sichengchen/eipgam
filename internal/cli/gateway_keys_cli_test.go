@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func TestGatewayKeyCLI(t *testing.T) {
@@ -105,7 +105,7 @@ func TestGatewayKeyCLIOwnValue(t *testing.T) {
 
 func TestGatewayKeyListWithReadOnlyMigration(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	s := settings.Settings{LAN: true, LANKey: "sk-magpie-fixture-cli"}
+	s := settings.Settings{LAN: true, LANKey: "sk-eipgam-fixture-cli"}
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
@@ -117,12 +117,12 @@ func TestGatewayKeyListWithReadOnlyMigration(t *testing.T) {
 		t.Skip("settings.json remains writable")
 	}
 	var out bytes.Buffer
-	if err := gatewayKeysTo(&out, []string{"gateway-key", "list"}); err != nil || !strings.Contains(out.String(), "Magpie") {
+	if err := gatewayKeysTo(&out, []string{"gateway-key", "list"}); err != nil || !strings.Contains(out.String(), "eipgam") {
 		t.Fatal("read-only migration blocked CLI list", out.String(), err)
 	}
 }
 
-// magpie gateway-key limit sets, shows and takes off a key's limit, and
+// eipgam gateway-key limit sets, shows and takes off a key's limit, and
 // list says what each key has used of its own (#585).
 func TestGatewayKeyLimitCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -271,7 +271,7 @@ func TestGatewayKeyModelsCLI(t *testing.T) {
 	}
 }
 
-// magpie gateway-key accounts sets, shows and takes off a key's account
+// eipgam gateway-key accounts sets, shows and takes off a key's account
 // whitelist, and refuses an account no provider has (#905). An account's
 // stable id, named by who is signed in, is exercised against a real
 // sign-in in the gateway's tests; a key's fingerprint is one here.
@@ -339,7 +339,7 @@ func TestGatewayKeyAccountsCLI(t *testing.T) {
 	}
 }
 
-// magpie gateway-key limit adds, lists, changes and removes a key's
+// eipgam gateway-key limit adds, lists, changes and removes a key's
 // several limits (#2227); the single-limit form still sets an only limit.
 func TestGatewayKeySeveralLimitsCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -465,7 +465,7 @@ func TestGatewayKeyQuotasCLI(t *testing.T) {
 	}
 }
 
-// magpie gateway-key move puts a key at a place, counted from 1 as list
+// eipgam gateway-key move puts a key at a place, counted from 1 as list
 // shows them, and list shows the keys in that order (alextjy on Discord).
 func TestGatewayKeyCLIMove(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -566,7 +566,7 @@ func TestGatewayKeyScopedLimitCLI(t *testing.T) {
 	}
 }
 
-// magpie gateway-key mcp sets, shows and takes off the MCP servers and
+// eipgam gateway-key mcp sets, shows and takes off the MCP servers and
 // tools a key may use (wakaka on Discord), and refuses a flag or a bad
 // entry as one.
 func TestGatewayKeyMCPCLI(t *testing.T) {
@@ -667,7 +667,7 @@ func TestGatewayKeyConcurrencyCLI(t *testing.T) {
 	}
 }
 
-// magpie gateway-key groups makes, changes and removes account groups,
+// eipgam gateway-key groups makes, changes and removes account groups,
 // and a key's accounts name one by its name (LeiWang_2000 on X).
 func TestGatewayKeyAccountGroupsCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())

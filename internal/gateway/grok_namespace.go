@@ -16,13 +16,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Codex groups some tools in a namespace (collaboration's spawn_agent,
 // codex_app's set_thread_title), which a Grok subscription's backend turns
 // a request away over. Its functions go to Grok flat (provider's grokBody,
-// collaboration__spawn_agent) as they go to a backend magpie translates
+// collaboration__spawn_agent) as they go to a backend eipgam translates
 // for, and a call the model makes to one comes back to Codex under its own
 // name and namespace (#404).
 

@@ -12,7 +12,7 @@ import (
 // What the plan readers that sign with an account's access key share
 // (tencent_usage.go, alibaba_usage.go).
 
-// replyHead is the start of a reply magpie couldn't read, to say what it
+// replyHead is the start of a reply eipgam couldn't read, to say what it
 // was in an error.
 func replyHead(raw []byte) string {
 	s := strings.TrimSpace(QuotedReply(raw))

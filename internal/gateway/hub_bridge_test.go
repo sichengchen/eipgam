@@ -10,7 +10,7 @@ import (
 )
 
 // bridgeHub is fakeHub whose Tools, as the library's, leaves out a
-// Remote magpie's router for a request of another magpie's router, and
+// Remote eipgam's router for a request of another eipgam's router, and
 // says which requests were.
 type bridgeHub struct {
 	*fakeHub
@@ -28,9 +28,9 @@ func (b *bridgeHub) Tools(ctx context.Context, agent string) []HubTool {
 	return ts
 }
 
-// A request of another magpie's router (RouterHeader) is one to the
+// A request of another eipgam's router (RouterHeader) is one to the
 // library (FromRouter), and isn't given a server that is a Remote
-// magpie's router: neither listed, nor run when named. Two magpies that
+// eipgam's router: neither listed, nor run when named. Two magpies that
 // have each other as Remote magpies don't ask each other round. Without
 // the header, it is given as any server.
 func TestHubLeavesRemoteRouterToARouter(t *testing.T) {
@@ -80,8 +80,8 @@ func TestHubLeavesRemoteRouterToARouter(t *testing.T) {
 }
 
 // The gateway's info says its router has a server to give ("mcp_hub")
-// while the hub is on with a server that isn't a Remote magpie's router,
-// for another magpie that has this one as a provider to give it a server.
+// while the hub is on with a server that isn't a Remote eipgam's router,
+// for another eipgam that has this one as a provider to give it a server.
 func TestInfoSaysMCPHub(t *testing.T) {
 	fresh(t)
 	f := &fakeHub{on: true, servers: map[string][]HubServer{"": {{Name: "home", Bridge: true}}}}
@@ -97,13 +97,13 @@ func TestInfoSaysMCPHub(t *testing.T) {
 			Name   string `json:"name"`
 			MCPHub bool   `json:"mcp_hub"`
 		}
-		if err := json.Unmarshal(w.Body.Bytes(), &info); err != nil || info.Name != "magpie" {
+		if err := json.Unmarshal(w.Body.Bytes(), &info); err != nil || info.Name != "eipgam" {
 			t.Fatalf("info %d: %s", w.Code, w.Body.String())
 		}
 		return info.MCPHub
 	}
 	if says() {
-		t.Error("mcp_hub with only a Remote magpie's router behind it")
+		t.Error("mcp_hub with only a Remote eipgam's router behind it")
 	}
 	f.mu.Lock()
 	f.servers[""] = append(f.servers[""], HubServer{Name: "fs"})

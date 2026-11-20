@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // grokRelaySearchStream is a reply as grok2api_python (xLmiler's Grok
@@ -14,9 +14,9 @@ import (
 // <think> tags led by a Windows line end ("\r\n<think>{results}</think>\r\n"
 // in process_model_response), then Grok's answer token by token, with no
 // finish_reason before [DONE].
-const grokRelaySearchStream = `data: {"id": "chatcmpl-6c1f0e3a-1b7e-4a51-9a51-0c6e8f1f2d11", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "\r\n<think>\r\n<details><summary>\u8d44\u6599[0]: magpie</summary>\r\nA local LLM gateway\r\n\n[Link](https://usemagpie.ai)\r\n</details></think>\r\n"}}]}
+const grokRelaySearchStream = `data: {"id": "chatcmpl-6c1f0e3a-1b7e-4a51-9a51-0c6e8f1f2d11", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "\r\n<think>\r\n<details><summary>\u8d44\u6599[0]: eipgam</summary>\r\nA local LLM gateway\r\n\n[Link](https://usemagpie.ai)\r\n</details></think>\r\n"}}]}
 
-data: {"id": "chatcmpl-1f0b2c4d-8e9a-4b3c-a2d1-5e6f7a8b9c0d", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "Magpie"}}]}
+data: {"id": "chatcmpl-1f0b2c4d-8e9a-4b3c-a2d1-5e6f7a8b9c0d", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "eipgam"}}]}
 
 data: {"id": "chatcmpl-2a3b4c5d-6e7f-4a8b-9c0d-1e2f3a4b5c6d", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": " is a gateway."}}]}
 
@@ -32,9 +32,9 @@ func TestGrokRelayThinkAfterLineEnd(t *testing.T) {
 	for _, c := range []struct {
 		name, path, body string
 	}{
-		{"messages", "/v1/messages", `{"model":"grokr/grok-3-search","stream":true,"max_tokens":100,"messages":[{"role":"user","content":"magpie?"}]}`},
-		{"responses", "/v1/responses", `{"model":"grokr/grok-3-search","stream":true,"input":[{"role":"user","content":"magpie?"}]}`},
-		{"messages whole", "/v1/messages", `{"model":"grokr/grok-3-search","max_tokens":100,"messages":[{"role":"user","content":"magpie?"}]}`},
+		{"messages", "/v1/messages", `{"model":"grokr/grok-3-search","stream":true,"max_tokens":100,"messages":[{"role":"user","content":"eipgam?"}]}`},
+		{"responses", "/v1/responses", `{"model":"grokr/grok-3-search","stream":true,"input":[{"role":"user","content":"eipgam?"}]}`},
+		{"messages whole", "/v1/messages", `{"model":"grokr/grok-3-search","max_tokens":100,"messages":[{"role":"user","content":"eipgam?"}]}`},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -49,11 +49,11 @@ func TestGrokRelayThinkAfterLineEnd(t *testing.T) {
 				t.Fatalf("code %d: %s", code, out)
 			}
 			think, text := grokRelayParts(t, out)
-			if !strings.Contains(think, "资料[0]: magpie") || !strings.Contains(think, "[Link](https://usemagpie.ai)") {
+			if !strings.Contains(think, "资料[0]: eipgam") || !strings.Contains(think, "[Link](https://usemagpie.ai)") {
 				t.Errorf("thinking %q, want the search results", think)
 			}
-			if text != "Magpie is a gateway." {
-				t.Errorf("answer %q, want %q", text, "Magpie is a gateway.")
+			if text != "eipgam is a gateway." {
+				t.Errorf("answer %q, want %q", text, "eipgam is a gateway.")
 			}
 		})
 	}

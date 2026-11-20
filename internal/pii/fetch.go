@@ -16,8 +16,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/source"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/source"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // dlState is a model's download under way, one at a time.
@@ -35,8 +36,8 @@ var dl dlState
 // client has no timeout: the model takes minutes on a slow line. A
 // download that stops getting bytes is ended by stall instead, and one
 // whose server doesn't answer by the header timeout. It goes through
-// magpie's proxy (netproxy.Func: the one set in magpie, else the
-// system's), like every other request magpie makes: cloned from
+// eipgam's proxy (netproxy.Func: the one set in eipgam, else the
+// system's), like every other request eipgam makes: cloned from
 // http.DefaultTransport when this package loads, before netproxy.Install
 // set its Proxy, it went direct, and in China huggingface.co answered with
 // a *.facebook.com certificate (hh0592821 on Discord).
@@ -53,7 +54,7 @@ var stallAfter = 60 * time.Second
 // Download fetches pf-serve and the model, each checked against its
 // sha256, in the background, and calls done once both are on disk. A
 // download already under way is left to go on. What was fetched of the
-// model before (a download stopped, magpie quit) is taken up where it
+// model before (a download stopped, eipgam quit) is taken up where it
 // stopped.
 func Download(done func()) error {
 	if !Supported() {
@@ -147,7 +148,7 @@ func ensureServe(ctx context.Context) error {
 var upgrading atomic.Bool
 
 // upgrade fetches serveTag's pf-serve where only an older one is on disk
-// (magpie was updated since the model was downloaded), ends the old one so
+// (eipgam was updated since the model was downloaded), ends the old one so
 // that the next request starts the new, and deletes the old. One that
 // can't be fetched leaves the old to run, and is tried again on the next
 // start.
@@ -182,13 +183,14 @@ func removeOld() {
 	}
 }
 
+var fetchServeArchive = update.DownloadPrivacyHelper
+
 // installServe fetches pf-serve's zip and puts what is in it in
 // serveDir: each file by its name alone, so nothing lands outside it.
 func installServe(ctx context.Context) error {
 	z := filepath.Join(dir(), serveTag+"-"+target()+".zip")
 	defer os.Remove(z)
-	var n atomic.Int64
-	if err := fetch(ctx, serveBase+serveTag+"/pf-serve-"+target()+".zip", z, -1, serveSHA[target()], &n); err != nil {
+	if err := fetchServeArchive(ctx, serveTag, target(), z); err != nil {
 		return err
 	}
 	zr, err := zip.OpenReader(z)
@@ -236,7 +238,7 @@ func unzipTo(f *zip.File, path string) error {
 }
 
 // Fetch is fetch for another package's pinned file (memembed's model):
-// through magpie's proxy, taken up where a stopped one left off, and
+// through eipgam's proxy, taken up where a stopped one left off, and
 // renamed into place only when its sha256 is want.
 func Fetch(ctx context.Context, url, path string, size int64, want string, done *atomic.Int64) error {
 	return fetch(ctx, url, path, size, want, done)

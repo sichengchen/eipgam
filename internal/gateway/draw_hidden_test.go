@@ -6,9 +6,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // 321sssrt on X: an image model unticked in its provider's editor
@@ -82,8 +82,8 @@ func TestHiddenDrawerLeavesListsButStillDraws(t *testing.T) {
 		t.Fatalf("a hidden pick isn't what draws: %q missing %q", Drawer(), DrawerMissing())
 	}
 	s := New()
-	drawingMainTurn(t, s, "hd/text", "session", "turn", "", "magpie-codex")
-	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "", "", "turn", "magpie-codex")
+	drawingMainTurn(t, s, "hd/text", "session", "turn", "", "eipgam-codex")
+	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "", "", "turn", "eipgam-codex")
 	if code != 200 || answer.Model != "hd/gpt-image-hidden" {
 		t.Fatalf("settings pick hidden: %d %s", code, raw)
 	}

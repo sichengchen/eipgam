@@ -1,9 +1,9 @@
 package provider
 
 // A key's balance typed by hand (tenacious_eagle on Discord): for a key
-// whose vendor tells no balance, at no Balance URL magpie knows or finds,
+// whose vendor tells no balance, at no Balance URL eipgam knows or finds,
 // the user types what the vendor's own page says is left. The key's card
-// then shows that less what magpie's own usage prices the calls it sent
+// then shows that less what eipgam's own usage prices the calls it sent
 // on the key since, marked as an estimate ("≈$12.34"). Typing the balance
 // again sets it anew, from then.
 //
@@ -12,7 +12,7 @@ package provider
 // typed one stays saved, unused, as the user left it.
 
 // The balance may be typed in yuan (tenacious_eagle_96548): the spend,
-// priced in USD, is then counted at the dollar's rate in yuan magpie last
+// priced in USD, is then counted at the dollar's rate in yuan eipgam last
 // learned (internal/fx, fetched behind the page and cached), and while it
 // has never learned one what is left is unknown, never counted at a guess.
 // It may refill (the same user: $10 a month from the 1st): at each refill,
@@ -40,7 +40,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/fx"
+	"github.com/sichengchen/eipgam/internal/fx"
 )
 
 // OwnBalance is a key's balance as the user typed it: USD left at At, or,
@@ -60,7 +60,7 @@ type OwnBalance struct {
 const MaxExpiring = 20
 
 // UnmarshalJSON reads b as saved, and a v0.1.3305 balance's one grant
-// (`expiring`, an object) as the first of its grants: an older magpie
+// (`expiring`, an object) as the first of its grants: an older eipgam
 // reads the list's field as nothing, never as a balance it can't parse.
 func (b *OwnBalance) UnmarshalJSON(data []byte) error {
 	type plain OwnBalance
@@ -197,7 +197,7 @@ func (r Refill) String() string {
 const MaxOwnBalance = 1_000_000
 
 // BalanceEstimate is what a card shows of a balance typed by hand: the
-// amount typed (in Currency), when, and what magpie counted spent on the
+// amount typed (in Currency), when, and what eipgam counted spent on the
 // key since (in USD), from the last refill when it refills.
 type BalanceEstimate struct {
 	Set   float64   `json:"set"`
@@ -235,7 +235,7 @@ type ExpiringLeft struct {
 }
 
 // KeySpent is usage.KeySpent, which package usage sets: what the calls
-// magpie sent on the key keyID from start on cost, in USD. nil (a test
+// eipgam sent on the key keyID from start on cost, in USD. nil (a test
 // of this package alone) counts nothing.
 var KeySpent func(keyID string, start time.Time) float64
 
@@ -243,7 +243,7 @@ var KeySpent func(keyID string, start time.Time) float64
 // and which refill is the last.
 var ownNow = time.Now
 
-// cnyPerUSD is the dollar's rate in yuan magpie last learned, false when
+// cnyPerUSD is the dollar's rate in yuan eipgam last learned, false when
 // it has never learned one; never waited for.
 var cnyPerUSD = func() (float64, bool) {
 	r, ok := fx.Known()
@@ -412,7 +412,7 @@ func spendGrants(grants []Expiring, from, now time.Time, spent func(time.Time) f
 }
 
 // TakesOwnBalance says p's keys may have a balance typed by hand: keys
-// whose vendor tells none magpie knows where to ask. A relay whose query
+// whose vendor tells none eipgam knows where to ask. A relay whose query
 // is looked for (probesBalance) takes one too: when none is found, the
 // typed balance is shown.
 func (p Provider) TakesOwnBalance() bool {

@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const iso = (n) => new Date(n).toISOString();
 const USERS = ["a@example.com", "b@example.com", "c@example.com", "d@example.com"];
 
@@ -106,7 +106,7 @@ async function open(browser, lang, width, w) {
   const errors = [], log = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, w, log));
-  await page.goto("http://magpie.test/?mode=panel");
+  await page.goto("http://eipgam.test/?mode=panel");
   await page.locator('#ptabs [data-ptab="usage"]').click();
   await page.locator(`${group("codex")} .pq-pick`).waitFor();
   const tr = async (k, vars = {}) => {

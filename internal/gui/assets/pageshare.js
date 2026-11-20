@@ -1,7 +1,7 @@
-// A picture a plugin's page drew (magpie.image.copy, magpie.image.save,
+// A picture a plugin's page drew (eipgam.image.copy, eipgam.image.save,
 // plugin-runtime.md): its frame can't download a file or reach the
-// clipboard, and the app's window can't copy a picture, so magpie does it
-// (pageimage.go); in magpie web this server is another computer, and the
+// clipboard, and the app's window can't copy a picture, so eipgam does it
+// (pageimage.go); in eipgam web this server is another computer, and the
 // browser's window does it here. pluginpages.js imports this the first
 // time a page shares one (or asks for a file), so it weighs nothing on the core.
 
@@ -26,7 +26,7 @@ window.pageShare = async function (spec, save, params) {
     if (save) {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(png);
-      a.download = (name.replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-").replace(/\.png$/i, "").trim() || "magpie") + ".png";
+      a.download = (name.replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-").replace(/\.png$/i, "").trim() || "eipgam") + ".png";
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 60e3);
       return { path: "" };

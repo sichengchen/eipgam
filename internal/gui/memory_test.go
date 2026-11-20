@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 // The Memory tab's Select acts on the memories picked at once

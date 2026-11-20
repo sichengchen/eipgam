@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // syncHome is a sandbox home with a models.dev catalog that knows glm-4.6's
@@ -143,22 +143,22 @@ func TestCrushModelsCarryMaxTokens(t *testing.T) {
 	}
 }
 
-// A provider added after a magpie model was picked reaches the lists agents
-// keep of magpie's models; a file magpie wrote nothing into stays as it is.
+// A provider added after a eipgam model was picked reaches the lists agents
+// keep of eipgam's models; a file eipgam wrote nothing into stays as it is.
 func TestSyncCatalogRewritesAgentLists(t *testing.T) {
 	home := syncHome(t)
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	writeFile(t, piModels, `{"providers":{"mine":{"baseUrl":"http://x"},"magpie":{"name":"magpie","models":[]}}}`)
-	// connected: a block of magpie's name in an agent not on magpie is the
+	writeFile(t, piModels, `{"providers":{"mine":{"baseUrl":"http://x"},"eipgam":{"name":"eipgam","models":[]}}}`)
+	// connected: a block of eipgam's name in an agent not on eipgam is the
 	// user's own (TestCatalogSyncLeavesAHandWrittenMagpieBlock)
-	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"magpie","defaultModel":"relay/glm-4.6"}`)
+	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"eipgam","defaultModel":"relay/glm-4.6"}`)
 	setUpInMagpie("pi")
 	crushCfg := filepath.Join(home, ".config", "crush", "crush.json")
 	crushBody := `{"providers":{"mine":{"base_url":"http://x"}}}`
 	writeFile(t, crushCfg, crushBody)
 	codexDir := filepath.Join(home, ".codex")
-	codexCat := filepath.Join(codexDir, "magpie-models.json")
-	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"magpie\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(codexDir, "eipgam-models.json")
+	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"eipgam\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 
 	if err := provider.Save(provider.Provider{ID: "added", Name: "Added", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
@@ -172,7 +172,7 @@ func TestSyncCatalogRewritesAgentLists(t *testing.T) {
 		t.Errorf("pi models.json:\n%s", pi)
 	}
 	if got := readFile(crushCfg); got != crushBody {
-		t.Errorf("crush config without magpie changed:\n%s", got)
+		t.Errorf("crush config without eipgam changed:\n%s", got)
 	}
 	cx := readFile(codexCat)
 	if !strings.Contains(cx, `"slug": "added/m2"`) || !strings.Contains(cx, `"context_window": 204800`) {
@@ -190,7 +190,7 @@ func TestSyncCatalogRewritesAgentLists(t *testing.T) {
 }
 
 // Signed in, Codex asks the gateway for its list and keeps it until it
-// ages; a cache from before magpie's list changed is aged at once, one of
+// ages; a cache from before eipgam's list changed is aged at once, one of
 // the list as it is stays as it is.
 func TestSyncCatalogAgesCodexCache(t *testing.T) {
 	home := syncHome(t)
@@ -227,8 +227,8 @@ func must(b []byte, err error) []byte {
 }
 
 // OpenCode is handed each model's window, so it compacts when the model
-// needs it; and a sync puts magpie's provider back when a model of
-// magpie's is chosen but the provider is gone from the file.
+// needs it; and a sync puts eipgam's provider back when a model of
+// eipgam's is chosen but the provider is gone from the file.
 func TestOpenCodeModelsCarryContextAndSyncRestores(t *testing.T) {
 	home := syncHome(t)
 	b, _ := json.Marshal(magpieProviderJSON("opencode"))
@@ -236,14 +236,14 @@ func TestOpenCodeModelsCarryContextAndSyncRestores(t *testing.T) {
 		t.Fatalf("%s", b)
 	}
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
-	writeFile(t, cfg, `{"model":"magpie/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
+	writeFile(t, cfg, `{"model":"eipgam/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
 	if err := opencode(home, filepath.Join(home, ".config")).Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if s := readFile(cfg); !strings.Contains(s, `"magpie"`) || !strings.Contains(s, `"mine"`) || !strings.Contains(s, `204800`) {
+	if s := readFile(cfg); !strings.Contains(s, `"eipgam"`) || !strings.Contains(s, `"mine"`) || !strings.Contains(s, `204800`) {
 		t.Fatalf("%s", s)
 	}
-	// one that doesn't use magpie gets nothing
+	// one that doesn't use eipgam gets nothing
 	body := `{"model":"mine/x","provider":{"mine":{"name":"mine"}}}`
 	writeFile(t, cfg, body)
 	if err := opencode(home, filepath.Join(home, ".config")).Sync(); err != nil {
@@ -254,67 +254,67 @@ func TestOpenCodeModelsCarryContextAndSyncRestores(t *testing.T) {
 	}
 }
 
-// A model of magpie's chosen for OpenCode that a provider of the file's own
-// already sends to magpie is named there, and magpie's flat provider isn't
+// A model of eipgam's chosen for OpenCode that a provider of the file's own
+// already sends to eipgam is named there, and eipgam's flat provider isn't
 // added beside it with the same models again.
 func TestOpenCodeKeepsItsOwnGatewayProviders(t *testing.T) {
 	home := syncHome(t)
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, cfg, `{
   "provider": {
-    "magpie-relay": {"npm": "@ai-sdk/openai-compatible", "options": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
+    "eipgam-relay": {"npm": "@ai-sdk/openai-compatible", "options": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
     "elsewhere": {"options": {"baseURL": "https://example.com/v1"}, "models": {"relay/glm-4.6": {}}}
   },
-  "model": "magpie-relay/relay/glm-4.6"
+  "model": "eipgam-relay/relay/glm-4.6"
 }`)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Fields[0].Set("magpie/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "magpie-relay/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "eipgam-relay/relay/glm-4.6" {
 		t.Fatalf("model = %q", v)
 	}
-	if _, ok := edit.GetJSON(cfg, "provider.magpie"); ok {
-		t.Fatal("magpie's provider added beside the file's own")
+	if _, ok := edit.GetJSON(cfg, "provider.eipgam"); ok {
+		t.Fatal("eipgam's provider added beside the file's own")
 	}
-	// a model none of them lists still gets magpie's provider
-	os.WriteFile(cfg, []byte(`{"provider": {"magpie-relay": {"options": {"baseURL": "http://127.0.0.1:3425/v1"}, "models": {}}}}`), 0o644)
-	if err := oc.Fields[0].Set("magpie/relay/glm-4.6"); err != nil {
+	// a model none of them lists still gets eipgam's provider
+	os.WriteFile(cfg, []byte(`{"provider": {"eipgam-relay": {"options": {"baseURL": "http://127.0.0.1:3425/v1"}, "models": {}}}}`), 0o644)
+	if err := oc.Fields[0].Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "magpie/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "eipgam/relay/glm-4.6" {
 		t.Fatalf("model = %q", v)
 	}
-	if _, ok := edit.GetJSON(cfg, "provider.magpie"); !ok {
-		t.Fatal("magpie's provider not added")
+	if _, ok := edit.GetJSON(cfg, "provider.eipgam"); !ok {
+		t.Fatal("eipgam's provider not added")
 	}
 }
 
 // OpenCode 2 keeps a provider under providers, its base URL in settings,
 // as OpenChamber's provider form saves one, and reads it there before the
-// same name under provider: a provider of the user's own at magpie's
+// same name under provider: a provider of the user's own at eipgam's
 // gateway there is the file's own as one under provider is (#3915).
 func TestOpenCodeKeepsItsOwnGatewayProvidersUnderProviders(t *testing.T) {
 	home := syncHome(t)
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, cfg, `{
   "providers": {
-    "magpie-relay": {"package": "aisdk:@ai-sdk/openai-compatible", "settings": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
+    "eipgam-relay": {"package": "aisdk:@ai-sdk/openai-compatible", "settings": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
     "elsewhere": {"settings": {"baseURL": "https://example.com/v1"}, "models": {"relay/glm-4.6": {}}}
   },
-  "model": "magpie-relay/relay/glm-4.6"
+  "model": "eipgam-relay/relay/glm-4.6"
 }`)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Fields[0].Set("magpie/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "magpie-relay/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "eipgam-relay/relay/glm-4.6" {
 		t.Fatalf("model = %q", v)
 	}
-	if _, ok := edit.GetJSON(cfg, "provider.magpie"); ok {
-		t.Fatal("magpie's provider added beside the file's own")
+	if _, ok := edit.GetJSON(cfg, "provider.eipgam"); ok {
+		t.Fatal("eipgam's provider added beside the file's own")
 	}
-	// one named as magpie's relay, at the gateway: its model is magpie's
+	// one named as eipgam's relay, at the gateway: its model is eipgam's
 	writeFile(t, cfg, `{"providers": {"relay": {"settings": {"baseURL": "http://127.0.0.1:3425/v1"}, "models": {"glm-4.6": {}}}}, "model": "relay/glm-4.6"}`)
 	if got := oc.Models(); len(got) != 1 || got[0] != "relay/glm-4.6" {
 		t.Fatalf("models = %v", got)
@@ -334,10 +334,10 @@ func TestOpenCodeKeepsItsOwnGatewayProvidersUnderProviders(t *testing.T) {
   "provider": {"mine": {"options": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}}},
   "providers": {"mine": {"settings": {"baseURL": "https://example.com/v1"}, "models": {"relay/glm-4.6": {}}}}
 }`)
-	if err := oc.Fields[0].Set("magpie/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "magpie/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "eipgam/relay/glm-4.6" {
 		t.Fatalf("picked on the provider under provider: model = %q", v)
 	}
 }
@@ -366,7 +366,7 @@ func TestMiMoCodeCatalogNarrowedSeparately(t *testing.T) {
 
 // An output limit above the model's window (models.dev lists deepseek-chat's
 // 384000 against 128000 of context) is cut to the window for every agent
-// magpie hands an output limit; one whose window isn't known keeps its
+// eipgam hands an output limit; one whose window isn't known keeps its
 // output. OpenCode is handed no limit without a window.
 func TestMaxTokensWithinContextWindow(t *testing.T) {
 	syncHome(t)

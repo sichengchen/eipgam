@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Magpie Sessions in the Library's Discover (cryingLiu on X): an MCP server
+// eipgam Sessions in the Library's Discover (cryingLiu on X): an MCP server
 // that searches and reads what was said in every agent's sessions on this
 // computer. What was said is the user's own, so it is opt in: its sheet
 // says what the agents picked may do and ticks none until they are picked,
@@ -18,7 +18,7 @@ const { I18N } = strings();
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const tr = (lang, s) => (lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
-const ABOUT = "Search and read what was said in every agent's sessions on this computer: an earlier conversation, decision or fix, from Claude Code, Codex or any agent Magpie reads.";
+const ABOUT = "Search and read what was said in every agent's sessions on this computer: an earlier conversation, decision or fix, from Claude Code, Codex or any agent eipgam reads.";
 const HINT = "Pick the agents that may search and read what was said in your other sessions.";
 const IMAGES = "Pick the agents that may generate images: each image costs what the model set in Settings › Models › Images charges.";
 
@@ -32,7 +32,7 @@ function route(lang) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") {
       return json({
-        dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+        dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
         agents: [
           { id: "claude", name: "Claude Code", icon: "claudecode-color", mcp: `${HOME}/.claude.json`, skills: `${HOME}/.claude/skills` },
           { id: "codex", name: "Codex", icon: "codex", mcp: `${HOME}/.codex/config.toml`, skills: `${HOME}/.codex/skills` },
@@ -42,7 +42,7 @@ function route(lang) {
     }
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "magpie-sessions", name: "magpie-sessions", title: "Magpie Sessions", publisher: "Magpie", description: ABOUT, transport: "stdio", runs: "magpie", featured: true, optIn: true, have: "" },
+        { id: "eipgam-sessions", name: "eipgam-sessions", title: "eipgam Sessions", publisher: "eipgam", description: ABOUT, transport: "stdio", runs: "eipgam", featured: true, optIn: true, have: "" },
         { id: "fetch", name: "fetch", title: "Fetch", description: "Read the web.", transport: "stdio", runs: "uvx", featured: true, have: "" },
       ] });
     }
@@ -60,7 +60,7 @@ function route(lang) {
 const wide = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Magpie Sessions' sheet is opt in and says what it gives", async (t) => {
+  test(engine + ": eipgam Sessions' sheet is opt in and says what it gives", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     for (const lang of LANGS) {
@@ -73,12 +73,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", route(lang));
-          await page.addInitScript(() => { localStorage.setItem("magpie.libTab", "mcp"); });
-          await page.goto("http://magpie.test/?view=library");
-          await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="magpie-sessions"]').click();
+          await page.addInitScript(() => { localStorage.setItem("eipgam.libTab", "mcp"); });
+          await page.goto("http://eipgam.test/?view=library");
+          await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="eipgam-sessions"]').click();
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
-          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Magpie Sessions");
+          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "eipgam Sessions");
           const hints = await sheet.locator(".mk-hint").allTextContents();
           assert(hints.map((h) => h.trim()).includes(tr(lang, HINT)), hints.join(" | "));
           assert(!hints.some((h) => h.includes(tr(lang, IMAGES))), "not the image servers' hint");

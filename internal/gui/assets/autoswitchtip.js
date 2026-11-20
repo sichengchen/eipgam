@@ -1,5 +1,5 @@
 // The hover hint beside Switch {agent}'s account automatically (the owner,
-// 11-11): how magpie switches the agent's account, and why that is the
+// 11-11): how eipgam switches the agent's account, and why that is the
 // agent's own use of the account. It says what is sent and by whom, and
 // promises nothing about bans: what an account may be used for is the
 // vendor's call. Its lines rest out of sight in the accounts list, and
@@ -15,9 +15,9 @@ window.autoSwitchTip = function (box, head, p) {
   if (!m || !(m.mode === "moves" || m.mode === "kept" && !m.routed) || box.querySelector(":scope > .hint")) return;
   const codex = p.account?.agent === "codex";
   const lines = codex
-    ? [t("When the account runs low, magpie signs Codex in to your next account, as codex login does. Sessions already open keep their account until they are restarted."),
+    ? [t("When the account runs low, eipgam signs Codex in to your next account, as codex login does. Sessions already open keep their account until they are restarted."),
       t("Requests still come from Codex itself. Use only accounts that are yours: sharing one is against OpenAI's terms.")]
-    : [t("When the account runs low, magpie signs Claude Code in to your next account, as /login does. Sessions already open keep their account until they are restarted."),
+    : [t("When the account runs low, eipgam signs Claude Code in to your next account, as /login does. Sessions already open keep their account until they are restarted."),
       t("Requests still go from Claude Code straight to Anthropic, unchanged. Use only accounts that are yours: sharing one is against Anthropic's terms.")];
   box.classList.add("hint-row");
   box.append(...lines.map((s) => el("p", "hint", s)));

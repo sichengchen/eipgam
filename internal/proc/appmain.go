@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // errAppMain is what a probe of an app's own program (a Mac bundle's, a
@@ -20,7 +20,7 @@ var errAppMain = errors.New("not run: it is an app's own program, which opens th
 // answers it. An `opencode` on PATH that resolves to OpenCode.app's own
 // program (a folder of the bundle on PATH, where a Mac's case-insensitive
 // disk finds OpenCode as opencode, or a link to it) put OpenCode's window
-// up each time magpie asked its version, at every start and after each
+// up each time eipgam asked its version, at every start and after each
 // update (saint carol on Discord). The bundle's other programs (OpenCode's
 // opencode-cli, Kiro CLI.app's kiro-cli beside its kiro_cli_desktop) are
 // CLIs and are run, and so is a bundle inside an app's own: ChatGPT.app's

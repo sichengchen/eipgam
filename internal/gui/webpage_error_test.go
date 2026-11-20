@@ -10,20 +10,20 @@ import (
 
 const cf524 = `<!DOCTYPE html>
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
-<head><title>magpie.example.com | 524: A timeout occurred</title></head>
+<head><title>eipgam.example.com | 524: A timeout occurred</title></head>
 <body><h1>A timeout occurred</h1></body></html>`
 
 // An error with a proxy's page in it reaches the page as the page's title,
 // said by a key the GUI translates, and not as markup.
 func TestFailSaysAProxyPageByItsTitle(t *testing.T) {
 	w := httptest.NewRecorder()
-	fail(w, errors.New("remote magpie answered 524: "+cf524))
+	fail(w, errors.New("remote eipgam answered 524: "+cf524))
 	var got map[string]string
 	if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
 		t.Fatal(err)
 	}
-	what := "remote magpie answered 524: magpie.example.com | 524: A timeout occurred"
-	if got["what"] != what || got["said"] != "A proxy in front of magpie answered, not magpie ({what})" {
+	what := "remote eipgam answered 524: eipgam.example.com | 524: A timeout occurred"
+	if got["what"] != what || got["said"] != "A proxy in front of eipgam answered, not eipgam ({what})" {
 		t.Fatalf("got %v", got)
 	}
 	if strings.Contains(got["error"], "<") {

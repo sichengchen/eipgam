@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Claude Code's permission mode is the user's own (EricChenChannel on X:
 // bypassPermissions set by hand in settings.json kept coming back as
-// default). magpie writes it where Claude Code reads it, with the consent
-// key bypass needs at launch, and nothing magpie does to the agent puts it
+// default). eipgam writes it where Claude Code reads it, with the consent
+// key bypass needs at launch, and nothing eipgam does to the agent puts it
 // back or takes it out.
 func permissionHome(t *testing.T) (string, string) {
 	t.Helper()
@@ -48,7 +48,7 @@ func TestClaudePermissionModeWritten(t *testing.T) {
 		t.Fatal("Claude Code has no permission mode setting")
 	}
 	if !f.Own {
-		t.Error("the permission mode is the user's own, not magpie's wiring")
+		t.Error("the permission mode is the user's own, not eipgam's wiring")
 	}
 	if err := f.Set("bypassPermissions"); err != nil {
 		t.Fatal(err)
@@ -81,12 +81,12 @@ func TestClaudePermissionModeOutlivesMagpie(t *testing.T) {
 	if _, err := claude(home).ConnectHow(); err != nil {
 		t.Fatal(err)
 	}
-	// picked in magpie, so Apply has seen it
+	// picked in eipgam, so Apply has seen it
 	if err := claude(home).Pick("permission_mode", "bypassPermissions"); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := appliedOf(claude(home).ID).Fields["permission_mode"]; ok {
-		t.Error("the user's permission mode was recorded as magpie's")
+		t.Error("the user's permission mode was recorded as eipgam's")
 	}
 	if err := claude(home).Pick("model", "relay/flash"); err != nil {
 		t.Fatal(err)

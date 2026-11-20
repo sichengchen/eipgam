@@ -60,7 +60,7 @@ func TestSyncedSkillKeepsItsRepo(t *testing.T) {
 // computer found for the skill (Group again) stays through the sync.
 func TestSyncKeepsRepoFoundHere(t *testing.T) {
 	b := onA(t)
-	// as a magpie before this made it: the same JSON without the field
+	// as a eipgam before this made it: the same JSON without the field
 	raw, err := json.Marshal(b)
 	if err != nil {
 		t.Fatal(err)

@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const levels = ["off", "low", "medium", "high", "max"];
-const model = "magpie/moonshot/kimi-k2.8";
+const model = "eipgam/moonshot/kimi-k2.8";
 const kimi = (effort) => ({
   id: "kimi", name: "Kimi Code", icon: "kimi", path: "/home/u/.kimi-code/config.toml", wired: true,
   fields: [
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, sets));
-        await page.goto("http://magpie.test/" + (mode ? "?mode=" + mode : ""));
+        await page.goto("http://eipgam.test/" + (mode ? "?mode=" + mode : ""));
         await page.locator(row).waitFor();
         return page;
       };

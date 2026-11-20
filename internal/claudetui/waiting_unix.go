@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // waiting is what Claude Code is doing while it has drawn nothing: the

@@ -50,7 +50,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           return base(route);
         });
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://eipgam.test/?view=gateway");
         const own = page.locator("#gwOwn");
         const set = own.locator('[data-setting="callsPage"]');
         await set.waitFor();

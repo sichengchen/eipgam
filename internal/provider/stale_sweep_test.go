@@ -8,7 +8,7 @@ import (
 
 // What the last request held and kept goes once its time is past, with no
 // request after it: the catalog was dropped only when the next one looked,
-// so a magpie nobody asked again kept the last catalog for good.
+// so a eipgam nobody asked again kept the last catalog for good.
 func TestHeldAndKeptGoWithNoRequestAfter(t *testing.T) {
 	isolate(t)
 	home := t.TempDir()

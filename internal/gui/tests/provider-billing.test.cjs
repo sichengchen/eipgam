@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A provider on a plan and one paid as used are told apart (EV_John_Liu
 // on X): a quiet grey badge on its Providers row (Plan, Pay as you go, or
-// both for keys on each), none where magpie can't tell; the editor's
+// both for keys on each), none where eipgam can't tell; the editor's
 // Billing under Advanced sets it by the user's word, Auto handing it back;
 // and a routing group's card sums up its members' billing, each member's
 // on hover. In every language, in both engines, wide and narrow.
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
-        await page.goto(`http://magpie.test/?view=${view}`);
+        await page.goto(`http://eipgam.test/?view=${view}`);
         const w = await page.evaluate((ks) => Object.fromEntries(ks.map((k) => [k, t(k)])), STRINGS);
         return { page, errors, posts, w };
       };
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await badge(page, "Zhipu GLM").textContent(), w["Plan"]);
         assert.equal(await badge(page, "Some Relay").textContent(), w["Pay as you go"]);
         assert.equal(await badge(page, "Volcengine").textContent(), w["Plan + pay as you go"]);
-        assert.equal(await badge(page, "Own Server").count(), 0, "no badge where magpie can't tell");
+        assert.equal(await badge(page, "Own Server").count(), 0, "no badge where eipgam can't tell");
         // grey, not an accent: the muted colour on the pill
         const look = await badge(page, "Zhipu GLM").evaluate((b) => {
           const s = getComputedStyle(b), probe = document.createElement("span");

@@ -1,5 +1,5 @@
 // Manage agents: hide or unhide many agents at once, by search and
-// selection. It changes magpie's arrangement and what the Library lists,
+// selection. It changes eipgam's arrangement and what the Library lists,
 // never an agent's config.
 // app.js imports this when Manage is pressed, so it weighs nothing on the
 // core.

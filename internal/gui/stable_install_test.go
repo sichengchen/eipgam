@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // A fresh install of Stable's version stays on Stable (fishmagic80 on X):
-// usemagpie.ai's Stable download, 0.1.11, put in where magpie never ran,
+// usemagpie.ai's Stable download, 0.1.11, put in where eipgam never ran,
 // takes Settings' Update channel Stable before its first check, so that
 // check finds nothing newer and 0.1.12 isn't offered. The newest's
-// download, an install magpie ran in before, a version that is both
+// download, an install eipgam ran in before, a version that is both
 // Stable's and the newest, and a feed that can't be read leave the
 // channel on every version.
 func TestFreshStableInstallStaysOnStable(t *testing.T) {
@@ -38,14 +38,14 @@ func TestFreshStableInstallStaysOnStable(t *testing.T) {
 		json.NewEncoder(w).Encode(update.Release{Version: v})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	defer func() { Version = oldV }()
 	o := updates
 	defer func() { updates = o }()
 	defer freshInstall.Store(false)
 
-	// start is a first run of version in a new magpie folder, or (used)
+	// start is a first run of version in a new eipgam folder, or (used)
 	// one that held settings before this run; then the first check
 	run := func(t *testing.T, version string, used bool) updateJSON {
 		t.Helper()
@@ -86,7 +86,7 @@ func TestFreshStableInstallStaysOnStable(t *testing.T) {
 			t.Fatalf("channel %q", got)
 		}
 	})
-	t.Run("magpie ran here before", func(t *testing.T) {
+	t.Run("eipgam ran here before", func(t *testing.T) {
 		before := asked.Load()
 		run(t, "0.1.11", true)
 		if got := settings.Load().UpdateChannel; got != "" {

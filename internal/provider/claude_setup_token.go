@@ -2,7 +2,7 @@ package provider
 
 // A Claude account added by a setup-token: the long-lived token `claude
 // setup-token` prints, which Claude Code takes in CLAUDE_CODE_OAUTH_TOKEN.
-// magpie keeps it in logins.json as it keeps a sign-in, and hands it to the
+// eipgam keeps it in logins.json as it keeps a sign-in, and hands it to the
 // real Claude Code, in that variable, for runs in the account's own config
 // directory only (ClaudeDirToken); it never asks Anthropic anything with it.
 //
@@ -26,7 +26,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // claudeTokenAuth is a setup-token as savedLogin.Auth keeps it.
@@ -70,7 +70,7 @@ var errClaudeSetupToken = errors.New("unknown: a setup-token can't read the allo
 // setup-token account (SetKeepLoginAs), or to putting one in its sign-in
 // store: Claude Code is switched to it in its settings.json alone
 // (claude_token_env.go), when the user picks it.
-const errClaudeTokenSwitch = "%s was added by a setup-token: Use switches Claude Code itself to it, but magpie can't keep Claude Code on it, as it can't read its allowance"
+const errClaudeTokenSwitch = "%s was added by a setup-token: Use switches Claude Code itself to it, but eipgam can't keep Claude Code on it, as it can't read its allowance"
 
 // checkClaudeSetupToken is token trimmed, or why it isn't a setup-token.
 func checkClaudeSetupToken(token string) (string, error) {

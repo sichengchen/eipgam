@@ -10,32 +10,32 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// On Windows the magpie before must have let go of its WebView2 as well as
+// On Windows the eipgam before must have let go of its WebView2 as well as
 // gone itself: the new one's WebView2 opens the same profile folder
 // (EBWebView), and one made while the old one's msedgewebview2 processes
 // still run there joins the browser going down, and its window never comes
 // (vsoullai on X, 0.1.4096: the new instance hung after an update's
 // restart). The folder's lockfile is no sign: the browser lets it go before
-// its last processes have ended. And an old magpie still quitting after
+// its last processes have ended. And an old eipgam still quitting after
 // 20s holds Wails' single instance mutex, so the new one took itself for a
-// second launch and handed its start to the magpie quitting.
+// second launch and handed its start to the eipgam quitting.
 var (
-	// predecessorMax is how long the magpie before may take to quit: its
+	// predecessorMax is how long the eipgam before may take to quit: its
 	// OnShutdown ports Codex's rollouts, puts agents' configs back and
 	// may install an update
 	predecessorMax = 60 * time.Second
 	// predecessorWebMax is how long its WebView2's processes may take after
 	predecessorWebMax = 30 * time.Second
-	// stuckFor is how long the magpie before may sit with one thread left
+	// stuckFor is how long the eipgam before may sit with one thread left
 	// before it is taken for stuck in its exit and ended (stuckExiting)
 	stuckFor = time.Second
 )
 
-// awaitGone waits for the magpie that relaunched this one to exit, and then
+// awaitGone waits for the eipgam that relaunched this one to exit, and then
 // for every msedgewebview2 process it had, each bounded.
 func awaitGone(pid int) {
 	start := time.Now()
-	// the magpie first: while its handle is open its pid is no other's, so
+	// the eipgam first: while its handle is open its pid is no other's, so
 	// the processes naming it their parent are its own
 	self, err := windows.OpenProcess(windows.SYNCHRONIZE|windows.PROCESS_TERMINATE, false, uint32(pid))
 	if err != nil {
@@ -53,7 +53,7 @@ func awaitGone(pid int) {
 		}
 	}
 	if !awaitExit(self, uint32(pid), predecessorMax) {
-		logPredecessor("the magpie before (%d) is still running after %s; going on", pid, predecessorMax)
+		logPredecessor("the eipgam before (%d) is still running after %s; going on", pid, predecessorMax)
 		return
 	}
 	deadline := time.Now().Add(predecessorWebMax)
@@ -65,19 +65,19 @@ func awaitGone(pid int) {
 	}
 	switch {
 	case left > 0:
-		logPredecessor("%d of the magpie before's %d WebView2 processes still run after %s; going on", left, len(webs), predecessorWebMax)
+		logPredecessor("%d of the eipgam before's %d WebView2 processes still run after %s; going on", left, len(webs), predecessorWebMax)
 	case time.Since(start) > time.Second:
-		logPredecessor("waited %s for the magpie before (%d) and its %d WebView2 processes to end", time.Since(start).Round(100*time.Millisecond), pid, len(webs))
+		logPredecessor("waited %s for the eipgam before (%d) and its %d WebView2 processes to end", time.Since(start).Round(100*time.Millisecond), pid, len(webs))
 	}
 }
 
-// awaitExit waits up to limit for the magpie before (h, pid) to end. One
+// awaitExit waits up to limit for the eipgam before (h, pid) to end. One
 // that sits with a single thread left is stuck in its exit: ExitProcess
 // has ended every other thread and a DLL's detach on the last one waits
 // for one of them, forever, while the process still holds the gateway's
 // port and the WebView2 profile this one is about to open (BESTLJP0412
 // on X: after an update's restart the window was "Not Responding" and the
-// old magpie sat there with one thread). Nothing of it is left to finish,
+// old eipgam sat there with one thread). Nothing of it is left to finish,
 // so it is ended.
 func awaitExit(h windows.Handle, pid uint32, limit time.Duration) bool {
 	deadline := time.Now().Add(limit)
@@ -101,9 +101,9 @@ func awaitExit(h windows.Handle, pid uint32, limit time.Duration) bool {
 		if time.Since(oneSince) < stuckFor {
 			continue
 		}
-		logPredecessor("the magpie before (%d) is stuck in its exit with one thread left; ending it", pid)
+		logPredecessor("the eipgam before (%d) is stuck in its exit with one thread left; ending it", pid)
 		if err := windows.TerminateProcess(h, 1); err != nil {
-			logPredecessor("ending the magpie before (%d): %v", pid, err)
+			logPredecessor("ending the eipgam before (%d): %v", pid, err)
 			oneSince = time.Time{}
 			continue
 		}
@@ -134,7 +134,7 @@ func threads(pid uint32) uint32 {
 }
 
 func logPredecessor(format string, a ...any) {
-	fmt.Fprintf(os.Stderr, "magpie: "+format+"\n", a...)
+	fmt.Fprintf(os.Stderr, "eipgam: "+format+"\n", a...)
 }
 
 // waitHandle waits up to max for the process h to end.

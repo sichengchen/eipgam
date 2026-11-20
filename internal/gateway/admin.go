@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 // AdminPath is the management API: add, change and remove the providers,
@@ -16,7 +16,7 @@ import (
 //
 // Unlike every model route, no call is let in as "from this computer": it
 // needs an enabled gateway key that carries Admin (access.Key.Admin, set by
-// `magpie gateway-key admin` and the app, never through the API), from
+// `eipgam gateway-key admin` and the app, never through the API), from
 // loopback and from anywhere. A key the gateway doesn't know, and a call
 // with none, are 401; any other key is 403. From another machine the key
 // must be AdminAny, and the gateway is shared (lanGuard) as for any call
@@ -27,7 +27,7 @@ import (
 // refused whatever its Origin says (null, a foreign page, a listed page,
 // localhost). A request that names this computer by a name that isn't its
 // own (DNS rebinding) is refused too, with its key or without.
-const AdminPath = "/v1/magpie/admin/"
+const AdminPath = "/v1/eipgam/admin/"
 
 // adminHandler is what serves the routes under AdminPath, set by the app's
 // package (gui) at start; nil serves 503.
@@ -49,33 +49,33 @@ func (s *Server) admin(w http.ResponseWriter, r *http.Request) {
 	// a page, whatever it says it is: its headers aren't its script's to drop
 	if r.Header.Get("Origin") != "" || r.Header.Get("Sec-Fetch-Site") != "" || r.Header.Get("Sec-Fetch-Mode") != "" {
 		log.Printf("refused %s %s: the management API answers no web page (Origin %q)", r.Method, r.URL.Path, r.Header.Get("Origin"))
-		adminRefuse(w, http.StatusForbidden, "admin_browser_refused", "magpie's management API is for scripts, not web pages: a request that carries Origin or Sec-Fetch headers is refused, with a key or without")
+		adminRefuse(w, http.StatusForbidden, "admin_browser_refused", "eipgam's management API is for scripts, not web pages: a request that carries Origin or Sec-Fetch headers is refused, with a key or without")
 		return
 	}
 	who := access.Caller(r.Context())
 	if who.KeyID == "" {
-		adminRefuse(w, http.StatusUnauthorized, "admin_key_required", "the management API needs a gateway key that may manage magpie, even from this computer: send it as Authorization: Bearer <key>, after `magpie gateway-key admin <id> local`")
+		adminRefuse(w, http.StatusUnauthorized, "admin_key_required", "the management API needs a gateway key that may manage eipgam, even from this computer: send it as Authorization: Bearer <key>, after `eipgam gateway-key admin <id> local`")
 		return
 	}
 	if who.Admin == "" {
-		log.Printf("refused %s %s: gateway key %q may not manage magpie", r.Method, r.URL.Path, who.KeyName)
-		adminRefuse(w, http.StatusForbidden, AdminCode, "this gateway key may not manage magpie: allow it with `magpie gateway-key admin <id> local` (or `any` for other machines)")
+		log.Printf("refused %s %s: gateway key %q may not manage eipgam", r.Method, r.URL.Path, who.KeyName)
+		adminRefuse(w, http.StatusForbidden, AdminCode, "this gateway key may not manage eipgam: allow it with `eipgam gateway-key admin <id> local` (or `any` for other machines)")
 		return
 	}
 	if local(r) {
 		if !ownHost(r.Host) {
 			log.Printf("refused %s %s: reached loopback as %q", r.Method, r.URL.Path, r.Host)
-			adminRefuse(w, http.StatusForbidden, "admin_host_refused", "magpie's management API doesn't answer a request that reached this computer under the name "+r.Host+": call it as localhost or 127.0.0.1")
+			adminRefuse(w, http.StatusForbidden, "admin_host_refused", "eipgam's management API doesn't answer a request that reached this computer under the name "+r.Host+": call it as localhost or 127.0.0.1")
 			return
 		}
 	} else if who.Admin != access.AdminAny {
-		log.Printf("refused %s %s from another machine: gateway key %q may manage magpie from this computer only", r.Method, r.URL.Path, who.KeyName)
-		adminRefuse(w, http.StatusForbidden, AdminCode, "this gateway key may manage magpie from this computer only: allow other machines with `magpie gateway-key admin <id> any`")
+		log.Printf("refused %s %s from another machine: gateway key %q may manage eipgam from this computer only", r.Method, r.URL.Path, who.KeyName)
+		adminRefuse(w, http.StatusForbidden, AdminCode, "this gateway key may manage eipgam from this computer only: allow other machines with `eipgam gateway-key admin <id> any`")
 		return
 	}
 	hp := adminHandler.Load()
 	if hp == nil {
-		adminRefuse(w, http.StatusServiceUnavailable, "admin_unavailable", "this magpie serves no management API")
+		adminRefuse(w, http.StatusServiceUnavailable, "admin_unavailable", "this eipgam serves no management API")
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, 4<<20)

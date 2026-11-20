@@ -6,26 +6,26 @@ import (
 	"os"
 	"slices"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
-// `magpie claude-desktop launcher [add|remove]` is the isolated Claude
-// Desktop (#5671, baranwang on X), as `magpie claude launcher` is
-// claude-magpie: add makes ~/Applications/Claude Magpie.app, which starts
-// Claude Desktop on magpie in a folder of its own, and moves a Desktop on
-// magpie there, so the user's own Claude.app stays signed in with
+// `eipgam claude-desktop launcher [add|remove]` is the isolated Claude
+// Desktop (#5671, baranwang on X), as `eipgam claude launcher` is
+// claude-eipgam: add makes ~/Applications/Claude eipgam.app, which starts
+// Claude Desktop on eipgam in a folder of its own, and moves a Desktop on
+// eipgam there, so the user's own Claude.app stays signed in with
 // Anthropic; remove puts it back. The GUI's switch on Claude Desktop's
 // row does the same (agent.SetDesktopIsolated). macOS only.
 
-const claudeDesktopLauncherUsage = `magpie claude-desktop launcher [add|remove]
-          Claude Magpie.app (macOS): Claude Desktop on magpie in a folder of
+const claudeDesktopLauncherUsage = `eipgam claude-desktop launcher [add|remove]
+          Claude eipgam.app (macOS): Claude Desktop on eipgam in a folder of
           its own, beside your own Claude Desktop signed in with Anthropic
-magpie claude-desktop launcher claude-dir [on|off]
+eipgam claude-desktop launcher claude-dir [on|off]
           its Code tab's Claude Code on a folder of its own
-          (CLAUDE_CONFIG_DIR=~/.claude-magpie-desktop), or on ~/.claude
+          (CLAUDE_CONFIG_DIR=~/.claude-eipgam-desktop), or on ~/.claude
 `
 
-// claudeDesktopLaunchCmd is `magpie claude-desktop launcher …`; ok false
+// claudeDesktopLaunchCmd is `eipgam claude-desktop launcher …`; ok false
 // for another form.
 func claudeDesktopLaunchCmd(args []string) (ok bool, err error) {
 	if len(args) < 2 || args[0] != "claude-desktop" && args[0] != "claude-app" || args[1] != "launcher" {
@@ -57,10 +57,10 @@ func claudeDesktopLauncher(args []string) error {
 		return claudeDesktopClaudeDir(args[1:])
 	}
 	if len(args) > 1 {
-		return fmt.Errorf("magpie claude-desktop launcher takes one word, not %q", args[1])
+		return fmt.Errorf("eipgam claude-desktop launcher takes one word, not %q", args[1])
 	}
 	if what != "status" && what != "add" && what != "remove" {
-		return fmt.Errorf("magpie claude-desktop launcher: add, remove or nothing, not %q", what)
+		return fmt.Errorf("eipgam claude-desktop launcher: add, remove or nothing, not %q", what)
 	}
 	st, ok := desktopIsolatedHere()
 	if !ok {
@@ -73,8 +73,8 @@ func claudeDesktopLauncher(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("Claude Magpie:", p)
-		fmt.Println("Open it to use Claude Desktop on magpie; your own Claude Desktop stays signed in with Anthropic.")
+		fmt.Println("Claude eipgam:", p)
+		fmt.Println("Open it to use Claude Desktop on eipgam; your own Claude Desktop stays signed in with Anthropic.")
 		return nil
 	case "remove":
 		was := st.Launcher
@@ -90,16 +90,16 @@ func claudeDesktopLauncher(args []string) error {
 		fmt.Println(st.Launcher)
 		return nil
 	}
-	fmt.Println("no Claude Magpie app: run `magpie claude-desktop launcher add`")
+	fmt.Println("no Claude eipgam app: run `eipgam claude-desktop launcher add`")
 	return nil
 }
 
-// claudeDesktopClaudeDir is `magpie claude-desktop launcher claude-dir
-// [on|off]` (#6459): the Code tab of Claude Magpie.app's Desktop on a
+// claudeDesktopClaudeDir is `eipgam claude-desktop launcher claude-dir
+// [on|off]` (#6459): the Code tab of Claude eipgam.app's Desktop on a
 // Claude Code folder of its own, or on ~/.claude; nothing says which.
 func claudeDesktopClaudeDir(args []string) error {
 	if len(args) > 1 {
-		return fmt.Errorf("magpie claude-desktop launcher claude-dir takes one word, not %q", args[1])
+		return fmt.Errorf("eipgam claude-desktop launcher claude-dir takes one word, not %q", args[1])
 	}
 	st, ok := desktopIsolatedHere()
 	if !ok {
@@ -109,24 +109,24 @@ func claudeDesktopClaudeDir(args []string) error {
 		if st.Claude {
 			fmt.Println(st.ClaudeDir)
 		} else {
-			fmt.Println("~/.claude: run `magpie claude-desktop launcher claude-dir on` for a folder of its own")
+			fmt.Println("~/.claude: run `eipgam claude-desktop launcher claude-dir on` for a folder of its own")
 		}
 		return nil
 	}
 	if args[0] != "on" && args[0] != "off" {
-		return fmt.Errorf("magpie claude-desktop launcher claude-dir: on, off or nothing, not %q", args[0])
+		return fmt.Errorf("eipgam claude-desktop launcher claude-dir: on, off or nothing, not %q", args[0])
 	}
 	home, _ := os.UserHomeDir()
 	if err := setDesktopIsolatedClaude(home, args[0] == "on"); err != nil {
 		return err
 	}
 	if args[0] == "on" {
-		fmt.Println("Claude Code in Claude Magpie:", st.ClaudeDir)
+		fmt.Println("Claude Code in Claude eipgam:", st.ClaudeDir)
 	} else {
-		fmt.Println("Claude Code in Claude Magpie: ~/.claude")
+		fmt.Println("Claude Code in Claude eipgam: ~/.claude")
 	}
 	if st.Launcher != "" {
-		fmt.Println("Quit Claude Magpie and open it again to use it.")
+		fmt.Println("Quit Claude eipgam and open it again to use it.")
 	}
 	return nil
 }

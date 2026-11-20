@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // ccPlugin is the Command Code plan as its plugin serves it: its
@@ -69,7 +69,7 @@ func TestPeakOf(t *testing.T) {
 	}
 }
 
-// ollamaCloudCatalog is models.dev's api.json as magpie had it on
+// ollamaCloudCatalog is models.dev's api.json as eipgam had it on
 // 2026-11-01, these entries byte for byte (descriptions and the like left
 // out): Ollama Cloud's DeepSeek models at their Off-Peak row of
 // https://ollama.com/pricing, its GLM at its one price, and DeepSeek's own
@@ -168,7 +168,7 @@ func TestOllamaCloudOffPeakPrice(t *testing.T) {
 	}
 }
 
-// commandCodeCatalog is models.dev's api.json as magpie had it on
+// commandCodeCatalog is models.dev's api.json as eipgam had it on
 // 2026-10-30, these entries byte for byte (descriptions and the like left
 // out). DeepSeek lists V4.1 Flash only as deepseek-flash, by a dated
 // canonical id; Command Code's own catalog lists its undated

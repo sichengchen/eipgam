@@ -6,35 +6,35 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A reply limit typed by hand into an agent's file stays (sayagoodbyeplz
 // on Discord: WorkBuddy's deepseek-v4.1-flash replies 128000 tokens, not
 // the 384000 models.dev says, and Pi's maxTokens set to 128000 was written
-// back to 384000 on the next sync). magpie writes its models whole, so a
-// value in the file is told apart by what magpie has wanted there: the
-// stash keeps, per file and model, the reply limits magpie handed it
+// back to 384000 on the next sync). eipgam writes its models whole, so a
+// value in the file is told apart by what eipgam has wanted there: the
+// stash keeps, per file and model, the reply limits eipgam handed it
 // (outputsWantedKey), and one in the file that is none of them is the
-// user's. It stays until the user sets the model's Max output in magpie
-// (the editor's Model settings, or `magpie model output`), which is their
-// word on it there and is written over it, as is magpie's when no record
-// says what magpie wanted (a model new to the file, a stash that can't be
-// read: unknown is magpie's, as before).
+// user's. It stays until the user sets the model's Max output in eipgam
+// (the editor's Model settings, or `eipgam model output`), which is their
+// word on it there and is written over it, as is eipgam's when no record
+// says what eipgam wanted (a model new to the file, a stash that can't be
+// read: unknown is eipgam's, as before).
 //
 // The record is of every value wanted, not only the last written: an
 // agent's block is also built to be compared (Drift) and never written,
-// and an old value of magpie's left in the file is still magpie's.
+// and an old value of eipgam's left in the file is still eipgam's.
 
-// outputsWantedKey is where the stash keeps the reply limits magpie has
+// outputsWantedKey is where the stash keeps the reply limits eipgam has
 // wanted in the file at path, as JSON: {model: [n, …]}, newest last.
 func outputsWantedKey(path string) string { return "output:" + path + ":wanted" }
 
 // outputsRemembered is how many values a model's record keeps.
 const outputsRemembered = 8
 
-// outputsKept is want, the reply limit magpie hands each model of the file
+// outputsKept is want, the reply limit eipgam hands each model of the file
 // at path, with have's, the file's own now, kept where it is the user's.
 // It records want's values as wanted.
 func outputsKept(path string, want, have map[string]int) map[string]int {
@@ -83,7 +83,7 @@ func outputsKept(path string, want, have map[string]int) map[string]int {
 	return out
 }
 
-// outputSetIn says the user set a Max output in magpie for the model an
+// outputSetIn says the user set a Max output in eipgam for the model an
 // agent lists as id, "provider/model": its own or its provider's.
 func outputSetIn(s settings.Settings, id string) bool {
 	prov, _, ok := strings.Cut(id, "/")
@@ -104,8 +104,8 @@ func numberOf(v any) int {
 	return 0
 }
 
-// piOutputsKept keeps a maxTokens the user typed into magpie's models in
-// Pi's models.json at path (outputsKept); v is the block magpie writes.
+// piOutputsKept keeps a maxTokens the user typed into eipgam's models in
+// Pi's models.json at path (outputsKept); v is the block eipgam writes.
 func piOutputsKept(path string, v any) {
 	block, _ := v.(map[string]any)
 	ms, _ := block["models"].([]map[string]any)
@@ -140,9 +140,9 @@ func piOutputsKept(path string, v any) {
 	}
 }
 
-// openCodeOutputsKept keeps a limit.output the user typed into magpie's
+// openCodeOutputsKept keeps a limit.output the user typed into eipgam's
 // models in an OpenCode config at path (outputsKept); ms are the models
-// magpie writes.
+// eipgam writes.
 func openCodeOutputsKept(path string, ms orderedJSON) {
 	want := map[string]int{}
 	for _, p := range ms {

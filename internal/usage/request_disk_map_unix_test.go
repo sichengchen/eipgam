@@ -14,7 +14,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // The chunks a start reads from the file are of the file's pages, not of

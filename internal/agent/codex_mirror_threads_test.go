@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // Chris on Discord (the Codex app on a Mac): "Model provider mismatch.
@@ -13,13 +13,13 @@ import (
 // name, and CC Switch's OpenAI mirror ("custom": name OpenAI, the
 // ChatGPT sign-in, no base_url) is named OpenAI as the built-in is. Codex
 // 0.166 and 0.167 resume a thread only on the provider id it is on now,
-// and magpie left the mirror out of every move: its threads stayed on it
-// while Codex was on the built-in OpenAI beside magpie, and OpenAI's
+// and eipgam left the mirror out of every move: its threads stayed on it
+// while Codex was on the built-in OpenAI beside eipgam, and OpenAI's
 // stayed on OpenAI while Codex was on the mirror. Both are the ChatGPT
 // account's threads, so they follow whichever of the two Codex is on.
 const ccSwitchMirrorTable = "[model_providers.custom]\nname = \"OpenAI\"\nrequires_openai_auth = true\nsupports_websockets = true\nwire_api = \"responses\"\n"
 
-// Codex on OpenAI beside its sign-in with a magpie model, the mirror a
+// Codex on OpenAI beside its sign-in with a eipgam model, the mirror a
 // table left from CC Switch: its threads move to OpenAI; a profile's
 // mirror keeps its own.
 func TestCodexMirrorThreadsFollowOpenAI(t *testing.T) {
@@ -51,7 +51,7 @@ func TestCodexMirrorThreadsFollowOpenAI(t *testing.T) {
 	}
 }
 
-// The mirror at the top when a magpie model is picked: magpie takes it
+// The mirror at the top when a eipgam model is picked: eipgam takes it
 // down and Codex goes on OpenAI, so its threads go to OpenAI, and back to
 // the mirror at the Disconnect, which puts it back on top.
 func TestCodexMirrorAtTopJoinsWithItsThreads(t *testing.T) {

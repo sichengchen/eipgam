@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// #2855: a Codex conversation that used OpenAI, then went through magpie to
-// DeepSeek, then had magpie disconnected again, was stuck on HTTP 400
+// #2855: a Codex conversation that used OpenAI, then went through eipgam to
+// DeepSeek, then had eipgam disconnected again, was stuck on HTTP 400
 // "Invalid 'input[43].content': array too long. Expected an array with
 // maximum length 0, but got an array with length 1 instead." — the remote
 // compact with it. The reporter's rollout holds the poison: 25 reasoning
@@ -21,8 +21,8 @@ import (
 // gAAAA its GPT-phase items carry), which Codex stores and replays to
 // OpenAI when the thread goes back there. OpenAI takes a reasoning item
 // sent back only with its content empty (#1411) and cannot open another
-// vendor's seal. So what magpie hands a client must be re-sendable to a
-// strict Responses upstream: a reasoning item magpie makes, its text a
+// vendor's seal. So what eipgam hands a client must be re-sendable to a
+// strict Responses upstream: a reasoning item eipgam makes, its text a
 // summary, nothing sealed — the shape its own translations have always
 // given, which the first test pins.
 
@@ -119,7 +119,7 @@ func assertResendable(t *testing.T, it map[string]any, text string) {
 	}
 }
 
-// A Chat upstream's reasoning, translated for Codex, is an item magpie
+// A Chat upstream's reasoning, translated for Codex, is an item eipgam
 // makes: an rs_ id and a summary, no content, nothing sealed. It has been
 // so on main; this pins the contract #2855 turns on.
 func TestTranslatedChatReasoningCarriesNoContent(t *testing.T) {
@@ -151,7 +151,7 @@ func TestTranslatedChatReasoningCarriesNoContent(t *testing.T) {
 	}
 	for _, it := range append(done, completed...) {
 		if id, _ := it["id"].(string); !strings.HasPrefix(id, "rs_") {
-			t.Errorf("reasoning id %q, want one of magpie's own", id)
+			t.Errorf("reasoning id %q, want one of eipgam's own", id)
 		}
 		assertResendable(t, it, "weighing the options")
 	}
@@ -160,8 +160,8 @@ func TestTranslatedChatReasoningCarriesNoContent(t *testing.T) {
 // A Responses upstream's reasoning item with its text in it, served
 // translated (Codex asked a search the model doesn't run itself), goes to
 // Codex as the upstream wrote it today: stored, and poison when the thread
-// replays to OpenAI, on magpie or off it (#2855). It goes as an item
-// magpie makes, its text a summary, nothing sealed.
+// replays to OpenAI, on eipgam or off it (#2855). It goes as an item
+// eipgam makes, its text a summary, nothing sealed.
 func TestForeignSealedReasoningGivenCodexCarriesNoContent(t *testing.T) {
 	fresh(t)
 	saveDSK(t, &dskRelay{})

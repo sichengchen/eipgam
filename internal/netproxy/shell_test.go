@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // shellSays has the login shell export vars, and nothing else.
@@ -73,9 +73,9 @@ func envVal(env []string, k string) string {
 }
 
 // jimlee0824v2 on X: the proxy is exported in the shell profile, the
-// proxy app's system proxy is off, and magpie opened from the Dock went
+// proxy app's system proxy is off, and eipgam opened from the Dock went
 // direct until the proxy was set in it by hand. Auto takes the shell's,
-// as a terminal's programs do: for magpie's requests, in Settings' line,
+// as a terminal's programs do: for eipgam's requests, in Settings' line,
 // and for the CLIs it starts.
 func TestAutoTakesTheShellsProxy(t *testing.T) {
 	clearProxyEnv(t)
@@ -103,7 +103,7 @@ func TestAutoTakesTheShellsProxy(t *testing.T) {
 	}
 	env := EnvWith("", []string{"PATH=/bin"})
 	if envVal(env, "HTTPS_PROXY") != want || envVal(env, "HTTP_PROXY") != want {
-		t.Fatalf("a CLI magpie starts wasn't given the shell's proxy: %q", env)
+		t.Fatalf("a CLI eipgam starts wasn't given the shell's proxy: %q", env)
 	}
 	if np := envVal(env, "NO_PROXY"); !strings.Contains(np, "corp.example") || !strings.Contains(np, "127.0.0.1") {
 		t.Fatalf("NO_PROXY = %q, want the shell's corp.example beside loopback", np)
@@ -124,7 +124,7 @@ func TestShellProxyByScheme(t *testing.T) {
 	}
 }
 
-// A profile that exports the proxy app's port for good doesn't cut magpie
+// A profile that exports the proxy app's port for good doesn't cut eipgam
 // off while the app is closed: nothing listening, it goes direct, and
 // takes the proxy again once the app is up.
 func TestClosedShellProxyGoesDirect(t *testing.T) {
@@ -156,8 +156,8 @@ func TestClosedShellProxyGoesDirect(t *testing.T) {
 	}
 }
 
-// What the user set comes first: magpie's own setting ("direct" too), the
-// environment magpie runs with, then the system's; the shell's only when
+// What the user set comes first: eipgam's own setting ("direct" too), the
+// environment eipgam runs with, then the system's; the shell's only when
 // none of them names a proxy.
 func TestShellProxyComesLast(t *testing.T) {
 	shell := ""
@@ -183,7 +183,7 @@ func TestShellProxyComesLast(t *testing.T) {
 		// ALL_PROXY: Go reads HTTPS_PROXY once per process
 		t.Setenv("ALL_PROXY", "http://10.0.0.1:3128")
 		if got := proxyFor(t, "https://api.example/"); got != "http://10.0.0.1:3128" {
-			t.Fatalf("magpie's own environment lost to the shell's: %q", got)
+			t.Fatalf("eipgam's own environment lost to the shell's: %q", got)
 		}
 	})
 	t.Run("system", func(t *testing.T) {

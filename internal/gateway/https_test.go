@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func setHTTPS(t *testing.T, on bool) {
@@ -64,9 +64,9 @@ func magpieCA(t *testing.T) *x509.Certificate {
 	return c
 }
 
-// zhangly1 on X: Claude on another computer on the LAN needed magpie at
+// zhangly1 on X: Claude on another computer on the LAN needed eipgam at
 // https://. With HTTPS on, another computer is served TLS with a
-// certificate magpie's CA signs, which a client trusting that CA alone
+// certificate eipgam's CA signs, which a client trusting that CA alone
 // verifies, plain http:// from it is refused, and the switch takes
 // effect at the next connection; off, it is plain http:// again.
 func TestHTTPSOtherComputer(t *testing.T) {
@@ -90,10 +90,10 @@ func TestHTTPSOtherComputer(t *testing.T) {
 		t.Errorf("on, plain from another computer: %d %q, want it refused", code, body)
 	}
 	if _, _, err := mcall(t, trusting(t), "GET", "https://"+addr+"/v1/models", key); err == nil {
-		t.Error("a client that doesn't trust magpie's CA verified its certificate")
+		t.Error("a client that doesn't trust eipgam's CA verified its certificate")
 	}
 	info, err := ServedCert()
-	if err != nil || info.From != "magpie" || info.Issuer == "" || !info.Until.After(time.Now()) {
+	if err != nil || info.From != "eipgam" || info.Issuer == "" || !info.Until.After(time.Now()) {
 		t.Errorf("ServedCert: %+v %v", info, err)
 	}
 	setHTTPS(t, false)
@@ -153,9 +153,9 @@ func newTestPKI(t *testing.T) testPKI {
 }
 
 // The user's own certificate and key, imported (a chain and a key apart,
-// in any order), are served instead of one magpie's CA signs; a pair
+// in any order), are served instead of one eipgam's CA signs; a pair
 // that can't be served is refused and leaves nothing behind; removed,
-// magpie's CA signs again.
+// eipgam's CA signs again.
 func TestHTTPSImportedCert(t *testing.T) {
 	key := mtlsHome(t, false)
 	setHTTPS(t, true)
@@ -190,7 +190,7 @@ func TestHTTPSImportedCert(t *testing.T) {
 		t.Fatalf("imported: %d %q %v", code, body, err)
 	}
 	if _, _, err := mcall(t, trusting(t, magpieCA(t)), "GET", "https://"+addr+"/v1/models", key); err == nil {
-		t.Error("magpie's CA's certificate was served over the imported one")
+		t.Error("eipgam's CA's certificate was served over the imported one")
 	}
 	if info, err := ServedCert(); err != nil || info.From != "imported" || info.Issuer != "Test Root" || !strings.Contains(strings.Join(info.Names, ","), "nas.home") {
 		t.Errorf("ServedCert: %+v %v", info, err)
@@ -203,8 +203,8 @@ func TestHTTPSImportedCert(t *testing.T) {
 	}
 }
 
-// Another computer fetches magpie's CA without a key, from an address
-// the share lets in, before it trusts magpie's https://; every other
+// Another computer fetches eipgam's CA without a key, from an address
+// the share lets in, before it trusts eipgam's https://; every other
 // route still asks for the key. With no CA made yet there is none.
 func TestHTTPSCAFile(t *testing.T) {
 	mtlsHome(t, false)

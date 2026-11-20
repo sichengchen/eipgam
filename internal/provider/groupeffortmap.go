@@ -42,7 +42,7 @@ func (g *Group) SetMemberEffortMap(id string, to map[string]string) {
 // renamedEffortMaps is maps with each member as to spells it now, those
 // it gives "" dropped; nil when none is left. Two members spelled as one
 // keep the map of the one already spelled so, else the first's in the
-// order of their spelling: a group shared from a magpie with OpenAI's
+// order of their spelling: a group shared from a eipgam with OpenAI's
 // model on two providers, imported where one serves both, keeps that
 // one's own.
 func renamedEffortMaps(m map[string]map[string]string, to func(string) string) map[string]map[string]string {

@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // Settings has it no more, and its search leads to the editor
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=models");
+      await page.goto("http://eipgam.test/?view=settings&tab=models");
       await settingsDrawn(page);
       assert.equal(await page.locator("#view-settings #claudeLeanRow").count(), 0, "not in Settings");
       await page.locator("#setQ").fill(w.name);

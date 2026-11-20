@@ -7,7 +7,7 @@ package library
 // first clause of each description, as it last listed them. They are kept
 // in a file of their own, so a router started again describes its servers
 // before it has run any of them; they are what the servers said, not
-// magpie's words, and no model writes them.
+// eipgam's words, and no model writes them.
 
 import (
 	"crypto/sha256"
@@ -19,8 +19,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // hubCard is what the router last learnt of one server, for the server as

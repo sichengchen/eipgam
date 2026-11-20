@@ -11,7 +11,7 @@ import (
 
 // What a request or a background look asks of one provider (its proxy,
 // whether it is left alone) is read from providers.json as parsed once,
-// not a parse of the whole file each time: 3.6 GB of a live magpie's 33 GB
+// not a parse of the whole file each time: 3.6 GB of a live eipgam's 33 GB
 // in 53 minutes. A save, and another process's edit, are seen at once.
 func TestStoredParsedOnceUntilTheFileChanges(t *testing.T) {
 	isolate(t)

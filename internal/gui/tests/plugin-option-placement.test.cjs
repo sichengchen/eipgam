@@ -19,7 +19,7 @@ const free = { key: "free_only", label: "Free models only", on: false };
 const CASES = {
   mixed: [panel, free],
   top: [panel],
-  // an older plugin: no placement, or one magpie doesn't know
+  // an older plugin: no placement, or one eipgam doesn't know
   none: [{ ...panel, placement: undefined }, { ...free, placement: "sidebar" }],
 };
 
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, CASES[which], posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "WorkBuddy Pro" }).click();
         const ed = page.locator("#modal .editor");
         await ed.locator(".plugin-options").first().waitFor();

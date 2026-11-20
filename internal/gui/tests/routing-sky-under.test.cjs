@@ -6,9 +6,9 @@
 // intent off the row's right edge, its name squeezed out. The magpies fly
 // over the cards, as before, but nothing at rest covers a card's words (the
 // owner, 11-09: "鸟要在卡片上面", after 869c4d112 put them under), a dot held
-// at its seat or waiting at magpie sits whole beside the card, and a long
+// at its seat or waiting at eipgam sits whole beside the card, and a long
 // intent is cut short on its row, read whole in its tooltip, the name kept.
-// Three agents at once (one still waiting at magpie), at a wide window (the
+// Three agents at once (one still waiting at eipgam), at a wide window (the
 // reporter's, where a row says it on its name's line), at 1100px, at the
 // narrow stage and at a phone's width, in every language, both engines.
 const assert = require("node:assert/strict");
@@ -36,7 +36,7 @@ const order = () => [{ id: "b", provider: "b", name: "B", kind: "account", model
 const group = { id: "jd", name: "jd-auto-balanced", members: ["a/fast", "b/opus"] };
 const at = (ms) => new Date(now - ms).toISOString();
 // claude's request is with b (the intent's pick), codex's with a, and
-// kimi's waits at magpie for routing to pick
+// kimi's waits at eipgam for routing to pick
 const routes = () => [
   { id: 7, seq: 7, time: at(3000), agent: "claude", model: "group/jd", provider: "b", tokens: 9000, group, order: order(),
     tries: [{ id: "b", model: "opus", start: at(2500) }], done: false,
@@ -80,7 +80,7 @@ function serve(lang, live) {
   };
 }
 
-// covered: the words on the stage's cards that a magpie or a dot is drawn
+// covered: the words on the stage's cards that a eipgam or a dot is drawn
 // over. The sky is over the cards (the owner, 11-09: "鸟要在卡片上面"), so
 // what sits at rest must sit beside the words, never on them.
 const covered = () => {
@@ -98,9 +98,9 @@ const covered = () => {
   return out;
 };
 
-// crossing: watches every frame a magpie flies through magpie's box, and
+// crossing: watches every frame a eipgam flies through eipgam's box, and
 // keeps what of the sky was on the hub's words then: its dot and its body.
-// The magpie trails its dot by its length, so as it leaves the box by the
+// The eipgam trails its dot by its length, so as it leaves the box by the
 // side its tail or a wing brushes the words for a frame or two; across
 // them (the way before) dot and body went over the name and address.
 const crossing = () => {
@@ -178,18 +178,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         });
         const live = { pending: [], queued: [] };
         await page.route("**/*", serve(lang, live));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         // the two requests routing picked for are held at their seats, the
-        // third's dot waits at magpie
+        // third's dot waits at eipgam
         await page.waitForFunction(() => document.querySelectorAll(".rt-sky .pkt.held").length === 2);
         await page.waitForFunction(() => document.querySelectorAll(".rt-sky .pkt:not([visibility])").length === 3);
-        await page.waitForTimeout(900); // the third's flight to magpie lands, the carriers fly off
+        await page.waitForTimeout(900); // the third's flight to eipgam lands, the carriers fly off
         const flown = await page.evaluate(() => document.querySelectorAll(".rt-sky .rt-flier").length);
-        assert(flown >= 1, "the magpie carrying the waiting request stays with it at magpie");
+        assert(flown >= 1, "the eipgam carrying the waiting request stays with it at eipgam");
 
         const over = await page.evaluate(above);
         assert(over.length >= 3 && over.every(Boolean), `the magpies fly over the cards: ${JSON.stringify(over)}`);
-        assert.deepEqual(await page.evaluate(covered), [], "a magpie or dot at rest is never on a card's words");
+        assert.deepEqual(await page.evaluate(covered), [], "a eipgam or dot at rest is never on a card's words");
         const ds = await page.evaluate(dots);
         assert.equal(ds.length, 3, JSON.stringify(ds));
         for (const d of ds) {
@@ -197,7 +197,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert(d.gap <= 12, `a ${d.held ? "held" : "waiting"} dot must sit at its card (${d.gap.toFixed(1)}px off): ${JSON.stringify(ds)}`);
         }
 
-        // routing picks a for kimi's: its magpie flies on through magpie's
+        // routing picks a for kimi's: its eipgam flies on through eipgam's
         // box, along its edge, never over its name or address
         await page.evaluate(crossing);
         const next = { ...routes()[2], provider: "a", order: order().slice(1), tries: [{ id: "a", model: "fast", start: new Date().toISOString() }] };
@@ -205,8 +205,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (live.pending.length) await live.pending.shift().fulfill({ json: reply }); else live.queued.push(reply);
         await page.waitForFunction(() => document.querySelectorAll(".rt-sky .pkt.held").length === 3, null, { timeout: 8000 });
         const crossed = await page.evaluate(() => window.crossed);
-        assert(crossed.frames >= 5, `the magpie flew through magpie's box: ${JSON.stringify(crossed)}`);
-        assert.deepEqual([...new Set(crossed.hits)], [], "a magpie crossing magpie's box keeps off its words");
+        assert(crossed.frames >= 5, `the eipgam flew through eipgam's box: ${JSON.stringify(crossed)}`);
+        assert.deepEqual([...new Set(crossed.hits)], [], "a eipgam crossing eipgam's box keeps off its words");
 
         const row = await page.evaluate(intentRow, INTENT);
         assert(row, "the row the intent picked says the intent");

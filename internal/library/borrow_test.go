@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// a Library as a remote magpie tells it: two skills and two prompt sets
+// a Library as a remote eipgam tells it: two skills and two prompt sets
 func remoteLibrary(t *testing.T) *Bundle {
 	t.Helper()
 	sandbox(t)
@@ -217,8 +217,8 @@ func TestBorrowedSkillGoesWithTheRemote(t *testing.T) {
 	}
 }
 
-// fenglian980510 on X: a magpie in Docker shows no agent, so its skills and
-// prompts are ticked for none. A magpie that uses its Library gives them
+// fenglian980510 on X: a eipgam in Docker shows no agent, so its skills and
+// prompts are ticked for none. A eipgam that uses its Library gives them
 // to its own agents, as it would a new one; one the remote ticked keeps
 // its ticks.
 func TestBorrowFromAMagpieWithNoAgents(t *testing.T) {
@@ -249,7 +249,7 @@ func TestBorrowFromAMagpieWithNoAgents(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !remote.NoAgents {
-		t.Fatal("a magpie showing no agent didn't say so")
+		t.Fatal("a eipgam showing no agent didn't say so")
 	}
 	NoAgentsShown = nil
 
@@ -281,12 +281,12 @@ func TestBorrowFromAMagpieWithNoAgents(t *testing.T) {
 	}
 }
 
-// A magpie with agents here says nothing of the kind: what it ticked for
+// A eipgam with agents here says nothing of the kind: what it ticked for
 // none stays with none.
 func TestBorrowFromAMagpieWithAgentsKeepsNone(t *testing.T) {
 	remote := remoteLibrary(t)
 	if remote.NoAgents {
-		t.Fatal("a magpie with agents said it shows none")
+		t.Fatal("a eipgam with agents said it shows none")
 	}
 	remote.Skills[0].Agents = []string{}
 	sandbox(t)

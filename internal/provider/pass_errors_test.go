@@ -11,7 +11,7 @@ func TestPassesErrors(t *testing.T) {
 		want bool
 	}{
 		{"keyed", Provider{ID: "relay", Key: "k", Chat: "https://x/v1", PassErrors: true}, true},
-		{"keyed, left to magpie", Provider{ID: "relay", Key: "k", Chat: "https://x/v1"}, false},
+		{"keyed, left to eipgam", Provider{ID: "relay", Key: "k", Chat: "https://x/v1"}, false},
 		{"no endpoint", Provider{ID: "relay", PassErrors: true}, false},
 		{"an account", Provider{ID: "codex", Account: &Account{}, Chat: "https://x/v1", PassErrors: true}, false},
 	} {

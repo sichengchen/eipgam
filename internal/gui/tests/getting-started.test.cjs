@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// wangye1644294 on X: magpie isn't friendly to a first-time user; a guide,
+// wangye1644294 on X: eipgam isn't friendly to a first-time user; a guide,
 // routing set up in a click and the agents found here, please. A new user's
 // Agents page (the window's first page, and the panel's first tab) has a Get
 // started card: add a model source, connect an agent (those found here, each
@@ -29,8 +29,8 @@ function newWorld() {
 }
 
 function agents(w) {
-  // with no model served, the agents' pickers have none of magpie's
-  const mine = w.served ? [{ value: "relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via magpie" }] : [];
+  // with no model served, the agents' pickers have none of eipgam's
+  const mine = w.served ? [{ value: "relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via eipgam" }] : [];
   const field = (value, own) => [{ key: "model", label: "model", value, options: [...own, ...mine] }];
   return [
     { id: "codex", name: "Codex", icon: "generic", path: "/fixture/codex", wired: w.wired, fields: field(w.wired ? "relay/m1" : "", [{ value: "gpt-5.4", label: "GPT-5.4" }]) },
@@ -94,19 +94,19 @@ const LAYOUTS = [
 ];
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const STRINGS = ["Get started", "Add a model source", "Connect an agent", "Set up routing (optional)", "Hide Get started",
-  "A subscription you already pay for, a provider, or an API key", "magpie found these on this computer. Click one to connect it:",
+  "A subscription you already pay for, a provider, or an API key", "eipgam found these on this computer. Click one to connect it:",
   "A routing group sends each request to the right model, and to the next one when a model fails", "+{n} more below", "{n} of {m} done", "{n} models ready to use", "Add “{name}”"];
 
 async function open(browser, layout, lang, w, posts) {
   const context = await browser.newContext({ viewport: layout.viewport, reducedMotion: "reduce" });
-  await context.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "agents"); } catch {} });
+  await context.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "agents"); } catch {} });
   const page = await context.newPage();
   page.setDefaultTimeout(5000);
   page.setDefaultNavigationTimeout(60000);
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));
   await page.route("**/*", server(lang, w, posts));
-  await page.goto("http://magpie.test" + layout.url);
+  await page.goto("http://eipgam.test" + layout.url);
   // folded under Get started, the rows are there but out of view
   await page.locator(".row.agent").first().waitFor({ state: "attached" });
   return { context, page };
@@ -176,7 +176,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // a provider added: the step is ticked from the state, the agents can
         // be connected, and a routing group is a click away
         w.served = 12;
-        await page.goto("http://magpie.test" + layout.url);
+        await page.goto("http://eipgam.test" + layout.url);
         await card.waitFor();
         assert.equal(await stepDone(page, "source"), true);
         assert.match(await page.locator('.guide-step[data-step="source"] .guide-say').textContent(), /12/);
@@ -206,7 +206,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // done stays done: a reload brings no card back, and the agent
         // connected is in view, the rest folded as for anyone
-        await page.goto("http://magpie.test" + layout.url);
+        await page.goto("http://eipgam.test" + layout.url);
         await page.locator(".row.agent").first().waitFor();
         assert.equal(await page.locator(".guide").count(), 0);
         assert.equal(await folded(page), 4);
@@ -244,7 +244,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // and brought back from Settings › General, where its hide said:
         // a row there only while it is away and would show
         const pg = again.page, tr = (s) => pg.evaluate((s) => t(s), s);
-        await pg.goto("http://magpie.test/?view=settings&tab=general");
+        await pg.goto("http://eipgam.test/?view=settings&tab=general");
         const back = pg.locator("#guideBackRow");
         await back.locator("button").waitFor();
         assert.equal(await back.locator(".name").textContent(), await tr("Get started"));
@@ -259,7 +259,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(w.hidden, false);
         assert.equal(await pg.locator("#status").textContent(), await tr("Get started is back on the Agents page"));
         assert.equal(await pg.locator("#view-settings").evaluate((v) => v.scrollTop), before, "no click moved the page");
-        await pg.goto("http://magpie.test" + layout.url);
+        await pg.goto("http://eipgam.test" + layout.url);
         await pg.locator("#agentsLead .guide").waitFor();
         assert.deepEqual(pg.errors, []);
       });

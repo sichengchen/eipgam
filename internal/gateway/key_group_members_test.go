@@ -8,20 +8,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A routing group listing alone (Group.Unlists) stands in for its
 // members in the lists, so its members are left out of them. A gateway
 // key that may use those members and not the group is given neither:
-// luckymanjc on Discord (11-05) held his Remote magpie's key to every
+// luckymanjc on Discord (11-05) held his Remote eipgam's key to every
 // Codex model ("codex/*", his three accounts), and his other computer
 // was offered GPT-6-Luna alone, the one Codex model no group of his
 // listed alone; the key's picker offered it alone too. The group stands
 // in only for a caller that may use it: for the rest the members it may
 // use are listed, on every route a list is read from, the remote
-// magpie's included.
+// eipgam's included.
 func TestKeyNotGivenTheGroupIsListedItsMembers(t *testing.T) {
 	codexFreeBesidePro(t)
 	p, err := provider.Find("codex")
@@ -34,7 +34,7 @@ func TestKeyNotGivenTheGroupIsListedItsMembers(t *testing.T) {
 	if err := provider.SaveGroup(provider.Group{ID: "mygpt", Name: "MyGPT", Members: []string{"codex/gpt-6.1-sol", "codex/gpt-6-astra", "codex/gpt-5.6-terra"}, Unlists: true}); err != nil {
 		t.Fatal(err)
 	}
-	keys, secrets := newCaller(t, "Magpie")
+	keys, secrets := newCaller(t, "eipgam")
 	var accts []string
 	for _, r := range p.AccountIDs() {
 		accts = append(accts, "codex/"+r.ID)
@@ -100,7 +100,7 @@ func TestKeyNotGivenTheGroupIsListedItsMembers(t *testing.T) {
 		t.Fatalf("key given the group: %v", ids)
 	}
 
-	// the other computer: a Remote magpie on the reporter's key is
+	// the other computer: a Remote eipgam on the reporter's key is
 	// offered every Codex model
 	hold([]string{"codex/*", "codex/gpt-6-luna"}, accts)
 	remote := httptest.NewServer(New().Handler())
@@ -119,6 +119,6 @@ func TestKeyNotGivenTheGroupIsListedItsMembers(t *testing.T) {
 		got = append(got, m.ID)
 	}
 	if !has(got, append(members, "codex/gpt-6-luna")...) {
-		t.Fatalf("remote magpie: %v", got)
+		t.Fatalf("remote eipgam: %v", got)
 	}
 }

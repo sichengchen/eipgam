@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const models = [
   { id: "a/m", name: "m", providerName: "A", icon: "generic" },
   { id: "b/m", name: "m", providerName: "B", icon: "generic" },
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     const extra = [{ id: "plain", name: "Plain group", members: ["c/x"], ready: true, memberInfo: info(["c/x"]) }];
     await page.route("**/*", serve("en", false, true, extra));
-    await page.goto("http://magpie.test/?view=groups");
+    await page.goto("http://eipgam.test/?view=groups");
     const card = page.locator('.rt-group[data-id="mine"]'), btn = page.locator(".rt-gplans"), q = page.locator("input.rt-gfilter");
     await card.locator(".rt-gquota").first().waitFor({ timeout: boot });
     await card.evaluate((e) => { window.keptPlanCard = e; });
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, web, true));
-        await page.goto("http://magpie.test/?view=groups");
+        await page.goto("http://eipgam.test/?view=groups");
         const view = page.locator("#view-groups");
         const lines = view.locator(".rt-group .rt-gquota");
         await lines.first().waitFor({ timeout: boot });
@@ -186,7 +186,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve("en", false, false));
-    await page.goto("http://magpie.test/?view=groups");
+    await page.goto("http://eipgam.test/?view=groups");
     await page.locator('#view-groups .rt-group[data-id="mine"]').waitFor({ timeout: boot });
     await page.waitForFunction(() => Array.isArray(quotas), null, { timeout: boot });
     await page.waitForTimeout(1300);

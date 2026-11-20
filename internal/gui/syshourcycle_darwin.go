@@ -1,6 +1,6 @@
 package gui
 
-import "github.com/yetone/magpie/internal/proc"
+import "github.com/sichengchen/eipgam/internal/proc"
 
 func readHourCycle() string {
 	read := func(key string) string {

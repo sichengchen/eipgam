@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Claude Code runs a plugin's hooks and MCP servers with CLAUDE_PLUGIN_ROOT
@@ -13,7 +13,7 @@ import (
 // commands, arguments and env, and in skill and agent Markdown (its plugins
 // reference, "Where each variable resolves"). A part the library carries
 // runs as an ordinary hook, server, skill or subagent of each agent, where
-// neither is set, so magpie resolves every reference to them it can find
+// neither is set, so eipgam resolves every reference to them it can find
 // before writing the part out.
 //
 // A hook's command can also read the variable itself, in the language it
@@ -167,7 +167,7 @@ func pluginSkillText(dir, name string) error {
 }
 
 // healPluginRefs resolves the plugin variables still in the parts of an
-// installed plugin, written by a magpie that left them as they were: a
+// installed plugin, written by a eipgam that left them as they were: a
 // hook's program read, a server that reads them, a subagent's prompt.
 // Such a reference never works outside Claude Code's plugin runtime, so
 // resolving it changes nothing that worked; the next sync writes the

@@ -10,15 +10,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/steady"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/steady"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // A Codex subagent resumed with resume_agent went on its lead's model, not
 // the one it was spawned on (HoGee_xxl on X). Codex's multi-agent V1, which
-// magpie's own models ask for, builds the resumed subagent's config from
+// eipgam's own models ask for, builds the resumed subagent's config from
 // the lead's current turn (codex-rs core/src/agent/child_config.rs,
 // build_agent_resume_config → build_agent_shared_config sets config.model
 // to turn.model_info().slug), and resume_single_agent_from_rollout
@@ -34,7 +34,7 @@ import (
 // for, and puts a later request of that thread asking for another back on
 // it. Within a V1 thread the model never changes otherwise: a subagent has
 // no /model. Kept on disk (codex-subagents.json, next to the providers) so
-// a subagent resumed after magpie restarted, an update's included, is
+// a subagent resumed after eipgam restarted, an update's included, is
 // still known. A model set for every subagent (codexSubagentPick) still
 // moves the request after this.
 
@@ -106,7 +106,7 @@ func (s *Server) codexResumeTo(r *http.Request, agent, kind, asked string, meta 
 		return ""
 	}
 	to := s.codexSpawns.keep(thread, asked)
-	// a spawn model of magpie's it no longer serves (its provider removed
+	// a spawn model of eipgam's it no longer serves (its provider removed
 	// or switched off) is not gone back to: the subagent was sent there,
 	// to a 404, after the user had removed the provider and moved Codex
 	// to another model (jockyer on X). It goes on as asked, and that is
@@ -119,7 +119,7 @@ func (s *Server) codexResumeTo(r *http.Request, agent, kind, asked string, meta 
 }
 
 // moved notes asked as thread's model in place of from, the model it was
-// spawned on, which magpie no longer serves.
+// spawned on, which eipgam no longer serves.
 func (c *codexSpawns) moved(thread, from, asked string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -196,7 +196,7 @@ func (c *codexSpawns) save(path string, now time.Time) {
 	if err != nil {
 		return
 	}
-	tmp := path + ".magpie-tmp"
+	tmp := path + ".eipgam-tmp"
 	if os.WriteFile(tmp, b, 0o600) != nil {
 		return
 	}

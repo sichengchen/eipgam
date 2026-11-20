@@ -12,21 +12,21 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Where magpie is PID 1 (a container running `magpie serve`), or a child
+// Where eipgam is PID 1 (a container running `eipgam serve`), or a child
 // subreaper, the processes its children leave behind are adopted by it:
 // an agent's CLI that ends with its MCP servers (uv, node, npm, a graph
-// indexer) still running or just ended leaves them to magpie, and nothing
-// in magpie waits for a process it never started. They stayed <defunct>
-// children of `magpie serve` until it restarted (254 after 7 days,
-// Kling__Lab on X). cmd.Wait reaps the ones magpie starts; this reaps the
+// indexer) still running or just ended leaves them to eipgam, and nothing
+// in eipgam waits for a process it never started. They stayed <defunct>
+// children of `eipgam serve` until it restarted (254 after 7 days,
+// Kling__Lab on X). cmd.Wait reaps the ones eipgam starts; this reaps the
 // rest.
 
-// OrphanEvery is how often the zombies adopted by magpie are looked for.
+// OrphanEvery is how often the zombies adopted by eipgam are looked for.
 // One that was already a zombie at the previous look is nobody's to wait
-// for: every command magpie starts is waited for the moment it ends.
+// for: every command eipgam starts is waited for the moment it ends.
 var OrphanEvery = 5 * time.Second
 
-// adopts says whether processes whose parent ends become magpie's.
+// adopts says whether processes whose parent ends become eipgam's.
 func adopts() bool {
 	if os.Getpid() == 1 {
 		return true
@@ -37,8 +37,8 @@ func adopts() bool {
 	return e == 0 && v != 0
 }
 
-// KeepReaping reaps the zombies magpie has adopted, until ctx ends. It
-// does nothing where magpie adopts none.
+// KeepReaping reaps the zombies eipgam has adopted, until ctx ends. It
+// does nothing where eipgam adopts none.
 func KeepReaping(ctx context.Context) {
 	if !adopts() {
 		return

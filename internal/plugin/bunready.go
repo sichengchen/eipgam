@@ -1,6 +1,6 @@
 package plugin
 
-// Bun while it is being downloaded (#6735). magpie downloads its Bun the
+// Bun while it is being downloaded (#6735). eipgam downloads its Bun the
 // first time a plugin is asked for, and a download on a slow or blocked
 // link can take minutes, or stall a minute at a time and go on. A request
 // for a plugin's provider used to wait on it, holding the host's lock, so
@@ -14,9 +14,9 @@ package plugin
 // A failed download is said at once for bunRetryGap, then tried again by
 // the next call. Installs (Bun) wait for it as long as their context lets.
 //
-// When the download fails, a Bun on PATH is taken if it is one magpie
+// When the download fails, a Bun on PATH is taken if it is one eipgam
 // would run itself: no older than BunVersion, not set aside, passing the
-// try a new release gets. magpie's checksummed build stays the one used
+// try a new release gets. eipgam's checksummed build stays the one used
 // whenever it can be had; the user's own Bun is better than no plugins.
 
 import (
@@ -100,7 +100,7 @@ var pathBuns = func() []string {
 
 // testSandbox is testenv.Marker, which plugin can't import outside its
 // tests: set in a test binary testenv isolated.
-const testSandbox = "MAGPIE_TEST_SANDBOX"
+const testSandbox = "EIPGAM_TEST_SANDBOX"
 
 // bunFetch is one download of a Bun, run in the background.
 type bunFetch struct {
@@ -198,7 +198,7 @@ func (f *bunFetch) notReady(cause error) *BunNotReadyError {
 // wait is bounded by ctx and by bunReadyWait from when the download began;
 // past them the caller is told Bun isn't ready, and the download goes on.
 func hostBun(ctx context.Context) (string, error) {
-	if b := os.Getenv("MAGPIE_BUN"); b != "" {
+	if b := os.Getenv("EIPGAM_BUN"); b != "" {
 		return b, nil
 	}
 	v, exe, ok := bunAtHand()
@@ -232,7 +232,7 @@ func hostBun(ctx context.Context) (string, error) {
 // bunNotReadyNow is why a caller who stopped waiting for the host (cause)
 // got no host, when that is Bun's download: nil when Bun is at hand.
 func bunNotReadyNow(cause error) error {
-	if os.Getenv("MAGPIE_BUN") != "" {
+	if os.Getenv("EIPGAM_BUN") != "" {
 		return nil
 	}
 	_, exe, ok := bunAtHand()
@@ -248,8 +248,8 @@ func bunNotReadyNow(cause error) error {
 	return f.notReady(cause)
 }
 
-// bunFromPath is a Bun on this machine taken when magpie's own download
-// failed, copied in where magpie keeps that version, as magpie-bun
+// bunFromPath is a Bun on this machine taken when eipgam's own download
+// failed, copied in where eipgam keeps that version, as eipgam-bun
 // (#1048), and made the one in use when it is newer than BunVersion.
 func bunFromPath(ctx context.Context) (string, bool) {
 	seen := map[string]bool{}
@@ -264,7 +264,7 @@ func bunFromPath(ctx context.Context) (string, bool) {
 		ok := bunVersionRe.MatchString(rv) && readBunState().usable(rv)
 		bunMu.Unlock()
 		if !ok {
-			log.Printf("plugins: the Bun at %s (%q) isn't one magpie runs: at least %s, not set aside", p, rv, BunVersion)
+			log.Printf("plugins: the Bun at %s (%q) isn't one eipgam runs: at least %s, not set aside", p, rv, BunVersion)
 			continue
 		}
 		if err := tryBun(ctx, p, rv); err != nil {

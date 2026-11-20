@@ -1,5 +1,5 @@
 // Settings › Models › Images' Video generation: the model a video request
-// that names none is made with, generate_video's — the one magpie picks or
+// that names none is made with, generate_video's — the one eipgam picks or
 // one named. A custom provider's model makes videos once marked so in its
 // Model settings (#1399), which the row says while no model makes any,
 // with a way to the Providers page.
@@ -16,7 +16,7 @@ window.videoGenFill = function (r, s, keep) {
   r.id = "videoGenRow";
   r.hidden = false;
   const who = el("div", "who");
-  who.append(el("div", "name", t("Video generation")), el("div", "sub wraps", t("The model Magpie Image makes videos with")));
+  who.append(el("div", "name", t("Video generation")), el("div", "sub wraps", t("The model eipgam Image makes videos with")));
   if (!models.length && !v) {
     // the way there: the Providers page, where a provider's models are
     const how = el("div", "sub wraps video-gen-how", t("To make videos with a provider's model, right-click it in the provider's Model settings and choose Makes › Video model"));

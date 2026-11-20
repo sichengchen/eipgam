@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // projectSandbox is a sandbox HOME with Claude Code and Codex installed,
@@ -88,7 +88,7 @@ func linkTo(t *testing.T, p, name string) bool {
 	return err == nil && filepath.Base(target) == name
 }
 
-// magpie library project … (#5193, Sephiro_Lan on X): a folder added, given
+// eipgam library project … (#5193, Sephiro_Lan on X): a folder added, given
 // skills, a skill's agents changed and the skills taken away from a
 // terminal, written as the window's Library › Projects page writes them:
 // links in the folders the agents read, the project's .gitignore left as
@@ -135,13 +135,13 @@ func TestLibraryProjectCmd(t *testing.T) {
 	refused("skill", "add", ".", "xlsx", "agents=zz") // no such agent
 	refused("skill", "add", ".", "xlsx", "--yes")     // an unknown flag
 
-	// a folder there that isn't magpie's is left as it is, and said
+	// a folder there that isn't eipgam's is left as it is, and said
 	own := filepath.Join(proj, ".claude/skills/xlsx")
 	if err := os.MkdirAll(own, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	out, err := projectOut(t, "skill", "add", ".", "xlsx", "agents=claude")
-	if err == nil || !strings.Contains(out, "xlsx") || !strings.Contains(out, "isn't magpie's") {
+	if err == nil || !strings.Contains(out, "xlsx") || !strings.Contains(out, "isn't eipgam's") {
 		t.Errorf("a folder of the user's in the way: %v\n%s", err, out)
 	}
 	if fi, err := os.Lstat(own); err != nil || !fi.IsDir() {
@@ -190,7 +190,7 @@ func TestLibraryProjectCmd(t *testing.T) {
 	refused("rm", ".")
 }
 
-// --keep-files takes the project off the list and leaves what magpie
+// --keep-files takes the project off the list and leaves what eipgam
 // placed there, as the page's "keep its skills" box does.
 func TestLibraryProjectRmKeep(t *testing.T) {
 	proj := projectSandbox(t)
@@ -213,13 +213,13 @@ func TestLibraryProjectHelp(t *testing.T) {
 			t.Errorf("%v: %q", args, helpFor(args))
 		}
 	}
-	if !strings.Contains(helpFor([]string{"library", "--help"}), "magpie library project") {
+	if !strings.Contains(helpFor([]string{"library", "--help"}), "eipgam library project") {
 		t.Error("library's usage doesn't name project")
 	}
 }
 
-// magpie library project instructions … (VictorHong1022 on X): a
-// project's own instructions set from a terminal go, between magpie's two
+// eipgam library project instructions … (VictorHong1022 on X): a
+// project's own instructions set from a terminal go, between eipgam's two
 // lines, into the file each agent reads in the project, the user's own
 // text there untouched, first to every agent here that reads one (the
 // shared instructions are on for none); an agent with no such file is
@@ -250,7 +250,7 @@ func TestLibraryProjectInstructionsCmd(t *testing.T) {
 		t.Errorf("show:\n%s", out)
 	}
 	must("instructions", ".", "text", "Use", "pnpm", "here.")
-	part := "<!-- magpie:begin · written by magpie from its Library -->\nUse pnpm here.\n<!-- magpie:end -->\n"
+	part := "<!-- eipgam:begin · written by eipgam from its Library -->\nUse pnpm here.\n<!-- eipgam:end -->\n"
 	if got := read("CLAUDE.md"); got != "Mine.\n\n"+part {
 		t.Errorf("CLAUDE.md = %q", got)
 	}

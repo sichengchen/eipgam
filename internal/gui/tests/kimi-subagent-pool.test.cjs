@@ -14,13 +14,13 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const models = [
-  { value: "magpie/think/deep", label: "Deep", ref: "think/deep" },
-  { value: "magpie/think/wide", label: "Wide", ref: "think/wide" },
+  { value: "eipgam/think/deep", label: "Deep", ref: "think/deep" },
+  { value: "eipgam/think/wide", label: "Wide", ref: "think/wide" },
 ];
 const kimi = () => ({
   id: "kimi", name: "Kimi Code", icon: "kimi", path: "/home/u/.kimi-code/config.toml", wired: true,
   fields: [
-    { key: "model", label: "model", value: "magpie/think/deep", options: models },
+    { key: "model", label: "model", value: "eipgam/think/deep", options: models },
     { key: "effort", label: "thinking", value: "", options: [{ value: "" }, { value: "off" }, { value: "high" }] },
     { key: "subagent_model", label: "subagent model", value: "", options: [{ value: "" }, ...models] },
     { key: "subagent_pool", label: "subagent pool", value: "", options: models },
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, sets));
         t.after(() => browser.close());
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator(row).waitFor();
         // closed, the row has no square for the pool
         assert.equal(await page.locator(`${row} [data-key="subagent_pool"]`).count(), 0);
@@ -122,8 +122,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.locator("#pop #list li", { hasText: "Deep" }).first().click();
         await page.waitForFunction(() => document.querySelector('.row.agent[data-id="kimi"] .ag-pool .v')?.textContent === "Deep");
         assert.deepEqual(sets, [
-          { agent: "kimi", field: "subagent_pool", value: "magpie/think/wide" },
-          { agent: "kimi", field: "subagent_pool", value: "magpie/think/wide\nmagpie/think/deep" },
+          { agent: "kimi", field: "subagent_pool", value: "eipgam/think/wide" },
+          { agent: "kimi", field: "subagent_pool", value: "eipgam/think/wide\neipgam/think/deep" },
         ]);
         // the subagent model's own tick can't be taken out of the pool
         await page.locator("#pop #list li", { hasText: "Wide" }).first().click();

@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posted));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=settings&tab=privacy");
+        await page.goto("http://eipgam.test/?view=settings&tab=privacy");
         await settingsDrawn(page);
 
         // the secret kinds first, each on Mask; personal ones behind a button
@@ -161,7 +161,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve("en", [], { from: REAL, to: MADE }));
     await watchSettingsReads(page);
-    await page.goto("http://magpie.test/?view=settings&tab=privacy");
+    await page.goto("http://eipgam.test/?view=settings&tab=privacy");
     await settingsDrawn(page);
     const box = page.locator("#maskTryList textarea.mask-try-in");
     await reach(page, box);

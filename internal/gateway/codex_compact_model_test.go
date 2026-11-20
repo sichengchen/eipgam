@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // summaryUpstream is a Responses upstream that summarises and counts the
@@ -30,7 +30,7 @@ func summaryUpstream(t *testing.T) (url string, count func() int) {
 }
 
 // 0neB1aze on X: Codex's memories can be put on a model of its own, its
-// compaction could not. A compaction magpie makes goes on the model set
+// compaction could not. A compaction eipgam makes goes on the model set
 // for it; unset, it stays on the session's.
 func TestCodexCompactOnItsOwnModel(t *testing.T) {
 	setup(t, provider.Responses, &fake{t: t})

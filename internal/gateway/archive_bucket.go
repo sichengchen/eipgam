@@ -6,11 +6,11 @@ package gateway
 // the bucket was never pruned, and a month of whole bodies grew one by
 // 18 GB (an R2 user on X).
 //
-// Only objects magpie made are ever removed: under the archive's folder,
+// Only objects eipgam made are ever removed: under the archive's folder,
 // archive/<date>/<id>.json, of ArchiveName's shape. The backup, shared
 // usage and anything else in the bucket are never listed or touched.
 //
-// The bucket is listed once the serving magpie starts (so a bucket grown
+// The bucket is listed once the serving eipgam starts (so a bucket grown
 // before this is brought under the size whether the archive is on or not),
 // and after that only once a tenth of the size more has been uploaded,
 // counted as uploads go: one LIST page for a thousand calls, never one
@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // archiveKeeper is a bucket that can be listed and removed from: the S3
@@ -63,7 +63,7 @@ var bucketCap = BucketArchiveCap
 var archiveFirstPrune = 2 * time.Minute
 
 // KeepBucketArchiveBounded brings the archive in the bucket under its size
-// once the serving magpie has started, for a bucket grown before the size
+// once the serving eipgam has started, for a bucket grown before the size
 // was kept: on or off, the archive's own objects past the size go.
 func KeepBucketArchiveBounded(ctx context.Context) {
 	t := time.NewTimer(archiveFirstPrune)
@@ -171,7 +171,7 @@ func pruneBucketOnce(ctx context.Context, k archiveKeeper, kept string) (int64, 
 	listed := map[string]bool{}
 	err := k.Each(ctx, "archive/", func(name string, size int64) {
 		if !archiveObject(name) {
-			return // not one magpie made: never counted, never removed
+			return // not one eipgam made: never counted, never removed
 		}
 		calls = append(calls, bucketCall{name, size})
 		listed[name] = true
@@ -246,7 +246,7 @@ func pruneBucketOnce(ctx context.Context, k archiveKeeper, kept string) (int64, 
 }
 
 // archiveObject says whether name, as the bucket lists it, is a call
-// magpie archived: "archive/<date>/<id>.json" as ArchiveName makes it.
+// eipgam archived: "archive/<date>/<id>.json" as ArchiveName makes it.
 func archiveObject(name string) bool {
 	rest, ok := strings.CutPrefix(name, "archive/")
 	date, base, ok2 := strings.Cut(rest, "/")

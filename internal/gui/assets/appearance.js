@@ -6,7 +6,7 @@
 // app.js imports this when Settings draws or the look changed, so it
 // weighs nothing on the core.
 
-// the presets: magpie's own first, then a few quiet ones
+// the presets: eipgam's own first, then a few quiet ones
 const ACCENTS = () => [["", t("Default"), "#4f46e5"], ["#2563eb", t("Blue")], ["#0d9488", t("Teal")], ["#16a34a", t("Green")], ["#ea580c", t("Orange")], ["#db2777", t("Pink")], ["#52525b", t("Graphite")]];
 
 window.lookPaint = async function () {
@@ -23,9 +23,9 @@ window.lookPaint = async function () {
 window.drawLook = function (s, keep) {
   $("#colorblindSegs").title = t("Colorblind-safe chart colors, and each allowance window's line in a dash of its own");
   $("#colorblindSegs").replaceChildren(segsOO(s.colorblind, (v) => savePrefs({ ...keep, colorblind: v })));
-  $("#reduceMotionSegs").title = t("Animations stand still, as with the system's Reduce Motion, so magpie keeps the computer less busy");
+  $("#reduceMotionSegs").title = t("Animations stand still, as with the system's Reduce Motion, so eipgam keeps the computer less busy");
   $("#reduceMotionSegs").replaceChildren(segsOO(s.reduceMotion, (v) => savePrefs({ ...keep, reduceMotion: v })));
-  $("#birdSegs").title = t("magpie's bird hops on what is still loading; Off keeps it away, and magpie stops looking for it");
+  $("#birdSegs").title = t("eipgam's bird hops on what is still loading; Off keeps it away, and eipgam stops looking for it");
   $("#birdSegs").replaceChildren(segsOO(!s.noBird, (v) => savePrefs({ ...keep, noBird: !v })));
   drawAccent(s, keep);
   drawWallpaper(s);

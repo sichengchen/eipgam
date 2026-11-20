@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Another computer's magpie has a heading of its own in the add sheet,
+// Another computer's eipgam has a heading of its own in the add sheet,
 // after On this machine, not among the Relays (Avalon on Discord: "供应商添加
-// 中没有Remote magpie 的选项"), and searching for remote, magpie or 远程
+// 中没有Remote eipgam 的选项"), and searching for remote, eipgam or 远程
 // finds it there, at a narrow width with no sideways scroll. It is added
-// with its address and key alone: the Remote magpie editor asks for the address above the key,
-// with a hint on where the other magpie shows it and that each request
+// with its address and key alone: the Remote eipgam editor asks for the address above the key,
+// with a hint on where the other eipgam shows it and that each request
 // goes on in the API the agent spoke. Adding without one says so in its
 // own words and sends nothing; with one, the address goes as the preset's
 // endpoint, however it was typed (the backend puts every API on it).
@@ -26,13 +26,13 @@ const presets = [
   { id: "openai", name: "OpenAI", icon: "openai", kind: "vendor", chat: "https://api.openai.com/v1", added: false },
   { id: "openrouter", name: "OpenRouter", icon: "openai", kind: "relay", chat: "https://openrouter.ai/api/v1", added: true },
   { id: "ollama", name: "Ollama", icon: "ollama", kind: "local", chat: "http://localhost:11434/v1", noKey: true, added: false },
-  { id: "remote-magpie", name: "Remote magpie", icon: "magpie", kind: "remote", added: false,
-    note: "another computer's magpie, shared on its network", endpoint: "http://192.168.1.20:3425",
-    endpointHint: "The address and API key the other computer's magpie shows in Settings › Network and sharing, under Share on local network. Its models and routing groups are listed here; each request goes on in the API the agent spoke.",
-    endpointNeeded: "The other magpie's address is needed" },
+  { id: "remote-eipgam", name: "Remote eipgam", icon: "eipgam", kind: "remote", added: false,
+    note: "another computer's eipgam, shared on its network", endpoint: "http://192.168.1.20:3425",
+    endpointHint: "The address and API key the other computer's eipgam shows in Settings › Network and sharing, under Share on local network. Its models and routing groups are listed here; each request goes on in the API the agent spoke.",
+    endpointNeeded: "The other eipgam's address is needed" },
 ];
 const providers = [{ id: "openrouter", name: "OpenRouter", icon: "openai", preset: "openrouter", models: [], agents: [], key: { set: true, masked: "sk-…ab12" } },
-  { id: "office", name: "Office", icon: "magpie", preset: "remote-magpie", chat: "http://office/v1", responses: "http://office/v1", anthropic: "http://office", decide: "http://office/v1",
+  { id: "office", name: "Office", icon: "eipgam", preset: "remote-eipgam", chat: "http://office/v1", responses: "http://office/v1", anthropic: "http://office", decide: "http://office/v1",
     libraryMCP: true, deciders: ["judge/custom-a", "judge/custom-b"], models: [{ id: "lib/m1", name: "Chat", on: true }, { id: "judge/custom-a", name: "custom-a · judge", on: false }, { id: "judge/custom-b", name: "custom-b · judge", on: false }], agents: [], key: { set: true, masked: "sk-…ab12" } },
 ];
 
@@ -59,9 +59,9 @@ function server(lang, saves) {
 }
 
 const L = {
-  en: { field: "Endpoint", hint: /Settings › Network and sharing, under Share on local network.*the API the agent spoke/, needed: "The other magpie's address is needed", note: "another computer's magpie, shared on its network", add: "Add", name: "Name", mcp: "Add its MCP servers to the Library",
+  en: { field: "Endpoint", hint: /Settings › Network and sharing, under Share on local network.*the API the agent spoke/, needed: "The other eipgam's address is needed", note: "another computer's eipgam, shared on its network", add: "Add", name: "Name", mcp: "Add its MCP servers to the Library",
     decide: ["Jev endpoint", "System One endpoint"] },
-  zh: { field: "接口地址", hint: /设置 › 网络与共享 › 局域网共享.*原样转发/, needed: "需要填写另一台 magpie 的地址", note: "远程：另一台电脑上的 magpie，局域网共享", add: "添加", name: "名称", mcp: "把它的 MCP 服务器加到资源库",
+  zh: { field: "接口地址", hint: /设置 › 网络与共享 › 局域网共享.*原样转发/, needed: "需要填写另一台 eipgam 的地址", note: "远程：另一台电脑上的 eipgam，局域网共享", add: "添加", name: "名称", mcp: "把它的 MCP 服务器加到资源库",
     decide: ["Jev 端点", "System One 端点"] },
 };
 
@@ -71,12 +71,12 @@ const sections = (page) => page.evaluate(() => [...document.querySelectorAll("#a
   [...k.nextElementSibling.querySelectorAll(".tile .n")].map((n) => n.textContent),
 ]));
 const H = {
-  en: { remote: ["Another computer's magpie", "shared on its network"], local: "On this machine", relays: "Relays", finds: ["remote", "Magpie"] },
-  zh: { remote: ["另一台电脑上的 magpie", "在它的局域网上共享"], local: "本机", relays: "中转", finds: ["remote", "magpie", "远程"] },
+  en: { remote: ["Another computer's eipgam", "shared on its network"], local: "On this machine", relays: "Relays", finds: ["remote", "eipgam"] },
+  zh: { remote: ["另一台电脑上的 eipgam", "在它的局域网上共享"], local: "本机", relays: "中转", finds: ["remote", "eipgam", "远程"] },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Remote magpie has its own heading in the add sheet", async (t) => {
+  test(engine + ": Remote eipgam has its own heading in the add sheet", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     for (const lang of ["en", "zh"]) {
@@ -86,16 +86,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, []));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator("#addProvider").click();
         const sheet = page.locator("#addSheet");
         await sheet.locator(".tile .n", { hasText: /^OpenRouter$/ }).waitFor();
         const all = await sections(page);
         const at = all.findIndex(([b]) => b === h.remote[0]);
         assert(at >= 0, "no heading of its own: " + JSON.stringify(all));
-        assert.deepEqual(all[at], [...h.remote, ["Remote magpie"]]);
+        assert.deepEqual(all[at], [...h.remote, ["Remote eipgam"]]);
         assert.equal(all[at - 1][0], h.local, "right after On this machine");
-        for (const [b, , names] of all) if (b !== h.remote[0]) assert(!names.includes("Remote magpie"), "also under " + b);
+        for (const [b, , names] of all) if (b !== h.remote[0]) assert(!names.includes("Remote eipgam"), "also under " + b);
         assert.deepEqual(all.find(([b]) => b === h.relays)[2], ["OpenRouter"]);
         assert.equal(await page.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth), true, "no sideways scroll");
 
@@ -103,7 +103,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (const word of h.finds) {
           await q.fill(word);
           await page.waitForFunction(() => document.querySelectorAll("#addSheet .tile").length === 1);
-          assert.deepEqual(await sections(page), [[...h.remote, ["Remote magpie"]]], word);
+          assert.deepEqual(await sections(page), [[...h.remote, ["Remote eipgam"]]], word);
         }
         assert.deepEqual(errors, []);
         await page.context().close();
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Remote magpie asks for the other magpie's address", async (t) => {
+  test(engine + ": Remote eipgam asks for the other eipgam's address", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
@@ -125,12 +125,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, saves));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         // A remote's explicit list is authoritative, including an empty
         // list after refresh: Jev Router still belongs to chat.
         const classifications = await page.evaluate(() => {
           const remote = {
-            preset: "remote-magpie", chat: "http://office/v1", decide: "http://office/v1",
+            preset: "remote-eipgam", chat: "http://office/v1", decide: "http://office/v1",
             deciders: ["judge/custom", "judge/@cf/cloudflare/clef"],
           };
           return [
@@ -168,7 +168,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await page.locator("#addProvider").click();
         const sheet = page.locator("#addSheet");
-        const tile = sheet.locator(".tile", { has: page.locator(".n", { hasText: /^Remote magpie$/ }) });
+        const tile = sheet.locator(".tile", { has: page.locator(".n", { hasText: /^Remote eipgam$/ }) });
         assert.equal(await tile.getAttribute("title"), w.note);
         // the sheet's last row, under the fold at this height: the reader's
         // wheel brings it up (a scroll from code, Playwright's own included,
@@ -182,7 +182,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await tile.click();
         const ed = page.locator(".editor.new");
-        await ed.locator(".ehead b", { hasText: "Remote magpie" }).waitFor();
+        await ed.locator(".ehead b", { hasText: "Remote eipgam" }).waitFor();
 
         // the field, above the key, focused first; the OpenAI preset has none
         const label = ed.locator("label", { hasText: new RegExp("^" + w.field + "$") });
@@ -201,15 +201,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // a Name and an ID under the key, blank; the switch off
         const name = ed.locator("input.provider-name"), id = ed.locator("input.provider-id");
         assert.equal(await ed.locator("label", { hasText: new RegExp("^" + w.name + "$") }).count(), 1);
-        assert.equal(await name.getAttribute("placeholder"), "Remote magpie");
-        assert.equal(await id.getAttribute("placeholder"), "remote-magpie");
+        assert.equal(await name.getAttribute("placeholder"), "Remote eipgam");
+        assert.equal(await id.getAttribute("placeholder"), "remote-eipgam");
         const ny = await name.evaluate((n) => n.getBoundingClientRect().top);
         assert(ky < ny, "the name under the key");
         const mcp = ed.locator(".library-mcp", { hasText: w.mcp }).locator("input");
         assert.equal(await mcp.isChecked(), false, "off when added");
 
         // no endpoint: said, nothing sent, the page where it was
-        await key.fill("sk-magpie-x");
+        await key.fill("sk-eipgam-x");
         const y = await page.evaluate(() => document.scrollingElement.scrollTop);
         await ed.locator(".bar button.primary", { hasText: w.add }).click();
         assert.equal(await ed.locator(".editor-error").textContent(), w.needed);
@@ -223,20 +223,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction(() => !document.querySelector(".editor.new"));
         assert.equal(saves.length, 1);
         const s = saves[0];
-        assert.equal(s.preset, "remote-magpie");
-        assert.equal(s.key, "sk-magpie-x");
+        assert.equal(s.preset, "remote-eipgam");
+        assert.equal(s.key, "sk-eipgam-x");
         assert.equal(s.chat, "192.168.1.20:3425");
-        assert.equal(s.name, "Remote magpie");
-        assert.equal(s.id, "remote-magpie");
+        assert.equal(s.name, "Remote eipgam");
+        assert.equal(s.id, "remote-eipgam");
         assert.equal(s.libraryMCP, false);
         assert.equal(s.libraryShared, false, "skills and prompts off when added");
 
         // named, its id following; then an id of its own; switched on
         await page.locator("#addProvider").click();
         await tile.click();
-        await ed.locator(".ehead b", { hasText: "Remote magpie" }).waitFor();
+        await ed.locator(".ehead b", { hasText: "Remote eipgam" }).waitFor();
         await ed.locator("input.endpoint").fill("192.168.1.21:3425");
-        await ed.locator("input[type=password]").first().fill("sk-magpie-y");
+        await ed.locator("input[type=password]").first().fill("sk-eipgam-y");
         await ed.locator("input.provider-name").fill("Home Lab");
         assert.equal(await ed.locator("input.provider-id").getAttribute("placeholder"), "home-lab");
         await ed.locator(".library-mcp input").check();
@@ -246,9 +246,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual([saves[1].name, saves[1].id, saves[1].libraryMCP, saves[1].libraryShared], ["Home Lab", "home-lab", true, true]);
         await page.locator("#addProvider").click();
         await tile.click();
-        await ed.locator(".ehead b", { hasText: "Remote magpie" }).waitFor();
+        await ed.locator(".ehead b", { hasText: "Remote eipgam" }).waitFor();
         await ed.locator("input.endpoint").fill("192.168.1.22:3425");
-        await ed.locator("input[type=password]").first().fill("sk-magpie-z");
+        await ed.locator("input[type=password]").first().fill("sk-eipgam-z");
         await ed.locator("input.provider-name").fill("Home Lab");
         await ed.locator("input.provider-id").fill("Lab 2");
         await ed.locator(".bar button.primary", { hasText: w.add }).click();

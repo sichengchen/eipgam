@@ -1,15 +1,15 @@
-// Package uninstall takes magpie off this computer: `magpie uninstall` and
-// Settings › Uninstall magpie.
+// Package uninstall takes eipgam off this computer: `eipgam uninstall` and
+// Settings › Uninstall eipgam.
 //
-// Jevik_AI on X deleted magpie's folders by hand, and Codex's config.toml
+// Jevik_AI on X deleted eipgam's folders by hand, and Codex's config.toml
 // kept openai_base_url on 127.0.0.1:3425: every Codex turn failed with a
-// 502, with nothing left that knew why. Deleting magpie's files never puts
+// 502, with nothing left that knew why. Deleting eipgam's files never puts
 // an agent back, so uninstalling does that first, the way each agent's
-// Disconnect does (what magpie changed goes back, what the user changed
-// by hand since stays theirs), then removes what magpie registered with
+// Disconnect does (what eipgam changed goes back, what the user changed
+// by hand since stays theirs), then removes what eipgam registered with
 // the system, then its own files.
 //
-// What it leaves: the magpie executable itself (a running program can't
+// What it leaves: the eipgam executable itself (a running program can't
 // delete itself everywhere, and the user put it there), and the Library's
 // folder while it holds skills or servers the user's agents use.
 package uninstall
@@ -26,17 +26,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/autostart"
-	"github.com/yetone/magpie/internal/claudecode"
-	"github.com/yetone/magpie/internal/daemon"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/pii"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/shortcut"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/autostart"
+	"github.com/sichengchen/eipgam/internal/claudecode"
+	"github.com/sichengchen/eipgam/internal/daemon"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/pii"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/shortcut"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // Done is one thing uninstalling did, or couldn't.
@@ -55,7 +55,7 @@ type Report struct {
 	// CodexApp: a Codex app still on the config it read before, which
 	// the user quits and opens
 	CodexApp bool `json:"codexApp,omitempty"`
-	// Exe is the magpie executable, left where it is
+	// Exe is the eipgam executable, left where it is
 	Exe string `json:"exe"`
 }
 
@@ -99,7 +99,7 @@ var (
 // before it restarts the Codex app's app-server.
 var codexAppWait = 30 * time.Second
 
-// Connected are the agents magpie is in now, which Run disconnects.
+// Connected are the agents eipgam is in now, which Run disconnects.
 func Connected() []*agent.Agent {
 	var out []*agent.Agent
 	for _, a := range agents() {
@@ -110,7 +110,7 @@ func Connected() []*agent.Agent {
 	return out
 }
 
-// Agents disconnects every agent magpie is in: the first half of
+// Agents disconnects every agent eipgam is in: the first half of
 // uninstalling, which the app does while it still runs.
 func Agents(ctx context.Context, r *Report) {
 	// failover first: it is a provider in Codex's config too
@@ -128,7 +128,7 @@ func Agents(ctx context.Context, r *Report) {
 		codex = codex || a.ID == "codex"
 	}
 	// what no Disconnect could name: an agent whose config points at
-	// magpie's gateway with the marks magpie kept gone (its folder deleted
+	// eipgam's gateway with the marks eipgam kept gone (its folder deleted
 	// by hand, a fresh install beside an old config) reads as not
 	// connected, and Codex left on that address knocks on a port nothing
 	// answers any more (#3866)
@@ -141,7 +141,7 @@ func Agents(ctx context.Context, r *Report) {
 		r.Agents = append(r.Agents, d)
 		codex = true
 	}
-	// the threads Codex ran on magpie's models open without magpie
+	// the threads Codex ran on eipgam's models open without eipgam
 	portRollouts(10 * time.Second)
 	if codex {
 		// the Codex app read the old config as its app-server started
@@ -166,7 +166,7 @@ func disconnect(a *agent.Agent) error {
 	return err
 }
 
-// System removes what magpie registered with the system: its background
+// System removes what eipgam registered with the system: its background
 // service, opening at login, its Start menu shortcut and links.
 func System(r *Report) {
 	exe, _ := executable()
@@ -177,7 +177,7 @@ func System(r *Report) {
 		{"background service", removeService},
 		{"open at login", autostartOff},
 		{"Start menu shortcut", func() error { return removeShortcut(exe) }},
-		{"magpie:// links", func() error { return removeScheme(exe) }},
+		{"eipgam:// links", func() error { return removeScheme(exe) }},
 		{"privacy model's helper", endPII},
 		// Windows: the folder chosen to install in, so a download opened
 		// after this asks again
@@ -191,7 +191,7 @@ func System(r *Report) {
 	}
 }
 
-// Folders are magpie's own folders Data removes, and the Library's folder
+// Folders are eipgam's own folders Data removes, and the Library's folder
 // when it keeps that.
 func Folders() (remove []string, keep string) {
 	home, _ := os.UserHomeDir()
@@ -242,8 +242,8 @@ func libraryInUse() bool {
 	return false
 }
 
-// Data removes magpie's own files: settings, providers, sign-ins kept by
-// magpie, usage, caches. With the Library in use, everything in magpie's
+// Data removes eipgam's own files: settings, providers, sign-ins kept by
+// eipgam, usage, caches. With the Library in use, everything in eipgam's
 // folder but it goes.
 func Data(r *Report) {
 	remove, keep := Folders()
@@ -261,7 +261,7 @@ func Data(r *Report) {
 		r.Data = append(r.Data, d)
 	}
 	if keep != "" {
-		r.Kept = append(r.Kept, Done{What: keep, Err: "skills and servers your agents use from magpie's Library"})
+		r.Kept = append(r.Kept, Done{What: keep, Err: "skills and servers your agents use from eipgam's Library"})
 	}
 }
 
@@ -288,12 +288,12 @@ func removeAllBut(dir, keep string) error {
 	return errors.Join(errs...)
 }
 
-// Run uninstalls magpie: agents, then the system, then its files. The
+// Run uninstalls eipgam: agents, then the system, then its files. The
 // app runs Data itself once it has quit (WebView2 holds its folder open
 // while it runs), so it calls Agents and System only.
 func Run(ctx context.Context) *Report {
 	r := &Report{}
-	// the service first: one still serving would put magpie back
+	// the service first: one still serving would put eipgam back
 	System(r)
 	Agents(ctx, r)
 	Data(r)
@@ -302,8 +302,8 @@ func Run(ctx context.Context) *Report {
 }
 
 // KeepData is Run without Data: every agent put back as it was and
-// magpie's service, login item and shortcuts removed, with its settings,
-// providers and usage kept for a magpie installed again. install.sh
+// eipgam's service, login item and shortcuts removed, with its settings,
+// providers and usage kept for a eipgam installed again. install.sh
 // --uninstall runs it, so an agent never stays pointed at a gateway the
 // script took away (whimsical_wolf_15477 on Discord: Codex after
 // uninstalling).
@@ -316,7 +316,7 @@ func KeepData(ctx context.Context) *Report {
 }
 
 // AfterExit waits for process pid to end, for up to wait, then removes
-// magpie's files: what the app starts as it quits.
+// eipgam's files: what the app starts as it quits.
 func AfterExit(pid int, wait time.Duration) *Report {
 	until := time.Now().Add(wait)
 	for update.Alive(pid) && time.Now().Before(until) {
@@ -335,8 +335,8 @@ var startAfter = func(cmd *exec.Cmd) error {
 	return proc.StartReaped(cmd)
 }
 
-// DataAfterExit starts `magpie uninstall --data-after <this pid>`, which
-// removes magpie's files once this process, the app, has quit: the app's
+// DataAfterExit starts `eipgam uninstall --data-after <this pid>`, which
+// removes eipgam's files once this process, the app, has quit: the app's
 // half of Run after Agents and System.
 func DataAfterExit() error {
 	exe, err := executable()
@@ -346,8 +346,8 @@ func DataAfterExit() error {
 	return startAfter(proc.Command(exe, "uninstall", "--data-after", strconv.Itoa(os.Getpid())))
 }
 
-// removable says whether p can be one of magpie's folders: never one
-// that holds more than magpie's, as the home, a root or a relative path
+// removable says whether p can be one of eipgam's folders: never one
+// that holds more than eipgam's, as the home, a root or a relative path
 // would, from a variable set to one.
 func removable(p, home string) bool {
 	return p != "" && filepath.IsAbs(p) && filepath.Dir(p) != p && (home == "" || !within(home, p))

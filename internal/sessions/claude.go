@@ -10,7 +10,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Claude Code writes one line per event: the prompts as "user" lines, each
@@ -206,7 +206,7 @@ func ccRelocated(s *state, b []byte, main bool) {
 }
 
 // ccStale reports whether a Claude Code session's kept parse was made by a
-// magpie that didn't read /cd's relocated lines, and the folder it names is
+// eipgam that didn't read /cd's relocated lines, and the folder it names is
 // not the project the file is in: the session was moved with /cd, and its
 // parse names the folder it left. Read again once, the parse is current.
 func ccStale(f file, s *state) bool {

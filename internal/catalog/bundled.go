@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// The catalog magpie ships with (creeksuen on X). Where models.dev can't
+// The catalog eipgam ships with (creeksuen on X). Where models.dev can't
 // be reached (a network in China, a proxy not set yet), a first run had
 // no catalog at all: no prices, context windows, reasoning levels or
 // names, and a plugin's provider listed no models. The binary carries a

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // AcMilan on Discord: beside the ChatGPT sign-in, Codex 0.166's app
@@ -14,7 +14,7 @@ import (
 // current provider is openai. Switch to cc-switch-official to
 // continue"). CC Switch 3.17 to 3.20 sent the official account through
 // its own proxy under that id; CC Switch 4 moves those threads back to
-// OpenAI itself. magpie's sync moves them to the provider Codex is on,
+// OpenAI itself. eipgam's sync moves them to the provider Codex is on,
 // and leaves config.toml's table as it is; none moves while a profile
 // picks that id, and a thread of a provider of the user's stays.
 func TestCodexMovesCCSwitchOfficialThreads(t *testing.T) {
@@ -71,7 +71,7 @@ func TestCodexMovesCCSwitchOfficialThreads(t *testing.T) {
 		codexThreadOn(t, dir, official, "cc-switch-official")
 		codex(home).Sync()
 		if p := codexRowOn(t, dir, official); p != "cc-switch-official" {
-			t.Fatalf("moved with Codex not on magpie: %q", p)
+			t.Fatalf("moved with Codex not on eipgam: %q", p)
 		}
 	})
 }

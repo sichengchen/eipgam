@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/netproxy"
 )
 
-// Zhangzhangi on X: a Remote magpie on a domain of its own with a
+// Zhangzhangi on X: a Remote eipgam on a domain of its own with a
 // self-signed certificate. Its editor peeks at the certificate, the user
 // trusts it (ServerPin), and then its models and its test go through;
 // before, both fail on the certificate. A pin of another certificate is
@@ -226,8 +226,8 @@ func freshCert(t *testing.T) tls.Certificate {
 	}
 	tmpl := &x509.Certificate{
 		SerialNumber: big.NewInt(time.Now().UnixNano()),
-		Subject:      pkix.Name{CommonName: "api.magpie.local"},
-		DNSNames:     []string{"api.magpie.local"},
+		Subject:      pkix.Name{CommonName: "api.eipgam.local"},
+		DNSNames:     []string{"api.eipgam.local"},
 		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1)},
 		NotBefore:    time.Now().Add(-time.Hour),
 		NotAfter:     time.Now().Add(24 * time.Hour),

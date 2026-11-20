@@ -239,7 +239,7 @@ function provPrefsProviders(ids, names = {}) {
 // openProvPrefs: the provider's editor, its Advanced opened on its own
 // settings (fields there since the owner's 11-09)
 async function openProvPrefs(page, id) {
-  await page.goto(`http://magpie.test/?view=providers&edit=${encodeURIComponent(id)}`);
+  await page.goto(`http://eipgam.test/?view=providers&edit=${encodeURIComponent(id)}`);
   const adv = page.locator(".editor details.advanced");
   await adv.waitFor({ timeout: 60000 });
   if (!(await adv.evaluate((d) => d.open))) await adv.locator(":scope > summary").click();

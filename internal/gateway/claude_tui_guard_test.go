@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // guardClaude stands in for an interactive Claude Code whose tap puts the
@@ -45,7 +45,7 @@ func guardClaude(t *testing.T) string {
 echo "args $*" >> ` + log + `
 cb=$(cat "$(printf '%s\n' "$@" | grep -o '"claude-mcp-helper","[^"]*"' | head -1 | sed 's/.*","//; s/"$//')")
 me=$$
-sent() { echo "sent $(cat "$MAGPIE_CLAUDE_GUARD" 2>/dev/null)" >> ` + log + `; }
+sent() { echo "sent $(cat "$EIPGAM_CLAUDE_GUARD" 2>/dev/null)" >> ` + log + `; }
 start() { echo '{"type":"stream_event","event":{"type":"message_start","message":{"id":"m'$1'","model":"claude-sonnet-5","usage":{"input_tokens":1}}}}'; }
 stop() {
   echo '{"type":"stream_event","event":{"type":"message_delta","delta":{"stop_reason":"'$1'"},"usage":{"output_tokens":3}}}'
@@ -58,8 +58,8 @@ while read -r line; do
     continue;;
   esac
   printf 'told %s\n' "$line" >> ` + log + `
-  if [ -n "$MAGPIE_CLAUDE_GUARD" ] && [ -z "$FAKE_NO_TAP" ]; then : > "$MAGPIE_CLAUDE_GUARD.live"; fi
-  if [ -n "$FAKE_REFUSE_EFFORT" ] && grep -q '"effort"' "$MAGPIE_CLAUDE_GUARD" 2>/dev/null; then
+  if [ -n "$EIPGAM_CLAUDE_GUARD" ] && [ -z "$FAKE_NO_TAP" ]; then : > "$EIPGAM_CLAUDE_GUARD.live"; fi
+  if [ -n "$FAKE_REFUSE_EFFORT" ] && grep -q '"effort"' "$EIPGAM_CLAUDE_GUARD" 2>/dev/null; then
     sent
     echo '` + tuiEffortRefusal + `'
     continue
@@ -73,7 +73,7 @@ while read -r line; do
   esac
   for k in 1 2 3; do
     sent; start $k
-    echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_G'$me'_'$k'","name":"mcp__magpie__read"}}}'
+    echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_G'$me'_'$k'","name":"mcp__eipgam__read"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{}"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_stop","index":0}}'
     stop tool_use
@@ -90,7 +90,7 @@ done
 	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
-	helper := filepath.Join(t.TempDir(), "magpie")
+	helper := filepath.Join(t.TempDir(), "eipgam")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift
@@ -133,7 +133,7 @@ func guardTurn(t *testing.T, s *Server, conv, guards string) (id, text string) {
 	}
 	last := res.Content[len(res.Content)-1]
 	if last.Type == "tool_use" {
-		// the run's call reaches magpie after its reply is told
+		// the run's call reaches eipgam after its reply is told
 		eventually(t, "the run's call "+last.ID, func() bool {
 			s.subscription.mu.Lock()
 			defer s.subscription.mu.Unlock()
@@ -150,7 +150,7 @@ func guardServer(t *testing.T) *Server {
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
 	t.Cleanup(s.subscription.abortAll) // before srv.Close: a run's MCP call holds a request open
-	t.Setenv("MAGPIE_ADDR", srv.Listener.Addr().String())
+	t.Setenv("EIPGAM_ADDR", srv.Listener.Addr().String())
 	return s
 }
 
@@ -210,7 +210,7 @@ func TestClaudeTUIToolLoopCarriesEachBatchsSafeguards(t *testing.T) {
 // A run without the tap (a Claude Code that doesn't load it) can't be
 // given a batch's safeguards: one whose rules changed is let go, and the
 // log says why, where it said "process expired" alone and the run's end
-// read "magpie ended it" (vibbow, #4804).
+// read "eipgam ended it" (vibbow, #4804).
 func TestClaudeTUIToolResultsLogWhyTheRunEnded(t *testing.T) {
 	log := guardClaude(t)
 	t.Setenv("FAKE_NO_TAP", "1")

@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // TestMain gives the package a home of its own (testenv). A home an agent is
@@ -75,8 +75,8 @@ func TestMain(m *testing.M) {
 	claudeShellEnv = func(string) string { return "" }
 	codexSystemProxy = func() netproxy.Proxy { return netproxy.Proxy{} }
 	proxyProbe = func(string, string) bool { return true }
-	// nor an address of the agent's own asked whether magpie answers
-	// there (a reverse proxy, #1985): known, and not magpie, as for a
+	// nor an address of the agent's own asked whether eipgam answers
+	// there (a reverse proxy, #1985): known, and not eipgam, as for a
 	// relay; the proxy-kept tests answer it
 	magpieAt = func(string) (bool, bool) { return false, true }
 	os.Exit(testenv.Run(m))

@@ -80,7 +80,7 @@ func enc58check(p []byte) string {
 
 // testSeed is a 32-byte seed made from name.
 func testSeed(name string) []byte {
-	h := sha256.Sum256([]byte("magpie crypto test " + name))
+	h := sha256.Sum256([]byte("eipgam crypto test " + name))
 	return h[:]
 }
 

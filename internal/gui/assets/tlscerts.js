@@ -51,7 +51,7 @@ function drawPin(pin, draft, peek, seen) {
 
 // tlsCertRows draws the rows where app.js left at. Server certificate is
 // for an https:// address at a host the user chose (provider.PinHosts):
-// every one of theirs and Remote magpie's, and a preset's pointed at their
+// every one of theirs and Remote eipgam's, and a preset's pointed at their
 // own server, never the vendor's own hosts; save has the Save body carry
 // the pin. The client certificate's fields are saved by app.js itself.
 window.tlsTyped = (draft, body) => {
@@ -69,7 +69,7 @@ window.tlsCertRows = function ({ p, pr, draft, at, certTakes, onHTTPS, addressOf
   if (certTakes()) {
     const box = el("div", "client-cert");
     for (const [k, label, hold] of [["clientCert", t("Certificate"), "client.pem"], ["clientKey", t("Key"), "client-key.pem"], ["serverCA", t("Server CA"), "ca.pem"]]) {
-      const i = input(draft[k] || "", "~/magpie-laptop/" + hold);
+      const i = input(draft[k] || "", "~/eipgam-laptop/" + hold);
       i.className = "words cert-" + k;
       i.setAttribute("aria-label", label);
       i.oninput = () => { draft[k] = i.value; };

@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A gateway key may be held to some models (#882, access.Key.Models): it
@@ -18,16 +18,16 @@ import (
 // is refused before any provider is asked. A model is held to by its
 // provider's id and its own, "<provider>/<model>", whatever the agent
 // called it. A routing group passes when the key names it, "group/<id>"
-// (or "group/*", every group), a group magpie found by its auto/<model>
+// (or "group/*", every group), a group eipgam found by its auto/<model>
 // too, either id passing for the other (allows), and then every member of
 // it does, through it. A group of the user's own the key doesn't name is
 // never the key's, however few models it has and all of them the key's
 // (kautism on Discord: a key given gemini 3.8 was shown, and could use, a
 // group the user made of gemini 3.8 alone, a group never handed out); a
-// group magpie found, one model several providers serve, passes when
+// group eipgam found, one model several providers serve, passes when
 // every model in it does, as it is that model.
 
-// magpieChoseKey marks, in a request's context, a call magpie makes for a
+// magpieChoseKey marks, in a request's context, a call eipgam makes for a
 // model the user picked in its settings rather than the caller (a web
 // search's, an image description's, a Codex title's): the key's models
 // don't hold it.
@@ -39,7 +39,7 @@ func magpieChose(ctx context.Context) context.Context {
 
 // keyHolds is the calling key's models, when they hold this request: the
 // models it lists, and those a limit of some models it has spent counts
-// (access.Identity.Spent, zola_xynb on X), which hold magpie's own calls
+// (access.Identity.Spent, zola_xynb on X), which hold eipgam's own calls
 // for the key too, as their spend counts in it.
 func keyHolds(r *http.Request) (access.Identity, bool) {
 	who := access.Caller(r.Context())
@@ -154,7 +154,7 @@ func keyGroupRefusal(w http.ResponseWriter, who access.Identity, ref string, ms 
 // use is answered with: a 429 saying the limit and when it resets, with
 // Retry-After, when a limit of the key's spent on it is why, else
 // keyModelError's 403. It names no reset in remoteKeyLimitHeader: a
-// magpie using this one as a remote rests only the model on it, as the
+// eipgam using this one as a remote rests only the model on it, as the
 // key's other models are still served.
 func keyModelRefusal(w http.ResponseWriter, who access.Identity, ref string) (int, string) {
 	if g, _, ok := provider.FindGroup(ref); ok && groupBarred(who, g) {
@@ -169,7 +169,7 @@ func keyModelRefusal(w http.ResponseWriter, who access.Identity, ref string) (in
 // groupKeysError is what a key is told of a routing group bound to other
 // keys (groupBarred).
 func groupKeysError(who access.Identity, g provider.Group) string {
-	return fmt.Sprintf("The gateway key %q may not use %s: the routing group is bound to other gateway keys. Bind this key to it in the group's editor on magpie's Routing page, or use another model.",
+	return fmt.Sprintf("The gateway key %q may not use %s: the routing group is bound to other gateway keys. Bind this key to it in the group's editor on eipgam's Routing page, or use another model.",
 		who.KeyName, g.Ref())
 }
 
@@ -194,7 +194,7 @@ func spentAmong(who access.Identity, cs []candidate) (access.SpentScope, bool) {
 }
 
 // accountHolds is the calling key's accounts, when they hold this
-// request: magpie's own calls for the key — a web search, a picture
+// request: eipgam's own calls for the key — a web search, a picture
 // described, a Codex title — are of the models the user picked, so the
 // models don't hold them, but their spend lands on an account or key all
 // the same, and the accounts hold them too.
@@ -266,7 +266,7 @@ func groupNamed(who access.Identity, g provider.Group) bool {
 }
 
 // groupAllowed says the key may use the routing group g: it names it, or
-// g is a group magpie found (foundGroup) and the key may use every member
+// g is a group eipgam found (foundGroup) and the key may use every member
 // of it. A group of the user's own that a key listing models doesn't name
 // is not its, every member its or not: what the key lists is what it was
 // given (kautism). A key that names accounts and no model was given every
@@ -307,7 +307,7 @@ func groupBarred(who access.Identity, g provider.Group) bool {
 
 // groupGiven says a request may use the routing group g: held to some
 // models (keyHolds' who and held), as groupAllowed says; else unless g
-// is bound to other keys than its (groupBarred). A call magpie makes for
+// is bound to other keys than its (groupBarred). A call eipgam makes for
 // a model the user picked in its settings (magpieChose) is held by no
 // key, as keyHolds says.
 func groupGiven(r *http.Request, who access.Identity, held bool, g provider.Group, ms []provider.Member) bool {
@@ -321,7 +321,7 @@ func groupGiven(r *http.Request, who access.Identity, held bool, g provider.Grou
 }
 
 // withGatewayKey says r comes with a gateway key that a routing group bound to
-// other keys bars (groupBarred): any key, but on a call magpie makes for
+// other keys bars (groupBarred): any key, but on a call eipgam makes for
 // a model the user picked (magpieChose).
 func withGatewayKey(r *http.Request) bool {
 	if chose, _ := r.Context().Value(magpieChoseKey{}).(bool); chose {
@@ -330,7 +330,7 @@ func withGatewayKey(r *http.Request) bool {
 	return access.Caller(r.Context()).KeyID != ""
 }
 
-// foundGroup says g is a group magpie found (one model several providers
+// foundGroup says g is a group eipgam found (one model several providers
 // serve, auto/<model>), the user's changes to it kept or not.
 func foundGroup(g provider.Group) bool {
 	return g.Auto || strings.HasPrefix(g.ID, "auto-")
@@ -519,7 +519,7 @@ func keyAllowed(r *http.Request, es []provider.Entry) []provider.Entry {
 // standing in for it is listed the model itself, when it may use it, as
 // nothing stands in for it for the key (luckymanjc on Discord, 11-05: a
 // key held to every Codex model and his three accounts, his Remote
-// magpie's, was listed GPT-6-Luna alone, the one Codex model no group of
+// eipgam's, was listed GPT-6-Luna alone, the one Codex model no group of
 // his listed alone). off is the list's own picks (ModelOff), nil for
 // none; a model they leave out stays out.
 func keyListed(r *http.Request, shown []provider.Entry, off func(string) bool) []provider.Entry {
@@ -758,7 +758,7 @@ func (s *Server) onKeys(r *http.Request, p provider.Provider, model, asked strin
 
 // keyModelError is what a request for a model its key may not use is told.
 func keyModelError(who access.Identity, model string) string {
-	return fmt.Sprintf("The gateway key %q may not use %s; it may use %s. Change the key's models in magpie's Gateway page, or use a model it has.",
+	return fmt.Sprintf("The gateway key %q may not use %s; it may use %s. Change the key's models in eipgam's Gateway page, or use a model it has.",
 		who.KeyName, model, strings.Join(who.Models, ", "))
 }
 
@@ -767,14 +767,14 @@ func keyModelError(who access.Identity, model string) string {
 // held to some accounts (who.Group).
 func keyAccountsError(who access.Identity, model string) string {
 	if who.Group != "" {
-		msg := fmt.Sprintf("The routing group %q is held to some accounts, and none of the accounts or keys behind %s is one of them; it may use %s. Change the group's accounts in magpie's Routing page",
+		msg := fmt.Sprintf("The routing group %q is held to some accounts, and none of the accounts or keys behind %s is one of them; it may use %s. Change the group's accounts in eipgam's Routing page",
 			who.Group, model, keyAccountNames(who))
 		if who.KeyName != "" {
 			msg += fmt.Sprintf(" (and the gateway key %q's in its Gateway page)", who.KeyName)
 		}
 		return msg + ", or use an account it has."
 	}
-	return fmt.Sprintf("The gateway key %q is not allowed to use the accounts behind %s: no account or key behind it is one the key may use; it may use %s. Change the key's accounts in magpie's Gateway page, or use an account it has.",
+	return fmt.Sprintf("The gateway key %q is not allowed to use the accounts behind %s: no account or key behind it is one the key may use; it may use %s. Change the key's accounts in eipgam's Gateway page, or use an account it has.",
 		who.KeyName, model, keyAccountNames(who))
 }
 
@@ -788,7 +788,7 @@ func groupsHeldError(model string, left []Weighed) string {
 			by = append(by, w.HeldBy)
 		}
 	}
-	return fmt.Sprintf("Every account or key behind %s is one the routing group %s is held away from: it is held to other accounts, or names another account for the model. Change the group's accounts in magpie's Routing page, or use an account it has.",
+	return fmt.Sprintf("Every account or key behind %s is one the routing group %s is held away from: it is held to other accounts, or names another account for the model. Change the group's accounts in eipgam's Routing page, or use an account it has.",
 		model, strings.Join(by, ", "))
 }
 

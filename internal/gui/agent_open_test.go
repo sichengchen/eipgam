@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // Open in terminal on an Agents row (coolmantou on Discord): the page
@@ -118,7 +118,7 @@ func TestAgentCommandNeedsAProgram(t *testing.T) {
 	if run := agentLine(&agent.Agent{ID: "x@wsl:U", Bin: "claude;rm", WSL: "U"}, "", "windows"); run != "" {
 		t.Errorf("wsl with a bad name: %q", run)
 	}
-	// one that starts on magpie by its environment (agy) opens on that
+	// one that starts on eipgam by its environment (agy) opens on that
 	if run := agentCommand(&agent.Agent{ID: "agy", Bin: "agy", Launch: func() string { return "X=1 agy" }}); run != "X=1 agy" {
 		t.Errorf("agy: %q", run)
 	}

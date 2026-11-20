@@ -42,7 +42,7 @@ func ownCards(t *testing.T) map[string]SubscriptionQuota {
 
 // A key whose vendor tells no balance (tenacious_eagle on Discord): the
 // user types what the vendor's page says is left, and its card shows that
-// less what magpie priced the calls it sent on the key since, marked as
+// less what eipgam priced the calls it sent on the key since, marked as
 // an estimate. Typing it again counts from then; off takes the card
 // away. A key with none typed has no card, nor does a key turned off, and
 // an estimate is no reading the balance history keeps.
@@ -205,7 +205,7 @@ func TestOwnBalanceParsed(t *testing.T) {
 	}
 }
 
-// rateStub holds the dollar's rate in yuan magpie knows: ok false is
+// rateStub holds the dollar's rate in yuan eipgam knows: ok false is
 // none ever learned.
 func rateStub(t *testing.T, rate float64, ok bool) {
 	t.Helper()
@@ -223,7 +223,7 @@ func clockStub(t *testing.T, now time.Time) {
 }
 
 // A balance typed in yuan (tenacious_eagle_96548 on Discord) is counted
-// down by the spend, priced in USD, at the dollar's rate magpie last
+// down by the spend, priced in USD, at the dollar's rate eipgam last
 // learned, and shown in yuan. While no rate was ever learned, what is
 // left with spend counted is unknown: never the spend at a rate of 0, 1
 // or a guess. With nothing spent yet, it needs no rate.

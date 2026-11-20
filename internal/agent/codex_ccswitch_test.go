@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // CC Switch's Codex config, as it writes it: its "custom" table, one of
@@ -22,11 +22,11 @@ const ccSwitchCodex = "model_provider = \"custom\"\nmodel = \"gpt-5.4\"\nmodel_r
 	"[profiles.work]\nmodel_provider = \"cc-switch-2\"\n"
 
 // A Codex thread keeps the provider it was started on, and CC Switch puts
-// every third-party one on its "custom" table: reopened after magpie took
-// Codex over, it still went to the relay, a magpie model picked in it
-// too, and the relay said the model wasn't found. While a magpie model is
-// on, CC Switch's tables go through magpie too, and get their own base URL
-// back when Codex steps off magpie; a profile's table and the user's own
+// every third-party one on its "custom" table: reopened after eipgam took
+// Codex over, it still went to the relay, a eipgam model picked in it
+// too, and the relay said the model wasn't found. While a eipgam model is
+// on, CC Switch's tables go through eipgam too, and get their own base URL
+// back when Codex steps off eipgam; a profile's table and the user's own
 // stay as they are.
 func TestCodexTakesCCSwitchTables(t *testing.T) {
 	for _, auth := range []string{`{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, ""} {
@@ -45,7 +45,7 @@ func TestCodexTakesCCSwitchTables(t *testing.T) {
 			t.Fatal(err)
 		}
 		if c := table("custom"); c["base_url"] != v1 || c["experimental_bearer_token"] != "sk-relay" || c["requires_openai_auth"] != "true" {
-			t.Fatalf("auth %q: custom not through magpie:\n%s", auth, read())
+			t.Fatalf("auth %q: custom not through eipgam:\n%s", auth, read())
 		}
 		if table("cc-switch-2")["base_url"] != "https://old.example/v1" || table("mine")["base_url"] != "https://mine.example/v1" {
 			t.Fatalf("auth %q: other tables changed:\n%s", auth, read())
@@ -53,7 +53,7 @@ func TestCodexTakesCCSwitchTables(t *testing.T) {
 		if d := cx.Check(); d != "" {
 			t.Fatalf("auth %q: check: %s", auth, d)
 		}
-		// CC Switch writes its table again: the row says so, and magpie's
+		// CC Switch writes its table again: the row says so, and eipgam's
 		// next sync takes it over again
 		if err := edit.SetTOMLKey(path, "model_providers.custom", "base_url", "https://relay2.example/v1"); err != nil {
 			t.Fatal(err)
@@ -90,8 +90,8 @@ func TestCodexTakesCCSwitchTables(t *testing.T) {
 	}
 }
 
-// A CC Switch table the user pointed at magpie by hand stays so when Codex
-// steps off magpie: magpie gives back only what it took.
+// A CC Switch table the user pointed at eipgam by hand stays so when Codex
+// steps off eipgam: eipgam gives back only what it took.
 func TestCodexKeepsHandPointedCCSwitchTable(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
 	v1 := here(home).v1()
@@ -112,7 +112,7 @@ func TestCodexKeepsHandPointedCCSwitchTable(t *testing.T) {
 // CC Switch's official OpenAI provider mirror writes model_provider = "custom"
 // and a [model_providers.custom] table with name = "OpenAI", requires_openai_auth = true
 // and no base_url (#504): it is the official provider, so its models are grouped
-// under OpenAI, and neither it nor a relay's table is pointed at magpie for a
+// under OpenAI, and neither it nor a relay's table is pointed at eipgam for a
 // Codex not connected while another account is on (TylerBai_loveai on X).
 func TestCodexCCSwitchOfficialOpenAIMirror(t *testing.T) {
 	const ccSwitchOfficialMirror = "model_provider = \"custom\"\nmodel = \"gpt-5.4\"\n\n" +
@@ -161,7 +161,7 @@ func TestCodexCCSwitchOfficialOpenAIMirror(t *testing.T) {
 		t.Fatalf("other custom name grouped under %q, want custom", opts[0].Group)
 	}
 
-	// 2. Account failover points the mirror table's base_url at magpie, not openai_base_url
+	// 2. Account failover points the mirror table's base_url at eipgam, not openai_base_url
 	claims := func(m map[string]any) string {
 		b, _ := json.Marshal(m)
 		return "h." + base64.RawURLEncoding.EncodeToString(b) + ".s"
@@ -193,7 +193,7 @@ func TestCodexCCSwitchOfficialOpenAIMirror(t *testing.T) {
 	}
 	_ = pathFailover
 
-	// Real relays with a base_url never get pointed at magpie gateway for failover
+	// Real relays with a base_url never get pointed at eipgam gateway for failover
 	homeRelayFailover, readRelayFailover := codexHome(t, string(me), ccSwitchCodex)
 	cxRelayFailover := codex(homeRelayFailover)
 	pathRelay := filepath.Join(homeRelayFailover, ".codex", "config.toml")
@@ -215,7 +215,7 @@ func TestCodexCCSwitchOfficialOpenAIMirror(t *testing.T) {
 	cxSwitch := codex(homeSwitch)
 	pathSwitch := filepath.Join(homeSwitch, ".codex", "config.toml")
 	logins(true)
-	// mirror failover as a magpie from before left it, marker and all
+	// mirror failover as a eipgam from before left it, marker and all
 	if err := edit.SetTOMLKey(pathSwitch, "model_providers.custom", "base_url", here(homeSwitch).codexURL()); err != nil {
 		t.Fatal(err)
 	}
@@ -245,13 +245,13 @@ func TestCodexCCSwitchOfficialOpenAIMirror(t *testing.T) {
 
 // CC Switch's OpenAI mirror ("custom": name OpenAI, the ChatGPT sign-in, no
 // base_url) left in config.toml after the user moved Codex onto the
-// built-in provider and a magpie model. Codex's openai_base_url, which
-// takes the built-in provider to magpie, doesn't reach a table of another
+// built-in provider and a eipgam model. Codex's openai_base_url, which
+// takes the built-in provider to eipgam, doesn't reach a table of another
 // id, so a thread started on "custom" and reopened went straight to
-// ChatGPT, which refused the magpie model picked in it, and magpie never
-// saw the request (#1796, WardLu). While Codex goes to magpie by the base
+// ChatGPT, which refused the eipgam model picked in it, and eipgam never
+// saw the request (#1796, WardLu). While Codex goes to eipgam by the base
 // URL the mirror does too; a profile's mirror is the user's to pick, and
-// stepping off magpie takes the base URL off again.
+// stepping off eipgam takes the base URL off again.
 func TestCodexTakesCCSwitchMirrorForItsThreads(t *testing.T) {
 	const cfg = "model = \"gpt-5.4\"\n\n" +
 		"[model_providers.custom]\nname = \"OpenAI\"\nrequires_openai_auth = true\nsupports_websockets = true\nwire_api = \"responses\"\n\n" +
@@ -273,7 +273,7 @@ func TestCodexTakesCCSwitchMirrorForItsThreads(t *testing.T) {
 			t.Fatal(err)
 		}
 		if c := table("custom"); c["base_url"] != at.codexURL() || c["requires_openai_auth"] != "true" || c["name"] != "OpenAI" {
-			t.Fatalf("round %d: the mirror isn't through magpie:\n%s", round, read())
+			t.Fatalf("round %d: the mirror isn't through eipgam:\n%s", round, read())
 		}
 		if _, ok := table("cc-switch-3")["base_url"]; ok {
 			t.Fatalf("round %d: the profile's mirror changed:\n%s", round, read())
@@ -291,13 +291,13 @@ func TestCodexTakesCCSwitchMirrorForItsThreads(t *testing.T) {
 			t.Fatal(err)
 		}
 		if _, ok := table("custom")["base_url"]; ok {
-			t.Fatalf("round %d: off magpie (%q), the mirror keeps magpie's URL:\n%s", round, off, read())
+			t.Fatalf("round %d: off eipgam (%q), the mirror keeps eipgam's URL:\n%s", round, off, read())
 		}
 		if _, ok := stashLoad()[at.key("codex.mirrors")]; ok {
 			t.Errorf("round %d: stash left", round)
 		}
 	}
-	// one the user changed while magpie had it stays as they left it
+	// one the user changed while eipgam had it stays as they left it
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}

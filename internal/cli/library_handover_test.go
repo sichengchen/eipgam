@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
-// magpie library skill hand-over / hand-back (tnt1223): a skill kept in
+// eipgam library skill hand-over / hand-back (tnt1223): a skill kept in
 // ~/.agents/skills moves into the library's folder and back again; --all
 // takes the library's skills kept there, and nothing else.
 func TestLibrarySkillHandOver(t *testing.T) {

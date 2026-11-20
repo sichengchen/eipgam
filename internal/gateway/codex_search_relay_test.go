@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // searchingRelay is a fake relay of OpenAI's API that answers Codex's
@@ -76,10 +76,10 @@ func (f *searchingRelay) reset(status int) {
 }
 
 // A relay of OpenAI's API that runs Codex's web.run itself, set to search
-// the web by itself, is sent web.run as Codex sent it: magpie's searcher
+// the web by itself, is sent web.run as Codex sent it: eipgam's searcher
 // was asked instead, and the relay's own search never used (YIXIE233 on
-// X). Not set so, it is searched by magpie as before; set so and failing,
-// magpie searches in its place and says why.
+// X). Not set so, it is searched by eipgam as before; set so and failing,
+// eipgam searches in its place and says why.
 func TestCodexWebRunGoesToRelayThatSearches(t *testing.T) {
 	fresh(t)
 	relay := newSearchingRelay(t)
@@ -96,7 +96,7 @@ func TestCodexWebRunGoesToRelayThatSearches(t *testing.T) {
 	}
 	h := New().Handler()
 
-	// off: magpie's search, as before; the relay is asked nothing
+	// off: eipgam's search, as before; the relay is asked nothing
 	save(false)
 	got := readSearchReply(t, codexSearchPost(h, "/v1/alpha/search", codexSearchBody("relay/gpt-5.5")))
 	if !strings.Contains(got.Output, "go1.27.1") || len(relay.reached()) != 0 || len(apis.asked) != 1 {
@@ -113,7 +113,7 @@ func TestCodexWebRunGoesToRelayThatSearches(t *testing.T) {
 			t.Fatalf("%s: answered %+v", path, got)
 		}
 		if len(apis.asked) != 0 {
-			t.Fatalf("%s: magpie searched too: %v", path, apis.asked)
+			t.Fatalf("%s: eipgam searched too: %v", path, apis.asked)
 		}
 		if p := relay.reached(); len(p) != 1 || p[0] != "/v1/alpha/search" {
 			t.Fatalf("%s: relay reached %v", path, p)
@@ -129,7 +129,7 @@ func TestCodexWebRunGoesToRelayThatSearches(t *testing.T) {
 		}
 	}
 
-	// on, and the relay can't: magpie searches in its place, never ending the turn
+	// on, and the relay can't: eipgam searches in its place, never ending the turn
 	relay.reset(404)
 	apis.asked = nil
 	got = readSearchReply(t, codexSearchPost(h, "/v1/alpha/search", codexSearchBody("relay/gpt-5.5")))
@@ -141,7 +141,7 @@ func TestCodexWebRunGoesToRelayThatSearches(t *testing.T) {
 
 // In a routing group the switch is the member's that a turn goes to: a
 // group led by a relay that searches sends web.run to it, one led by a
-// provider that doesn't is searched by magpie, though a member after it
+// provider that doesn't is searched by eipgam, though a member after it
 // searches.
 func TestCodexWebRunInGroupFollowsLeadingMember(t *testing.T) {
 	fresh(t)
@@ -185,8 +185,8 @@ func TestCodexWebRunInGroupFollowsLeadingMember(t *testing.T) {
 }
 
 // Codex's web_search tool on a turn goes to a relay set to search by
-// itself as Codex sent it, and magpie's searcher isn't asked; not set so,
-// the relay is sent no web_search tool, magpie's search in its place.
+// itself as Codex sent it, and eipgam's searcher isn't asked; not set so,
+// the relay is sent no web_search tool, eipgam's search in its place.
 func TestResponsesWebSearchToolToRelayThatSearches(t *testing.T) {
 	fresh(t)
 	relay := newSearchingRelay(t)

@@ -12,8 +12,8 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // A request asked twice — its first member overloaded, the next answering
@@ -210,7 +210,7 @@ func rowOf(t *testing.T, of func(usage.Record) bool) usage.Record {
 }
 
 // A request's row says what came back down as well as what went up:
-// DownBytes the bytes of the vendors' replies magpie read, its tries
+// DownBytes the bytes of the vendors' replies eipgam read, its tries
 // summed, the overloaded member's refusal too, whole or streamed
 // (faithleysath, matrix0487 on Discord). Before, a row had none.
 func TestLedgerKeepsDownBytes(t *testing.T) {

@@ -1,27 +1,26 @@
-# magpie reference
+# eipgam reference
 
-The full manual: every agent magpie wires, every provider option, the gateway, routing, plugins, the CLI, Docker, sync and the files magpie keeps. For the overview, see the [README](../README.md).
+The full manual: every agent eipgam wires, every provider option, the gateway, routing, plugins, the CLI, Docker, sync and the files eipgam keeps. For the overview, see the [README](../README.md).
 
 Renamed a project folder? See [relocating Claude Code sessions](session-relocation.md).
 
 One place to pick every agent's model: Codex on Kimi, Claude Code
-on GLM, Gemini CLI on Qwen, from the menu bar. [usemagpie.ai](https://usemagpie.ai)
+on GLM, Gemini CLI on Qwen, from the menu bar.
 
-[![Discord](https://img.shields.io/badge/Discord-join%20the%20community-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF)
 
-`magpie` is a single screen that lists each AI agent on your machine and
+`eipgam` is a single screen that lists each AI agent on your machine and
 the model it is set to. Click a value, pick a model. That is the whole app.
 
 It lives in the menu bar: click the icon and a panel drops down; the same
-screen also opens as a normal window (`magpie`, or *Open magpie* in the tray menu),
+screen also opens as a normal window (`eipgam`, or *Open eipgam* in the tray menu),
 which opens on the page you last left, as a Mac app comes back as it was,
-and there is a terminal version (`magpie tui`) and a plain CLI. The
-terminal version serves the gateway while it is open when no other magpie
-(the app, `magpie web`, `magpie serve`) does, and says so on its status
-line; agents connected to magpie lose it when it quits.
+and there is a terminal version (`eipgam tui`) and a plain CLI. The
+terminal version serves the gateway while it is open when no other eipgam
+(the app, `eipgam web`, `eipgam serve`) does, and says so on its status
+line; agents connected to eipgam lose it when it quits.
 
 ```
-  ◉ magpie
+  ◉ eipgam
 
   ▸ Claude Code   claude-fable-5-1[1m]                        ~/.claude/settings.json
     Codex         gpt-6-astra   effort medium
@@ -43,11 +42,11 @@ line; agents connected to magpie lose it when it quits.
 - **Edits config files surgically.** Only the one key you change is touched;
   comments, ordering and indentation in your `settings.json`, `config.toml`,
   `opencode.jsonc` or `config.yaml` survive intact. Writes are atomic.
-- **One endpoint for every agent.** magpie runs a local gateway that speaks
+- **One endpoint for every agent.** eipgam runs a local gateway that speaks
   OpenAI chat completions, OpenAI Responses and the Anthropic Messages API,
   and forwards to whichever vendor serves the model. Codex, Claude Code,
   OpenCode and the rest all point at `http://127.0.0.1:3425/v1` and pick
-  from one catalog; the translation between APIs happens in magpie, streaming
+  from one catalog; the translation between APIs happens in eipgam, streaming
   and tool calls included.
 - **Your subscriptions, shared.** Sign in to Claude Code, Codex (ChatGPT)
   or Copilot and that login shows up as a provider: every other agent can
@@ -57,9 +56,9 @@ line; agents connected to magpie lose it when it quits.
   Amazon Bedrock and its Mantle endpoint, Kimi, Z.ai, MiniMax, StepFun, Xiaomi MiMo, Qwen, Tencent Cloud Token Plan,
   Mistral, Groq, Nous Portal, xAI, OpenRouter, Together,
   Fireworks, Fireworks Nexus, SiliconFlow, NVIDIA NIM, PipeLLM, Ollama, LM Studio…),
-  paste a key, done. Custom vendors need a name and a base URL. magpie never
+  paste a key, done. Custom vendors need a name and a base URL. eipgam never
   reads keys from your shell environment.
-- **Real model lists, nothing compiled in.** With a key in hand magpie asks
+- **Real model lists, nothing compiled in.** With a key in hand eipgam asks
   the vendor which models it serves and offers exactly those; the
   [models.dev](https://models.dev) catalog fills in names, reasoning efforts
   and the list for vendors that have none (a model the vendor's own entry
@@ -68,7 +67,7 @@ line; agents connected to magpie lose it when it quits.
   deployment keeps its own name), and refreshes itself in the
   background once it goes stale. Where models.dev can't be reached, the
   last copy fetched keeps answering, a first run answers from the copy
-  magpie ships with, and a failed fetch is tried again within minutes,
+  eipgam ships with, and a failed fetch is tried again within minutes,
   through the proxy set in Settings. Choose which models each provider exposes,
   or expose them all — a model released this morning is in the picker on
   the next refresh.
@@ -79,12 +78,12 @@ line; agents connected to magpie lose it when it quits.
   "Only models I pick" switch turns the list around: the models ticked
   when it is switched on stay, and a model added later, of any provider,
   stays out of that agent's picker and its config until it is ticked
-  (`magpie visible <agent> --only-picked`, back with `--show-new`). A
+  (`eipgam visible <agent> --only-picked`, back with `--show-new`). A
   model asked for by name still works either way.
 - **Profiles.** Snapshot every agent's settings under a name and switch all of
   them back in one move. The profile in use, the one applying would change
   nothing, is ticked, the tray panel's Profiles button shows its name, and
-  `magpie profiles` marks it ✓.
+  `eipgam profiles` marks it ✓.
 - **Real logos, no framework.** Plain HTML over the system webview; brand
   icons from [lobehub/icons](https://github.com/lobehub/lobe-icons).
 
@@ -92,87 +91,87 @@ line; agents connected to magpie lose it when it quits.
 
 | Agent        | File                              | Fields          |
 | ------------ | --------------------------------- | --------------- |
-| Claude Code  | `~/.claude/settings.json`         | provider, model, opus/sonnet/haiku/fable, auto mode, sign-in (through magpie) |
-| Claude Desktop | `Claude/` + `Claude-3p/configLibrary/` in `~/Library/Application Support` (`%LOCALAPPDATA%` on Windows, `~/.config` on Linux). A Desktop installed as an MSIX package on Windows keeps them in its package instead (`%LOCALAPPDATA%\Packages\Claude_<publisher>\LocalCache\Local`, or `AnthropicPBC.Claude_<publisher>` for the Store's package, its own data in `LocalCache\Roaming\Claude`). Desktop 2.31226 and later, packaged, reads the real `%LOCALAPPDATA%\Claude-3p` instead, so for a packaged Desktop magpie writes both ([`desktopdir`](../internal/desktopdir/desktopdir.go)) | provider (its third-party gateway mode: Code and Cowork on magpie, no Anthropic sign-in; restart Desktop), opus/sonnet/haiku/fable, subagent model and subagent effort (magpie's settings, applied by the gateway to subagent tool turns; no restart) |
+| Claude Code  | `~/.claude/settings.json`         | provider, model, opus/sonnet/haiku/fable, auto mode, sign-in (through eipgam) |
+| Claude Desktop | `Claude/` + `Claude-3p/configLibrary/` in `~/Library/Application Support` (`%LOCALAPPDATA%` on Windows, `~/.config` on Linux). A Desktop installed as an MSIX package on Windows keeps them in its package instead (`%LOCALAPPDATA%\Packages\Claude_<publisher>\LocalCache\Local`, or `AnthropicPBC.Claude_<publisher>` for the Store's package, its own data in `LocalCache\Roaming\Claude`). Desktop 2.31226 and later, packaged, reads the real `%LOCALAPPDATA%\Claude-3p` instead, so for a packaged Desktop eipgam writes both ([`desktopdir`](../internal/desktopdir/desktopdir.go)) | provider (its third-party gateway mode: Code and Cowork on eipgam, no Anthropic sign-in; restart Desktop), opus/sonnet/haiku/fable, subagent model and subagent effort (eipgam's settings, applied by the gateway to subagent tool turns; no restart) |
 | Codex        | `~/.codex/config.toml`            | provider, model, effort |
 | Gemini CLI   | `~/.gemini/settings.json`, `~/.gemini/.env` | auth, model |
 | OpenCode     | `~/.config/opencode/opencode.json(c)` (`$OPENCODE_CONFIG_DIR`) | model, small |
-| OpenChamber  | `~/.config/openchamber/preferences.json` (`$OPENCHAMBER_DATA_DIR`; magpie's provider in OpenCode's config) | model, small (its own defaults, over OpenCode's) |
+| OpenChamber  | `~/.config/openchamber/preferences.json` (`$OPENCHAMBER_DATA_DIR`; eipgam's provider in OpenCode's config) | model, small (its own defaults, over OpenCode's) |
 | MiMo Code    | `~/.config/mimocode/mimocode.json(c)` | model, small |
-| DevEco Code  | `~/.config/deveco/deveco.json(c)` (`$DEVECO_CONFIG_DIR`; its key is `magpie-deveco`, as parts of it send OpenCode's User-Agent) | model, small |
+| DevEco Code  | `~/.config/deveco/deveco.json(c)` (`$DEVECO_CONFIG_DIR`; its key is `eipgam-deveco`, as parts of it send OpenCode's User-Agent) | model, small |
 | Pi           | `~/.pi/agent/settings.json`       | model           |
 | StepCode     | `~/.stepcode/config.toml` (+ `models.json`; `$STEP_CODING_AGENT_DIR`, `$STEPCODE_CONFIG_DIR`) | model |
-| MothX        | `~/.mothx/settings.json` (`$MOTHX_DIR`; `%APPDATA%\mothx` on Windows) | model, thinking (`defaultProvider`/`defaultModel`/`defaultThinkingLevel`; magpie as the provider `magpie` beside the user's own, `openai-chat` with `thinkingFormat: "openai"`) |
-| PenguinHarness | `~/.penguin/data/default_project/.project_config.toml` (`$PENGUIN_HOME`, `$PENGUIN_PROJECT_ID`; the same on Windows) | model (`default_model`; magpie as `[providers.magpie]`, `openai-responses`, and its models as `[[models]]` entries of that provider) |
-| Aside        | `~/.aside/u/0/settings.json` (+ `models.json`; the first account, the only one magpie wires) | model, effort, fast, standard, deep, visual, image |
+| MothX        | `~/.mothx/settings.json` (`$MOTHX_DIR`; `%APPDATA%\mothx` on Windows) | model, thinking (`defaultProvider`/`defaultModel`/`defaultThinkingLevel`; eipgam as the provider `eipgam` beside the user's own, `openai-chat` with `thinkingFormat: "openai"`) |
+| PenguinHarness | `~/.penguin/data/default_project/.project_config.toml` (`$PENGUIN_HOME`, `$PENGUIN_PROJECT_ID`; the same on Windows) | model (`default_model`; eipgam as `[providers.eipgam]`, `openai-responses`, and its models as `[[models]]` entries of that provider) |
+| Aside        | `~/.aside/u/0/settings.json` (+ `models.json`; the first account, the only one eipgam wires) | model, effort, fast, standard, deep, visual, image |
 | OmO (omo-ai) | `~/.omo/agent/settings.json` (+ `models.json`; `$OMO_CODING_AGENT_DIR`, `$SENPI_CODING_AGENT_DIR`) | model |
-| Prime Agent  | `~/.prime/agent/settings.json` (+ `models.json`; `$PRIME_AGENT_CODING_AGENT_DIR`) | model, thinking (Pi's fields; its key `magpie-prime-agent` names it, since its requests carry no User-Agent; the global settings alone, `allowedModels` and `subagentDefaultModel` left as they are) |
-| mu           | `~/.mu/agent/settings.json` (+ `models.json`; `$MU_AGENT_DIR`, `$KYRN_AGENT_DIR`, `$MU_CODING_AGENT_DIR`, `$KYRN_CODING_AGENT_DIR`, or `~/.kyrn/agent` while there is no `~/.mu`) | model, thinking (Pi's fields; its key `magpie-mu` names it, since its requests say `pi/<version>`; the desktop app uses the same folder; its judge in `~/.mu/mu.json` left alone) |
+| Prime Agent  | `~/.prime/agent/settings.json` (+ `models.json`; `$PRIME_AGENT_CODING_AGENT_DIR`) | model, thinking (Pi's fields; its key `eipgam-prime-agent` names it, since its requests carry no User-Agent; the global settings alone, `allowedModels` and `subagentDefaultModel` left as they are) |
+| mu           | `~/.mu/agent/settings.json` (+ `models.json`; `$MU_AGENT_DIR`, `$KYRN_AGENT_DIR`, `$MU_CODING_AGENT_DIR`, `$KYRN_CODING_AGENT_DIR`, or `~/.kyrn/agent` while there is no `~/.mu`) | model, thinking (Pi's fields; its key `eipgam-mu` names it, since its requests say `pi/<version>`; the desktop app uses the same folder; its judge in `~/.mu/mu.json` left alone) |
 | Goose        | `~/.config/goose/config.yaml`     | model           |
 | Cursor CLI   | `~/.cursor/cli-config.json`       | model           |
-| Zed          | `~/.config/zed/settings.json` (`$XDG_CONFIG_HOME` on Linux, `%APPDATA%\Zed` on Windows) | model (a `magpie` OpenAI-compatible provider; its catalog in Zed's picker) |
-| VS Code (Chat) | `~/Library/Application Support/Code/User/settings.json` + `chatLanguageModels.json` (`~/.config/Code/User` on Linux, `%APPDATA%\Code\User` on Windows) | model (`chat.defaultModel`; a `magpie` Custom Endpoint group, its catalog in Chat's model picker; VS Code 1.122+, no Copilot sign-in or key needed). Each profile's own pair under `User/profiles/<id>/` (listed in `globalStorage/storage.json`) gets the same, unless the profile uses the default's |
-| VS Code Insiders (Chat) | the same files under `Code - Insiders/User` in place of `Code/User` | as VS Code, a row of its own; its models send the token `magpie-vscode-insiders`, since its chat's User-Agent is VS Code's |
-| VSCodium (Chat) | the same files under `VSCodium/User` in place of `Code/User` | as VS Code, a row of its own; its models send the token `magpie-vscodium`, so Usage counts them as VSCodium; its Chat features must be turned on (`chat.disableAIFeatures=false`, and `defaultChatAgent` plus `trustedExtensionAuthAccess` for GitHub.copilot-chat in its product.json). With the Marketplace's GitHub Copilot Chat 0.48.1, which has no Custom Endpoint provider, the group is written for its OpenAI Compatible provider (`customoai`, the token sent as `x-api-key`), which lists models only while Copilot Chat is signed in to GitHub with a personal Copilot plan |
-| Zoo Code (VS Code) | VS Code's `Code/User/settings.json` (and each profile's): `zoo-code.autoImportSettingsPath` names `globalStorage/zoocodeorganization.zoo-code/settings/magpie-import.json` beside it | model (one provider profile `magpie`, OpenAI Compatible, imported by Zoo Code at start-up) |
-| Copilot (JetBrains) | `byok.json` in `~/.config/github-copilot` (`$XDG_CONFIG_HOME/github-copilot` when set, `%USERPROFILE%\AppData\Local\github-copilot` on Windows), the Copilot language server's own file, which Xcode's and Eclipse's Copilot read too | provider (a `magpie` custom endpoint provider beside the user's: every magpie model at the gateway's `/v1/chat/completions`, sent with `magpie-copilot-jetbrains`; a model hidden in Manage Models stays hidden through a sync; off removes magpie's three keys alone). Found by the `github-copilot-intellij` plugin in a JetBrains IDE or Android Studio. Listed after the IDE restarts, and only while Copilot is signed in to GitHub on a plan with Bring Your Own Key (Free, Pro, Pro+; Business and Enterprise when the organisation allows it); the model is picked in Copilot Chat |
-| JetBrains Air | `acp.json` in `~/Library/Application Support/JetBrains/Air` (`~/.config/JetBrains/Air` on Linux, `%APPDATA%\JetBrains\Air` on Windows) + `magpie-opencode.json` beside it | model (a `Magpie` ACP agent: OpenCode's `opencode acp` on magpie's provider alone, its models and routing groups in Air's model menu; needs OpenCode installed) |
-| Air (JetBrains IDEs) | `~/.jetbrains/acp.json` (`%USERPROFILE%\.jetbrains\acp.json` on Windows; the Air plugin in 2026.2+ IDEs, shared with AI Assistant's custom agents) + `magpie-opencode.json` beside it | model (the same `Magpie` ACP agent as the Air app's, in Air's agent menu in the IDE; needs OpenCode installed; a `Magpie (WSL <distro>)` agent too for each running WSL distro that has OpenCode, for WSL projects) |
+| Zed          | `~/.config/zed/settings.json` (`$XDG_CONFIG_HOME` on Linux, `%APPDATA%\Zed` on Windows) | model (a `eipgam` OpenAI-compatible provider; its catalog in Zed's picker) |
+| VS Code (Chat) | `~/Library/Application Support/Code/User/settings.json` + `chatLanguageModels.json` (`~/.config/Code/User` on Linux, `%APPDATA%\Code\User` on Windows) | model (`chat.defaultModel`; a `eipgam` Custom Endpoint group, its catalog in Chat's model picker; VS Code 1.122+, no Copilot sign-in or key needed). Each profile's own pair under `User/profiles/<id>/` (listed in `globalStorage/storage.json`) gets the same, unless the profile uses the default's |
+| VS Code Insiders (Chat) | the same files under `Code - Insiders/User` in place of `Code/User` | as VS Code, a row of its own; its models send the token `eipgam-vscode-insiders`, since its chat's User-Agent is VS Code's |
+| VSCodium (Chat) | the same files under `VSCodium/User` in place of `Code/User` | as VS Code, a row of its own; its models send the token `eipgam-vscodium`, so Usage counts them as VSCodium; its Chat features must be turned on (`chat.disableAIFeatures=false`, and `defaultChatAgent` plus `trustedExtensionAuthAccess` for GitHub.copilot-chat in its product.json). With the Marketplace's GitHub Copilot Chat 0.48.1, which has no Custom Endpoint provider, the group is written for its OpenAI Compatible provider (`customoai`, the token sent as `x-api-key`), which lists models only while Copilot Chat is signed in to GitHub with a personal Copilot plan |
+| Zoo Code (VS Code) | VS Code's `Code/User/settings.json` (and each profile's): `zoo-code.autoImportSettingsPath` names `globalStorage/zoocodeorganization.zoo-code/settings/eipgam-import.json` beside it | model (one provider profile `eipgam`, OpenAI Compatible, imported by Zoo Code at start-up) |
+| Copilot (JetBrains) | `byok.json` in `~/.config/github-copilot` (`$XDG_CONFIG_HOME/github-copilot` when set, `%USERPROFILE%\AppData\Local\github-copilot` on Windows), the Copilot language server's own file, which Xcode's and Eclipse's Copilot read too | provider (a `eipgam` custom endpoint provider beside the user's: every eipgam model at the gateway's `/v1/chat/completions`, sent with `eipgam-copilot-jetbrains`; a model hidden in Manage Models stays hidden through a sync; off removes eipgam's three keys alone). Found by the `github-copilot-intellij` plugin in a JetBrains IDE or Android Studio. Listed after the IDE restarts, and only while Copilot is signed in to GitHub on a plan with Bring Your Own Key (Free, Pro, Pro+; Business and Enterprise when the organisation allows it); the model is picked in Copilot Chat |
+| JetBrains Air | `acp.json` in `~/Library/Application Support/JetBrains/Air` (`~/.config/JetBrains/Air` on Linux, `%APPDATA%\JetBrains\Air` on Windows) + `eipgam-opencode.json` beside it | model (a `eipgam` ACP agent: OpenCode's `opencode acp` on eipgam's provider alone, its models and routing groups in Air's model menu; needs OpenCode installed) |
+| Air (JetBrains IDEs) | `~/.jetbrains/acp.json` (`%USERPROFILE%\.jetbrains\acp.json` on Windows; the Air plugin in 2026.2+ IDEs, shared with AI Assistant's custom agents) + `eipgam-opencode.json` beside it | model (the same `eipgam` ACP agent as the Air app's, in Air's agent menu in the IDE; needs OpenCode installed; a `eipgam (WSL <distro>)` agent too for each running WSL distro that has OpenCode, for WSL projects) |
 | Copilot CLI  | `~/.copilot/settings.json`        | model           |
 | Crush        | `~/.config/crush/crush.json`      | large, small    |
-| DeepSeek Harness (dsh) | `~/.dsh/profiles/*/cordis.patch.yml` (`$DSH_HOME`; a custom provider, Magpie, its key `MAGPIE_GATEWAY_KEY` in `~/.dsh/.env` and dsh's own key store `~/.dsh/.credentials.yaml`, which the desktop app reads; on one of magpie's models its `web-search-deepseek` row also goes to the gateway, which searches with the model or Settings › Models › Web search, unless dsh has a `DEEPSEEK_API_KEY` or a row of your own), or `~/.dsh/config.yaml` before dsh 0.1.5 | model, effort |
-| Reasonix Studio (2.x, or a native Go `reasonix` 2.x / 1.39.x CLI) | `~/.reasonix/config.toml` + `.env` (`%APPDATA%/reasonix` on Windows; `$REASONIX_HOME`) | model (Executor), planner (Plan), effort (a dedicated `magpie` provider, shared by Studio and the native CLI) |
+| DeepSeek Harness (dsh) | `~/.dsh/profiles/*/cordis.patch.yml` (`$DSH_HOME`; a custom provider, eipgam, its key `EIPGAM_GATEWAY_KEY` in `~/.dsh/.env` and dsh's own key store `~/.dsh/.credentials.yaml`, which the desktop app reads; on one of eipgam's models its `web-search-deepseek` row also goes to the gateway, which searches with the model or Settings › Models › Web search, unless dsh has a `DEEPSEEK_API_KEY` or a row of your own), or `~/.dsh/config.yaml` before dsh 0.1.5 | model, effort |
+| Reasonix Studio (2.x, or a native Go `reasonix` 2.x / 1.39.x CLI) | `~/.reasonix/config.toml` + `.env` (`%APPDATA%/reasonix` on Windows; `$REASONIX_HOME`) | model (Executor), planner (Plan), effort (a dedicated `eipgam` provider, shared by Studio and the native CLI) |
 | Command Code | `~/.commandcode/settings.json` (+ `providers.json`) | model |
-| fx           | `~/.fx/settings.json`             | model (a keyless `magpie` provider) |
+| fx           | `~/.fx/settings.json`             | model (a keyless `eipgam` provider) |
 | omp (oh-my-pi) | `~/.omp/agent/config.yml` (+ `models.yml`) | model |
 | Devin        | `~/.config/devin/config.json` (`%APPDATA%\devin\config.json` on Windows) | model |
 | Hermes Agent | `~/.hermes/config.yaml` (`%LOCALAPPDATA%\hermes` on Windows; `$HERMES_HOME`), and each profile's under `profiles/` | model |
 | Mister Morph | `~/.morph/config.yaml` (`$MISTER_MORPH_CONFIG`) | model, effort (`llm` on the gateway as `openai_response_compatible`, the Responses API; what it had comes back when you switch away) |
-| Kimi Code    | `~/.kimi/config.toml` (`$KIMI_SHARE_DIR`) | model (a `magpie` provider; magpie's models in Kimi's /model) |
-| Qwen Code    | `~/.qwen/settings.json` (`$QWEN_HOME`) | model (magpie's models as `modelProviders.openai` entries on a `MAGPIE_QWEN_API_KEY` env var; settings.model; `security.auth.selectedType` openai while wired) |
-| Muse Code    | `~/.config/muse/settings.json` (`$XDG_CONFIG_HOME`) | model (endpoint_transport to the gateway, auth none; magpie's models in Muse's list) |
-| Empryo       | `~/.empryo/config.json` | defaultModel (a `magpie` provider at the gateway in `providers`) |
-| nanobot      | `~/.nanobot/config.json` | model (`agents.defaults`: provider `magpie`, model `magpie/<id>` and its context window; a `magpie` provider at the gateway in `providers`. A `modelPreset` that would go over it is stashed and put back on off. Its gateway and WebUI take a change at their next reply) |
+| Kimi Code    | `~/.kimi/config.toml` (`$KIMI_SHARE_DIR`) | model (a `eipgam` provider; eipgam's models in Kimi's /model) |
+| Qwen Code    | `~/.qwen/settings.json` (`$QWEN_HOME`) | model (eipgam's models as `modelProviders.openai` entries on a `EIPGAM_QWEN_API_KEY` env var; settings.model; `security.auth.selectedType` openai while wired) |
+| Muse Code    | `~/.config/muse/settings.json` (`$XDG_CONFIG_HOME`) | model (endpoint_transport to the gateway, auth none; eipgam's models in Muse's list) |
+| Empryo       | `~/.empryo/config.json` | defaultModel (a `eipgam` provider at the gateway in `providers`) |
+| nanobot      | `~/.nanobot/config.json` | model (`agents.defaults`: provider `eipgam`, model `eipgam/<id>` and its context window; a `eipgam` provider at the gateway in `providers`. A `modelPreset` that would go over it is stashed and put back on off. Its gateway and WebUI take a change at their next reply) |
 | miniQ        | `~/.local/share/miniq/settings.json` (`%LOCALAPPDATA%\miniq` on Windows, `$MINIQ_DATA_DIR` or the folder `miniq-data-dir.json` names) | model (`provider`: `baseUrl` at the gateway's `/v1`, miniQ's own key, `model` the catalog id, `apiProtocol` `chat_completions`; the user's provider is stashed whole and put back on off. A running daemon is told through its `settings.update` RPC) |
-| Paimon       | `~/.config/paimon/config.json` (`$PAIMON_CONFIG_HOME`) | model (`model` `litellm:<id>`, `providers.litellm` at the gateway with magpie's key, and `compaction.context_window` the model's window; what the user had in all three is stashed and put back on off. Paimon reads it at start-up) |
-| Ante         | `~/.ante/catalog.json` and `settings.json` (`$ANTE_HOME`) | provider, model (a `magpie` provider on OpenAiCompatible, with no auth of magpie's: the gateway lets this machine in with any token and Ante counts a provider with none as authenticated; magpie's models in Ante's model picker, and Ante started on magpie, which is what its settings' `provider` decides) |
-| AstrBot      | `data/cmd_config.json` under `$ASTRBOT_ROOT`, else `~/.astrbot` (the desktop app's) | model (a `magpie` entry in `provider_sources` and magpie's models in `provider`, the user's own entries kept; the default chat model in `agent_runner.config.model.provider_id`, or `provider_settings.default_provider_id` on AstrBot before 4.28's agent runner; restart AstrBot after connecting; Docker installs aren't reached) |
-| QwenPaw      | each agent's `agent.json` in its workspace (`~/.qwenpaw/workspaces/<agent>`, the agents listed in `config.json`), under `$QWENPAW_WORKING_DIR`, else a legacy `~/.copaw`, else `~/.qwenpaw` | model (a `magpie` custom provider in `providers/custom/magpie.json` under QwenPaw's secret folder, `$QWENPAW_SECRET_DIR` or `~/.qwenpaw.secret`, OpenAI Chat at the gateway with magpie's models; the agent's `active_model` set to it, what was there put back on Disconnect; one row per agent, `qwenpaw` the default and `qwenpaw#<id>` the others; an agent on an ACP backend isn't listed; restart QwenPaw after the first connect), effort (the agent's `thinking_level`; magpie's models with reasoning levels are declared `thinking_param_style: "effort"` so QwenPaw applies it) |
-| OpenClaw     | `openclaw.json` in `~/.openclaw` (`$OPENCLAW_CONFIG_PATH`, `$OPENCLAW_STATE_DIR`, `~/.openclaw-<profile>` for `$OPENCLAW_PROFILE`, `~` as `$OPENCLAW_HOME`) | model (a `magpie` provider in `models.providers`, `openai-completions`, with magpie's models in it; `agents.defaults.model`'s primary set to it, what was there put back on Disconnect; `magpie/*` added to a `modelPolicy.allow` that would refuse it; the user's own keys in the provider and its models kept; a chat already on a model keeps it until `/model default`) |
-| jcode        | `config.toml` in `$JCODE_HOME`, else `~/.jcode` | model (a `[providers.magpie]` profile, `openai-compatible`, with magpie's models in it; `[provider] default_provider`/`default_model` set to it, what was there put back on Disconnect; the user's own keys in the profile, such as `headers` and a model's `reasoning_effort`, kept; restart open jcode sessions after connecting) |
-| Dim (alpha, `dima`) | none of Dim's: magpie's own `dim.json` beside its settings, and a `dima` function in your shell profiles | model (Dim's documented start-up variables, set only for that run: `DIM_BASE_URL` the gateway's `/v1`, `DIM_API_FORMAT=openai-compatible`, `DIM_API_KEY`, `DIM_MODEL` and both token limits; Dim's home (`$DIMCODE_HOME`, else `~/.dimcode-alpha`), saved Providers and account are never read or written. Type `dima` in a new terminal; picking Dim's own again takes the function out) |
-| Mistral Vibe | `config.toml` in `$VIBE_HOME`, else `~/.vibe` | model (a `[[providers]]` entry named magpie with the gateway's `/v1` and the key as an `Authorization` header in `extra_headers`, since Vibe reads keys only from the environment; one `[[models]]` entry per model, aliased `magpie/<provider>/<model>`; `active_model` set to the alias, what was there put back on Disconnect; a `thinking` level the user set on a model kept; restart open vibe sessions after connecting) |
-| MiniMax Code (mcode) | `~/.minimax/config.yaml` (`$MINIMAX_DATA_DIR`, or the folder the desktop app moved it to) | model (a `magpie` custom provider; magpie's models in its /model) |
-| Droid (Factory) | `~/.factory/settings.json` (`$FACTORY_HOME_OVERRIDE`) | model (magpie's models as BYOK `customModels`, in Droid's /model) |
-| Cline (CLI)  | `~/.cline/data/settings/providers.json` (`$CLINE_DIR`) | model, effort (magpie takes its openai-compatible provider) |
-| Qoder (CLI)  | `~/.qoder/settings.json` (`$QODER_CONFIG_DIR`) | model, effort (a `magpie` custom provider; needs a Qoder plan with BYOK) |
+| Paimon       | `~/.config/paimon/config.json` (`$PAIMON_CONFIG_HOME`) | model (`model` `litellm:<id>`, `providers.litellm` at the gateway with eipgam's key, and `compaction.context_window` the model's window; what the user had in all three is stashed and put back on off. Paimon reads it at start-up) |
+| Ante         | `~/.ante/catalog.json` and `settings.json` (`$ANTE_HOME`) | provider, model (a `eipgam` provider on OpenAiCompatible, with no auth of eipgam's: the gateway lets this machine in with any token and Ante counts a provider with none as authenticated; eipgam's models in Ante's model picker, and Ante started on eipgam, which is what its settings' `provider` decides) |
+| AstrBot      | `data/cmd_config.json` under `$ASTRBOT_ROOT`, else `~/.astrbot` (the desktop app's) | model (a `eipgam` entry in `provider_sources` and eipgam's models in `provider`, the user's own entries kept; the default chat model in `agent_runner.config.model.provider_id`, or `provider_settings.default_provider_id` on AstrBot before 4.28's agent runner; restart AstrBot after connecting; Docker installs aren't reached) |
+| QwenPaw      | each agent's `agent.json` in its workspace (`~/.qwenpaw/workspaces/<agent>`, the agents listed in `config.json`), under `$QWENPAW_WORKING_DIR`, else a legacy `~/.copaw`, else `~/.qwenpaw` | model (a `eipgam` custom provider in `providers/custom/eipgam.json` under QwenPaw's secret folder, `$QWENPAW_SECRET_DIR` or `~/.qwenpaw.secret`, OpenAI Chat at the gateway with eipgam's models; the agent's `active_model` set to it, what was there put back on Disconnect; one row per agent, `qwenpaw` the default and `qwenpaw#<id>` the others; an agent on an ACP backend isn't listed; restart QwenPaw after the first connect), effort (the agent's `thinking_level`; eipgam's models with reasoning levels are declared `thinking_param_style: "effort"` so QwenPaw applies it) |
+| OpenClaw     | `openclaw.json` in `~/.openclaw` (`$OPENCLAW_CONFIG_PATH`, `$OPENCLAW_STATE_DIR`, `~/.openclaw-<profile>` for `$OPENCLAW_PROFILE`, `~` as `$OPENCLAW_HOME`) | model (a `eipgam` provider in `models.providers`, `openai-completions`, with eipgam's models in it; `agents.defaults.model`'s primary set to it, what was there put back on Disconnect; `eipgam/*` added to a `modelPolicy.allow` that would refuse it; the user's own keys in the provider and its models kept; a chat already on a model keeps it until `/model default`) |
+| jcode        | `config.toml` in `$JCODE_HOME`, else `~/.jcode` | model (a `[providers.eipgam]` profile, `openai-compatible`, with eipgam's models in it; `[provider] default_provider`/`default_model` set to it, what was there put back on Disconnect; the user's own keys in the profile, such as `headers` and a model's `reasoning_effort`, kept; restart open jcode sessions after connecting) |
+| Dim (alpha, `dima`) | none of Dim's: eipgam's own `dim.json` beside its settings, and a `dima` function in your shell profiles | model (Dim's documented start-up variables, set only for that run: `DIM_BASE_URL` the gateway's `/v1`, `DIM_API_FORMAT=openai-compatible`, `DIM_API_KEY`, `DIM_MODEL` and both token limits; Dim's home (`$DIMCODE_HOME`, else `~/.dimcode-alpha`), saved Providers and account are never read or written. Type `dima` in a new terminal; picking Dim's own again takes the function out) |
+| Mistral Vibe | `config.toml` in `$VIBE_HOME`, else `~/.vibe` | model (a `[[providers]]` entry named eipgam with the gateway's `/v1` and the key as an `Authorization` header in `extra_headers`, since Vibe reads keys only from the environment; one `[[models]]` entry per model, aliased `eipgam/<provider>/<model>`; `active_model` set to the alias, what was there put back on Disconnect; a `thinking` level the user set on a model kept; restart open vibe sessions after connecting) |
+| MiniMax Code (mcode) | `~/.minimax/config.yaml` (`$MINIMAX_DATA_DIR`, or the folder the desktop app moved it to) | model (a `eipgam` custom provider; eipgam's models in its /model) |
+| Droid (Factory) | `~/.factory/settings.json` (`$FACTORY_HOME_OVERRIDE`) | model (eipgam's models as BYOK `customModels`, in Droid's /model) |
+| Cline (CLI)  | `~/.cline/data/settings/providers.json` (`$CLINE_DIR`) | model, effort (eipgam takes its openai-compatible provider) |
+| Qoder (CLI)  | `~/.qoder/settings.json` (`$QODER_CONFIG_DIR`) | model, effort (a `eipgam` custom provider; needs a Qoder plan with BYOK) |
 | Qoder CN (CLI) | `~/.qoder-cn/settings.json` (`$QODERCN_CONFIG_DIR`) | model, effort (as Qoder; its own accounts, a Qoder CN plan with BYOK) |
 | Grok Build   | `~/.grok/config.toml` (`$GROK_HOME`) | model, effort |
-| Grok App     | `agent-home/config.toml` in its data folder (`$GROK_APP_HOME`, else `~/Library/Application Support/com.grokapp.grok-app`, `%APPDATA%\grokapp\grok-app\data`, `$XDG_DATA_HOME/grok-app`, or `~/.grok-app`) | model (a `[model.magpie]` custom provider under Accounts, with magpie's models and their effort levels in `app_models`; the route, `[models] default`, stays until the user presses Use on magpie there (one of the App's own routes picked in magpie is written as the route, and magpie's channel goes); a route an older magpie set to `magpie` is put back once; Disconnect drops the channel and puts the route back only if it is still `magpie`, else the one it was on before Connect if none is left; a model or default effort picked in the App kept; instructions, MCP and skills are the Library's Grok App row on agent-home; RTK has no hook for it or for Grok Build) |
-| ZCode        | `~/.zcode/v2/provider_config.json` and `config.json`, under the data folder moved in ZCode's settings (`dataBaseDir`); `~` is `$HOME` when set, on Windows too, as ZCode reads it before `%USERPROFILE%` | provider (magpie's models in ZCode's picker) |
-| WorkBuddy    | `~/.workbuddy/models.json` (`$WORKBUDDY_CONFIG_DIR`) | provider (magpie's models in WorkBuddy's picker) |
-| WorkBuddy AI | `~/.workbuddy-ai/models.json` (the international build) | provider (magpie's models in WorkBuddy AI's picker) |
-| CodeBuddy (CodeBuddy Code CLI, CodeBuddy IDE) | `~/.codebuddy/models.json` (`$CODEBUDDY_CONFIG_DIR` for the CLI), `settings.json` | model (magpie's models in its list; the CLI session's model; the IDE picks from the list) |
-| Raycast      | `~/.config/raycast/ai/providers.yaml` in the user's folder, on Mac and Windows | provider (a `magpie` entry in Raycast AI's Custom Providers, magpie's models in its model picker; Raycast Pro; the user's providers, `tools` and comments kept) |
-| Kiro Crew    | `~/.kiro/crew/config.json` (`$KIROCREW_HOME`; `config.local.json` over it is left alone) | provider, harness (`agent.acp_backend`, and `agent.member_acp_backend` for a harness that can dispatch: an agent connected to magpie, so its models are magpie's: the one Crew is set to is connected along with it when it isn't yet, and disconnected with it again; the user's value is put back on Disconnect) |
-| OpenPencil   | `openpencil/settings.json` in the config folder: `~/Library/Application Support` (macOS), `$XDG_CONFIG_HOME` or `~/.config` (Linux), `%APPDATA%` (Windows) | provider (a `magpie` entry in its `builtin_agents`, magpie's models in its chat's model picker; the user's entries and settings kept; refused while OpenPencil runs, as it writes the file back when it quits) |
-| OpenBot      | `OpenBot/openbot-custom-providers-v1.json` in the app data folder: `~/Library/Application Support` (macOS), `%APPDATA%` (Windows), `$XDG_CONFIG_HOME` or `~/.config` (Linux) | provider (a keyless `magpie` endpoint at `/agent/openbot/v1`, magpie's models in its model picker; the user's endpoints kept; OpenBot reads it at start, so restart it) |
-| Craft Agents | `~/.craft-agent/config.json` (or `$CRAFT_CONFIG_DIR`) | model (a keyless `pi_compat` connection `magpie` at `/agent/craft-agents/v1`, made the default; the user's connections and default kept and put back on off; new sessions use it) |
-| Obsidian     | Copilot for Obsidian 4+'s `.obsidian/plugins/copilot/data.json` in each vault `obsidian.json` lists (`~/Library/Application Support/obsidian`, `%APPDATA%\obsidian`, `$XDG_CONFIG_HOME/obsidian`, Flatpak, Snap) | provider (a keyless `magpie` provider at `/agent/obsidian/v1`, magpie's models in Copilot's chat picker and the default; the user's settings kept; reload Copilot or restart Obsidian) |
-| Tuanjie Cowork | `~/.codely/settings.json` | model (a `magpie` entry in `customModelProviders`, the gateway's `/v1` with Cowork's own key, and a `magpie` entry in `customModels` on `wireApi` `chat`; the user's providers and models kept; pick "<model> (magpie)" in Cowork's model menu once, restarting Cowork if it isn't listed yet) |
-| NewMax       | `newmax.db` (SQLite, the row `app` of its `settings` table) in `$NEWMAX_USER_DATA_DIR`, else `~/.newmax` (every OS) | provider (a `magpie-gateway` entry in its `providers` and `providerOrder`, magpie's models in its model picker; the rest of the row kept byte for byte; refused while NewMax runs, as it writes its settings back whenever one changes) |
-| LiveAgent    | `config.json` (JSONC, K-brain's) in `$LIVEAGENT_HOME`, else `$K_BRAIN_HOME`, else the folder `~/.liveagent/data-dir.json` points to, else `~/.liveagent` (every OS) | provider (`magpie`, `magpie-responses` and `magpie-anthropic` entries in its `providers`, each model on the one of the API it is served on natively: Chat Completions and Responses at the gateway's `/v1` as OpenAI providers whose request format the user can switch in LiveAgent and magpie keeps, Anthropic Messages at its root; magpie's models in its model picker; a model or provider of magpie's deleted in LiveAgent stays out; a default still K-brain's own demo model becomes magpie's first; refused while LiveAgent or its `k-brain` backend runs, as it writes its settings back whenever one changes) |
-| T3 Code      | `~/.t3/userdata/settings.json` (`$T3CODE_HOME/userdata`) | provider (a `magpie` provider instance on Claude Code, magpie's models as its custom models; a `magpie-codex` instance on Codex, whose `launchArgs` are Codex's own `-c` overrides to magpie and a `magpie-codex-models.json` catalog beside the settings. The harness is picked in T3's model picker) |
-| OpenMausBot  | `~/.openmausbot/config.json` (`$OMB_DATA_DIR`) | provider (a `magpie` engine in `instances`: OpenMausBot's own Claude endpoint shape, Claude Code with `ANTHROPIC_BASE_URL` at the gateway and magpie's models as its `endpointModels`, in its own `CLAUDE_CONFIG_DIR` under `providers/magpie`. With no `instances` saved, OpenMausBot's default engines are written beside it. OpenMausBot reads it when it starts) |
-| Avibe        | `~/.avibe/config/config.json` (`$AVIBE_HOME`; `~/.vibe_remote` from before 3.0), changed through its control socket `state/dispatch.sock` (Windows: `runtime/control-ipc/endpoint.json`) while it runs | provider (a `magpie` model source on its Models page: custom vendor, OpenAI chat completions at the gateway's `/v1`, with Avibe's own key; Avibe lists magpie's models from the gateway and adds the source to Vibey's, Claude Code's, Codex's and OpenCode's routes. Avibe has to be running to connect or disconnect it) |
-| Kun          | `~/.kun/data/model-connections.v2.json` (`$KUN_DATA_DIR`), changed through its runtime's admin API (`baseUrl` and `runtimeToken` of `runtime.json` in the same folder) while it runs | model (a `magpie` connection in Settings > Providers: HTTP, OpenAI chat completions at the gateway's `/v1`, with Kun's own key and the models picked for Kun; the model picked is Kun's default. Kun has to be running to connect or disconnect it) |
-| OpenHanako   | `~/.hanako/provider-catalog.json` + `agents/<id>/config.yaml` (`$HANA_HOME`; its local API while it runs) | model (the primary agent's; magpie's models as a provider) |
-| AtomCode     | `~/.atomcode/config.toml` (`$ATOMCODE_HOME`) | model, effort (a `magpie` provider account, one model table per catalog model as its own sign-in writes) |
-| Open Code Review | `~/.opencodereview/config.json` | model (a `magpie` custom provider made the one in use; its Claude Code, Codex, Cursor, Kimi Code and OpenCode plugins run the same `ocr`) |
-| Snow CLI     | `~/.snow/profiles/magpie.json` (`$SNOW_CONFIG_DIR`), made the active profile and copied to `config.json` | model (the user's other profiles' models too; Snow App takes the profile in with "Sync Snow CLI API config") |
-| Alma         | Alma's local API (`localhost:23001`, while Alma runs; alma-server's data in `$ALMA_DATA_DIR`, `$XDG_DATA_HOME/alma` or `~/.local/share/alma` on Linux) | model (Alma's default; magpie's models as a provider), and Image Generation's model when it is Auto: the one magpie draws with |
-| Shelley      | Shelley's local socket (`~/.config/shelley/shelley.sock`, `$XDG_CONFIG_HOME/shelley`, `$SHELLEY_SOCKET`; while `shelley serve` runs) | model (the default profile's; magpie's models as Shelley custom models of type `openai` at the gateway's `/v1` with Shelley's own key, one per model picked; the profile's model and thinking level are stashed and put back on Disconnect, and magpie's custom models go) |
-| Lody | Its own confirmation dialog (`lody://provider/import`) | adds selected Claude, Codex, Pi, DSH, Kimi Code, Grok and Bub Providers on the local machine; no settings edited by magpie |
+| Grok App     | `agent-home/config.toml` in its data folder (`$GROK_APP_HOME`, else `~/Library/Application Support/com.grokapp.grok-app`, `%APPDATA%\grokapp\grok-app\data`, `$XDG_DATA_HOME/grok-app`, or `~/.grok-app`) | model (a `[model.eipgam]` custom provider under Accounts, with eipgam's models and their effort levels in `app_models`; the route, `[models] default`, stays until the user presses Use on eipgam there (one of the App's own routes picked in eipgam is written as the route, and eipgam's channel goes); a route an older eipgam set to `eipgam` is put back once; Disconnect drops the channel and puts the route back only if it is still `eipgam`, else the one it was on before Connect if none is left; a model or default effort picked in the App kept; instructions, MCP and skills are the Library's Grok App row on agent-home; RTK has no hook for it or for Grok Build) |
+| ZCode        | `~/.zcode/v2/provider_config.json` and `config.json`, under the data folder moved in ZCode's settings (`dataBaseDir`); `~` is `$HOME` when set, on Windows too, as ZCode reads it before `%USERPROFILE%` | provider (eipgam's models in ZCode's picker) |
+| WorkBuddy    | `~/.workbuddy/models.json` (`$WORKBUDDY_CONFIG_DIR`) | provider (eipgam's models in WorkBuddy's picker) |
+| WorkBuddy AI | `~/.workbuddy-ai/models.json` (the international build) | provider (eipgam's models in WorkBuddy AI's picker) |
+| CodeBuddy (CodeBuddy Code CLI, CodeBuddy IDE) | `~/.codebuddy/models.json` (`$CODEBUDDY_CONFIG_DIR` for the CLI), `settings.json` | model (eipgam's models in its list; the CLI session's model; the IDE picks from the list) |
+| Raycast      | `~/.config/raycast/ai/providers.yaml` in the user's folder, on Mac and Windows | provider (a `eipgam` entry in Raycast AI's Custom Providers, eipgam's models in its model picker; Raycast Pro; the user's providers, `tools` and comments kept) |
+| Kiro Crew    | `~/.kiro/crew/config.json` (`$KIROCREW_HOME`; `config.local.json` over it is left alone) | provider, harness (`agent.acp_backend`, and `agent.member_acp_backend` for a harness that can dispatch: an agent connected to eipgam, so its models are eipgam's: the one Crew is set to is connected along with it when it isn't yet, and disconnected with it again; the user's value is put back on Disconnect) |
+| OpenPencil   | `openpencil/settings.json` in the config folder: `~/Library/Application Support` (macOS), `$XDG_CONFIG_HOME` or `~/.config` (Linux), `%APPDATA%` (Windows) | provider (a `eipgam` entry in its `builtin_agents`, eipgam's models in its chat's model picker; the user's entries and settings kept; refused while OpenPencil runs, as it writes the file back when it quits) |
+| OpenBot      | `OpenBot/openbot-custom-providers-v1.json` in the app data folder: `~/Library/Application Support` (macOS), `%APPDATA%` (Windows), `$XDG_CONFIG_HOME` or `~/.config` (Linux) | provider (a keyless `eipgam` endpoint at `/agent/openbot/v1`, eipgam's models in its model picker; the user's endpoints kept; OpenBot reads it at start, so restart it) |
+| Craft Agents | `~/.craft-agent/config.json` (or `$CRAFT_CONFIG_DIR`) | model (a keyless `pi_compat` connection `eipgam` at `/agent/craft-agents/v1`, made the default; the user's connections and default kept and put back on off; new sessions use it) |
+| Obsidian     | Copilot for Obsidian 4+'s `.obsidian/plugins/copilot/data.json` in each vault `obsidian.json` lists (`~/Library/Application Support/obsidian`, `%APPDATA%\obsidian`, `$XDG_CONFIG_HOME/obsidian`, Flatpak, Snap) | provider (a keyless `eipgam` provider at `/agent/obsidian/v1`, eipgam's models in Copilot's chat picker and the default; the user's settings kept; reload Copilot or restart Obsidian) |
+| Tuanjie Cowork | `~/.codely/settings.json` | model (a `eipgam` entry in `customModelProviders`, the gateway's `/v1` with Cowork's own key, and a `eipgam` entry in `customModels` on `wireApi` `chat`; the user's providers and models kept; pick "<model> (eipgam)" in Cowork's model menu once, restarting Cowork if it isn't listed yet) |
+| NewMax       | `newmax.db` (SQLite, the row `app` of its `settings` table) in `$NEWMAX_USER_DATA_DIR`, else `~/.newmax` (every OS) | provider (a `eipgam-gateway` entry in its `providers` and `providerOrder`, eipgam's models in its model picker; the rest of the row kept byte for byte; refused while NewMax runs, as it writes its settings back whenever one changes) |
+| LiveAgent    | `config.json` (JSONC, K-brain's) in `$LIVEAGENT_HOME`, else `$K_BRAIN_HOME`, else the folder `~/.liveagent/data-dir.json` points to, else `~/.liveagent` (every OS) | provider (`eipgam`, `eipgam-responses` and `eipgam-anthropic` entries in its `providers`, each model on the one of the API it is served on natively: Chat Completions and Responses at the gateway's `/v1` as OpenAI providers whose request format the user can switch in LiveAgent and eipgam keeps, Anthropic Messages at its root; eipgam's models in its model picker; a model or provider of eipgam's deleted in LiveAgent stays out; a default still K-brain's own demo model becomes eipgam's first; refused while LiveAgent or its `k-brain` backend runs, as it writes its settings back whenever one changes) |
+| T3 Code      | `~/.t3/userdata/settings.json` (`$T3CODE_HOME/userdata`) | provider (a `eipgam` provider instance on Claude Code, eipgam's models as its custom models; a `eipgam-codex` instance on Codex, whose `launchArgs` are Codex's own `-c` overrides to eipgam and a `eipgam-codex-models.json` catalog beside the settings. The harness is picked in T3's model picker) |
+| OpenMausBot  | `~/.openmausbot/config.json` (`$OMB_DATA_DIR`) | provider (a `eipgam` engine in `instances`: OpenMausBot's own Claude endpoint shape, Claude Code with `ANTHROPIC_BASE_URL` at the gateway and eipgam's models as its `endpointModels`, in its own `CLAUDE_CONFIG_DIR` under `providers/eipgam`. With no `instances` saved, OpenMausBot's default engines are written beside it. OpenMausBot reads it when it starts) |
+| Avibe        | `~/.avibe/config/config.json` (`$AVIBE_HOME`; `~/.vibe_remote` from before 3.0), changed through its control socket `state/dispatch.sock` (Windows: `runtime/control-ipc/endpoint.json`) while it runs | provider (a `eipgam` model source on its Models page: custom vendor, OpenAI chat completions at the gateway's `/v1`, with Avibe's own key; Avibe lists eipgam's models from the gateway and adds the source to Vibey's, Claude Code's, Codex's and OpenCode's routes. Avibe has to be running to connect or disconnect it) |
+| Kun          | `~/.kun/data/model-connections.v2.json` (`$KUN_DATA_DIR`), changed through its runtime's admin API (`baseUrl` and `runtimeToken` of `runtime.json` in the same folder) while it runs | model (a `eipgam` connection in Settings > Providers: HTTP, OpenAI chat completions at the gateway's `/v1`, with Kun's own key and the models picked for Kun; the model picked is Kun's default. Kun has to be running to connect or disconnect it) |
+| OpenHanako   | `~/.hanako/provider-catalog.json` + `agents/<id>/config.yaml` (`$HANA_HOME`; its local API while it runs) | model (the primary agent's; eipgam's models as a provider) |
+| AtomCode     | `~/.atomcode/config.toml` (`$ATOMCODE_HOME`) | model, effort (a `eipgam` provider account, one model table per catalog model as its own sign-in writes) |
+| Open Code Review | `~/.opencodereview/config.json` | model (a `eipgam` custom provider made the one in use; its Claude Code, Codex, Cursor, Kimi Code and OpenCode plugins run the same `ocr`) |
+| Snow CLI     | `~/.snow/profiles/eipgam.json` (`$SNOW_CONFIG_DIR`), made the active profile and copied to `config.json` | model (the user's other profiles' models too; Snow App takes the profile in with "Sync Snow CLI API config") |
+| Alma         | Alma's local API (`localhost:23001`, while Alma runs; alma-server's data in `$ALMA_DATA_DIR`, `$XDG_DATA_HOME/alma` or `~/.local/share/alma` on Linux) | model (Alma's default; eipgam's models as a provider), and Image Generation's model when it is Auto: the one eipgam draws with |
+| Shelley      | Shelley's local socket (`~/.config/shelley/shelley.sock`, `$XDG_CONFIG_HOME/shelley`, `$SHELLEY_SOCKET`; while `shelley serve` runs) | model (the default profile's; eipgam's models as Shelley custom models of type `openai` at the gateway's `/v1` with Shelley's own key, one per model picked; the profile's model and thinking level are stashed and put back on Disconnect, and eipgam's custom models go) |
+| Lody | Its own confirmation dialog (`lody://provider/import`) | adds selected Claude, Codex, Pi, DSH, Kimi Code, Grok and Bub Providers on the local machine; no settings edited by eipgam |
 
 Provider-scoped agents (OpenCode, MiMo Code, DevEco Code, Pi, OmO, StepCode, MothX, PenguinHarness, Aside, Goose, Crush, omp, Hermes Agent) take `provider/model`.
 Only agents that are installed or configured are shown.
@@ -181,17 +180,17 @@ Only agents that are installed or configured are shown.
 
 #### StepCode
 
-StepCode is configured via [`stepcode.go`](../internal/agent/stepcode.go). Magpie manages global `defaultProvider` and `defaultModel` in `~/.stepcode/config.toml` (or the parent of an absolute `STEP_CODING_AGENT_DIR`) and writes its catalog into `~/.stepcode/models.json` using Pi's provider format. Magpie only manages model selection; StepCode controls thinking levels itself. Project-local `.stepcode/config.toml` overlays take precedence over global settings. Restart StepCode or begin a new session after changing models. Detection is strictly directory-based (`~/.stepcode`), so having Smallstep's unrelated `step` certificate CLI on `PATH` is never mistaken for StepCode.
+StepCode is configured via [`stepcode.go`](../internal/agent/stepcode.go). eipgam manages global `defaultProvider` and `defaultModel` in `~/.stepcode/config.toml` (or the parent of an absolute `STEP_CODING_AGENT_DIR`) and writes its catalog into `~/.stepcode/models.json` using Pi's provider format. eipgam only manages model selection; StepCode controls thinking levels itself. Project-local `.stepcode/config.toml` overlays take precedence over global settings. Restart StepCode or begin a new session after changing models. Detection is strictly directory-based (`~/.stepcode`), so having Smallstep's unrelated `step` certificate CLI on `PATH` is never mistaken for StepCode.
 
-The optional real CLI verification test is run with `MAGPIE_TEST_STEPCODE_BIN=/path/to/step go test ./internal/agent -run '^TestStepCodeRealCLISandbox$' -count=1`. It runs StepCode in an isolated temporary sandbox with telemetry disabled and without live credentials.
+The optional real CLI verification test is run with `EIPGAM_TEST_STEPCODE_BIN=/path/to/step go test ./internal/agent -run '^TestStepCodeRealCLISandbox$' -count=1`. It runs StepCode in an isolated temporary sandbox with telemetry disabled and without live credentials.
 
 #### MothX
 
-MothX (oschina/mothx, formerly vibecoding) is configured via [`mothx.go`](../internal/agent/mothx.go). Magpie writes its provider `magpie` into `providers` in MothX's global `settings.json` (`$MOTHX_DIR`, else `%APPDATA%\mothx` on Windows, else `~/.mothx`) and sets `defaultProvider`, `defaultModel` and `defaultThinkingLevel`. The provider uses `openai-chat` with `thinkingFormat: "openai"`, so a thinking level goes out as `reasoning_effort` for every model; without it MothX guesses Qwen's or DeepSeek's thinking fields from a model id. What the user adds to magpie's block (headers, a `thinkingFormat` of their own) stays. The key `magpie-mothx` names it, and so does its User-Agent (`Vibecoding Client/<version>`). A project's `.mothx/settings.json` overlays the global one and is left alone. MothX reads its settings at start-up, so restart open `mothx` sessions after a change. Disconnect puts `settings.json` back byte for byte when nothing else changed in it; when MothX or the user changed it meanwhile (its `/model` and `/statusline … global` write the whole file), Disconnect takes out only magpie's provider, its pick and a `providers` object it left empty.
+MothX (oschina/mothx, formerly vibecoding) is configured via [`mothx.go`](../internal/agent/mothx.go). eipgam writes its provider `eipgam` into `providers` in MothX's global `settings.json` (`$MOTHX_DIR`, else `%APPDATA%\mothx` on Windows, else `~/.mothx`) and sets `defaultProvider`, `defaultModel` and `defaultThinkingLevel`. The provider uses `openai-chat` with `thinkingFormat: "openai"`, so a thinking level goes out as `reasoning_effort` for every model; without it MothX guesses Qwen's or DeepSeek's thinking fields from a model id. What the user adds to eipgam's block (headers, a `thinkingFormat` of their own) stays. The key `eipgam-mothx` names it, and so does its User-Agent (`Vibecoding Client/<version>`). A project's `.mothx/settings.json` overlays the global one and is left alone. MothX reads its settings at start-up, so restart open `mothx` sessions after a change. Disconnect puts `settings.json` back byte for byte when nothing else changed in it; when MothX or the user changed it meanwhile (its `/model` and `/statusline … global` write the whole file), Disconnect takes out only eipgam's provider, its pick and a `providers` object it left empty.
 
 #### PenguinHarness
 
-PenguinHarness (Prism-Shadow/penguin-harness, the `penguin` command, npm `@prismshadow/penguin-cli`) is configured via [`penguin.go`](../internal/agent/penguin.go). It keeps each Project's models in `<root>/<project>/.project_config.toml`, the root being `$PENGUIN_HOME`, else `~/.penguin/data` on every system, and the Project the CLI works in `$PENGUIN_PROJECT_ID`, else `default_project`. Magpie writes `[providers.magpie]` (`openai-responses`, so a thinking level goes out as `reasoning.effort`; the key `magpie-penguin` names it), one `[[models]]` entry per model of magpie's with its name, window, reply cap, whether it reads images and its price, and points `default_model` at one. The user's own models, the command policy and the rest stay. Penguin's server reads the file again when it changes, so no restart is needed; a sync with nothing new leaves the file alone. A file magpie made is private (0600), as Penguin keeps its own, and goes again on Disconnect; otherwise Disconnect takes out magpie's provider, its entries and a vision model among them, and puts back the user's own default. Its User-Agent is the OpenAI SDK's, so usage names it by its key. Installed with `curl -fsSL https://penguin.ooo/install.sh | sh` (`irm https://penguin.ooo/install.ps1 | iex` on Windows); an install.sh tarball updates with `penguin update --yes`, an npm one with npm.
+PenguinHarness (Prism-Shadow/penguin-harness, the `penguin` command, npm `@prismshadow/penguin-cli`) is configured via [`penguin.go`](../internal/agent/penguin.go). It keeps each Project's models in `<root>/<project>/.project_config.toml`, the root being `$PENGUIN_HOME`, else `~/.penguin/data` on every system, and the Project the CLI works in `$PENGUIN_PROJECT_ID`, else `default_project`. eipgam writes `[providers.eipgam]` (`openai-responses`, so a thinking level goes out as `reasoning.effort`; the key `eipgam-penguin` names it), one `[[models]]` entry per model of eipgam's with its name, window, reply cap, whether it reads images and its price, and points `default_model` at one. The user's own models, the command policy and the rest stay. Penguin's server reads the file again when it changes, so no restart is needed; a sync with nothing new leaves the file alone. A file eipgam made is private (0600), as Penguin keeps its own, and goes again on Disconnect; otherwise Disconnect takes out eipgam's provider, its entries and a vision model among them, and puts back the user's own default. Its User-Agent is the OpenAI SDK's, so usage names it by its key. Installed with `curl -fsSL https://penguin.ooo/install.sh | sh` (`irm https://penguin.ooo/install.ps1 | iex` on Windows); an install.sh tarball updates with `penguin update --yes`, an npm one with npm.
 
 #### Reasonix Studio
 
@@ -201,35 +200,35 @@ do not count. Tested with
 [Studio 2.24.0](https://github.com/esengine/DeepSeek-Reasonix/releases/tag/studio-v2.24.0).
 
 Pick the Executor model in the app, or use
-`magpie reasonix magpie/deepseek/deepseek-chat` (`magpie reasonix
-magpie/group/code` for a routing group). Select Plan independently with
-`magpie reasonix planner magpie/deepseek/deepseek-chat`, or use `magpie reasonix
-planner off` to disable the separate planner. `magpie reasonix effort high` sets
-an advertised Executor reasoning level. `magpie reasonix default` restores the
-previous Executor selection; `magpie reasonix planner default` restores Plan.
-Magpie's provider and private `.env` key are removed when neither role needs
+`eipgam reasonix eipgam/deepseek/deepseek-chat` (`eipgam reasonix
+eipgam/group/code` for a routing group). Select Plan independently with
+`eipgam reasonix planner eipgam/deepseek/deepseek-chat`, or use `eipgam reasonix
+planner off` to disable the separate planner. `eipgam reasonix effort high` sets
+an advertised Executor reasoning level. `eipgam reasonix default` restores the
+previous Executor selection; `eipgam reasonix planner default` restores Plan.
+eipgam's provider and private `.env` key are removed when neither role needs
 them. Restart Studio for new sessions; project/session overrides still take
 precedence. Other providers and credentials are preserved. A non-managed
-provider named `magpie` is a conflict, reported without overwriting it. Studio
+provider named `eipgam` is a conflict, reported without overwriting it. Studio
 and the native CLI share these files, so updating only Studio does not isolate
 their settings.
 
 The released-client stream/tool contract test is run with
-`MAGPIE_TEST_REASONIX_CLI=/path/to/reasonix go test ./internal/agent -run
+`EIPGAM_TEST_REASONIX_CLI=/path/to/reasonix go test ./internal/agent -run
 '^TestReasonixStudioCLIIntegration$' -count=1`. It uses isolated settings and
 a local test upstream, with no vendor credentials.
 
 #### DeepSeek Harness: the DeepSeek row by hand
 
-Connecting dsh gives it magpie's own routes on dsh's pi-ai adapter
-(`magpie`, `magpie-responses`, `magpie-anthropic`). dsh's DeepSeek row
-(`llm-deepseek`, the `deepseek-official` route) is dsh's: magpie never
+Connecting dsh gives it eipgam's own routes on dsh's pi-ai adapter
+(`eipgam`, `eipgam-responses`, `eipgam-anthropic`). dsh's DeepSeek row
+(`llm-deepseek`, the `deepseek-official` route) is dsh's: eipgam never
 points it anywhere, and Disconnect leaves an entry of yours there alone.
 That row does more for DeepSeek's own models than pi-ai does: when dsh's
 prompt or tools change mid-session it adds the change to the history
 (`systemPromptUpdate: in-history`, `toolUpdate: addition-only`), so
 DeepSeek keeps its cache of what came before, and it uploads images
-through the Files API (#3298). To keep that and still go through magpie
+through the Files API (#3298). To keep that and still go through eipgam
 (usage, sessions, the accounts behind `deepseek/…`), point the row at
 the gateway yourself, in `~/.dsh/profiles/<profile>/cordis.patch.yml`
 (`desktop` for the app, `web` for `dsh web`, `headless`):
@@ -238,34 +237,34 @@ the gateway yourself, in `~/.dsh/profiles/<profile>/cordis.patch.yml`
 - id: llm-deepseek
   config:
     baseURL: http://127.0.0.1:3425
-    apiKeyEnv: MAGPIE_DS_KEY
+    apiKeyEnv: EIPGAM_DS_KEY
     models:
       - id: deepseek/deepseek-flash
-        name: DeepSeek V4.1 Flash (magpie)
+        name: DeepSeek V4.1 Flash (eipgam)
         contextWindow: 1000000
         inputModalities: [text, image]
         systemPromptUpdate: in-history
         toolUpdate: addition-only
       - id: deepseek/deepseek-v4-pro
-        name: DeepSeek V4 Pro (magpie)
+        name: DeepSeek V4 Pro (eipgam)
         contextWindow: 1000000
 ```
 
 - `baseURL` is the gateway's root, with no `/anthropic`: llm-deepseek adds
   `/v1/messages` itself (`http://127.0.0.1:3425/v1` works too).
-- The model ids are magpie's (`magpie models`); dsh sends them as written and
-  magpie asks DeepSeek for its own name (`deepseek-flash`). A `models` list
+- The model ids are eipgam's (`eipgam models`); dsh sends them as written and
+  eipgam asks DeepSeek for its own name (`deepseek-flash`). A `models` list
   replaces llm-deepseek's defaults, which give the in-history updates to its
   own `deepseek-flash` entry only, so name them again on yours.
-- The key is the gateway's, not DeepSeek's: `magpie` on this computer, the
-  sharing key from another one. magpie sends DeepSeek your DeepSeek key from
+- The key is the gateway's, not DeepSeek's: `eipgam` on this computer, the
+  sharing key from another one. eipgam sends DeepSeek your DeepSeek key from
   the provider, as for any agent. Keep it under a name of your own
-  (`MAGPIE_DS_KEY`): `DEEPSEEK_API_KEY` is your DeepSeek key's, and magpie
-  takes `MAGPIE_GATEWAY_KEY` out on Disconnect. Export it, put it in
+  (`EIPGAM_DS_KEY`): `DEEPSEEK_API_KEY` is your DeepSeek key's, and eipgam
+  takes `EIPGAM_GATEWAY_KEY` out on Disconnect. Export it, put it in
   `~/.dsh/.env` (the CLI reads that), or enter it on the DeepSeek row in dsh's
   Models page (dsh's own key store, the one the desktop app reads).
-- Start sessions on the row's model in dsh. Picking a model for dsh in magpie
-  sets dsh's start on one of magpie's routes again.
+- Start sessions on the row's model in dsh. Picking a model for dsh in eipgam
+  sets dsh's start on one of eipgam's routes again.
 
 What goes through, tried with dsh 0.2.1-rc.2 (`dsh --profile headless`) and
 a DeepSeek API key: llm-deepseek's request reaches DeepSeek's Anthropic
@@ -274,100 +273,100 @@ message in the history, `tool_addition` blocks, the `anthropic-beta` header
 and its `dsh_session_log` and `dsh_plugin_packages` fields included. A system
 message added after two turns was followed and the turns before it were read
 from DeepSeek's cache. The session (`x-deepseek-harness-session-id`) and a
-compaction (`x-deepseek-harness-compact`) are recorded as on magpie's own
+compaction (`x-deepseek-harness-compact`) are recorded as on eipgam's own
 routes. Neither header, nor `x-deepseek-harness-user-id`, goes on to DeepSeek.
 
 What doesn't:
-- magpie has no Files API. llm-deepseek's upload to `/v1/files` is answered
+- eipgam has no Files API. llm-deepseek's upload to `/v1/files` is answered
   404, and it sends that request's images inline as base64 instead, every
   turn, up to `maxInlineRequestImageBytes` (20 MiB by default; past it dsh
   takes the oldest images out of the request), where Files would take
   128 MiB (`maxRequestFilesBytes`). Raise it in
   your entry for long sessions with many images, as in
   `maxInlineRequestImageBytes: 67108864`.
-- Keep the row on DeepSeek's own models. magpie passes llm-deepseek's fields
+- Keep the row on DeepSeek's own models. eipgam passes llm-deepseek's fields
   on as they are, `dsh_session_log` (dsh's log of the session) among them, so
   another provider's model on this row would be sent them too.
 
 #### VSCodium Chat
 
 VSCodium's Chat features are disabled by default. To use the Chat model
-picker with magpie, set `"chat.disableAIFeatures": false` in VSCodium's
+picker with eipgam, set `"chat.disableAIFeatures": false` in VSCodium's
 settings and add the `defaultChatAgent` and `trustedExtensionAuthAccess`
 entries required by [VSCodium's Copilot guide](https://github.com/VSCodium/vscodium/blob/master/docs/ext-github-copilot.md)
 to VSCodium's `product.json`. The guide also explains how to install a
 compatible GitHub Copilot Chat extension, since the Open VSX registry does
 not normally provide Microsoft's extension. Restart VSCodium, or run
-**Developer: Reload Window**, after changing these files. Magpie's models
-then appear under the `magpie` custom endpoint group.
+**Developer: Reload Window**, after changing these files. eipgam's models
+then appear under the `eipgam` custom endpoint group.
 
 #### Zoo Code
 
 Zoo Code (the VS Code extension `ZooCodeOrganization.zoo-code`) keeps its
-provider profiles in VS Code's encrypted secret storage, which magpie can't
-write. Magpie uses Zoo Code's own `zoo-code.autoImportSettingsPath` setting
-instead: it writes a settings file, `magpie-import.json` in Zoo Code's
-`globalStorage/zoocodeorganization.zoo-code/settings` folder, with one OpenAI Compatible profile named `magpie` (the
-gateway's `/v1`, the key `magpie-zoo-code`, the model picked), and points the
+provider profiles in VS Code's encrypted secret storage, which eipgam can't
+write. eipgam uses Zoo Code's own `zoo-code.autoImportSettingsPath` setting
+instead: it writes a settings file, `eipgam-import.json` in Zoo Code's
+`globalStorage/zoocodeorganization.zoo-code/settings` folder, with one OpenAI Compatible profile named `eipgam` (the
+gateway's `/v1`, the key `eipgam-zoo-code`, the model picked), and points the
 setting at it in VS Code's `settings.json` and each profile's. Zoo Code imports
 that file each time it starts, so run **Developer: Reload Window** after a
-change. While connected, every start switches Zoo Code back to the `magpie`
+change. While connected, every start switches Zoo Code back to the `eipgam`
 profile. Disconnect puts the setting back as it was and deletes the file, but
-the imported `magpie` profile stays in Zoo Code: pick another profile there, or
+the imported `eipgam` profile stays in Zoo Code: pick another profile there, or
 delete it in Zoo Code's settings. Only VS Code (Stable) is wired. Zoo Code for
 JetBrains starts its extension with an empty configuration, so the setting
 can't reach it there.
 
 #### Zed-compatible Agent paths
 
-Magpie can use a Zed-compatible fork or installation whose executable or
+eipgam can use a Zed-compatible fork or installation whose executable or
 configuration directory is different from the upstream defaults. Set these
-variables before starting Magpie:
+variables before starting eipgam:
 
 ```sh
-export MAGPIE_ZED_BIN=/Applications/ZedG.app/Contents/MacOS/zedg
-export MAGPIE_ZED_CONFIG_DIR="$HOME/.config/zed"
-export MAGPIE_ZED_PROCESS_NAMES=zedg,ZedG
-magpie serve
+export EIPGAM_ZED_BIN=/Applications/ZedG.app/Contents/MacOS/zedg
+export EIPGAM_ZED_CONFIG_DIR="$HOME/.config/zed"
+export EIPGAM_ZED_PROCESS_NAMES=zedg,ZedG
+eipgam serve
 ```
 
-`MAGPIE_ZED_BIN` controls installation detection, `MAGPIE_ZED_CONFIG_DIR`
+`EIPGAM_ZED_BIN` controls installation detection, `EIPGAM_ZED_CONFIG_DIR`
 selects the directory containing `settings.json`, and
-`MAGPIE_ZED_PROCESS_NAMES` supplies comma-separated process names used for
+`EIPGAM_ZED_PROCESS_NAMES` supplies comma-separated process names used for
 restart notices. The existing Zed configuration adapter is reused, so this is
 intended for forks that keep Zed's `settings.json` and Agent model schema, such
 as [ZedG](https://github.com/x6nux/zed-globalization). These variables affect
-the Magpie process in which they are set; put them in the service environment
-when running Magpie under systemd or Docker. They configure a Zed-compatible
-Agent on the same machine as Magpie; they do not discover or modify an Agent
+the eipgam process in which they are set; put them in the service environment
+when running eipgam under systemd or Docker. They configure a Zed-compatible
+Agent on the same machine as eipgam; they do not discover or modify an Agent
 running on another host. On macOS, if the configured binary does not resolve to
-a `.app` bundle, Magpie falls back to the standard Zed application locations
+a `.app` bundle, eipgam falls back to the standard Zed application locations
 when authorizing the gateway credential.
 
 ## Providers and the gateway
 
 Every model an agent can pick is spelled `provider/model` and served by
-magpie's gateway, so agents never hold vendor keys or vendor URLs. Add a
+eipgam's gateway, so agents never hold vendor keys or vendor URLs. Add a
 provider, and its models appear in every agent's picker:
 
 ```sh
-magpie presets                          # the vendors magpie knows, grouped: vendors, relays, local
-magpie provider add moonshot sk-…       # a preset needs only the key
-magpie provider add ollama              # local servers need none
-magpie provider add "My Relay" url=https://relay.example.com/v1 key=sk-… models=gpt-5.5,claude-sonnet-5
-magpie providers                        # host, key, exposed models, who uses what
-magpie provider moonshot                # one provider in detail
-magpie provider models moonshot         # re-fetch the vendor's list (add ids to choose which to expose)
-magpie provider models moonshot +kimi-k2.6 -kimi-k2.5   # expose one more, take one out; the rest stay
-magpie provider models moonshot a b c   # the whole list of models to expose, replacing it (all: the default)
-magpie provider refresh moonshot        # re-fetch it, and drop picks it no longer has (the TUI: m)
-magpie provider refresh-every relay 6h  # the gateway fetches its list every 6h (1d, 30m; off; at least 10m; a Remote magpie 10m unless set)
-magpie provider auto-include relay 'gpt-*' 're:claude-.*'  # a newly listed model these match is exposed (none clears)
-magpie provider test moonshot           # one tiny request per API, with latency
-magpie provider key moonshot sk-…       # replace the key
-magpie provider rm moonshot
-magpie models                           # the catalog agents see
-magpie claude moonshot/kimi-k2.6        # use it
+eipgam presets                          # the vendors eipgam knows, grouped: vendors, relays, local
+eipgam provider add moonshot sk-…       # a preset needs only the key
+eipgam provider add ollama              # local servers need none
+eipgam provider add "My Relay" url=https://relay.example.com/v1 key=sk-… models=gpt-5.5,claude-sonnet-5
+eipgam providers                        # host, key, exposed models, who uses what
+eipgam provider moonshot                # one provider in detail
+eipgam provider models moonshot         # re-fetch the vendor's list (add ids to choose which to expose)
+eipgam provider models moonshot +kimi-k2.6 -kimi-k2.5   # expose one more, take one out; the rest stay
+eipgam provider models moonshot a b c   # the whole list of models to expose, replacing it (all: the default)
+eipgam provider refresh moonshot        # re-fetch it, and drop picks it no longer has (the TUI: m)
+eipgam provider refresh-every relay 6h  # the gateway fetches its list every 6h (1d, 30m; off; at least 10m; a Remote eipgam 10m unless set)
+eipgam provider auto-include relay 'gpt-*' 're:claude-.*'  # a newly listed model these match is exposed (none clears)
+eipgam provider test moonshot           # one tiny request per API, with latency
+eipgam provider key moonshot sk-…       # replace the key
+eipgam provider rm moonshot
+eipgam models                           # the catalog agents see
+eipgam claude moonshot/kimi-k2.6        # use it
 ```
 
 Custom providers take `url=` (an OpenAI-compatible base), `anthropic=` (an
@@ -378,13 +377,13 @@ be overridden the same way.
 
 A model whose vendor answers that it is deprecated or retired (OpenCode
 Zen's 410 "Model exo-free has been deprecated.") leaves that provider's
-models in `magpie models`, `/v1/models` and every agent's list, even while
+models in `eipgam models`, `/v1/models` and every agent's list, even while
 the vendor's own list still names it. It comes back once a request for it
 as `provider/model` is answered, or after a week.
 
-`magpie provider set <id> header.<Name>=<value>` sends a header of your own
+`eipgam provider set <id> header.<Name>=<value>` sends a header of your own
 on every request to a key+URL provider (an empty value removes it; signed-in
-accounts ignore them). It replaces a header of the same name magpie would
+accounts ignore them). It replaces a header of the same name eipgam would
 send, except `anthropic-beta`, which is a list: your betas are added after
 the ones the agent asked for that request (Claude Code's, its 1M context's
 `context-1m-2025-08-07` for a `[1m]` model, fast mode's), each once. A beta
@@ -394,46 +393,46 @@ agent's; any other of yours is always sent. The beta of the agent's own
 sign-in (`oauth-2025-04-20`, which Claude Code signed in to claude.ai asks)
 never goes, as the sign-in never does; one you set yourself does.
 
-`magpie provider set <id> resolve.<host>=<place>[,<place>…]` connects a
+`eipgam provider set <id> resolve.<host>=<place>[,<place>…]` connects a
 host name of the provider's own base URLs to the places listed, as curl's
 `--resolve` does (the provider editor's Advanced › Connect to): a place is
 an IP address (with a port if it has its own) or `dns:<name>`, looked up at
 each connection, tried in order, and the URL's name stays for TLS and Host.
 An empty value takes that host out; `resolve=` clears them all. Only a
 provider you added with a base URL of its own, or a preset you pointed at a
-server of your own, takes them. `magpie provider <id>` lists them as
+server of your own, takes them. `eipgam provider <id>` lists them as
 `connect`.
 
-A key+URL provider is sent the User-Agent the agent sent magpie, as it
+A key+URL provider is sent the User-Agent the agent sent eipgam, as it
 sent it, on every API (chat, Anthropic, Responses, Gemini, count_tokens,
 embeddings, images, videos): a coding plan that serves only the agents it
-names knows them by it, and a gateway of your own behind magpie sees which
-agent asked. Through another computer's magpie (Remote magpie) the vendor
+names knows them by it, and a gateway of your own behind eipgam sees which
+agent asked. Through another computer's eipgam (Remote eipgam) the vendor
 at the far end gets the agent's too. A request the agent sent without one,
-and magpie's own (its classifier's, the image tool's, model lists), go with
-magpie's (`magpie/<version>`). A `header.User-Agent` you set wins over
-both. `magpie provider set <id> user-agent=magpie` (the editor's "Send the
-agent's own User-Agent" unticked) sends magpie's in its place;
+and eipgam's own (its classifier's, the image tool's, model lists), go with
+eipgam's (`eipgam/<version>`). A `header.User-Agent` you set wins over
+both. `eipgam provider set <id> user-agent=eipgam` (the editor's "Send the
+agent's own User-Agent" unticked) sends eipgam's in its place;
 `user-agent=agent` is the default again. A signed-in account, a plugin's
-and a vendor whose own client magpie goes as (OpenCode, Cline, Kilo) keep
+and a vendor whose own client eipgam goes as (OpenCode, Cline, Kilo) keep
 the User-Agent their sign-in sends, and don't take it.
 
-`magpie provider set <id> search=yes` (the editor's Advanced › Web search,
+`eipgam provider set <id> search=yes` (the editor's Advanced › Web search,
 "Searches the web by itself") is for a relay in front of Anthropic's or
 OpenAI's own API that runs web search itself. Claude Code's WebSearch,
 Codex's `web_search` tool and Codex's web.run (its `POST /v1/alpha/search`)
 then go to the relay as they were sent, with its key, instead of through
-magpie's search; the relay's answer goes back as it came. If the relay's
-search fails, magpie searches in its place and says why. In a routing group
+eipgam's search; the relay's answer goes back as it came. If the relay's
+search fails, eipgam searches in its place and says why. In a routing group
 the member a turn would go to first decides. `search=no`, the default,
-keeps magpie's search; Settings › Models › Web search set to magpie's
+keeps eipgam's search; Settings › Models › Web search set to eipgam's
 search for models that search by themselves wins over it.
 
-`magpie usage` (and `--csv`) takes `today`, `7d`, `30d` or `all`, each from a
+`eipgam usage` (and `--csv`) takes `today`, `7d`, `30d` or `all`, each from a
 local midnight, or a window ending now: `--last 24h` (any Go duration, `90m`)
 or `--days 1.5`; the CSV then holds that window's calls only (#2075).
 
-`magpie usage` also lists **upstream provider keys** to help check upstream bills.
+`eipgam usage` also lists **upstream provider keys** to help check upstream bills.
 Each request records the fingerprint and saved name of the key that actually
 served it, including image calls and account/key failover. The CSV adds
 `provider_key_id` and `provider_key_name`. JSON uses `providerKeyId` and `providerKeyName`, distinct from gateway caller
@@ -442,7 +441,7 @@ in usage records.
 Rotating the provider's first key does not move old usage to its replacement;
 deleted keys keep their historical identity. Older records appear as
 **key not recorded**, never inferred from today's configured key.
-These are upstream credentials, not keys clients use to call Magpie.
+These are upstream credentials, not keys clients use to call eipgam.
 
 The CSV's `cache_write_tokens` is still every cache write; the two
 columns, `cache_write_5m_tokens` and `cache_write_1h_tokens`, split it by how
@@ -452,7 +451,7 @@ The app shows the split on a request's Cache and the usage tiles' tooltips.
 **Requests and failures** count requests, each once by how it ended: a
 request failed when the agent got an error. One that a later try answered
 (the next member of a group, another account) is not a failure; the Usage
-page, the Requests card, its rankings and group rows, and `magpie usage`
+page, the Requests card, its rankings and group rows, and `eipgam usage`
 count it as answered on a retry (`retried` in the JSON). On the Requests
 card each count is a button for its requests in the list below (the
 Failed and Retried filters, `failed=1` and `retried=1`). A try a vendor
@@ -468,7 +467,7 @@ vendor's reply said it ran at, empty when the reply doesn't say. The
 ChatGPT backend (Codex signed in with ChatGPT) says `auto` and `default`
 whether Fast ran or not, so from it those are left empty too. The JSON
 log keeps them as `tier_asked`, `tier_sent` and `tier_served`, and each
-try in `/v1/magpie/route` has `tier` and `tier_served`. A request's row
+try in `/v1/eipgam/route` has `tier` and `tier_served`. A request's row
 on the Requests page shows them as Service tier (asked, sent when it
 differs, answered). The last column,
 `upstream_stop`, is why the upstream said its reply ended, in its own
@@ -476,7 +475,7 @@ words (`stop`, `tool_calls`, `end_turn`, a Responses reply's
 `completed`), empty when it said none. A request's row on the Requests
 page shows it as Upstream stop reason.
 
-**Output speed** (tok/s on the Usage and Routing pages, `magpie usage`) is
+**Output speed** (tok/s on the Usage and Routing pages, `eipgam usage`) is
 all output tokens the vendor counted, reasoning and tool calls included, over
 the time from the first output to the last, summed per request: the
 tokens of every timed request over the sum of their windows, so concurrent
@@ -532,7 +531,7 @@ a whole time: 1,000 tokens or more over a second or more. Under that the
 wait is too much of the time to tell anything, so an 11-token answer in
 2.75 s shows none, as an 815-token Claude Code reply does. Gateway rows and other agents' keep their own
 speed. A floor never mixes into a measured speed: the Speed trend and
-`magpie usage` count timed calls only.
+`eipgam usage` count timed calls only.
 
 A group's speed (a row of the Usage page's ranking, by model, provider or
 agent, its Output speed card, and the overview's lists) says how many
@@ -553,26 +552,26 @@ It lists **accounts** too: each Codex, Claude or other subscription account's
 tokens and cost, by the account that actually answered — the one that took
 over after a failover, the one `X-Magpie-Account` pinned. The account is named
 as the Routing view names it (its email or login, never a token); the CSV
-adds `provider_account` (JSON `providerAccount`), `magpie usage --csv
+adds `provider_account` (JSON `providerAccount`), `eipgam usage --csv
 --account <name>` keeps one account's calls, and the app's Usage page has an
 Accounts list and an Account filter on Requests. An older record names the
 account its call went out as when its host says so (`chatgpt.com as
 dee@example.com`); otherwise it appears as **account not recorded**, never
 inferred from today's sign-in. OTLP export never carries the account.
 
-One magpie can serve several computers (an office one, a personal one):
+One eipgam can serve several computers (an office one, a personal one):
 share it on the network (Settings → Network and sharing → Share on local network), and on each
-other computer add it as a **Remote magpie** — in the app's Add sheet, under
-its own heading, Another computer's magpie, after On this machine; on the
+other computer add it as a **Remote eipgam** — in the app's Add sheet, under
+its own heading, Another computer's eipgam, after On this machine; on the
 TUI's Providers page (`a`, then its address and key; `w` changes the address,
 `m` fetches its list again), or
-`magpie provider add remote-magpie sk-magpie-… url=http://192.168.1.20:3425 id=office`.
-Each computer's own magpie still wires its agents, while the providers,
+`eipgam provider add remote-eipgam sk-eipgam-… url=http://192.168.1.20:3425 id=office`.
+Each computer's own eipgam still wires its agents, while the providers,
 routing groups (`office/group/…`) and usage are the shared one's. A request
 goes on in the API the agent spoke — Anthropic Messages, Responses, Chat
-Completions, token counting — and a model the shared magpie's provider serves
+Completions, token counting — and a model the shared eipgam's provider serves
 on another API only is turned into that API once, never on both computers.
-Its list is the models the shared magpie's agents are shown, each named with
+Its list is the models the shared eipgam's agents are shown, each named with
 its provider there (`Claude Sonnet 5 · Relay A · office`) — the ids stay ids
 (`office/relay-a/claude-sonnet-5`), only these labels carry the names.
 Its image and video models are discovered automatically and served through
@@ -587,30 +586,30 @@ id to avoid a 403. Embeddings, rerank and speech-to-text requests use the remote
 APIs, and its exposed retrieval models are kept when fetching its list.
 These remain in agent model lists as on the remote; being listed does not
 mean an embedding or rerank model can hold a conversation.
-When the shared magpie's computer comes back at another address on the same
+When the shared eipgam's computer comes back at another address on the same
 network (a router handing it a new IP after a restart), the other computers
 find it by themselves: one that can't connect looks on its own networks for
-the magpie that answers its key, saves the new address and goes on. This
+the eipgam that answers its key, saves the new address and goes on. This
 needs an IP address on a private network; a name (`a-pc.local`) or a
 Tailscale address is followed as it is. Over the internet, use Tailscale's
-stable address or name, or a public URL in front of the shared magpie.
+stable address or name, or a public URL in front of the shared eipgam.
 The remote must serve the requested API and model, and allow the supplied
 key to use them. Responses uses HTTP, including SSE, rather than WebSocket.
 An older remote without decision-model discovery still serves its existing
 APIs; update it and refresh the list to expose System One models here.
-Its quotas show too: the Usage page, the menu bar and `magpie quota` list the
-shared magpie's cards named with it (`Codex · office`, id `office/codex`), as
-that magpie last read them — only the computer holding the sign-ins asks the
-vendors, and it answers from what it has kept (`GET /v1/magpie/quotas/cards`).
+Its quotas show too: the Usage page, the menu bar and `eipgam quota` list the
+shared eipgam's cards named with it (`Codex · office`, id `office/codex`), as
+that eipgam last read them — only the computer holding the sign-ins asks the
+vendors, and it answers from what it has kept (`GET /v1/eipgam/quotas/cards`).
 A card's refresh here has it read that card once more
-(`POST /v1/magpie/quotas/refresh`, at most once in 30 seconds a card); the
+(`POST /v1/eipgam/quotas/refresh`, at most once in 30 seconds a card); the
 remote's own card has it read every card, each saved Claude account's
 `/usage` too, as its Usage page's Refresh does, and is waited for up to 25
 seconds (#5443). Until it has read anything, the remote's one card says so. Their history is shown with
 its own. A Codex card's
 reset can be used from here (#3850): **Use one…** asks first, as for this
-computer's accounts, and that magpie spends it on its account
-(`POST /v1/magpie/quotas/codex-reset`, below). It takes the provider's key
+computer's accounts, and that eipgam spends it on its account
+(`POST /v1/eipgam/quotas/codex-reset`, below). It takes the provider's key
 with full access there; a read-only or held key is told so. A GLM team's
 resets are still used on bigmodel.cn.
 
@@ -619,18 +618,18 @@ turn for the requested image model. If that provider does not list the model,
 or the turn cannot be identified, it uses Settings → Models → Images → Image generation
 (including Automatic). Off disables this fallback, not a matching model on the
 turn's provider. An explicit `provider/model` keeps its destination; an upstream
-image error does not retry through the setting. Magpie Image MCP is not required.
+image error does not retry through the setting. eipgam Image MCP is not required.
 
-The same model is an MCP server on the gateway at `/mcp/magpie/image`
+The same model is an MCP server on the gateway at `/mcp/eipgam/image`
 (Streamable HTTP; tools `generate_image`, `generate_video`,
 `generation_result`), for agents that aren't set up from the Library, such
-as magpie in Docker in gateway mode. Add `http://<host>:3425/mcp/magpie/image`
+as eipgam in Docker in gateway mode. Add `http://<host>:3425/mcp/eipgam/image`
 as an HTTP MCP server; from another computer send a gateway key as
 `Authorization: Bearer <key>`. An image comes back in the tool's answer and
 at a URL on the gateway kept for an hour (the same key reads it), a video at
 `/v1/videos/<id>/content`. With Image generation Off the tool says so.
 `generate_image` and `generate_video` take an optional `model`
-(provider/model, one of those the tool's schema lists, for `magpie tool`
+(provider/model, one of those the tool's schema lists, for `eipgam tool`
 `--model`). Left out, the one in Settings is used. One that isn't listed, or
 that a gateway key may not use, is refused with the models that may be used.
 
@@ -652,52 +651,52 @@ upstream API keys. Turn on **Settings → Network and sharing → Share on local
 sharing is on. Create a named key for each client and copy it from its row.
 To move from another gateway without touching its clients, enter the key they
 already send in **Your own key (optional)** (8–256 characters, no spaces, not
-starting with `sk-magpie-`, unlike any other key); left empty, magpie makes
+starting with `sk-eipgam-`, unlike any other key); left empty, eipgam makes
 one. The list shows only its last four characters, and it is counted,
 limited and restricted as any other key, from this computer too.
 Rename, disable, rotate or remove keys independently; rotation and removal
 ask for confirmation. Rotation keeps the name, enabled state, limits and usage
 history; other keys are unchanged. Its dialog takes an optional value of
 your own, checked as a new key's is (8–256 printable ASCII characters, no
-spaces, not starting with `sk-magpie-`, no other gateway key's and none of
-your providers' API keys); left empty, magpie makes one. While sharing is on, **Gateway → Connect**
+spaces, not starting with `sk-eipgam-`, no other gateway key's and none of
+your providers' API keys); left empty, eipgam makes one. While sharing is on, **Gateway → Connect**
 offers loopback and shared addresses, plus enabled gateway keys, for all
 connection examples. With sharing off, Connect keeps the original **API key**
-field and local `magpie` token, without a gateway-key picker. Its arbitrary
-local option is **This computer**, distinct from the named **Magpie** key.
+field and local `eipgam` token, without a gateway-key picker. Its arbitrary
+local option is **This computer**, distinct from the named **eipgam** key.
 
 For a headless gateway, use the CLI before exposing the port:
 
 ```sh
-magpie gateway-key add "Remote laptop" # prints the new credential once
-magpie gateway-key add Family --key -  # keeps a key clients already send, read from stdin
-magpie gateway-key list                # ids, names, enabled state and masked keys
-magpie gateway-key rotate <id>         # prints the replacement; identity stays the same
-magpie gateway-key rotate <id> --key -  # gives it a value of your own instead, read from stdin
-magpie gateway-key remove <id>         # revokes remote access
-magpie gateway-key limit <id> week --tokens 2m --cost 5   # its own limit
-magpie gateway-key limit <id> list     # each limit, used, left and reset
-magpie gateway-key limit <id> 10d --tokens 5m   # every 10 days, from now
-magpie gateway-key limit <id> total --cost 300  # $300 in total, until reset
-magpie gateway-key limit <id> account --account codex/me@example.com --window 5h --tokens 2m   # with that account's 5 hours
-magpie gateway-key limit <id> 5h --tokens 200k  # every 5 hours, from now
-magpie gateway-key limit <id> add week --cost 20   # one more limit; all must pass
-magpie gateway-key limit <id> add month --cost 20 --model openai/*   # a limit of only OpenAI's models
-magpie gateway-key limit <id> remove 2 # take off the 2nd limit
-magpie gateway-key limit <id> reset    # count its usage from 0 again (reset 2: only the 2nd)
-magpie gateway-key limit <id> off      # no limit
-magpie gateway-key models <id> openai/gpt-5 anthropic/*   # only these models
-magpie gateway-key models <id> all     # every model
-magpie gateway-key accounts <id> codex/me@example.com   # only these accounts
-magpie gateway-key accounts <id> codex/!me@example.com  # every account but these, later ones too
-magpie gateway-key accounts <id> all    # every account
-magpie gateway-key groups add Work codex/me@example.com openai/<key id>   # a named account group
-magpie gateway-key accounts <id> @Work   # only the group's accounts (!@Work: every account but them)
-magpie gateway-key groups set Work codex/me@example.com   # every key naming Work follows at once
-magpie gateway-key mcp <id> github fs/read_file   # only these MCP servers and tools
-magpie gateway-key mcp <id> none        # no MCP server (all: every one)
-magpie gateway-key quotas <id> on      # told the quotas of what it may use
-magpie gateway-key admin <id> local     # may manage magpie through /v1/magpie/admin/, from this computer (any: from the network too; off)
+eipgam gateway-key add "Remote laptop" # prints the new credential once
+eipgam gateway-key add Family --key -  # keeps a key clients already send, read from stdin
+eipgam gateway-key list                # ids, names, enabled state and masked keys
+eipgam gateway-key rotate <id>         # prints the replacement; identity stays the same
+eipgam gateway-key rotate <id> --key -  # gives it a value of your own instead, read from stdin
+eipgam gateway-key remove <id>         # revokes remote access
+eipgam gateway-key limit <id> week --tokens 2m --cost 5   # its own limit
+eipgam gateway-key limit <id> list     # each limit, used, left and reset
+eipgam gateway-key limit <id> 10d --tokens 5m   # every 10 days, from now
+eipgam gateway-key limit <id> total --cost 300  # $300 in total, until reset
+eipgam gateway-key limit <id> account --account codex/me@example.com --window 5h --tokens 2m   # with that account's 5 hours
+eipgam gateway-key limit <id> 5h --tokens 200k  # every 5 hours, from now
+eipgam gateway-key limit <id> add week --cost 20   # one more limit; all must pass
+eipgam gateway-key limit <id> add month --cost 20 --model openai/*   # a limit of only OpenAI's models
+eipgam gateway-key limit <id> remove 2 # take off the 2nd limit
+eipgam gateway-key limit <id> reset    # count its usage from 0 again (reset 2: only the 2nd)
+eipgam gateway-key limit <id> off      # no limit
+eipgam gateway-key models <id> openai/gpt-5 anthropic/*   # only these models
+eipgam gateway-key models <id> all     # every model
+eipgam gateway-key accounts <id> codex/me@example.com   # only these accounts
+eipgam gateway-key accounts <id> codex/!me@example.com  # every account but these, later ones too
+eipgam gateway-key accounts <id> all    # every account
+eipgam gateway-key groups add Work codex/me@example.com openai/<key id>   # a named account group
+eipgam gateway-key accounts <id> @Work   # only the group's accounts (!@Work: every account but them)
+eipgam gateway-key groups set Work codex/me@example.com   # every key naming Work follows at once
+eipgam gateway-key mcp <id> github fs/read_file   # only these MCP servers and tools
+eipgam gateway-key mcp <id> none        # no MCP server (all: every one)
+eipgam gateway-key quotas <id> on      # told the quotas of what it may use
+eipgam gateway-key admin <id> local     # may manage eipgam through /v1/eipgam/admin/, from this computer (any: from the network too; off)
 ```
 
 Each gateway key can have its own **limit**: a token total, an estimated
@@ -706,7 +705,7 @@ time: from midnight, from Monday, from the 1st), every N days (#1509;
 N from 1 to 3650) or every N hours (#2102; N from 1 to 8760, such as 5 for
 a subscription's 5-hour pace), or **in total** (`total`, @Cyrus_4433 on X):
 a limit that never resets by the clock, counted from when it is set and
-started again only by **Reset usage** (`magpie gateway-key limit <id> total
+started again only by **Reset usage** (`eipgam gateway-key limit <id> total
 --cost 300`); its 429 says it stays refused until it is reset or raised. Or it follows **an account's window** (`account`, ljayic on X): one
 subscription account's own 5 hours, week or month, starting and resetting
 when that account's last reading says its window does (Gateway keys → the
@@ -715,24 +714,24 @@ key's limit → Window → An account's window, then the account's window; CLI
 be read (no reading yet, or its reset has passed with none since), the
 limit isn't reset or lifted: it counts from the reset that passed (or from
 when the limit was set), its row says it resets with the account's window,
-and a refused call is told to retry in 5 minutes while magpie reads the
+and a refused call is told to retry in 5 minutes while eipgam reads the
 accounts again. An N-day or N-hour cycle starts when the
 limit is set and runs N×24 or N hours, then the next one starts where it
 ended, so a restart, a time-zone change or a daylight-saving shift doesn't
 move it. Changing only
 the caps or **Count cache reads too** keeps the cycle; changing N or the
 period, or turning the limit on, starts a new one then. Set it with **Limit** on
-the key's row (saved with Save) or `magpie gateway-key limit`; the row shows
+the key's row (saved with Save) or `eipgam gateway-key limit`; the row shows
 what the key has used, what is left and when it resets. A key can have up to
 five limits, each in a window of its own (#2227), such as $3 every 5 hours and
 $20 a week, as a subscription's two windows: **Add a limit** in the editor or
-`magpie gateway-key limit <id> add`. A request passes only while every one has
+`eipgam gateway-key limit <id> add`. A request passes only while every one has
 something left; its reservation is held in each window, and its 429 names the
 spent limit that resets last. Two limits can't share a window: a window's
 tokens and cost caps go in one limit. Setting a window without `add` changes
-the key's limit of that window, or its only one. `GET /v1/magpie/limit` gives
-each in `limits`, and in `limit` the one holding the key most, which a magpie
-from before #2227 reads; such a magpie also keeps only the first limit
+the key's limit of that window, or its only one. `GET /v1/eipgam/limit` gives
+each in `limits`, and in `limit` the one holding the key most, which a eipgam
+from before #2227 reads; such a eipgam also keeps only the first limit
 (`limit` in caller-keys.json, the rest under `moreLimits`). Tokens counted are a
 call's uncached input, output and cache writes, plus cache reads when **Count
 cache reads too** is on. Cost is an estimate at the Usage page's prices; a
@@ -744,45 +743,45 @@ counts are read from the usage log, so they survive a restart. A request in
 flight holds a reservation (its body's size in tokens plus the key's mean
 output per call), so requests sent at once overshoot by about one call; a
 streamed reply is settled when it ends with the usage its vendor reported.
-**Reset usage** in the key's limit editor (or `magpie gateway-key limit
+**Reset usage** in the key's limit editor (or `eipgam gateway-key limit
 <id> reset`) counts the key's tokens and cost from 0 together, from now: the
 editor's resets the limit it is open on, the CLI's every limit, or the nth
 with `reset <n>`. An
 N-day or N-hour key starts a new cycle then. A day, week or month key keeps
 its window's end (midnight, Monday, the 1st): only the calls before the
 reset stop counting, so it doesn't drift off the calendar. The reset is
-stored with the key (`since` in caller-keys.json, magpie's own: a value a
+stored with the key (`since` in caller-keys.json, eipgam's own: a value a
 client sends is ignored), so it survives a restart; the usage log itself is
 untouched. Keys saved before keep their JSON as it was.
-A key can read its own status with `GET /v1/magpie/limit`; it is told its
+A key can read its own status with `GET /v1/eipgam/limit`; it is told its
 own and no other key's, whatever the request names. A key held to a
 budget, models or accounts is also told `heldTo` (`budget`, `models`,
 `accounts`), `models` (what it may use), `quotas` (whether its owner lets
 it see quotas and the status line) and, while that is on,
 `quotaProviders` (the providers whose cards it is told); `limited` stays
-about its budget alone. A magpie that has this
-one as a Remote magpie provider shows each of its keys' limits on its
+about its budget alone. A eipgam that has this
+one as a Remote eipgam provider shows each of its keys' limits on its
 Usage page this way (#1547). Requests from
 this computer that send no gateway key are not limited; a gateway key used
 from this computer is.
 
 A limit can count **only some models** (zola_xynb on X): pick them under
 **Models** in the limit's editor, or `--model` (again, or a comma list) on
-`magpie gateway-key limit`, as `<provider>/<model>` or `<provider>/*`, such
+`eipgam gateway-key limit`, as `<provider>/<model>` or `<provider>/*`, such
 as $20 a month on `openai/*` beside $50 a month on the whole key. Such a
 limit counts only the calls those models answered, by the provider and
 model in the usage log. Once it is spent, a request naming one of them is
 refused with the same 429 (it names the models, and sets no
-`X-Magpie-Limit-Reset`, so a magpie using this one as a remote rests only
+`X-Magpie-Limit-Reset`, so a eipgam using this one as a remote rests only
 the model), and a routing group, a model's fallbacks, `count_tokens`,
-embeddings, images, videos, the decision groups and magpie's own calls for
+embeddings, images, videos, the decision groups and eipgam's own calls for
 the key leave its models out and go on to the others, from the next
 request on, midway through a conversation too. Its spent models stay in
 the key's model lists. A limit without models is the whole key's, as every
 limit before this was; two limits of the same window can share it only
 when they count different models. A request through a group holds no
 reservation in a model's limit, so requests sent at once through groups
-can go over it by about a call each. A magpie from before this reads such
+can go over it by about a call each. A eipgam from before this reads such
 a limit, if it is a key's first, as the whole key's.
 
 A key's holder can also open **`/me`** in a browser at the address they
@@ -794,7 +793,7 @@ providers. Gateway → Gateway keys shows that address with a Copy button,
 so it can be handed out with the keys.
 
 A gateway key can also be held to some **models** (#882): pick them with the
-**All models** badge on the key's row, or run `magpie gateway-key models <id>
+**All models** badge on the key's row, or run `eipgam gateway-key models <id>
 openai/gpt-5 anthropic/*` (`all` takes the restriction off). A pattern is
 `<provider>/<model>` or `<provider>/*`, matched against the provider that
 serves the call, so a bare model name is resolved first, or a routing group,
@@ -806,7 +805,7 @@ and the Anthropic and Gemini lists, and is refused any other model with a
 not use is skipped. A routing group of your own is the key's only when it
 names it, even when every model in the group is one the key may use (a key
 given `google/gemini-3.8` neither sees nor may ask a group you made of that
-model alone; kautism on Discord); a group magpie found (`auto/<model>`,
+model alone; kautism on Discord); a group eipgam found (`auto/<model>`,
 one model several providers serve) is the key's when it may use every
 provider's model in it. A key that names accounts and no model may use a
 group of yours made only of those accounts' providers' models, as it may
@@ -817,26 +816,26 @@ listed may use every model.
 A decision model (Jev, Clef and the like) is a model too: a routing group
 the key names asks its own decision model for every turn, whatever the key
 lists, but the key may ask one itself, at `/v1/systemone` or in another
-magpie's list of decision models, only when it names it (or its
+eipgam's list of decision models, only when it names it (or its
 `<provider>/*`). The menu lists the decision models after their provider's
 chat models, each marked as one (Kautism on Discord).
 
 A gateway key can also be held to some **MCP servers and tools** (wakaka
 on Discord): pick them under **MCP servers** in the key row's ⋯ menu (a
 key held to some then shows a badge that opens the same list), or run
-`magpie gateway-key mcp <id> github fs/read_file` (`all` takes the
+`eipgam gateway-key mcp <id> github fs/read_file` (`all` takes the
 restriction off, `none` gives the key no MCP server). An entry is a
 server's name, every tool of it, or `<server>/<tool>`, that tool alone; the
-servers are the Library's (by their names there) and magpie's own:
-`magpie-web-search`, `magpie-vision`, `magpie-image`, `magpie-browser` and
-`magpie-tools`. Every route that reaches a server holds the key to it: the
+servers are the Library's (by their names there) and eipgam's own:
+`eipgam-web-search`, `eipgam-vision`, `eipgam-image`, `eipgam-browser` and
+`eipgam-tools`. Every route that reaches a server holds the key to it: the
 MCP hub lists only the servers and tools the key may use and refuses a
 call of any other; `/mcp/<name>` and `/mcp/run/<name>` answer 403 for a
 server the key may not use, leave the tools it may not use out of
-`tools/list` and refuse a `tools/call` of one; magpie's own servers do the
-same, and `/v1/magpie/mcp` lists only those the key may use. A key issued
-under a held key is held to its issuer's list too. `GET /v1/magpie/limit`
-tells a held key its list as `mcp`. A model's own web search, which magpie
+`tools/list` and refuse a `tools/call` of one; eipgam's own servers do the
+same, and `/v1/eipgam/mcp` lists only those the key may use. A key issued
+under a held key is held to its issuer's list too. `GET /v1/eipgam/limit`
+tells a held key its list as `mcp`. A model's own web search, which eipgam
 serves through its search when the provider has none, is not an MCP call
 and is not held by this list.
 
@@ -844,7 +843,7 @@ A gateway key can also be held to some **accounts** (#905): the accounts
 and keys its requests may use, picked in the same menu right after their
 provider's models — an account by who is signed in, a key by its
 fingerprint — or with
-`magpie gateway-key accounts <id> codex/me@example.com openai/<key id>`
+`eipgam gateway-key accounts <id> codex/me@example.com openai/<key id>`
 (`all` takes the restriction off). An entry `<provider>/!<account>` keeps
 that account out instead: the key may use every other account, those
 signed in later too, and is held to no model by it (LeiWang_2000 on X;
@@ -860,7 +859,7 @@ rotated, an account signed out, an account of an agent that keeps no
 logins renamed — is kept as it is, matching nothing, so the key is held
 closer, never wider. A routing group the key names is its members'
 through the accounts it may use only: naming a group is not naming its
-accounts, and magpie's own calls for the key — a web search, a picture
+accounts, and eipgam's own calls for the key — a web search, a picture
 described, a Codex title — are of the models the user picked, but their
 spend lands on an account, so the accounts hold them too. When every
 account or key behind a model is one the key may not use, the request is
@@ -873,14 +872,14 @@ accounts listed may use every account, as keys always did.
 
 An **account group** names a set of accounts of any providers
 (LeiWang_2000 on X): made in the Gateway page's "Account groups" or with
-`magpie gateway-key groups add <name> <accounts…>`, and named in a key's
+`eipgam gateway-key groups add <name> <accounts…>`, and named in a key's
 accounts as `@<group>` to use them or `!@<group>` to keep them out, in the
 same menus. A key reads the group as it is on each request, so changing a
 group's accounts changes every key that names it; an account signed out
 since matches nothing, and a group a key names can't be removed. Groups
 are backed up and synced with the gateway keys.
 
-While LAN sharing is enabled, or `MAGPIE_ADDR` puts the gateway on the
+While LAN sharing is enabled, or `EIPGAM_ADDR` puts the gateway on the
 network (a host other than loopback or `localhost`: `0.0.0.0` in the Docker
 image, a server's address), remote requests require an enabled gateway key
 sent as Bearer, `x-api-key`, `x-goog-api-key` or `?key=`; one without gets
@@ -889,38 +888,38 @@ Docker's port publishing (the peer is the bridge, not the host's loopback)
 and a WSL distro under NAT. Loopback remains permissive: any token works,
 including a stale or disabled gateway key. Only a valid, enabled key is
 attributed to its named identity. Neither shared nor on the network, a
-remote request is refused (403). A `MAGPIE_ADDR` pinned to one interface's
+remote request is refused (403). A `EIPGAM_ADDR` pinned to one interface's
 address asks a key even of this computer's agents calling that address;
 `0.0.0.0` with agents on `127.0.0.1` doesn't. The Claude subscription's
-own tool calls back to magpie are let in there by their run's one-time
+own tool calls back to eipgam are let in there by their run's one-time
 token, without a key (#1546).
-Sharing listens on every interface, unless `MAGPIE_ADDR` names a host of its
-own: `MAGPIE_ADDR=127.0.0.1:3425` behind Tailscale Serve, or one interface's
+Sharing listens on every interface, unless `EIPGAM_ADDR` names a host of its
+own: `EIPGAM_ADDR=127.0.0.1:3425` behind Tailscale Serve, or one interface's
 address, stays where it is while shared, and what reaches it from elsewhere
 still needs an enabled gateway key (#1112).
 
-**Codex on another computer** (#1281) can name the shared magpie its model
-provider, with a gateway key, and read magpie's models in Codex's own
+**Codex on another computer** (#1281) can name the shared eipgam its model
+provider, with a gateway key, and read eipgam's models in Codex's own
 catalog shape from `GET /v1/codex/models`. `/v1/models` is OpenAI's list,
 which Codex can't read, and `/backend-api/codex/models` is the ChatGPT
 backend's, for a Codex signed in to ChatGPT on the gateway's own computer;
 a gateway key gets a 401 there.
 
 ```toml
-model_provider = "magpie"
+model_provider = "eipgam"
 model = "provider/model"
 
-[model_providers.magpie]
-name = "magpie"
+[model_providers.eipgam]
+name = "eipgam"
 base_url = "http://192.168.1.20:3425/v1"
 model_catalog_url = "http://192.168.1.20:3425/v1/codex/models"
-env_key = "MAGPIE_API_KEY"   # the gateway key
+env_key = "EIPGAM_API_KEY"   # the gateway key
 wire_api = "responses"
 supports_websockets = false
 ```
 
-The list is the models the shared magpie shows Codex (its Agents page
-picks), each as the `model_catalog_json` magpie writes for a Codex on its
+The list is the models the shared eipgam shows Codex (its Agents page
+picks), each as the `model_catalog_json` eipgam writes for a Codex on its
 own computer describes it, and only the models the key may use. Codex 0.161
 reads it by default; 0.160 needs `[features] api_key_model_discovery = true`.
 Codex before 0.166 reads at most 1 MiB of a catalog, and every entry
@@ -928,7 +927,7 @@ carries the instructions official Codex sends its model (about 21 KB), so
 for such a Codex past about 48 models the list keeps the first that fit and
 the answer's `X-Magpie-Left-Out` header says how many it left out: update
 Codex, pick fewer for Codex, or hold the key to fewer. Codex 0.166 and later
-read the list whole (magpie knows it by the `client_version` Codex sends).
+read the list whole (eipgam knows it by the `client_version` Codex sends).
 
 A request that reaches loopback through a proxy or tunnel on this computer
 (Cloudflare Tunnel's `cloudflared`, ngrok, Tailscale serve or funnel, frp's
@@ -936,41 +935,41 @@ HTTP proxy, Caddy, nginx) is someone else's, and is answered as one from
 another machine (#1022): it carries a forwarding header (`Forwarded`,
 `X-Forwarded-For`, `X-Real-IP`, `Cf-Connecting-IP`, `True-Client-IP`,
 `Tailscale-User-Login`), which no agent sends. Without sharing it is refused;
-with sharing, or a `MAGPIE_ADDR` on the network, it needs an enabled gateway
+with sharing, or a `EIPGAM_ADDR` on the network, it needs an enabled gateway
 key, as from the network. This
-covers every route: the model APIs, quotas, MCP sign-ins. To serve magpie
+covers every route: the model APIs, quotas, MCP sign-ins. To serve eipgam
 through a Cloudflare Tunnel, turn on **Settings → Network and sharing → Share on local network**,
 add a gateway key for each client, point the tunnel's service at
 `http://127.0.0.1:3425`, and give clients the tunnel's address with that key.
 A tunnel that forwards bare TCP (frp's `tcp`, `ssh -R`, socat) adds no header
 and can't be told from an agent here: point it at this computer's LAN
 address with sharing on, not at loopback. A proxy here that signs its
-clients in itself can be trusted with `MAGPIE_TRUST_PROXY=1`, which keeps
+clients in itself can be trusted with `EIPGAM_TRUST_PROXY=1`, which keeps
 what it forwards local, as before.
 
 To let other computers in only from some addresses, list them as IPs and
 CIDR ranges in **Settings → Network and sharing → Allowed addresses**, or in
-`MAGPIE_ALLOW_IPS` (`203.0.113.7,10.0.0.0/8,2001:db8::/32`), which comes
+`EIPGAM_ALLOW_IPS` (`203.0.113.7,10.0.0.0/8,2001:db8::/32`), which comes
 first. A request from any other address is refused 403, even with an
 enabled gateway key, and the refusal names the address it came from. This
 computer is always let in. The address is the connection's own, never a
 forwarding header, so behind a proxy or tunnel every client has the proxy's
-address: limit them at the proxy. A mistyped entry in `MAGPIE_ALLOW_IPS`
+address: limit them at the proxy. A mistyped entry in `EIPGAM_ALLOW_IPS`
 lets nothing in rather than everything. When settings.json can't be read, or
 doesn't parse and has no good backup, the list read last stays in force; if
-none was read since magpie started, only this computer is let in until the
-file is repaired. `magpie web`'s page honours the same list.
+none was read since eipgam started, only this computer is let in until the
+file is repaired. `eipgam web`'s page honours the same list.
 
-**HTTPS.** A magpie reached over the internet (a server used as a relay)
+**HTTPS.** A eipgam reached over the internet (a server used as a relay)
 can serve HTTPS itself, with no proxy in front:
 
 ```sh
-magpie serve --tls-cert /etc/letsencrypt/live/relay.example.com/fullchain.pem \
+eipgam serve --tls-cert /etc/letsencrypt/live/relay.example.com/fullchain.pem \
              --tls-key  /etc/letsencrypt/live/relay.example.com/privkey.pem
 ```
 
-`MAGPIE_TLS_CERT` and `MAGPIE_TLS_KEY` do the same (for Docker), and `magpie
-web` and `magpie daemon install` take the same flags; the service keeps the
+`EIPGAM_TLS_CERT` and `EIPGAM_TLS_KEY` do the same (for Docker), and `eipgam
+web` and `eipgam daemon install` take the same flags; the service keeps the
 pair when it is installed again without them, and `--no-tls` takes it away.
 The files are PEM: the certificate with its chain after it, and its private
 key. One without the other, or files that don't load, refuse to start
@@ -978,58 +977,58 @@ rather than serve plain HTTP. The certificate is read again when either
 file changes, so a renewal (certbot, acme.sh) is served on the next
 connection without a restart; files that don't load then (a renewal half
 written) leave the one before in place, and the log says so. Other
-computers reach the gateway, and `magpie web`'s page, over `https://` only,
-and the network links magpie prints say `https://`; plain HTTP from them is
+computers reach the gateway, and `eipgam web`'s page, over `https://` only,
+and the network links eipgam prints say `https://`; plain HTTP from them is
 answered 400. This computer may still call `http://127.0.0.1` on the same
-port, as the agents, MCP servers and status checks magpie wires here do,
+port, as the agents, MCP servers and status checks eipgam wires here do,
 since no certificate for the server's name covers loopback. A container or
 a WSL distro calling through its NAT address is another computer, and uses
 `https://`. Gateway keys, sharing and allowed addresses work as over HTTP.
 
 **HTTPS on the local network.** Without a certificate of your own, turn
-on Settings → Network and sharing → HTTPS (or `magpie https on`; zhangly1
-on X: Claude on another computer needed magpie at `https://`). magpie
+on Settings → Network and sharing → HTTPS (or `eipgam https on`; zhangly1
+on X: Claude on another computer needed eipgam at `https://`). eipgam
 serves other computers `https://` with a certificate its own CA (the mTLS
-one, in `~/.config/magpie/mtls`) signs for this computer's names, its
+one, in `~/.config/eipgam/mtls`) signs for this computer's names, its
 addresses and the name the client dialled; this computer keeps plain
-`http://`. Each computer that calls magpie trusts the CA once: Save under
-magpie's CA puts `magpie-ca.crt` in Downloads, and the gateway serves it
+`http://`. Each computer that calls eipgam trusts the CA once: Save under
+eipgam's CA puts `eipgam-ca.crt` in Downloads, and the gateway serves it
 to any address the share lets in, without a key, at
-`https://<this computer>:<port>/magpie-ca.crt` (`curl -kO`, then check its
-SHA-256 against the one Settings and `magpie https` show). Then:
+`https://<this computer>:<port>/eipgam-ca.crt` (`curl -kO`, then check its
+SHA-256 against the one Settings and `eipgam https` show). Then:
 
 ```sh
 # macOS
-sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain magpie-ca.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain eipgam-ca.crt
 # Windows, as administrator
-certutil -addstore -f Root magpie-ca.crt
+certutil -addstore -f Root eipgam-ca.crt
 # Debian, Ubuntu
-sudo cp magpie-ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
+sudo cp eipgam-ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
 # Claude Code and other Node apps, which keep their own list
-export NODE_EXTRA_CA_CERTS=/path/to/magpie-ca.crt
+export NODE_EXTRA_CA_CERTS=/path/to/eipgam-ca.crt
 ```
 
 Windows' own `curl.exe` checks revocation, which a private CA has none
 of, so it needs `--ssl-no-revoke`; Node, browsers and Claude Code don't.
 
 To serve a certificate of your own instead (one your network's CA, or a
-public one, signed), Import… under Certificate (or `magpie https import
+public one, signed), Import… under Certificate (or `eipgam https import
 cert.pem key.pem`): PEM, the certificate with its chain and an
 unencrypted key, in one file or several. It is kept in
-`~/.config/magpie/https` and read again when it changes; Remove goes back
-to magpie's CA. `--tls-cert` comes before both. A page open from another
+`~/.config/eipgam/https` and read again when it changes; Remove goes back
+to eipgam's CA. `--tls-cert` comes before both. A page open from another
 computer can't turn HTTPS on or off under itself.
 
-**Client certificates (mTLS).** A magpie open to the internet can also
+**Client certificates (mTLS).** A eipgam open to the internet can also
 ask every other computer for a client certificate it issued itself
 (hhdaxia on X, #5596), so a stolen gateway key alone gets nowhere. Turn on
-Settings → Network and sharing → Require a client certificate (or `magpie
-mtls on`). magpie makes its own CA in `~/.config/magpie/mtls`; with no
+Settings → Network and sharing → Require a client certificate (or `eipgam
+mtls on`). eipgam makes its own CA in `~/.config/eipgam/mtls`; with no
 `--tls-cert` it serves other computers `https://` with a certificate that
 CA signs, so they need its `ca.pem`. Issue each device a certificate under
-Client certificates (or `magpie mtls issue laptop`): `client.pem`,
-`client-key.pem` and `ca.pem` are saved to Downloads/magpie-laptop, and the
-key is kept nowhere else. Issuing the same name again, or Revoke (`magpie
+Client certificates (or `eipgam mtls issue laptop`): `client.pem`,
+`client-key.pem` and `ca.pem` are saved to Downloads/eipgam-laptop, and the
+key is kept nowhere else. Issuing the same name again, or Revoke (`eipgam
 mtls revoke laptop`), refuses the old one at once, on connections already
 open too. A request from another computer without a good certificate is
 refused 403 (or at the handshake), with a gateway key or without. This
@@ -1037,19 +1036,19 @@ computer, and a WSL distro's agent with its key, are answered as before,
 over plain `http://127.0.0.1` too. A page open from another computer can't
 turn it on without a certificate, nor revoke or reissue its own.
 
-On the other computer, give a Remote magpie (or any provider of your own at
+On the other computer, give a Remote eipgam (or any provider of your own at
 an `https://` address, such as one behind an Nginx that checks client
 certificates) the three files under Advanced → Client certificate. They are
 shown only to that provider's own host. curl takes them as `--cert
 client.pem --key client-key.pem --cacert ca.pem`. Not covered yet: a proxy
-or tunnel in front of magpie can't pass a certificate on, so with mTLS on
+or tunnel in front of eipgam can't pass a certificate on, so with mTLS on
 its requests are refused unless it checks certificates itself and
-`MAGPIE_TRUST_PROXY=1` is set; `magpie web`'s page port doesn't hand
+`EIPGAM_TRUST_PROXY=1` is set; `eipgam web`'s page port doesn't hand
 gateway calls on under mTLS (call the gateway's own port); there is no
 `.p12` for a browser yet (`openssl pkcs12 -export -in client.pem -inkey
 client-key.pem -out laptop.p12` makes one).
 
-**A self-signed certificate.** A Remote magpie, a provider of your own,
+**A self-signed certificate.** A Remote eipgam, a provider of your own,
 or a preset pointed at a server of yours (Ollama or LM Studio on another
 computer behind `https://`), on a domain whose certificate this computer
 doesn't trust, such as a self-signed one, or one macOS calls "not
@@ -1073,12 +1072,12 @@ so its requests count as another computer's, as above.
 **Usage → Overview → Gateway keys** groups calls by the client's key, never
 the provider's credential. **Usage → Requests** offers the same filter;
 CSV includes `caller_key_id` and `caller_key_name`. Deleted keys keep their
-history. The usual local `magpie` token and older records stay unattributed.
+history. The usual local `eipgam` token and older records stay unattributed.
 Caller attribution includes chat, images, video creation and System One.
 Provider attribution stays independent; CSV puts `provider_key_*` before
 `caller_key_*`.
-An existing LAN key becomes **Magpie** without changing the credential.
-`lanKey` remains in settings for older Magpie versions. Disabling or removing
+An existing LAN key becomes **eipgam** without changing the credential.
+`lanKey` remains in settings for older eipgam versions. Disabling or removing
 the default key replaces that mirror with a random non-empty revoked value;
 rotation does not re-enable it. Turning sharing off and on again neither
 re-enables a disabled default key nor makes a removed one again; only
@@ -1089,7 +1088,7 @@ CLI key management, or the Settings and key-list pages from opening.
 If settings are read-only, changing the default key fails without changing
 it: make `settings.json` writable and retry so older versions cannot keep
 accepting its old credential. Independent named keys remain manageable.
-Gateway credentials stay in `~/.config/magpie/caller-keys.json` (XDG-aware,
+Gateway credentials stay in `~/.config/eipgam/caller-keys.json` (XDG-aware,
 mode `0600`), never in usage records or list responses.
 
 Alibaba Cloud's international Token Plan is `alibaba-token-plan`
@@ -1114,7 +1113,7 @@ Completions at `/compatible-mode/v1` and Anthropic Messages at
 
 A script or a provisioning tool manages providers, accounts, gateway keys and
 account groups with no hand-edited file (ljayic on X). The routes are under
-`/v1/magpie/admin/` and are the app's own handlers, so a page and a script
+`/v1/eipgam/admin/` and are the app's own handlers, so a page and a script
 can't drift:
 
 | Route | What it does |
@@ -1138,11 +1137,11 @@ served: a provider's saved key, a gateway key's secret after its `add-key` or
 `rotate-key` answer, exporting sign-ins, and what changes this computer's
 other apps (moving, showing, restarting).
 
-Who may call it: a gateway key set with `magpie gateway-key admin <id>
+Who may call it: a gateway key set with `eipgam gateway-key admin <id>
 local|any`, or in the app from the key's menu, Advanced (Off, From this
-computer, From any computer); such a key says Manages magpie in its row. `local` is from this computer only; `any` also from the network
+computer, From any computer); such a key says Manages eipgam in its row. `local` is from this computer only; `any` also from the network
 when sharing is on. Only a key the user made can have it: a read-only,
-Magpie Browser, issued or expiring key, and the default sharing key, can't,
+eipgam Browser, issued or expiring key, and the default sharing key, can't,
 and the API can't set the level on any key, so it can't raise its own
 caller. A request with no key is 401, a key without the level 403
 (`gateway_key_not_admin`). Browsers never call it, with or without a key:
@@ -1191,8 +1190,8 @@ no list of models to fetch, so the preset names them: the embedding models
 embeddings have no route here.
 
 ```sh
-curl localhost:3425/v1/rerank -H "Authorization: Bearer $MAGPIE_KEY" \
-  -d '{"model":"voyage/rerank-3","query":"what eats seeds","documents":["a magpie","a stone"],"top_k":1}'
+curl localhost:3425/v1/rerank -H "Authorization: Bearer $EIPGAM_KEY" \
+  -d '{"model":"voyage/rerank-3","query":"what eats seeds","documents":["a eipgam","a stone"],"top_k":1}'
 ```
 
 ### Decisions
@@ -1203,7 +1202,7 @@ conversation), and `questions`, each answered with a probability, a choice
 or a score. It takes the gateway's key, as chat does, and is sent as given,
 only `model` changed, to an OpenAI API key, to Azure OpenAI (at
 `/openai/v1/decisions`, the model your deployment's name) or to another
-magpie. Any other provider is refused with a 400 that says so. Only input
+eipgam. Any other provider is refused with a 400 that says so. Only input
 tokens are counted, cached ones apart.
 
 A decision model that answers System One instead (a Jev, a Clef, a
@@ -1219,7 +1218,7 @@ other way, `/v1/systemone` with a model only the Decisions API serves
 (`openai/gpt-6-luna`) is asked there and answered as System One answers.
 
 ```sh
-curl localhost:3425/v1/decisions -H "Authorization: Bearer $MAGPIE_KEY" \
+curl localhost:3425/v1/decisions -H "Authorization: Bearer $EIPGAM_KEY" \
   -d '{"model":"gpt-6-luna","input":"The parcel arrived torn open.","questions":[{"type":"predicate","name":"damaged","instructions":"Was the parcel damaged?"}]}'
 ```
 
@@ -1235,15 +1234,15 @@ on the Agent Platform API (`aiplatform.googleapis.com`) in the project (billing
 has to be on there), then sign in with `gcloud auth application-default login`
 or have a service account's key file
 ([Google's guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/gcp-auth)).
-[Where magpie looks for the credentials, and the kinds it reads](subsystems/providers-accounts.md#responsibilities-and-sources-of-truth).
+[Where eipgam looks for the credentials, and the kinds it reads](subsystems/providers-accounts.md#responsibilities-and-sources-of-truth).
 
 ```sh
-magpie provider add google-vertex project=my-project
-magpie provider set google-vertex location=us-central1        # global (the default), us, eu or a region
-magpie provider set google-vertex credentials=~/keys/vertex.json
-magpie provider set google-vertex impersonate=vertex@my-project.iam.gserviceaccount.com
-magpie provider set google-vertex impersonate=                # empty clears it
-magpie provider test google-vertex
+eipgam provider add google-vertex project=my-project
+eipgam provider set google-vertex location=us-central1        # global (the default), us, eu or a region
+eipgam provider set google-vertex credentials=~/keys/vertex.json
+eipgam provider set google-vertex impersonate=vertex@my-project.iam.gserviceaccount.com
+eipgam provider set google-vertex impersonate=                # empty clears it
+eipgam provider test google-vertex
 ```
 
 `project=` is the project's id. `location=` is `global` (the default, and what
@@ -1260,7 +1259,7 @@ its token is sent to. Adding, listing and showing it ask Google nothing; the
 credentials are read when a request is signed.
 
 Each location serves models of its own, and Vertex AI has no list to ask which,
-so magpie gives each location the models it answered with on 2026-10-06
+so eipgam gives each location the models it answered with on 2026-10-06
 (and Gemini 4: `gemini-4-argon` since 2026-10-13, `gemini-4-carbon` since
 2026-11-10 and `gemini-4-hydrogen` since 2026-11-12, at `global`, `us` and
 `eu`):
@@ -1275,15 +1274,15 @@ A region that serves one more, as asia-northeast1 serves `gemini-3.5-flash`,
 has it typed in with the rest you want:
 
 ```sh
-magpie provider models google-vertex gemini-2.5-pro gemini-2.5-flash gemini-2.5-flash-lite gemini-3.5-flash
-magpie provider models google-vertex all     # back to the location's list
+eipgam provider models google-vertex gemini-2.5-pro gemini-2.5-flash gemini-2.5-flash-lite gemini-3.5-flash
+eipgam provider models google-vertex all     # back to the location's list
 ```
 
-`magpie provider set google-vertex location=…` keeps the models picked, so pick
+`eipgam provider set google-vertex location=…` keeps the models picked, so pick
 again after a move.
 
 A partner model is one whose id names its publisher before a slash, as
-`deepseek-ai/deepseek-v4.1-flash-maas` does. magpie asks it on Google's
+`deepseek-ai/deepseek-v4.1-flash-maas` does. eipgam asks it on Google's
 OpenAI-compatible chat completions in your project
 (`…/locations/<location>/endpoints/openapi/chat/completions`) with the same
 credentials, and asks a Gemini model on generateContent, with nothing to set.
@@ -1293,13 +1292,13 @@ such as `google/gemma-4-26b-a4b-it-maas`) is typed in under its full id, as
 any model is:
 
 ```sh
-magpie provider models google-vertex gemini-3.8-flash deepseek-ai/deepseek-v4.1-flash-maas google/gemma-4-26b-a4b-it-maas
+eipgam provider models google-vertex gemini-3.8-flash deepseek-ai/deepseek-v4.1-flash-maas google/gemma-4-26b-a4b-it-maas
 ```
 
 Turn each partner model on for the project in Model Garden first: until then
-Google refuses it. `magpie provider test google-vertex` tests Gemini, and a
+Google refuses it. `eipgam provider test google-vertex` tests Gemini, and a
 partner model is tested on its own (right-click it in the app, or
-`magpie provider test google-vertex <model>`).
+`eipgam provider test google-vertex <model>`).
 
 Anthropic's Claude is served too, with nothing more to set: a model whose id
 starts with `claude-` is asked on Anthropic's Messages API in your project
@@ -1318,7 +1317,7 @@ and [Flex PayGo](https://docs.cloud.google.com/gemini-enterprise-agent-platform/
 are asked for with request headers. The editor's **Headers** offers both,
 `X-Vertex-AI-LLM-Request-Type` and `X-Vertex-AI-LLM-Shared-Request-Type`, to
 add; their values are the ones Google's pages give. From the CLI:
-`magpie provider set google-vertex header.<Name>=<value>`. [What was seen of
+`eipgam provider set google-vertex header.<Name>=<value>`. [What was seen of
 Priority PayGo](subsystems/providers-accounts.md#constraints-and-failure-behavior).
 
 When a request fails:
@@ -1329,7 +1328,7 @@ When a request fails:
   or set `credentials=`.
 - `GOOGLE_APPLICATION_CREDENTIALS names <file>, which isn't there`, or
   `GOOGLE_APPLICATION_CREDENTIALS is "…", not a full path` (`CLOUDSDK_CONFIG`
-  too): the variable names no file magpie can read, and gcloud's own isn't
+  too): the variable names no file eipgam can read, and gcloud's own isn't
   read in its place. Give the whole path (a `~/` at its start is the home),
   unset it, or set `credentials=`.
 - `the Google credentials in <file>: the sign-in was refused`, with the advice
@@ -1350,26 +1349,26 @@ When a request fails:
 
 ### Plugins
 
-A subscription magpie doesn't sign in to itself can come from an
+A subscription eipgam doesn't sign in to itself can come from an
 [OpenCode](https://opencode.ai) provider plugin or a
 [pi](https://github.com/earendil-works/pi) package: the npm packages OpenCode
 users install to sign in to a plan (their `auth` hook), and the pi packages
-that register a provider (`pi.registerProvider`), work in magpie as they do
-there. magpie runs them on [Bun](https://bun.sh), downloaded the first
+that register a provider (`pi.registerProvider`), work in eipgam as they do
+there. eipgam runs them on [Bun](https://bun.sh), downloaded the first
 time a plugin needs it, and the plugin signs in, lists the models and makes
-each request; magpie serves them to agents like any provider's.
+each request; eipgam serves them to agents like any provider's.
 
 ```sh
-magpie plugin add workbuddy              # a community plugin by its name (WorkBuddy, think-tags, Qoder)
-magpie plugin add opencode-gemini-auth   # an npm package, or a path to a plugin of your own
-magpie plugin add pi-antigravity         # a pi package, the same way
-magpie plugin                           # the plugins, what each signs in to, and whether you are
-magpie plugin login google-plugin       # its sign-in: the method, its questions, the browser or a key
-magpie plugin logout google-plugin
-magpie plugin off opencode-gemini-auth  # on brings it back; rm removes it; update updates them all
+eipgam plugin add workbuddy              # a community plugin by its name (WorkBuddy, think-tags, Qoder)
+eipgam plugin add opencode-gemini-auth   # an npm package, or a path to a plugin of your own
+eipgam plugin add pi-antigravity         # a pi package, the same way
+eipgam plugin                           # the plugins, what each signs in to, and whether you are
+eipgam plugin login google-plugin       # its sign-in: the method, its questions, the browser or a key
+eipgam plugin logout google-plugin
+eipgam plugin off opencode-gemini-auth  # on brings it back; rm removes it; update updates them all
 ```
 
-A provider id magpie already has (google, openai, anthropic) is
+A provider id eipgam already has (google, openai, anthropic) is
 `<id>-plugin`. In the app, Settings → Plugins adds and removes them, and
 the providers they sign in to are in Add provider → From plugins.
 
@@ -1378,10 +1377,10 @@ example a third-party plugin and your own copy of it. One of them serves
 that id: the one you picked, or else the one added last. Both plugins stay
 listed, and each row in Plugins › Installed says which one serves the
 provider. The other row has **Use for <provider>**, which switches the
-provider to it. `magpie plugin` prints the same thing, and
+provider to it. `eipgam plugin` prints the same thing, and
 
 ```sh
-magpie plugin use ~/dev/my-acme-auth acme   # this plugin serves acme from now on
+eipgam plugin use ~/dev/my-acme-auth acme   # this plugin serves acme from now on
 ```
 
 makes the pick. Each plugin can still be switched off or removed on its
@@ -1389,31 +1388,31 @@ own.
 
 A package is pi's when its `package.json` has a `pi` manifest, the
 `pi-package` keyword, or depends on `@earendil-works/pi-coding-agent`.
-magpie installs pi beside it and loads it with pi's own loader; the
-providers it registers are what magpie uses, and its commands, tools and
+eipgam installs pi beside it and loads it with pi's own loader; the
+providers it registers are what eipgam uses, and its commands, tools and
 renderers are left alone. Its sign-in runs as in pi: an OAuth login's
 questions and pages, and the dialogs and pickers it shows (`ctx.ui`, its
-terminal components too), are asked in magpie's sign-in; an API key works
+terminal components too), are asked in eipgam's sign-in; an API key works
 as well. pi's own files (its `auth.json` and what a package keeps) are in
-`pi/` under magpie's config directory, not your `~/.pi`, unless
+`pi/` under eipgam's config directory, not your `~/.pi`, unless
 `PI_CODING_AGENT_DIR` says otherwise. Requests reach the package as pi
 sends them, and its replies keep their thinking and tool calls.
 
 #### For plugin authors
 
-A plugin is an OpenCode plugin or a pi package; nothing magpie-specific is
-needed. For an OpenCode plugin magpie reads a few more fields, which
+A plugin is an OpenCode plugin or a pi package; nothing eipgam-specific is
+needed. For an OpenCode plugin eipgam reads a few more fields, which
 OpenCode ignores:
 
-- **The provider's icon**: `icon` on the `auth` hook, or `"magpie": {
+- **The provider's icon**: `icon` on the `auth` hook, or `"eipgam": {
   "icon": "…" }` in the plugin's `package.json` (for every provider it
   signs in to that names none). An `https://` URL of a picture on a public
-  host, which magpie fetches once and keeps, or a `data:image/…` URI;
+  host, which eipgam fetches once and keeps, or a `data:image/…` URI;
   PNG, JPEG, GIF, WebP, ICO or SVG, at most 1 MB. Anything else is ignored,
   and the icon the plugin market lists for the plugin is shown instead.
   The `package.json` icon is also the card's picture under Discover →
   Unofficial, on GitHub for a repository tagged `magpie-plugin`.
-- **The plugin's name**: `"magpie": { "name": "…" }` in its `package.json`
+- **The plugin's name**: `"eipgam": { "name": "…" }` in its `package.json`
   names its row in Settings → Plugins, and its sidebar tab when its page
   gives no title, for a plugin the community's list doesn't name (that
   list's name wins). A package's npm name, which Bun keys it by, has to be
@@ -1423,7 +1422,7 @@ OpenCode ignores:
   A repository tagged `magpie-plugin` shows it on its card under Discover
   → Unofficial, on GitHub too, in place of the repository's name (npm's
   copy of the package says it when the card installs from npm).
-- **What the plugin is**: `"magpie": { "summary": { "en": "…", "zh": "…" } }`
+- **What the plugin is**: `"eipgam": { "summary": { "en": "…", "zh": "…" } }`
   is its card's line under Discover → Unofficial, on GitHub, in the window's
   language (zh-TW reads `zh`), else in English, else GitHub's description.
   A sentence a language: one line of at most 300 bytes, a language code of
@@ -1432,16 +1431,16 @@ OpenCode ignores:
 - **An API key's field**: a `type: "api"` method's `label` titles the key's
   field, as OpenCode's dialog does (one that only says "API key" reads
   "<provider> API key"), and its `placeholder` is the hint inside the field
-  (and after the question in `magpie plugin login`). The method's `prompts`
+  (and after the question in `eipgam plugin login`). The method's `prompts`
   are asked first, as in OpenCode, and reach `authorize(inputs)`. A prompt of
-  `type: "password"` (magpie's own; OpenCode has `text` and `select`) is typed unseen:
-  a masked field in the app, no echo in `magpie plugin login` (#1982).
+  `type: "password"` (eipgam's own; OpenCode has `text` and `select`) is typed unseen:
+  a masked field in the app, no echo in `eipgam plugin login` (#1982).
 - **Sign-in words in other languages**: beside OpenCode's English, a
   method's `labels`, a prompt's `messages`, and a select option's `labels`
   and `hints`, each an object of language code to text (`{"zh": "…",
   "zh-TW": "…", "ja": "…", "de": "…"}`), as a page's `titles` are. The app
   shows the window's language, then its first part (`zh` for `zh-TW`), else
-  the English; `magpie plugin login` stays English.
+  the English; `eipgam plugin login` stays English.
 
 ```js
 export const LemonPlugin = async () => ({
@@ -1461,10 +1460,10 @@ the hook as a variable (or cast it), or put the icon in `package.json`.
 #### Web search APIs from a plugin
 
 A plugin can add a web search API to Settings › Models › Web search with a
-`search` hook (magpie's own; OpenCode ignores it). It is listed after
+`search` hook (eipgam's own; OpenCode ignores it). It is listed after
 Tavily, Brave and the rest under its own name, and added, keyed, switched
-off, reordered and removed like them (`magpie search add <plugin>:<id> <key>`
-on the command line). magpie keeps its keys (several, tried in turn, a refused
+off, reordered and removed like them (`eipgam search add <plugin>:<id> <key>`
+on the command line). eipgam keeps its keys (several, tried in turn, a refused
 one resting), its order and its place in the request log, masks the query
 as it does for every search API, and asks the plugin only while the
 plugin is on and the Web search plugin is.
@@ -1489,7 +1488,7 @@ export const MojeekSearch = async () => ({
 ```
 
 `execute` returns `[{ title, url, text?, age? }]` (or `{ results: [...] }`);
-magpie strips tags and cuts each page's text. A throw with a numeric
+eipgam strips tags and cuts each page's text. A throw with a numeric
 `status` (and `retryAfter`, its Retry-After) is the API refusing the key,
 treated as a built-in's 401/402/403/429 is; any other throw is a failure
 and the next search API is asked. It has the time a search API has
@@ -1548,11 +1547,11 @@ event of a streamed reply and `onResponse(body, ctx)` a whole one, all in
 the agent's own API. A hook returns the changed object, or nothing to
 leave it; `onEvent` returns `null` to drop an event, and
 `ctx.reject(status, message)` turns a request away. Declare it with
-`"magpie": { "middleware": "./mw.js" }` in `package.json`, or add a single
+`"eipgam": { "middleware": "./mw.js" }` in `package.json`, or add a single
 `*.middleware.js` file:
 
 ```js
-// alias.middleware.js — magpie plugin add ./alias.middleware.js
+// alias.middleware.js — eipgam plugin add ./alias.middleware.js
 export const events = ["message_start"]
 export function onRequest(body, ctx) {
   ctx.state.asked = body.model
@@ -1570,7 +1569,7 @@ a JavaScript engine written in Go (about a microsecond a streamed event),
 not on Bun: no timers, `fetch` or Node APIs, and imports only of files
 beside it. A hook that throws or takes too long (250 ms a request, 50 ms an
 event) leaves what it was given as it was. Settings → Plugins shows each
-middleware's calls, time and failures. The [plugin guide](https://usemagpie.ai/docs/plugins#middleware)
+middleware's calls, time and failures. The [plugin guide](subsystems/gateway-middleware.md)
 has the rest.
 
 Middleware runs through the built-in plugin `middleware` (Gateway
@@ -1584,16 +1583,16 @@ isn't serving, a request gets a 503 and nothing is sent.
 them with its **Options** button in Plugins › Installed, or
 
 ```sh
-magpie plugin options model-map '{"mapping": {"fast": "moonshot/kimi-k2.6"}}'
-magpie plugin options model-map off   # clears them
+eipgam plugin options model-map '{"mapping": {"fast": "moonshot/kimi-k2.6"}}'
+eipgam plugin options model-map off   # clears them
 ```
 
 The name can be a package's short name (`model-map` for
 `@magpie-community/middleware-model-map`). A package's
-`"magpie": { "options": {…} }` is the example the editor starts from.
+`"eipgam": { "options": {…} }` is the example the editor starts from.
 A key that a provider plugin declares as a switch for its provider (the
 editor's Plugin options, such as Cursor's `wire_trace`) goes where the
-plugin reads it, beside the switches the editor saves: `magpie plugin
+plugin reads it, beside the switches the editor saves: `eipgam plugin
 options cursor '{"wire_trace": true}'` turns it on, and `off` puts every
 switch back to the plugin's default.
 
@@ -1603,17 +1602,17 @@ with the same JSON: `param-override` (`param_override`), `model-map`
 (`model_mapping`), `system-prompt`, `word-guard` (sensitive words) and
 `think-tags` (strip `<think>…</think>`, or `thinking_to_content`), and
 `antigravity-cloak`, which keeps words Antigravity turns a system prompt
-away for out of what it sends Antigravity alone (magpie itself already
+away for out of what it sends Antigravity alone (eipgam itself already
 rewords the lines it knows of: Codex's, Claude Code's, Hermes' earlier
-persona, omp's; `magpie provider set antigravity prompt=as-written` turns
+persona, omp's; `eipgam provider set antigravity prompt=as-written` turns
 that off). A
 middleware's entry in the community `registry.json` has
 `"kind": "middleware"` and no `providers`.
 
 #### Agent plugins
 
-A plugin can add an agent magpie has no setup of its own for. Its
-`package.json` names the module (`"magpie": { "agent": "./agent.js" }`), or
+A plugin can add an agent eipgam has no setup of its own for. Its
+`package.json` names the module (`"eipgam": { "agent": "./agent.js" }`), or
 it is a single `*.agent.js` file:
 
 ```js
@@ -1621,7 +1620,7 @@ export const agent = {
   id: "aider", name: "Aider", bin: "aider",
   config: "~/.aider.conf.yml",   // json, yaml or env
   model: "model",                // the key of the model
-  prefix: "openai/",             // written before magpie's model id
+  prefix: "openai/",             // written before eipgam's model id
   ua: ["aider", "litellm"],
 }
 export function connect({ gateway, model, models, decisionModels }) {
@@ -1629,7 +1628,7 @@ export function connect({ gateway, model, models, decisionModels }) {
 }
 ```
 
-It is then on the Agents page like magpie's own: picking one of magpie's
+It is then on the Agents page like eipgam's own: picking one of eipgam's
 models writes the model and what `connect` returns, and its own model or
 Disconnect puts every key back as it was. It runs in moejs like middleware.
 `connect` gets `gateway` (`url`, `v1`, `key`), `model` and `models` (each
@@ -1647,7 +1646,7 @@ call costs. Each is left out when it isn't known (a routing group has no
   "pricing": { "prompt": "0.0000003", "completion": "0.0000012", "input_cache_read": "0.00000003" } }
 ```
 
-`connect` also gets `decisionModels`: magpie's decision models (Jev, Clef,
+`connect` also gets `decisionModels`: eipgam's decision models (Jev, Clef,
 a vendor's or a plugin's model marked `decides`, as the routing groups'
 pickers offer them), and the routing groups made of them. They are kept
 out of `models`, which an agent offers for a conversation, and out of
@@ -1664,30 +1663,30 @@ It is `[]` when there are none:
 An agent that takes the gateway only from how it is started, not from a
 file, says so in `launch`: `{ env: { GEMINI_API_KEY: "{key}",
 GOOGLE_GEMINI_BASE_URL: "{url}" }, model: "--model" }`. While its model is
-one of magpie's, magpie puts a function named after its `bin` in the
-user's shells (zsh, bash, fish, PowerShell) that runs `magpie <id> run`,
+one of eipgam's, eipgam puts a function named after its `bin` in the
+user's shells (zsh, bash, fish, PowerShell) that runs `eipgam <id> run`,
 which starts the agent with those variables and the model flag; its own
 model takes the function out. A value is `{key}`, `{url}` or `{v1}`, a
 path after the address at most, so nothing else a plugin says reaches a
 shell profile. Beside `launch`:
 
 - `merge`: key paths of a json config whose object `connect` returns
-  magpie's members of, written beside the user's own and taken out alone
+  eipgam's members of, written beside the user's own and taken out alone
   (`["customModelsConfig.customModels"]`);
 - `launch.args`: flags put before the user's arguments, each `{config}`,
   the config's path (`{ "--settings": "{config}" }`); `launch.plain`:
   arguments that start the agent as it is, never on the gateway
   (`["remote-control"]`);
-- `base`: for a config handed over by `launch.args`, so magpie's own
+- `base`: for a config handed over by `launch.args`, so eipgam's own
   file, the agent's own settings file: `connect` and `own` get it as
   `base`, the user's own model is written there, and stepping out takes
   the config away whole;
 - `own({ config, base, model })`: the user's own models for the picker, each
   `{ value, model, direct }`, `direct` naming the vendor it goes to;
 - `effort: true`, the Effort field; `wsl: true`, the agent in WSL
-  distros too; `aliases`, other names `magpie <name>` takes.
+  distros too; `aliases`, other names `eipgam <name>` takes.
 
-An id magpie's own agents use is refused, except a built-in's that moves
+An id eipgam's own agents use is refused, except a built-in's that moves
 onto a community plugin: with `@magpie-community/agent-agy` installed and
 on, `agy` is the plugin's, and what the built-in had wired is handed over
 as the plugin's, so nothing changes for the user; with it off or removed,
@@ -1715,10 +1714,10 @@ is counted at whatever the model's maker charges. Say what a provider
 actually charges, and the usage ledger and the session totals use that:
 
 ```sh
-magpie model price relay-a/gpt-5.5                        # what it is counted at, and where that came from
-magpie model price relay-a/gpt-5.5 0.12,0.60,0.01,0.15   # input,output,cache read,cache write
-magpie model price relay-a/gpt-5.5 --reset                # take your price off this model
-magpie model prices                                       # every model you priced
+eipgam model price relay-a/gpt-5.5                        # what it is counted at, and where that came from
+eipgam model price relay-a/gpt-5.5 0.12,0.60,0.01,0.15   # input,output,cache read,cache write
+eipgam model price relay-a/gpt-5.5 --reset                # take your price off this model
+eipgam model prices                                       # every model you priced
 ```
 
 The four numbers are USD per million tokens. All four are asked for, because
@@ -1732,22 +1731,22 @@ relay that sells `kimi-k3` as `moonshot-kimi-k3` answers as `kimi-k3`, so its
 calls are counted at `relay-a/kimi-k3`'s price. A model with a price of its
 own, `0` included, keeps it when the reply's name is that model however
 spelled, the vendor's own alias, or a relay's rename. A call the vendor
-genuinely answered with another model — the `swapped` mark `magpie usage
+genuinely answered with another model — the `swapped` mark `eipgam usage
 --csv` and the Requests page show — is counted at the model that answered,
 which is the one the vendor billed for; a price you set for the model you
 asked for, `0` included, still says what that model costs you, and when the
 model that answered has no price the asked-for one's is kept.
 
-`magpie model price provider/model` says where a price came from, and for a
+`eipgam model price provider/model` says where a price came from, and for a
 model with none, the two commands that give it one.
 
 A call with no price at all is left out of a total's cost, never counted as
 free: the Usage page's sum says how many calls it couldn't price beside it
 ("≈$1.20+", then "3 calls unpriced"; Sessions, which prices by model, says how
-many models), and `magpie usage` and the terminal app's Usage page say the
-same after their totals. magpie doesn't guess a variant's price from a
+many models), and `eipgam usage` and the terminal app's Usage page say the
+same after their totals. eipgam doesn't guess a variant's price from a
 similar name (`-auto`, `-max`, `-fast` can each cost differently); give it
-one with `magpie model price`, or in the provider's editor under the model.
+one with `eipgam model price`, or in the provider's editor under the model.
 
 A **Kimi Code** membership's models are counted at the Kimi API model each
 one is, not at the $0 models.dev lists them at for the plan: `k3` and
@@ -1755,7 +1754,7 @@ one is, not at the $0 models.dev lists them at for the plan: `k3` and
 at `kimi-k3.1-pro-highspeed`, `kimi-for-coding-highspeed` at
 `kimi-k2.7-code-highspeed`. `kimi-for-coding` is K2.8 Preview, which the API
 doesn't sell, so it has no price until you give it one
-(`magpie model price kimi-code/kimi-for-coding …`).
+(`eipgam model price kimi-code/kimi-for-coding …`).
 
 A **fifth number** is a 1-hour cache write's price. Anthropic bills a cache
 write kept for 5 minutes at 1.25× input and one kept for an hour at 2× input,
@@ -1767,9 +1766,9 @@ cache write at one price however long it is kept (its `copilot_usage` counts a
 1-hour write as the `cache_write` a 5-minute one is), so a model on Copilot has
 no 1-hour price unless you give one, Claude's too. Any other model has
 no 1-hour price unless you give one: a 1-hour write it reports is counted at
-the 5-minute price, and neither `magpie model price` nor the app's boxes show
+the 5-minute price, and neither `eipgam model price` nor the app's boxes show
 a 1-hour price for it. A call recorded
-before magpie kept the split counts all its writes at the 5-minute price, as
+before eipgam kept the split counts all its writes at the 5-minute price, as
 it did.
 
 A **long-context price** is what the whole request costs once its prompt is
@@ -1777,7 +1776,7 @@ over a size, as OpenAI bills gpt-6-astra, gpt-6.1-sol and gpt-6-luna over
 272K input (2× input and cache, 1.5× output):
 
 ```sh
-magpie model price openai/gpt-6-astra 10,50,1,12.5 --tier 272k 20,75,2,25
+eipgam model price openai/gpt-6-astra 10,50,1,12.5 --tier 272k 20,75,2,25
 ```
 
 The size counts the prompt the way OpenAI does: uncached input + cache reads
@@ -1801,7 +1800,7 @@ on the model in the provider's model editor (`"modelSameAs":
 {"workbuddy/kimi-k3-1": "kimi-k3"}` in settings.json) and its calls are
 costed at Kimi K3's list price, at the provider's price rate, never at
 another provider's tariff. A model with no Same as is never matched to
-another by its name. `magpie model price <provider/model>` says when a
+another by its name. `eipgam model price <provider/model>` says when a
 price came from it.
 `--reset` removes the first, and says so when a `<provider id>/*` price is
 still in force; reset that one by name to take it away too.
@@ -1823,15 +1822,15 @@ single provider-wide price.
 ### Counting two ids as one model
 
 A vendor can name one model two ways, as `deepseek-v4.1-flash` and
-`deepseek-flash`, and Usage, Sessions and `magpie usage` then show it as two
+`deepseek-flash`, and Usage, Sessions and `eipgam usage` then show it as two
 rows. Say they are one, and every place that counts usage by model counts
 them under the name you gave:
 
 ```sh
-magpie model alias deepseek-v4.1-flash deepseek-flash   # count it as deepseek-flash
-magpie model alias deepseek-v4.1-flash                  # what it is counted as
-magpie model alias deepseek-v4.1-flash --reset          # under its own id again
-magpie model aliases                                    # every alias you set
+eipgam model alias deepseek-v4.1-flash deepseek-flash   # count it as deepseek-flash
+eipgam model alias deepseek-v4.1-flash                  # what it is counted as
+eipgam model alias deepseek-v4.1-flash --reset          # under its own id again
+eipgam model aliases                                    # every alias you set
 ```
 
 It is kept in settings.json as `"usageAliases": {"deepseek-v4.1-flash":
@@ -1854,14 +1853,14 @@ own id.
 ### What a model takes
 
 A provider that serves a model models.dev does not list, or lists at the
-wrong size, has a window and a reply limit magpie cannot know. Say what they
+wrong size, has a window and a reply limit eipgam cannot know. Say what they
 are:
 
 ```sh
-magpie model context relay-a/gpt-5.5 262144    # the window a request may hold, or 1m
-magpie model output  relay-a/gpt-5.5 131072    # the most a reply may hold, or 128k
-magpie model context "relay-a/*" 200000        # every model of that provider
-magpie model output  relay-a/gpt-5.5 --reset   # take your limit off this model
+eipgam model context relay-a/gpt-5.5 262144    # the window a request may hold, or 1m
+eipgam model output  relay-a/gpt-5.5 131072    # the most a reply may hold, or 128k
+eipgam model context "relay-a/*" 200000        # every model of that provider
+eipgam model output  relay-a/gpt-5.5 --reset   # take your limit off this model
 ```
 
 The `*` is quoted because zsh treats a name it cannot expand as a command
@@ -1885,30 +1884,30 @@ told it. Only a model whose limit nobody knows goes at 16384. A reply that
 runs into it ends with `stop_reason: max_tokens`, which a Responses client
 reads as `incomplete_details.reason: "max_output_tokens"` (#1792).
 
-Saving a window or a reply limit writes that number into the model lists magpie
+Saving a window or a reply limit writes that number into the model lists eipgam
 keeps in the agents' own files — Pi's `contextWindow` and `maxTokens`, OpenCode's
 `limit`, and Crush's, droid's, Cline's, Qoder's and Zcode's — which an agent reads
 at start-up. A session already running therefore keeps the window it began with,
 while the gateway's own `/models` and every request from then on are right at
 once.
 
-#### All of a model at once: `magpie model spec`
+#### All of a model at once: `eipgam model spec`
 
-`magpie model spec` sets a model's window, reply limit, vision and reasoning
-levels in one command, and says where each value magpie goes by came from:
+`eipgam model spec` sets a model's window, reply limit, vision and reasoning
+levels in one command, and says where each value eipgam goes by came from:
 
 ```sh
-magpie model spec kenari/glm-5:free                          # what it has, and whether each is yours
-magpie model spec kenari/glm-5:free --context 128k --output 16k --vision on --reasoning low-high
-magpie model spec kenari/glm-5:free --reasoning low,medium,high   # a list instead of a range
-magpie model spec kenari/glm-5:free --reasoning off          # send it no reasoning field
-magpie model spec kenari/glm-5:free --vision auto            # take one value of yours off
-magpie model spec "kenari/*" --context 200000 --output 32k   # every model of the provider without its own
-magpie model spec kenari/glm-5:free --reset                  # take every value of yours off
-magpie model specs                                           # the models you gave a spec
+eipgam model spec kenari/glm-5:free                          # what it has, and whether each is yours
+eipgam model spec kenari/glm-5:free --context 128k --output 16k --vision on --reasoning low-high
+eipgam model spec kenari/glm-5:free --reasoning low,medium,high   # a list instead of a range
+eipgam model spec kenari/glm-5:free --reasoning off          # send it no reasoning field
+eipgam model spec kenari/glm-5:free --vision auto            # take one value of yours off
+eipgam model spec "kenari/*" --context 200000 --output 32k   # every model of the provider without its own
+eipgam model spec kenari/glm-5:free --reset                  # take every value of yours off
+eipgam model specs                                           # the models you gave a spec
 ```
 
-It writes the same stores `magpie model context`, `output`, `images` and
+It writes the same stores `eipgam model context`, `output`, `images` and
 `efforts` do — the window in providers.json, the rest in settings.json
 (`modelOutputs`, `modelImages`, `modelEfforts`, `modelReasonless`) — so the
 order above holds for each part, and a catalog refresh keeps them. A model
@@ -1916,16 +1915,16 @@ nothing knew the levels of can be given them (`--reasoning low-high`), and
 a request to it is sent at the nearest of those. One that has its own can
 only be narrowed to some of them, which narrows what agents are offered:
 the vendor is still asked at any level it has, as with
-`magpie model efforts`. A bad number, an
+`eipgam model efforts`. A bad number, an
 unknown flag, a level that isn't one, or a range that runs backwards is
 refused, and nothing of the command is written.
 
-What you set wins everywhere magpie reads a model: the app's badges and
+What you set wins everywhere eipgam reads a model: the app's badges and
 level chips, the gateway's `/v1/models` (`context_window`,
 `max_output_tokens`, `reasoning_levels`), the `max_tokens` a request is sent
 with, whether images reach it or are described
-first, which model magpie picks to describe images, and the model lists
-magpie writes into the agents.
+first, which model eipgam picks to describe images, and the model lists
+eipgam writes into the agents.
 
 ### The name a vendor knows a model by
 
@@ -1934,11 +1933,11 @@ with, a dated name, a `-latest` that is not what models.dev calls it. Say
 which name to ask for:
 
 ```sh
-magpie model wire relay-b/model-2                           # what the vendor is asked for
-magpie model wire relay-b/model-2 vendor-c/model-2-preview  # ask for it by this
-magpie model wire 'relay-b/*' 'vendor-c/*'                  # every model, * being the model
-magpie model wire relay-b/model-2 --reset                   # ask for it by its own name again
-magpie model wires                                          # every name your vendors are asked for models by
+eipgam model wire relay-b/model-2                           # what the vendor is asked for
+eipgam model wire relay-b/model-2 vendor-c/model-2-preview  # ask for it by this
+eipgam model wire 'relay-b/*' 'vendor-c/*'                  # every model, * being the model
+eipgam model wire relay-b/model-2 --reset                   # ask for it by its own name again
+eipgam model wires                                          # every name your vendors are asked for models by
 ```
 
 Quote the arguments with a `*` in them: zsh reads a bare `*` as a glob and
@@ -1957,16 +1956,16 @@ removal that took nothing away.
 
 Only the request that goes out carries that name, in the model field of a
 chat, Responses or Anthropic Messages request and of an Anthropic token
-count; image requests are left with the name magpie knows the model by.
+count; image requests are left with the name eipgam knows the model by.
 Gemini CLI and Antigravity sign-ins go on Code Assist, and there the model
-an effort picks is a variant of the model magpie knows — `gemini-3.7-flash`
+an effort picks is a variant of the model eipgam knows — `gemini-3.7-flash`
 at `high` is sent as `gemini-3.7-flash-high` — so a `*` in the name is that
 variant: `'antigravity/*' 'vendor-c/*'` asks for `vendor-c/gemini-3.7-flash-high`
 and `vendor-c/gemini-3.7-flash-low` each by its own, as it does everywhere
 else. A name with no `*` in it, or one given for `antigravity/gemini-3.7-flash`
 itself, is that one name at every level.
 
-Everything else keeps the name magpie knows the model by: the catalog agents
+Everything else keeps the name eipgam knows the model by: the catalog agents
 pick from, the routing groups' membership, `GET /models`, and what a call is
 recorded and priced as. What the vendor's own reply said answered is kept
 beside that, in the ledger's `served_model`, which is what it is for, and it
@@ -1976,21 +1975,21 @@ in force when the ledger is read, since a record keeps what the vendor
 answered and not the name the request went out under: naming a model after
 the call re-judges that call, which is then left reading as a swap. What a
 provider *supports* — whether it takes a temperature, which reasoning levels
-fit — is still asked about the model magpie knows, so a rename upstream does
-not change how magpie behaves towards the model.
+fit — is still asked about the model eipgam knows, so a rename upstream does
+not change how eipgam behaves towards the model.
 
 An upstream name is **one provider's**, not the model's: another provider
 serving the same id is asked for it under its own name, or this one. The
 model it is given for has to be one that provider serves — `<provider>/*`
-is the way to say one for every model — because a name for a model magpie
+is the way to say one for every model — because a name for a model eipgam
 would never ask the provider for is not a name of its own: the model is
-asked for by the name magpie knows it by, and nothing anywhere would say the
+asked for by the name eipgam knows it by, and nothing anywhere would say the
 name given for it is not the one in force. A relay that serves a model under
 an id of its own *and* lists it does get the name; what is refused is a
 model the provider's list does not have at all. The model test uses the name
 too, so a relay that only knows its own ids does not report a working model
 as broken. An image model is the exception that follows the rule above: it is
-tested by the name magpie knows it by, on the images API and on the chat it
+tested by the name eipgam knows it by, on the images API and on the chat it
 falls back to, because that is how a drawing is asked for.
 
 ### The API a model is asked on
@@ -1998,22 +1997,22 @@ falls back to, because that is how a drawing is asked for.
 A relay whose one key serves some models on chat completions and others on
 Responses, Anthropic's messages or Gemini's generateContent can be told which
 API each model is asked on. It is the provider editor's **API this model is
-asked on**, under Model settings, and `magpie model api` sets the same
+asked on**, under Model settings, and `eipgam model api` sets the same
 setting from the terminal, so a script can set many models:
 
 ```sh
-magpie model api relay/gpt-5.5                                  # what it is asked on, and what the provider has
-magpie model api relay/gpt-5.5 responses                        # chat, responses, anthropic, gemini or auto
-magpie model api relay/claude-opus-5-5 relay/claude-sonnet-5 anthropic   # several at once
-magpie model api relay/gpt-5.5 --reset                          # auto again: the vendor's list and every URL
-magpie model apis                                               # the models you set an API for
-magpie model apis relay                                         # each of relay's models and its API
-magpie model tier relay/gpt-5.5 ultrafast                      # fast, ultrafast or usual: the speed every request for it is sent at
+eipgam model api relay/gpt-5.5                                  # what it is asked on, and what the provider has
+eipgam model api relay/gpt-5.5 responses                        # chat, responses, anthropic, gemini or auto
+eipgam model api relay/claude-opus-5-5 relay/claude-sonnet-5 anthropic   # several at once
+eipgam model api relay/gpt-5.5 --reset                          # auto again: the vendor's list and every URL
+eipgam model apis                                               # the models you set an API for
+eipgam model apis relay                                         # each of relay's models and its API
+eipgam model tier relay/gpt-5.5 ultrafast                      # fast, ultrafast or usual: the speed every request for it is sent at
 ```
 
 It is saved as the editor's Save saves it (`provider.SetModelPrefs`, into
 `modelAPIs` in settings.json), so a running gateway asks the model on that
-API from its next request, and the model lists magpie writes into the agents
+API from its next request, and the model lists eipgam writes into the agents
 are brought up to date. The provider needs a URL for the API (More endpoints
 in its editor) and at least two of the four for there to be a choice; Vertex
 AI's model ids say their own. An API that isn't one, an API the provider has
@@ -2033,7 +2032,7 @@ provider with no System One URL, one with only that URL, and a signed-in
 account refuse it.
 
 ```sh
-magpie model api relay/ep-decide decide   # asked on System One
+eipgam model api relay/ep-decide decide   # asked on System One
 ```
 
 ### Routing groups
@@ -2042,18 +2041,18 @@ A routing group is several models, from one provider or many, that an agent
 picks as one: `group/<id>`. The gateway routes each request over every
 member's keys and accounts together. A model two of your providers serve
 under the same name becomes a group on its own; the Routing view in the app
-and `magpie group` make any other:
+and `eipgam group` make any other:
 
 ```sh
-magpie groups                           # yours, then those magpie found
-magpie group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=order stays=session
-magpie group opus-anywhere              # one group, its models in order
-magpie group set opus-anywhere models+=openrouter/anthropic/claude-opus-5.5 routing=usage
-magpie group set opus-anywhere models-=copilot/claude-opus-5.5
-magpie group set opus-anywhere routing=weight weight=claude/claude-opus-5-5=3,copilot/claude-opus-5.5=1
-magpie group copy opus-anywhere "Opus test"  # the same models, routing and rules, to change on its own
-magpie group rm opus-anywhere           # one magpie found is hidden; magpie group restore <id> brings it back
-magpie claude group/opus-anywhere       # use it
+eipgam groups                           # yours, then those eipgam found
+eipgam group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=order stays=session
+eipgam group opus-anywhere              # one group, its models in order
+eipgam group set opus-anywhere models+=openrouter/anthropic/claude-opus-5.5 routing=usage
+eipgam group set opus-anywhere models-=copilot/claude-opus-5.5
+eipgam group set opus-anywhere routing=weight weight=claude/claude-opus-5-5=3,copilot/claude-opus-5.5=1
+eipgam group copy opus-anywhere "Opus test"  # the same models, routing and rules, to change on its own
+eipgam group rm opus-anywhere           # one eipgam found is hidden; eipgam group restore <id> brings it back
+eipgam claude group/opus-anywhere       # use it
 ```
 
 `routing=` is `smart` (the default: of the subscriptions with quota to
@@ -2068,9 +2067,9 @@ weight is 1 to 1000, `weight=` alone clears them all, and a group in the
 group counts as one member, `weight=group/fast=2`). `fast` (speed first; also `fastest`, `speed`) sends each request to
 the member that answered fastest lately, by the time to its first token
 and how fast it wrote: compare the same model on several API channels and
-the quickest goes first. `magpie provider set <id> routing=fast` does the
+the quickest goes first. `eipgam provider set <id> routing=fast` does the
 same for one provider's keys. A key has no allowance to weigh, so it goes by its
-order or by what magpie sent it lately — except a sub2api key its owner gave
+order or by what eipgam sent it lately — except a sub2api key its owner gave
 a 5-hour, day or 7-day limit: with the provider's Balance URL set to the
 relay's `/v1/usage`, its card shows those windows and routing weighs it by
 them as it does a subscription, resting it till the window renews once the
@@ -2087,12 +2086,12 @@ its errors go to the agent).
 one provider serves it.
 
 `listed=no` (the group editor's **Model lists: The group alone**) keeps the
-models a group names, and those its patterns match, out of `magpie models`,
+models a group names, and those its patterns match, out of `eipgam models`,
 `/v1/models` and every agent's list, so a client offers the group alone.
 A signed-in subscription's models leave the lists too. Codex alone keeps its
 ChatGPT sign-in's own models, which its app reaches on that sign-in.
 The group stands in for them only where it is given: a gateway key that
-may use none of the groups listing a model alone (a Remote magpie's key
+may use none of the groups listing a model alone (a Remote eipgam's key
 held to `codex/*`) is listed that model, when it may use it, and the
 Gateway page's key picker offers each one.
 They are still served: the group routes over them, and a request naming one
@@ -2112,8 +2111,8 @@ key) rests and the next is asked, and the Routing page's Requests list shows
 every try. It takes no patterns, rules, classifier, effort or fast mode.
 
 ```sh
-magpie group add Jevs models=typesafe/jev-latest,openrouter/~typesafe/jev-latest routing=order
-curl -s localhost:3425/v1/systemone -H 'Authorization: Bearer magpie' \
+eipgam group add Jevs models=typesafe/jev-latest,openrouter/~typesafe/jev-latest routing=order
+curl -s localhost:3425/v1/systemone -H 'Authorization: Bearer eipgam' \
   -d '{"model":"group/jevs","state":{"message":"fix the login bug"},"questions":{"intent":{"type":"choice","choices":["bug","feature"]}}}'
 ```
 
@@ -2147,7 +2146,7 @@ the offered configurations on this device across window restarts; new or changed
 configurations can be offered again. **Add provider → Import…** still includes ignored configurations.
 Discovery runs in the background, at most once a minute when opening or
 refreshing the page, and refreshes after an import. Configurations already in
-magpie, entries that cannot be imported, providers turned off in their source
+eipgam, entries that cannot be imported, providers turned off in their source
 app, and ID collisions that cannot join as another key are excluded from the
 hint. The latter two remain available through manual import. Counts refer to
 configurations in source apps, which may include the same provider
@@ -2156,27 +2155,27 @@ reach the automatic hint; ignored fingerprints are kept in local browser storage
 
 The app's Import from other apps dialog can copy providers from Claude Code's
 `settings.json` (`CLAUDE_CONFIG_DIR` when set) and Codex's `config.toml`
-(`CODEX_HOME` when set) into magpie. Codex imports custom
+(`CODEX_HOME` when set) into eipgam. Codex imports custom
 `[model_providers.*]` entries with an inline `experimental_bearer_token`,
 including fixed headers for custom providers in
 `[model_providers.*.http_headers]` and models from
 `[profiles.*]` or `model_catalog_json`. Review the entries before importing;
-subsequent changes to agent settings are not automatically copied to magpie.
-Entries that point back to magpie or only name an `env_key` are skipped.
+subsequent changes to agent settings are not automatically copied to eipgam.
+Entries that point back to eipgam or only name an `env_key` are skipped.
 
 The same dialog reads OpenCode's own sign-ins, `auth.json` in
 `$XDG_DATA_HOME/opencode` (`~/.local/share/opencode` when unset, on Windows
 too), where `opencode auth login` keeps them. An API key comes in on the
-magpie preset at the same address: OpenCode Go's key on OpenCode Go, Zen's
+eipgam preset at the same address: OpenCode Go's key on OpenCode Go, Zen's
 (`opencode`) on OpenCode Zen, and a vendor's (OpenAI, Anthropic, Kimi,
 OpenRouter and others) on its own. OpenCode keeps no address beside a key,
-so one of a provider magpie has no preset for is listed and skipped. Sign-ins
+so one of a provider eipgam has no preset for is listed and skipped. Sign-ins
 (Claude Pro/Max, Copilot, an enterprise server's token) are listed and
-skipped; add the subscription in magpie instead. OpenCode is read only when
+skipped; add the subscription in eipgam instead. OpenCode is read only when
 you open the dialog: the Providers page's automatic check leaves it out, as
-the file holds every sign-in OpenCode has. magpie never writes to it.
+the file holds every sign-in OpenCode has. eipgam never writes to it.
 
-### How magpie picks an account
+### How eipgam picks an account
 
 When a subscription has several accounts on (Claude Code's or Codex's
 saved accounts, say), or a routing group has several members, the gateway
@@ -2247,7 +2246,7 @@ each of these groups ordered by the share used.
   end) go by when their credits left run out after that: the one whose
   credits are lost first goes first, and one with none that run out
   after those whose do. A Claude or ChatGPT account
-  magpie knows nothing of yet goes first once, to learn what it has left
+  eipgam knows nothing of yet goes first once, to learn what it has left
   from the answer (a ChatGPT account, while another is known: one whose
   usage can't be read is asked so again an hour after its last answer,
   until its answers tell its week); any other unknown account goes after
@@ -2275,7 +2274,7 @@ each of these groups ordered by the share used.
   conversation goes to the account the fewest other conversations of the
   last 30 minutes are on.
 - **Least used first**: the lowest share used first; then the account
-  magpie sent the fewest tokens lately (half of them stop counting after an
+  eipgam sent the fewest tokens lately (half of them stop counting after an
   hour). An account not known counts as unused.
 - **Use before expiry**: the account with the highest pace first. Pace is the
   share of the week left divided by the hours until the week renews (at
@@ -2289,14 +2288,14 @@ each of these groups ordered by the share used.
   28 days. When the vendor doesn't say how much expires, all that is left
   counts. Accounts whose
   pace is within a tenth of the highest in their band count as alike, and
-  among them the one magpie sent the fewest tokens lately goes first. A
+  among them the one eipgam sent the fewest tokens lately goes first. A
   Claude or ChatGPT account not known goes first once, as in Smart (a
   ChatGPT one while another is known); another unknown account counts as
   a fresh week. A ChatGPT account whose usage
   page can't be read is known from the week its answers tell, until a
   reading works again.
 - **Speed first**: the account, key or group member that answered this
-  model fastest lately first. magpie keeps, in memory, how long each one's
+  model fastest lately first. eipgam keeps, in memory, how long each one's
   streamed answers took to their first token and how many tokens a second
   they wrote after it, newer answers counting more (a 20-minute
   half-life), and ranks them by the time a 200-token reply would take.
@@ -2330,10 +2329,10 @@ routed by one of them. Turned off, the pickers offer Smart alone, and a
 provider or group still set to one of them is tried in its listed order.
 
 Your own routing groups are the built-in plugin `groups` (Routing groups in
-Plugins › Built-in), which stays on while you have one. The groups magpie
+Plugins › Built-in), which stays on while you have one. The groups eipgam
 finds for a model two providers serve don't need it. Turned off, the gateway
 doesn't list or serve a group of your own, and the Routing groups page has no New
-group button; `magpie groups` still lists them.
+group button; `eipgam groups` still lists them.
 
 **Make first** sets the accounts' order. How much that order counts
 depends on the routing:
@@ -2344,7 +2343,7 @@ depends on the routing:
 | In turn | Where the rotation goes next. |
 | Smart | Only between accounts whose windows all renew in the same hours, or whose shares used are equal. |
 | Least used first | Only between accounts with the same share used and the same tokens sent lately. |
-| Use before expiry | Only between accounts in the same pace band that magpie sent the same tokens lately, in practice none since magpie started. |
+| Use before expiry | Only between accounts in the same pace band that eipgam sent the same tokens lately, in practice none since eipgam started. |
 | Speed first | Only between those within a tenth of each other's speed, and among those not measured lately. |
 | Cheapest first | Only between those that cost the same now, and among those with no known price. |
 
@@ -2358,10 +2357,10 @@ rests the account until it is back, and the same request goes to the next
 candidate at once, as long as none of the reply has been sent. How long it
 rests comes from the first of these that is known: the reset time in the
 refusal (Claude Code's `usage limit reached|<time>`, ChatGPT's
-`resets_at`), the reset of a window magpie last read as used up (98%, 100%
+`resets_at`), the reset of a window eipgam last read as used up (98%, 100%
 In order), the vendor's `Retry-After` or rate-limit reset header (an hour
 at most), else 15 minutes. A key's provider can rest longer of its own:
-`magpie provider quota-rest <id> 6h`, or `until 08:00` for an allowance
+`eipgam provider quota-rest <id> 6h`, or `until 08:00` for an allowance
 that comes back at a time of day (`until 00:00+08:00` on the vendor's
 clock). Its own rest stands over a `Retry-After` that asked for more than
 the hour. It is never longer than 8 days. The account's
@@ -2374,10 +2373,10 @@ the account for as long as the vendor asks (an hour at most), or a
 minute, doubled each time it comes back right after its rest, up to 30
 minutes. Out of credit rests half an hour. Any other failure rests a minute, longer each time it fails
 again, up to 10 minutes; a subscription that fails with a window used up
-rests until that window renews. `magpie provider rest-cap <id> 4h` moves
+rests until that window renews. `eipgam provider rest-cap <id> 4h` moves
 both of those caps, 30 and 10 minutes, for one provider's keys and
 accounts, from 1 minute (every rest a minute) up to 8 days; `default` gives
-them back. `magpie provider rest-cap <id> off` is for a relay or an account
+them back. `eipgam provider rest-cap <id> off` is for a relay or an account
 pool whose unknown errors come now and then: a key or account of it that
 fails without saying why (a 5xx, a dropped connection) doesn't rest at all,
 and the next request asks it again. A refused key (401, 403), a model it
@@ -2397,19 +2396,19 @@ API. Codex and Chat clients get a 400 saying the model refused the request,
 which they don't ask again for. Any other 400 is never asked again.
 
 **Through the gateway, or on its own.** Everything above is the gateway's,
-for requests sent through magpie. Claude Code or Codex used on its own
+for requests sent through eipgam. Claude Code or Codex used on its own
 talks to the vendor with the account it is signed in to, and routing
-never sees it. For that, magpie looks at the account the agent is signed
+never sees it. For that, eipgam looks at the account the agent is signed
 in to a minute after it starts and every 5 minutes after (Codex's every
 30 minutes while it has written no session for half an hour, read at the
 next look once it writes one again; every minute near its cap): once it has used
-98% of a window (100% In order), or reached its usage cap, magpie signs
+98% of a window (100% In order), or reached its usage cap, eipgam signs
 the agent in to the next ticked account, in their order, whose allowance
-is known and under that share. A saved Claude account magpie knows
+is known and under that share. A saved Claude account eipgam knows
 nothing of yet (see below) is read first. When every other account is
-past that share too, magpie moves the agent to the one with the most room
+past that share too, eipgam moves the agent to the one with the most room
 left, if it has at least a point more than the account it is on; else the
-agent stays. `magpie accounts switch claude next` (or `codex next`) does
+agent stays. `eipgam accounts switch claude next` (or `codex next`) does
 the same by hand: the next account after the one the agent is on, in
 their order and wrapping round, that has room, or the one with the most
 room left when none has. It takes accounts that aren't ticked too, as
@@ -2422,38 +2421,38 @@ it. *Keep … signed in to* turns this off: the agent stays on the first
 account, or on the account you picked, whatever it has left. It changes nothing in the gateway's routing.
 
 Removing the account Codex or Claude Code is signed in to (its *Remove*,
-or `magpie accounts forget <codex|claude> <email|name>`) signs the agent
+or `eipgam accounts forget <codex|claude> <email|name>`) signs the agent
 in to another of its accounts first, as that one's *Use* would, then
 forgets this one; if that switch fails, nothing is removed. Codex's only
 account is signed out instead, as `codex logout` does. Claude Code is
 never signed out: when the account is the only one it can be signed in
-to (an account added by setup-token doesn't count), magpie keeps it and
+to (an account added by setup-token doesn't count), eipgam keeps it and
 says so. Add another account first, or sign out in Claude Code itself,
 then remove it.
 
-A Codex that isn't connected to magpie goes straight to OpenAI on its own
-sign-in, however many of its accounts are on: magpie only moves Codex's
+A Codex that isn't connected to eipgam goes straight to OpenAI on its own
+sign-in, however many of its accounts are on: eipgam only moves Codex's
 sign-in (`auth.json`) as above. Connected, a request the signed-in account
 has no allowance for goes on to the others through the gateway. *Only
-switch Codex's sign-in* under Providers › Codex (or `magpie accounts
-switch-only codex on`) keeps Codex's requests off magpie even then
+switch Codex's sign-in* under Providers › Codex (or `eipgam accounts
+switch-only codex on`) keeps Codex's requests off eipgam even then
 (#1907). An `openai_base_url` you wrote yourself stays. The
 Codex app and a running `codex app-server` read the sign-in when they
 start, so one already open stays on its account until it is opened again;
-a new `codex` session takes the new one. Connected to magpie, Codex's
+a new `codex` session takes the new one. Connected to eipgam, Codex's
 requests go through it as before.
 
-*Only switch Claude Code's sign-in* under Providers › Claude (or `magpie
+*Only switch Claude Code's sign-in* under Providers › Claude (or `eipgam
 accounts switch-only claude on`) keeps the Claude accounts to Claude
-Code alone, with one account too: magpie still moves Claude Code's own
+Code alone, with one account too: eipgam still moves Claude Code's own
 sign-in as above, and serves no request on them. They leave the model
 list, and a request that names them, from any agent, a group, a
-fallback or a Claude Code connected to magpie, is refused as kept to
+fallback or a Claude Code connected to eipgam, is refused as kept to
 Claude Code, so no turn runs through Claude Code's SDK mode, which
 spends more of the allowance than Claude Code used on its own (myduso on
 Discord). Their usage is still read and shown.
 
-**Switch accounts only.** To use magpie only to switch Claude Code (or
+**Switch accounts only.** To use eipgam only to switch Claude Code (or
 Codex) between your accounts, leave it not connected on Agents and sign
 your accounts in under Providers › Claude Code. Its row on Agents then
 shows the account it is signed in to; click it, and the *Switch accounts
@@ -2466,7 +2465,7 @@ it from any app, open Claude Code's (or Codex's) row and click its
 *account* line.
 
 **How often an allowance is read.** Routing uses what was read last and
-never waits for a reading, except the first one after magpie starts (3
+never waits for a reading, except the first one after eipgam starts (3
 seconds at most). A reading over a minute old is read again in the
 background as a request is routed, and an account that fails for its
 quota is read again at once; if a reading was already under way as it
@@ -2474,21 +2473,21 @@ failed, the account is read again as soon as that reading is back. A
 reading the Usage page made counts as one, its age from when it was made.
 Codex and most other subscriptions read every
 account from the vendor this way. A Codex account is also known from each
-reply ChatGPT sends magpie for it, which says what the account has used:
+reply ChatGPT sends eipgam for it, which says what the account has used:
 an account near its usage cap is held from the next turn on (#1295). A
 usage cap is set on the account's row for each of its windows, and a
 window can have one of its own, set from its meter: a five-hour window at
 50% and a weekly one at 40%, or no cap on one window. The account is held
 while any window is past its own. A
-usage cap is still a stop on what magpie has read, not a guarantee: a turn
+usage cap is still a stop on what eipgam has read, not a guarantee: a turn
 already under way can take an account past it, so a 99% cap doesn't
-promise 1% is left. Claude is different: magpie never asks
+promise 1% is left. Claude is different: eipgam never asks
 Anthropic itself. It reads only the account Claude Code is signed in to,
 by running Claude Code's `/usage`:
 
-- once after magpie starts;
+- once after eipgam starts;
 - when you open or refresh the Usage page (in the app or the TUI), or run
-  `magpie quota` or `magpie accounts`, at most every 30 seconds;
+  `eipgam quota` or `eipgam accounts`, at most every 30 seconds;
 - otherwise again after 5 to 15 minutes (drawn at random each time), and
   only if Claude Code was used since.
 
@@ -2501,27 +2500,27 @@ whose reset has passed counts as empty again.
 ### Signed-in agents as providers
 
 An agent you have signed in to is a subscription with models behind it, so
-magpie offers it as a provider too. Claude Code (an OAuth login in the macOS
+eipgam offers it as a provider too. Claude Code (an OAuth login in the macOS
 Keychain or `~/.claude/.credentials.json`), Codex (a ChatGPT login in
 `~/.codex/auth.json`), Copilot (a GitHub login in
 `~/.config/github-copilot/apps.json`), Devin (`devin auth login`, kept in
-`~/.local/share/devin/credentials.toml`) and Qoder (signed in from magpie with
-its OAuth device flow, kept in magpie's own config; Qoder CN is its own
+`~/.local/share/devin/credentials.toml`) and Qoder (signed in from eipgam with
+its OAuth device flow, kept in eipgam's own config; Qoder CN is its own
 subscription beside it, for accounts on qoder.cn made with an Alibaba Cloud
-account or a phone number, which can't sign in on qoder.com) appear in `magpie providers` and in
+account or a phone number, which can't sign in on qoder.com) appear in `eipgam providers` and in
 the Providers tab as *signed in as …*, with their models spelled
 `claude/claude-sonnet-5`, `codex/gpt-5.5`, `copilot/claude-sonnet-4.5` or
-`devin/swe-2-max` in every other agent's picker. magpie reads the agent's own credentials each
+`devin/swe-2-max` in every other agent's picker. eipgam reads the agent's own credentials each
 time, refreshes tokens the way the agent does — writing a rotated token
 back where the agent will find it — and stores nothing but your model
 picks; sign out of the agent and the provider is gone. The model list is
-the vendor's own too: magpie asks Anthropic's, Copilot's or Codex's API with
+the vendor's own too: eipgam asks Anthropic's, Copilot's or Codex's API with
 that same sign-in, so a model added upstream appears on the next refresh.
-The ChatGPT backend only streams and rejects a few parameters, so magpie
+The ChatGPT backend only streams and rejects a few parameters, so eipgam
 translates non-streaming requests and drops what it would refuse.
 Claude subscriptions are different: Anthropic classifies another agent's
 system prompt as third-party traffic even when the OAuth request otherwise
-looks like Claude Code. magpie therefore drives the genuine local `claude`
+looks like Claude Code. eipgam therefore drives the genuine local `claude`
 binary for every Claude subscription generation. The caller's tools are
 bridged into that live turn over MCP, and tool results resume the same Claude
 Code process; Pi, OpenCode and every other agent use this path automatically.
@@ -2534,76 +2533,76 @@ devin CLI uses, and a Cursor subscription to the agent API cursor-agent
 uses, each with the CLI's sign-in and the caller's tools passed through
 (Cursor's model calls them as MCP tools; none of Cursor's own tools run).
 Google sign-ins — Gemini CLI's and Antigravity's — talk to Google's Code
-Assist API directly: magpie reads Gemini CLI's own login from `~/.gemini` or
+Assist API directly: eipgam reads Gemini CLI's own login from `~/.gemini` or
 signs one in itself, and refreshes the token in memory. Google no longer
 serves Gemini CLI's sign-in to individual accounts, only to Gemini Code
 Assist Standard and Enterprise, which need a Google Cloud project named
-(`magpie accounts project gemini <email> <project-id>`, or
+(`eipgam accounts project gemini <email> <project-id>`, or
 `GOOGLE_CLOUD_PROJECT` in `~/.gemini/.env`). Google may suspend an
-Antigravity account it sees used outside Antigravity, so magpie asks before
+Antigravity account it sees used outside Antigravity, so eipgam asks before
 adding one; use an account you can afford to lose.
 
 Accounts signed in elsewhere can be imported from their files instead of
 signed in again: *Import accounts from a file…* under a subscription's
-accounts, or `magpie accounts import <codex|claude|antigravity|factory|<plugin>>
+accounts, or `eipgam accounts import <codex|claude|antigravity|factory|<plugin>>
 <file>... [--yes]`. For ChatGPT that takes Codex's `auth.json`, codexbar's
 `~/.codexbar/config.json` (every ChatGPT account it switches between) and
 the exports of Cockpit Tools, CLIProxyAPI and Sub2API, as many files as
 you like. Each ChatGPT sign-in is refreshed before it is added, which
-checks it and makes magpie its only holder: the tool the file came from
+checks it and makes eipgam its only holder: the tool the file came from
 (Codex on another computer, codexbar, Cockpit Tools, CLIProxyAPI) is
 signed out of that account and has to sign in again. A backup carries no
 sign-in, so this is also how accounts move to a new computer: import the
 file from the old one there. The files are only read. An account
-magpie has already is left as it is, two Team seats of one email stay two
+eipgam has already is left as it is, two Team seats of one email stay two
 accounts, and an entry with only an access token (a ChatGPT web session)
 is refused, since it would stop working within days with nothing to renew
 it. For Claude it takes Claude Code's `.credentials.json`, CLIProxyAPI's
 auth files and claude-swap's export (`cswap --export <file>`, format 1;
 an encrypted one is decrypted first, and an API-key account is added as a
-key instead). A Claude sign-in is kept as the file has it, magpie asking
+key instead). A Claude sign-in is kept as the file has it, eipgam asking
 Anthropic nothing, with its organization, and a cswap alias becomes the
-account's name in magpie when it has none and the name picks no other
+account's name in eipgam when it has none and the name picks no other
 account. Claude Code renews it the first time it runs on it, and the
 file's copy stops working then: remove the account from cswap (`cswap
 --remove-account`) rather than switch to it there again.
 
 ### Connecting anything else
 
-The gateway listens on `127.0.0.1:3425` (`MAGPIE_ADDR` changes it) and starts
-with the app; `magpie serve` runs it alone. For reverse-proxied or container
-deployments, set `MAGPIE_PUBLIC_URL=https://magpie.example.com` to the base
+The gateway listens on `127.0.0.1:3425` (`EIPGAM_ADDR` changes it) and starts
+with the app; `eipgam serve` runs it alone. For reverse-proxied or container
+deployments, set `EIPGAM_PUBLIC_URL=https://eipgam.example.com` to the base
 URL shown in the console and CLI, including connection examples. While
-other machines are let in (Share on local network, or a `MAGPIE_ADDR` on
+other machines are let in (Share on local network, or a `EIPGAM_ADDR` on
 the network), the Gateway page's Connect starts at it until you pick
 another address there, Settings › About lists it beside the local URL, and
-`magpie web` shows it as the gateway's address: on the Gateway page, in
+`eipgam web` shows it as the gateway's address: on the Gateway page, in
 About's Gateway URL and at the sidebar's foot. Local agent configs still
 use the local gateway address.
 
-Building an app or agent that should use magpie, or get a row on the
+Building an app or agent that should use eipgam, or get a row on the
 Agents page: see [Integrating your app or agent](integrating.md).
 
 External clients behind a reverse proxy need an enabled gateway key
 (Gateway → Gateway keys): with Settings → Network and sharing → Share on local network on, or a
-`MAGPIE_ADDR` on the network, magpie asks for one; otherwise it refuses
+`EIPGAM_ADDR` on the network, eipgam asks for one; otherwise it refuses
 them, unless the proxy authenticates its clients itself
-(`MAGPIE_TRUST_PROXY=1`, below). A public URL with no port of
-its own — a reverse proxy's `https://magpie.example.com` — is the address
-`magpie web` prints for its own page too. One location is enough: the
+(`EIPGAM_TRUST_PROXY=1`, below). A public URL with no port of
+its own — a reverse proxy's `https://eipgam.example.com` — is the address
+`eipgam web` prints for its own page too. One location is enough: the
 page's port (`127.0.0.1:3430`) answers the gateway's client routes as well
 (`/v1/…`, `/v1beta/…`, `/mcp/…`, `/backend-api/codex/…` and the same
 routes without `/v1`), handing them to the gateway, so a proxy that sends
-everything to the page's port serves the page at `https://magpie.example.com/`
-and the agents at `https://magpie.example.com/v1`. On the page's port every
+everything to the page's port serves the page at `https://eipgam.example.com/`
+and the agents at `https://eipgam.example.com/v1`. On the page's port every
 one of those routes is answered as a request from another machine, from
 loopback too: only while Settings → Network and sharing → Share on local
-network is on (or `MAGPIE_ADDR` is on the network), and with an enabled
+network is on (or `EIPGAM_ADDR` is on the network), and with an enabled
 gateway key, after the allow list. A forward to that port that adds no
 forwarding header (frp's `tcp`, `ssh -R`, socat, an nginx `proxy_pass`
-without `X-Forwarded-For`) reaches it from loopback, so magpie can't tell
+without `X-Forwarded-For`) reaches it from loopback, so eipgam can't tell
 it from an agent on this computer and never answers it as one;
-`MAGPIE_TRUST_PROXY=1` doesn't change that. The page's sign-in cookie is
+`EIPGAM_TRUST_PROXY=1` doesn't change that. The page's sign-in cookie is
 no gateway key, and the page and its `/api` still need the page's key (or
 on a LazyCat box the box's sign-in, see [LazyCat](#lazycat)).
 Agents on this computer call the gateway's own port (`127.0.0.1:3425`),
@@ -2616,7 +2615,7 @@ forwarding header needs a gateway key as one from the network does (see
 a forwarding header looks like an agent here: put the page's port, not
 the gateway's, behind a forward that adds none. A proxy that authenticates
 its clients itself can be trusted on the gateway's port with
-`MAGPIE_TRUST_PROXY=1`.
+`EIPGAM_TRUST_PROXY=1`.
 
 It exposes:
 
@@ -2632,31 +2631,31 @@ It exposes:
 | `/v1/models`, `/v1beta/models` | the catalog            |
 | `/v1/codex/models`       | the catalog as Codex's `model_catalog_url` reads it ([Codex on another computer](#providers-and-the-gateway)) |
 | `/api/version`, `/api/tags`, `/api/show` | the catalog as an Ollama server lists it, for a client that takes a custom endpoint only as Ollama (below) |
-| `/mcp/magpie/hub` | MCP (Streamable HTTP): every MCP server in the Library, as one server, for any app, while *Library → MCP → MCP router* is on |
-| `/mcp/magpie/hub/{agent}` | MCP (Streamable HTTP): the Library's MCP servers ticked for that agent, as one server, while *Library → MCP → MCP router* is on |
-| `/v1/magpie/native/{provider}/{path}` | a provider's own API, as it is (GET, POST, PUT, PATCH, DELETE; below) |
+| `/mcp/eipgam/hub` | MCP (Streamable HTTP): every MCP server in the Library, as one server, for any app, while *Library → MCP → MCP router* is on |
+| `/mcp/eipgam/hub/{agent}` | MCP (Streamable HTTP): the Library's MCP servers ticked for that agent, as one server, while *Library → MCP → MCP router* is on |
+| `/v1/eipgam/native/{provider}/{path}` | a provider's own API, as it is (GET, POST, PUT, PATCH, DELETE; below) |
 
 With that switch on, each agent that takes an MCP server over HTTP is
-given one entry, `magpie`, in place of the Library's servers, and magpie
+given one entry, `eipgam`, in place of the Library's servers, and eipgam
 runs those servers itself, once for every agent: a command is started on
 its first call and ended after 10 minutes with none. Each tool is named
 `<server>__<tool>`, and a tool turned off in the Library isn't listed. An
 agent that reaches no server over HTTP (Claude Desktop), or has an entry
-called `magpie` of its own, keeps each server's own entry, and the page
+called `eipgam` of its own, keeps each server's own entry, and the page
 says so. An agent in WSL or on another computer is given the address it
-reaches magpie at, with its key. Turning the switch off gives every agent
+reaches eipgam at, with its key. Turning the switch off gives every agent
 each server's own entry again. It is guarded as the gateway is: a local
 request, or one with a gateway key, and no other web page
 ([MCP router](subsystems/mcp-router.md)).
 
-`/v1/magpie/native/<provider>/<path>` reaches a provider's own API
-through magpie, for what the OpenAI shape doesn't carry. `<provider>` is
+`/v1/eipgam/native/<provider>/<path>` reaches a provider's own API
+through eipgam, for what the OpenAI shape doesn't carry. `<provider>` is
 the provider's id; `<path>` is joined to its host, not to its base URL,
-so `/v1/magpie/native/qwen/api/v1/tasks/<task_id>` asks
+so `/v1/eipgam/native/qwen/api/v1/tasks/<task_id>` asks
 `https://dashscope-intl.aliyuncs.com/api/v1/tasks/<task_id>`.
 GET, POST, PUT, PATCH and DELETE are passed on with the query and body as
 sent, and the answer comes back as it came, a stream as it arrives.
-magpie signs it with the provider's key, the way that provider takes one;
+eipgam signs it with the provider's key, the way that provider takes one;
 the caller's own `Authorization`, `x-api-key`, `x-goog-api-key`, cookies
 and `?key=` never go on. It serves a provider added with an API key (a
 vendor's or your own), not a subscription, a sign-in or a plugin's
@@ -2674,7 +2673,7 @@ Each `/v1/models` entry includes `reasoning` and `supported_reasoning_levels`
 clients of the Catwalk schema (Crush and kin) read (#2576). A routing group is marked `reasoning` when any
 member thinks; `supported_reasoning_levels` lists the levels the members
 that think have in common. A member known not to think doesn't take them
-away (#2127), nor does one whose levels nothing knows (#597). A member magpie
+away (#2127), nor does one whose levels nothing knows (#597). A member eipgam
 knows does not think is sent no reasoning ask when the group routes to it,
 so the effort the group is asked for reaches the members that take it and
 doesn't turn a vendor away as a 400; a member nothing speaks for is sent
@@ -2690,22 +2689,22 @@ from `/api/tags`, each one's tools, vision, thinking and window from
 `/api/show`, and chats on `/v1/chat/completions`. Ollama's own chat
 (`/api/chat`, `/api/generate`, so `ollama run`) isn't served. Copilot sends
 no key, so this works on this computer only; behind a reverse proxy with a
-single public URL, `/api` goes to `magpie web`'s page (which answers the
+single public URL, `/api` goes to `eipgam web`'s page (which answers the
 gateway's `/v1` routes but not its `/api` ones), so give the gateway's own
 port.
 
 Requests pass straight through when the vendor speaks the agent's API and
 are translated otherwise, streaming, tool calls and reasoning included. The
-key is `magpie` (any value works; the gateway only listens on loopback), and
+key is `eipgam` (any value works; the gateway only listens on loopback), and
 models are named `provider/model`.
 
 - A routing group is asked by its id (`group/<id>`) or its name.
 - A bare model id (`glm-5.3`) works too. When several providers serve it,
-  it goes to the routing group magpie found for it, which asks them in the
+  it goes to the routing group eipgam found for it, which asks them in the
   order of the Providers page and falls over to the next. With found
   groups off, it goes to the first of them in that order alone.
 - Speech to text (`/v1/audio/transcriptions`, `/v1/audio/translations`)
-  takes OpenAI's multipart form, its `model` a magpie id such as
+  takes OpenAI's multipart form, its `model` a eipgam id such as
   `openai/whisper-1`, `groq/whisper-large-v3` or a custom provider's own
   (a vLLM `qwen3-asr`). The form goes to that provider's OpenAI-style base
   as it was sent, the audio byte for byte; only the model is set to the
@@ -2715,7 +2714,7 @@ models are named `provider/model`.
   such endpoint answers its own 404.
 - Text to speech (`/v1/audio/speech`) takes OpenAI's JSON body
   (`model`, `input`, `voice`, `response_format`, `speed`, `instructions`,
-  `stream_format`), its `model` a magpie id such as
+  `stream_format`), its `model` a eipgam id such as
   `openai/gpt-4o-mini-tts` or `groq/playai-tts`. The body goes to that
   provider's OpenAI-style base with only the model set to the provider's
   own id; any other field (Mistral's `voice_id`) goes as sent. The answer
@@ -2732,9 +2731,9 @@ Anything with a base-URL setting can use it:
 
 | Tool speaks | Base URL                   | Environment                                   |
 | ----------- | -------------------------- | --------------------------------------------- |
-| OpenAI      | `http://127.0.0.1:3425/v1` | `OPENAI_BASE_URL`, `OPENAI_API_KEY=magpie`      |
-| Anthropic   | `http://127.0.0.1:3425`    | `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY=magpie` |
-| Gemini      | `http://127.0.0.1:3425`    | `GOOGLE_GEMINI_BASE_URL`, `GEMINI_API_KEY=magpie` |
+| OpenAI      | `http://127.0.0.1:3425/v1` | `OPENAI_BASE_URL`, `OPENAI_API_KEY=eipgam`      |
+| Anthropic   | `http://127.0.0.1:3425`    | `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY=eipgam` |
+| Gemini      | `http://127.0.0.1:3425`    | `GOOGLE_GEMINI_BASE_URL`, `GEMINI_API_KEY=eipgam` |
 
 An optional `X-Magpie-Account: <account>` header (the account's email
 or login, or its id on the Routing page) pins a request to one account of a
@@ -2743,13 +2742,13 @@ whose plan lacks the model, or one resting is an error rather than another
 account's reply. The header is not sent on to the vendor. A header value is
 ASCII, so an account named in other letters (`北冥`) is sent percent-encoded
 (`X-Magpie-Account: %E5%8C%97%E5%86%A5`, JavaScript's `encodeURIComponent`);
-magpie decodes it, and a value that isn't such an encoding is the name as
+eipgam decodes it, and a value that isn't such an encoding is the name as
 written.
 
 A status bar can show where a turn went before its first token arrives:
 send `X-Magpie-Session: <id>` with the requests (an agent's own session
 header, such as Pi's or Claude Code's, works too) and read
-`GET /v1/magpie/route?session=<id>`. It answers the session's latest
+`GET /v1/eipgam/route?session=<id>`. It answers the session's latest
 request as routing has it so far — `asked` (the model the agent named),
 `group`, `rule` (the group's rule that matched, and `rule.pick`, the
 effort its decision model picked), `model` and `effort` (the member being
@@ -2760,59 +2759,59 @@ tried now, as `provider/model`, and the reasoning it was sent at), and
 decided, before the vendor is asked. `after=<seq>&wait=<seconds>` (up to 60)
 holds the answer until the route changes past the `seq` of the last one,
 so a UI can follow a turn with one request at a time. Only the session
-named is told; like `/v1/magpie/quotas`, it answers this machine, and
+named is told; like `/v1/eipgam/quotas`, it answers this machine, and
 another only with the key of a gateway shared on the local network. A key
 held to a budget, to some models or to some accounts is told the routes of
 its own requests alone: another key's session answers `route: null`.
 
-To show the one in use without a session, `GET /v1/magpie/quotas` (and
-`magpie quota --json`, the same list) has `lastServedAt` on each
+To show the one in use without a session, `GET /v1/eipgam/quotas` (and
+`eipgam quota --json`, the same list) has `lastServedAt` on each
 subscription account, plan and key that answered a request through the
 gateway in the last 30 days, and `last: true` on the latest. It is kept
 in `served.json` beside `providers.json`, so a restart keeps it.
 
 Each subscription window there also has the Usage page's whole-window
 estimate (#2333): `holds` (`tokens`, `cost` at API list prices, `priced`)
-reckoned from magpie's own calls through the account since the window
+reckoned from eipgam's own calls through the account since the window
 began, over the share used. Where it can't be told honestly, `holdsWhy`
 says why instead: `low` (under 5% used), `clock` (no reset clock), `log`
-(the window began before magpie's log), `none` (nothing routed in it) or
+(the window began before eipgam's log), `none` (nothing routed in it) or
 `credits` (a call in it may have been paid from credits). A window with
 neither is one no whole is told for: a pool, a family, money, or a card
 with a balance or read on another computer.
 
-`GET /v1/magpie/quotas?kept=1` answers the same list from what magpie last
+`GET /v1/eipgam/quotas?kept=1` answers the same list from what eipgam last
 read, asking no vendor and never waiting for a read, for something that asks
-often. `magpie statusline` is built on it for Claude Code's status line
+often. `eipgam statusline` is built on it for Claude Code's status line
 (#1997): Claude Code runs it on every message with the session's JSON on
 stdin, and it prints one line, the model the session's latest turn went to
-(from `/v1/magpie/route`), then each subscription and plan with its windows'
+(from `/v1/eipgam/route`), then each subscription and plan with its windows'
 use, `*` on the one that answered last:
 `→ claude/claude-opus-5-5 | claude a@example.com* 5h 62% 7d 41% | claude B 5h 8% 7d 30%`.
 The accounts that answered through the gateway in the last 30 days are
-shown, every one when none has; `magpie statusline claude` (a provider, or
+shown, every one when none has; `eipgam statusline claude` (a provider, or
 an account's email, login or name) keeps only those. It works however Claude
 Code signs in to the gateway, unlike the `anthropic-ratelimit-*` headers,
 which Claude Code reads only while signed in to claude.ai. The status
-line square on Claude Code's row in the Agents page (or `magpie claude
+line square on Claude Code's row in the Agents page (or `eipgam claude
 statusline on`) turns it on: it writes `statusLine` in
-`~/.claude/settings.json` to run this magpie by its full path
-(`"statusLine": {"type": "command", "command": "/Applications/Magpie.app/Contents/MacOS/magpie statusline"}`),
+`~/.claude/settings.json` to run this eipgam by its full path
+(`"statusLine": {"type": "command", "command": "/Applications/eipgam.app/Contents/MacOS/eipgam statusline"}`),
 and off, or Disconnect, takes out only a status line that runs
-`magpie statusline`. A status line of the user's own (claude-hud, a script)
+`eipgam statusline`. A status line of the user's own (claude-hud, a script)
 is never written over: the square isn't shown while one is there, and on is
 refused. Claude Code runs a changed status line in its open sessions too,
 so nothing needs a restart. It is offered for Claude Code on this computer,
 not in a WSL distro. With the gateway not running it prints an empty line.
 
-Claude Code on another computer than magpie (magpie in Docker, on a server)
-can't be switched on from the square: magpie can't write that computer's
+Claude Code on another computer than eipgam (eipgam in Docker, on a server)
+can't be switched on from the square: eipgam can't write that computer's
 settings.json, and the command would name a binary inside the container.
-`GET` or `POST /v1/magpie/statusline` answers the same line as plain text, so
+`GET` or `POST /v1/eipgam/statusline` answers the same line as plain text, so
 that computer needs only curl. The optional `?session=<id>` (or, in a POST,
 the `session_id` of the JSON Claude Code sends on stdin) adds the model like
-`/v1/magpie/route`, and `?only=` (comma separated, repeatable) keeps the
-accounts as `magpie statusline claude` does. A caller that isn't this
+`/v1/eipgam/route`, and `?only=` (comma separated, repeatable) keeps the
+accounts as `eipgam statusline claude` does. A caller that isn't this
 computer needs a gateway key, a read-only one included (it gets the windows
 without the model). A key held to a budget, models or accounts is refused
 it (403 `gateway_key_held`) until its owner turns on Quotas for the key
@@ -2821,18 +2820,18 @@ model it may use, so a key held to `claude/*` gets
 `claude <account> 5h 12% 7d 33%` and no other provider's. `?format=json`
 answers the same as JSON for a status line that draws its own (claude-hud):
 `text` the line, `model` the session's, and `accounts` the cards it shows,
-each in `/v1/magpie/quotas`' shape (`windows[].used`, `resetsAt`). On the
+each in `/v1/eipgam/quotas`' shape (`windows[].used`, `resetsAt`). On the
 computer Claude Code runs on:
-`"statusLine": {"type": "command", "command": "curl -fsS -m 1 -H 'Authorization: Bearer <gateway key>' --data-binary @- http://<host>:3425/v1/magpie/statusline || true"}`.
-`magpie web` shows this command with its own address under Settings → About.
+`"statusLine": {"type": "command", "command": "curl -fsS -m 1 -H 'Authorization: Bearer <gateway key>' --data-binary @- http://<host>:3425/v1/eipgam/statusline || true"}`.
+`eipgam web` shows this command with its own address under Settings → About.
 
-`magpie heap [<file>]` is for a report of magpie holding too much memory: a
+`eipgam heap [<file>]` is for a report of eipgam holding too much memory: a
 macOS `sample` of the app shows Go's frames as `???`. It asks the running
-magpie that serves the gateway (the app, the menu bar, `magpie serve` or
-`magpie web`) for `GET /v1/magpie/heap`, a Go heap profile taken after a
+eipgam that serves the gateway (the app, the menu bar, `eipgam serve` or
+`eipgam web`) for `GET /v1/eipgam/heap`, a Go heap profile taken after a
 collection (`runtime/pprof`'s `heap`, gzipped protobuf, which
 `go tool pprof` reads), and writes it to `<file>`, else
-`magpie-heap-<date>-<time>.pb.gz` in the working folder, never over a file
+`eipgam-heap-<date>-<time>.pb.gz` in the working folder, never over a file
 there. It prints the file and the runtime's numbers the gateway sends in
 `X-Magpie-Heap-Stats`: the process, `HeapAlloc` (and what is live after the
 collection), `HeapInuse`, `HeapSys`, `StackSys`, `Sys` (all Go took from
@@ -2842,88 +2841,88 @@ computer calling it as `localhost` or a loopback address: another machine,
 a proxy's or tunnel's client, any request with a browser's marks (an
 Origin, listed or not, `null`, `Sec-Fetch-*`, a `Mozilla/` user agent) and
 any other `Host` are refused 403, with a gateway key too. With
-`MAGPIE_ADDR` on an address that isn't loopback, the call isn't from
+`EIPGAM_ADDR` on an address that isn't loopback, the call isn't from
 loopback, so it is refused as well.
 
-`magpie cpu [<file>] [--seconds N]` is for a report of magpie using too
+`eipgam cpu [<file>] [--seconds N]` is for a report of eipgam using too
 much CPU (@LeiCheng42 on X, while Codex ran). It asks the same running
-magpie for `GET /v1/magpie/cpu?seconds=N`, a Go CPU profile recorded for
+eipgam for `GET /v1/eipgam/cpu?seconds=N`, a Go CPU profile recorded for
 30 seconds, or N from 5 to 120 (`runtime/pprof`'s CPU profile, gzipped
-protobuf, which `go tool pprof` reads). While it records, use magpie as
+protobuf, which `go tool pprof` reads). While it records, use eipgam as
 you do when it is busy, such as running Codex: the gateway goes on serving
 every other call, and the profile is of that. It writes the profile to
-`<file>`, else `magpie-cpu-<date>-<time>.pb.gz` in the working folder,
+`<file>`, else `eipgam-cpu-<date>-<time>.pb.gz` in the working folder,
 and refuses a file that is there before it records, not after. It prints
 the file and the numbers the gateway sends in `X-Magpie-CPU-Stats`: the
 process, the CPU time it used over the seconds recorded (user and system,
 as the system counts it, with the share of one core) and since it started,
 its cores and `GOMAXPROCS`, and the goroutine count. Go records one CPU
-profile at a time, so a second `magpie cpu` while one records is refused
+profile at a time, so a second `eipgam cpu` while one records is refused
 409; one whose caller hangs up stops recording. The route answers the same
-callers as `/v1/magpie/heap`, and refuses the same ones 403.
+callers as `/v1/eipgam/heap`, and refuses the same ones 403.
 
-`magpie goroutines [<file>]` is for a report of magpie stuck at something
+`eipgam goroutines [<file>]` is for a report of eipgam stuck at something
 while it goes on running, such as an app that kept an old list for days
 (#3362): killing it to look would end what was stuck. It asks the same
-running magpie for `GET /v1/magpie/goroutines`, every goroutine's stack as
+running eipgam for `GET /v1/eipgam/goroutines`, every goroutine's stack as
 text (`runtime/pprof`'s `goroutine` profile at debug 2, the form a crash
 prints): each goroutine's state and how long it has waited
 (`[select, 4320 minutes]`), its frames with source lines, and who started
 it. Arguments are printed as numbers, never what they point at, so it holds
 no keys or messages. Nothing is stopped. It writes the dump to `<file>`,
-else `magpie-goroutines-<date>-<time>.txt` in the working folder, never
+else `eipgam-goroutines-<date>-<time>.txt` in the working folder, never
 over a file there, and prints the file and the process the gateway names in
 `X-Magpie-Goroutine-Stats` (its id, program, version, uptime and goroutine
-count). The route answers the same callers as `/v1/magpie/heap`, and
+count). The route answers the same callers as `/v1/eipgam/heap`, and
 refuses the same ones 403. It answers ahead of everything else a request
 passes through first (the allow list, which reads settings.json under its
 lock, and the catalog and file holds), so it still answers when those, or
 `/v1/models` and agents' requests behind them, are stuck, and the dump
 names who holds them.
 
-The app doesn't put `magpie` on a terminal's PATH unless Settings →
+The app doesn't put `eipgam` on a terminal's PATH unless Settings →
 Command line is used to put it there; until then, run the app's own
 program, which takes every command. On macOS:
-`/Applications/magpie.app/Contents/MacOS/magpie goroutines`. On Windows,
+`/Applications/eipgam.app/Contents/MacOS/eipgam goroutines`. On Windows,
 in PowerShell, the app as it last started (it records its path for
-`start magpie`):
-`& (Get-ItemPropertyValue 'HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\magpie.exe' '(default)') goroutines | Out-Host`.
+`start eipgam`):
+`& (Get-ItemPropertyValue 'HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\eipgam.exe' '(default)') goroutines | Out-Host`.
 `| Out-Host` has PowerShell wait for the app's program, which is built
 without a console of its own, and print what it says. The same goes for
-`magpie heap` and `magpie cpu`. A portable copy (a `.portable` file or
+`eipgam heap` and `eipgam cpu`. A portable copy (a `.portable` file or
 a `data` folder beside it) records no path, and a copy moved since its
 last start leaves the old one: run the program where it is, such as
-`& "$HOME\Downloads\magpie-windows-amd64.exe" goroutines | Out-Host`.
+`& "$HOME\Downloads\eipgam-windows-amd64.exe" goroutines | Out-Host`.
 
-`magpie log [--path] [-n N] [-f]` says where magpie's logs are. The app
+`eipgam log [--path] [-n N] [-f]` says where eipgam's logs are. The app
 (its window, the menu bar or tray icon and the panel, opened from the
 Finder, the Dock, the Start menu or a terminal) writes what it logs to
-`app.log` as well as to stderr: `~/Library/Logs/magpie/app.log` on macOS,
-`%LOCALAPPDATA%\magpie\logs\app.log` on Windows,
-`$XDG_STATE_HOME/magpie/app.log` (`~/.local/state/magpie/app.log`) on Linux
-and the BSDs, and `logs/app.log` in a portable magpie's data folder. A
+`app.log` as well as to stderr: `~/Library/Logs/eipgam/app.log` on macOS,
+`%LOCALAPPDATA%\eipgam\logs\app.log` on Windows,
+`$XDG_STATE_HOME/eipgam/app.log` (`~/.local/state/eipgam/app.log`) on Linux
+and the BSDs, and `logs/app.log` in a portable eipgam's data folder. A
 panic's trace goes there too. At 5 MiB it becomes `app.old.log`, over the
 one before, so two files are kept at most. The file is readable by your
 user only, and what looks like a key or token is masked in it, though
-nothing magpie logs is meant to carry one. Settings › About › Log has its
-path and an Open that shows its folder. `magpie log` prints its path, the
-older file when there is one, the service's log when `magpie daemon` is
-installed and the log of a gateway `magpie tui` left running; `--path`
+nothing eipgam logs is meant to carry one. Settings › About › Log has its
+path and an Open that shows its folder. `eipgam log` prints its path, the
+older file when there is one, the service's log when `eipgam daemon` is
+installed and the log of a gateway `eipgam tui` left running; `--path`
 prints the app's alone, `-n N` its last N lines and `-f` follows it,
-across a rotation, until Ctrl+C. `magpie serve`, `magpie web` and the TUI
+across a rotation, until Ctrl+C. `eipgam serve`, `eipgam web` and the TUI
 write no `app.log`: their log is the terminal's, or the service's.
 
 A gateway key held to a budget, to some models or to some accounts is told
-none of this magpie's accounts (#1981): `/v1/magpie/quotas`,
-`/v1/magpie/quotas/history`, `/v1/magpie/quotas/cards`,
-`POST /v1/magpie/quotas/refresh` and `/v1/magpie/concurrency` answer it
+none of this eipgam's accounts (#1981): `/v1/eipgam/quotas`,
+`/v1/eipgam/quotas/history`, `/v1/eipgam/quotas/cards`,
+`POST /v1/eipgam/quotas/refresh` and `/v1/eipgam/concurrency` answer it
 403 with `"code": "gateway_key_held"`, from this machine or another. It
-reads its own limit from `GET /v1/magpie/limit`. Another magpie that uses
+reads its own limit from `GET /v1/eipgam/limit`. Another eipgam that uses
 such a key shows only that key's own card.
 
 Its owner can let such a key be told the quotas of what it may use
 (#2216): the **Quotas** badge on the key's row (on hover; it reads
-*Quotas shown* while on), or `magpie gateway-key quotas <id> on` (`off`
+*Quotas shown* while on), or `eipgam gateway-key quotas <id> on` (`off`
 again, or no argument to see which). The four quota routes then tell it
 the cards of the providers whose every model it may use — a key held to
 some of a provider's models is told nothing of that provider, since the
@@ -2931,15 +2930,15 @@ models it may not use spend the same quota — and of those only the
 accounts and keys it may use, account names and balances included. A
 card it isn't told is refused a refresh (403 `gateway_key_held`), and a
 refresh that names none reads again only the cards it is told. A key
-told none of the cards is answered `/v1/magpie/quotas/cards` 403
-`gateway_key_held` as before, so another magpie shows its own card, not
-that nothing was read. The status line (`/v1/magpie/statusline`) is told
-the same cards. `/v1/magpie/concurrency` and `/v1/magpie/usage` still
+told none of the cards is answered `/v1/eipgam/quotas/cards` 403
+`gateway_key_held` as before, so another eipgam shows its own card, not
+that nothing was read. The status line (`/v1/eipgam/statusline`) is told
+the same cards. `/v1/eipgam/concurrency` and `/v1/eipgam/usage` still
 refuse it.
 
 A Codex account's rate-limit reset can be used through the gateway as
 the Usage page's **Use a reset** does (#3850, the same code):
-`POST /v1/magpie/quotas/codex-reset?user=<email>` spends one of that
+`POST /v1/eipgam/quotas/codex-reset?user=<email>` spends one of that
 account's resets (`&credit=<id>` one of its `resets.each`, else the one
 that runs out first) and answers `{"code": "reset", "windows": 2}`, or
 `no_credit` or `nothing_to_reset` with nothing spent. It can't be
@@ -2950,16 +2949,16 @@ app's scheme, a `*.localhost` page) included; a read-only key 403
 `gateway_key_read_only`; a key held to a budget, models or accounts 403
 `gateway_key_held`, whether or not it is told quotas. The account is
 always named (400 without `user`). A second ask for the same account
-while one is out is answered 409. Another magpie's Codex card uses this,
-and so can an app reading `/v1/magpie/quotas/cards`, such as a DSH
+while one is out is answered 409. Another eipgam's Codex card uses this,
+and so can an app reading `/v1/eipgam/quotas/cards`, such as a DSH
 provider plugin, with a key of full access.
 
-When magpie updates, every Remote magpie it uses that runs an older
-release is asked to update too: `POST /v1/magpie/update?version=<v>`,
+When eipgam updates, every Remote eipgam it uses that runs an older
+release is asked to update too: `POST /v1/eipgam/update?version=<v>`,
 sent with the provider's key a little after start and every hour, at most
 once in six hours for a version. Nothing is set up for it. The remote
 updates as its own automatic update would (the app restarts into the new
-version once nothing is in flight; `magpie serve` puts it in where it runs
+version once nothing is in flight; `eipgam serve` puts it in where it runs
 from and restarts once idle), or answers why it doesn't: `current`,
 `off` (automatic updates or downloads are off there), or `unsupported`
 with `why` `container`, `package` (with `manager` and `command`),
@@ -2971,23 +2970,23 @@ read-only key is refused 403 `gateway_key_read_only` and a held key 403
 `gateway_key_held`.
 
 An app of your own can read the Usage page's numbers too.
-`GET /v1/magpie/usage?period=<today|week|month|all>` is the page's summary,
+`GET /v1/eipgam/usage?period=<today|week|month|all>` is the page's summary,
 the same JSON as the window's `/api/usage` (`path` is left out for another
 machine), with every session in `sessions` where the window's lists the
-top 100 by tokens; `sessionCount` is how many there are. `GET /v1/magpie/usage/requests` is its requests a page at a time
+top 100 by tokens; `sessionCount` is how many there are. `GET /v1/eipgam/usage/requests` is its requests a page at a time
 (`offset`, `limit` up to 500), with the same filters as the Requests log:
 `period`, `day`, `agent`, `provider`, `model`, `account`, `callerKey`,
 `purpose`, `failed`, `retried`, `q`, `via`, `computer`. `callerKey=none`
 keeps the calls no gateway key made, and `by.callerKey` splits the page's
 calls by key, `none` among them (#2521). What was said in a call is not
-in either. Like `/v1/magpie/quotas`, they answer this machine, and another
+in either. Like `/v1/eipgam/quotas`, they answer this machine, and another
 only with a gateway key. A key held to a budget, to some models or to some
-accounts is told its own calls alone: `/v1/magpie/usage` refuses it with a
-403, and `/v1/magpie/usage/requests` keeps only its rows, filter lists and
+accounts is told its own calls alone: `/v1/eipgam/usage` refuses it with a
+403, and `/v1/eipgam/usage/requests` keeps only its rows, filter lists and
 share of the split by key.
 
 To keep a ledger of your own from those requests (rdsaltbo on X, #6060),
-read them as changes: `GET /v1/magpie/usage/requests?cursor=start&limit=500`
+read them as changes: `GET /v1/eipgam/usage/requests?cursor=start&limit=500`
 answers `rows`, `deleted`, `next_cursor` and `has_more`; read again with
 `cursor=<next_cursor>` until `has_more` is `false`, keep the last
 `next_cursor`, and poll with it. `cursor=now` gives the cursor of this
@@ -2997,18 +2996,18 @@ offset and `limit` read above are unchanged.
 - **Rows** are upserts by `id`. The `id` (`u_…`) is made of what the record
   itself says (when, whose, the ids below), never a token count, status,
   model name or price, so it is the same on every read and after a restart
-  of magpie. A row magpie reads again with different figures (an agent's
+  of eipgam. A row eipgam reads again with different figures (an agent's
   file mends its tokens, an error arrives) comes again with the same `id` and
   a higher `seq`: replace what you hold. `origin` says where the row is from:
   `gateway`, `session` (read from the agent's own file; the gateway never
-  saw it), `reported` (`POST /v1/magpie/usage/requests`) or empty.
+  saw it), `reported` (`POST /v1/eipgam/usage/requests`) or empty.
   Every row is one request, never a session or model total: there is no
   other granularity.
 - **Original ids** are under `original_ids`, each only when the source gave
   it, and none is ever made up: `request_id` (the vendor's, or the one the
   agent recorded), `response_id` (a response object the agent recorded),
   `client_response_id` (the one the gateway sent its client, which can be
-  magpie's own when it translated the reply), `message_id` (the agent's own
+  eipgam's own when it translated the reply), `message_id` (the agent's own
   message id, Claude Code's `msg_…`), `session_id` and `native_session_id`.
   A missing key is a missing id. Use them to deduplicate against another
   collector; use `id` to keep your own ledger idempotent. They are not
@@ -3018,7 +3017,7 @@ offset and `limit` read above are unchanged.
   row, with another `id`, comes in `rows`), or one the user cleared. Drop
   them from your ledger, so a call is never counted twice. Reading with
   `cursor=start` lists the ledger as it is and no deleted ids.
-- **A cursor** is opaque and tied to this magpie's feed
+- **A cursor** is opaque and tied to this eipgam's feed
   (`usage-feed.jsonl` next to `usage.jsonl`), to the filters and key it was
   given with, and to the moment it was given: a page that was not committed
   is read again and gives the same rows, so rows may come twice and never
@@ -3027,19 +3026,19 @@ offset and `limit` read above are unchanged.
   and `day` have no say in it; `agent`, `provider`, `model`, `account`,
   `callerKey`, `failed`, `retried`, `q`, `via` and `computer` narrow the rows
   (the cursor still passes the rows they leave out). Deleted ids are kept 30
-  days. A cursor magpie can't resume from is refused, never answered with a
+  days. A cursor eipgam can't resume from is refused, never answered with a
   gap: `400 cursor_invalid`, `400 cursor_filter_changed` (read again with
   `cursor=start` for new filters), `410 cursor_expired` (older than the
   deleted ids kept) and `410 cursor_reset` (the feed was lost or replaced).
   After a 410, read `cursor=start` and replace what you hold of the ledger.
-  A price change does not make a row new: `cost` is magpie's price at the time
+  A price change does not make a row new: `cost` is eipgam's price at the time
   of the read; keep the tokens, or the `cost` of a `reported` row.
 - A key held to a budget, models or accounts gets its own rows and its own
   deleted ids, and a cursor given to another key is refused. `client_ip`
   is left out, as in the offset mode.
 
 What is in flight now, for a status bar such as SketchyBar (#2132):
-`GET /v1/magpie/concurrency` answers `requests`, every agent request the
+`GET /v1/eipgam/concurrency` answers `requests`, every agent request the
 gateway is working on, whether or not any limit is set (those waiting for a
 slot among them); `waiting`, how many of those wait for a slot under a
 provider's or account's limit; and `tools`, Claude Code turns run through a
@@ -3053,33 +3052,33 @@ waiting in a key's or account's queue, `rpm` waiting for room in the
 minute, `upstream` out at the vendor (sent, or its reply streaming). No
 prompt, reply or key is in it. The read asks no vendor and isn't counted
 itself, so it can be polled every second. It answers as
-`/v1/magpie/quotas` does: this machine, another only with a gateway key,
+`/v1/eipgam/quotas` does: this machine, another only with a gateway key,
 and never a held key.
 
 Each request as it is routed, live, for a display that shows them
-(#3387): `GET /v1/magpie/route-events/snapshot` answers `cursor`, `active`
+(#3387): `GET /v1/eipgam/route-events/snapshot` answers `cursor`, `active`
 and `routes`, the requests going now; then
-`GET /v1/magpie/route-events?after=<cursor>` streams each change after that
+`GET /v1/eipgam/route-events?after=<cursor>` streams each change after that
 cursor as server-sent events, one `route` event a change (`id` is its
 cursor, `kind` what changed, `route` the request as it is now: `id`,
 `time`, `agent`, `provider`, `model`, `attempt`, `fallback`, `phase`,
 `status`, `failed`, `ms`, `ttft_ms`). A display replaces its request of
 that `id` and drops it once `phase` is `done` or `dropped`. A 409
-`snapshot_required`, an `event: reset`, a restart of magpie or a dropped
+`snapshot_required`, an `event: reset`, a restart of eipgam or a dropped
 connection means: take a snapshot again. No session, account, key, folder,
-prompt, reply or error text is in it. It answers as `/v1/magpie/usage`
-does: this machine, another only with a gateway key while magpie is
+prompt, reply or error text is in it. It answers as `/v1/eipgam/usage`
+does: this machine, another only with a gateway key while eipgam is
 shared, and never a held key. Give a display a read-only key,
-`magpie gateway-key add Screen --read-only`, which can spend nothing. See
+`eipgam gateway-key add Screen --read-only`, which can spend nothing. See
 the [route event contract](subsystems/gateway-routing.md#route-events-for-a-display).
 
-An app that calls its vendor itself, not through magpie, can report those
-calls so the Usage page counts them: `POST /v1/magpie/usage/requests` with
+An app that calls its vendor itself, not through eipgam, can report those
+calls so the Usage page counts them: `POST /v1/eipgam/usage/requests` with
 `Content-Type: application/json`. The body is one record or an array of up
 to 5000 (32 MiB at most), shaped like a `usage.jsonl` line:
 
 ```sh
-curl -s http://127.0.0.1:3425/v1/magpie/usage/requests \
+curl -s http://127.0.0.1:3425/v1/eipgam/usage/requests \
   -H 'Content-Type: application/json' \
   -d '[{"t":"2026-10-13T08:00:00Z","agent":"my-app","provider":"anthropic",
         "model":"claude-sonnet-4-6","in":1200,"out":340,"cache_read":9000,
@@ -3106,7 +3105,7 @@ curl -s http://127.0.0.1:3425/v1/magpie/usage/requests \
   content came in under a quarter of its window, or whose window was under
   a second after a wait over four times longer, was held and let go in a
   burst, and tells no speed. Leave out what you don't know.
-- **Pricing:** a record without `cost` is priced at magpie's prices for
+- **Pricing:** a record without `cost` is priced at eipgam's prices for
   its provider and model.
 - **Past times:** `t` is taken as given, however far back, so a history
   can be backfilled; it may not be before 2000-01-01T00:00:00Z or more
@@ -3135,21 +3134,21 @@ conversation did.
 Records written before these fields came have neither. Codex's sub-agents are told
 apart by `kind` only.
 
-`magpie quota refresh <provider> [<account>]` reads that card again, as its
+`eipgam quota refresh <provider> [<account>]` reads that card again, as its
 refresh button on the Usage page does, and prints it alone; the other
 vendors aren't asked. Name the account by its login or its alias, or write
 `<provider>/<account>`. A second refresh of the same card within 30 seconds
 asks nobody and prints what was read, saying so on stderr, so a status line
-can run it in a loop. `--json` prints the card as `magpie quota --json` does,
+can run it in a loop. `--json` prints the card as `eipgam quota --json` does,
 with `readAt` (when it was read) and `error` (why it couldn't be).
 
-`magpie quota wait <provider|account>` blocks until that subscription (any
-of its accounts magpie has on) or that one account has allowance again — no
+`eipgam quota wait <provider|account>` blocks until that subscription (any
+of its accounts eipgam has on) or that one account has allowance again — no
 window that stops it used up — then exits 0, so a long task stopped by its
 limit can go on unattended:
 
 ```sh
-until codex exec "…"; do magpie quota wait codex || break; done
+until codex exec "…"; do eipgam quota wait codex || break; done
 ```
 
 It reads the vendors itself, whether or not the gateway runs, and again
@@ -3162,39 +3161,39 @@ unknown name exits 2 and Ctrl+C 130.
 
 A ChatGPT account that holds credits keeps answering once a usage window is
 used up: the vendor spends the credits, so a task goes on. That is the
-default. `magpie quota credits <account> off` (or *Use credits* on the
-account's Usage card) turns it off for that account: once magpie's latest
+default. `eipgam quota credits <account> off` (or *Use credits* on the
+account's Usage card) turns it off for that account: once eipgam's latest
 reading of its windows, refreshed about every minute, shows one used up,
 the gateway holds it as used up till the window renews, and requests go to
 the other accounts, groups and fallbacks; with none left, the request gets a
 429 saying why, unless the account spends its resets by itself and its week
-is used up, when a reset is spent first. `magpie quota credits <account>
+is used up, when a reset is spent first. `eipgam quota credits <account>
 last` (or *Only after everything else* under *Use credits*) keeps the
 credits but spends them last: once a window is used up, the account is
 tried after every other account, key and fallback that isn't on its
 credits, so the order goes subscription, then API key, then the credits.
-`magpie quota credits <account> first` (or *Before moving to another
+`eipgam quota credits <account> first` (or *Before moving to another
 account* under *Use credits*, on the Usage card or under the account's ⋯
-in its provider's editor) spends them before moving on: by default magpie
+in its provider's editor) spends them before moving on: by default eipgam
 sends requests to an account with room once one is nearly used up, and
 signs Codex in to it; with first, while the account holds credits, it keeps
 its place in the order and Codex stays signed in to it. First and last are
-one or the other. `magpie quota credits` lists the accounts set not to
-spend them and those that spend them first or last, `magpie quota credits
+one or the other. `eipgam quota credits` lists the accounts set not to
+spend them and those that spend them first or last, `eipgam quota credits
 <account>` says one's. Off and last change the gateway's routing only,
-never the account Codex is signed in to. The credits an account holds show beside its windows in `magpie quota`,
-`magpie accounts`, the Usage page and the menu bar panel.
+never the account Codex is signed in to. The credits an account holds show beside its windows in `eipgam quota`,
+`eipgam accounts`, the Usage page and the menu bar panel.
 
 An account can have a name of your own, for telling apart seats the vendor
 names alike (a team's GLM seats under masked emails): click the account's
-name in its provider's editor, or `magpie accounts alias <agent> <email>
-<name>` (`--clear` takes it off). The name is magpie's, kept in
+name in its provider's editor, or `eipgam accounts alias <agent> <email>
+<name>` (`--clear` takes it off). The name is eipgam's, kept in
 providers.json; the vendor's or plugin's sign-in is never written to. It
-shows on the account's Usage card, in the menu bar, in `magpie accounts`,
-`magpie quota` and `GET /v1/magpie/quotas` (`alias`). The name picks the
-account wherever its email does: `magpie accounts switch claude Work`,
+shows on the account's Usage card, in the menu bar, in `eipgam accounts`,
+`eipgam quota` and `GET /v1/eipgam/quotas` (`alias`). The name picks the
+account wherever its email does: `eipgam accounts switch claude Work`,
 `forget`, `alias`, `provider pool <id> --accounts` and `provider
-account-cap`. magpie refuses a name two accounts have, or one that is
+account-cap`. eipgam refuses a name two accounts have, or one that is
 another account's email, rather than pick one by guess; `next` after
 `switch` is always the next account (see above). A GLM Coding Plan
 seat added both as a key and as a signed-in ZCode account is shown once, on
@@ -3212,10 +3211,10 @@ puts it back), and the tab's foot says how many are hidden. Hiding is the
 panel's only: routing, caps, the Usage page and the menu bar's own cells
 still have it, and a menu bar cell for it still opens its card. A card or
 quota row hidden on the Usage page (its card's *Hide from Overview*) is left
-out of the panel's tab too, and of `magpie tui`'s Usage page; a
+out of the panel's tab too, and of `eipgam tui`'s Usage page; a
 subscription hidden there whole shows as hidden in the panel's *Arrange*,
 whose *Show* brings it back on the Usage page too. Both are
-kept in magpie's settings (`usageOrder`, `panelUsageHidden`). Which
+kept in eipgam's settings (`usageOrder`, `panelUsageHidden`). Which
 allowances the menu bar itself shows beside its icon is picked in Settings.
 The same list has *Tokens and cost today* and *Tokens and cost, last 7
 days*: every agent's requests as the Usage page's Requests tab sums them,
@@ -3226,42 +3225,42 @@ cached. Clicked, one opens the Requests tab at that period.
 
 The *Gateway* tab in the app has this as copy buttons and ready-made
 snippets (shell, curl, Python, Node) for each API, the list of model ids,
-and the recent calls; `MAGPIE_DEBUG=1` logs every call to the terminal.
+and the recent calls; `EIPGAM_DEBUG=1` logs every call to the terminal.
 
 **Claude Code** gets `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` and the
 model variables in the `env` block of `settings.json`; picking a native
 model (`opus`, `sonnet`…) removes them and restores whatever was there.
 A key in `ANTHROPIC_AUTH_TOKEN` signs Claude Code out of claude.ai while it
-runs through magpie: claude.ai's plan limits in `/usage`, its connectors,
+runs through eipgam: claude.ai's plan limits in `/usage`, its connectors,
 voice and `/teleport` are off. Set its sign-in to claude.ai to keep that
-login: magpie writes the token empty, Claude Code sends magpie its claude.ai
-sign-in, and magpie never passes it on (nor its `oauth-2025-04-20` beta). A
-provider that refuses magpie's own key is then reported to Claude Code as
+login: eipgam writes the token empty, Claude Code sends eipgam its claude.ai
+sign-in, and eipgam never passes it on (nor its `oauth-2025-04-20` beta). A
+provider that refuses eipgam's own key is then reported to Claude Code as
 a 502, not as its sign-in refused, so Claude Code doesn't log out. Remote
 Control and ultrareview stay off: Claude Code has them only on Anthropic's
 own address. The choice is offered where the gateway takes any key, so not
-from a WSL distro under NAT while magpie is shared on the network.
+from a WSL distro under NAT while eipgam is shared on the network.
 
-**Codex** gets a `[model_providers.magpie]` table, `model_catalog_json`
-pointing at `~/.codex/magpie-models.json` (written from the catalog, so the
+**Codex** gets a `[model_providers.eipgam]` table, `model_catalog_json`
+pointing at `~/.codex/eipgam-models.json` (written from the catalog, so the
 models show in Codex's own list) and a valid `model`/`effort`; picking a
 native model or disconnecting removes `model_provider` and the catalog. The
-`[model_providers.magpie]` table stays, so a thread started on magpie can
+`[model_providers.eipgam]` table stays, so a thread started on eipgam can
 still be opened. Codex won't load its config at all when `model_provider =
-"magpie"` has no table ("Model provider `magpie` not found"). If another
-tool leaves that state behind, magpie writes the table back the next time
+"eipgam"` has no table ("Model provider `eipgam` not found"). If another
+tool leaves that state behind, eipgam writes the table back the next time
 it syncs. Signed in to ChatGPT (the sign-in field's default), Codex keeps
-its own provider and sign-in, and magpie's models join its list through
-`openai_base_url`. magpie becomes Codex's provider then only while the
+its own provider and sign-in, and eipgam's models join its list through
+`openai_base_url`. eipgam becomes Codex's provider then only while the
 Codex app holds the account: OpenAI no longer allows it and it has no
 credits left, except a workspace account still within its overage. The
-app sends nothing for a held account, so magpie steps in, and it steps
+app sends nothing for a held account, so eipgam steps in, and it steps
 back once the account has room again. A window at 100% with credits left
 doesn't count: Codex stays signed in and keeps sending on those. Your
 ChatGPT sign-in is never touched.
 Codex reads its model list at start-up, so restart it after a switch.
 
-**OpenCode, Pi, Crush** get a `magpie` provider entry and `magpie/provider/model`.
+**OpenCode, Pi, Crush** get a `eipgam` provider entry and `eipgam/provider/model`.
 
 **Gemini CLI** switches `auth` between API key, Google account and Vertex;
 the API key goes to `~/.gemini/.env`. Picking a catalog model points
@@ -3270,32 +3269,32 @@ the API key goes to `~/.gemini/.env`. Picking a catalog model points
 `settings.json`; a native model puts the previous auth back.
 
 **Antigravity CLI** (`agy`) takes the gateway, its key and the model only
-from how it is started. Picking a catalog model (`magpie agy <model>`)
-puts a function named `agy` in a marked block (`# >>> magpie agy >>>`) of
+from how it is started. Picking a catalog model (`eipgam agy <model>`)
+puts a function named `agy` in a marked block (`# >>> eipgam agy >>>`) of
 your shell profiles: `.zshrc`, the bash profile a terminal reads, and
 `config.fish` (the PowerShell profiles on Windows). In a new terminal,
-plain `agy` then runs `magpie agy run`, which starts the real agy with the
-gateway, the key and `--model` (yours wins when you give one); off magpie
+plain `agy` then runs `eipgam agy run`, which starts the real agy with the
+gateway, the key and `--model` (yours wins when you give one); off eipgam
 it starts agy untouched. A terminal open already takes the command the
-Launch row copies. Stepping out (`magpie agy default`) takes the block out
-again. `magpie agy env` prints what `agy run` adds.
+Launch row copies. Stepping out (`eipgam agy default`) takes the block out
+again. `eipgam agy env` prints what `agy run` adds.
 
-**Dim** alpha (`dima`, npm's `dimcode-alpha`) is started on magpie the
+**Dim** alpha (`dima`, npm's `dimcode-alpha`) is started on eipgam the
 way Dim documents for any OpenAI-compatible endpoint: `DIM_BASE_URL`,
 `DIM_API_FORMAT=openai-compatible`, `DIM_API_KEY`, `DIM_MODEL`,
 `DIM_MAX_CONTEXT_TOKENS` and `DIM_MAX_OUTPUT_TOKENS`, for that run only.
-Picking a catalog model (`magpie dim <model>`) keeps it in magpie's own
+Picking a catalog model (`eipgam dim <model>`) keeps it in eipgam's own
 `dim.json` and puts a marked `dima` function in your shell profiles, which
-runs `magpie dim run`; Dim's own folder, saved Providers and account are
-not touched. `magpie dim default` takes the file and the function out
-again, and `magpie dim env` prints what `dim run` adds. No WSL twin.
+runs `eipgam dim run`; Dim's own folder, saved Providers and account are
+not touched. `eipgam dim default` takes the file and the function out
+again, and `eipgam dim env` prints what `dim run` adds. No WSL twin.
 
 agy installed in a WSL distro is listed as Antigravity CLI · WSL
 <distro>, found by `~/.gemini/antigravity-cli` or the `agy` command there.
 A catalog model puts the same marked `agy` function in the distro's
 `~/.bashrc`, `~/.zshrc` and `~/.config/fish/config.fish` (each one that is
 there, plus the one for your login shell in the distro's `/etc/passwd`).
-There is no magpie inside the distro, so this function reads the model
+There is no eipgam inside the distro, so this function reads the model
 from `settings.json` itself. It names the gateway at the address the
 distro reaches it on: Windows' address under NAT, which a sync rewrites
 when WSL comes back on another one.
@@ -3305,17 +3304,17 @@ when WSL comes back on another one.
 A vendor or relay can hand its users a ready-made provider as a link:
 
 ```
-magpie://import?preset=moonshot&key=sk-…
-magpie://import?name=Acme%20Relay&chat=https://api.acme.example/v1&anthropic=https://api.acme.example&key=sk-…&models=gpt-5.5,claude-sonnet-5
+eipgam://import?preset=moonshot&key=sk-…
+eipgam://import?name=Acme%20Relay&chat=https://api.acme.example/v1&anthropic=https://api.acme.example&key=sk-…&models=gpt-5.5,claude-sonnet-5
 ```
 
-Opening one brings up magpie with what the link would add: the name, the
+Opening one brings up eipgam with what the link would add: the name, the
 hosts your prompts and key would go to, the models. Nothing is saved until
-you press *Add*. `magpie import <link>` does the same in a terminal.
+you press *Add*. `eipgam import <link>` does the same in a terminal.
 
 | Parameter   | Meaning                                                            |
 | ----------- | ------------------------------------------------------------------ |
-| `preset`    | a preset id (`magpie presets`); its endpoints are used. Not `google-vertex`, which is asked at your own Google Cloud project |
+| `preset`    | a preset id (`eipgam presets`); its endpoints are used. Not `google-vertex`, which is asked at your own Google Cloud project |
 | `region`    | with a preset that has regions, which one                          |
 | `name`      | the provider's name; required without a preset                     |
 | `id`        | its id; derived from the name when absent                          |
@@ -3327,341 +3326,123 @@ you press *Add*. `magpie import <link>` does the same in a terminal.
 | `models`    | model ids to expose, comma separated                               |
 | `catalog`   | models.dev provider id, for model names and reasoning levels       |
 | `website`, `keys` | the vendor's site and its API-key page (https)               |
-| `icon`      | an https picture of the vendor's own (PNG, JPEG, GIF, WebP, ICO, SVG, at most 1 MB). magpie downloads it once, after you confirm the import, into its icons folder; without one it falls back to the catalog's logo or a plain mark |
-| `balance`   | where the key's balance is read (https), on the host of one of the base URLs, asked with the key; `{key}` in it stands for the key. Without it magpie reads the vendors it knows and asks a relay new-api's and sub2api's balance paths |
+| `icon`      | an https picture of the vendor's own (PNG, JPEG, GIF, WebP, ICO, SVG, at most 1 MB). eipgam downloads it once, after you confirm the import, into its icons folder; without one it falls back to the catalog's logo or a plain mark |
+| `balance`   | where the key's balance is read (https), on the host of one of the base URLs, asked with the key; `{key}` in it stands for the key. Without it eipgam reads the vendors it knows and asks a relay new-api's and sub2api's balance paths |
 | `balance_path` | where the amount is in the JSON reply (`data.balance`, `$ data.quota / 500000`, `;` between several); needs `balance` |
 | `balance_method` | `GET` (the default) or `POST` with no body; needs `balance` |
 
 Base URLs must be https (plain http only to this machine or the local
 network). A link sets no other header or token for the balance; one that
-needs it is set up in the provider's editor. Web pages and GitHub don't link custom schemes reliably, so link
-to `https://usemagpie.ai/import#<same parameters>` instead: it opens
-magpie, and offers the download when it is not installed. The parameters
-stay in the fragment, which browsers never send to a server. The full guide,
-with a link builder: <https://usemagpie.ai/docs/import>.
+needs it is set up in the provider's editor. Use the `eipgam://` scheme to open an import from an installed copy.
 
 ## Install
 
-Download the app for macOS, Windows or Linux from
-[usemagpie.ai](https://usemagpie.ai), or install it from a terminal (on
-Linux, the desktop app, with WebKitGTK 4.1 installed for it on a desktop
-that lacks it; the terminal build where there is no desktop):
+Download the macOS app for Apple silicon or Intel from
+[eipgam releases](https://github.com/sichengchen/eipgam/releases).
+For local builds from a checkout of this repository:
 
 ```sh
-curl -fsSL https://usemagpie.ai/install.sh | sh
+make build            # ./eipgam, including the desktop app
+make app              # macOS menu-bar app bundle
+make cli              # terminal-only build
+make release-windows  # cross-compile the Windows desktop app
+make release-linux    # build the Linux desktop app for this machine
 ```
 
-On a Linux computer with a desktop (a graphical session, the user's
-graphical login when run over ssh, or a desktop installed in `xsessions` /
-`wayland-sessions`) but without the app's libraries, the installer
-installs WebKitGTK 4.1 (which brings GTK 3) with the distribution's
-package manager, says so in one line first, and then installs the desktop
-app: `apt-get install -y libwebkit2gtk-4.1-0` on Debian and Ubuntu
-(`apt-get update` and once more when the lists are missing or stale),
-`dnf install -y webkit2gtk4.1` on Fedora, `pacman -S --needed --noconfirm
-webkit2gtk-4.1` on Arch, `zypper --non-interactive install
-libwebkit2gtk-4_1-0` on openSUSE, through `sudo` (which asks for the
-password) unless it runs as root. It does so only when someone is at the
-terminal: `curl … | sh` gives the script the pipe for stdin, so it reads
-`/dev/tty`. With no terminal (CI, a Dockerfile), no `sudo`, another
-distribution, or an install that fails, it installs the terminal build and
-ends with the command that installs the libraries; run it again afterwards
-for the app. `--gui` installs the app either way (the libraries too, at a
-terminal); `--tui` (or `MAGPIE_CLI=1`) installs the terminal build on a
-desktop and installs no package. The libraries are looked up with `ldconfig -p`, in `/sbin`
-as well, since a Debian user's `PATH` doesn't have it, and in the usual
-library folders where there is no cache. On musl (Alpine) it is always the
-terminal build.
+For macOS signing and installation, see the [README](../README.md).
+Linux desktop builds need GTK 3 and WebKitGTK 4.1. Windows desktop builds
+use WebView2. Termux uses `-tags nogui`.
 
-Behind a firewall, or without access to GitHub, both the installer and
-`magpie update` take `--proxy <url>` (http, https, socks5, socks5h; or
-`MAGPIE_PROXY`, and `HTTPS_PROXY` / `ALL_PROXY` as usual) and
-`--mirror <prefix>`, a GitHub download mirror of your choosing put before
-the release's github.com URL (or `MAGPIE_MIRROR`; `magpie update mirror
-<prefix>|off` keeps one for every update, the app's too):
+### Updates
 
-```sh
-curl -fsSL https://usemagpie.ai/install.sh | sh -s -- --proxy http://127.0.0.1:7890
-magpie update --mirror https://mirror.example/
-```
+eipgam checks for newer published releases in `sichengchen/eipgam`.
+The release workflow publishes the macOS app and CLI for Apple silicon
+and Intel. The local privacy filter downloads its versioned helper from
+the same repository and checks the attestation from `privacy-filter.yml`.
+Updates and release notes are also available from
+`eipgam update` and Settings → About.
 
-No mirror is used unless you give one, and the SHA-256 every download is
-checked against still comes from usemagpie.ai, never from the mirror.
+GitHub supplies the asset's SHA-256. Before downloading, eipgam verifies
+a Sigstore build attestation from the tagged `release.yml` workflow in
+this repository for that asset name and digest. A missing or unreadable
+attestation stops installation. On macOS, the bundle must also pass
+`codesign` verification and match the installed app's signing team.
 
-On a network that lets github.com through and not usemagpie.ai (a company
-allow list), the app and `magpie update` need no setting: when the feed
-fails, the newest release is read from `yetone/magpie-releases` itself
-(`api.github.com/repos/yetone/magpie-releases/releases/latest`, or the
-release page's redirect when the API is rate-limited), with its
-`SHA256SUMS` and `SHA256SUMS.sig` from github.com. They go through the same
-check as the feed's: the ed25519 signature against the key built into the
-binary, the version in the signed message, each file's hash from the signed
-list. A release read this way must be signed whatever its version. The
-Stable and Daily channels and a `MAGPIE_UPDATE_FEED` of your own don't
-fall back.
-
-Settings → About → *Update source* (`"updateSource"` in settings.json,
-`magpie settings set updateSource github`, this computer's own) chooses where an
-update comes from. Automatic (empty, the default) is what is described here:
-usemagpie.ai, then GitHub. `site` (usemagpie.ai only) never goes to GitHub,
-for the release or for a file. `github` (GitHub only) reads the release from
-`yetone/magpie-releases` without asking the feed, and downloads files from
-github.com (through a `--mirror` when one is given, then GitHub's API route);
-usemagpie.ai is not asked. On the Stable and Daily channels the release is
-only the site's pick, so `github` still reads it from the feed and downloads
-from GitHub. A `MAGPIE_UPDATE_FEED` of your own is never overridden. Every source
-is held to the same signature and hashes (`Release.verify`).
-
-Release files are downloaded from usemagpie.ai's copy on Cloudflare R2
-(`usemagpie.ai/files/<tag>/<file>`). Every five minutes the site copies the
-newest release and the Stable one from GitHub into R2, which takes a file
-only with the SHA-256 the release's `SHA256SUMS` gives; the feed names R2
-only for a file it holds, and gives each file's github.com address beside it
-(`github`). When the site's copy fails, the app, `magpie update` and the
-installer go on to github.com's address, through your mirror when one is
-set (a mirror is only ever put before a github.com address). A file R2
-doesn't hold (an older release) is redirected to github.com.
-
-When github.com's download address fails (it answered 504 for every release
-file for hours on 2026-11-08) and no mirror is set, the app, `magpie update`
-and the installer download the same file through GitHub's API
-(`api.github.com/repos/yetone/magpie-releases/releases/assets/<id>`, asked
-with `Accept: application/octet-stream`). The file is checked as before: the
-feed's SHA-256, and on the Mac the installed app's signing team. A mirror you
-set keeps precedence, and no API route is tried through it. While the
-download address fails, usemagpie.ai's feed points each file at
-`usemagpie.ai/dl/<tag>/<file>`, which redirects to the API's address, so an
-older magpie can update too.
-
-Mac releases are signed and notarised; the Windows and Linux builds are not
-signed yet (Windows SmartScreen may ask before the first run). Every build
-keeps itself current: the app
-downloads a new version in the background and installs it when you restart
-(*Restart to Update* in the menu) or quit; `magpie update` does the same from
-a terminal. A restart first asks for a release newer than the one
-downloaded, and downloads that one before it restarts, so you land on the
-newest (unless downloads wait for a click). Every release is on
-[yetone/magpie-releases](https://github.com/yetone/magpie-releases/releases).
-
-### Signed releases
-
-usemagpie.ai's feed only carries a release; it is not what magpie trusts. From
-v0.1.3862 on, release CI in `yetone/magpie-releases` signs each release's
-`SHA256SUMS` with an ed25519 key and publishes the signature as
-`SHA256SUMS.sig` (base64). The signed text is the line `magpie release
-<version>` followed by `SHA256SUMS`, so a signature is good for one version
-only. The private key is the `UPDATE_SIGNING_KEY` secret of
-`yetone/magpie-releases`, nowhere else. The public key is built into magpie
-(`internal/update/signed.go`).
-
-From v0.1.3891 the release workflow also attests every file with
-`actions/attest-build-provenance` (a SLSA provenance statement signed through
-Sigstore with the run's GitHub identity). Before downloading a file of such a
-release, the updater (`internal/update/attest.go`, sigstore-go) fetches the
-bundles for the file's signed SHA-256 (from the site's copy first when the file
-comes from the site, below, else from
-`api.github.com/repos/yetone/magpie-releases/attestations/sha256:<digest>`) and
-checks them offline against the Sigstore trusted root embedded in the binary
-(`attest_root.json`, public-good instance): certificate chain, certificate
-timestamp, Rekor entry, issuer `token.actions.githubusercontent.com`, subject
-`release.yml` of `yetone/magpie-releases` on `main` or a `v*` tag, source
-repository `yetone/magpie-releases`, and the digest among the statement's
-subjects. This is in addition to the ed25519 check, never instead of it. A
-bundle that fails, or GitHub saying it has none (404, empty list), refuses the
-file. Anything that leaves it unknown (GitHub unreachable, rate limited, 5xx,
-not JSON, *Update source* set to the site alone and the site has none) does not stop the update,
-since the signature has held; the log says the file went unattested. A
-`MAGPIE_UPDATE_FEED` of your own skips it. The embedded root must be renewed
-(`gh attestation trusted-root`, first line) when Sigstore rotates its public
-good keys; until then a new chain fails as "not attested".
-
-The same bundles are kept on R2 (`site/files.js`, `keepBundles`): the five-minute
-cron asks that API for each file's digest of a release from v0.1.3891 on and,
-once every file has one, writes `<tag>/attestations.jsonl` (a bundle to a line),
-served at `https://usemagpie.ai/files/<tag>/attestations.jsonl` and checked with
-`gh attestation verify <file> -R yetone/magpie-releases --bundle
-attestations.jsonl`. It is not a release asset (the release's count is
-unchanged), is written only whole, and is pruned with its tag.
-
-The updater reads it for a file the feed names on the site
-(`https://usemagpie.ai/files/<tag>/<file>`), before asking GitHub's API
-(ArcticLampyrid on X). The site is only transport: its bundles go through the
-same check (embedded root, identity, the signed digest), so it can't make a bad
-one pass. A miss (a pruned tag's 302 to GitHub, which is not followed; any
-other status; no bundle in the body; the site unreachable) asks GitHub's API as
-before. A bundle from the site that fails asks GitHub's API too, and a valid one
-there holds; when that API can't be read, it is a refusal, not unknown. With
-*Update source* set to the site alone, the site's bundles are checked and
-GitHub is never asked: a miss is unknown, a failing bundle a refusal. With it
-set to GitHub, the file and its bundles come from GitHub alone.
-
-The feed hands the app that `SHA256SUMS` and signature (`signed`). The app
-checks the signature against its key, takes every file's SHA-256 from the
-signed list, and refuses the update when the signature is missing or does not
-match, or when the feed's own hash for a file differs from the signed one.
-That holds for the Mac app, `magpie update`, the background update and the
-Windows and Linux builds alike, so a changed feed, a mirror or a proxy can no
-longer swap a file together with its hash. On the Mac the new app's signing
-team is still checked too.
-
-Transition: a magpie that has the key refuses any release at or above
-v0.1.3862 that is not signed. Releases below it were never signed, and a
-magpie older than the key (it ignores `signed`) still updates by the feed's
-SHA-256 as before, so nobody is cut off; the first update that lands on a
-signed release is trusted that way once, and every one after it is verified.
-`MAGPIE_UPDATE_FEED`, which points updates at a server of your own for
-testing, lifts the requirement (a signature the server does give is still
-checked). `install.sh` does not verify the signature: its first download is
-trusted to the site over HTTPS and the SHA-256 the site gives.
+A download mirror is an optional prefix in front of the GitHub asset URL.
+Set it in Settings → About → Download source or with
+`eipgam update mirror <prefix>`. Using a mirror still requires the
+GitHub metadata and attestation. `eipgam update mirror off` restores
+direct downloads. Set the update-specific proxy in Settings → Network
+and sharing or use `eipgam update --proxy <address>`.
 
 ### Update channel
 
-magpie takes every version as it comes out unless you choose Daily or
-Stable, in *Settings → About → Update channel* or with
-`magpie update channel daily` or `magpie update channel stable`
-(`magpie update channel every` goes back; `magpie update channel` prints
-the one in use). It is saved as `"updateChannel": "daily"` or `"stable"`
-in settings.json, and the app and `magpie update` both follow it.
-
-Daily is one version a day. Each day at 20:00 UTC it becomes the newest
-release out by then whose Test run on `main` passed (the run on the
-release's own commit) and that has all of its 17 files; a day with no
-such release keeps the day before's. A release marked urgent goes to Daily
-at once. What's new lists every version since yours as one list, and the
-Version row names the newest out on Every version as it does on Stable.
-The site works it out every quarter hour
-(`https://usemagpie.ai/api/latest?channel=daily`,
-`usemagpie.ai/download/daily/<platform>`); the Docker image's `daily` tag
-follows it.
-
-Stable is one version a week. Each Monday at 00:00 UTC it becomes the
-newest release that had been out for three days by then (Friday 00:00
-UTC), so every Stable version has had three days of use on the Every
-version channel first. A release marked urgent goes to Stable at once.
-When Stable moves past several versions, What's new lists the notes of
-every version since yours as one list.
-
-A version installed from the site, or kept from Every version when the
-channel changed, can be newer than Stable's or Daily's; the app keeps it
-and waits until the channel passes it. While it waits, the Version row
-says so (*Newer than Daily's 0.1.4395; it updates once Daily passes it*),
-names the newest version out on Every version, and offers to switch to
-Every version; `magpie update` says the same.
-
-The site's downloads offer Stable's version beside the newest
-(`usemagpie.ai/download/stable/<platform>`). A fresh install of it (no
-magpie run on this computer before) takes Stable before its first update
-check, so it isn't offered the newest at once: it asks the feed for
-Stable's version and the newest, and when it is Stable's and a newer one
-is out, sets `"updateChannel": "stable"`. A channel you set is kept, and a
-version that is both Stable's and the newest stays on Every version.
-
-The update feed works this out from the release list
-(`https://usemagpie.ai/api/latest?channel=stable`); nothing is promoted
-by hand. A release is urgent when its notes have a line that starts with
-`**Urgent release:**` and says why, for example:
-
-```md
-**Urgent release:** the gateway sent requests without a key to a page on another site.
-```
-
-magpie-releases' release run writes it from an `Urgent: <why>` trailer on
-any commit since the version before. It can also be added to a published
-release with `gh release edit` while the release is among the newest 100
-(about a day of releases); the feed's ledger reads them every quarter
-hour. A release is never marked prerelease for this.
-
-From source:
-
-```sh
-go install github.com/yetone/magpie@latest
-```
-
-or build locally:
-
-```sh
-make build            # ./magpie with the desktop app (needs cgo + the platform webview)
-make app              # macOS: magpie.app, a menu bar app with no Dock icon
-make cli              # terminal-only build, no cgo, cross-compiles anywhere
-make release          # dist/: native app build + cli builds for every platform
-make release-windows  # dist/: the Windows app, amd64 and arm64 (cross-compiles)
-make release-linux    # dist/: the Linux app for this machine's arch
-```
-
-The release targets and `make app` pack the UI's files into one zip first
-(`make assets-pack`, `build/assetpack`; embedded by `-tags packedassets`),
-which takes about 6 MB off each binary. `make build`, `make cli` and the
-tests embed the tree as it is.
-
-Linux needs `libgtk-3-dev` and `libwebkit2gtk-4.1-dev` for the app build
-(the Makefile adds the `gtk3` tag; with plain `go build`, pass `-tags gtk3`);
-Windows uses the WebView2 runtime that ships with the OS.
-
-Termux uses the Android terminal build: the installer puts it in
-`$PREFIX/bin`, and `make build` selects it automatically. With plain
-`go build` or `go install`, pass `-tags nogui`; use `magpie web` or
-`magpie tui` for the interface. `magpie autostart on` requires Termux:Boot.
+`eipgam update channel every` follows each published release.
+`daily` uses the latest daily cutoff at 20:00 UTC. `stable` uses the
+newest release that had been out for three days when the current UTC
+week began on Monday. Both channels can also receive a release whose notes
+start a line with `**Urgent release:**` as soon as it is published.
 
 ### As a background service
 
-`magpie daemon install` runs `magpie serve` as a service of your own, with
+`eipgam daemon install` runs `eipgam serve` as a service of your own, with
 no window and no desktop session: a server, or a machine you reach over
 SSH. The system starts it at login (and at boot, see below) and starts it
 again when it stops with a failure.
 
 ```sh
-magpie daemon install    # write the service and start it; again, to take a new PATH or proxy
-magpie daemon status     # running or not, its pid, file and logs, whether the gateway answers
-magpie daemon restart    # after updating magpie
-magpie daemon stop|start
-magpie daemon uninstall  # stop it and remove the file
-magpie daemon web on     # the service serves the browser page too; off stops it, no word shows it
+eipgam daemon install    # write the service and start it; again, to take a new PATH or proxy
+eipgam daemon status     # running or not, its pid, file and logs, whether the gateway answers
+eipgam daemon restart    # after updating eipgam
+eipgam daemon stop|start
+eipgam daemon uninstall  # stop it and remove the file
+eipgam daemon web on     # the service serves the browser page too; off stops it, no word shows it
 ```
 
 The service serves only the gateway unless asked for the page:
-`magpie daemon install --web` (or `magpie daemon web on` once installed)
-runs `magpie serve --web`, which serves the gateway and `magpie web`'s
+`eipgam daemon install --web` (or `eipgam daemon web on` once installed)
+runs `eipgam serve --web`, which serves the gateway and `eipgam web`'s
 page from one process, so the page shows the service's own gateway,
 providers and accounts. It listens on `127.0.0.1:3430`, which answers the
 gateway's `/v1` routes too (see [Connecting anything else](#connecting-anything-else)), so one
 reverse-proxy location serves both; `--lan` puts it on
 `0.0.0.0:3430` and `--addr host:port` anywhere, with the same warning as
-`magpie web --lan`: anyone with the link can change your settings. Its key
-is made once and kept in the service file (as `MAGPIE_WEB_KEY`, readable by
+`eipgam web --lan`: anyone with the link can change your settings. Its key
+is made once and kept in the service file (as `EIPGAM_WEB_KEY`, readable by
 you alone), so the link stays the same across restarts and reinstalls;
 `daemon web off` drops it, and the next `on` makes a new one.
-`magpie daemon status` prints the link. `--no-web` installs without it.
+`eipgam daemon status` prints the link. `--no-web` installs without it.
 
-`magpie web` beside a running service doesn't take the gateway's port:
+`eipgam web` beside a running service doesn't take the gateway's port:
 when the service serves the page it prints that page's link and exits, and
-otherwise its own page uses the service's gateway and says so. A magpie
+otherwise its own page uses the service's gateway and says so. A eipgam
 holding the port but slow to answer (a busy server, or one still starting)
 is waited for, not raced: the new one serves the gateway only once the
 port is free.
 
-- **Linux:** a systemd user unit, `~/.config/systemd/user/magpie.service`
+- **Linux:** a systemd user unit, `~/.config/systemd/user/eipgam.service`
   (`$XDG_CONFIG_HOME/systemd/user` when set), run with `systemctl --user`,
-  no root. Its log: `journalctl --user -u magpie -f`. systemd starts a
+  no root. Its log: `journalctl --user -u eipgam -f`. systemd starts a
   user's units at their first login and stops them at their last, so for
   the gateway to run from boot with no one logged in, run
-  `sudo loginctl enable-linger $USER` once; `magpie daemon status` says so
+  `sudo loginctl enable-linger $USER` once; `eipgam daemon status` says so
   when it isn't on. From `su` or `sudo -u`, `systemctl --user` can't reach
   your session: log in as the user, or set
   `XDG_RUNTIME_DIR=/run/user/$(id -u)`. On WSL, turn systemd on first
   (`[boot] systemd=true` in `/etc/wsl.conf`). A system without systemd is
-  told so; run `magpie serve` under the manager it has.
-- **macOS:** a launch agent, `~/Library/LaunchAgents/com.yetone.magpie.serve.plist`,
+  told so; run `eipgam serve` under the manager it has.
+- **macOS:** a launch agent, `~/Library/LaunchAgents/com.sichengchen.eipgam.serve.plist`,
   loaded with `launchctl bootstrap gui/$UID`. Its log:
-  `~/Library/Logs/magpie/serve.log`, beside the app's own `app.log`
-  (`magpie log`).
-- **Windows:** not a service; `magpie autostart on` opens magpie, which
-  serves the gateway, when you log in. Inside WSL, `magpie daemon` works as
+  `~/Library/Logs/eipgam/serve.log`, beside the app's own `app.log`
+  (`eipgam log`).
+- **Windows:** not a service; `eipgam autostart on` opens eipgam, which
+  serves the gateway, when you log in. Inside WSL, `eipgam daemon` works as
   on Linux.
 
-The service gets the environment `magpie daemon install` ran in: `PATH`
-(where it finds the agents' CLIs and bun), the proxy variables, `MAGPIE_*`
-settings such as `MAGPIE_ADDR` (and the `--tls-cert`/`--tls-key` pair, as
-`MAGPIE_TLS_CERT` and `MAGPIE_TLS_KEY`), the XDG folders and the agents' own folder
+The service gets the environment `eipgam daemon install` ran in: `PATH`
+(where it finds the agents' CLIs and bun), the proxy variables, `EIPGAM_*`
+settings such as `EIPGAM_ADDR` (and the `--tls-cert`/`--tls-key` pair, as
+`EIPGAM_TLS_CERT` and `EIPGAM_TLS_KEY`), the XDG folders and the agents' own folder
 variables (`CODEX_HOME`, `CLAUDE_CONFIG_DIR`…). To that `PATH` it adds
 what a terminal of yours has and the shell may not: nvm's default Node
 (not its newest), the other version managers' and npm's folders, and your
@@ -3669,9 +3450,9 @@ login shell's own `PATH`, so plugins and the MCP servers they start find
 `node` with nvm loaded lazily or over SSH. When no `node` is found even
 then, the install says so. The file is readable by you
 alone, since a proxy's address can hold a password. Run the install again
-after changing any of them. It runs magpie by the name it has on `PATH`
+after changing any of them. It runs eipgam by the name it has on `PATH`
 when that is the same file (Homebrew's link stays right across updates),
-and refuses a `go run` build. It is refused while `magpie autostart` is on:
+and refuses a `go run` build. It is refused while `eipgam autostart` is on:
 the app opened at login serves the gateway too, and the two would take
 turns failing on the port. The app opened by hand while the service runs
 uses the service's gateway.
@@ -3681,52 +3462,52 @@ uses the service's gateway.
 `docker build` makes a server image: the terminal-only binary on Debian 12
 slim, with bash and curl, so a vendor's `curl … | bash` installer runs and
 the CLI it installs (Cursor's, Devin's, Grok Build) finds the glibc it links,
-as the plugins' Bun does, and a terminal opens in the container (`docker exec -it magpie bash`, or a
-NAS panel's terminal; `magpie` is on its PATH), run as nonroot,
-with everything it keeps in a volume at `/config`: magpie's own files
-(`/config/magpie`), the sign-ins kept where their agent keeps them (HOME is
+as the plugins' Bun does, and a terminal opens in the container (`docker exec -it eipgam bash`, or a
+NAS panel's terminal; `eipgam` is on its PATH), run as nonroot,
+with everything it keeps in a volume at `/config`: eipgam's own files
+(`/config/eipgam`), the sign-ins kept where their agent keeps them (HOME is
 `/config/home`, so `~/.codex`, `~/.claude`… are in it) and the cache with the
 Bun plugins run on (`/config/cache`, downloaded once). A volume made by an
-older image keeps working: magpie adds these folders to it on start, and only
+older image keeps working: eipgam adds these folders to it on start, and only
 sign-ins made with that older image, which lived outside the volume, have to
 be made again.
 
 ```sh
-docker build -t magpie .
-docker run -d --name magpie -p 127.0.0.1:3425:3425 -p 127.0.0.1:3430:3430 -v magpie-config:/config magpie
+docker build -t eipgam .
+docker run -d --name eipgam -p 127.0.0.1:3425:3425 -p 127.0.0.1:3430:3430 -v eipgam-config:/config eipgam
 ```
 
 3425 is the gateway for agents. Inside the container it takes any key; a
 request from outside it, the host's own included, must carry an enabled
 gateway key as its API key, and one without gets 401. Make one in the
 browser UI (Gateway → Gateway keys) or with
-`docker exec magpie magpie gateway-key add "Docker client"`. Sharing
+`docker exec eipgam eipgam gateway-key add "Docker client"`. Sharing
 (Settings → Network and sharing → Share on local network) isn't needed for this; turning it on
-also creates a key named **Magpie**. The ports above are published on the
+also creates a key named **eipgam**. The ports above are published on the
 host's loopback; Docker's `-p 3425:3425` puts the gateway on every interface
 of the host, for other machines to reach. Upgrading from an earlier image:
-an agent outside the container that sends `magpie`, or another key that
+an agent outside the container that sends `eipgam`, or another key that
 isn't an enabled gateway key, now gets 401 ("the API key sent is not an
-enabled magpie gateway key"); give it a gateway key.
+enabled eipgam gateway key"); give it a gateway key.
 Inside the container
-magpie only sees the container's own address (Docker's 172.17.x), so set
-`-e MAGPIE_PUBLIC_URL=http://<the host's or NAS's address>:3425` (the port
+eipgam only sees the container's own address (Docker's 172.17.x), so set
+`-e EIPGAM_PUBLIC_URL=http://<the host's or NAS's address>:3425` (the port
 published on the host) for the address it shows and prints to be the one
 other machines use; behind a reverse proxy, set it to that external base URL
 and follow the [authentication requirements above](#connecting-anything-else),
-especially when the proxy reaches magpie over loopback.
+especially when the proxy reaches eipgam over loopback.
 Other containers on the same host reach the gateway at the host's Docker
 bridge address on the published port, `http://172.17.0.1:3425` on the default
-bridge; magpie reads it from the container's default route and lists it as
-"Other containers on this host" (in the browser UI and in `magpie web`'s log).
+bridge; eipgam reads it from the container's default route and lists it as
+"Other containers on this host" (in the browser UI and in `eipgam web`'s log).
 On Linux `host.docker.internal` is there only for a container given
 `extra_hosts: ["host.docker.internal:host-gateway"]`.
 
-For the browser UI run the image with `magpie web --addr 0.0.0.0:3430 --no-open`
+For the browser UI run the image with `eipgam web --addr 0.0.0.0:3430 --no-open`
 in place of the default `serve`, and open
-`http://localhost:3430/?k=<key from docker logs magpie>` (set `MAGPIE_WEB_KEY`
+`http://localhost:3430/?k=<key from docker logs eipgam>` (set `EIPGAM_WEB_KEY`
 to keep one key across restarts; a browser then stays signed in for 400
-days, and `MAGPIE_NAME` to title its tab `<name> · magpie`, telling several
+days, and `EIPGAM_NAME` to title its tab `<name> · eipgam`, telling several
 deployments apart; a name set in Settings → Network and sharing → Advanced →
 Name comes first). A browser keeps cookies per host, not per port, so another service on
 the same address can take the sign-in away: by clearing its site data, or by
@@ -3737,45 +3518,45 @@ subscriptions and import sign-ins from a file. The vendor sends a sign-in's
 browser back to `localhost` (ChatGPT to `http://localhost:1455/auth/callback?code=…`),
 which is your own machine, not the container, so that page won't load: copy
 its whole address from the address bar and paste it into the sign-in's
-*Callback URL* field. `docker exec -it magpie /magpie accounts add codex`
+*Callback URL* field. `docker exec -it eipgam /eipgam accounts add codex`
 does the same in a terminal: open the link it prints, then paste the address
 the browser ended on. Keys, sign-ins and plugins live in the volume, so a
 restart, or a new container on the same volume, keeps them.
 
-Magpie Browser's extension can't be loaded from the container's folders, so
-in the browser UI the Library's Magpie Browser sheet offers *Download the
+eipgam Browser's extension can't be loaded from the container's folders, so
+in the browser UI the Library's eipgam Browser sheet offers *Download the
 extension*: a zip pointed at the page's own address (3430 hands the
-gateway's routes on), with a gateway key named **Magpie Browser** of its
+gateway's routes on), with a gateway key named **eipgam Browser** of its
 own, made once and reused while it is on. Unzip it and choose the folder
 with Load unpacked on `chrome://extensions`. An extension already loaded
-takes the address and a gateway key in its popup. The Magpie Browser key
+takes the address and a gateway key in its popup. The eipgam Browser key
 connects the extension and nothing else: it reaches no model, MCP server
 or stats, so a copy of the zip left in Downloads spends nothing. A key a
-magpie from before made for the zip with full access is held so the next
+eipgam from before made for the zip with full access is held so the next
 time the gateway starts. A browser is the container's own only when it
 connects from the container's own computer; the host's Chrome reaches the
 container from the bridge (172.17.0.1), so it is the key's alone, and the
 container's agents don't use it yet (#5529). To use it from the host, give
-the caller of `/mcp/magpie/browser` a key of its own with full access and
+the caller of `/mcp/eipgam/browser` a key of its own with full access and
 connect the extension with that key. A browser that connects with another
 key is that key's alone. A browser connecting from outside with no key, or
 from a web page's origin, is refused as before. A keyed browser is let go
 once its key is turned off, removed or rotated.
 
-The image has a `HEALTHCHECK`: `magpie healthcheck` exits 0 while the gateway
-answers on `MAGPIE_ADDR`, under `serve` and `web` alike, so `docker ps` shows
+The image has a `HEALTHCHECK`: `eipgam healthcheck` exits 0 while the gateway
+answers on `EIPGAM_ADDR`, under `serve` and `web` alike, so `docker ps` shows
 the container as healthy (Compose: `depends_on: condition: service_healthy`)
-with no curl in the image. The running magpie writes where it listens, its
+with no curl in the image. The running eipgam writes where it listens, its
 pid and how it was started (`app`, `tray`, `web`, `serve`) to `gateway.json` in
-its config folder, so `magpie healthcheck`, `magpie update` and the other
-commands find it from a shell that doesn't have `MAGPIE_ADDR` (a systemd
-service's); `--addr host:port` names it by hand, and `magpie status --json`
+its config folder, so `eipgam healthcheck`, `eipgam update` and the other
+commands find it from a shell that doesn't have `EIPGAM_ADDR` (a systemd
+service's); `--addr host:port` names it by hand, and `eipgam status --json`
 prints the role, pid, version and address for a watchdog. Bind-mounting a folder at `/config` in place of a
 named volume works too; it has to be writable by uid 65532.
 
 #### NAS with agents on other machines
 
-Magpie can run on a headless NAS as a shared gateway even when the agents that
+eipgam can run on a headless NAS as a shared gateway even when the agents that
 use it (Claude Code, Codex, OpenCode, and so on) run on other computers. The
 container does not discover agent installations on the NAS host or on remote
 machines: configure those agents to use the NAS address and an enabled gateway
@@ -3787,18 +3568,18 @@ Such a page is in **gateway mode**: it shows Sessions, Library, Providers,
 Routing, Gateway, Usage, Masking, Plugins and Settings, with no Agents tab.
 The Library has its MCP servers, with the MCP router: other
 computers' apps connect at the router's address with a gateway key. Its
-Skills and Instructions are there too, for a magpie on another computer
-that adds this one as an "Another computer's magpie" provider with Use its skills and
-prompts on: that magpie takes them and gives them to its own agents.
+Skills and Instructions are there too, for a eipgam on another computer
+that adds this one as an "Another computer's eipgam" provider with Use its skills and
+prompts on: that eipgam takes them and gives them to its own agents.
 Sessions lists only the sessions of other computers' agents that came
 through this gateway, never this machine's agents' session files
 ([gateway sessions](subsystems/gateway-sessions.md)). Settings leaves out what is written into this machine's agents (provider in
 model names) and the desktop's alerts and tray. Codex's and Claude Code's own
 settings (Codex subagents, long conversations, Codex thread titles and the
 rest) are on the Agents page, in the agent's opened row, so a gateway has
-none of them. `magpie web` is in it by itself when it finds
+none of them. `eipgam web` is in it by itself when it finds
 no agents on its machine, as in the container, and with
-`magpie web --gateway`. *Settings › General › Gateway mode* picks Automatic,
+`eipgam web --gateway`. *Settings › General › Gateway mode* picks Automatic,
 On or Off for this machine (it wins over both); Off brings every page back.
 The app's own window is never in gateway mode.
 
@@ -3806,24 +3587,25 @@ For a bind-mounted configuration directory, the directory must be writable by
 the non-root container user (uid 65532):
 
 ```sh
-sudo chown -R 65532:65532 /volume1/docker/magpie/config
+sudo chown -R 65532:65532 /volume1/docker/eipgam/config
 ```
 
 An example Docker Compose project is:
 
 ```yaml
 services:
-  magpie:
-    image: ghcr.io/yetone/magpie:latest
+  eipgam:
+    build: .
+    image: eipgam:local
     restart: unless-stopped
     ports:
       # 127.0.0.1: the host alone; every caller outside the container needs a gateway key.
       - "127.0.0.1:3425:3425"
       - "127.0.0.1:3430:3430"
     environment:
-      MAGPIE_ADDR: 0.0.0.0:3425
-      MAGPIE_PUBLIC_URL: http://<nas-address>:3425
-      MAGPIE_WEB_KEY: <random-key>
+      EIPGAM_ADDR: 0.0.0.0:3425
+      EIPGAM_PUBLIC_URL: http://<nas-address>:3425
+      EIPGAM_WEB_KEY: <random-key>
     volumes:
       - ./config:/config
     command: [web, --addr, 0.0.0.0:3430, --no-open]
@@ -3835,23 +3617,16 @@ To let remote agents reach it, change the gateway mapping to `3425:3425` (or
 bind it only to the NAS interface or VPN address) and recreate the
 container. For Internet access, prefer a
 VPN such as Tailscale or WireGuard; a reverse proxy or tunnel forwarding to
-Magpie over loopback needs a gateway key from its clients, as the network does.
+eipgam over loopback needs a gateway key from its clients, as the network does.
 
-The image's tags: `latest` is the newest release, and magpie releases
-several times a day. `daily` is the desktop app's Daily channel: once a
-day at 20:00 UTC, the newest release whose CI run passed, or an urgent one
-at once (`.github/workflows/docker-daily.yml` follows
-`usemagpie.ai/api/latest?channel=daily`), for Renovate or Watchtower to
-update at most daily (with Renovate, pin its digest);
-`stable` is the desktop app's Stable channel, one a week. `0.1.N` is one
-release, `0.1` the newest of its line, and `edge` every change on `main`.
+Build the container image from the checkout you want to run.
 
 #### LazyCat
 
-On a [LazyCat](https://lazycat.cloud) box (懒猫微服) magpie runs as an
-app's service with `magpie web`. With `MAGPIE_WEB_SIGN_IN=lazycat` the page
+On a [LazyCat](https://lazycat.cloud) box (懒猫微服) eipgam runs as an
+app's service with `eipgam web`. With `EIPGAM_WEB_SIGN_IN=lazycat` the page
 takes the box's own sign-in for its key: the box's administrators open
-magpie from the box's app list (`https://magpie.<box>.heiyu.space`), signed
+eipgam from the box's app list (`https://eipgam.<box>.heiyu.space`), signed
 in to the box, with nothing to paste. The page sets them no cookie of its
 own, so signing out of the box signs them out of the page; a browser signed
 in with the key's link keeps its cookie. A manifest (`lzc-manifest.yml`) for
@@ -3859,10 +3634,10 @@ it:
 
 ```yaml
 application:
-  subdomain: magpie
+  subdomain: eipgam
   upstreams:
     - location: /
-      backend: http://magpie:3430/
+      backend: http://eipgam:3430/
   # the gateway's client routes (clientPrefixes, internal/gateway/oneport.go),
   # for agents that aren't signed in to the box: the gateway checks them as
   # everywhere
@@ -3887,13 +3662,14 @@ application:
     - /me
     - /deepseek-chat
     - /join
-    - /magpie-ca.crt
+    - /eipgam-ca.crt
 services:
-  magpie:
-    image: ghcr.io/yetone/magpie:0.1.N
+  eipgam:
+    build: .
+    image: eipgam:local
     command: web --addr 0.0.0.0:3430 --no-open
     environment:
-      - MAGPIE_WEB_SIGN_IN=lazycat
+      - EIPGAM_WEB_SIGN_IN=lazycat
     binds:
       # the app's own folder, which the box keeps across updates and the
       # image's user (uid 65532) can write: a folder the box makes for a
@@ -3914,12 +3690,12 @@ another app's page on the box makes. Another account, a request another app
 or the box itself sent, one with no account, one another page made and one
 from a browser that doesn't say where it came from are turned away and told
 why; the link with the key, in the app's log, still signs a browser in.
-`magpie web` won't start with `MAGPIE_WEB_SIGN_IN=lazycat` without
+`eipgam web` won't start with `EIPGAM_WEB_SIGN_IN=lazycat` without
 `LAZYCAT_APP_DOMAIN`, which LazyCat sets in an app's containers, so the
-setting isn't taken somewhere else by mistake; that is all magpie can check
+setting isn't taken somewhere else by mistake; that is all eipgam can check
 of where it runs. The setting says the box's ingress is the only way to the
 page's port. The box's sign-in stands in for no gateway key: the gateway's
-client routes ask for theirs as everywhere. magpie sends none of the box's
+client routes ask for theirs as everywhere. eipgam sends none of the box's
 `X-HC-*` headers on to a vendor, the ChatGPT backend or an MCP server,
 unless a provider's `PassHeaders` names one.
 
@@ -3930,7 +3706,7 @@ the box's login page. Let nothing but the box's ingress reach the page's
 port (3430): not a TCP ingress (`application.ingress`) or the box's LAN port
 forwarding. There the box passes every header as the caller wrote it, and
 anyone who reaches that port could say they are the box's administrator.
-magpie turns away a peer on a public address whatever it sends, but it
+eipgam turns away a peer on a public address whatever it sends, but it
 can't tell a private one from the ingress: LazyCat's docs
 (developer.lazycat.cloud/en/http-request-headers.html) say the ingress sets
 `X-HC-*` after authenticating and clears them when it fails, and name no
@@ -3941,8 +3717,8 @@ some of the box's own apps are): from there, as from the box itself, the
 page's port can be reached, so such an app is trusted as the box's
 administrators are. The gateway's port (3425) can be published: the
 gateway checks what reaches it as everywhere, and the box's sign-in
-stands in for none of it. magpie takes the app's address from
-`LAZYCAT_APP_DOMAIN`, so `MAGPIE_PUBLIC_URL` isn't needed.
+stands in for none of it. eipgam takes the app's address from
+`LAZYCAT_APP_DOMAIN`, so `EIPGAM_PUBLIC_URL` isn't needed.
 
 ### Developing
 
@@ -3954,85 +3730,85 @@ builds with `-tags dev` and opens the app with the UI served straight from
 `internal/gui/assets`: save `app.css`, `app.js` or `index.html` and the window
 reloads itself. With `fswatch` installed (`brew install fswatch`), a change to a
 Go file rebuilds and relaunches the app too. The dev build uses its own gateway
-port (`DEV_ADDR`, default 127.0.0.1:3426), so a magpie you already run keeps
+port (`DEV_ADDR`, default 127.0.0.1:3426), so a eipgam you already run keeps
 serving your agents. Point it at a scratch home to keep your real agent
 configs out of it:
 
 ```sh
-HOME=/tmp/magpie-home XDG_CONFIG_HOME=/tmp/magpie-home/.config make dev
+HOME=/tmp/eipgam-home XDG_CONFIG_HOME=/tmp/eipgam-home/.config make dev
 ```
 
-`MAGPIE_THEME=light|dark` forces the palette and `MAGPIE_DEBUG=1` prints what the
+`EIPGAM_THEME=light|dark` forces the palette and `EIPGAM_DEBUG=1` prints what the
 gateway translates.
 
 ## Use
 
 ```sh
-magpie                          # open the app: a window plus the menu bar icon
-magpie tray                     # menu bar icon only (use this in your login items)
-magpie tui                      # the same thing, in the terminal; serves the gateway while open when no other magpie does
-magpie web                      # the app's window in a browser (WSL, a server over SSH); --lan, --addr, --no-open, --gateway, --tls-cert/--tls-key
-                                # (a new key each run; MAGPIE_WEB_KEY keeps one, for a page run as a service)
-                                # (in a LazyCat app, MAGPIE_WEB_SIGN_IN=lazycat lets the box's administrators in without it)
-                                # (behind a reverse proxy, MAGPIE_WEB_URL=https://<the page there> prints the link through it)
-magpie serve                    # the gateway alone, no window; --web[=host:port] serves the page too, from the same process
+eipgam                          # open the app: a window plus the menu bar icon
+eipgam tray                     # menu bar icon only (use this in your login items)
+eipgam tui                      # the same thing, in the terminal; serves the gateway while open when no other eipgam does
+eipgam web                      # the app's window in a browser (WSL, a server over SSH); --lan, --addr, --no-open, --gateway, --tls-cert/--tls-key
+                                # (a new key each run; EIPGAM_WEB_KEY keeps one, for a page run as a service)
+                                # (in a LazyCat app, EIPGAM_WEB_SIGN_IN=lazycat lets the box's administrators in without it)
+                                # (behind a reverse proxy, EIPGAM_WEB_URL=https://<the page there> prints the link through it)
+eipgam serve                    # the gateway alone, no window; --web[=host:port] serves the page too, from the same process
                                 # --tls-cert <file> --tls-key <file>: https:// for other computers (see HTTPS under sharing)
-magpie https                    # https:// for other computers: on, off, import <files>, remove, ca [--out]
-magpie mtls                     # other computers need a client certificate magpie issued: on, off, issue <device>, revoke <device>, list
-magpie daemon install           # run magpie serve as a service (systemd, launchd); --web, --lan, --addr serve the page too; --tls-cert/--tls-key, --no-tls
-magpie ls                       # list every agent and its current settings
-magpie claude opus              # set a model (agent names accept prefixes: cc, oc, gem …)
-magpie codex gpt-5.6-sol
-magpie codex effort high        # other fields
-magpie codex effort             # one field, as it is now
-magpie codex xhigh              # bare effort levels are recognised too
-magpie codex zai/glm-5.3        # any catalog model, through the gateway
-magpie claude moonshot/kimi-k2.5
-magpie claude haiku minimax/MiniMax-M3   # one tier on its own model
-magpie claude haiku ""          # back to the main model
-magpie gemini auth api-key
-magpie opencode anthropic/claude-sonnet-5
-magpie oc small anthropic/claude-haiku-4-5
-magpie mimo anthropic/claude-sonnet-5
+eipgam https                    # https:// for other computers: on, off, import <files>, remove, ca [--out]
+eipgam mtls                     # other computers need a client certificate eipgam issued: on, off, issue <device>, revoke <device>, list
+eipgam daemon install           # run eipgam serve as a service (systemd, launchd); --web, --lan, --addr serve the page too; --tls-cert/--tls-key, --no-tls
+eipgam ls                       # list every agent and its current settings
+eipgam claude opus              # set a model (agent names accept prefixes: cc, oc, gem …)
+eipgam codex gpt-5.6-sol
+eipgam codex effort high        # other fields
+eipgam codex effort             # one field, as it is now
+eipgam codex xhigh              # bare effort levels are recognised too
+eipgam codex zai/glm-5.3        # any catalog model, through the gateway
+eipgam claude moonshot/kimi-k2.5
+eipgam claude haiku minimax/MiniMax-M3   # one tier on its own model
+eipgam claude haiku ""          # back to the main model
+eipgam gemini auth api-key
+eipgam opencode anthropic/claude-sonnet-5
+eipgam oc small anthropic/claude-haiku-4-5
+eipgam mimo anthropic/claude-sonnet-5
 
-magpie save work                # snapshot everything as a profile
-magpie use work                 # switch back
-magpie profiles
-magpie rm work
+eipgam save work                # snapshot everything as a profile
+eipgam use work                 # switch back
+eipgam profiles
+eipgam rm work
 
-magpie sync                     # refresh the models.dev catalog and every live model list
+eipgam sync                     # refresh the models.dev catalog and every live model list
 
-magpie settings                 # every setting the window's Settings saves, its value and default (--json too)
-magpie settings get usageAlert
-magpie settings set noBird on   # checked and saved as the window saves it
-magpie settings set redactWords acme,globex
-magpie settings reset theme     # back to its default
-magpie settings set dayStart 4   # a day starts at 4:00 (0 to 6): the Usage page and daily and monthly key caps cut days there; the Sessions page does not yet
+eipgam settings                 # every setting the window's Settings saves, its value and default (--json too)
+eipgam settings get usageAlert
+eipgam settings set noBird on   # checked and saved as the window saves it
+eipgam settings set redactWords acme,globex
+eipgam settings reset theme     # back to its default
+eipgam settings set dayStart 4   # a day starts at 4:00 (0 to 6): the Usage page and daily and monthly key caps cut days there; the Sessions page does not yet
 
-magpie quota                    # what is left of every subscription, plan and key balance
-magpie quota refresh codex      # read Codex's cards again now (once per 30s)
-magpie quota wait codex         # block until a Codex account has allowance again
-magpie quota credits me@example.com off   # hold a ChatGPT account at its limit instead of spending credits
-magpie quota credits me@example.com last  # spend its credits only after every other account, key and fallback
-magpie quota credits me@example.com first # spend its credits before moving to another account
+eipgam quota                    # what is left of every subscription, plan and key balance
+eipgam quota refresh codex      # read Codex's cards again now (once per 30s)
+eipgam quota wait codex         # block until a Codex account has allowance again
+eipgam quota credits me@example.com off   # hold a ChatGPT account at its limit instead of spending credits
+eipgam quota credits me@example.com last  # spend its credits only after every other account, key and fallback
+eipgam quota credits me@example.com first # spend its credits before moving to another account
 
-magpie tools                    # the tools magpie's MCP servers give agents, with their parameters
-magpie tools generate_image     # one tool in full
-magpie tool generate_image "a magpie on a branch, watercolour" --size 1536x1024 -o hero.png
-magpie tool generate_image --n 2 --quality high --background transparent "an app icon"   # hero.png, then numbered
-magpie tool analyze_image ./shot.png --prompt "what does the error say?"
-magpie tool web_search "go 1.27 release notes"
+eipgam tools                    # the tools eipgam's MCP servers give agents, with their parameters
+eipgam tools generate_image     # one tool in full
+eipgam tool generate_image "a eipgam on a branch, watercolour" --size 1536x1024 -o hero.png
+eipgam tool generate_image --n 2 --quality high --background transparent "an app icon"   # hero.png, then numbered
+eipgam tool analyze_image ./shot.png --prompt "what does the error say?"
+eipgam tool web_search "go 1.27 release notes"
 ```
 
-`magpie tool` calls a tool through the running magpie's own MCP servers
+`eipgam tool` calls a tool through the running eipgam's own MCP servers
 (image generation, image recognition, web search and plugins' tools), as an
 agent's MCP call does, so it has the same tools and parameters, models from
 Settings, and the same usage counting. A parameter is `--<param> <value>`; the
 words left over are the tool's one required text. An unknown or missing
 parameter is refused before anything is called. An image or video it makes is
 saved at `-o` (a file or a folder) or in the current folder, never over a file
-that is there; `--json` prints the raw answer. It needs magpie running (the
-app, `magpie serve` or the service); `MAGPIE_GATEWAY=<url>` points it at
+that is there; `--json` prints the raw answer. It needs eipgam running (the
+app, `eipgam serve` or the service); `EIPGAM_GATEWAY=<url>` points it at
 another.
 
 In the app, click any value to open a filtered list; type to search or to
@@ -4050,23 +3826,23 @@ again to return to the whole period. Changing the period clears the selection.
 On macOS, *Settings → Preferences → Session terminal* chooses which installed
 app opens a session from the terminal button in *Usage → Sessions*. The list
 contains apps registered to open `.command` files, with the current system
-default listed once. With no saved choice, magpie follows that default, or
+default listed once. With no saved choice, eipgam follows that default, or
 Terminal when the default is not a terminal. The *Resume* button still copies
 the command.
 
 Rex (superlogical.com/rex) is listed too when its `rex` program is found,
 on `PATH` or inside a `Rex*.app` in `/Applications` or `~/Applications`
 (only a native program counts, so the Perl tool also called `rex` is not
-taken). Rex claims no `.command` files, so magpie opens it through its CLI,
-in a Rex session of its own labelled `magpie`. Outside Rex, `rex run` with no
+taken). Rex claims no `.command` files, so eipgam opens it through its CLI,
+in a Rex session of its own labelled `eipgam`. Outside Rex, `rex run` with no
 `-s` adds a tab only when Rex has exactly one session: with none or several it
 exits 3 (not found or ambiguous), and the CLI can't tell which session the app
-shows. So magpie finds its session with `rex ls --json` and runs
+shows. So eipgam finds its session with `rex ls --json` and runs
 `rex run -s <its ID> --label=<session or agent> -- /bin/sh -c '<command>; exec $SHELL -l'`,
 then names the new tab with `rex window rename`. With no such session (or one
-that ended since the list) it runs `rex new magpie --window=<session or agent> -- …`,
+that ended since the list) it runs `rex new eipgam --window=<session or agent> -- …`,
 whose first tab is so named. A tab added from outside shows only in the
-app's sidebar, so magpie then brings Rex forward and asks the app to go to
+app's sidebar, so eipgam then brings Rex forward and asks the app to go to
 it: it takes the client of kind `app` from `rex client list --json` (the one
 attached to its session, else the last app connected) and runs
 `rex -C <client> do session.select session_id=<session> window_id=<tab>`.
@@ -4095,12 +3871,12 @@ until you start a new one.
 ### Moving to another machine
 
 ```sh
-magpie backup                   # writes magpie.magpie-backup, asks for a passphrase twice
-magpie backup --no-keys ~/b.magpie-backup   # the same with no API keys in it
-magpie restore magpie.magpie-backup         # on the other machine
-magpie restore --no-agents b.magpie-backup  # providers, settings, profiles; agents left as they are
-magpie restore --no-library b.magpie-backup # the library here left as it is
-magpie backup --no-usage ~/b.magpie-backup  # no usage history in it
+eipgam backup                   # writes eipgam.eipgam-backup, asks for a passphrase twice
+eipgam backup --no-keys ~/b.eipgam-backup   # the same with no API keys in it
+eipgam restore eipgam.eipgam-backup         # on the other machine
+eipgam restore --no-agents b.eipgam-backup  # providers, settings, profiles; agents left as they are
+eipgam restore --no-library b.eipgam-backup # the library here left as it is
+eipgam backup --no-usage ~/b.eipgam-backup  # no usage history in it
 ```
 
 A backup holds your providers (with their keys, unless `--no-keys`), the
@@ -4132,7 +3908,7 @@ left as it is, and one removed on one machine stays on the others. The usage his
 along too (unless `--no-usage`): every call in `usage.jsonl`, gzipped, and
 the quota cards' history. Restoring merges it with the history there: a call
 already there is never added again, so restoring the same backup twice counts
-nothing twice (`magpie restore --no-usage` leaves it out). Piped
+nothing twice (`eipgam restore --no-usage` leaves it out). Piped
 in, the passphrase is the first line of stdin.
 
 ### Keeping machines in sync
@@ -4148,7 +3924,7 @@ the gateway runs. Choose one of these:
 - **GitHub**: an existing repository, using a fine-grained token
   with Contents read and write permission. The repository must be private:
   sync refuses a public one, whose history would give anyone every sealed version.
-  The address can include a folder, such as `github://owner/repo/magpie-sync`.
+  The address can include a folder, such as `github://owner/repo/eipgam-sync`.
   Each update is a commit to that branch, so the repository also provides a
   history of the encrypted backup.
 
@@ -4165,12 +3941,12 @@ Settings → Sync lists those fields under **Kept on this computer**, and
 **Follow the others** takes the synced value again.
 
 ```sh
-magpie webdav on https://dav.jianguoyun.com/dav/ user=me@example.com
-magpie s3 on s3://my-bucket/magpie endpoint=https://<account>.r2.cloudflarestorage.com access-key-id=…
-magpie s3 on s3://backups endpoint=http://nas.local:9000 path-style=yes access-key-id=…
-magpie s3                       # where it syncs to and how the last sync went; magpie s3 now, off
-magpie github on github://owner/private-backups/settings branch=main
-magpie github                   # where it syncs to and how the last sync went; magpie github now, off
+eipgam webdav on https://dav.jianguoyun.com/dav/ user=me@example.com
+eipgam s3 on s3://my-bucket/eipgam endpoint=https://<account>.r2.cloudflarestorage.com access-key-id=…
+eipgam s3 on s3://backups endpoint=http://nas.local:9000 path-style=yes access-key-id=…
+eipgam s3                       # where it syncs to and how the last sync went; eipgam s3 now, off
+eipgam github on github://owner/private-backups/settings branch=main
+eipgam github                   # where it syncs to and how the last sync went; eipgam github now, off
 ```
 
 For S3:
@@ -4182,9 +3958,9 @@ For S3:
 - The secret is asked for and saved like the WebDAV password. It is used only
   with the endpoint and access key it was given for.
 - The bucket must already exist.
-- The access key needs to read and write `<prefix>/magpie/`. On AWS it also
+- The access key needs to read and write `<prefix>/eipgam/`. On AWS it also
   needs to list the bucket.
-- A server without conditional writes is supported. There magpie checks the
+- A server without conditional writes is supported. There eipgam checks the
   object's ETag just before each write. Two computers that write in the
   same moment can both pass that check (Aliyun OSS, #1776), and the later
   write is the one kept. The other computer notices at its next sync, a
@@ -4205,7 +3981,7 @@ For GitHub:
 - Give a fine-grained token access to this repository with Contents read and
   write permission. It is asked for by the CLI, never accepted in a command
   line, and is saved separately from the library's GitHub token.
-- Folder is optional. Files go in `<folder>/magpie/`; every changed backup
+- Folder is optional. Files go in `<folder>/eipgam/`; every changed backup
   creates a commit. Unchanged setup creates no backup commit.
 - Use the same encryption passphrase on every computer. It must differ from
   the GitHub token. The token and sync connection settings stay on each computer.
@@ -4224,30 +4000,30 @@ No restart is needed for saved settings. The export is the built-in plugin
 `otel` (Observability in Plugins › Built-in), which stays on while settings
 or the environment say to export.
 
-For `magpie serve`, environment variables override the saved preferences:
+For `eipgam serve`, environment variables override the saved preferences:
 
 ```sh
-MAGPIE_OTEL_ENABLED=true MAGPIE_OTEL_ENDPOINT=http://localhost:4318 magpie serve
+EIPGAM_OTEL_ENABLED=true EIPGAM_OTEL_ENDPOINT=http://localhost:4318 eipgam serve
 ```
 
-- `MAGPIE_OTEL_ENABLED`: `true` or `false`; an endpoint alone does not enable export.
-- `MAGPIE_OTEL_ENDPOINT`: an HTTP(S) base URL; `/v1/traces` and `/v1/metrics` are appended.
-- `MAGPIE_OTEL_HEADERS`: comma-separated `name=value` pairs, for example
+- `EIPGAM_OTEL_ENABLED`: `true` or `false`; an endpoint alone does not enable export.
+- `EIPGAM_OTEL_ENDPOINT`: an HTTP(S) base URL; `/v1/traces` and `/v1/metrics` are appended.
+- `EIPGAM_OTEL_HEADERS`: comma-separated `name=value` pairs, for example
   `Authorization=Bearer%20token`. Percent-encode spaces and commas in values.
-- `MAGPIE_OTEL_METRICS`: `true` or `false`, off by default.
-- `MAGPIE_OTEL_SESSIONS`: `true` or `false`, off by default; trace supported local
+- `EIPGAM_OTEL_METRICS`: `true` or `false`, off by default.
+- `EIPGAM_OTEL_SESSIONS`: `true` or `false`, off by default; trace supported local
   agent interactions from newly recorded session events.
-- `MAGPIE_OTEL_BODIES`: `true` or `false`, off by default; sends each call's
+- `EIPGAM_OTEL_BODIES`: `true` or `false`, off by default; sends each call's
   request and reply as the trace's Langfuse input and output.
-- `MAGPIE_OTEL_BODIES_WHOLE`: `true` or `false`, off by default; with bodies on,
+- `EIPGAM_OTEL_BODIES_WHOLE`: `true` or `false`, off by default; with bodies on,
   keeps them entire rather than cut at 256 KB. A long reply is written to a
   temporary file; a body too large for the collector is still refused.
 - `OTEL_RESOURCE_ATTRIBUTES`: the standard OpenTelemetry variable, merged into
   the resource of both traces and metrics, for example to tell servers apart:
 
   ```sh
-  OTEL_RESOURCE_ATTRIBUTES='service.instance.id=magpie-prod-01,host.name=server-a,deployment.environment.name=production' \
-    MAGPIE_OTEL_ENABLED=true MAGPIE_OTEL_ENDPOINT=http://localhost:4318 magpie serve
+  OTEL_RESOURCE_ATTRIBUTES='service.instance.id=eipgam-prod-01,host.name=server-a,deployment.environment.name=production' \
+    EIPGAM_OTEL_ENABLED=true EIPGAM_OTEL_ENDPOINT=http://localhost:4318 eipgam serve
   ```
 
   Comma-separated `key=value` pairs, as the
@@ -4256,20 +4032,20 @@ MAGPIE_OTEL_ENABLED=true MAGPIE_OTEL_ENDPOINT=http://localhost:4318 magpie serve
   `%2C`, `=` as `%3D` and `%` as `%25`; `+` stays a plus), every value is a
   string, and the last of a repeated key wins. Any invalid entry (no `=`, an
   empty key, a bad escape, bytes that aren't UTF-8 once decoded, an empty
-  entry such as a trailing comma) discards the whole variable: magpie logs
+  entry such as a trailing comma) discards the whole variable: eipgam logs
   which entry, never its contents, and exports with the default resource.
   Nothing else about the machine is looked up or sent.
 - `OTEL_SERVICE_NAME`: the resource's `service.name`, over a `service.name` in
-  `OTEL_RESOURCE_ATTRIBUTES`. With neither set, or set empty, it is `magpie`.
+  `OTEL_RESOURCE_ATTRIBUTES`. With neither set, or set empty, it is `eipgam`.
 
   Neither variable turns export on, and both are read in the process that
-  exports (the app, or `magpie serve`), so restart it after changing them.
+  exports (the app, or `eipgam serve`), so restart it after changing them.
 
 For Langfuse, pick **Collector › Langfuse**, then the host (Cloud EU
 `https://cloud.langfuse.com`, Cloud US `https://us.cloud.langfuse.com`, or
 **Self-hosted** with your own address, which also takes another Langfuse
 Cloud region such as `https://jp.cloud.langfuse.com`) and the project's public
-and secret keys (Langfuse › Settings › API Keys). magpie saves them as the
+and secret keys (Langfuse › Settings › API Keys). eipgam saves them as the
 endpoint `<host>/api/public/otel` and the header
 `Authorization: Basic <base64(public-key:secret-key)>`, kept with the other
 OTLP headers (left out of a backup without keys). Nothing is saved until both
@@ -4279,13 +4055,13 @@ metrics off, since Langfuse takes traces only, and turns export on. A Langfuse
 endpoint set up by hand opens in this view with its keys filled in, and
 changing a key or the host keeps every other header and the metrics and
 export choices as they were. Switching from another collector leaves that
-collector's headers behind. For `magpie serve`, the same values go in the
-environment: `MAGPIE_OTEL_ENDPOINT=https://cloud.langfuse.com/api/public/otel`
-and `MAGPIE_OTEL_HEADERS=Authorization=Basic%20<base64(public-key:secret-key)>,x-langfuse-ingestion-version=4`.
+collector's headers behind. For `eipgam serve`, the same values go in the
+environment: `EIPGAM_OTEL_ENDPOINT=https://cloud.langfuse.com/api/public/otel`
+and `EIPGAM_OTEL_HEADERS=Authorization=Basic%20<base64(public-key:secret-key)>,x-langfuse-ingestion-version=4`.
 
 Traces include agent, provider, model, token counts (including cache and
 reasoning), HTTP status, timing, route ID, and the name of the gateway key the
-request came with (`magpie.gateway_key.name`, absent without a key; never the
+request came with (`eipgam.gateway_key.name`, absent without a key; never the
 key's ID or secret). Attempts with the same route ID
 share a trace ID. Chat, Responses, Anthropic and Gemini gateway requests
 also export a parent request span and child spans for every routing attempt,
@@ -4298,7 +4074,7 @@ Tool execution inside the caller is outside the gateway's trace.
 
 Model-call spans also send estimated USD input, output and total costs to
 Langfuse via `langfuse.observation.cost_details`, using the same effective
-prices as Magpie's usage ledger (custom prices first, then catalog prices).
+prices as eipgam's usage ledger (custom prices first, then catalog prices).
 Input cost includes cache reads and writes; reasoning tokens are already
 included in output cost. Explicit zero prices are exported too. Unknown
 prices are omitted so Langfuse can use its own model pricing. Parent and tool
@@ -4320,7 +4096,7 @@ scan; other unresolved concurrent requests retain gateway traces without waiting
 Polling reuses headers by path, size and mtime.
 Other adapters still use recent observations (five minutes).
 Only loopback requests without a gateway key can be deduplicated. The native
-client session ID takes precedence over a Magpie routing override; unknown
+client session ID takes precedence over a eipgam routing override; unknown
 sessions retain gateway traces, including WSL mirrored and Docker Desktop
 clients whose sessions are not visible locally. Requests without a session ID
 fall back to recent observations for that agent.
@@ -4340,7 +4116,7 @@ includes Codex calls with an explicit kind (subagent, review, memgen, title or
 compact): even if a child has a readable rollout, these can appear twice. Only
 its unclassified calls use local-session deduplication; a rollout alone does not
 prove every auxiliary request was recorded. Keyed and non-loopback clients
-always retain gateway traces. Magpie reads new events from local session stores
+always retain gateway traces. eipgam reads new events from local session stores
 every two seconds; it does not upload
 completed history when enabled. Restarting or changing the destination starts
 an observation window. Span IDs remain stable across repeated records.
@@ -4382,7 +4158,7 @@ Gemini snapshot reads cap at 32 MiB; Gemini retains the current prompt plus
 Completed observations are deduplicated with bounded metadata. Claude's final
 response and Gemini's final token records may take one extra poll to settle.
 
-Inferred timings carry `magpie.timing.source=inferred`. Tool arguments/results
+Inferred timings carry `eipgam.timing.source=inferred`. Tool arguments/results
 and user input/output follow **Include request and response bodies**, masking
 secrets and respecting the whole-body preference. Session directory/title
 metadata, credentials and account names are not exported.
@@ -4392,14 +4168,14 @@ clients to avoid duplicate token usage. Unsupported clients and remote
 forwarded requests retain gateway tracing; the local usage ledger is unchanged.
 This mode shows agent activity rather than gateway retries or provider-routing
 details. It reads this computer's local sessions, including calls made without
-Magpie as the proxy.
+eipgam as the proxy.
 
 Metrics group duration and input/output token histograms by agent, provider,
 model, operation, error status and gateway key name. Each gateway key name
 multiplies a metric's series (one set per name requests came with), which
 matters to a collector that limits or bills by series; a name is not unique,
 so keys sharing one are counted together. Prompt/reply text is exported only when
-**Include request and response bodies** is enabled (`MAGPIE_OTEL_BODIES=true`);
+**Include request and response bodies** is enabled (`EIPGAM_OTEL_BODIES=true`);
 secrets are masked and each body is limited to 256 KiB unless **Include the
 whole bodies** is enabled. Conversation IDs are exported only with
 conversation tracing; provider account names/keys are never exported.
@@ -4417,10 +4193,10 @@ are retried up to two times, with retry delays capped at 60 seconds; other
 errors and partial rejection are logged
 without the collector's response body. Each HTTP attempt times out after
 three seconds. Graceful gateway shutdown allows at most three seconds to
-drain; `magpie serve` currently exits on SIGTERM without draining, so its last
+drain; `eipgam serve` currently exits on SIGTERM without draining, so its last
 batch may be lost. This is best-effort export; local usage records remain
 available if it fails.
-Requests follow magpie's proxy setting, with loopback collectors going direct.
+Requests follow eipgam's proxy setting, with loopback collectors going direct.
 Queued records are discarded if export is disabled or the destination or
 credentials change before sending. Redirects are not followed.
 Backups without keys omit OTLP headers; restoring one preserves this machine's
@@ -4428,7 +4204,7 @@ headers only when the collector endpoint is unchanged.
 
 ## Files
 
-magpie's folder, `~/.config/magpie`, is kept flat on purpose: backups,
+eipgam's folder, `~/.config/eipgam`, is kept flat on purpose: backups,
 sync, Docker volume mounts and older magpies all find each file by its
 name there (#2028). Below, each file says what it is for. A `.lock`
 beside a file is held while it is written, across magpies; a `.bak` is
@@ -4448,7 +4224,7 @@ What you set:
 
 Accounts and sign-ins:
 
-- `logins.json` — the subscription accounts signed in through magpie
+- `logins.json` — the subscription accounts signed in through eipgam
   (0600)
 - `plugin-auth.json` — the plugins' sign-ins (0600)
 - `mcp-signins.json` — sign-ins to MCP servers (0600)
@@ -4457,10 +4233,10 @@ Accounts and sign-ins:
 - `redact.key` — the key behind the placeholders privacy masking puts in
   place of what it hides
 
-What magpie set on your agents:
+What eipgam set on your agents:
 
-- `stash.json` — values magpie replaced, restored on switch-back
-- `applied.json` — what magpie last set on each agent, and when
+- `stash.json` — values eipgam replaced, restored on switch-back
+- `applied.json` — what eipgam last set on each agent, and when
 - `migrations.json` — which subscriptions moved to their plugin
   ([Built-in subscriptions that a plugin serves](../AGENTS.md))
 
@@ -4494,10 +4270,10 @@ Kept for the window:
   What's new, and the day you said not to show it again
 - `start-menu-shortcut` — the Start menu shortcut was made (Windows)
 
-In `~/.cache/magpie`:
+In `~/.cache/eipgam`:
 
-- `bun/<version>/magpie-bun` — the Bun plugins run on, named
-  so that a proxy app's PROCESS-NAME rule can match it (`magpie-bun.exe` on
+- `bun/<version>/eipgam-bun` — the Bun plugins run on, named
+  so that a proxy app's PROCESS-NAME rule can match it (`eipgam-bun.exe` on
   Windows)
 - `models.json` — models.dev catalog (OpenCode's cache at
   `~/.cache/opencode/models.json` is used when present)
@@ -4505,44 +4281,27 @@ In `~/.cache/magpie`:
 
 `XDG_CONFIG_HOME` and `XDG_CACHE_HOME` are respected.
 
-## What magpie sends by itself
+## What eipgam sends by itself
 
-magpie sends no telemetry. It counts no users, makes no install id, and
-sends nothing about which agents, providers, models, plugins or MCP
-servers it is used with. What it does ask for by itself is on the
-[Privacy page](https://usemagpie.ai/docs/privacy): updates from
-usemagpie.ai (`/api/latest`, every 6 hours by default and never by
-itself with `noAutoUpdate` set; `/api/notes` after an update; `/files/…`
-for a download), icons, the
-[models.dev](https://models.dev) catalog and the exchange rate. None of
-these requests carries an id or an account.
+eipgam sends no telemetry. Automatic update checks and release notes use
+[`sichengchen/eipgam`](https://github.com/sichengchen/eipgam) on GitHub.
+The app also fetches the [models.dev](https://models.dev) catalog and
+currency exchange rates. Plugin discovery uses the community repository
+and npm. Plugin and MCP registry usage counts appear only if you
+configure a stats service.
 
-Discover's counts of who uses and likes each plugin, and the Library
-market's of who uses each MCP server, are read from usemagpie.ai
-(`GET /api/plugins/stats`, at most once an hour, with no id). They come
-from other magpies; this one reports nothing and sends no likes. The code
-is [internal/stats/plugins.go](../internal/stats/plugins.go).
-
-magpie lists no sponsors or partners: the add sheet, the TUI's and
-`magpie providers presets` list the built-in presets alone, and no list
-of them is fetched. A preset's website and key-page links go straight to
-the vendor, with no referral code.
-
-A plugin's, an import link's and the library's icons sit on hosts their
-authors picked. magpie fetches each through
-`https://usemagpie.ai/api/icon?url=<https URL>`, so the host sees
-Cloudflare's address and never the user's. The worker sends only
-`Accept: image/*` and its own User-Agent, passes on a PNG, JPEG, GIF, WebP,
-ICO or SVG of at most 1 MB and refuses anything else, and counts and keeps
-nothing. The code is [internal/iconproxy](../internal/iconproxy/iconproxy.go)
-and `icon` in [site/worker.js](../site/worker.js).
+Provider import icons are fetched after confirmation, directly from the
+public HTTPS address or through `EIPGAM_ICON_PROXY` when configured.
+The library uses bundled eipgam artwork and uses the configured proxy
+for remote MCP icons. Without a proxy, remote cards show initials.
 
 ## Community
 
+Report bugs and propose changes in the [eipgam repository](https://github.com/sichengchen/eipgam/issues).
+
 Questions, setups worth sharing, ideas, bugs: come talk to us and other
-magpie users on [Discord](https://discord.gg/vGSnD3ZKQF). Issues and pull
 requests are welcome here too.
 
 ## License
 
-MIT. See [LICENSE](../LICENSE).
+eipgam uses the [MIT License](../LICENSE). The original Magpie license and dependency notices are in [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES).

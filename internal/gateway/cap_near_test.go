@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // nearCapBackend is a ChatGPT backend for the near-cap tests: each
@@ -391,7 +391,7 @@ func TestNearCapClaudeAccountsTakeOneTurnEach(t *testing.T) {
 
 // A turn that waits for the one before it on an account near its cap has
 // no try yet, and its row said "routing" till that one ended (tmr11235 on
-// X, v0.1.3852): its route says queued, and the wait is one magpie knows
+// X, v0.1.3852): its route says queued, and the wait is one eipgam knows
 // of, so the watch on a request with no route doesn't end it as unknown.
 func TestNearCapWaitSaysQueued(t *testing.T) {
 	codexSignedIn(t)

@@ -14,10 +14,10 @@ import (
 	"time"
 )
 
-// `magpie serve` runs on as the new version once an update is put in where
+// `eipgam serve` runs on as the new version once an update is put in where
 // it runs from (acezan on Discord: the service's serve ran on from
-// "magpie.real (deleted)" after `magpie web` updated the program they
-// share; #4335 on a Mac). Here the test binary, copied to magpie.real, is
+// "eipgam.real (deleted)" after `eipgam web` updated the program they
+// share; #4335 on a Mac). Here the test binary, copied to eipgam.real, is
 // a released serve on a port of the test's own; the update renames a new
 // program over it, a script that notes its pid and arguments. serve runs
 // it in its own place: the same pid, with serve's arguments.
@@ -31,7 +31,7 @@ func TestServeRestartsIntoAnUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 	dir := t.TempDir()
-	bin := filepath.Join(dir, "magpie.real")
+	bin := filepath.Join(dir, "eipgam.real")
 	if err := os.WriteFile(bin, b, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestServeRestartsIntoAnUpdate(t *testing.T) {
 	ln.Close()
 
 	cmd := exec.Command(bin, "serve")
-	cmd.Env = append(os.Environ(), "MAGPIE_CLI_TEST_SERVE=1", "MAGPIE_ADDR="+addr)
+	cmd.Env = append(os.Environ(), "EIPGAM_CLI_TEST_SERVE=1", "EIPGAM_ADDR="+addr)
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestServeRestartsIntoAnUpdate(t *testing.T) {
 	// the update: a new program renamed over the old, as an update puts
 	// it in; the running serve's file is now gone
 	marker := filepath.Join(dir, "ran")
-	next := filepath.Join(dir, "magpie.real.new")
+	next := filepath.Join(dir, "eipgam.real.new")
 	script := "#!/bin/sh\necho \"$$ $*\" > '" + marker + "'\nexec sleep 60\n"
 	if err := os.WriteFile(next, []byte(script), 0o755); err != nil {
 		t.Fatal(err)

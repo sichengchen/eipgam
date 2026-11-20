@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 var hexSHA = lazyre.New(`^[0-9a-f]{7,40}$`)

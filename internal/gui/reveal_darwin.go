@@ -5,8 +5,8 @@ package gui
 import (
 	"fmt"
 
+	"github.com/sichengchen/eipgam/internal/proc"
 	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/yetone/magpie/internal/proc"
 )
 
 // revealFolder shows the folder selected in its parent's Finder window,

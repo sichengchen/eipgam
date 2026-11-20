@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A custom provider's "Searches the web by itself" (#359): a relay in front
-// of Anthropic's or OpenAI's own API, whose web search magpie can't tell
+// of Anthropic's or OpenAI's own API, whose web search eipgam can't tell
 // from its host. The editor has a Web search row with it, opening as it was
 // saved; Save posts it, ticked or not. A relay with only a Chat address has
 // no API to search on: the row comes once an Anthropic one is typed. A
-// signed-in account (Codex here) has no such row: magpie knows how it
+// signed-in account (Codex here) has no such row: eipgam knows how it
 // searches. Its note names Codex's web.run, which goes to such a relay
 // too (YIXIE233 on X), and reads whole at a phone's width. In English,
 // Chinese, Traditional Chinese, Japanese and German.
@@ -65,7 +65,7 @@ const words = {
   ja: { tick: "自分でウェブ検索する", save: "保存", more: "その他のエンドポイント", anthropic: "Anthropic URL" },
   de: { tick: "Sucht selbst im Web", save: "Speichern", more: "Weitere Endpunkte", anthropic: "Anthropic-URL" },
 };
-const note = "For a relay in front of Anthropic's or OpenAI's API: Claude Code's WebSearch and Codex's web_search and web.run go to it as sent, not through magpie's search. magpie doesn't automatically search with it for other models, but you can name it as the searcher.";
+const note = "For a relay in front of Anthropic's or OpenAI's API: Claude Code's WebSearch and Codex's web_search and web.run go to it as sent, not through eipgam's search. eipgam doesn't automatically search with it for other models, but you can name it as the searcher.";
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: name }).click();
       await unfold(page);
       await page.locator(".editor .bar").waitFor();

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // AI Studio's OpenAI-compatible /models names each model models/{id}, and
@@ -46,7 +46,7 @@ func TestGeminiImageModelListedWithModelsPrefix(t *testing.T) {
 	})}
 	draw := func(model, size string) {
 		t.Helper()
-		req := `{"model":"gg/` + model + `","prompt":"a magpie"`
+		req := `{"model":"gg/` + model + `","prompt":"a eipgam"`
 		if size != "" {
 			req += `,"size":"` + size + `"`
 		}

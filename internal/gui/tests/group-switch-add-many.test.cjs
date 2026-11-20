@@ -5,7 +5,7 @@
 // - A group of the user's has a switch on its card: off, it posts
 //   groups/switch with on false, the card's logos go grey and it
 //   says "switched off", and the keyboard stays on the switch; on again
-//   posts on true. A group magpie found has no switch (it is removed).
+//   posts on true. A group eipgam found has no switch (it is removed).
 // - justacati on X: a group switched off is listed after the ones on, and
 //   back in its place when it is on again; Move down on the last one on
 //   is not offered, as it would move it nowhere one can see.
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const card = (id) => page.locator(`.rt-group[data-id="${id}"]`);
       await card("g").waitFor();
       await page.locator(".rt-gsec").evaluate((x) => x.scrollIntoView({ block: "center" })); // as the reader would

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // CodexSuggestionsModel is the model the Codex app's prompt suggestions
@@ -20,12 +20,12 @@ func CodexSuggestionsModel() string {
 }
 
 // SetCodexSuggestionsModel puts Codex's prompt suggestions on id, a model
-// or routing group of magpie's (provider/model, group/<id>); "" leaves
+// or routing group of eipgam's (provider/model, group/<id>); "" leaves
 // them on the model Codex sends them on.
 func SetCodexSuggestionsModel(id string) error {
 	id = strings.TrimSpace(id)
 	if pid, model, ok := strings.Cut(id, "/"); id != "" && (!ok || pid == "" || model == "") {
-		return fmt.Errorf("Codex's prompt suggestions can't be put on %q: pick one of magpie's models (provider/model)", id)
+		return fmt.Errorf("Codex's prompt suggestions can't be put on %q: pick one of eipgam's models (provider/model)", id)
 	}
 	s := settings.Load()
 	if s.CodexSuggestions == id {

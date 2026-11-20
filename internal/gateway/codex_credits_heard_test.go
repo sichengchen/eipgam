@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // heardUsage is creditsUsage for Codex accounts whose credits are known
@@ -35,7 +35,7 @@ func heardUsage(t *testing.T, used map[string]float64) *sync.Map {
 }
 
 // @123xtv03k on X: Codex by itself goes on on the credits an account
-// bought once its plan's allowance runs out; through magpie the account
+// bought once its plan's allowance runs out; through eipgam the account
 // was benched until its window renewed. ChatGPT says the credits on the
 // 429 itself (x-codex-credits-has-credits, as Codex reads them), and the
 // refused turn is asked again of the same account at once, as one known
@@ -105,7 +105,7 @@ func TestCodexCreditsHeardOnTheRefusal(t *testing.T) {
 	})
 }
 
-// An account turned away as out of its allowance before magpie knew it
+// An account turned away as out of its allowance before eipgam knew it
 // held credits — bought after the plan ran out, or its reading failed —
 // rested until its window renewed. Once a reply or a reading says it holds
 // them (provider.OnCredits), the rest is lifted and it is asked again at

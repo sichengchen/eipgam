@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// #5468: magpie's provider in OpenCode's config sets setCacheKey, or
+// #5468: eipgam's provider in OpenCode's config sets setCacheKey, or
 // OpenCode sends no prompt_cache_key and an upstream that caches by it
 // misses every turn. A real OpenCode 2.2.5 sent prompt_cache_key with it
 // and none without; 1.19.5 sent promptCacheKey (the gateway's
@@ -16,7 +16,7 @@ func TestOpenCodeSetsCacheKey(t *testing.T) {
 	home := syncHome(t)
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Fields[0].Set("magpie/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	opts, _ := providerAt(t, cfg, "provider")["options"].(map[string]any)
@@ -25,11 +25,11 @@ func TestOpenCodeSetsCacheKey(t *testing.T) {
 	}
 
 	// the user's own false, under provider and under providers
-	writeFile(t, cfg, `{"model":"magpie/relay/glm-4.6","provider":{"magpie":{"name":"magpie","npm":"@ai-sdk/openai-compatible",`+
-		`"options":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"magpie","setCacheKey":false},"models":{}}},`+
-		`"providers":{"magpie":{"name":"magpie","package":"aisdk:@ai-sdk/openai-compatible","compatibility":{"supportsPromptCacheKey":false},`+
-		`"settings":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"magpie"},"models":{}}}}`)
-	for _, step := range []func() error{oc.Sync, func() error { return oc.Fields[0].Set("magpie/relay/glm-4.6") }} {
+	writeFile(t, cfg, `{"model":"eipgam/relay/glm-4.6","provider":{"eipgam":{"name":"eipgam","npm":"@ai-sdk/openai-compatible",`+
+		`"options":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"eipgam","setCacheKey":false},"models":{}}},`+
+		`"providers":{"eipgam":{"name":"eipgam","package":"aisdk:@ai-sdk/openai-compatible","compatibility":{"supportsPromptCacheKey":false},`+
+		`"settings":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"eipgam"},"models":{}}}}`)
+	for _, step := range []func() error{oc.Sync, func() error { return oc.Fields[0].Set("eipgam/relay/glm-4.6") }} {
 		if err := step(); err != nil {
 			t.Fatal(err)
 		}
@@ -46,9 +46,9 @@ func TestOpenCodeSetsCacheKey(t *testing.T) {
 		}
 	}
 
-	// under providers with no word of the user's: magpie's
-	writeFile(t, cfg, `{"model":"magpie/relay/glm-4.6","providers":{"magpie":{"name":"magpie","package":"aisdk:@ai-sdk/openai-compatible",`+
-		`"settings":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"magpie"},"models":{}}}}`)
+	// under providers with no word of the user's: eipgam's
+	writeFile(t, cfg, `{"model":"eipgam/relay/glm-4.6","providers":{"eipgam":{"name":"eipgam","package":"aisdk:@ai-sdk/openai-compatible",`+
+		`"settings":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"eipgam"},"models":{}}}}`)
 	if err := oc.Sync(); err != nil {
 		t.Fatal(err)
 	}
@@ -56,6 +56,6 @@ func TestOpenCodeSetsCacheKey(t *testing.T) {
 	compat, _ := native["compatibility"].(map[string]any)
 	settings, _ := native["settings"].(map[string]any)
 	if compat["supportsPromptCacheKey"] != true || settings["setCacheKey"] != nil || settings["baseURL"] == nil {
-		t.Fatalf("providers.magpie:\n%s", readFile(cfg))
+		t.Fatalf("providers.eipgam:\n%s", readFile(cfg))
 	}
 }

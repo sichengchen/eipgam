@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Settings › General › Sidebar pages (youimark on X: a docker gateway has no
 // use for Agents or Library): the pages ticked off leave the sidebar, are
-// kept for this browser (localStorage magpie.navHidden), and the window
+// kept for this browser (localStorage eipgam.navHidden), and the window
 // that would open on one opens Providers. A link to one still opens it. Chromium and WebKit. No backend:
 // the API is faked.
 const assert = require("node:assert/strict");
@@ -11,7 +11,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const BASE = "http://magpie.test/";
+const BASE = "http://eipgam.test/";
 
 function server({ web = false, gateway = false } = {}) {
   return async (route) => {
@@ -57,7 +57,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.deepEqual((await hidden()).sort(), ["agents", "library"]);
     assert.match(await page.locator(".nav-pages-pick").innerText(), /2 hidden/);
     // kept: a reload, and the window opening on Agents, gives way to Providers
-    await page.evaluate(() => localStorage.removeItem("magpie.lastView")); // as a window opened fresh
+    await page.evaluate(() => localStorage.removeItem("eipgam.lastView")); // as a window opened fresh
     await page.goto(BASE);
     await page.waitForSelector("#nav button.on");
     assert.deepEqual((await hidden()).sort(), ["agents", "library"]);
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.goto(BASE + "?view=library");
     await page.waitForFunction(() => !document.querySelector("#view-library")?.hidden);
     assert.equal(await on(), "view-library");
-    await page.evaluate(() => localStorage.setItem("magpie.lastView", "library"));
+    await page.evaluate(() => localStorage.setItem("eipgam.lastView", "library"));
     await page.goto(BASE);
     await page.waitForSelector("#nav button.on");
     assert.equal(await page.evaluate(() => document.querySelector("#nav button.on").dataset.view), "providers");

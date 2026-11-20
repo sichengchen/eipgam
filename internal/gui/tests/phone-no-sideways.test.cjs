@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// magpie's web page on a phone (#4943, precis1onz: iOS Safari, dark, the
+// eipgam's web page on a phone (#4943, precis1onz: iOS Safari, dark, the
 // Usage page). It went sideways: Requests' "Split by" and its five choices
 // ran past the screen and the view scrolled with it. And a dark band stood
 // at the screen's foot: the Requests table's stand-in scrollbar (#799),
@@ -7,7 +7,7 @@
 // Settings' tabs, filled with long names, fits the phone's width, and
 // nothing is held to the view's foot. At 375px in every language and at
 // 390 and 430 in English, Chromium and WebKit; no backend, the API is
-// faked. MAGPIE_ASSETS runs it on older assets.
+// faked. EIPGAM_ASSETS runs it on older assets.
 const assert = require("node:assert/strict");
 const { openPage } = require("./reader.cjs");
 const fs = require("node:fs/promises");
@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit, devices } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const now = Date.now();
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const MODELS = ["deepseek-v4-flash", "claude-opus-5-5", "gpt-6.1-sol", "qwen/qwen3-coder-480b-a35b-instruct:free"];
@@ -166,7 +166,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await page.locator("#view-agents").waitFor();
         const bad = [];
         for (const [view, sub] of stops) {

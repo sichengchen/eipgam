@@ -71,13 +71,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, false));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.waitForSelector("#subscriptionUsage .subscription-card");
 
         // cards until the reader picks the table
         assert.equal(await page.locator(".qt").count(), 0);
         assert.equal(await page.locator("#quotaView .opt.on").innerText(), CARDS[lang]);
-        assert.equal(await page.evaluate(() => localStorage.getItem("magpie.quotaView")), null, "nothing is saved until the reader picks");
+        assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.quotaView")), null, "nothing is saved until the reader picks");
 
         await page.locator("#quotaView .opt", { hasText: TABLE[lang] }).click();
         await page.waitForSelector("#subscriptionUsage .qt tbody tr");
@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator(".qt tbody tr .qt-msg").count(), 2);
 
         // the pick is remembered
-        assert.equal(await page.evaluate(() => localStorage.getItem("magpie.quotaView")), '"table"');
+        assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.quotaView")), '"table"');
         await page.reload();
         await page.waitForSelector("#subscriptionUsage .qt tbody tr");
         assert.equal(await page.locator("#quotaView .opt.on").innerText(), TABLE[lang]);
@@ -156,9 +156,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const page = await (await browser.newContext({ viewport: { width: 1100, height: 800 }, reducedMotion: "reduce" })).newPage();
     page.setDefaultTimeout(5000);
-    await page.addInitScript(() => { localStorage.setItem("magpie.quotaView", '"table"'); localStorage.setItem("magpie.quotaTableOpen", '["codex"]'); });
+    await page.addInitScript(() => { localStorage.setItem("eipgam.quotaView", '"table"'); localStorage.setItem("eipgam.quotaTableOpen", '["codex"]'); });
     await page.route("**/*", serve("en", true));
-    await page.goto("http://magpie.test/?view=usage");
+    await page.goto("http://eipgam.test/?view=usage");
     await page.waitForSelector("#subscriptionUsage .qt tbody tr");
     assert.match(await page.$eval(".qt tbody tr:nth-child(1)", (tr) => tr.innerText.replace(/\s+/g, " ")), /66%/, "Codex's accounts' mean left");
     const row = await page.$eval(".qt tbody tr:nth-child(2)", (tr) => tr.innerText.replace(/\s+/g, " "));

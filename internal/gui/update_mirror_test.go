@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // Settings › About › Download source (#893): the mirror is set and taken
-// away on its own, the same setting `magpie update mirror` writes, a full
+// away on its own, the same setting `eipgam update mirror` writes, a full
 // https:// address only, and the Settings page's save keeps it. A download
 // that fails through it says so (the page's mirror), which a check clears.
 func TestUpdateMirrorSetting(t *testing.T) {
@@ -59,7 +59,7 @@ func TestUpdateMirrorSetting(t *testing.T) {
 		}})
 	}))
 	defer feed.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", feed.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", feed.URL)
 	if err := settings.Save(settings.Settings{UpdateMirror: mirror.URL + "/"}); err != nil {
 		t.Fatal(err)
 	}

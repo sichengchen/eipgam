@@ -14,7 +14,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/emo";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = (skills) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("claude", "Claude Code")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills, servers: [],
 });
@@ -34,7 +34,7 @@ function server(lang, posts, state) {
       state.skills = [{ name: b.name, description: b.description, agents: b.agents }];
       return route.fulfill({ json: { ...lib(state.skills), result: { changed: b.agents, problems: [] } } });
     }
-    if (url.pathname === "/api/library/skill") return route.fulfill({ json: { text: `---\nname: ${url.searchParams.get("name")}\n---\n`, path: `${HOME}/.magpie/library/skills/${url.searchParams.get("name")}/SKILL.md` } });
+    if (url.pathname === "/api/library/skill") return route.fulfill({ json: { text: `---\nname: ${url.searchParams.get("name")}\n---\n`, path: `${HOME}/.eipgam/library/skills/${url.searchParams.get("name")}/SKILL.md` } });
     if (url.pathname === "/api/library/rtk") return route.fulfill({ json: {} });
     if (url.pathname === "/api/davsync") return route.fulfill({ json: { on: false } });
     if (url.pathname === "/api/usage/quotas") return route.fulfill({ json: [] });
@@ -56,14 +56,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (const width of [1100, 420]) {
         await t.test(`${lang} ${width}`, async () => {
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "skills"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           const posts = [], state = { skills: [] };
           await page.route("**/*", server(lang, posts, state));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const v = page.locator("#view-library");
           await v.locator("[data-lib=new-skill]").click();

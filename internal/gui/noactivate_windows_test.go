@@ -26,7 +26,7 @@ import (
 // fatalthrow's runtime.exit(2) self-deadlocks on runtime.finlock, leaving the
 // process wedged with one thread holding the single-instance mutex and
 // WebView2 profile (#6705, root cause of #5922 and #6678).
-const testNoActivateExitEnv = "MAGPIE_TEST_NOACTIVATE_EXIT"
+const testNoActivateExitEnv = "EIPGAM_TEST_NOACTIVATE_EXIT"
 
 var procDestroyWindowHookTest = windows.NewLazySystemDLL("user32.dll").NewProc("DestroyWindow")
 
@@ -44,7 +44,7 @@ func init() {
 		os.Stderr.WriteString("CreateWindowExW mainW: " + err.Error())
 		os.Exit(9)
 	}
-	title, _ := windows.UTF16PtrFromString("magpie noactivate exit")
+	title, _ := windows.UTF16PtrFromString("eipgam noactivate exit")
 	hwnd, _, err := procCreateWindowExW.Call(0, uintptr(unsafe.Pointer(cls)), uintptr(unsafe.Pointer(title)),
 		w32.WS_OVERLAPPEDWINDOW, 0, 0, 100, 100, 0, 0, 0, 0)
 	if hwnd == 0 {

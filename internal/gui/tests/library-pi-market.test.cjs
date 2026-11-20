@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "C:\\Users\\nine";
 const lib = () => ({
-  dir: `${HOME}\\.magpie\\library`, backups: `${HOME}\\.magpie\\backups`, home: HOME,
+  dir: `${HOME}\\.eipgam\\library`, backups: `${HOME}\\.eipgam\\backups`, home: HOME,
   agents: [
     { id: "pi", name: "Pi", icon: "", skills: `${HOME}\\.pi\\agent\\skills` },
     { id: "pi@wsl:Ubuntu", name: "Pi · WSL Ubuntu", icon: "", skills: "\\\\wsl.localhost\\Ubuntu\\home\\nine\\.pi\\agent\\skills", wsl: "Ubuntu" },
@@ -139,7 +139,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, calls));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         await v.locator(".lib-tabs").getByText(w.tab, { exact: true }).click();

@@ -25,14 +25,14 @@ func stubDarwin(t *testing.T, exe string, openErr error) *[]string {
 
 const link = "ccswitch://v1/import?resource=provider&app=claude&name=Relay&endpoint=https%3A%2F%2Fapi.example.com&apiKey=sk-x"
 
-// The link goes to CC Switch by its bundle id, and magpie's bundle is
+// The link goes to CC Switch by its bundle id, and eipgam's bundle is
 // registered again, which drops the claim an older Info.plist made.
 func TestForwardOpensCCSwitchAndRegistersMagpieAgain(t *testing.T) {
-	calls := stubDarwin(t, "/Applications/magpie.app/Contents/MacOS/magpie", nil)
+	calls := stubDarwin(t, "/Applications/eipgam.app/Contents/MacOS/eipgam", nil)
 	if err := Forward(link); err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"open -b com.ccswitch.desktop " + link, lsregister + " -f /Applications/magpie.app"}
+	want := []string{"open -b com.ccswitch.desktop " + link, lsregister + " -f /Applications/eipgam.app"}
 	if !slices.Equal(*calls, want) {
 		t.Fatalf("calls %q, want %q", *calls, want)
 	}
@@ -40,7 +40,7 @@ func TestForwardOpensCCSwitchAndRegistersMagpieAgain(t *testing.T) {
 
 // No CC Switch: Launch Services is told nothing more.
 func TestForwardWithoutCCSwitch(t *testing.T) {
-	calls := stubDarwin(t, "/Applications/magpie.app/Contents/MacOS/magpie", errors.New("Unable to find application named 'com.ccswitch.desktop'"))
+	calls := stubDarwin(t, "/Applications/eipgam.app/Contents/MacOS/eipgam", errors.New("Unable to find application named 'com.ccswitch.desktop'"))
 	if err := Forward(link); !errors.Is(err, ErrNotInstalled) {
 		t.Fatalf("err %v, want ErrNotInstalled", err)
 	}
@@ -49,9 +49,9 @@ func TestForwardWithoutCCSwitch(t *testing.T) {
 	}
 }
 
-// A magpie outside a bundle (go run, the CLI on PATH) registers nothing.
+// A eipgam outside a bundle (go run, the CLI on PATH) registers nothing.
 func TestForwardOutsideABundle(t *testing.T) {
-	calls := stubDarwin(t, "/usr/local/bin/magpie", nil)
+	calls := stubDarwin(t, "/usr/local/bin/eipgam", nil)
 	if err := Forward(link); err != nil {
 		t.Fatal(err)
 	}

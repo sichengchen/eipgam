@@ -14,7 +14,7 @@ import (
 	"time"
 	"weak"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A socket turn's body is freed once the turn is over (casyubaji on

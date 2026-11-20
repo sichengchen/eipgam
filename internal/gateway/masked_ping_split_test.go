@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A model that pauses in the middle of a placeholder while it writes a
-// tool call's arguments: magpie keeps an Anthropic client alive with a
+// tool call's arguments: eipgam keeps an Anthropic client alive with a
 // ping, and the agent's arguments still have the value, not the
 // placeholder. The ping released the held first piece with the start of
 // the placeholder in it, the next piece came with the rest, and Claude

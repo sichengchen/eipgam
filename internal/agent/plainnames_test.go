@@ -5,11 +5,11 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The model lists magpie writes into agents' own files (OpenCode, Pi, …)
+// The model lists eipgam writes into agents' own files (OpenCode, Pi, …)
 // name models alone once the user wants it (#335), as Codex's catalog
 // does: "Sol", not "Sol · A", and a group "Mix", not "Mix · routing group".
 func TestPlainNamesReachAgents(t *testing.T) {

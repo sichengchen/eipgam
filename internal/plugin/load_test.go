@@ -10,7 +10,7 @@ import (
 
 // A plugin reports its models' loads through input.magpie.load (axelburks
 // on Discord: an in-house vendor's busy models queue requests), when it
-// likes, from its own timer: magpie keeps each, a percent from 0 up, past
+// likes, from its own timer: eipgam keeps each, a percent from 0 up, past
 // 100 for a vendor that queues (axelburks again: 200% happens), capped at
 // LoadMost,
 // matched by id whatever its case, and a null clears one. What isn't a

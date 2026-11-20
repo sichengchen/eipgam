@@ -1,12 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// After Use Claude Magpie (xMopf7RF on X, 0.1.4111: "点击启用 Claude Magpie
-// 还是会先把 Claude Desktop 接入，反而留下一个 Claude Magpie 显示未接入"):
-// - the row the switch wires is Claude Magpie's, named so by the state
-//   (api.go names claude-desktop "Claude Magpie" while it is on), so no
+// After Use Claude eipgam (xMopf7RF on X, 0.1.4111: "点击启用 Claude eipgam
+// 还是会先把 Claude Desktop 接入，反而留下一个 Claude eipgam 显示未接入"):
+// - the row the switch wires is Claude eipgam's, named so by the state
+//   (api.go names claude-desktop "Claude eipgam" while it is on), so no
 //   row named Claude Desktop turns on;
-// - "Claude Code · Claude Magpie", the folder Claude Magpie's Code tab
+// - "Claude Code · Claude eipgam", the folder Claude eipgam's Code tab
 //   runs on, no longer reads "not connected, on its own settings": the
-//   tab is on magpie through Claude Magpie (twinCode), and its line says
+//   tab is on eipgam through Claude eipgam (twinCode), and its line says
 //   so, lit. Before the click it still reads not connected.
 // Every language, wide and narrow, both engines. No backend: faked here,
 // as api.go answers.
@@ -20,17 +20,17 @@ const assets = path.resolve(__dirname, "../assets");
 
 function fixture(lang) {
   const settings = { lang, theme: "light" };
-  const iso = { on: false, claude: false, claudeDir: "/test/.claude-magpie-desktop" };
+  const iso = { on: false, claude: false, claudeDir: "/test/.claude-eipgam-desktop" };
   let wired = false;
   const state = () => ({
     agents: [{
-      id: "claude-desktop", name: iso.on ? "Claude Magpie" : "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired,
-      fields: [{ key: "provider", label: "provider", value: wired ? "magpie" : "", options: [{ value: "magpie", label: "magpie", icon: "magpie" }] }],
+      id: "claude-desktop", name: iso.on ? "Claude eipgam" : "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired,
+      fields: [{ key: "provider", label: "provider", value: wired ? "eipgam" : "", options: [{ value: "eipgam", label: "eipgam", icon: "eipgam" }] }],
       models: { shown: 2, listed: 2, by: [{ name: "OpenCode Go", icon: "opencode", n: 2 }], names: ["DeepSeek V4 Pro", "Exo Free"] },
       isolated: { ...iso },
     }, {
-      id: "claude#magpie-desktop", name: "Claude Code · Claude Magpie", path: "/test/.claude-magpie-desktop/settings.json", icon: "claudecode-color", wired: false,
-      fields: [{ key: "provider", label: "provider", value: "", options: [{ value: "magpie", label: "magpie", icon: "magpie" }] }],
+      id: "claude#eipgam-desktop", name: "Claude Code · Claude eipgam", path: "/test/.claude-eipgam-desktop/settings.json", icon: "claudecode-color", wired: false,
+      fields: [{ key: "provider", label: "provider", value: "", options: [{ value: "eipgam", label: "eipgam", icon: "eipgam" }] }],
       ...(wired && iso.on && iso.claude ? { twinCode: true } : {}),
     }],
     profiles: [], settings,
@@ -44,7 +44,7 @@ function fixture(lang) {
     if (url.pathname === "/api/settings/desktop-isolated") {
       iso.on = req.postDataJSON().on;
       iso.claude = iso.on;
-      iso.launcher = "/test/Applications/Claude Magpie.app";
+      iso.launcher = "/test/Applications/Claude eipgam.app";
       return json(state());
     }
     if (url.pathname === "/api/agents/connect/claude-desktop") {
@@ -65,19 +65,19 @@ function fixture(lang) {
 }
 
 const W = {
-  en: { before: "Not connected · Claude Code · Claude Magpie uses its own settings", after: "On magpie through Claude Magpie" },
-  zh: { before: "未接入 · 用 Claude Code · Claude Magpie 自己的设置", after: "经 Claude Magpie 接入 magpie" },
-  "zh-TW": { after: "經 Claude Magpie 接入 magpie" },
-  ja: { after: "Claude Magpie 経由で magpie に接続" },
-  de: { after: "Über Claude Magpie auf magpie" },
+  en: { before: "Not connected · Claude Code · Claude eipgam uses its own settings", after: "On eipgam through Claude eipgam" },
+  zh: { before: "未接入 · 用 Claude Code · Claude eipgam 自己的设置", after: "经 Claude eipgam 接入 eipgam" },
+  "zh-TW": { after: "經 Claude eipgam 接入 eipgam" },
+  ja: { after: "Claude eipgam 経由で eipgam に接続" },
+  de: { after: "Über Claude eipgam auf eipgam" },
 };
 const cd = '.row.agent[data-id="claude-desktop"]';
-const code = '.row.agent[data-id="claude#magpie-desktop"]';
+const code = '.row.agent[data-id="claude#eipgam-desktop"]';
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(W)) {
     for (const width of [1100, 640]) {
-      test(`${engine} ${lang} ${width}px: after Use Claude Magpie the lit row is Claude Magpie, and its Code tab's row says it is on magpie`, async (t) => {
+      test(`${engine} ${lang} ${width}px: after Use Claude eipgam the lit row is Claude eipgam, and its Code tab's row says it is on eipgam`, async (t) => {
         const w = W[lang];
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang).serve);
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator(cd).waitFor({ state: "attached" });
         if (await page.locator(`.agent-fold ${cd}`).count()) {
           await page.locator(".agent-more").click();
@@ -96,17 +96,17 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator(`${cd} .name`).textContent(), "Claude Desktop");
         const line = page.locator(`${code} .ag-st`);
         if (w.before) assert.equal((await line.locator(".ag-st-t").textContent()).trim(), w.before);
-        assert.equal(await line.evaluate((n) => n.classList.contains("on")), false, "lit before Claude Magpie is on magpie");
+        assert.equal(await line.evaluate((n) => n.classList.contains("on")), false, "lit before Claude eipgam is on eipgam");
 
         const y = await page.evaluate(() => scrollY);
         await page.locator(`${cd} .ag-twin`).click();
         await page.locator(`${cd} .ag-conn.on`).waitFor();
-        // the lit row is Claude Magpie's; none named Claude Desktop is on
-        assert.equal(await page.locator(`${cd} .name`).textContent(), "Claude Magpie");
+        // the lit row is Claude eipgam's; none named Claude Desktop is on
+        assert.equal(await page.locator(`${cd} .name`).textContent(), "Claude eipgam");
         assert.equal(await page.evaluate(() => scrollY), y, "a click scrolled the page");
         const lit = await page.locator(".row.agent").evaluateAll((rs) => rs.filter((r) => r.querySelector(".ag-conn.on")).map((r) => r.querySelector(".name").textContent));
         assert.ok(!lit.includes("Claude Desktop"), `on: ${lit}`);
-        // the Code tab's row: on magpie through Claude Magpie, not "not connected"
+        // the Code tab's row: on eipgam through Claude eipgam, not "not connected"
         await page.locator(code).scrollIntoViewIfNeeded();
         assert.equal((await line.locator(".ag-st-t").textContent()).trim(), w.after);
         assert.equal(await line.evaluate((n) => n.classList.contains("on")), true, "its line isn't lit");

@@ -22,26 +22,26 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// A community plugin's own page in magpie's window (P4 of
-// docs/subsystems/plugin-runtime.md): package.json's magpie.page, shown in
-// a sandboxed frame (pluginpages.js), and its panels in magpie's own pages
-// (magpie.panels, P5), each in a frame of its own shut in the same way.
+// A community plugin's own page in eipgam's window (P4 of
+// docs/subsystems/plugin-runtime.md): package.json's eipgam.page, shown in
+// a sandboxed frame (pluginpages.js), and its panels in eipgam's own pages
+// (eipgam.panels, P5), each in a frame of its own shut in the same way.
 // Their files are served under
-// pluginPagePrefix and a token only this run of magpie hands out, with a
+// pluginPagePrefix and a token only this run of eipgam hands out, with a
 // policy that lets the page load nothing but its own files and reach
-// nothing over the network; it has no way to magpie's /api (apiFramed),
-// and what it may read of magpie's it asks the window for, which asks
+// nothing over the network; it has no way to eipgam's /api (apiFramed),
+// and what it may read of eipgam's it asks the window for, which asks
 // /api/plugin-pages/read for the reads its package declared.
 
 // pluginPagePrefix is where a plugin's page's files are served:
 // pluginPagePrefix + token + "/" + the file's path in the page's folder.
-const pluginPagePrefix = "/_magpie/plugin/"
+const pluginPagePrefix = "/_eipgam/plugin/"
 
 // pluginBridgePath is the window's side of the page's messages, served
 // beside every page's files: a page loads it as
@@ -81,7 +81,7 @@ type pluginPage struct {
 	// plugin's in plugins.json's order to ask for it
 	Replaces string   `json:"replaces,omitempty"`
 	Reads    []string `json:"reads"` // what it may read, of plugin.PageReads
-	// Actions are its items in magpie's menus (plugin.ActionSpec); each
+	// Actions are its items in eipgam's menus (plugin.ActionSpec); each
 	// opens this page
 	Actions []pluginAction `json:"actions,omitempty"`
 	// Service is where a browser reaches the page's local service
@@ -99,7 +99,7 @@ type pluginPage struct {
 	options   map[string]any // its plugin's, as plugins.json keeps them
 }
 
-// pluginAction is an item a plugin's page adds to one of magpie's menus.
+// pluginAction is an item a plugin's page adds to one of eipgam's menus.
 type pluginAction struct {
 	ID     string            `json:"id"`
 	Menu   string            `json:"menu"`  // of plugin.ActionMenus
@@ -107,7 +107,7 @@ type pluginAction struct {
 	Titles map[string]string `json:"titles,omitempty"`
 }
 
-// pluginPanel is a panel a plugin that is on adds to one of magpie's own
+// pluginPanel is a panel a plugin that is on adds to one of eipgam's own
 // pages (plugin.PanelSlots).
 type pluginPanel struct {
 	Spec   string            `json:"spec"`
@@ -259,9 +259,9 @@ func pagePolicy(r *http.Request, tok string, hashes ...string) string {
 // the scheme from the URL loaded, which is why only the iPhone failed.
 //
 // The desktop window names its own transport (ownWindow): wails://, or
-// http:// on Windows (#2501). A browser's page (magpie web) can come over
-// http or https, directly or through a proxy that ends TLS before magpie
-// (nginx, Cloudflare), and nothing magpie trusts says which, so both are
+// http:// on Windows (#2501). A browser's page (eipgam web) can come over
+// http or https, directly or through a proxy that ends TLS before eipgam
+// (nginx, Cloudflare), and nothing eipgam trusts says which, so both are
 // named: the same host, port and folder either way, and an https page
 // can't load http:// files anyway (mixed content).
 func ownSources(r *http.Request, path string) []string {
@@ -270,7 +270,7 @@ func ownSources(r *http.Request, path string) []string {
 	}
 	own := []string{"https://" + r.Host + path, "http://" + r.Host + path}
 	// A reverse proxy that doesn't pass the browser's Host on (nginx's
-	// proxy_pass does not) leaves r.Host as magpie's own address, which
+	// proxy_pass does not) leaves r.Host as eipgam's own address, which
 	// names nothing the browser asked for: every script and style of the
 	// page was refused and it drew as bare HTML (xuanwo on X, Day card).
 	// The window that framed the page is on the address the browser used,

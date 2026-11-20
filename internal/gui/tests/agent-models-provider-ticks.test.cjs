@@ -26,7 +26,7 @@ function fixture(lang) {
   const state = () => ({
     agents: [{
       id: "codex", name: "Codex", path: "/test/config.toml", icon: "codex-color", wired: true,
-      fields: [{ key: "model", label: "model", value: "magpie/deepseek/deepseek-v4", options: [{ value: "magpie/deepseek/deepseek-v4", label: "deepseek-v4", ref: "deepseek/deepseek-v4" }] }],
+      fields: [{ key: "model", label: "model", value: "eipgam/deepseek/deepseek-v4", options: [{ value: "eipgam/deepseek/deepseek-v4", label: "deepseek-v4", ref: "deepseek/deepseek-v4" }] }],
       models: count(),
     }],
     profiles: [], settings: { lang, theme: "light" },
@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       const row = page.locator('.row.agent[data-id="codex"]');
       await row.locator(".ag-link").click();
       const entry = row.locator(".ag-exp .ag-chips .ag-quiet");

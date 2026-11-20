@@ -9,7 +9,7 @@ import (
 
 func dshMessageID(msg string) string {
 	sum := sha256.Sum256([]byte(msg))
-	return "magpie-" + hex.EncodeToString(sum[:12])
+	return "eipgam-" + hex.EncodeToString(sum[:12])
 }
 
 // dsh's requests carry no session id, and a fork copies its source's
@@ -66,7 +66,7 @@ func TestDshLastConvsOnlyForDshTextMessages(t *testing.T) {
 func TestHistoryKeepsNoTurnIDs(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	now := historyNoon(t)
-	saveRoute(Route{ID: 1, Time: now, Agent: "dsh", Conv: "magpie-open", ResponseID: "chatcmpl-1", LastConvs: []string{"magpie-msg"}, Done: true})
+	saveRoute(Route{ID: 1, Time: now, Agent: "dsh", Conv: "eipgam-open", ResponseID: "chatcmpl-1", LastConvs: []string{"eipgam-msg"}, Done: true})
 	_, routes, _ := History(now.Format(dayForm))
 	if len(routes) != 1 || routes[0].ResponseID != "chatcmpl-1" || routes[0].LastConvs != nil {
 		t.Fatalf("history route %+v, want its reply and no turn ids", routes)

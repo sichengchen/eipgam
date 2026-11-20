@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 // the signature is fixed by the algorithm: this one was made by hand with
@@ -54,7 +54,7 @@ func TestAliPlanSite(t *testing.T) {
 	for url, region := range map[string]string{
 		"https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1": "ap-southeast-1",
 		"https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic":     "ap-southeast-1",
-		// Bailian's plan in Beijing is mainland China's, which magpie leaves out
+		// Bailian's plan in Beijing is mainland China's, which eipgam leaves out
 		"https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1": "",
 		"https://token-plan.maas.qwencloudapi.com/compatible-mode/v1":        "",
 		"https://dashscope-intl.aliyuncs.com/compatible-mode/v1":             "",

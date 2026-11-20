@@ -29,13 +29,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // filmsDashScope is whether p is a key of a DashScope plan that names video
 // models (the Token Plans' Wan 3.0 and HappyHorse): not a subscription's
-// account, another magpie or a plugin.
+// account, another eipgam or a plugin.
 func filmsDashScope(p provider.Provider) bool {
 	return p.Account == nil && !p.IsPlugin() && !p.IsRemoteMagpie() && dashScope(p) && len(p.PlanVideos()) > 0
 }
@@ -165,7 +165,7 @@ func (s *Server) dashScopeVideoStatus(ctx context.Context, p provider.Provider, 
 	var st videoState
 	model, task, ok := dashScopeTask(vendorID)
 	if !ok {
-		return st, 404, errors.New("this isn't the id of a video magpie started at DashScope")
+		return st, 404, errors.New("this isn't the id of a video eipgam started at DashScope")
 	}
 	at := dashScopeRoot(p) + "/api/v1/tasks/" + url.PathEscape(task)
 	b, code, err := s.sendAs(ctx, p, http.MethodGet, at, "", nil, true)

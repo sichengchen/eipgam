@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // codexThreadOn writes a thread of Codex's on the provider p, its rollout
@@ -52,16 +52,16 @@ func codexRowOn(t *testing.T, dir, id string) string {
 	return p
 }
 
-// kaizaoji on X: after using magpie with Codex and disconnecting it, Codex
+// kaizaoji on X: after using eipgam with Codex and disconnecting it, Codex
 // said a project's earlier context didn't exist. Codex lists only the
 // threads of the provider it is on (app-server thread/list, the resume
 // picker), and with no ChatGPT sign-in (or an API key, or an account out
-// of its allowance) magpie is Codex's provider, so every thread started
-// then names "magpie" and was gone once Codex was back on OpenAI. They
+// of its allowance) eipgam is Codex's provider, so every thread started
+// then names "eipgam" and was gone once Codex was back on OpenAI. They
 // come back to the provider Codex is on: at the Disconnect, and at a sync
 // after the provider was taken off by hand. A thread of a provider of the
 // user's own (CC Switch's "custom") stays where it is, and none moves
-// while Codex is on magpie, at its top or in a profile.
+// while Codex is on eipgam, at its top or in a profile.
 func TestCodexThreadsComeBackOffMagpie(t *testing.T) {
 	const (
 		mine   = "019a0000-0000-7000-8000-0000000000a1"
@@ -85,18 +85,18 @@ func TestCodexThreadsComeBackOffMagpie(t *testing.T) {
 		if err := cx.Fields[0].Set("fake/m1"); err != nil {
 			t.Fatal(err)
 		}
-		if p, _ := edit.GetTOMLTop(filepath.Join(dir, "config.toml"), "model_provider"); p != "magpie" {
-			t.Fatalf("provider %q, want magpie as Codex's provider with no sign-in", p)
+		if p, _ := edit.GetTOMLTop(filepath.Join(dir, "config.toml"), "model_provider"); p != "eipgam" {
+			t.Fatalf("provider %q, want eipgam as Codex's provider with no sign-in", p)
 		}
-		minePath := codexThreadOn(t, dir, mine, "magpie")
+		minePath := codexThreadOn(t, dir, mine, "eipgam")
 		codexThreadOn(t, dir, theirs, "custom")
 		codexThreadOn(t, dir, before, "openai")
-		// connected, magpie's threads are where Codex lists them
+		// connected, eipgam's threads are where Codex lists them
 		if err := cx.Sync(); err != nil {
 			t.Fatal(err)
 		}
-		if p := codexRowOn(t, dir, mine); p != "magpie" {
-			t.Fatalf("moved off magpie while Codex is on it: %q", p)
+		if p := codexRowOn(t, dir, mine); p != "eipgam" {
+			t.Fatalf("moved off eipgam while Codex is on it: %q", p)
 		}
 		if err := cx.Unwire(); err != nil {
 			t.Fatal(err)
@@ -111,20 +111,20 @@ func TestCodexThreadsComeBackOffMagpie(t *testing.T) {
 		}
 	})
 	t.Run("by hand", func(t *testing.T) {
-		// magpie taken out of config.toml by hand, its table left for its
-		// threads, and a profile of the user's on magpie
-		table := "\n[model_providers.magpie]\nname = \"magpie\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n"
-		profile := "\n[profiles.mg]\nmodel_provider = \"magpie\"\n"
+		// eipgam taken out of config.toml by hand, its table left for its
+		// threads, and a profile of the user's on eipgam
+		table := "\n[model_providers.eipgam]\nname = \"eipgam\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n"
+		profile := "\n[profiles.mg]\nmodel_provider = \"eipgam\"\n"
 		home, _ := codexHome(t, "", "model = \"gpt-5.4\"\n"+table+profile)
 		dir := filepath.Join(home, ".codex")
 		path := filepath.Join(dir, "config.toml")
-		codexThreadOn(t, dir, mine, "magpie")
+		codexThreadOn(t, dir, mine, "eipgam")
 		codexThreadOn(t, dir, theirs, "custom")
 		cx := codex(home)
 		cx.Sync()
 		// its threads are where `codex -p mg` lists them
-		if p := codexRowOn(t, dir, mine); p != "magpie" {
-			t.Fatalf("moved while a profile is on magpie: %q", p)
+		if p := codexRowOn(t, dir, mine); p != "eipgam" {
+			t.Fatalf("moved while a profile is on eipgam: %q", p)
 		}
 		os.WriteFile(path, []byte("model = \"gpt-5.4\"\n"+table), 0o644)
 		cx.Sync()
@@ -133,10 +133,10 @@ func TestCodexThreadsComeBackOffMagpie(t *testing.T) {
 				t.Errorf("thread %s on %q, want %q", id, p, want)
 			}
 		}
-		// CC Switch's provider set by hand: a thread left on magpie goes
+		// CC Switch's provider set by hand: a thread left on eipgam goes
 		// there, and so does OpenAI's, which Codex resumes there alone
 		// (lendOwn)
-		codexThreadOn(t, dir, before, "magpie")
+		codexThreadOn(t, dir, before, "eipgam")
 		os.WriteFile(path, []byte("model = \"gpt-5.4\"\nmodel_provider = \"custom\"\n"+table+"\n[model_providers.custom]\nname = \"custom\"\nbase_url = \"https://relay.example/v1\"\n"), 0o644)
 		cx.Sync()
 		for id, want := range map[string]string{mine: "custom", theirs: "custom", before: "custom"} {

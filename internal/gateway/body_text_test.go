@@ -13,7 +13,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // strictUp is a vendor that refuses a body with bytes that aren't UTF-8
@@ -133,7 +133,7 @@ var badText = []struct{ name, raw string }{
 	{"cut at the end", "\xe4\xbd"},
 }
 
-// inbound is each API an agent asks magpie on, with the text in the
+// inbound is each API an agent asks eipgam on, with the text in the
 // user's message and in a tool's result, where a file's bytes arrive.
 func inbound(text string, stream bool) []struct{ path, body string } {
 	s := "false"

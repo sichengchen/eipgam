@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Discover is one market: magpie's community, other authors and the
+// Discover is one market: eipgam's community, other authors and the
 // repositories tagged magpie-plugin on GitHub, browsed with one bar
 // (yetone: 社区插件、非官方插件散落的太厉害了，你要把它统筹起来). The bar's
 // kinds say how many of each there are under what Origin leaves; Origin
@@ -24,7 +24,7 @@ const GH = require("./fixtures/plugins-github-31.json");
 // two of them already here, a provider and a middleware, installed by the
 // spec the page would send for each: the strip says both sides of it, and
 // the kinds narrow it either way
-const HERE = ["mu-zi-lee/magpie-our-free-model", "ezdemo/magpie-haiku55-thinking"];
+const HERE = ["mu-zi-lee/eipgam-our-free-model", "ezdemo/eipgam-haiku55-thinking"];
 const INSTALLED = HERE
   .map((repo) => GH.repos.find((r) => r.repo === repo))
   .map((r) => ({ spec: r.spec, package: r.package, providers: [], version: "1.0.0", moved: [] }));
@@ -46,7 +46,7 @@ function server(lang, fetched, installed = INSTALLED) {
     if (url.pathname === "/api/plugins/github") return json(GH);
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
+    if (url.host !== "eipgam.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, fetched));
         try {
-          await page.goto("http://magpie.test/?view=plugins");
+          await page.goto("http://eipgam.test/?view=plugins");
           const view = page.locator("#view-plugins");
           const bar = view.locator(".pm-bar");
           await bar.waitFor();
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const kinds = bar.locator(".pm-kinds .opt");
           const said = () => kinds.evaluateAll((bs) => bs.map((b) => [b.firstChild.textContent, b.querySelector("em").textContent]));
           const want = async (rs) => Promise.all([["", "All"], ["pv", "Subscriptions"], ["mw", "Middleware"], ["ag", "Agents"]].map(async ([k, n]) => [await tr(n), String(count(rs, k))]));
-          // Zed, from magpie's community, is a subscription too
+          // Zed, from eipgam's community, is a subscription too
           const ZED = { kind: undefined, repo: "z/zed" };
           assert.deepEqual(await said(), await want([...GH.repos, ZED]));
           // nothing left over at this width: the kinds in Japanese are wide
@@ -119,9 +119,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.deepEqual(await said(), await want(fresh));
           assert.equal((await pops.nth(0).locator("b").textContent()).trim(), await tr("Unofficial, on GitHub") + " · " + await tr("Not installed"));
 
-          // magpie's community has no middleware: said so, and Show all
+          // eipgam's community has no middleware: said so, and Show all
           // puts back every pick
-          await choose(0, "magpie community");
+          await choose(0, "eipgam community");
           assert.equal(await cards.count(), 0);
           const none = view.locator(".pm-ghnone");
           assert.equal((await none.locator("span").textContent()).trim(), await tr("No plugin matches"));

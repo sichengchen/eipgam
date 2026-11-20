@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const reads = { n: 0 };
       await page.route("**/*", serve(lang, reads));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       assert.equal(reads.n, 0, "/api/speeds is read before the Sessions page is shown");
       await page.locator("#nav").getByRole("button", { name: w.nav, exact: true }).click();
       const row = (id) => page.locator(`#view-sessions .row.sm-sess[data-id="${id}"]`);

@@ -11,18 +11,18 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // The Windows app is one exe with no installer, and the site's download
-// lands it in Downloads as magpie-windows-amd64.exe. Left there, the Start
-// menu shortcut, Open at login and the `magpie` command all name a file
-// the user tidies away, and the command came from a magpie.com written
+// lands it in Downloads as eipgam-windows-amd64.exe. Left there, the Start
+// menu shortcut, Open at login and the `eipgam` command all name a file
+// the user tidies away, and the command came from a eipgam.com written
 // beside it in Downloads (lucky_eagle_38410 on Discord). So the desktop
 // app, opened from a folder downloads land in, installs itself the way a
 // Mac app is moved into Applications: it copies itself to
-// %LOCALAPPDATA%\Programs\magpie\magpie.exe — the user's own programs
+// %LOCALAPPDATA%\Programs\eipgam\eipgam.exe — the user's own programs
 // folder, no administrator — puts that folder on the user's PATH, and
 // opens the copy there, which makes the shortcut, Open at login and its
 // updates name it. The download is left where it is: it is the user's
@@ -32,40 +32,40 @@ import (
 // The first time, before anything is copied, the user is asked where to
 // put it (AskFolder, Windows' own dialog in the GUI), with that folder as
 // the default (feng_21795_78266 on Discord). A folder other than the
-// default is kept in HKCU\Software\magpie (InstallLocation), so a
+// default is kept in HKCU\Software\eipgam (InstallLocation), so a
 // download opened later finds it there, never asks again and never moves
 // it. A folder the user can't write to is refused with the reason:
-// magpie installs for the one user, updates itself without an
+// eipgam installs for the one user, updates itself without an
 // administrator, and its login item and PATH are the user's own, so a
 // copy in Program Files would need an administrator for every update.
 //
-// A copy still named as the site's download (magpie-windows-amd64.exe,
-// magpie-windows-amd64 (1).exe) is a download wherever it is kept: a
+// A copy still named as the site's download (eipgam-windows-amd64.exe,
+// eipgam-windows-amd64 (1).exe) is a download wherever it is kept: a
 // browser set to save into D:\下载, or a download moved into a folder of
 // the user's own and updated in place there. Run like that, a deleted
-// download was a deleted magpie, and each copy opened was an app of its
+// download was a deleted eipgam, and each copy opened was an app of its
 // own to Windows, with its own Start menu and taskbar entries
 // (@XBJNTMs2mDbsvPH on X). So it asks the same question the first time.
-// Cancel there is kept (HKCU\Software\magpie, NotInstalled): that copy
+// Cancel there is kept (HKCU\Software\eipgam, NotInstalled): that copy
 // runs where it is from then on and is never asked about again. Outside
 // a download folder it is only ever installed through the dialog, which
 // the user sees.
 //
 // It is left alone, and runs where it is as before, when it runs from
-// anywhere else under a name of its own (D:\Tools\magpie.exe, a USB
+// anywhere else under a name of its own (D:\Tools\eipgam.exe, a USB
 // drive), when it is portable (a data folder or .portable file beside
-// it, appdir), or with MAGPIE_NO_INSTALL=1.
+// it, appdir), or with EIPGAM_NO_INSTALL=1.
 
-// NoInstallEnv, set to 1, keeps a magpie run from Downloads there.
-const NoInstallEnv = "MAGPIE_NO_INSTALL"
+// NoInstallEnv, set to 1, keeps a eipgam run from Downloads there.
+const NoInstallEnv = "EIPGAM_NO_INSTALL"
 
 // installedFromEnv names, for the installed copy started in its place,
 // the exe it was installed from, whose leftovers it clears (Settled).
-const installedFromEnv = "MAGPIE_INSTALLED_FROM"
+const installedFromEnv = "EIPGAM_INSTALLED_FROM"
 
 // What Settle asks of the system; tests set them.
 var (
-	// installTarget is %LOCALAPPDATA%\Programs\magpie\magpie.exe, "" off
+	// installTarget is %LOCALAPPDATA%\Programs\eipgam\eipgam.exe, "" off
 	// Windows
 	installTarget = installPath
 	// downloadFolder says whether dir is one downloads land in:
@@ -75,16 +75,16 @@ var (
 	downloadFolder = isDownloadFolder
 	// fileVersion is the version in an exe's resources, 0 when unknown
 	fileVersion = exeVersion
-	// portableData is a portable magpie's data folder, "" installed
+	// portableData is a portable eipgam's data folder, "" installed
 	portableData = appdir.Portable
-	// webViewHome is the folder WebView2 keeps an installed magpie's
+	// webViewHome is the folder WebView2 keeps an installed eipgam's
 	// profile in by default, %APPDATA%\<exe name>; "" off Windows
 	webViewHome = webViewDefault
 	// installCLI puts the installed folder on the user's PATH with the
 	// command a terminal runs there
 	installCLI = cliPlace
 	// recordedDir is the folder the user chose to install in, "" when
-	// none was (the default, or a magpie installed before it could be
+	// none was (the default, or a eipgam installed before it could be
 	// chosen); recordDir keeps it
 	recordedDir = readInstallDir
 	recordDir   = writeInstallDir
@@ -95,9 +95,9 @@ var (
 )
 
 // downloadName is the name the site's Windows download has, with the
-// suffix a browser adds to a second one: magpie-windows-amd64.exe,
-// magpie-windows-arm64 (1).exe.
-var downloadName = lazyre.New(`(?i)^magpie-windows-(amd64|arm64)\b[^\\/]*\.exe$`)
+// suffix a browser adds to a second one: eipgam-windows-amd64.exe,
+// eipgam-windows-arm64 (1).exe.
+var downloadName = lazyre.New(`(?i)^eipgam-windows-(amd64|arm64)\b[^\\/]*\.exe$`)
 
 // isDownload says whether exe is a download Settle installs: one in a
 // folder downloads land in, or one kept elsewhere under the download's
@@ -129,14 +129,14 @@ var ErrNeedsAdmin = errors.New("only an administrator can write to this folder")
 var ErrDownloadFolder = errors.New("downloads land in this folder")
 
 // InstallDir is the folder a folder picked in AskFolder's dialog means:
-// itself when it is named magpie, else a magpie folder inside it, as
+// itself when it is named eipgam, else a eipgam folder inside it, as
 // installers do.
 func InstallDir(picked string) string {
 	picked = filepath.Clean(picked)
-	if strings.EqualFold(filepath.Base(picked), "magpie") {
+	if strings.EqualFold(filepath.Base(picked), "eipgam") {
 		return picked
 	}
-	return filepath.Join(picked, "magpie")
+	return filepath.Join(picked, "eipgam")
 }
 
 // Installable says why dir can't be installed in, nil when it can: a
@@ -185,7 +185,7 @@ func Installable(dir string) error {
 		}
 		made = append(made, d)
 	}
-	f, err := os.CreateTemp(dir, ".magpie-install-*")
+	f, err := os.CreateTemp(dir, ".eipgam-install-*")
 	if err != nil {
 		return writeErr(err)
 	}
@@ -202,9 +202,9 @@ func writeErr(err error) error {
 }
 
 // exeName is what the installed copy is called.
-const exeName = "magpie.exe"
+const exeName = "eipgam.exe"
 
-// installed is where magpie is installed: the folder the user chose, else
+// installed is where eipgam is installed: the folder the user chose, else
 // the default; ok is false when neither holds it, and to is then where
 // to offer, the folder chosen before first.
 func installed() (to string, ok bool) {
@@ -316,7 +316,7 @@ func settle(exe string) (string, error) {
 }
 
 // installFresh puts a copy of exe at to, puts its folder on the user's
-// PATH with the `magpie` command a terminal runs there (cliPlace), and
+// PATH with the `eipgam` command a terminal runs there (cliPlace), and
 // points the installed copy at the webview profile exe had, which is kept
 // by its file name.
 func installFresh(exe, to string) error {
@@ -336,13 +336,13 @@ func installFresh(exe, to string) error {
 	if err := installCLI(to, dir); err != nil {
 		// the app runs the same without the command; Settings' Command
 		// line says it isn't there and offers it again
-		log.Println("install: the magpie command:", err)
+		log.Println("install: the eipgam command:", err)
 	}
 	return nil
 }
 
 // keepWebView has the copy at to keep the webview profile exe had: the
-// pages' storage there would be lost to a new profile under magpie.exe's
+// pages' storage there would be lost to a new profile under eipgam.exe's
 // name. Nothing when that one has a profile already.
 func keepWebView(exe, to string) {
 	home := webViewHome
@@ -363,7 +363,7 @@ func copyBeside(exe, to string) (string, error) {
 		return "", err
 	}
 	defer src.Close()
-	f, err := os.CreateTemp(filepath.Dir(to), ".magpie-install-*")
+	f, err := os.CreateTemp(filepath.Dir(to), ".eipgam-install-*")
 	if err != nil {
 		return "", err
 	}
@@ -378,13 +378,13 @@ func copyBeside(exe, to string) (string, error) {
 	return f.Name(), nil
 }
 
-// Forward opens the installed magpie at to with this one's arguments, and
+// Forward opens the installed eipgam at to with this one's arguments, and
 // waits for it to say it is up; the caller then quits. A restart to
-// update waits on this one for that word (MAGPIE_STARTED): it is passed on
+// update waits on this one for that word (EIPGAM_STARTED): it is passed on
 // once the installed one has said it. When to can't be started, this one
 // runs on.
 func Forward(from, to string) error {
-	marker := filepath.Join(os.TempDir(), fmt.Sprintf("magpie-installed-%d", os.Getpid()))
+	marker := filepath.Join(os.TempDir(), fmt.Sprintf("eipgam-installed-%d", os.Getpid()))
 	os.Remove(marker)
 	defer os.Remove(marker)
 	var env []string
@@ -405,10 +405,10 @@ func Forward(from, to string) error {
 	return nil
 }
 
-// Settled clears, in the installed magpie Forward opened, what magpie left
+// Settled clears, in the installed eipgam Forward opened, what eipgam left
 // beside the exe it was installed from: what updates moved aside there,
-// an update downloaded for it (magpie.exe.new), and the magpie.com or magpie.cmd magpie wrote there to run it, which
-// the `magpie` on PATH is now. A file it didn't write, or wrote for
+// an update downloaded for it (eipgam.exe.new), and the eipgam.com or eipgam.cmd eipgam wrote there to run it, which
+// the `eipgam` on PATH is now. A file it didn't write, or wrote for
 // another program, is left.
 func Settled() {
 	from := os.Getenv(installedFromEnv)
@@ -439,7 +439,7 @@ func clearBeside(from string) {
 }
 
 // forwards says whether exe is a download Settle opens the installed
-// magpie in place of: nothing is written beside it for a terminal, which
+// eipgam in place of: nothing is written beside it for a terminal, which
 // runs the installed one.
 func forwards(exe string) bool {
 	if runtime.GOOS != "windows" || os.Getenv(NoInstallEnv) == "1" {

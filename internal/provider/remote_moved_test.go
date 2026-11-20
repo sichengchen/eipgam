@@ -16,10 +16,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
-// a magpie on 127.0.0.1 that proves it holds key and lists for key
+// a eipgam on 127.0.0.1 that proves it holds key and lists for key
 // alone, its list made by lister
 func movedMagpie(t *testing.T, key, lister string, hits *atomic.Int32) string {
 	t.Helper()
@@ -37,13 +37,13 @@ func movedMagpie(t *testing.T, key, lister string, hits *atomic.Int32) string {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		io.WriteString(w, `{"object":"list","data":[{"id":"own/m1","object":"model","magpie_via":["`+lister+`"]}]}`)
+		io.WriteString(w, `{"object":"list","data":[{"id":"own/m1","object":"model","eipgam_via":["`+lister+`"]}]}`)
 	}))
 	t.Cleanup(srv.Close)
 	return strings.TrimPrefix(srv.URL, "http://")
 }
 
-// answerProof answers a proof's ask as a magpie holding key does, at the
+// answerProof answers a proof's ask as a eipgam holding key does, at the
 // address the connection came to.
 func answerProof(w http.ResponseWriter, r *http.Request, key string) {
 	var in struct {
@@ -123,11 +123,11 @@ func seekHere(t *testing.T, ats ...string) *atomic.Int32 {
 	return asked
 }
 
-// A Remote magpie whose computer came back at another address
+// A Remote eipgam whose computer came back at another address
 // (luckymanjc): its list, finding no one at the old one, is asked at the
-// address that lists for its key and isn't this magpie, and the
-// provider is saved there. A magpie that refuses the key, and this
-// magpie itself, are passed over.
+// address that lists for its key and isn't this eipgam, and the
+// provider is saved there. A eipgam that refuses the key, and this
+// eipgam itself, are passed over.
 func TestRemoteMagpieFoundMoved(t *testing.T) {
 	isolate(t)
 	isolateFetchHome(t)
@@ -153,7 +153,7 @@ func TestRemoteMagpieFoundMoved(t *testing.T) {
 	}
 }
 
-// With no magpie of its key anywhere, nothing is saved and the list's
+// With no eipgam of its key anywhere, nothing is saved and the list's
 // error stands; a look is made once a minute at most.
 func TestRemoteMagpieNotFoundStays(t *testing.T) {
 	isolate(t)
@@ -236,13 +236,13 @@ func TestDialable(t *testing.T) {
 // hotel's, or A switched off) is sent neither the provider's key nor its
 // own headers before it proves it holds the key, and isn't saved: one
 // that lists 200 for anything and has no proof, one whose proof is made
-// under another key, and one that passes B's nonce on to the real magpie
-// elsewhere and hands back that magpie's proof. Only the real magpie,
+// under another key, and one that passes B's nonce on to the real eipgam
+// elsewhere and hands back that eipgam's proof. Only the real eipgam,
 // which proves it, is then asked with the key, and saved.
 func TestRemoteMagpieKeyGoesToNoNeighbour(t *testing.T) {
 	isolate(t)
 	isolateFetchHome(t)
-	const key, header = "sk-magpie-key-secret-of-a", "X-Office-Proxy"
+	const key, header = "sk-eipgam-key-secret-of-a", "X-Office-Proxy"
 	real := movedMagpie(t, key, "a", nil)
 	silent, silentHeard := impostor(t, nil)
 	// a proof made the right way under a key of its own
@@ -252,13 +252,13 @@ func TestRemoteMagpieKeyGoesToNoNeighbour(t *testing.T) {
 		}
 		json.NewDecoder(r.Body).Decode(&in)
 		at := r.Context().Value(http.LocalAddrContextKey).(net.Addr).String()
-		io.WriteString(w, `{"proof":"`+hex.EncodeToString(RemoteProof("sk-magpie-key-a-guess", in.Nonce, at))+`"}`)
+		io.WriteString(w, `{"proof":"`+hex.EncodeToString(RemoteProof("sk-eipgam-key-a-guess", in.Nonce, at))+`"}`)
 	})
 	garbled, garbledHeard := impostor(t, func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, `{"proof":"`+strings.Repeat("ab", 32)+`"}`)
 	})
 	// a relay: B's ask, nonce and key id as they came, put to the real
-	// magpie, and its answer handed back
+	// eipgam, and its answer handed back
 	relay, relayHeard := impostor(t, func(w http.ResponseWriter, r *http.Request) {
 		res, err := http.Post("http://"+real+RemoteProvePath, "application/json", r.Body)
 		if err != nil {
@@ -276,7 +276,7 @@ func TestRemoteMagpieKeyGoesToNoNeighbour(t *testing.T) {
 	}
 	p, _ := Find(id)
 	if _, err := p.Fetch(context.Background()); err == nil {
-		t.Fatal("fetch answered with no magpie of the key about")
+		t.Fatal("fetch answered with no eipgam of the key about")
 	}
 	if asked.Load() != 1 {
 		t.Fatalf("looked %d times", asked.Load())
@@ -299,7 +299,7 @@ func TestRemoteMagpieKeyGoesToNoNeighbour(t *testing.T) {
 		t.Errorf("saved at %q, want the old address", q.Chat)
 	}
 
-	// the real magpie, after them all, proves it and is saved
+	// the real eipgam, after them all, proves it and is saved
 	seekHere(t, movedAway, silent, wrong, garbled, relay, real)
 	p, _ = Find(id)
 	if _, err := p.Fetch(context.Background()); err != nil {
@@ -323,7 +323,7 @@ func TestRemoteProof(t *testing.T) {
 	}
 }
 
-// A request that read a Remote magpie at its old address, whose new one
+// A request that read a Remote eipgam at its old address, whose new one
 // was saved since (typed in by the user, or found by a look within
 // seekEvery), finds no one there: it is asked at the saved one, with no
 // look made (le13ure on X: a request asked the old address again and

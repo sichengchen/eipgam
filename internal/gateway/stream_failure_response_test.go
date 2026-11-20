@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // lastResponsesEvent is the last data line of a Responses stream, parsed.
@@ -64,7 +64,7 @@ func wholeFailedResponse(t *testing.T, v map[string]any) map[string]any {
 // A Responses stream that ends short after its output began is ended
 // with a response.failed a Responses client can read: the response the
 // stream began (its id and created_at), numbered after its last event.
-// magpie's own had only object, status and error, and Grok Build failed
+// eipgam's own had only object, status and error, and Grok Build failed
 // the turn on it with "serialization error: missing field `created_at`"
 // instead of saying the error (plugins#852).
 func TestResponsesStreamFailureIsAWholeResponse(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // relaySealedToken stands for what the ChatGPT backend puts in a
@@ -29,7 +29,7 @@ const codexSendTools = `"tools":[
 // brethhbbm on X ("codex subagent 返回的加密内容主agent 无法解析"), and
 // oevery and WilliamK7 on #3183: a Responses relay of the ChatGPT backend
 // (CPA, Sub2API) seals a subagent's send_message as the backend does but
-// leaves encrypted_function_args out. magpie gave every such call the
+// leaves encrypted_function_args out. eipgam gave every such call the
 // empty list, saying the message was plain text, so Codex handed the lead
 // the token as text and the lead could read nothing of its subagent's
 // result. A call whose message is sealed now names it; a plain one still

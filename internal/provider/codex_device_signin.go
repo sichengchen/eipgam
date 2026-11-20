@@ -15,9 +15,9 @@ import (
 )
 
 // A ChatGPT sign-in by device code, as `codex login --device-auth` does it
-// (codex-rs login/src/device_code_auth.rs): magpie asks for a code, the
-// user enters it on ChatGPT's device page in any browser, and magpie asks
-// until the page is done. Nothing comes back to localhost:1455, so magpie
+// (codex-rs login/src/device_code_auth.rs): eipgam asks for a code, the
+// user enters it on ChatGPT's device page in any browser, and eipgam asks
+// until the page is done. Nothing comes back to localhost:1455, so eipgam
 // on a server or in Docker, its window in a browser elsewhere, signs in
 // with no address to copy back (curtinp118 on Discord).
 

@@ -6,7 +6,7 @@ import (
 )
 
 // A session's models are counted under the names the user gave them
-// (provider.UsageAlias, `magpie model alias`): two ids of one model are one
+// (provider.UsageAlias, `eipgam model alias`): two ids of one model are one
 // row. Each was priced by its own id before; the merged row adds those
 // costs and is priced only when every id in it was. Changed rows use new
 // slices, so what List and Stats keep for the next read is never changed.

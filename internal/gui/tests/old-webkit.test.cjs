@@ -142,7 +142,7 @@ test("compat.js is the first of the page's own scripts", async () => {
   const srcs = all.filter((s) => s !== "boot.js" && s !== "theme.js" && s !== "omarchy.js");
   assert.equal(srcs[0], "compat.js", "loaded first: " + srcs.join(", "));
   // webfonts.js is imported by app.js in a browser tab only, cfgblocked.js
-  // when magpie can't write its folder, signsheets.js when a sign-in asks a
+  // when eipgam can't write its folder, signsheets.js when a sign-in asks a
   // value first, ruleedit.js on a masking rule's Edit, ratewindows.js when
   // a provider editor draws its rate windows, traywindows.js when the menu
   // bar shows a card, autoresetown.js when Settings draws Codex's auto-use
@@ -169,7 +169,7 @@ test("compat.js is the first of the page's own scripts", async () => {
   // panelarrange.js when its Allowances tab's Arrange is, modelfind.js
   // when Model settings draws many models, agentsmanager.js when the
   // Agents page's Manage is pressed, agentsuffix.js when an agent's Details
-  // open, phonetabs.js when magpie web is laid out for a phone,
+  // open, phonetabs.js when eipgam web is laid out for a phone,
   // pluginmd.js (a README's renderer) once plugins.js has run;
   // plugincounts.js (Discover's counts) when the Plugins page loads;
   // navicons.js (the sidebar lists' marks) with the first list drawn;
@@ -281,7 +281,7 @@ test("with Safari 15.0's built-ins, the panel and the window draw every page", a
       page.on("pageerror", (e) => errors.push(e.message));
       await page.addInitScript(TAKEN);
       await page.route("**/*", serve);
-      await page.goto(`http://magpie.test/?mode=${mode}`);
+      await page.goto(`http://eipgam.test/?mode=${mode}`);
       await page.locator("#agents .row").first().waitFor();
       assert.equal(await page.evaluate(() => [1, 2, 3].findLast((x) => x < 3)), 2, "compat.js fills findLast in");
       assert.deepEqual(await page.evaluate(() => { const a = { b: [1] }, c = structuredClone(a); return [c.b[0], c !== a && c.b !== a.b]; }), [1, true]);

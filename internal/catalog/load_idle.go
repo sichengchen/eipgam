@@ -9,7 +9,7 @@ import (
 
 // loadIdle is how long the loaded catalog stays in memory after the last
 // read of it. models.dev's api.json is ~6 MB, and parsed, with what is
-// voted and indexed of it, it was the largest thing an idle magpie held
+// voted and indexed of it, it was the largest thing an idle eipgam held
 // (~7 MB of a ~40 MB heap) for the life of the process. Read again, it
 // is parsed again from the same file (~0.1s), as after a Reset.
 const loadIdle = 2 * time.Minute

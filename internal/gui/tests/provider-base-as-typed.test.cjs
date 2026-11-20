@@ -60,10 +60,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       [c.field]: "https://old.example.com/x",
     }));
     await page.route("**/*", serve(posts, providers));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     const ed = page.locator(".editor");
     const open = async (id) => {
-      if (await ed.count()) { await page.goto("http://magpie.test/?view=providers"); await ed.waitFor({ state: "detached" }); }
+      if (await ed.count()) { await page.goto("http://eipgam.test/?view=providers"); await ed.waitFor({ state: "detached" }); }
       await page.locator(`#providers .row[data-id="${id}"]`).click();
       await ed.locator(".base-url").waitFor();
     };

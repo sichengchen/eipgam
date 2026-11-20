@@ -16,7 +16,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const now = Date.now();
 const iso = (ms) => new Date(ms).toISOString();
 const seat = { id: "codex@me", provider: "codex", name: "ChatGPT", who: "me@example.com", kind: "account", model: "gpt-6.1-sol", known: true, plan: "Pro" };
@@ -71,7 +71,7 @@ async function open(browser, lang, first) {
   page.on("pageerror", (e) => errors.push(e.message));
   const feed = { next: null };
   await page.route("**/*", serve(lang, first, feed));
-  await page.goto("http://magpie.test/?view=routing");
+  await page.goto("http://eipgam.test/?view=routing");
   await page.locator(".rt-req").first().waitFor();
   await page.locator(".rt-ctx .ctx-card").waitFor();
   const send = async (r) => {

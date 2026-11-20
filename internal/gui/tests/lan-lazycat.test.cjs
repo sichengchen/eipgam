@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// mtoolstec on X ran magpie as a LazyCat (懒猫微服) app. Share on local
+// mtoolstec on X ran eipgam as a LazyCat (懒猫微服) app. Share on local
 // network offered the app's domain, which only devices with LazyCat's
 // client reach, and the box's container bridge (172.28.3.65), which
 // nothing off the box reaches, named other containers'; other devices on
 // the home network wanted http://192.168.0.100:3425/v1.
-// - On the box's network (the package's network_mode: host) magpie finds
+// - On the box's network (the package's network_mode: host) eipgam finds
 //   the box's LAN address: it comes first, then the domain, named LazyCat
 //   client's, in Settings' menu, on the Gateway page and in the sidebar.
 // - On a bridge network that address can't be known: the domain alone,
@@ -18,12 +18,12 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 const { openPart, reach } = require("./reader.cjs");
 
-const LC = "https://magpie.snyht3.heiyu.space", BOX = "http://192.168.0.100:3999", HERE = "http://127.0.0.1:3999";
+const LC = "https://eipgam.snyht3.heiyu.space", BOX = "http://192.168.0.100:3999", HERE = "http://127.0.0.1:3999";
 const words = {
   en: { client: "LazyCat client", head: "LazyCat", lan: "Local network", here: "This computer",
-    sub: "Only devices with the LazyCat client reach this address. For other devices to use the box’s LAN IP on port 3999, forward port 3999 to Magpie in LazyCat’s LAN port forwarding app" },
+    sub: "Only devices with the LazyCat client reach this address. For other devices to use the box’s LAN IP on port 3999, forward port 3999 to eipgam in LazyCat’s LAN port forwarding app" },
   zh: { client: "懒猫客户端", head: "懒猫微服", lan: "局域网", here: "本机",
-    sub: "只有装了懒猫客户端的设备能访问这个地址。要让其他设备用微服的局域网 IP 加 3999 端口访问，请在懒猫的「局域网端口转发工具」里把 3999 端口转发到 Magpie" },
+    sub: "只有装了懒猫客户端的设备能访问这个地址。要让其他设备用微服的局域网 IP 加 3999 端口访问，请在懒猫的「局域网端口转发工具」里把 3999 端口转发到 eipgam" },
   "zh-TW": { client: "懶貓用戶端", head: "懶貓微服", lan: "區域網", here: "本機", sub: /區域網 IP 加 3999 連接埠.*「局域網端口轉發工具」/ },
   ja: { client: "LazyCat クライアント", head: "LazyCat", lan: "ローカルネットワーク", here: "このコンピュータ", sub: /LAN IP のポート 3999.*ポート 3999/ },
   de: { client: "LazyCat-Client", head: "LazyCat", lan: "Lokales Netzwerk", here: "Dieser Computer", sub: /LAN-IP der Box auf Port 3999.*Port 3999/ },
@@ -45,7 +45,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", fixture(lang, "light", [], { lan: true, bootGateway: true, publicURL: LC, lazyCat: LC,
             lazyCatBox: box, lanURLs: box ? [BOX, LC] : [LC] }));
-          await page.goto("http://magpie.test/?view=" + view);
+          await page.goto("http://eipgam.test/?view=" + view);
           return { page, errors };
         };
         const fits = async (page) => assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "wider than the window");
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const { page, errors } = await open("gateway", false);
           assert.deepEqual(await list(page), [[w.here, HERE], [w.client, LC]]);
           same((await page.locator("#gatewayLan .gw-url-none").textContent()).trim(), w.sub);
-          assert.match(await side(page), /magpie\.snyht3\.heiyu\.space/);
+          assert.match(await side(page), /eipgam\.snyht3\.heiyu\.space/);
           await fits(page);
           assert.deepEqual(errors, []);
         }

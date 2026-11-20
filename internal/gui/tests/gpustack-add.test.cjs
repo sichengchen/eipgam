@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, saves));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator("#addProvider").click();
           const tile = page.locator("#addSheet .tile", { hasText: /GPUStack/ });
           assert.equal(await tile.count(), 1);

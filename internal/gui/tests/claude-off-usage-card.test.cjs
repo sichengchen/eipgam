@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Kunlin03 on X: a Claude Pro account added in magpie, the Claude Code switch
+// Kunlin03 on X: a Claude Pro account added in eipgam, the Claude Code switch
 // off, said "No allowance reported" on its card. The gateway now answers an
 // account of a switched-off provider with its last reading, or, never read,
 // that it is switched off (login_usage.go); the card says so in the user's
@@ -30,7 +30,7 @@ const serve = (lang, web) => async (route) => {
   if (url.pathname === "/api/groups") return json({ groups: [] });
   if (url.pathname === "/api/plugins") return json({ plugins: [] });
   if (url.pathname === "/api/login/usage") return json({
-    "pro@example.com": { provider: "claude", plan: "Pro", windows: [], error: "not read yet: this subscription is switched off in magpie, so nothing is read for it" },
+    "pro@example.com": { provider: "claude", plan: "Pro", windows: [], error: "not read yet: this subscription is switched off in eipgam, so nothing is read for it" },
   });
   if (url.pathname.startsWith("/api/")) return json({});
   const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
@@ -49,7 +49,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
       const page = await context.newPage();
       await page.route("**/*", serve(lang, false));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude Code" }).first().click();
       const line = page.locator('.editor .accts .acc[data-account-id="pro@example.com"] .aq .aq-none');
       await line.waitFor();

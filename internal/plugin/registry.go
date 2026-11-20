@@ -13,18 +13,18 @@ import (
 
 	toml "github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/source"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/source"
 )
 
 // Where the npm registry in use came from (RegistryInUse.From).
 const (
-	FromMagpie  = "magpie"  // set on the Plugins page or with `magpie plugin registry`
-	FromEnv     = "env"     // magpie's environment: BUN_CONFIG_REGISTRY, NPM_CONFIG_REGISTRY
-	FromShell   = "shell"   // the login shell's, which magpie opened from the Dock doesn't have
+	FromMagpie  = "eipgam"  // set on the Plugins page or with `eipgam plugin registry`
+	FromEnv     = "env"     // eipgam's environment: BUN_CONFIG_REGISTRY, NPM_CONFIG_REGISTRY
+	FromShell   = "shell"   // the login shell's, which eipgam opened from the Dock doesn't have
 	FromBunfig  = "bunfig"  // install.registry in a .bunfig.toml
 	FromNPMRC   = "npmrc"   // registry= in an .npmrc
 	FromDefault = "default" // npm's own
@@ -47,8 +47,8 @@ var registryVars = []string{"BUN_CONFIG_REGISTRY", "NPM_CONFIG_REGISTRY", "npm_c
 // loginEnv is what the login shell said of a variable (a var for tests).
 var loginEnv = proc.LoginEnvKnown
 
-// Registry is the npm registry in use: the one set in magpie, then one the
-// user's own setup names (magpie's environment, the login shell's, a
+// Registry is the npm registry in use: the one set in eipgam, then one the
+// user's own setup names (eipgam's environment, the login shell's, a
 // .bunfig.toml, an .npmrc: a registry of the user's own, which bun reads
 // too), then npm's own (timwangdev on X: plugins from a custom npm
 // registry).
@@ -131,7 +131,7 @@ func CleanRegistry(u string) (string, error) {
 }
 
 // SetRegistry keeps u as the registry plugins use, "" or "default" for
-// none of magpie's own; an address that isn't one is refused, not kept.
+// none of eipgam's own; an address that isn't one is refused, not kept.
 func SetRegistry(u string) (RegistryInUse, error) {
 	if strings.EqualFold(strings.TrimSpace(u), "default") {
 		u = ""
@@ -152,7 +152,7 @@ func SetRegistry(u string) (RegistryInUse, error) {
 }
 
 // registryEnv is the registry bun installs from, given the environment it
-// runs in: the one set in magpie and the login shell's (which env lacks)
+// runs in: the one set in eipgam and the login shell's (which env lacks)
 // are told to it; one env, a bunfig or an .npmrc names bun reads itself.
 func registryEnv(env []string) []string {
 	r := Registry()
@@ -251,7 +251,7 @@ func npmrcs() []npmrc {
 	return out
 }
 
-// npmBase is the registry magpie asks of package name, and the token an
+// npmBase is the registry eipgam asks of package name, and the token an
 // .npmrc keeps for it: a scope's own registry (@scope:registry=) for a
 // package of that scope (bun installs it from there whatever the default
 // registry is); Registry's otherwise. official is whether it is npm's own.
@@ -312,7 +312,7 @@ func fetchRegistry(ctx context.Context, u, token string, limit int64) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "magpie")
+	req.Header.Set("User-Agent", "eipgam")
 	req.Header.Set("Accept", "application/json")
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)

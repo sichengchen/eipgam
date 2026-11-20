@@ -1,11 +1,11 @@
-/magpie
-/magpie.exe
-/magpie.app/
+/eipgam
+/eipgam.exe
+/eipgam.app/
 /dist/
-/magpie-dev
+/eipgam-dev
 /rsrc_windows_*.syso
-/magpie-dev-backend
-/magpie-dev.new
+/eipgam-dev-backend
+/eipgam-dev.new
 /internal/update/launcher-*.com
 /internal/gui/assets.zip
 /.overlay/

@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The Sessions page's search also finds what was said in other agents'
 // sessions (cryingLiu on X): under the list, the sessions of other agents
-// whose conversation says the words, from magpie's index of them
+// whose conversation says the words, from eipgam's index of them
 // (/api/sessions/said), asked again while the sessions are still being
 // listed and while the index is still reading. A hit,
 // there or in the agent's own list, opens the conversation in the sheet at
@@ -89,7 +89,7 @@ async function open(browser, lang, width, gateway = false) {
   page.on("pageerror", (e) => errors.push(e.message));
   const log = { said: [], read: [] };
   await page.route("**/*", serve(lang, log, gateway));
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://eipgam.test/?view=providers");
   await page.locator("#nav").getByRole("button", { name: nav[lang], exact: true }).click();
   const view = page.locator("#view-sessions");
   await view.locator('.row.sm-sess[data-id="p-1"]').waitFor();

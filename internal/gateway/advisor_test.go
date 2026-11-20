@@ -7,7 +7,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // advisorTurn is a Claude Code turn with its advisor on, as Claude Code
@@ -24,12 +24,12 @@ func advisorTurn(model, advisor string) string {
 }
 
 // Claude Code's advisor names its model as Claude Code names its own: on
-// magpie, by magpie's id, which the vendor doesn't know, so the request was
+// eipgam, by eipgam's id, which the vendor doesn't know, so the request was
 // turned away whole and the advisor never ran (JackChou on Discord). The
 // advisor's model now goes as the upstream's own name for it when it is
 // the same provider's Claude model; one the upstream can't run (another
-// provider's, a vendor's model asked) is run by magpie (advisor_serve.go),
-// and one magpie doesn't serve either is left out and the turn still
+// provider's, a vendor's model asked) is run by eipgam (advisor_serve.go),
+// and one eipgam doesn't serve either is left out and the turn still
 // answered.
 func TestAdvisorModelAsTheUpstreamNamesIt(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -56,14 +56,14 @@ func TestAdvisorModelAsTheUpstreamNamesIt(t *testing.T) {
 	}
 	for _, c := range []struct {
 		name, model, advisor, want string // want "" = not sent upstream
-		served                     bool   // run by magpie
+		served                     bool   // run by eipgam
 	}{
 		{"same provider", "relay/claude-sonnet-5-5", "relay/claude-opus-5-5", "claude-opus-5-5", false},
 		{"1M mark", "relay/claude-sonnet-5-5", "relay/claude-opus-5-5[1m]", "claude-opus-5-5", false},
 		{"Claude's own id", "relay/claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-5-5", false},
 		{"another provider", "relay/claude-sonnet-5-5", "other/claude-opus-5-5", "", true},
 		{"a vendor's model", "ds/deepseek-v4.1-flash", "relay/claude-opus-5-5", "", true},
-		{"a model magpie doesn't serve", "ds/deepseek-v4.1-flash", "nobody/claude-opus-5-5", "", false},
+		{"a model eipgam doesn't serve", "ds/deepseek-v4.1-flash", "nobody/claude-opus-5-5", "", false},
 		{"2M mark", "relay/claude-sonnet-5-5", "relay/claude-opus-5-5[2m]", "claude-opus-5-5", false},
 		// Claude Code is given a dotted id with dashes, and names the
 		// advisor so (Refeccd on Discord)
@@ -83,7 +83,7 @@ func TestAdvisorModelAsTheUpstreamNamesIt(t *testing.T) {
 			// offered as the model's own tool, Claude Code's instructions
 			// for it as written
 			if !strings.Contains(b, `"name":"advisor"`) || !strings.Contains(b, "You have access to an `advisor` tool") || strings.Contains(b, advisorGone) {
-				t.Errorf("%s: advisor not offered as magpie's: %s", c.name, b)
+				t.Errorf("%s: advisor not offered as eipgam's: %s", c.name, b)
 			}
 			continue
 		}

@@ -7,7 +7,7 @@ import (
 )
 
 // nb5p on Discord: Codex's picker drew each of Codex's own models by its
-// slug (gpt-6-astra · via magpie · GPT-6-Astra), the only list in magpie
+// slug (gpt-6-astra · via eipgam · GPT-6-Astra), the only list in eipgam
 // that did; every other one is drawn by the model's name. Each is drawn
 // by its name now, and picked as the slug Codex is set to.
 func TestCodexOwnModelsNamedInPicker(t *testing.T) {
@@ -17,7 +17,7 @@ func TestCodexOwnModelsNamedInPicker(t *testing.T) {
 	want := map[string]string{"gpt-6-astra": "GPT-6-Astra", "gpt-6.1-terra": "GPT-6.1 Terra"}
 	for _, c := range []struct{ name, auth string }{
 		{"beside the ChatGPT sign-in", `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`},
-		{"magpie the provider", `{"OPENAI_API_KEY":"sk-x"}`},
+		{"eipgam the provider", `{"OPENAI_API_KEY":"sk-x"}`},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			home, _ := codexHome(t, c.auth, "")

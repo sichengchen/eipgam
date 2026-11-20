@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Plugins › Built-in (Lxxyx on X: "功能太多了"): magpie's built-in plugins
+// Plugins › Built-in (Lxxyx on X: "功能太多了"): eipgam's built-in plugins
 // (internal/pluginrt, plugins/), each with a switch kept in plugins.yml.
 // Off, a plugin's parts leave the window: its page leaves the sidebar and
 // the header's tabs, its sections leave the pages they are on, its rows

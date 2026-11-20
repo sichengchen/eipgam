@@ -21,9 +21,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // shim is a version manager's shim an agent's CLI was found as.
@@ -88,7 +88,7 @@ func miseShim(bin string) *shim {
 		return nil
 	}
 	// mise-shim.exe runs the mise on PATH; the installers' own folders
-	// after it, for a magpie whose PATH lacks it
+	// after it, for a eipgam whose PATH lacks it
 	home, _ := os.UserHomeDir()
 	mgr := lookTool("mise", filepath.Join(home, ".local", "bin", exe("mise")),
 		filepath.Join(appdir.Getenv("LOCALAPPDATA"), "mise", "bin", exe("mise")))

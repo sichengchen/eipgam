@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // appendHarness is a script harness whose Claude Code keeps the file it is
@@ -26,7 +26,7 @@ done`)
 	if tui {
 		claudeTUIRuns = true
 		t.Cleanup(func() { claudeTUIRuns = false })
-		helper := filepath.Join(t.TempDir(), "magpie")
+		helper := filepath.Join(t.TempDir(), "eipgam")
 		testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift

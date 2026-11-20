@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A ChatGPT backend slow to hand over its model list doesn't hold magpie's
+// A ChatGPT backend slow to hand over its model list doesn't hold eipgam's
 // answer past the 5 s Codex waits for it: Codex then kept the list it was
-// built with, none of magpie's models in it (#539). The answer comes in
-// time, with magpie's models and Codex's own from its last list.
+// built with, none of eipgam's models in it (#539). The answer comes in
+// time, with eipgam's models and Codex's own from its last list.
 func TestCodexModelListBackendSlow(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
 	release := make(chan struct{})
@@ -44,7 +44,7 @@ func TestCodexModelListBackendSlow(t *testing.T) {
 	select {
 	case <-done:
 	case <-time.After(3 * time.Second):
-		t.Fatal("magpie's model list waited on the backend past the time Codex gives it")
+		t.Fatal("eipgam's model list waited on the backend past the time Codex gives it")
 	}
 	var list struct {
 		Models []map[string]any `json:"models"`
@@ -60,7 +60,7 @@ func TestCodexModelListBackendSlow(t *testing.T) {
 	}
 }
 
-// One /models request from Codex builds magpie's providers once (#746,
+// One /models request from Codex builds eipgam's providers once (#746,
 // sperwe: seven builds, each reading every agent's sign-in, some 200
 // keychain reads, took 5.3–5.6 s, past the 5 s Codex waits, and Codex kept
 // its own list): the catalog, the codex provider's picks and windows and

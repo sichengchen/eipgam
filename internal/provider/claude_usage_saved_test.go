@@ -38,7 +38,7 @@ func TestRefreshSavedClaudeUsage(t *testing.T) {
 	if before["max@x.com"].Error != errClaudeSaved.Error() {
 		t.Fatalf("unasked saved account: %+v", before["max@x.com"])
 	}
-	// the Usage page opened, `magpie quota`: the user asking, but not for
+	// the Usage page opened, `eipgam quota`: the user asking, but not for
 	// this account, and each saved account would start a Claude Code
 	beforeRuns := runs.Load()
 	AskClaudeUsage()
@@ -204,7 +204,7 @@ func TestRefreshEveryReadsSavedClaude(t *testing.T) {
 }
 
 // Claude Code run in a saved account's directory refreshes the sign-in it
-// keeps there when it is due, spending the old refresh token. magpie keeps
+// keeps there when it is due, spending the old refresh token. eipgam keeps
 // the new one at once, and doesn't hand the account to Claude Code itself
 // while that run may still be refreshing it: Claude Code's own copy would
 // be the spent one.
@@ -293,8 +293,8 @@ func TestSavedClaudeUsageSavesRotatedSignIn(t *testing.T) {
 	t.Fatal("max@x.com isn't saved")
 }
 
-// #5443 (prgrmrwy): the gateway's POST /v1/magpie/quotas/refresh with no
-// card named (another magpie's refresh of this one's card, or an app with
+// #5443 (prgrmrwy): the gateway's POST /v1/eipgam/quotas/refresh with no
+// card named (another eipgam's refresh of this one's card, or an app with
 // a gateway key) reads every card again (ReadAllCards), and a saved,
 // inactive Claude account kept the reading it had: ReadAllCards asked
 // AskUsage alone, which runs no saved account's Claude Code. It is the

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// claudeLook is magpie's next look at Claude Code's sign-in.
+// claudeLook is eipgam's next look at Claude Code's sign-in.
 func claudeLook() {
 	time.Sleep(10 * time.Millisecond)
 	forgetAccountCaches()
@@ -38,7 +38,7 @@ func claudeHolding() map[string]string {
 // switched to it; a Claude Code started on the Pro before writes the Pro's
 // profile after; then a refresh of Usage runs /usage, which renews the
 // sign-in, and Providers showed the Pro first again, its record holding
-// the Max's renewed tokens. Renewed under the profile magpie read at its
+// the Max's renewed tokens. Renewed under the profile eipgam read at its
 // last look, the sign-in is the Max's still.
 func TestClaudeMadeFirstStaysFirstWhenRenewedUnderAnothersProfile(t *testing.T) {
 	prof, creds := claudeThree(t)

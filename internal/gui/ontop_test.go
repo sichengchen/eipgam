@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // pinHost is the app's host as the pin sees it: a window that can be
@@ -90,14 +90,14 @@ func bootOf(t *testing.T, h http.Handler) map[string]any {
 	return out
 }
 
-// A browser's page (magpie web, or the app's page served to a browser)
+// A browser's page (eipgam web, or the app's page served to a browser)
 // has no window of its own to pin, and a Wayland session can't keep one
 // on top: the pin is refused there and nothing is saved.
 func TestPinRefusedWithoutAWindowToPin(t *testing.T) {
 	sandboxHome(t)
 	var told []bool
 	for name, w := range map[string]Windows{
-		"magpie web":     webHost{},
+		"eipgam web":     webHost{},
 		"no pin to make": folderOnly{},
 		"browser tab":    tabPinHost{pinHost{on: &told}},
 	} {

@@ -16,7 +16,7 @@ import (
 // meanwhile. An agent's instructions change mid-session only then, so the
 // prompt caches built on them aren't thrown away at every save.
 //
-// Its text goes to every agent's model vendor: it names neither magpie nor
+// Its text goes to every agent's model vendor: it names neither eipgam nor
 // any vendor, only the memories and how to read them.
 
 // Budgets, in characters, of the global part and of each project's.

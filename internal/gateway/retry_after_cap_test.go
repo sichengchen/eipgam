@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // burnBoth rests both keys the way a plan's day running out does: the
@@ -80,7 +80,7 @@ func capRetryAfterOn(t *testing.T, secs int) {
 }
 
 // The cap bounds only what the agent is told: the accounts rest the
-// plan's whole horizon inside magpie, and are not asked again sooner.
+// plan's whole horizon inside eipgam, and are not asked again sooner.
 func TestRetryAfterCapLeavesTheRestWhole(t *testing.T) {
 	burnBoth(t, 5, func() { capRetryAfterOn(t, 60) })
 	restingUntil.Lock()
@@ -98,7 +98,7 @@ func TestRetryAfterCapLeavesTheRestWhole(t *testing.T) {
 
 // A vendor's own Retry-After, passed on with its 429 (keepRetry), is
 // bounded the same way: Antigravity's quota runs out with a reset hours
-// away, said by the vendor rather than by magpie's rest.
+// away, said by the vendor rather than by eipgam's rest.
 func TestRetryAfterCapBoundsTheVendorsOwn(t *testing.T) {
 	for _, tc := range []struct {
 		name       string

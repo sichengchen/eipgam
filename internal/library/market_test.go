@@ -28,12 +28,12 @@ func TestFromRegistry(t *testing.T) {
 		"remotes": [
 			{"type": "sse", "url": "https://acme.dev/sse"},
 			{"type": "streamable-http", "url": "https://acme.dev/mcp", "headers": [
-				{"name": "X-Client", "value": "magpie"},
+				{"name": "X-Client", "value": "eipgam"},
 				{"name": "Authorization", "value": "Bearer {token}", "isRequired": true, "isSecret": true}
 			]}
 		]}`))
 	if !ok || m.Name != "weather" || m.Title != "weather" || m.Publisher != "acme" || m.Homepage != "https://github.com/acme/weather" ||
-		m.Icon != gh("acme") || m.Transport != "http" || m.server.URL != "https://acme.dev/mcp" || m.server.Headers["X-Client"] != "magpie" {
+		m.Icon != gh("acme") || m.Transport != "http" || m.server.URL != "https://acme.dev/mcp" || m.server.Headers["X-Client"] != "eipgam" {
 		t.Fatalf("remote: %+v %v", m, ok)
 	}
 	if len(m.Inputs) != 1 || m.Inputs[0].Key != "Authorization" || m.Inputs[0].format != "Bearer {}" || !m.Inputs[0].Secret {
@@ -68,7 +68,7 @@ func TestFromRegistry(t *testing.T) {
 		t.Fatalf("oci: %+v %v", m, ok)
 	}
 
-	// what magpie can't start: a URL with a variable in it, a package over
+	// what eipgam can't start: a URL with a variable in it, a package over
 	// another transport, a named argument it would have to make up
 	for _, s := range []string{
 		`{"name": "a/b", "remotes": [{"type": "streamable-http", "url": "https://{tenant}.acme.dev/mcp"}]}`,
@@ -154,7 +154,7 @@ func TestIcons(t *testing.T) {
 func TestOffered(t *testing.T) {
 	sandbox(t)
 	for u, want := range map[string]bool{
-		featured[0].Icon:                          true,
+		featured[0].Icon:                          false, // served as a bundled asset
 		gh("someone"):                             true,
 		"https://github.com/a/b.png?size=96":      false, // not an owner's
 		"http://github.com/someone.png?size=96":   false,
@@ -221,7 +221,7 @@ func TestSkillsShPages(t *testing.T) {
 	}
 }
 
-// magpie's own skills come first, marked official, and only where a
+// eipgam's own skills come first, marked official, and only where a
 // search names them (ttmouse on X).
 func TestFeaturedSkills(t *testing.T) {
 	sandbox(t)
@@ -233,26 +233,26 @@ func TestFeaturedSkills(t *testing.T) {
 	t.Cleanup(func() { popular.Lock(); popular.list = nil; popular.Unlock() })
 
 	list, _ := MarketSkills("")
-	if len(list) != 4 || list[0].ID != "magpie-community/plugins/magpie-setup" || list[1].ID != "magpie-community/plugins/magpie-quota" || list[2].ID != "magpie-community/plugins/magpie-sessions" || list[3].ID != "o/r/pdf" {
+	if len(list) != 4 || list[0].ID != "sichengchen/eipgam/eipgam-setup" || list[1].ID != "sichengchen/eipgam/eipgam-quota" || list[2].ID != "sichengchen/eipgam/eipgam-sessions" || list[3].ID != "o/r/pdf" {
 		t.Fatalf("market: %+v", list)
 	}
 	for _, m := range list[:3] {
-		if !m.Official || !m.Featured || m.Description == "" || m.Icon != gh("magpie-community") || !offered(m.Icon) {
-			t.Fatalf("magpie's own: %+v", m)
+		if !m.Official || !m.Featured || m.Description == "" || m.Icon != gh("sichengchen") || !offered(m.Icon) {
+			t.Fatalf("eipgam's own: %+v", m)
 		}
 	}
-	if list, _ := MarketSkills("quota"); len(list) == 0 || list[0].SkillID != "magpie-quota" || slices.ContainsFunc(list, func(m MarketSkill) bool { return m.SkillID == "magpie-setup" }) {
+	if list, _ := MarketSkills("quota"); len(list) == 0 || list[0].SkillID != "eipgam-quota" || slices.ContainsFunc(list, func(m MarketSkill) bool { return m.SkillID == "eipgam-setup" }) {
 		t.Fatalf("quota: %+v", list)
 	}
 	// yansheng1003 on X: an agent searches every agent's sessions
 	for _, q := range []string{"sessions", "conversation"} {
-		if list, _ := MarketSkills(q); len(list) == 0 || list[0].SkillID != "magpie-sessions" {
+		if list, _ := MarketSkills(q); len(list) == 0 || list[0].SkillID != "eipgam-sessions" {
 			t.Fatalf("%s: %+v", q, list)
 		}
 	}
-	// Leyuu_5 on X: an agent sets magpie up; found by what a user searches
+	// Leyuu_5 on X: an agent sets eipgam up; found by what a user searches
 	for _, q := range []string{"setup", "routing", "gateway key"} {
-		if list, _ := MarketSkills(q); len(list) == 0 || list[0].SkillID != "magpie-setup" {
+		if list, _ := MarketSkills(q); len(list) == 0 || list[0].SkillID != "eipgam-setup" {
 			t.Fatalf("%s: %+v", q, list)
 		}
 	}
@@ -308,7 +308,7 @@ func TestInstallFromRegistry(t *testing.T) {
 	if s.Name != "acme" || s.URL != "https://acme.dev/mcp" || s.Headers["Authorization"] != "Bearer k-123" || !slices.Equal(s.Agents, []string{"claude"}) {
 		t.Fatalf("server: %+v", s)
 	}
-	// its icon stays with it, and stays one magpie will fetch, once the
+	// its icon stays with it, and stays one eipgam will fetch, once the
 	// market has forgotten it
 	seenServers.Lock()
 	clear(seenServers.m)
@@ -327,31 +327,31 @@ func TestInstallFromRegistry(t *testing.T) {
 
 func TestMagpieImageIsOptIn(t *testing.T) {
 	sandbox(t)
-	ok(t)(InstallServer("magpie-image", nil, nil))
+	ok(t)(InstallServer("eipgam-image", nil, nil))
 	list, err := MarketServers("")
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == "magpie-image" })
-	if i < 0 || !list[i].OptIn || list[i].Have != "magpie-image" {
+	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == "eipgam-image" })
+	if i < 0 || !list[i].OptIn || list[i].Have != "eipgam-image" {
 		t.Fatalf("market: %+v", list)
 	}
 	l, err := load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := l.server("magpie-image")
+	s := l.server("eipgam-image")
 	if s == nil || len(s.Agents) != 0 || !filepath.IsAbs(s.Command) || strings.Join(s.Args, " ") != "mcp image" {
 		t.Fatalf("added as %+v", s)
 	}
 }
 
-// Magpie Image's card doesn't say videos need a Grok subscription: the
-// gateway also makes them with Seedance, another magpie and a provider whose
+// eipgam Image's card doesn't say videos need a Grok subscription: the
+// gateway also makes them with Seedance, another eipgam and a provider whose
 // model list marks video models (#1399).
 func TestMagpieImageSaysVideoModels(t *testing.T) {
 	d := selfServer().Description
-	if strings.Contains(d, "Grok subscription") || !strings.Contains(d, "video model set up in Magpie") {
+	if strings.Contains(d, "Grok subscription") || !strings.Contains(d, "video model set up in eipgam") {
 		t.Fatalf("description %q", d)
 	}
 }
@@ -377,7 +377,7 @@ func TestMarketSkillHadByName(t *testing.T) {
 	}
 }
 
-// Magpie Browser is magpie's own too, `magpie mcp browser`, given only to
+// eipgam Browser is eipgam's own too, `eipgam mcp browser`, given only to
 // the agents picked for it: it acts as the user wherever they're signed in.
 func TestMagpieBrowserIsOptIn(t *testing.T) {
 	sandbox(t)
@@ -403,7 +403,7 @@ func TestMagpieBrowserIsOptIn(t *testing.T) {
 	}
 }
 
-// Magpie Web Search is magpie's own too, `magpie mcp search` (lutra_fs on
+// eipgam Web Search is eipgam's own too, `eipgam mcp search` (lutra_fs on
 // Discord: Settings named the search MCP, the Library didn't have it),
 // given only to the agents picked for it: a search costs what the search
 // set in Settings charges.
@@ -415,7 +415,7 @@ func TestMagpieWebSearchIsOptIn(t *testing.T) {
 		t.Fatal(err)
 	}
 	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == searchServerName })
-	if i < 0 || !list[i].OptIn || list[i].Have != searchServerName || list[i].Title != "Magpie Web Search" {
+	if i < 0 || !list[i].OptIn || list[i].Have != searchServerName || list[i].Title != "eipgam Web Search" {
 		t.Fatalf("market: %+v", list)
 	}
 	l, err := load()
@@ -429,14 +429,14 @@ func TestMagpieWebSearchIsOptIn(t *testing.T) {
 	if v, ok := valueOf((&mcpFile{Format: fmtCodex}).encode(s), "tool_timeout_sec"); !ok || v != 120 {
 		t.Fatalf("Codex's entry: tool_timeout_sec = %v %v", v, ok)
 	}
-	// written by hand with another magpie binary, it is the same server
-	other := Server{Name: "web", Transport: "stdio", Command: "/opt/other/magpie", Args: []string{"mcp", "search"}}
+	// written by hand with another eipgam binary, it is the same server
+	other := Server{Name: "web", Transport: "stdio", Command: "/opt/other/eipgam", Args: []string{"mcp", "search"}}
 	if serverKey(&other) != serverKey(s) {
 		t.Fatalf("keys %q and %q", serverKey(&other), serverKey(s))
 	}
 }
 
-// Magpie Image Recognition is in Discover beside Magpie Image and Magpie
+// eipgam Image Recognition is in Discover beside eipgam Image and eipgam
 // Web Search, added for no agent until the user picks them, with time to
 // look (matrix0487 on Discord); any binary's `mcp vision` is the same
 // server.
@@ -457,7 +457,7 @@ func TestMagpieImageRecognitionIsOptIn(t *testing.T) {
 		t.Fatal(err)
 	}
 	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == visionServerName })
-	if i < 0 || list[i].Have != visionServerName || list[i].Title != "Magpie Image Recognition" {
+	if i < 0 || list[i].Have != visionServerName || list[i].Title != "eipgam Image Recognition" {
 		t.Fatalf("market: %+v", list)
 	}
 	l, err := load()
@@ -471,7 +471,7 @@ func TestMagpieImageRecognitionIsOptIn(t *testing.T) {
 	if v, ok := valueOf((&mcpFile{Format: fmtCodex}).encode(s), "tool_timeout_sec"); !ok || v != 120 {
 		t.Fatalf("Codex's entry: tool_timeout_sec = %v %v", v, ok)
 	}
-	other := Server{Name: "eyes", Transport: "stdio", Command: "/opt/other/magpie", Args: []string{"mcp", "vision"}}
+	other := Server{Name: "eyes", Transport: "stdio", Command: "/opt/other/eipgam", Args: []string{"mcp", "vision"}}
 	if serverKey(&other) != serverKey(s) {
 		t.Fatalf("keys %q and %q", serverKey(&other), serverKey(s))
 	}
@@ -480,7 +480,7 @@ func TestMagpieImageRecognitionIsOptIn(t *testing.T) {
 	}
 }
 
-// Magpie Memory is offered beside magpie's other servers and, being there
+// eipgam Memory is offered beside eipgam's other servers and, being there
 // to be shared, is given to every agent that can take it when added; a
 // copy at another path is the same server.
 func TestMemoryServerInDiscover(t *testing.T) {
@@ -501,13 +501,13 @@ func TestMemoryServerInDiscover(t *testing.T) {
 	if s == nil || len(s.Agents) == 0 || !filepath.IsAbs(s.Command) || strings.Join(s.Args, " ") != "mcp memory" {
 		t.Fatalf("added as %+v", s)
 	}
-	other := Server{Name: "mem", Transport: "stdio", Command: "/opt/other/magpie", Args: []string{"mcp", "memory"}}
+	other := Server{Name: "mem", Transport: "stdio", Command: "/opt/other/eipgam", Args: []string{"mcp", "memory"}}
 	if serverKey(&other) != serverKey(s) {
 		t.Fatalf("keys %q and %q", serverKey(&other), serverKey(s))
 	}
 }
 
-// Magpie Sessions is offered beside magpie's other servers but, since an
+// eipgam Sessions is offered beside eipgam's other servers but, since an
 // agent given it reads the user's other conversations, only to the agents
 // picked for it; it acts as this computer's user, and a copy at another
 // path is the same server.
@@ -532,7 +532,7 @@ func TestSessionsServerInDiscover(t *testing.T) {
 	if !hereOnly(s) {
 		t.Fatal("the sessions server is offered to other computers")
 	}
-	other := Server{Name: "said", Transport: "stdio", Command: "/opt/other/magpie", Args: []string{"mcp", "sessions"}}
+	other := Server{Name: "said", Transport: "stdio", Command: "/opt/other/eipgam", Args: []string{"mcp", "sessions"}}
 	if serverKey(&other) != serverKey(s) {
 		t.Fatalf("keys %q and %q", serverKey(&other), serverKey(s))
 	}

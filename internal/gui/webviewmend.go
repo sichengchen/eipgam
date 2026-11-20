@@ -11,10 +11,10 @@ import (
 // white but for its title bar, a sliver at the left edge and the status
 // bar, with nothing in the log, and closing it to the tray and opening it
 // again brought it back. Closing and opening hides the WebView2 controller
-// and shows it again, which has it draw its surface anew. magpie now does
+// and shows it again, which has it draw its surface anew. eipgam now does
 // what each failure needs (webViewMendFor) and logs it.
 
-// webViewMend is what magpie does for a failed WebView2 process.
+// webViewMend is what eipgam does for a failed WebView2 process.
 type webViewMend int
 
 const (

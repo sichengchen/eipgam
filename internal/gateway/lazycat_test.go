@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// lazyCatNet holds what a LazyCat box's network looks like to magpie for a
+// lazyCatNet holds what a LazyCat box's network looks like to eipgam for a
 // test: the interfaces' names, their addresses, the route table and
 // host.lzcapp's answer; nothing is looked up.
 func lazyCatNet(t *testing.T, names []string, addrs map[string][]string, table string, lzc ...string) {
@@ -45,19 +45,19 @@ const (
 	bridgeRoutes = "Iface\tDestination\tGateway\tFlags\neth0\t00000000\t41031CAC\t0003\neth0\t00001CAC\t00000000\t0001\n"
 )
 
-// mtoolstec on X: magpie in a LazyCat app offered the app's domain, which
+// mtoolstec on X: eipgam in a LazyCat app offered the app's domain, which
 // only devices with LazyCat's client reach, and the box's bridge
 // (172.28.3.65), which nothing off the box reaches; other devices on the
 // home network wanted http://192.168.0.100:3425/v1. On the box's network
 // (network_mode: host) the box's LAN address is offered first, then the
-// domain; a MAGPIE_PUBLIC_URL of the user's own stays first. On a bridge
+// domain; a EIPGAM_PUBLIC_URL of the user's own stays first. On a bridge
 // network the box's address can't be known: the domain alone, and no
 // bridge address for other containers.
 func TestLazyCatOffersTheBoxAddress(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3425")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("LAZYCAT_APP_DOMAIN", "magpie.snyht3.heiyu.space")
-	const lc = "https://magpie.snyht3.heiyu.space"
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3425")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("LAZYCAT_APP_DOMAIN", "eipgam.snyht3.heiyu.space")
+	const lc = "https://eipgam.snyht3.heiyu.space"
 	box := Scheme() + "://192.168.0.100:3425"
 
 	// host network: the box's interfaces, docker-style bridges among them
@@ -89,22 +89,22 @@ func TestLazyCatOffersTheBoxAddress(t *testing.T) {
 		t.Errorf("host.lzcapp on the LAN link: %v, want %v", got, want)
 	}
 	// the user's own address first
-	t.Setenv("MAGPIE_PUBLIC_URL", "https://ai.example.com")
+	t.Setenv("EIPGAM_PUBLIC_URL", "https://ai.example.com")
 	if got, want := LANURLs(), []string{"https://ai.example.com", box, lc}; !slices.Equal(got, want) {
-		t.Errorf("MAGPIE_PUBLIC_URL: %v, want %v", got, want)
+		t.Errorf("EIPGAM_PUBLIC_URL: %v, want %v", got, want)
 	}
-	// the package's MAGPIE_PUBLIC_URL, the domain, is said once
-	t.Setenv("MAGPIE_PUBLIC_URL", lc+"/")
+	// the package's EIPGAM_PUBLIC_URL, the domain, is said once
+	t.Setenv("EIPGAM_PUBLIC_URL", lc+"/")
 	if got, want := LANURLs(), []string{box, lc}; !slices.Equal(got, want) {
-		t.Errorf("MAGPIE_PUBLIC_URL the domain: %v, want %v", got, want)
+		t.Errorf("EIPGAM_PUBLIC_URL the domain: %v, want %v", got, want)
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	// MAGPIE_ADDR pinned to one address: that one alone is served
-	t.Setenv("MAGPIE_ADDR", "192.168.0.100:3425")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	// EIPGAM_ADDR pinned to one address: that one alone is served
+	t.Setenv("EIPGAM_ADDR", "192.168.0.100:3425")
 	if got, want := LANURLs(), []string{lc}; !slices.Equal(got, want) {
 		t.Errorf("pinned: %v, want %v", got, want)
 	}
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3425")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3425")
 
 	// bridge network: the container's eth0 alone, host.lzcapp the bridge's
 	lazyCatNet(t, []string{"lo", "eth0"}, map[string][]string{

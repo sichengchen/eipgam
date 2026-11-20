@@ -21,7 +21,7 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/hpack"
 
-	"github.com/yetone/magpie/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/netproxy"
 )
 
 // pingPolicyVendor is an HTTP/2 vendor that answers each request after a

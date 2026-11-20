@@ -62,7 +62,7 @@ func v4Fallback(t *http.Transport) {
 	}
 	t.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		if network == "tcp" && !v4Since(addr).IsZero() {
-			// An IPv6-only host (a remote magpie with no A record, or
+			// An IPv6-only host (a remote eipgam with no A record, or
 			// an IPv6 address typed in) has nothing to answer over
 			// IPv4: that dial failing clears the mark and goes on over
 			// tcp, so IPv6 is tried again at once, not in 30 minutes
@@ -112,7 +112,7 @@ type v6Conn struct {
 	addr string
 	mu   sync.Mutex
 	read bool // a byte came back
-	shut bool // closed on magpie's side
+	shut bool // closed on eipgam's side
 }
 
 func (c *v6Conn) Read(b []byte) (int, error) {
@@ -144,7 +144,7 @@ func (c *v6Conn) seen(n int, err error) {
 		c.read = true
 		return
 	}
-	// a timeout, or a close of magpie's own, says nothing of the path
+	// a timeout, or a close of eipgam's own, says nothing of the path
 	if err == nil || c.shut || errors.Is(err, net.ErrClosed) || errors.Is(err, os.ErrDeadlineExceeded) {
 		return
 	}

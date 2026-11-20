@@ -13,7 +13,7 @@ import (
 // of what a poll allocates, and so of its garbage collection). A pass
 // that lists the files as the last one did gives that list back instead,
 // and allocates nothing for it. The list is held only as long as
-// something else holds it or no collection has run since: a magpie with
+// something else holds it or no collection has run since: a eipgam with
 // the page shut keeps none of it.
 type filesKept struct {
 	sync.Mutex

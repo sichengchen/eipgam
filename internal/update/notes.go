@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Note is one release's notes, as the app shows them after an update.
@@ -25,19 +25,12 @@ type Note struct {
 	Pending bool `json:"pending,omitempty"`
 }
 
-// NotesFeed is where the notes of past releases are listed: beside the
-// update feed, on magpie's site. MAGPIE_NOTES_FEED points it elsewhere.
-func NotesFeed() string {
-	if f := os.Getenv("MAGPIE_NOTES_FEED"); f != "" {
-		return f
-	}
-	return Site + "/api/notes"
-}
+// NotesFeed is an explicit notes feed for development and testing.
+func NotesFeed() string { return os.Getenv("EIPGAM_NOTES_FEED") }
 
-// ReleasePage is version's page on GitHub, where its notes are when the
-// site can't give them (#661).
+// ReleasePage is version's page on the eipgam repository.
 func ReleasePage(version string) string {
-	return "https://github.com/yetone/magpie-releases/releases/tag/v" + strings.TrimPrefix(strings.TrimSpace(version), "v")
+	return Repository + "/releases/tag/v" + strings.TrimPrefix(strings.TrimSpace(version), "v")
 }
 
 // NotesBetween asks the site for the notes of every release after after
@@ -82,6 +75,9 @@ func NotesBack(ctx context.Context, upto string, n int, lang string) ([]Note, er
 
 // askNotes is the site's list for q, each release's notes in lang.
 func askNotes(ctx context.Context, q url.Values, lang string) ([]Note, error) {
+	if NotesFeed() == "" {
+		return githubNotes(ctx, q.Get("after"), q.Get("upto"))
+	}
 	if lang != "" {
 		q.Set("lang", lang)
 	}
@@ -145,7 +141,7 @@ func withLang(feed, lang string) string {
 	return u.String()
 }
 
-// MaxNotes is how many releases' notes are shown at most: magpie releases
+// MaxNotes is how many releases' notes are shown at most: eipgam releases
 // often, and a long-unopened one would have pages of them.
 const MaxNotes = 40
 
@@ -163,16 +159,7 @@ func MostNotes() int {
 	return MaxNotes
 }
 
-// Channel is Settings' Update channel: settings.UpdateStable, the update
-// feed asked for a version a week, the newest that had been out three days
-// as the week began (Monday 00:00 UTC); settings.UpdateDaily, a version a
-// day, the newest out by 20:00 UTC that passed its tests (the Test run on
-// its commit) and has every file; either one with an urgent release (a
-// security hole, a ban risk, lost data) as soon as it is out. "" is every
-// version, and so is a value magpie doesn't know. usemagpie.ai chooses
-// both from the release list (site/worker.js, "The Stable channel" and
-// "The Daily channel"); a release is urgent when a line of its notes
-// starts with "**Urgent release:**".
+// Channel is Settings' release cadence. An empty value follows each release.
 func Channel() string {
 	switch c := settings.Shared().UpdateChannel; c {
 	case settings.UpdateStable, settings.UpdateDaily:
@@ -182,7 +169,7 @@ func Channel() string {
 }
 
 // Picked is whether the update feed picks the version (Stable or Daily)
-// rather than offering every one: only the site knows a picked release.
+// rather than offering every one.
 func Picked() bool { return Channel() != "" }
 
 // Stable is whether Settings' Update channel is Stable.
@@ -284,7 +271,7 @@ var heading = lazyre.New(`^(#{1,6})\s+(.*?)\s*#*\s*$`)
 var installHeadings = []string{"Install", "安装", "安裝", "インストール"}
 
 // StripInstall takes a release's "Install" section (in any language) out of
-// its notes: the download links, which mean nothing to a magpie that just
+// its notes: the download links, which mean nothing to a eipgam that just
 // updated itself.
 // The section runs to the next heading of its level or above.
 func StripInstall(md string) string {
@@ -307,11 +294,11 @@ func StripInstall(md string) string {
 	return strings.TrimSpace(strings.Join(out, "\n"))
 }
 
-// ShowNotes decides, as magpie starts on current having last run as last
+// ShowNotes decides, as eipgam starts on current having last run as last
 // ("" when it never said), whether to show what changed since, and from
 // which version on (exclusive). Only an upgrade between releases shows:
 // not a fresh install, the same version again, a downgrade, or a build
-// from source. A magpie from before versions were kept has no last; when
+// from source. A eipgam from before versions were kept has no last; when
 // it was already in use (existed) its own version's notes are shown, from
 // "", which Between takes as upto's alone.
 func ShowNotes(last, current string, existed bool) (after string, show bool) {

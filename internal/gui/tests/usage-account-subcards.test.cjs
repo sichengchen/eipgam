@@ -27,7 +27,7 @@ const w = (name, used, h) => ({ name, used, resetsAt: at(h) });
 const model = (name, family, pool, used, h) => ({ name, family, ...(pool ? { pool } : {}), used, resetsAt: at(h) });
 const pool = (p, name, used, h) => ({ name, pool: p, used, resetsAt: at(h) });
 const AG = { provider: "antigravity", name: "Antigravity", icon: "antigravity-color", plan: "Google AI Pro" };
-// as magpie reports them: one account whose quota summary was read (its
+// as eipgam reports them: one account whose quota summary was read (its
 // models draw on pools, each pool's own windows beside them), two whose
 // summary wasn't (their models' own windows, by family)
 const pooled = { ...AG, user: "pooled@example.com", windows: [
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.waitForSelector('#subscriptionUsage .subscription-card[data-provider="antigravity"] .subscription-acct');
 
         // --- cards: an account a box of its own

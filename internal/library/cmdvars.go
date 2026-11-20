@@ -4,14 +4,14 @@ package library
 // Discord): $HOME/bin/x in the library is one value on a Mac (/Users) and
 // on Linux (/home). The library keeps $NAME, ${NAME} and a leading ~ as
 // the user wrote them; each agent is given them as it can read them, and
-// magpie puts them in itself where it starts the server.
+// eipgam puts them in itself where it starts the server.
 //
 // An agent that expands ${NAME} in a command and its args as it starts it
 // (cmdRefs) is given the reference in its own syntax, $NAME written
 // ${NAME}, so it reads the variable from its own environment. Every other
-// agent starts the command as written, with no shell, so magpie puts the
+// agent starts the command as written, with no shell, so eipgam puts the
 // values in as it writes the entry: HOME is the agent's home, the rest
-// what magpie's environment or a terminal has. A ~ is put in for every
+// what eipgam's environment or a terminal has. A ~ is put in for every
 // agent: none of them reads one. A variable nothing has is left as
 // written.
 //
@@ -33,15 +33,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
 // cmdVar is a variable in a command or an arg: ${NAME}, $NAME, or
 // %NAME% as cmd.exe writes one (ProgramFiles(x86) has parentheses).
 var cmdVar = lazyre.New(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)|%([A-Za-z_][A-Za-z0-9_()]*)%`)
 
-// cmdOS is the system magpie and the agents it writes for (WSL's aside)
+// cmdOS is the system eipgam and the agents it writes for (WSL's aside)
 // run on; a var for tests.
 var cmdOS = runtime.GOOS
 
@@ -147,7 +147,7 @@ func (f *mcpFile) withCmdVars(s *Server) *Server {
 	}
 	look := lookCmdVar
 	if f.WSL {
-		// the distro's variables aren't magpie's: only its HOME is known
+		// the distro's variables aren't eipgam's: only its HOME is known
 		look = func(string) (string, bool) { return "", false }
 	}
 	win := cmdOS == "windows" && !f.WSL
@@ -218,7 +218,7 @@ func expandCmd(v, home string, win bool, look func(string) (string, bool)) strin
 	})
 }
 
-// lookCmdVar is a variable as magpie's environment has it, else as a
+// lookCmdVar is a variable as eipgam's environment has it, else as a
 // terminal's does (loginVars).
 func lookCmdVar(n string) (string, bool) {
 	if x, ok := os.LookupEnv(n); ok {
@@ -228,7 +228,7 @@ func lookCmdVar(n string) (string, bool) {
 	return x, ok
 }
 
-// launchCmd is s's command and args as magpie starts it on this machine,
+// launchCmd is s's command and args as eipgam starts it on this machine,
 // or in distro (whose HOME is distroHome's), and its environment's home
 // (homeEnv): each ~ and variable put in.
 func launchCmd(s *Server, distro string) (string, []string, map[string]string) {

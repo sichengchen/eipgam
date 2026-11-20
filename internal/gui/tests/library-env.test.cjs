@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // paopao_baobao on X: Variables, the Library's tab for environment
 // variables. One is kept once and given to agents with the chips every other
-// tab has; an agent magpie can't write one for has its chip greyed, saying
+// tab has; an agent eipgam can't write one for has its chip greyed, saying
 // why, and a click on it posts nothing. A row's chip posts env/agents; Add
 // opens the editor and Save posts env/save; a row's Remove asks first and
 // posts env/remove. At 440px wide in en, zh, zh-TW, ja and de: no sideways
@@ -19,10 +19,10 @@ const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skill
 const ENV_AGENTS = [
   { id: "claude", file: `${HOME}/.claude/settings.json` },
   { id: "codex", file: `${HOME}/.codex/config.toml` },
-  { id: "cursor", no: "Cursor has no environment settings magpie can write" },
+  { id: "cursor", no: "Cursor has no environment settings eipgam can write" },
 ];
 const lib = (env) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("cursor", "Cursor")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills: [], problems: [],
   env, envAgents: ENV_AGENTS,
@@ -59,7 +59,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -88,14 +88,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const state = { env: [{ name: "HTTPS_PROXY", value: "http://127.0.0.1:7890", agents: ["codex"] }] };
         const posts = [], errors = [];
         const ctx = await browser.newContext({ viewport: { width: 440, height: 1000 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "env"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "env"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         await v.locator(".lib-env").first().waitFor();
@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // Cursor's chip is greyed, says why, and a click posts nothing
         const cur = row("HTTPS_PROXY").locator('.lib-ag[data-agent="cursor"]');
         assert.equal(await cur.getAttribute("aria-disabled"), "true");
-        assert.equal(await cur.getAttribute("title"), w("{agent} has no environment settings magpie can write", { agent: "Cursor" }));
+        assert.equal(await cur.getAttribute("title"), w("{agent} has no environment settings eipgam can write", { agent: "Cursor" }));
         await cur.click({ force: true });
         await page.waitForTimeout(150);
         assert.equal(posts.length, 0);

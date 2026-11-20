@@ -12,56 +12,56 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
-// A Remote magpie's list is followed (KaCli on Discord): the magpie
-// serving the gateway here waits at the other magpie's list for it to
+// A Remote eipgam's list is followed (KaCli on Discord): the eipgam
+// serving the gateway here waits at the other eipgam's list for it to
 // change (ListWaitHeader), and fetches it again the moment it has, through
 // the same RefetchTaking as KeepListsFresh, so the agents' configs written
 // from it (catalog.Touched, then their Sync) follow a route, group or
 // provider changed there within seconds rather than on the next
-// RemoteMagpieEvery. The schedule stays, for a magpie from before that
+// RemoteMagpieEvery. The schedule stays, for a eipgam from before that
 // doesn't wait (it answers its list at once, with no ETag), which is then
-// asked to wait again only after followOldAgain. A Remote magpie whose
+// asked to wait again only after followOldAgain. A Remote eipgam whose
 // user set its list to be fetched only when asked ("off") is not
 // followed either.
 
-// ListWaitHeader asks a magpie's model list to be answered once it is
+// ListWaitHeader asks a eipgam's model list to be answered once it is
 // other than the one If-None-Match names, waiting up to the seconds it
 // says; at the end of the wait, 304 says it is the same.
 const ListWaitHeader = "X-Magpie-List-Wait"
 
-// listWaitAsk is how many seconds a follower asks the other magpie to
+// listWaitAsk is how many seconds a follower asks the other eipgam to
 // wait, which holds it under a minute (the gateway's listWaitMost).
 const listWaitAsk = 50
 
-// follow paces: the shortest time between two asks of one magpie, the
+// follow paces: the shortest time between two asks of one eipgam, the
 // first wait after a failure (doubled to followFailMost), and how long
-// a magpie that doesn't wait is left to the schedule alone.
+// a eipgam that doesn't wait is left to the schedule alone.
 var (
 	followGap      = time.Second
 	followFailWait = 5 * time.Second
 	followFailMost = 5 * time.Minute
 	followOldAgain = time.Hour
 	// followLook is how often the providers followed are looked at again
-	// with no write of magpie's to say they changed
+	// with no write of eipgam's to say they changed
 	followLook = time.Minute
 	// followQuick: a 304 sooner than this that doesn't say it waited
-	// (ListWaitHeader) is from a magpie that didn't wait
+	// (ListWaitHeader) is from a eipgam that didn't wait
 	followQuick = 5 * time.Second
 )
 
-// errListNotWaited is a magpie that answered the list at once, with no
+// errListNotWaited is a eipgam that answered the list at once, with no
 // ETag: one from before ListWaitHeader. Or one whose 304 came at once and
-// doesn't say it waited: a magpie that tags every list, reached through a
+// doesn't say it waited: a eipgam that tags every list, reached through a
 // proxy that dropped ListWaitHeader, which asked again would be asked
 // each followGap.
-var errListNotWaited = errors.New("its magpie doesn't wait for its list to change; fetched on its schedule")
+var errListNotWaited = errors.New("its eipgam doesn't wait for its list to change; fetched on its schedule")
 
-// KeepRemoteListsFollowed follows the list of each Remote magpie the user
-// has, while ctx lasts: run by the magpie serving the gateway, beside
+// KeepRemoteListsFollowed follows the list of each Remote eipgam the user
+// has, while ctx lasts: run by the eipgam serving the gateway, beside
 // KeepListsFresh.
 func KeepRemoteListsFollowed(ctx context.Context) {
 	type follower struct {
@@ -113,13 +113,13 @@ func KeepRemoteListsFollowed(ctx context.Context) {
 }
 
 // followedMagpies are the Remote magpies whose lists are followed: on,
-// listing, not this magpie itself, with a schedule (their user's, or
+// listing, not this eipgam itself, with a schedule (their user's, or
 // RemoteMagpieEvery when none is set).
 //
 // Read from the parse kept until providers.json changes (storedFile), and
 // only a provider with an Anthropic address normalized: this runs every
 // minute, and parsing the whole file again each time was most of what an
-// idle magpie allocated for providers.
+// idle eipgam allocated for providers.
 func followedMagpies() []Provider {
 	var out []Provider
 	for _, p := range storedFile().Providers {
@@ -148,7 +148,7 @@ var followed = struct {
 	n map[string]int
 }{n: map[string]int{}}
 
-// followList waits at the Remote magpie id's list for its change, and
+// followList waits at the Remote eipgam id's list for its change, and
 // fetches it again each time it changed, until ctx ends. The list it has
 // first is fetched once too: it may have changed since it was fetched.
 func followList(ctx context.Context, id string) {
@@ -218,7 +218,7 @@ func followList(ctx context.Context, id string) {
 	}
 }
 
-// followedOne is the Remote magpie id as it is saved now, if it is still
+// followedOne is the Remote eipgam id as it is saved now, if it is still
 // followed.
 func followedOne(id string) *Provider {
 	for _, p := range followedMagpies() {
@@ -232,7 +232,7 @@ func followedOne(id string) *Provider {
 // waitRemoteList asks p's list to be answered once it is other than the
 // one tag names, and answers the tag of the list it has now. It is asked
 // as the list is fetched (listHeaders, signRemote), so the list the other
-// magpie compares is the one a fetch is answered.
+// eipgam compares is the one a fetch is answered.
 func waitRemoteList(ctx context.Context, p Provider, tag string) (string, error) {
 	ctx, cancel := context.WithTimeout(p.Via(ctx), (listWaitAsk+20)*time.Second)
 	defer cancel()
@@ -241,7 +241,7 @@ func waitRemoteList(ctx context.Context, p Provider, tag string) (string, error)
 		return "", err
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "magpie")
+	req.Header.Set("User-Agent", "eipgam")
 	for k, v := range p.listHeaders() {
 		catalog.PutUserHeader(req.Header, k, v)
 	}
@@ -259,7 +259,7 @@ func waitRemoteList(ctx context.Context, p Provider, tag string) (string, error)
 	io.Copy(io.Discard, io.LimitReader(res.Body, 64<<20))
 	switch {
 	case res.StatusCode == http.StatusNotModified:
-		// a magpie from before this one says no wait it held, and holds
+		// a eipgam from before this one says no wait it held, and holds
 		// each wait to its end; a 304 at once is a gateway stopping, or a
 		// list that wasn't waited for
 		if res.Header.Get(ListWaitHeader) == "" && time.Since(asked) < followQuick {

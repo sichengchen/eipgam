@@ -7,16 +7,16 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Sorghum on Discord: each of magpie's models in Kimi Code has the name
-// magpie shows for it (display_name) and, where magpie knows it, its most
+// Sorghum on Discord: each of eipgam's models in Kimi Code has the name
+// eipgam shows for it (display_name) and, where eipgam knows it, its most
 // output (max_output_size, the new Kimi Code's max_completion_tokens); a
-// value the user set in the table themselves stays, while one magpie wrote
-// follows magpie's catalog. kimi-cli, which has no max_output_size, gets the
+// value the user set in the table themselves stays, while one eipgam wrote
+// follows eipgam's catalog. kimi-cli, which has no max_output_size, gets the
 // name only.
 func TestKimiNamesAndOutput(t *testing.T) {
 	type model struct {
@@ -82,7 +82,7 @@ func TestKimiNamesAndOutput(t *testing.T) {
 		}
 		want := func(id string, name string, output int) {
 			t.Helper()
-			m := read()["magpie/"+id]
+			m := read()["eipgam/"+id]
 			if legacy {
 				output = 0
 			}
@@ -92,7 +92,7 @@ func TestKimiNamesAndOutput(t *testing.T) {
 			}
 		}
 		f := a.Field("model")
-		if err := f.Set("magpie/relay/big"); err != nil {
+		if err := f.Set("eipgam/relay/big"); err != nil {
 			t.Fatal(err)
 		}
 		if labels["relay/big"] == "" || labels["relay/big"] == "relay/big" {
@@ -100,16 +100,16 @@ func TestKimiNamesAndOutput(t *testing.T) {
 		}
 		want("relay/big", labels["relay/big"], 32000)
 		want("relay/wide", labels["relay/wide"], 128000)
-		// a model magpie knows no output for has no max_output_size
+		// a model eipgam knows no output for has no max_output_size
 		want("relay/bare", labels["relay/bare"], 0)
 
 		// the user names big themselves and caps wide, by hand in config.toml
-		edit.SetTOMLKey(a.Path, `models."magpie/relay/big"`, "display_name", "My Big")
+		edit.SetTOMLKey(a.Path, `models."eipgam/relay/big"`, "display_name", "My Big")
 		if !legacy {
-			edit.SetTOMLKey(a.Path, `models."magpie/relay/wide"`, "max_output_size", 8000)
-			edit.SetTOMLKey(a.Path, `models."magpie/relay/bare"`, "max_output_size", 4096)
+			edit.SetTOMLKey(a.Path, `models."eipgam/relay/wide"`, "max_output_size", 8000)
+			edit.SetTOMLKey(a.Path, `models."eipgam/relay/bare"`, "max_output_size", 4096)
 		}
-		// and magpie's catalog changes big's output
+		// and eipgam's catalog changes big's output
 		live(64000)
 		if err := a.Sync(); err != nil {
 			t.Fatal(err)
@@ -118,20 +118,20 @@ func TestKimiNamesAndOutput(t *testing.T) {
 		want("relay/wide", labels["relay/wide"], 8000)
 		want("relay/bare", labels["relay/bare"], 4096)
 		// and they stay through another write
-		if err := f.Set("magpie/relay/wide"); err != nil {
+		if err := f.Set("eipgam/relay/wide"); err != nil {
 			t.Fatal(err)
 		}
 		want("relay/big", "My Big", 64000)
 		want("relay/wide", labels["relay/wide"], 8000)
 
-		// a value magpie wrote that its catalog no longer has goes
+		// a value eipgam wrote that its catalog no longer has goes
 		live(0)
 		if err := a.Sync(); err != nil {
 			t.Fatal(err)
 		}
 		want("relay/big", "My Big", 0)
 
-		// out of magpie: its tables and what it wrote in them are gone
+		// out of eipgam: its tables and what it wrote in them are gone
 		if err := f.Set(""); err != nil {
 			t.Fatal(err)
 		}

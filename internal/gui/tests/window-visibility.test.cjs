@@ -9,7 +9,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const alternateAppJS = process.env.MAGPIE_APP_JS;
+const alternateAppJS = process.env.EIPGAM_APP_JS;
 
 function serve() {
   const state = { agents: [], profiles: [], settings: { lang: "en", theme: "light" } };
@@ -38,7 +38,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve());
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     await page.waitForFunction(() => typeof window.magpieWindowVisibility === "function");
 
     const hidden = await page.evaluate(() => {
@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       return {
         hidden: document.hidden,
         state: document.visibilityState,
-        marked: document.documentElement.classList.contains("magpie-out-of-sight"),
+        marked: document.documentElement.classList.contains("eipgam-out-of-sight"),
         playState: getComputedStyle(probe).animationPlayState,
         events: window.__visibilityEvents,
       };
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       return {
         hidden: document.hidden,
         state: document.visibilityState,
-        marked: document.documentElement.classList.contains("magpie-out-of-sight"),
+        marked: document.documentElement.classList.contains("eipgam-out-of-sight"),
         playState: getComputedStyle(document.querySelector("#visibilityProbe")).animationPlayState,
         events: window.__visibilityEvents,
       };
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const focused = await page.evaluate(() => {
       window.magpieWindowVisibility(false);
       window.dispatchEvent(new Event("focus"));
-      return { hidden: document.hidden, marked: document.documentElement.classList.contains("magpie-out-of-sight") };
+      return { hidden: document.hidden, marked: document.documentElement.classList.contains("eipgam-out-of-sight") };
     });
     assert.deepEqual(focused, { hidden: false, marked: false });
   });

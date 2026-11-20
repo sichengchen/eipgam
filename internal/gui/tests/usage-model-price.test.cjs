@@ -23,7 +23,7 @@ const KNOWN = G("relay/sol-7", "sol-7", 900000, { provider: "relay", model: "sol
 const AGENT = G("relay/agent-only-9", "agent-only-9", 300000, { provider: "relay", model: "agent-only-9", sub: "Relay" });
 const usage = {
   calls: 20, errors: 0, input: 1199800, output: 200, reasoning: 0, cache_read: 0, cache_write: 0, unpriced: 10, cost: 0, bucket: "day",
-  series: [], path: "~/.config/magpie/usage.jsonl", agents: [G("pi", "Pi", 1200000)], models: [KNOWN, AGENT],
+  series: [], path: "~/.config/eipgam/usage.jsonl", agents: [G("pi", "Pi", 1200000)], models: [KNOWN, AGENT],
 };
 const MAKER = { input: 0.5, output: 2, cache_read: 0.05, cache_write: 0.625 };
 const today = new Date();
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", serve(lang, saved, asks));
-        await p.goto("http://magpie.test/?view=usage");
+        await p.goto("http://eipgam.test/?view=usage");
         const row = p.locator(`#usageModels .row.stat[data-id="${KNOWN.id}"]`);
         await row.waitFor();
         await row.scrollIntoViewIfNeeded();
@@ -168,8 +168,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(asks.posts.at(-1), { model: "agent-only-9", price: { input: 2, output: 8, cache_read: 0, cache_write: 0 } });
 
         // Sessions: a model's bar, right-clicked, prices its bare id
-        await p.evaluate(() => { localStorage.setItem("magpie.usageTab", "sessions"); localStorage.setItem("magpie.sessRange", "all"); });
-        await p.goto("http://magpie.test/?view=usage");
+        await p.evaluate(() => { localStorage.setItem("eipgam.usageTab", "sessions"); localStorage.setItem("eipgam.sessRange", "all"); });
+        await p.goto("http://eipgam.test/?view=usage");
         const bar = p.locator("#sessModels .sess-bar").first();
         await bar.waitFor();
         await bar.scrollIntoViewIfNeeded();

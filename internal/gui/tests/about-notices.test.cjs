@@ -1,4 +1,6 @@
 const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
+const { resolve } = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
@@ -6,12 +8,12 @@ const { openPart } = require("./reader.cjs");
 
 // Every build carries moejs's third-party notices (THIRD_PARTY_NOTICES,
 // embedded in the binary); Settings › About's Open-source licenses shows
-// them whole, scrolled inside the dialog, in every language and at the tray
+// them whole, scrolled inside the dialog, in English and at the tray
 // panel's width.
 const words = {
-  en: "Open-source licenses", zh: "开源许可", "zh-TW": "開源授權", ja: "オープンソースライセンス", de: "Open-Source-Lizenzen",
+  en: "Open-source licenses",
 };
-const text = "magpie third-party notices\n" + "x".repeat(300) + "\n" + "line\n".repeat(400) + "4. V8 (ported code)\n";
+const text = readFileSync(resolve(__dirname, "../../../THIRD_PARTY_NOTICES"), "utf8");
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(words)) {
@@ -26,7 +28,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", []));
         await page.route("**/api/notices", (r) => r.fulfill({ json: { text } }));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator("#prefs").click();
         await openPart(page, "about");
         const row = page.locator("#about .row", { has: page.locator(".who", { hasText: words[lang] }) });
@@ -34,6 +36,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const pre = page.locator("#modal .notices-text");
         await pre.waitFor();
         assert.equal(await pre.textContent(), text);
+        assert.match(text, /Magpie[\s\S]+Copyright \(c\) 2026 yetone/);
         assert.equal(await page.locator("#modal .ehead b").textContent(), words[lang]);
         // the long text scrolls in the dialog, which stays inside the window
         const fits = await page.evaluate(() => {

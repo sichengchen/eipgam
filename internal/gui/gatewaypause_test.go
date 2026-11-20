@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // pauseSandbox gives a test its own HOME, a gateway port of its own and
@@ -27,7 +27,7 @@ func pauseSandbox(t *testing.T, ids ...string) (port int, wired map[string]bool,
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	port = freePort(t)
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:"+strconv.Itoa(port))
+	t.Setenv("EIPGAM_ADDR", "127.0.0.1:"+strconv.Itoa(port))
 	was := pausable.Load()
 	pausable.Store(true)
 	agents := map[string]*agent.Agent{}
@@ -87,7 +87,7 @@ func pauseSandbox(t *testing.T, ids ...string) (port int, wired map[string]bool,
 	return port, wired, calls
 }
 
-// me2seeks on X: quitting magpie with Disconnect and quit was the only way
+// me2seeks on X: quitting eipgam with Disconnect and quit was the only way
 // to stop its gateway. Pause disconnects every connected agent and stops
 // the listener with the app still running; nothing serves it meanwhile;
 // Resume serves it again and connects those agents again.
@@ -204,7 +204,7 @@ func TestGatewayResumesOnWire(t *testing.T) {
 }
 
 // A pause file that can't be read is a pause, not a gateway to start; a
-// process that isn't the app (magpie web, the CLI) is never paused.
+// process that isn't the app (eipgam web, the CLI) is never paused.
 func TestGatewayPauseFileUnreadable(t *testing.T) {
 	pauseSandbox(t)
 	if err := os.MkdirAll(filepath.Dir(pausePath()), 0o755); err != nil {

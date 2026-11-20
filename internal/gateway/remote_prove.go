@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A magpie looking for its Remote magpie at a new address (provider's
+// A eipgam looking for its Remote eipgam at a new address (provider's
 // remote_moved.go) asks each address that takes the connection to prove,
 // before anything keyed is sent there, that it holds the provider's
 // gateway key: it POSTs a nonce of its own and the key's sha256
@@ -24,8 +24,8 @@ import (
 //
 // The route carries no key, so lanGuard lets it through to here
 // (proveAsked) the way it does a CI job's OIDC trade: from another
-// machine only while magpie is shared, past the allow list. A web page is
-// refused (fromBrowser): only a magpie asks this. An ask for a key this
+// machine only while eipgam is shared, past the allow list. A web page is
+// refused (fromBrowser): only a eipgam asks this. An ask for a key this
 // gateway doesn't have counts against the failed authentications another
 // machine may make (tooManyAuthFails), as a wrong key does, and costs one
 // sha256 per key. The answer tells a caller nothing it didn't know: only
@@ -33,7 +33,7 @@ import (
 // for a nonce and an address of the asker's choosing, under a key it
 // doesn't have.
 
-// proveAsked: r is a magpie's ask for a proof, which carries no key.
+// proveAsked: r is a eipgam's ask for a proof, which carries no key.
 func proveAsked(r *http.Request) bool {
 	return r.Method == http.MethodPost && r.URL.Path == provider.RemoteProvePath && r.URL.RawPath == "" && !managedKey(r)
 }
@@ -50,7 +50,7 @@ func isHex(s string, least, most int) bool {
 func (s *Server) prove(w http.ResponseWriter, r *http.Request) {
 	if fromBrowser(r) {
 		log.Printf("refused %s %s from %s: a browser asked for a proof", r.Method, r.URL.Path, r.RemoteAddr)
-		writeError(w, provider.Chat, http.StatusForbidden, "only a magpie asks this")
+		writeError(w, provider.Chat, http.StatusForbidden, "only a eipgam asks this")
 		return
 	}
 	var in struct {

@@ -4,18 +4,18 @@
 // is shut out of ("Failed to read a named property 'origin' from 'Location':
 // Blocked a frame with origin "null" ..."), or an error out of a script an
 // extension put in the frame, is not the page's: onducoder opened Day card
-// in magpie web 0.1.3702 and got "stopped working" over a page that was fine.
+// in eipgam web 0.1.3702 and got "stopped working" over a page that was fine.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
-const bridge = path.resolve(process.env.MAGPIE_BRIDGE || path.join(__dirname, "../pagebridge.js"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
+const bridge = path.resolve(process.env.EIPGAM_BRIDGE || path.join(__dirname, "../pagebridge.js"));
 
 const tok = (c) => c.repeat(32);
-const entry = (c, name) => ({ spec: "/x/" + name, name, key: "plugin-" + name, title: name, reads: [], url: `/_magpie/plugin/${tok(c)}/index.html` });
+const entry = (c, name) => ({ spec: "/x/" + name, name, key: "plugin-" + name, title: name, reads: [], url: `/_eipgam/plugin/${tok(c)}/index.html` });
 // WebKit hands a sandboxed page's uncaught error to its handler as a bare
 // "Script error." with no error object, so only what arrives as a rejection
 // can be told apart there (masked: true are Chromium's alone)
@@ -36,7 +36,7 @@ const CASES = {
 };
 const pages = Object.entries(CASES).map(([name, v]) => entry(v.c, name.toLowerCase()));
 const html = (js) => `<!doctype html><meta charset="utf-8"><script src="_magpie/bridge.js"></script><script>${js}
-setTimeout(() => { window.done = magpie.options.get().then(() => true, () => true); }, 50);</script><p>page</p>`;
+setTimeout(() => { window.done = eipgam.options.get().then(() => true, () => true); }, 50);</script><p>page</p>`;
 
 async function server(route) {
   const url = new URL(route.request().url());
@@ -57,7 +57,7 @@ async function server(route) {
     if (m[2] === "index.html" && one) return route.fulfill({ headers: { ...headers, "Content-Type": "text/html" }, body: html(one.js) });
     return route.fulfill({ status: 404, body: "" });
   }
-  if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+  if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
   const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
   const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
   try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(8000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", server);
-    await page.goto("http://magpie.test/");
+    await page.goto("http://eipgam.test/");
     await page.locator("#nav button[data-plugin-page]").nth(pages.length - 1).waitFor({ state: "attached" });
     for (const [name, v] of Object.entries(CASES)) {
       if (engine === "webkit" && v.masked) continue;
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const frame = () => page.frames().find((x) => x.url().includes(tok(v.c)));
       for (let i = 0; i < 100 && !frame(); i++) await page.waitForTimeout(50);
       assert.ok(frame(), name + ": the frame opened");
-      await frame().waitForFunction(() => window.magpie?.theme).catch(() => {});
+      await frame().waitForFunction(() => window.eipgam?.theme).catch(() => {});
       // the window answers a frame's messages in order, so once this answer
       // is back, whatever the page raised before it has been heard
       if (!v.broken) {

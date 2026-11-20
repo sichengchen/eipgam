@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Managing sessions: every session of one agent, to look through and pick
 // up again, and to delete — which never deletes. A deleted session's files
-// are moved into magpie's own trash folder (<magpie dir>/trash/sessions/),
+// are moved into eipgam's own trash folder (<eipgam dir>/trash/sessions/),
 // with a note of where each came from, and a restore moves them back.
 //
 // Only the agents whose sessions are files of their own can be deleted:
@@ -80,8 +80,8 @@ type AgentCount struct {
 	Deletable bool   `json:"deletable"`
 }
 
-// Deletable says whether magpie can move an agent's sessions to its trash:
-// those kept as files of their own, in a layout magpie knows whole.
+// Deletable says whether eipgam can move an agent's sessions to its trash:
+// those kept as files of their own, in a layout eipgam knows whole.
 func Deletable(agent string) bool {
 	switch agent {
 	case "claude", "qoder", "qoder-cn", "workbuddy", "workbuddy-ai", "codebuddy", "codex", "pi", "raft", "cindy", "omp", "cursor", "dsh", "droid", "agy":
@@ -197,7 +197,7 @@ func ListAgent(agent string) []Managed {
 
 // NativeIDs are the ids of every session the agents named keep themselves,
 // by agent: one nothing was said in too, as ListAgent lists it. It tells a
-// gateway session an agent keeps from one only magpie saw. Only the named
+// gateway session an agent keeps from one only eipgam saw. Only the named
 // agents' files are looked at, and of those only the ones whose session id
 // is inside the file are read when they changed.
 func NativeIDs(agents map[string]bool) map[string]map[string]bool {
@@ -430,10 +430,10 @@ func listed(s *Session) {
 	s.Transcript = readable(*s)
 }
 
-// TrashDir is where deleted sessions are kept: <magpie dir>/trash/sessions.
+// TrashDir is where deleted sessions are kept: <eipgam dir>/trash/sessions.
 func TrashDir() string { return filepath.Join(settings.Dir(), "trash", "sessions") }
 
-// Trashed is a deleted session in magpie's trash.
+// Trashed is a deleted session in eipgam's trash.
 type Trashed struct {
 	Key     string    `json:"key"` // its folder in the trash, <agent>/<name>
 	Agent   string    `json:"agent"`
@@ -444,8 +444,8 @@ type Trashed struct {
 	Deleted time.Time `json:"deleted"`
 	Size    int64     `json:"size"`
 	Items   []moved   `json:"items"`
-	// Gateway: a session seen only through magpie's gateway, whose items
-	// are the conversation text magpie recorded of it (gateway_delete.go)
+	// Gateway: a session seen only through eipgam's gateway, whose items
+	// are the conversation text eipgam recorded of it (gateway_delete.go)
 	Gateway bool `json:"gateway,omitempty"`
 	// Forgot: a session of an agent that is gone, taken off the list
 	// (Forget); nothing of it was moved, Restore lists it again
@@ -465,7 +465,7 @@ type moved struct {
 // manifest is the note kept beside a trashed session's files.
 const manifest = "session.json"
 
-// Delete moves a session's files to magpie's trash: its own file, the
+// Delete moves a session's files to eipgam's trash: its own file, the
 // folder of its subagents and tool results beside it, its other files (a
 // Codex session's later segments, its subagents' elsewhere) and, for Claude
 // Code, the file history, todos and environment it keeps by the session's
@@ -475,7 +475,7 @@ const manifest = "session.json"
 // ~/.claude, and Restore puts it back there.
 func Delete(agent, id string) (Trashed, error) {
 	if !Deletable(agent) {
-		return Trashed{}, fmt.Errorf("magpie can't delete %s sessions", agent)
+		return Trashed{}, fmt.Errorf("eipgam can't delete %s sessions", agent)
 	}
 	if !safeID.MatchString(id) {
 		return Trashed{}, errors.New("no such session")
@@ -801,7 +801,7 @@ func copyAll(from, to string) error {
 	})
 }
 
-// Trash is what is in magpie's session trash, the latest deleted first.
+// Trash is what is in eipgam's session trash, the latest deleted first.
 func Trash() []Trashed {
 	out := []Trashed{}
 	notes, _ := filepath.Glob(filepath.Join(TrashDir(), "*", "*", manifest))
@@ -837,7 +837,7 @@ func trashFolder(key string) string {
 	return filepath.Join(TrashDir(), agent, name)
 }
 
-// Purge erases a trashed session for good: its folder in magpie's trash,
+// Purge erases a trashed session for good: its folder in eipgam's trash,
 // files and note. Only when the reader asks for it (#487); nothing is ever
 // erased by itself. A key that isn't a trashed session's, or whose folder
 // (or its agent's) is a link that could lead out of the trash, is refused.

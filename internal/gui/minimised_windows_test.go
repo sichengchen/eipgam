@@ -17,11 +17,11 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/w32"
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // #3495 (Lemonawa): a restart by itself (Settings' AutoRestart) an older
-// magpie makes from a main window minimised on the taskbar brings it back
+// eipgam makes from a main window minimised on the taskbar brings it back
 // minimised there (this one restarts by itself to the tray alone): up
 // (a later restart and lightweight mode count it so), never shown or made
 // the foreground window on the way, and, restored from the taskbar, back
@@ -30,7 +30,7 @@ import (
 //
 // The windows are real, so this runs where Windows has a desktop the user
 // sees: on the Windows box's signed-in session, not over ssh (session 0).
-const testMinimisedEnv = "MAGPIE_TEST_MINIMISED"
+const testMinimisedEnv = "EIPGAM_TEST_MINIMISED"
 
 func TestRestartMinimisedComesBackMinimised(t *testing.T) {
 	var session uint32
@@ -80,7 +80,7 @@ func init() {
 	// the page says every 50ms whether it is visible
 	seen := make(chan string, 1024)
 	app := application.New(application.Options{
-		Name:    "magpie minimised restart regression",
+		Name:    "eipgam minimised restart regression",
 		Windows: windowsOptions(),
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/vis" {
@@ -91,7 +91,7 @@ func init() {
 				return
 			}
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<html><body>magpie<script>setInterval(() => fetch("/vis?s=" + document.visibilityState), 50)</script></body></html>`)
+			fmt.Fprint(w, `<html><body>eipgam<script>setInterval(() => fetch("/vis?s=" + document.visibilityState), 50)</script></body></html>`)
 		})},
 	})
 	h := &host{app: app}
@@ -123,7 +123,7 @@ func init() {
 	}
 	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
 		go func() {
-			// what an older magpie left as it restarted by itself, read as
+			// what an older eipgam left as it restarted by itself, read as
 			// a start reads it (app.go)
 			markOldQuietRestart(mode != "shown")
 			quiet, minimised := takeQuietRestart()
@@ -205,7 +205,7 @@ func init() {
 }
 
 // mainUp says whether the window is up and whether it is minimised, read
-// together on the main thread, as an older magpie's AutoRestart read them.
+// together on the main thread, as an older eipgam's AutoRestart read them.
 func (h *host) mainUp() (up, minimised bool) {
 	application.InvokeSync(func() {
 		up = h.mainShown()

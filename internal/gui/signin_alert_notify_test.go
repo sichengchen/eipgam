@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/wailsapp/wails/v3/pkg/services/notifications"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // A click on a sign-in alert opens its provider's editor, where the

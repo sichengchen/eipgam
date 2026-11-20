@@ -1,11 +1,11 @@
 // Filtering reuses cards and leaves controls/editors in place. Real assets,
-// fixture APIs only; no running magpie or agent configuration is touched.
+// fixture APIs only; no running eipgam or agent configuration is touched.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const assets = process.env.MAGPIE_GROUP_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_GROUP_ASSETS || path.resolve(__dirname, "../assets");
 function fixture() {
   const models = Array.from({ length: 4000 }, (_, i) => ({ id: `p${i % 10}/model-${i}`, name: "Model " + i,
     provider: "p" + i % 10, providerName: "Provider " + i % 10, icon: "generic" }));
@@ -53,7 +53,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("console", (m) => { if (m.type() === "error") console.error(m.text()); });
         await page.route("**/*", (r) => serve(r, lang, feed));
-        await page.goto("http://magpie.test/?view=groups");
+        await page.goto("http://eipgam.test/?view=groups");
         await page.locator('.rt-group[data-id="g9"]').waitFor().catch(async (e) => { console.error(errors, await page.locator("body").innerText()); throw e; });
         const q = page.locator("input.rt-gfilter"), rows = page.locator(".rt-groups .rt-group");
         await page.evaluate(() => {
@@ -102,7 +102,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
     await page.clock.pauseAt(new Date(Date.now() + 1000));
     const feed = { data: fixture(), inspect: true };
     await page.route("**/*", (r) => serve(r, "en", feed));
-    await page.goto("http://magpie.test/?view=groups");
+    await page.goto("http://eipgam.test/?view=groups");
     await page.locator('.rt-group[data-id="g9"]').waitFor();
     assert.equal(await page.evaluate(() => window.__routingGroupCache().cached), true);
     await page.evaluate(() => window.show("agents"));
@@ -130,7 +130,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
     page.setDefaultNavigationTimeout(60000);
     const feed = { data: fixture() };
     await page.route("**/*", (r) => serve(r, "en", feed));
-    await page.goto("http://magpie.test/?view=groups");
+    await page.goto("http://eipgam.test/?view=groups");
     await page.locator('.rt-group[data-id="g9"]').waitFor();
     const q = page.locator("input.rt-gfilter");
     await q.focus();

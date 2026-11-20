@@ -1,6 +1,6 @@
 // Package memembed is memory's search by meaning:
 // paraphrase-multilingual-MiniLM-L12-v2 (sentence-transformers, Apache
-// 2.0; Xenova's int8 ONNX of it), run in magpie's own process by
+// 2.0; Xenova's int8 ONNX of it), run in eipgam's own process by
 // internal/pii/guard, gives each memory a place in a space where texts
 // that say the same are near, in any of 50 languages and across them,
 // and memory.Search
@@ -29,12 +29,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/pii"
-	"github.com/yetone/magpie/internal/pii/guard"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/pii"
+	"github.com/sichengchen/eipgam/internal/pii/guard"
 )
 
 // rev is the repo's revision the files below were hashed at.
@@ -54,7 +54,7 @@ var files = []pinned{
 // base is where the files are fetched from; a variable for tests.
 var base = "https://huggingface.co/Xenova/paraphrase-multilingual-MiniLM-L12-v2/resolve/"
 
-// Root is where the model is kept, in magpie's cache: a folder per
+// Root is where the model is kept, in eipgam's cache: a folder per
 // revision. A variable for tests.
 var Root = func() string { return filepath.Join(appdir.Cache(), "paraphrase-multilingual-MiniLM-L12-v2") }
 
@@ -383,7 +383,7 @@ func Keep(ctx context.Context, tick time.Duration) {
 
 // Index reads every memory a search can return that has no vector for its
 // text yet, keeps the vectors (dropping those of texts gone) and says how
-// many it read. One goes at a time, in this magpie and across them.
+// many it read. One goes at a time, in this eipgam and across them.
 func Index(ctx context.Context) (int, error) {
 	idx.mu.Lock()
 	defer idx.mu.Unlock()

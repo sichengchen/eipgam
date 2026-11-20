@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 func TestZed(t *testing.T) {
@@ -35,7 +35,7 @@ func TestZed(t *testing.T) {
 		t.Fatalf("original: %q", f.Get())
 	}
 	v, err := a.Spell("model", "relay/glm-4.6")
-	if err != nil || v != "magpie/relay/glm-4.6" {
+	if err != nil || v != "eipgam/relay/glm-4.6" {
 		t.Fatalf("spelling: %q %v", v, err)
 	}
 	if err := a.Apply("model", v); err != nil {
@@ -75,7 +75,7 @@ func TestZed(t *testing.T) {
 	if n, _ := edit.GetJSON(a.Path, zedProvider+".available_models.#"); n != "2" {
 		t.Fatalf("catalog did not sync: %s", readFile(a.Path))
 	}
-	if err := f.Set("magpie/relay/unknown"); err != nil {
+	if err := f.Set("eipgam/relay/unknown"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -88,7 +88,7 @@ func TestZed(t *testing.T) {
 		t.Fatal("did not restore whole default model")
 	}
 	if _, ok := edit.GetJSON(a.Path, zedProvider); ok {
-		t.Fatal("magpie provider left after reset")
+		t.Fatal("eipgam provider left after reset")
 	}
 }
 
@@ -100,7 +100,7 @@ func TestZedCredentialFailureLeavesSettings(t *testing.T) {
 	credential := zedCredential
 	t.Cleanup(func() { zedCredential = credential })
 	zedCredential = func(string) error { return errors.New("keychain locked") }
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err == nil || !strings.Contains(err.Error(), "keychain locked") {
+	if err := a.Field("model").Set("eipgam/relay/glm-4.6"); err == nil || !strings.Contains(err.Error(), "keychain locked") {
 		t.Fatalf("missing credential failure: %v", err)
 	}
 	if readFile(a.Path) != before {
@@ -118,7 +118,7 @@ func TestZedFreshAndOwn(t *testing.T) {
 		t.Fatal("sync created settings without a pick")
 	}
 	f := a.Field("model")
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -127,7 +127,7 @@ func TestZedFreshAndOwn(t *testing.T) {
 	if f.Get() != "" {
 		t.Fatalf("reset fresh: %q", f.Get())
 	}
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set("openai/gpt-custom"); err != nil {
@@ -137,13 +137,13 @@ func TestZedFreshAndOwn(t *testing.T) {
 		t.Fatalf("native model: %q", f.Get())
 	}
 	if _, ok := edit.GetJSON(a.Path, zedProvider); ok {
-		t.Fatal("magpie provider left on native selection")
+		t.Fatal("eipgam provider left on native selection")
 	}
 }
 
 // Zed's max_tokens is the window a prompt and its reply share, and it lets
 // a prompt fill max_tokens - max_output_tokens before it compacts (its
-// thread's input_token_capacity). That room is the prompt magpie's catalog
+// thread's input_token_capacity). That room is the prompt eipgam's catalog
 // says the model takes (#850): GPT-5's input 272000 with its 128000 reply,
 // a 400000 window as OpenAI gives it, and a model with no output limit
 // gets its context alone.
@@ -163,7 +163,7 @@ func TestZedWindowHoldsPromptAndReply(t *testing.T) {
 		t.Fatal(err)
 	}
 	a := zedAt(filepath.Join(home, "zed"))
-	if err := a.Field("model").Set("magpie/relay/gpt-5"); err != nil {
+	if err := a.Field("model").Set("eipgam/relay/gpt-5"); err != nil {
 		t.Fatal(err)
 	}
 	var p struct {
@@ -213,7 +213,7 @@ func TestZedTokenLimitOverrides(t *testing.T) {
 		t.Fatal(err)
 	}
 	a := zedAt(filepath.Join(home, "zed"))
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+	if err := a.Field("model").Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	check := func(output int) {
@@ -245,12 +245,12 @@ func TestZedRestoresProviderAndModelLimits(t *testing.T) {
 	writeFile(t, catalog.CachePath(), `{"zai":{"models":{"glm-4.6":{"id":"glm-4.6","name":"GLM","modalities":{"input":["text","image"]},"limit":{"context":204800,"output":300000}}}}}`)
 	catalog.Reset()
 	a := zedAt(filepath.Join(home, "zed"))
-	writeFile(t, a.Path, `{"agent":{"default_model":{"provider":"openai","model":"own"}},"language_models":{"openai_compatible":{"magpie":{"api_url":"https://my-proxy/v1","available_models":[]}}}}`)
+	writeFile(t, a.Path, `{"agent":{"default_model":{"provider":"openai","model":"own"}},"language_models":{"openai_compatible":{"eipgam":{"api_url":"https://my-proxy/v1","available_models":[]}}}}`)
 	before := readFile(a.Path)
 	if err := a.Sync(); err != nil || readFile(a.Path) != before {
 		t.Fatalf("sync changed a user's provider: %v", err)
 	}
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+	if err := a.Field("model").Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	// The independent reply limit keeps its allowance beside the prompt's
@@ -272,21 +272,21 @@ func TestZedReselectAfterNativePicker(t *testing.T) {
 	home := syncHome(t)
 	a := zedAt(filepath.Join(home, "zed"))
 	f := a.Field("model")
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	// Zed's picker changes only the model, leaving our provider installed.
 	if err := edit.SetJSON(a.Path, edit.KV{Path: zedModel, Value: map[string]string{"provider": "openai", "model": "gpt-custom"}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSON(a.Path, zedProvider); ok {
-		t.Fatal("reset restored magpie's own provider")
+		t.Fatal("reset restored eipgam's own provider")
 	}
 	if got := f.Get(); got != "openai/gpt-custom" {
 		t.Fatalf("reset model: %q", got)
@@ -297,16 +297,16 @@ func TestZedReselectPreservesProvider(t *testing.T) {
 	home := syncHome(t)
 	a := zedAt(filepath.Join(home, "zed"))
 	original := `{"api_url":"https://my-proxy/v1","available_models":[{"name":"custom","max_tokens":8192}],"headers":{"X-Custom":"keep"}}`
-	writeFile(t, a.Path, `{"agent":{"default_model":{"provider":"openai","model":"own"}},"language_models":{"openai_compatible":{"magpie":`+original+`}}}`)
+	writeFile(t, a.Path, `{"agent":{"default_model":{"provider":"openai","model":"own"}},"language_models":{"openai_compatible":{"eipgam":`+original+`}}}`)
 	f := a.Field("model")
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	native := `{"provider":"zed.dev","model":"claude-sonnet","temperature":0.3}`
 	if err := edit.SetJSON(a.Path, edit.KV{Path: zedModel, Value: json.RawMessage(native)}); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -323,12 +323,12 @@ func TestZedReselectPreservesProvider(t *testing.T) {
 func TestZedResetAfterNativePicker(t *testing.T) {
 	home := syncHome(t)
 	a := zedAt(filepath.Join(home, "zed"))
-	writeFile(t, a.Path, `{"agent":{"default_model":{"provider":"openai","model":"own"}},"language_models":{"openai_compatible":{"magpie":{"api_url":"https://my-proxy/v1","available_models":[]}}}}`)
+	writeFile(t, a.Path, `{"agent":{"default_model":{"provider":"openai","model":"own"}},"language_models":{"openai_compatible":{"eipgam":{"api_url":"https://my-proxy/v1","available_models":[]}}}}`)
 	f := a.Field("model")
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	// Zed's picker changes the model without removing magpie's provider.
+	// Zed's picker changes the model without removing eipgam's provider.
 	native := `{"provider":"zed.dev","model":"claude-sonnet","temperature":0.3}`
 	if err := edit.SetJSON(a.Path, edit.KV{Path: zedModel, Value: json.RawMessage(native)}); err != nil {
 		t.Fatal(err)
@@ -361,9 +361,9 @@ func TestZedXDGPath(t *testing.T) {
 func TestZedCustomPaths(t *testing.T) {
 	home := t.TempDir()
 	config := filepath.Join(home, "zedg-config")
-	t.Setenv("MAGPIE_ZED_BIN", "/opt/zedg/bin/zedg")
-	t.Setenv("MAGPIE_ZED_CONFIG_DIR", config)
-	t.Setenv("MAGPIE_ZED_PROCESS_NAMES", "zedg,ZedG")
+	t.Setenv("EIPGAM_ZED_BIN", "/opt/zedg/bin/zedg")
+	t.Setenv("EIPGAM_ZED_CONFIG_DIR", config)
+	t.Setenv("EIPGAM_ZED_PROCESS_NAMES", "zedg,ZedG")
 	a := zed(home, filepath.Join(home, ".config"))
 	want := filepath.Join(config, "settings.json")
 	if a.Bin != "/opt/zedg/bin/zedg" {
@@ -375,9 +375,9 @@ func TestZedCustomPaths(t *testing.T) {
 }
 
 func TestZedDefaultsStayStable(t *testing.T) {
-	t.Setenv("MAGPIE_ZED_BIN", "")
-	t.Setenv("MAGPIE_ZED_CONFIG_DIR", "")
-	t.Setenv("MAGPIE_ZED_PROCESS_NAMES", "")
+	t.Setenv("EIPGAM_ZED_BIN", "")
+	t.Setenv("EIPGAM_ZED_CONFIG_DIR", "")
+	t.Setenv("EIPGAM_ZED_PROCESS_NAMES", "")
 	a := zed(t.TempDir(), filepath.Join(t.TempDir(), ".config"))
 	if a.Bin != "zed" {
 		t.Fatalf("default binary: %q", a.Bin)
@@ -389,7 +389,7 @@ func TestZedDefaultsStayStable(t *testing.T) {
 }
 
 func TestZedCustomProcessNames(t *testing.T) {
-	t.Setenv("MAGPIE_ZED_PROCESS_NAMES", "zedg,ZedG")
+	t.Setenv("EIPGAM_ZED_PROCESS_NAMES", "zedg,ZedG")
 	want := []string{`(^|/)zedg( |$)`, `(^|/)ZedG( |$)`}
 	if got := zedProcessNames(); strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Fatalf("custom process names: %#v", got)
@@ -400,7 +400,7 @@ func TestZedRelativeConfigDirUsesDefault(t *testing.T) {
 	home := t.TempDir()
 	cfg := filepath.Join(home, ".config")
 	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
-	t.Setenv("MAGPIE_ZED_CONFIG_DIR", "zedg-config")
+	t.Setenv("EIPGAM_ZED_CONFIG_DIR", "zedg-config")
 	a := zed(home, cfg)
 	want := filepath.Join(cfg, "zed", "settings.json")
 	if runtime.GOOS == "windows" {
@@ -415,7 +415,7 @@ func TestZedRelativeConfigDirUsesDefault(t *testing.T) {
 
 // CoMi6818 (X): billion-context's documented route for Zed is its
 // /bili/ prefix before the provider's api_url. Through it, Zed's
-// magpie provider still reaches magpie: a model picked keeps the prefix,
+// eipgam provider still reaches eipgam: a model picked keeps the prefix,
 // a sync writes the models there, the key is saved for that address
 // (Zed looks it up by it), and ZedThrough takes it back off.
 func TestZedThroughBili(t *testing.T) {
@@ -427,9 +427,9 @@ func TestZedThroughBili(t *testing.T) {
 	a := zedAt(filepath.Join(home, "zed"))
 	writeFile(t, a.Path, `{"theme":"One Dark"}`)
 	if err := ZedThrough(a, "http://127.0.0.1:8787/bili/"); err == nil {
-		t.Fatal("put a Zed not on magpie through bili")
+		t.Fatal("put a Zed not on eipgam through bili")
 	}
-	if err := a.Apply("model", "magpie/relay/glm-4.6"); err != nil {
+	if err := a.Apply("model", "eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	bili := "http://127.0.0.1:8787/bili/" + gatewayV1()
@@ -447,7 +447,7 @@ func TestZedThroughBili(t *testing.T) {
 	}
 	// a pick keeps it, and saves the key for it again
 	keyed = nil
-	if err := a.Apply("model", "magpie/relay/glm-4.6"); err != nil {
+	if err := a.Apply("model", "eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if ZedURL(a) != bili || !slices.Equal(keyed, []string{bili}) {

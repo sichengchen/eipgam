@@ -39,7 +39,7 @@ for (const engine of ["chromium", "webkit"]) {
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve("en"));
-    await page.goto("http://magpie.test/");
+    await page.goto("http://eipgam.test/");
     await page.waitForFunction(() => typeof resetClock === "function" && typeof dateFmt === "function");
     const wrong = await page.evaluate(() => {
       // what resetClock and resetText said before dateFmt, word for word

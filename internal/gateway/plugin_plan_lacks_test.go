@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A plugin's account whose plan lacks the model is tried after the ones
@@ -22,7 +22,7 @@ import (
 func TestPluginAccountLackingTheModelGoesLast(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Setenv("FAKE_RESPONSES", "1")
 	t.Cleanup(plugin.Settle)
 	var mu sync.Mutex

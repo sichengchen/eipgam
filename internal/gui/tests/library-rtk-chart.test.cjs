@@ -37,7 +37,7 @@ function server(lang, view) {
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return route.fulfill({ json: { agents: [], profiles: [], settings: { lang, theme: "light" } } });
     if (url.pathname === "/api/plugins") return route.fulfill({ json: { plugins: [] } });
-    if (url.pathname === "/api/library") return route.fulfill({ json: { dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME, agents: [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }], instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [] } });
+    if (url.pathname === "/api/library") return route.fulfill({ json: { dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME, agents: [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }], instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [] } });
     if (url.pathname === "/api/library/rtk") return route.fulfill({ json: { path: "/opt/homebrew/bin/rtk", version: "1.0.1", url: "https://www.rtk-ai.app", agents: [{ id: "claude", name: "Claude Code", icon: "", on: true }], ...view } });
     if (url.pathname === "/api/usage/quotas") return route.fulfill({ json: [] });
     if (url.pathname === "/api/groups") return route.fulfill({ json: { groups: [] } });
@@ -69,13 +69,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, width, range, view) => {
       const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-      await ctx.addInitScript((r) => { try { localStorage.setItem("magpie.libTab", "rtk"); localStorage.setItem("magpie.rtkRange", r); } catch {} }, range);
+      await ctx.addInitScript((r) => { try { localStorage.setItem("eipgam.libTab", "rtk"); localStorage.setItem("eipgam.rtkRange", r); } catch {} }, range);
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, view));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.evaluate(() => document.querySelector('button[data-view="library"]').click());
       const chart = page.locator("#view-library .lib-rtk-chart");
       await chart.waitFor();

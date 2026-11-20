@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// AIStudio2API (the backend of @dorokuma/magpie-gemini-web's ai-studio)
+// AIStudio2API (the backend of @dorokuma/eipgam-gemini-web's ai-studio)
 // answers a model whose accounts all cool down with its AllCoolingError
 // (internal/aistudio/accounts.go) in an OpenAI error object
 // (internal/api/errors.go), the cooldown's kind and Google's own words

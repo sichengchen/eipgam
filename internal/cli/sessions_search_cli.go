@@ -12,21 +12,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
-// `magpie sessions search` and `magpie sessions show` (yansheng1003 on
+// `eipgam sessions search` and `eipgam sessions show` (yansheng1003 on
 // X: a command an agent can call to search its sessions): the Sessions
 // page's search over every agent's sessions (sessions.SearchSaid, the
 // index of what was said) and the sessions MCP server's text of a hit
 // and of a session (sessions.SaidText, SessionText), read here without
 // the app running.
 
-const sessionsSearchUsage = "usage: magpie sessions search <words…> [--agent <agent>] [--days N|today|all] [--limit N] [--wait <duration>] [--json]"
+const sessionsSearchUsage = "usage: eipgam sessions search <words…> [--agent <agent>] [--days N|today|all] [--limit N] [--wait <duration>] [--json]"
 
-const sessionsShowUsage = "usage: magpie sessions show <agent:id> [--find <words>] [--from N] [--max-chars N] [--json]"
+const sessionsShowUsage = "usage: eipgam sessions show <agent:id> [--find <words>] [--from N] [--max-chars N] [--json]"
 
-// searchWait is how long `magpie sessions search` waits for the index to
+// searchWait is how long `eipgam sessions search` waits for the index to
 // be brought up to date: the first time on a long history it is made,
 // and what was made is kept for the next run.
 const searchWait = 60 * time.Second
@@ -34,9 +34,9 @@ const searchWait = 60 * time.Second
 // sessionsTextHow is how the command's texts say to ask for more.
 var sessionsTextHow = sessions.TextHow{
 	More: "ask with a higher --limit",
-	Read: "Read one with: magpie sessions show <agent:id> --find <words>",
+	Read: "Read one with: eipgam sessions show <agent:id> --find <words>",
 	From: func(s sessions.Session, n int) string {
-		return fmt.Sprintf("magpie sessions show %s --from %d", sessions.SessionRef(s), n)
+		return fmt.Sprintf("eipgam sessions show %s --from %d", sessions.SessionRef(s), n)
 	},
 }
 
@@ -155,7 +155,7 @@ func signalContext() (context.Context, func()) {
 	return signal.NotifyContext(context.Background(), os.Interrupt)
 }
 
-// sessionsSearchTo: `magpie sessions search <words…>`.
+// sessionsSearchTo: `eipgam sessions search <words…>`.
 func sessionsSearchTo(w io.Writer, args []string) error {
 	o, err := parseSearchArgs(args, false)
 	if err != nil {
@@ -170,7 +170,7 @@ func sessionsSearchTo(w io.Writer, args []string) error {
 			return err
 		}
 		if !sessions.Reads(o.agent) {
-			return fmt.Errorf("%w: magpie sessions read on %s allows it", sessions.ErrNotRead, o.agent)
+			return fmt.Errorf("%w: eipgam sessions read on %s allows it", sessions.ErrNotRead, o.agent)
 		}
 	}
 	ctx, stop := signalContext()
@@ -215,7 +215,7 @@ func sessionsSearchTo(w io.Writer, args []string) error {
 	return nil
 }
 
-// sessionsShowTo: `magpie sessions show <agent:id>`.
+// sessionsShowTo: `eipgam sessions show <agent:id>`.
 func sessionsShowTo(w io.Writer, args []string) error {
 	o, err := parseSearchArgs(args, true)
 	if err != nil {
@@ -258,12 +258,12 @@ func findSession(ref string) (sessions.Session, error) {
 	agent, id, ok := strings.Cut(ref, ":")
 	if ok && agent != "" && id != "" {
 		if !sessions.Reads(agent) {
-			return sessions.Session{}, fmt.Errorf("%w: magpie sessions read on %s allows it", sessions.ErrNotRead, agent)
+			return sessions.Session{}, fmt.Errorf("%w: eipgam sessions read on %s allows it", sessions.ErrNotRead, agent)
 		}
 		if s, found := sessions.Find(agent, id); found {
 			return s, nil
 		}
-		return sessions.Session{}, fmt.Errorf("no session %s (magpie sessions search finds them)", ref)
+		return sessions.Session{}, fmt.Errorf("no session %s (eipgam sessions search finds them)", ref)
 	}
 	var have []sessions.Session
 	for _, s := range sessions.List(sessions.All) {
@@ -273,7 +273,7 @@ func findSession(ref string) (sessions.Session, error) {
 	}
 	switch len(have) {
 	case 0:
-		return sessions.Session{}, fmt.Errorf("no session %s (magpie sessions search finds them; name one as agent:id)", ref)
+		return sessions.Session{}, fmt.Errorf("no session %s (eipgam sessions search finds them; name one as agent:id)", ref)
 	case 1:
 		if !sessions.Reads(have[0].Agent) {
 			return sessions.Session{}, sessions.ErrNotRead
@@ -301,5 +301,5 @@ func searchAgent(typed string) (string, error) {
 			return id, nil
 		}
 	}
-	return "", fmt.Errorf("unknown agent %q (magpie sessions read lists them)\n%s", typed, sessionsSearchUsage)
+	return "", fmt.Errorf("unknown agent %q (eipgam sessions read lists them)\n%s", typed, sessionsSearchUsage)
 }

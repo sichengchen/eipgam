@@ -14,9 +14,9 @@ import (
 
 	"net/url"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Cursor's CLI (cursor-agent) keeps a chat in a folder of its own under its
@@ -180,7 +180,7 @@ func cursorParentOf(f file) string {
 // in -shm when they are; both would change the folder and make the chat
 // look written to a moment ago. A store with no log to replay is opened
 // immutable, which touches nothing; one with a log is read from a copy of
-// the two files, in a folder of magpie's own that close removes; a large
+// the two files, in a folder of eipgam's own that close removes; a large
 // store's copy is shared while it is unchanged (cursor_snapshot.go).
 func openCursorStore(path string) (db *sql.DB, closeDB func(), err error) {
 	return OpenUntouched(path)

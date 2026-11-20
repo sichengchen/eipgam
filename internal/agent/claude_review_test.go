@@ -5,25 +5,25 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // anthropicAPI is a provider on Anthropic's own API, whose review results
 // come back (gateway.AutoModeAnswered).
 const anthropicAPI = "https://api.anthropic.com"
 
-// TestClaudeAutoModeReview: Claude Code in auto mode behind magpie on a
+// TestClaudeAutoModeReview: Claude Code in auto mode behind eipgam on a
 // model Anthropic doesn't review (1EFLOPS on X, on Codex's gpt-6.1-sol)
 // said "this session isn't eligible because your requests go through
 // 127.0.0.1:3425…", and 2.1.322 with its telemetry off refuses every
 // action there instead, on DeepSeek and on a relay's Claude model alike
 // (JoyYoung2Lucky on X). Anthropic's page says to turn the review off
-// (CLAUDE_CODE_AUTO_MODE_SERVER=0) for a gateway that can't run it: magpie
+// (CLAUDE_CODE_AUTO_MODE_SERVER=0) for a gateway that can't run it: eipgam
 // does unless every model Claude Code can reach through it is reviewed
 // with the results coming back, shown or behind a group or a fallback. A
-// value of the user's is theirs, and magpie's goes when Claude Code is
-// taken off magpie.
+// value of the user's is theirs, and eipgam's goes when Claude Code is
+// taken off eipgam.
 func TestClaudeAutoModeReview(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -122,14 +122,14 @@ func TestClaudeAutoModeReview(t *testing.T) {
 		t.Fatalf("fallback gone: %q, want unset", review())
 	}
 
-	// off magpie, onto Claude Code's own model, and reset: magpie's goes
+	// off eipgam, onto Claude Code's own model, and reset: eipgam's goes
 	set("model", "v/gpt-x")
 	if review() != "0" {
 		t.Fatalf("set to v/gpt-x: %q, want 0", review())
 	}
 	set("model", "claude-opus-4-8")
 	if review() != "" {
-		t.Fatalf("Claude's own model kept magpie's value: %q", review())
+		t.Fatalf("Claude's own model kept eipgam's value: %q", review())
 	}
 	set("model", "v/gpt-x")
 	if review() != "0" {
@@ -137,7 +137,7 @@ func TestClaudeAutoModeReview(t *testing.T) {
 	}
 	set("model", "")
 	if review() != "" {
-		t.Fatalf("reset kept magpie's value: %q", review())
+		t.Fatalf("reset kept eipgam's value: %q", review())
 	}
 
 	// the user's own value is theirs, through a switch, Sync and reset
@@ -174,7 +174,7 @@ func TestClaudeAutoModeReview(t *testing.T) {
 	}
 }
 
-// TestT3CodeAutoModeReview: T3 Code's magpie instance runs Claude Code on
+// TestT3CodeAutoModeReview: T3 Code's eipgam instance runs Claude Code on
 // the gateway through its own environment, so it is told the same: the
 // review off while a model it lists isn't reviewed with its results
 // coming back, and on (not set) once each is.
@@ -229,7 +229,7 @@ func TestT3CodeAutoModeReview(t *testing.T) {
 // set to is judged on the provider it resolves to, as the gateway judges
 // its requests, not by its name alone. A Claude model on Anthropic's API
 // counts; one falling back to another vendor's model, or a group with
-// such a member, doesn't; a name magpie doesn't know is judged by the name.
+// such a member, doesn't; a name eipgam doesn't know is judged by the name.
 func TestClaudeReviewedJudgesTheSetModelWhereItGoes(t *testing.T) {
 	syncHome(t)
 	if err := provider.Save(provider.Provider{ID: "a", Name: "A", Anthropic: anthropicAPI, Key: "k", Models: []string{"claude-sonnet-5"}}); err != nil {

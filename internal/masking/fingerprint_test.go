@@ -3,7 +3,7 @@ package masking
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Fingerprint is the same for settings that mask alike and differs for

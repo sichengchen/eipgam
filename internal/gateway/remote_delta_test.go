@@ -10,13 +10,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // hopLog records what a server was asked: each request's body and headers.
 type hopLog struct {
 	mu      sync.Mutex
-	bodies  [][]byte // as the other magpie reads them, decoded
+	bodies  [][]byte // as the other eipgam reads them, decoded
 	wires   [][]byte // as they went
 	headers []http.Header
 }
@@ -104,7 +104,7 @@ func userAsks(text string) string {
 // Two magpies, each the other's provider (LotusDecoder on X): Codex says
 // store false and sends the conversation whole, and the leg between the
 // magpies carried all of it each turn. Now the second turn goes to the
-// other magpie as its new input alone after the id it kept the first
+// other eipgam as its new input alone after the id it kept the first
 // under, and the vendor behind it is still sent the whole conversation.
 // Here one gateway is both computers', "office" its own address.
 func TestRemoteMagpieSentTheNewInputAfterAKeptTurn(t *testing.T) {
@@ -139,19 +139,19 @@ func TestRemoteMagpieSentTheNewInputAfterAKeptTurn(t *testing.T) {
 	if rec := askHop(t, h, ua, storeFalseTurn("office/fake/m1", bigImage), nil); rec.Code != 200 || !strings.Contains(rec.Body.String(), "answer 1") {
 		t.Fatalf("turn 1: %d %s", rec.Code, rec.Body.String())
 	}
-	if !strings.HasPrefix(hop.header(0).Get(KeepTurnHeader), "magpie/") {
+	if !strings.HasPrefix(hop.header(0).Get(KeepTurnHeader), "eipgam/") {
 		t.Fatalf("turn 1 not asked kept: %v", hop.header(0))
 	}
 	if rec := askHop(t, h, ua, storeFalseTurn("office/fake/m1", bigImage, userSaw("answer 1"), userAsks("and now?")), nil); rec.Code != 200 || !strings.Contains(rec.Body.String(), "answer 2") {
 		t.Fatalf("turn 2: %d %s", rec.Code, rec.Body.String())
 	}
 	if hop.n() != 2 {
-		t.Fatalf("the other magpie asked %d times", hop.n())
+		t.Fatalf("the other eipgam asked %d times", hop.n())
 	}
 	q := hop.body(1)
 	in, _ := json.Marshal(q["input"])
 	if q["previous_response_id"] == nil || strings.Contains(string(in), "QUFB") || !strings.Contains(string(in), "and now?") || len(hop.raw(1)) > 4000 || q["store"] != false {
-		t.Fatalf("turn 2 to the other magpie, %d bytes: prev %v store %v input %.300s", len(hop.raw(1)), q["previous_response_id"], q["store"], in)
+		t.Fatalf("turn 2 to the other eipgam, %d bytes: prev %v store %v input %.300s", len(hop.raw(1)), q["previous_response_id"], q["store"], in)
 	}
 	// the vendor still sees the whole conversation, store false as asked
 	v := vendor.raw(1)
@@ -168,7 +168,7 @@ func TestRemoteMagpieSentTheNewInputAfterAKeptTurn(t *testing.T) {
 		t.Fatalf("turn 3: %d %s", rec.Code, rec.Body.String())
 	}
 	if q := hop.body(2); q["previous_response_id"] == nil || strings.Contains(hop.raw(2), "QUFB") {
-		t.Fatalf("turn 3 to the other magpie: %.300s", hop.raw(2))
+		t.Fatalf("turn 3 to the other eipgam: %.300s", hop.raw(2))
 	}
 	for _, want := range []string{"QUFB", "answer 1", "and now?", "answer 2", "third"} {
 		if !strings.Contains(vendor.raw(2), want) {
@@ -185,7 +185,7 @@ func TestRemoteMagpieSentTheNewInputAfterAKeptTurn(t *testing.T) {
 	}
 }
 
-// fakeRemote is a server answering as a magpie would on /v1/responses:
+// fakeRemote is a server answering as a eipgam would on /v1/responses:
 // keeps says it kept the turn, and lost answers every
 // previous_response_id previous_response_not_found.
 func fakeRemote(t *testing.T, keeps, lost bool) (*hopLog, http.Handler) {
@@ -216,7 +216,7 @@ func fakeRemote(t *testing.T, keeps, lost bool) (*hopLog, http.Handler) {
 	return hop, New().Handler()
 }
 
-// A magpie that said it kept the turn but no longer holds it (restarted)
+// A eipgam that said it kept the turn but no longer holds it (restarted)
 // answers previous_response_not_found: the conversation goes again whole
 // at once, and the next turn isn't tried as a delta, which would cost a
 // failed round trip each turn.
@@ -243,7 +243,7 @@ func TestRemoteMagpieLostTurnSentWhole(t *testing.T) {
 	}
 }
 
-// A magpie from before this never says it kept a turn: it is never sent
+// A eipgam from before this never says it kept a turn: it is never sent
 // a delta, which it might relay to a vendor that ignores the id.
 func TestOlderRemoteMagpieSentWhole(t *testing.T) {
 	hop, h := fakeRemote(t, false, false)
@@ -294,9 +294,9 @@ func TestRemoteMagpieEditedHistorySentWhole(t *testing.T) {
 	}
 }
 
-// Only another magpie can ask its store false turn kept: the header from
+// Only another eipgam can ask its store false turn kept: the header from
 // any other client is ignored, nothing is kept, and an id it names later
-// isn't there. A magpie asking it gets the turn kept and is told so; one
+// isn't there. A eipgam asking it gets the turn kept and is told so; one
 // naming an id not held is answered previous_response_not_found before
 // any vendor is asked, rather than the id relayed to one that may ignore
 // it.
@@ -318,13 +318,13 @@ func TestKeepTurnOnlyFromAMagpie(t *testing.T) {
 		t.Fatal(err)
 	}
 	h := New().Handler()
-	// plain clients: the header as a magpie writes it, or another value
-	// from Codex as a magpie's hop carries it on
+	// plain clients: the header as a eipgam writes it, or another value
+	// from Codex as a eipgam's hop carries it on
 	for _, c := range []struct{ ua, keep string }{
-		{"curl/8.0", "magpie/0.1.2300"},
-		{"pi/1.0", "magpie/0.1.2300"},
+		{"curl/8.0", "eipgam/0.1.2300"},
+		{"pi/1.0", "eipgam/0.1.2300"},
 		{"codex_cli_rs/0.50.0", "1"},
-		{"magpie/0.1.2300", "1"},
+		{"eipgam/0.1.2300", "1"},
 	} {
 		rec := askHop(t, h, c.ua, storeFalseTurn("fake/m1", userAsks("my name is Ada")), map[string]string{KeepTurnHeader: c.keep})
 		if rec.Code != 200 || rec.Header().Get(KeptTurnHeader) != "" {
@@ -340,23 +340,23 @@ func TestKeepTurnOnlyFromAMagpie(t *testing.T) {
 		}
 	}
 
-	// another magpie
-	magpie := map[string]string{KeepTurnHeader: "magpie/0.1.2300", AgentHeader: "codex", ViaHeader: "studio"}
+	// another eipgam
+	eipgam := map[string]string{KeepTurnHeader: "eipgam/0.1.2300", AgentHeader: "codex", ViaHeader: "studio"}
 	n0 := vendor.n()
-	rec := askHop(t, h, "magpie/0.1.2300", storeFalseTurn("fake/m1", userAsks("my name is Ada")), magpie)
+	rec := askHop(t, h, "eipgam/0.1.2300", storeFalseTurn("fake/m1", userAsks("my name is Ada")), eipgam)
 	if rec.Code != 200 || rec.Header().Get(KeptTurnHeader) != "1" {
-		t.Fatalf("magpie: %d, told kept %q", rec.Code, rec.Header().Get(KeptTurnHeader))
+		t.Fatalf("eipgam: %d, told kept %q", rec.Code, rec.Header().Get(KeptTurnHeader))
 	}
-	rec = askHop(t, h, "magpie/0.1.2300", `{"model":"fake/m1","store":false,"previous_response_id":"resp_v`+fmt.Sprint(n0+1)+`","input":[`+userAsks("what is my name?")+`]}`, magpie)
+	rec = askHop(t, h, "eipgam/0.1.2300", `{"model":"fake/m1","store":false,"previous_response_id":"resp_v`+fmt.Sprint(n0+1)+`","input":[`+userAsks("what is my name?")+`]}`, eipgam)
 	if rec.Code != 200 {
-		t.Fatalf("magpie's delta: %d %s", rec.Code, rec.Body.String())
+		t.Fatalf("eipgam's delta: %d %s", rec.Code, rec.Body.String())
 	}
 	if v := vendor.raw(n0 + 1); !strings.Contains(v, "my name is Ada") || !strings.Contains(v, "answer "+fmt.Sprint(n0+1)) || strings.Contains(v, "previous_response_id") {
 		t.Fatalf("vendor not given the conversation whole: %s", v)
 	}
-	// an id not held, from a magpie asking its turns kept: not relayed
+	// an id not held, from a eipgam asking its turns kept: not relayed
 	n := vendor.n()
-	rec = askHop(t, h, "magpie/0.1.2300", `{"model":"fake/m1","store":false,"previous_response_id":"resp_gone","input":[`+userAsks("hi")+`]}`, magpie)
+	rec = askHop(t, h, "eipgam/0.1.2300", `{"model":"fake/m1","store":false,"previous_response_id":"resp_gone","input":[`+userAsks("hi")+`]}`, eipgam)
 	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "previous_response_not_found") || vendor.n() != n {
 		t.Fatalf("lost id: %d %s, vendor asked %d times", rec.Code, rec.Body.String(), vendor.n()-n)
 	}

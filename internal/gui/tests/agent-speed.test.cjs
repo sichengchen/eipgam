@@ -18,12 +18,12 @@ const assets = path.resolve(__dirname, "../assets");
 
 function fixtures(c) {
   const options = [
-    { value: "magpie/codex/gpt-5.5", ref: "codex/gpt-5.5", label: "GPT-5.5", group: "ChatGPT", fastFor: c.agent, fast: !!c.pick, ultra: c.pick === "ultrafast", ultraOk: true },
-    { value: "magpie/zai/glm-5", ref: "zai/glm-5", label: "GLM-5", group: "Z.ai" },
+    { value: "eipgam/codex/gpt-5.5", ref: "codex/gpt-5.5", label: "GPT-5.5", group: "ChatGPT", fastFor: c.agent, fast: !!c.pick, ultra: c.pick === "ultrafast", ultraOk: true },
+    { value: "eipgam/zai/glm-5", ref: "zai/glm-5", label: "GLM-5", group: "Z.ai" },
   ];
   const effort = { key: "effort", label: "effort", value: "high", options: ["low", "medium", "high"].map((v) => ({ value: v, label: v })) };
   const name = c.agent === "codex" ? "Codex" : "OpenCode";
-  return [{ id: c.agent, name, path: "/test/" + c.agent, wired: true, fields: [{ key: "model", label: "model", value: c.model || "magpie/codex/gpt-5.5", options }, effort] }];
+  return [{ id: c.agent, name, path: "/test/" + c.agent, wired: true, fields: [{ key: "model", label: "model", value: c.model || "eipgam/codex/gpt-5.5", options }, effort] }];
 }
 
 function server(lang, c, posts, refuse) {
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, c, posts, refuse));
-          await page.goto("http://magpie.test/" + (panel ? "?mode=panel" : "?view=agents"));
+          await page.goto("http://eipgam.test/" + (panel ? "?mode=panel" : "?view=agents"));
           const row = `.row.agent[data-id="${c.agent}"]`;
           await page.locator(row).waitFor();
           if (panel) await page.locator(`${row} .ag-sum`).click();
@@ -148,7 +148,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         // a model with no fast mode: no Speed
         {
-          const { page, speed } = await open({ agent: "codex", model: "magpie/zai/glm-5" });
+          const { page, speed } = await open({ agent: "codex", model: "eipgam/zai/glm-5" });
           assert.equal(await speed.count(), 0);
           await page.context().close();
         }

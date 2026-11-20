@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // EV_John_Liu on X: whether a provider is on a plan or pay as you go is
 // marked on Providers and on a routing group's members. /api/providers
-// gives magpie's reading (billingKind) and the user's word (billing),
+// gives eipgam's reading (billingKind) and the user's word (billing),
 // the editor's save keeps the word on a preset and on a typed-in
 // provider, refuses a value that is neither, and a group's member says
 // its provider's billing.

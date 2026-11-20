@@ -1,12 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Settings › About › Download source (#893): updates come from usemagpie.ai,
-// then GitHub, or a mirror typed in for GitHub (a full https:// address, the
-// same setting as `magpie update mirror`), and no mirror is one click back. A download that
-// failed through the mirror says it's the mirror's and offers GitHub, which
-// takes the mirror away and downloads again. No click moves the page,
-// nothing is a native select, no left border. English and Chinese; the
-// line's way to the docs' Mirrors page and what a mirror's address is, in
-// every language, wide and narrow. No backend, the API is faked.
+// eipgam releases come from GitHub. A mirror can serve the release file,
+// and removing it restores the direct download.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -18,11 +12,8 @@ const assets = path.resolve(__dirname, "../assets");
 
 const words = {
   en: { row: "Download source", use: "Use a mirror…", save: "Save", github: "Remove mirror", change: "Change", bad: "full https:// address",
-    tip: "a file from the mirror that doesn't match it is not installed",
-    viaGitHub: "from usemagpie.ai, and from GitHub when that fails", viaMirror: "and through this mirror when that fails", failed: "through the mirror", official: "Download from GitHub" },
-  zh: { row: "下载源", use: "使用镜像…", save: "保存", github: "不用镜像", change: "修改", bad: "完整的 https:// 地址",
-    tip: "从镜像下载的文件如果与校验和不符，magpie 不会安装它",
-    viaGitHub: "从 usemagpie.ai 下载，失败时改从 GitHub 下载", viaMirror: "失败时经此镜像下载", failed: "经镜像", official: "改用官方下载" },
+    tip: "A download must match the SHA-256 in its GitHub build attestation.",
+    viaGitHub: "Downloads come from the eipgam releases on GitHub.", viaMirror: "Downloads use this mirror.", failed: "through the mirror", official: "Download from GitHub" },
 };
 
 const M = "https://mirror.example/gh/";
@@ -31,7 +22,7 @@ function server(lang, ctl) {
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data, status) => route.fulfill({ json: data, status: status || 200 });
-    const settings = () => ({ theme: "light", lang, version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 }, ...(ctl.mirror ? { updateMirror: ctl.mirror } : {}) });
+    const settings = () => ({ theme: "light", lang, version: "0.1.900", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 }, ...(ctl.mirror ? { updateMirror: ctl.mirror } : {}) });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: settings() });
@@ -79,7 +70,7 @@ async function open(browser, lang, ctl, errors, width) {
   page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
   await page.route("**/*", server(lang, ctl));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings");
+  await page.goto("http://eipgam.test/?view=settings");
   await settingsDrawn(page); // rows found are the ones that stay (#1659)
   await openPart(page, "about");
   await page.locator("#setPage-about").waitFor({ state: "visible" });
@@ -96,20 +87,16 @@ async function click(page, loc) {
 }
 
 // the row's way to the docs' Mirrors page, and, typing one, what a
-// mirror's address is (WeltAn_X on X), in every language
+// mirror's address is (WeltAn_X on X), in English
 const how = {
-  en: { use: "Use a mirror…", more: "How mirrors work", hint: "goes before the release's github.com link", docs: "https://usemagpie.ai/docs/mirrors#settings" },
-  zh: { use: "使用镜像…", more: "镜像怎么用", hint: "加在发布文件的 github.com 链接前面", docs: "https://usemagpie.ai/docs/zh/mirrors#settings" },
-  "zh-TW": { use: "使用鏡像…", more: "鏡像怎麼用", hint: "加在釋出檔案的 github.com 連結前面", docs: "https://usemagpie.ai/docs/zh/mirrors#settings" },
-  ja: { use: "ミラーを使う…", more: "ミラーの使い方", hint: "github.com リンクの前に付けます", docs: "https://usemagpie.ai/docs/ja/mirrors#settings" },
-  de: { use: "Spiegel verwenden…", more: "Wie Spiegel funktionieren", hint: "vor dem github.com-Link des Releases", docs: "https://usemagpie.ai/docs/mirrors#settings" },
+  en: { use: "Use a mirror…", more: "How mirrors work", hint: "goes before the release's github.com link", docs: "https://github.com/sichengchen/eipgam/blob/main/docs/reference.md#updates" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Download source says what a mirror is and links the docs, in every language", async (t) => {
+  test(engine + ": Download source says what a mirror is and links the docs, in English", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
-    for (const lang of Object.keys(how)) for (const width of [900, 420]) {
+    for (const lang of ["en"]) for (const width of [900, 420]) {
       const w = how[lang];
       await t.test(lang + " at " + width + "px", async () => {
         const ctl = { posts: [] };
@@ -143,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   test(engine + ": Download source sets a mirror, and GitHub is one click back", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
-    for (const lang of ["en", "zh"]) {
+    for (const lang of ["en"]) {
       const w = words[lang];
       await t.test(lang + ": a mirror typed in, a bad one refused, GitHub back", async () => {
         const ctl = { posts: [] };
@@ -151,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const { page, row } = await open(browser, lang, ctl, errors);
         assert.equal((await row.locator(".name").innerText()).trim(), w.row);
         await row.locator(".sub", { hasText: w.viaGitHub }).waitFor();
-        assert.equal((await row.locator("code").innerText()).trim(), "usemagpie.ai");
+        assert.equal((await row.locator("code").innerText()).trim(), "github.com/sichengchen/eipgam");
         // the tooltip's second half reads as a sentence (AlwaySleepyZzz on Discord)
         assert.ok((await row.locator(".sub").getAttribute("title")).includes(w.tip), "the tooltip says a mismatched mirror file is not installed");
         assert.equal(await page.locator("#about select").count(), 0, "no native select");

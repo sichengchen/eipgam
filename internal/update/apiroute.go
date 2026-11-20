@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/source"
+	"github.com/sichengchen/eipgam/internal/source"
 )
 
 // GitHub's API route to a release's file. github.com's download address
 // (…/releases/download/<tag>/<file>) can answer 504 on every try while
 // the same file is served through the API: on 2026-11-08 github.com gave
-// 504 for every magpie release's file for hours, while
+// 504 for every eipgam release's file for hours, while
 // api.github.com/repos/<owner>/<repo>/releases/assets/<id>, asked with
 // Accept: application/octet-stream, redirected to the file at once. A
 // download whose github.com address is busy goes on there (download): the

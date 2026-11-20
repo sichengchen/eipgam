@@ -120,7 +120,7 @@ func TestSubagentsEachAgentsFile(t *testing.T) {
 }
 
 // A subagent file of the user's own by the same name is never written
-// over, nor taken away; one magpie wrote that the user edited is theirs
+// over, nor taken away; one eipgam wrote that the user edited is theirs
 // from then on: a change in the library leaves it as the user has it.
 func TestSubagentsLeaveTheUsersFiles(t *testing.T) {
 	h := sandbox(t)
@@ -139,7 +139,7 @@ func TestSubagentsLeaveTheUsersFiles(t *testing.T) {
 		t.Fatalf("the user's own file was written over:\n%s", read(t, own))
 	}
 
-	// the user edits magpie's Codex file, then the library's subagent
+	// the user edits eipgam's Codex file, then the library's subagent
 	// changes: the edit stays, and the page is told why
 	codex := filepath.Join(h, ".codex/agents/reviewer.toml")
 	oc := filepath.Join(h, ".config/opencode/agents/reviewer.md")
@@ -154,7 +154,7 @@ func TestSubagentsLeaveTheUsersFiles(t *testing.T) {
 		t.Errorf("the user's edit was written over:\n%s", read(t, codex))
 	}
 	if !strings.Contains(read(t, oc), "You review code, twice.") {
-		t.Errorf("magpie's untouched OpenCode file wasn't updated:\n%s", read(t, oc))
+		t.Errorf("eipgam's untouched OpenCode file wasn't updated:\n%s", read(t, oc))
 	}
 	var codexSaid bool
 	for _, p := range res.Problems {
@@ -164,12 +164,12 @@ func TestSubagentsLeaveTheUsersFiles(t *testing.T) {
 		t.Errorf("problems: %+v", res.Problems)
 	}
 
-	// removed from the library: magpie's own file goes, the user's stay
+	// removed from the library: eipgam's own file goes, the user's stay
 	if _, err := RemoveSubagents([]string{"reviewer"}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(oc); !os.IsNotExist(err) {
-		t.Errorf("magpie's OpenCode file stayed: %v", err)
+		t.Errorf("eipgam's OpenCode file stayed: %v", err)
 	}
 	if read(t, codex) != edited || !strings.Contains(read(t, own), "My own reviewer.") {
 		t.Error("removing took the user's files")
@@ -203,7 +203,7 @@ func TestSubagentCheck(t *testing.T) {
 // subagent, which Codex ran on its lead's model) goes into Codex's role
 // file, whose model Codex lays over the lead's pick; no other agent's file
 // is written one, and the page is told only Codex takes it. Changed in the
-// library, the role file magpie wrote changes with it; taken away, the
+// library, the role file eipgam wrote changes with it; taken away, the
 // role is as one written without a model.
 func TestSubagentModelGoesToCodex(t *testing.T) {
 	h := sandbox(t)

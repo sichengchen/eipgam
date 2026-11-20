@@ -9,20 +9,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// #3850 (prgrmrwy): magpie runs on a home server, and the office's remote
-// magpie card (or DSH's, reading the cards) said "1 reset" with no way to
-// use it but walking to the server. POST /v1/magpie/quotas/codex-reset
+// #3850 (prgrmrwy): eipgam runs on a home server, and the office's remote
+// eipgam card (or DSH's, reading the cards) said "1 reset" with no way to
+// use it but walking to the server. POST /v1/eipgam/quotas/codex-reset
 // spends it there, through the Usage page's own code. A reset can't be
 // undone, so only a gateway key with full access spends one: never a
 // request with no key, from this computer or a page or app the gateway
 // lets in on loopback without one, nor a read-only key or a held one.
 func TestCodexResetNeedsAFullKey(t *testing.T) {
 	codexSignedIn(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	b := newResetBackend(t, "acct-1")
 	keys, secrets := newCaller(t, "Full", "Read only", "Held")
 	if _, err := access.Update("access-key", access.Change{Key: keys[1].ID, ReadOnly: true}); err != nil {
@@ -64,7 +64,7 @@ func TestCodexResetNeedsAFullKey(t *testing.T) {
 		{"a foreign page, no key", loop, gw, "https://evil.example", ""},
 		{"a foreign page with the full key", loop, gw, "https://evil.example", secrets[0]},
 		{"another machine, no key", lan, gw, "", ""},
-		{"another machine, a wrong key", lan, gw, "", "sk-magpie-wrong"},
+		{"another machine, a wrong key", lan, gw, "", "sk-eipgam-wrong"},
 		{"a read-only key", lan, gw, "", secrets[1]},
 		{"a read-only key, this computer", loop, gw, "", secrets[1]},
 		{"a held key", lan, gw, "", secrets[2]},
@@ -108,13 +108,13 @@ func TestCodexResetNeedsAFullKey(t *testing.T) {
 	}
 }
 
-// The office's magpie spends the home server's reset through its remote
-// magpie provider (#3850): the card here keeps the remote's resets, and
+// The office's eipgam spends the home server's reset through its remote
+// eipgam provider (#3850): the card here keeps the remote's resets, and
 // using one asks the remote with the provider's key. A read-only key there
 // says so in words the card can show.
 func TestRemoteCodexResetThroughTheGateway(t *testing.T) {
 	codexSignedIn(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	provider.ForgetRemoteCardsForTest()
 	t.Cleanup(provider.ForgetRemoteCardsForTest)
 	b := newResetBackend(t, "acct-1")

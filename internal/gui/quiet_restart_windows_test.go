@@ -23,14 +23,14 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/w32"
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // aquaarboraurum on X: the window a restart to update brings back is
 // white, every time, its title bar there and its page alive; a restart by
-// hand, or a reload, draws it. The restart is played here as magpie makes
+// hand, or a reload, draws it. The restart is played here as eipgam makes
 // it on Windows: an old process with its window up starts the new one
 // detached (update's launch), marks the restart as one by itself
 // (markQuietRestart) and quits; the new one waits for it to go
@@ -41,7 +41,7 @@ import (
 //
 // The windows are real, so this runs on the Windows box's signed-in
 // session, not over ssh (session 0).
-const testRestartDrawEnv = "MAGPIE_TEST_RESTART_DRAW"
+const testRestartDrawEnv = "EIPGAM_TEST_RESTART_DRAW"
 
 func TestRestartedWindowIsDrawn(t *testing.T) {
 	var session uint32
@@ -57,7 +57,7 @@ func TestRestartedWindowIsDrawn(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 			defer cancel()
 			// not t.TempDir: WebView2's processes still hold files in it
-			home, err := os.MkdirTemp("", "magpie-restart-draw-")
+			home, err := os.MkdirTemp("", "eipgam-restart-draw-")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -237,7 +237,7 @@ func restartDrawPage(loaded chan<- struct{}, seen chan<- string) http.Handler {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, `<html><body style="margin:0;background:#2a6f97;height:100vh">magpie<script>fetch("/loaded");const say = () => fetch("/vis?s=" + document.visibilityState);document.addEventListener("visibilitychange", say);setInterval(say, 50)</script></body></html>`)
+		fmt.Fprint(w, `<html><body style="margin:0;background:#2a6f97;height:100vh">eipgam<script>fetch("/loaded");const say = () => fetch("/vis?s=" + document.visibilityState);document.addEventListener("visibilitychange", say);setInterval(say, 50)</script></body></html>`)
 	})
 }
 
@@ -256,14 +256,14 @@ func userFront(title string) {
 	w32.SetForegroundWindow(hwnd)
 }
 
-// restartDrawOld is the magpie before: its window up and drawn, it starts
+// restartDrawOld is the eipgam before: its window up and drawn, it starts
 // the new one as update's launch does and quits.
 func restartDrawOld(mode string, report func(string, ...any)) {
 	fail := func(format string, a ...any) { report(format, a...); os.Exit(1) }
 	loaded := make(chan struct{}, 16)
 	seen := make(chan string, 4096)
 	app := application.New(application.Options{
-		Name:    "magpie restart draw regression",
+		Name:    "eipgam restart draw regression",
 		Windows: windowsOptions(),
 		Assets:  application.AssetOptions{Handler: restartDrawPage(loaded, seen)},
 	})
@@ -297,7 +297,7 @@ func restartDrawOld(mode string, report func(string, ...any)) {
 					fail("old: the other app: %v", err)
 				}
 				other := uint32(ps.Process.Pid)
-				os.Setenv("MAGPIE_TEST_OTHER_PID", strconv.Itoa(int(other)))
+				os.Setenv("EIPGAM_TEST_OTHER_PID", strconv.Itoa(int(other)))
 				for deadline, click := time.Now().Add(20*time.Second), time.Now().Add(time.Second); ; time.Sleep(100 * time.Millisecond) {
 					var pid uint32
 					windows.GetWindowThreadProcessId(windows.GetForegroundWindow(), &pid)
@@ -330,7 +330,7 @@ func restartDrawOld(mode string, report func(string, ...any)) {
 			// as update's launch starts the new version: detached, no
 			// console, its window on the desktop this one is on
 			cmd := proc.Command(self, "-test.run=^$")
-			cmd.Env = append(os.Environ(), "MAGPIE_REPLACES="+strconv.Itoa(os.Getpid()),
+			cmd.Env = append(os.Environ(), "EIPGAM_REPLACES="+strconv.Itoa(os.Getpid()),
 				testRestartDrawEnv+"=new,"+mode+","+strings.SplitN(os.Getenv(testRestartDrawEnv), ",", 3)[2])
 			if cmd.SysProcAttr == nil {
 				cmd.SysProcAttr = &syscall.SysProcAttr{}
@@ -366,7 +366,7 @@ func restartDrawNew(mode string, report func(string, ...any), end func(bool)) {
 	loaded := make(chan struct{}, 16)
 	seen := make(chan string, 4096)
 	app := application.New(application.Options{
-		Name:    "magpie restart draw regression",
+		Name:    "eipgam restart draw regression",
 		Windows: windowsOptions(),
 		Assets:  application.AssetOptions{Handler: restartDrawPage(loaded, seen)},
 	})
@@ -378,7 +378,7 @@ func restartDrawNew(mode string, report func(string, ...any), end func(bool)) {
 	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
 		go func() {
 			defer func() {
-				if pid, err := strconv.Atoi(os.Getenv("MAGPIE_TEST_OTHER_PID")); err == nil {
+				if pid, err := strconv.Atoi(os.Getenv("EIPGAM_TEST_OTHER_PID")); err == nil {
 					endProcess(uint32(pid))
 				}
 				end(ok)
@@ -433,7 +433,7 @@ func restartDrawNew(mode string, report func(string, ...any), end func(bool)) {
 			if strings.Contains(mode, "cover") {
 				// the cover goes after the window has been up under it
 				time.Sleep(2 * time.Second)
-				if pid, err := strconv.Atoi(os.Getenv("MAGPIE_TEST_OTHER_PID")); err == nil {
+				if pid, err := strconv.Atoi(os.Getenv("EIPGAM_TEST_OTHER_PID")); err == nil {
 					endProcess(uint32(pid))
 				}
 				time.Sleep(500 * time.Millisecond)

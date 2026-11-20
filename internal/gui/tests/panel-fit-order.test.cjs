@@ -16,7 +16,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_PANEL_FIT_ORDER_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_PANEL_FIT_ORDER_ASSETS || path.join(__dirname, "../assets"));
 const H = 3600e3;
 const iso = (ms) => new Date(ms).toISOString();
 
@@ -111,10 +111,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
-      await page.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "usage"); } catch {} });
+      await page.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "usage"); } catch {} });
       const panel = trayPanel(page);
       await page.route("**/*", serve(page, lang, panel));
-      await page.goto("http://magpie.test/?mode=panel");
+      await page.goto("http://eipgam.test/?mode=panel");
 
       // the card drawn with its rings and curve, and the page done asking
       // while its first fit is still on its way

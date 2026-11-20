@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
 )
 
 // A model can also loop across turns: it asks for the same tool call, the
@@ -379,12 +379,12 @@ func (l toolLoop) called() string {
 
 // why is what the Routing, Usage and Sessions views say of the turn.
 func (l toolLoop) why() string {
-	return fmt.Sprintf("tool loop: the same tool call got the same result %d turns in a row (%s); answered by magpie, sent nowhere", l.turns, l.called())
+	return fmt.Sprintf("tool loop: the same tool call got the same result %d turns in a row (%s); answered by eipgam, sent nowhere", l.turns, l.called())
 }
 
 // notice is what the agent shows the user, as the turn's answer, in lang
 // (conversationLang). It goes to the vendor with the conversation's next
-// turn, so it names neither magpie nor a vendor's limits; the setting is
+// turn, so it names neither eipgam nor a vendor's limits; the setting is
 // named as the GUI in that language names it (Korean, which the GUI
 // hasn't, as English does).
 func (l toolLoop) notice(lang string) string {
@@ -414,5 +414,5 @@ func writeLocalText(w http.ResponseWriter, from provider.Protocol, req *Request,
 	events <- Event{Kind: KText, Text: text}
 	events <- Event{Kind: KStop, Stop: "stop"}
 	close(events)
-	relayStatus(w, from, "magpie", req, events, &Usage{}, func() {})
+	relayStatus(w, from, "eipgam", req, events, &Usage{}, func() {})
 }

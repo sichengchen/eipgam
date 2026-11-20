@@ -3,7 +3,7 @@ package agent
 import (
 	"cmp"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // decisionEndpoints are the gateway paths a decision model is asked on:
@@ -11,13 +11,13 @@ import (
 // translates to System One for it (decisions_systemone.go).
 var decisionEndpoints = []string{"/v1/systemone", "/v1/decisions"}
 
-// pluggedDecisionModels are magpie's decision models as an agent plugin's
+// pluggedDecisionModels are eipgam's decision models as an agent plugin's
 // connect is given them, apart from models: the models a routing group's
 // pickers offer (provider.OfferedDeciders, what /v1/models lists under
 // X-Magpie-Deciders), then the routing groups of them, each with the
 // paths it is asked on. models is chat models only, which an agent offers
 // for a conversation; a decision model there would be offered for one
-// and fail (baranwang on X: a plugin wiring magpie's judging models into
+// and fail (baranwang on X: a plugin wiring eipgam's judging models into
 // its agent had no way to learn them). [] for none, never nil.
 func pluggedDecisionModels(agent string) []map[string]any {
 	ds := provider.OfferedDeciders(nil)

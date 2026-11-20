@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Copy all keys (@emilochen on X: one provider's keys from this computer to
-// a magpie in the cloud): a key provider with more than one key has Copy all
+// a eipgam in the cloud): a key provider with more than one key has Copy all
 // N keys under Add another key. It asks provider/key with allKeys and copies
-// what comes back, one a line, through magpie's clipboard, and says how many
+// what comes back, one a line, through eipgam's clipboard, and says how many
 // went and where to paste them. One key has no such row; each row's own
 // Copy stays. Add another key is still the one row that adds. The page
 // doesn't scroll. Every language, wide and narrow.
@@ -54,11 +54,11 @@ function serve(lang, n, posts) {
 }
 
 const words = {
-  en: { all: "Copy all 3 keys", another: "Add another key", note: "3 keys copied, one a line — paste them into Paste several in another magpie" },
-  zh: { all: "全部复制（3 个密钥）", another: "添加另一个密钥", note: "已复制 3 个密钥，每行一个 — 在另一台 magpie 的“批量粘贴”里粘贴即可" },
-  "zh-TW": { all: "全部複製（3 個金鑰）", another: "新增另一個金鑰", note: "已複製 3 個金鑰，每行一個 — 在另一台 magpie 的「批次貼上」裡貼上即可" },
-  ja: { all: "3 個のキーをすべてコピー", another: "別のキーを追加", note: "3 個のキーを 1 行に 1 つずつコピーしました — 別の magpie の「まとめて貼り付け」に貼り付けてください" },
-  de: { all: "Alle 3 Schlüssel kopieren", another: "Weiteren Schlüssel hinzufügen", note: "3 Schlüssel kopiert, einer pro Zeile — in einem anderen magpie unter „Mehrere einfügen“ einfügen" },
+  en: { all: "Copy all 3 keys", another: "Add another key", note: "3 keys copied, one a line — paste them into Paste several in another eipgam" },
+  zh: { all: "全部复制（3 个密钥）", another: "添加另一个密钥", note: "已复制 3 个密钥，每行一个 — 在另一台 eipgam 的“批量粘贴”里粘贴即可" },
+  "zh-TW": { all: "全部複製（3 個金鑰）", another: "新增另一個金鑰", note: "已複製 3 個金鑰，每行一個 — 在另一台 eipgam 的「批次貼上」裡貼上即可" },
+  ja: { all: "3 個のキーをすべてコピー", another: "別のキーを追加", note: "3 個のキーを 1 行に 1 つずつコピーしました — 別の eipgam の「まとめて貼り付け」に貼り付けてください" },
+  de: { all: "Alle 3 Schlüssel kopieren", another: "Weiteren Schlüssel hinzufügen", note: "3 Schlüssel kopiert, einer pro Zeile — in einem anderen eipgam unter „Mehrere einfügen“ einfügen" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, n, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Relay" }).first().click();
         await page.locator(".editor .accts .acc.add").waitFor();
         return { page, errors, posts };

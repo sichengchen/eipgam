@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // xyxyxy_15591 on Discord: an update put in by itself shouldn't put the
@@ -23,9 +23,9 @@ import (
 func TestRestartBySelfComesBackQuietly(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	mark := filepath.Join(home, "magpie", quietRestartFile)
+	mark := filepath.Join(home, "eipgam", quietRestartFile)
 
-	exe := filepath.Join(t.TempDir(), "magpie")
+	exe := filepath.Join(t.TempDir(), "eipgam")
 	os.WriteFile(exe, []byte("old"), 0o755)
 	self, _ := os.Stat(exe)
 	os.WriteFile(exe, []byte("newer"), 0o755) // in already: install has nothing to swap
@@ -66,7 +66,7 @@ func TestRestartBySelfComesBackQuietly(t *testing.T) {
 		t.Fatal("the mark is read twice")
 	}
 
-	// magpie web restarts in place: nothing to mark
+	// eipgam web restarts in place: nothing to mark
 	if !restartInto(true, false, "", true) {
 		t.Fatal("web restart failed")
 	}
@@ -112,12 +112,12 @@ func TestRestartBySelfComesBackQuietly(t *testing.T) {
 // eating_dream on X (v0.1.4303, AutoRestart on, a check every half
 // hour): every update put the main window back over what they were
 // doing. A restart nobody clicked (restartBySelf: Settings' AutoRestart,
-// a terminal's magpie update, a Remote magpie's ask, another copy's
+// a terminal's eipgam update, a Remote eipgam's ask, another copy's
 // install) comes back in the tray alone, whether the window was up,
 // minimised or closed; one the user clicked opens it as it was.
 func TestRestartBySelfComesBackToTheTray(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	exe := filepath.Join(t.TempDir(), "magpie")
+	exe := filepath.Join(t.TempDir(), "eipgam")
 	os.WriteFile(exe, []byte("old"), 0o755)
 	self, _ := os.Stat(exe)
 	os.WriteFile(exe, []byte("newer"), 0o755)

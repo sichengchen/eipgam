@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// maohy915 on X: a magpie on a NAS, used from another computer's magpie,
+// maohy915 on X: a eipgam on a NAS, used from another computer's eipgam,
 // showed failed calls on Routing while Usage's Failed filter found none.
 // The calls had failed on one provider and been answered by its fallback:
 // the failed try wrote no row (nothing was billed) and its request's row

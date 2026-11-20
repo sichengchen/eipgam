@@ -94,7 +94,7 @@ async function open(t, engine, lang, width, folder) {
   const errors = [], posts = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, posts, routeFrom(folder)));
-  await page.goto("http://magpie.test/?view=routing");
+  await page.goto("http://eipgam.test/?view=routing");
   const group = page.locator(".rt-group").first();
   await group.waitFor({ state: "attached" });
   return { page, group, errors, posts };

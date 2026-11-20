@@ -14,19 +14,19 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // biliFileFixture is a billion-context.json written by hand, as bili
 // 0.1.213's own tests write theirs (tests/external-summary-settings.test.ts):
-// a recipe with a key's variable, one with a stored key, magpie's recipe
-// on another computer's port, a comment and a key magpie doesn't know.
+// a recipe with a key's variable, one with a stored key, eipgam's recipe
+// on another computer's port, a comment and a key eipgam doesn't know.
 const biliFileFixture = `{
   // my summary models
   "providers": {
     "glm": { "baseUrl": "https://open.bigmodel.cn/api/paas/v4", "api": "openai", "apiKeyEnv": "GLM_KEY", "models": { "glm-4.9-flash": {} } },
     "claude": { "baseUrl": "https://api.anthropic.com/v1", "api": "anthropic", "credentialRef": "primary", "models": { "claude-haiku": { "contextWindow": 2048 } } },
-    "magpie": { "baseUrl": "http://127.0.0.1:4567/v1", "api": "openai", "credentialRef": "magpie", "models": { "gpt-5.4-mini": {} } }
+    "eipgam": { "baseUrl": "http://127.0.0.1:4567/v1", "api": "openai", "credentialRef": "eipgam", "models": { "gpt-5.4-mini": {} } }
   },
   "compress": { "externalSummary": { "enabled": true, "targets": ["claude/claude-haiku"] } },
   "retained": true
@@ -104,7 +104,7 @@ func TestBiliConfigFileWhereBiliLooks(t *testing.T) {
 }
 
 // TestBiliFileCarried: a sync carries billion-context.json as it is,
-// comments and all, with magpie's recipe at the default address; the
+// comments and all, with eipgam's recipe at the default address; the
 // other computer gets it with its own gateway in the recipe and the key
 // in bili's store, keeps the file it replaced with the backups, and its
 // running bili reads it again. A bundle without it leaves the file there.
@@ -123,8 +123,8 @@ func TestBiliFileCarried(t *testing.T) {
 	if !strings.Contains(*b.Bili, "// my summary models") || !strings.Contains(*b.Bili, `"retained": true`) {
 		t.Errorf("carried not as written:\n%s", *b.Bili)
 	}
-	if u := gjson.Get(string(jsonc.ToJSON([]byte(*b.Bili))), "providers.magpie.baseUrl").String(); u != "http://"+gateway.DefaultAddr+"/v1" {
-		t.Errorf("magpie's recipe carried at %s", u)
+	if u := gjson.Get(string(jsonc.ToJSON([]byte(*b.Bili))), "providers.eipgam.baseUrl").String(); u != "http://"+gateway.DefaultAddr+"/v1" {
+		t.Errorf("eipgam's recipe carried at %s", u)
 	}
 	carried := mustJSON(t, b)
 
@@ -140,15 +140,15 @@ func TestBiliFileCarried(t *testing.T) {
 		t.Errorf("billion-context.json after the sync:\n%s", got)
 	}
 	r := biliJSON(t, biliCfgPath(h2))
-	if u := r.Get("providers.magpie.baseUrl").String(); u != "http://127.0.0.1:5555/v1" {
-		t.Errorf("magpie's recipe sent to %s, not this computer's gateway", u)
+	if u := r.Get("providers.eipgam.baseUrl").String(); u != "http://127.0.0.1:5555/v1" {
+		t.Errorf("eipgam's recipe sent to %s, not this computer's gateway", u)
 	}
 	if r.Get("providers.glm.apiKeyEnv").String() != "GLM_KEY" || !r.Get("retained").Bool() {
 		t.Errorf("the user's own keys: %s", r.Raw)
 	}
 	creds := biliCfgPath(h2) + ".summary-credentials.json"
 	var keys map[string]string
-	if err := json.Unmarshal([]byte(read(t, creds)), &keys); err != nil || keys["magpie"] != gateway.TokenFor("billion-context") {
+	if err := json.Unmarshal([]byte(read(t, creds)), &keys); err != nil || keys["eipgam"] != gateway.TokenFor("billion-context") {
 		t.Errorf("bili's key store: %v %v", keys, err)
 	}
 	if fi, err := os.Stat(creds); err != nil || runtime.GOOS != "windows" && fi.Mode().Perm() != 0o600 {
@@ -178,7 +178,7 @@ func TestBiliFileCarried(t *testing.T) {
 	if n := reloads.Load(); n != 1 {
 		t.Errorf("an unchanged file reloaded bili (%d)", n)
 	}
-	// from a magpie that didn't carry it: this computer's stays
+	// from a eipgam that didn't carry it: this computer's stays
 	in.Bili = nil
 	ok(t)(Put(&in))
 	if read(t, biliCfgPath(h2)) != got {
@@ -228,7 +228,7 @@ func TestBiliFileDSNNotInKeylessBackup(t *testing.T) {
 }
 
 // TestBiliSettingsChanged: the tab's settings are written where bili
-// reads them, with the comments, recipes and keys magpie doesn't know as
+// reads them, with the comments, recipes and keys eipgam doesn't know as
 // they were, and the running bili asked to reload.
 func TestBiliSettingsChanged(t *testing.T) {
 	h, reloads := biliSandbox(t, "4567")
@@ -249,13 +249,13 @@ func TestBiliSettingsChanged(t *testing.T) {
 		"compress.nudgeGrowthTokens":            "80000",
 		"compress.requireNudge":                 "true",
 		"compress.externalSummary.enabled":      "true",
-		"compress.externalSummary.targets":      `["magpie/gpt-5.4-mini","claude/claude-haiku"]`,
+		"compress.externalSummary.targets":      `["eipgam/gpt-5.4-mini","claude/claude-haiku"]`,
 		"compress.prompts.compressPhilosophy":   phil,
 		"compress.acknowledgePromptsRisk":       "true",
-		"providers.magpie.baseUrl":              "http://127.0.0.1:4567/v1",
+		"providers.eipgam.baseUrl":              "http://127.0.0.1:4567/v1",
 		"providers.claude.credentialRef":        "primary",
 		"retained":                              "true",
-		`providers.magpie.models.gpt-5\.4-mini`: "{}",
+		`providers.eipgam.models.gpt-5\.4-mini`: "{}",
 	} {
 		v := r.Get(k)
 		if got := v.String(); v.IsArray() || v.IsObject() {
@@ -267,7 +267,7 @@ func TestBiliSettingsChanged(t *testing.T) {
 			t.Errorf("%s = %s, want %s", k, got, want)
 		}
 	}
-	if s.Growth != 80000 || !s.Nudge || !s.Summary || s.Targets[0] != "magpie/gpt-5.4-mini" || s.Philosophy != phil {
+	if s.Growth != 80000 || !s.Nudge || !s.Summary || s.Targets[0] != "eipgam/gpt-5.4-mini" || s.Philosophy != phil {
 		t.Errorf("read back: %+v", s)
 	}
 	if strings.Join(s.Recipes, ",") != "claude/claude-haiku,glm/glm-4.9-flash" {
@@ -297,7 +297,7 @@ func TestBiliSettingsChanged(t *testing.T) {
 // compress.visibilityMarkers reads as on until the file says false, the
 // switch writes false where bili reads it (CONFIGURATION.md, 0.1.213),
 // keeps the rest of the file, and turning it back on takes the key out to
-// bili's default rather than leaving a value magpie chose. A provider's or
+// bili's default rather than leaving a value eipgam chose. A provider's or
 // model's own setting is the user's and stays as it is.
 func TestBiliMarkersSwitch(t *testing.T) {
 	h, _ := biliSandbox(t, "4567")
@@ -332,7 +332,7 @@ func TestBiliMarkersSwitch(t *testing.T) {
 
 // TestBiliSettingsRefused: what bili would refuse, and so turn its whole
 // compress section off over, is never written: an out-of-range step, a
-// summary switched on with no model, a recipe of the user's named magpie,
+// summary switched on with no model, a recipe of the user's named eipgam,
 // a file bili can't read.
 func TestBiliSettingsRefused(t *testing.T) {
 	h, _ := biliSandbox(t, "4567")
@@ -348,11 +348,11 @@ func TestBiliSettingsRefused(t *testing.T) {
 	if _, err := os.Stat(biliCfgPath(h)); err == nil {
 		t.Error("a refused change wrote the file")
 	}
-	theirs := `{"providers":{"magpie":{"baseUrl":"https://api.example.com/v1","api":"openai","apiKeyEnv":"K","models":{"m":{}}}}}`
+	theirs := `{"providers":{"eipgam":{"baseUrl":"https://api.example.com/v1","api":"openai","apiKeyEnv":"K","models":{"m":{}}}}}`
 	write(t, biliCfgPath(h), theirs)
 	model := "gpt-5.4-mini"
 	if _, err := SetBiliSettings(BiliChange{Model: &model}); err == nil {
-		t.Error("the user's own recipe named magpie written over")
+		t.Error("the user's own recipe named eipgam written over")
 	}
 	write(t, biliCfgPath(h), "{ broken")
 	growth := 60000
@@ -388,7 +388,7 @@ func TestBiliKeyStoreKeptPrivate(t *testing.T) {
 	biliMust[*BiliSettings](t)(SetBiliSettings(BiliChange{Model: &model}))
 	var keys map[string]string
 	json.Unmarshal([]byte(read(t, creds)), &keys)
-	if keys["primary"] != "sk-mine" || keys["magpie"] == "" {
+	if keys["primary"] != "sk-mine" || keys["eipgam"] == "" {
 		t.Errorf("store: %v", keys)
 	}
 }

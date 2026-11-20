@@ -9,7 +9,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 
 function server(lang) {
   const relay = { id: "relay", name: "Relay", icon: "generic", preset: "relay", host: "relay.test", chat: "https://relay.test/v1",
@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("dialog", (d) => { errors.push("native dialog"); d.dismiss(); });
     await page.route("**/*", server(lang));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     const modal = page.locator("#modal"), ask = page.getByRole("alertdialog");
     const name = modal.locator("input.provider-name");
     for (const button of [w.dup, w.more]) {

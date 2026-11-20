@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 const (
@@ -87,7 +87,7 @@ func askQuietClaude(t *testing.T) (string, time.Duration, time.Duration) {
 	return b.String(), gap, time.Since(began)
 }
 
-// Wing8Aqua on X: pi asked Claude Fable 5.2 through magpie and gave up
+// Wing8Aqua on X: pi asked Claude Fable 5.2 through eipgam and gave up
 // with "stream idle timeout after 300000ms". A relayed Claude stream, held
 // before its headers or quiet after message_start, was kept alive with
 // comments for keepaliveLongest (5 minutes) after the vendor was last

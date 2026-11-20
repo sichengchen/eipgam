@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // Google's Decisions API's choice answer, as its reference gives it
@@ -85,7 +85,7 @@ func googleKey(t *testing.T, up *googleDecisionsUp) *Server {
 	return s
 }
 
-// WangYeruo on X: magpie's System One API, asked for
+// WangYeruo on X: eipgam's System One API, asked for
 // google/gemini-decision-1 with a Google AI Studio key's provider, went to
 // OpenRouter. It reaches Google's Decisions API on that key, as Google
 // takes it — the state an input of text, the key as x-goog-api-key — and

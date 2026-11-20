@@ -39,7 +39,7 @@ func TestDshDocStartOnlyFirst(t *testing.T) {
 		"[]\n---\n- id: a\n",
 	} {
 		write(t, p, raw)
-		if _, err := dshRead(p); err == nil || !strings.Contains(err.Error(), "not a list of entries magpie can edit") {
+		if _, err := dshRead(p); err == nil || !strings.Contains(err.Error(), "not a list of entries eipgam can edit") {
 			t.Fatalf("%q: want the file refused, got %v", raw, err)
 		}
 	}

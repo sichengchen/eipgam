@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // TestClaudeToolSearchOn: Claude Code before 2.1.304 keeps tool search off
 // behind an ANTHROPIC_BASE_URL other than Anthropic's, so every MCP tool's
-// definition went on each request: magpie's MCP router's 245 tools were
+// definition went on each request: eipgam's MCP router's 245 tools were
 // 124K tokens of a 341K context (cybercaius on Discord). While Claude Code
-// is on magpie, magpie sets ENABLE_TOOL_SEARCH=true; it goes when Claude
-// Code is taken off magpie, and a value of the user's, an empty one
+// is on eipgam, eipgam sets ENABLE_TOOL_SEARCH=true; it goes when Claude
+// Code is taken off eipgam, and a value of the user's, an empty one
 // among them, is theirs through a switch, Sync and reset.
 func TestClaudeToolSearchOn(t *testing.T) {
 	home := t.TempDir()
@@ -46,24 +46,24 @@ func TestClaudeToolSearchOn(t *testing.T) {
 
 	set("model", "v/gpt-x")
 	if v, _ := search(); v != "true" {
-		t.Fatalf("on magpie: %q, want true", v)
+		t.Fatalf("on eipgam: %q, want true", v)
 	}
 	sync()
 	if v, _ := search(); v != "true" {
 		t.Fatalf("Sync: %q", v)
 	}
-	// off magpie, onto Claude Code's own model, and reset: magpie's goes
+	// off eipgam, onto Claude Code's own model, and reset: eipgam's goes
 	set("model", "claude-opus-4-8")
 	if v, has := search(); has {
-		t.Fatalf("Claude's own model kept magpie's value: %q", v)
+		t.Fatalf("Claude's own model kept eipgam's value: %q", v)
 	}
 	set("model", "v/gpt-x")
 	if v, _ := search(); v != "true" {
-		t.Fatalf("back on magpie: %q", v)
+		t.Fatalf("back on eipgam: %q", v)
 	}
 	set("model", "")
 	if v, has := search(); has {
-		t.Fatalf("reset kept magpie's value: %q", v)
+		t.Fatalf("reset kept eipgam's value: %q", v)
 	}
 
 	// the user's own value is theirs
@@ -84,7 +84,7 @@ func TestClaudeToolSearchOn(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	// magpie's "true" taken out by the user, then a value of theirs: magpie
+	// eipgam's "true" taken out by the user, then a value of theirs: eipgam
 	// doesn't write over it
 	set("model", "v/gpt-x")
 	if err := edit.SetJSON(path, edit.KV{Path: "env." + claudeSearchEnv, Value: "false"}); err != nil {
@@ -92,14 +92,14 @@ func TestClaudeToolSearchOn(t *testing.T) {
 	}
 	sync()
 	if v, _ := search(); v != "false" {
-		t.Fatalf("the user's false after magpie's true became %q", v)
+		t.Fatalf("the user's false after eipgam's true became %q", v)
 	}
 	if v, _ := edit.GetJSON(path, "theme"); v != "dark" {
 		t.Fatal("theme lost")
 	}
 }
 
-// TestT3CodeToolSearchOn: T3 Code's magpie instance runs Claude Code on the
+// TestT3CodeToolSearchOn: T3 Code's eipgam instance runs Claude Code on the
 // gateway through its own environment, which may be a Claude Code from
 // before 2.1.304: it is given ENABLE_TOOL_SEARCH=true too, and a value the
 // user gave the instance stays.
@@ -127,7 +127,7 @@ func TestT3CodeToolSearchOn(t *testing.T) {
 		return vs
 	}
 	if vs := search(); len(vs) != 1 || vs[0] != "true" {
-		t.Fatalf("magpie's instance: %q, want [true]", vs)
+		t.Fatalf("eipgam's instance: %q, want [true]", vs)
 	}
 	// the user's own value on the instance
 	var file map[string]any

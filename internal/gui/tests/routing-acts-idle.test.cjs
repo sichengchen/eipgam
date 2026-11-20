@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// freefcw on X (11-09): magpie at 32% CPU and its webviews at 220MB, idle.
+// freefcw on X (11-09): eipgam at 32% CPU and its webviews at 220MB, idle.
 // The Routing page redraws Accounts and keys each second (its countdowns),
 // and each drawing made every provider's heading anew: a new <img> asks for
 // its icon whether or not the list keeps the old heading, so five providers
@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [], asked = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, asked));
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://eipgam.test/?view=routing");
           await page.locator(".rt-acts .rt-prov").nth(provs.length - 1).waitFor();
           // every heading drawn, each icon asked for once
           await page.waitForFunction((n) => [...document.querySelectorAll(".rt-acts .rt-prov img")].filter((i) => i.complete).length === n, provs.length);

@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// ARNO on Discord (我在设置里关闭了"模型名称带供应商"但是接入的remote-magpie的
-// 模型名字还是带上了…): a remote magpie's models are named in its list with
-// its own provider after them ("DeepSeek Chat · Relay A"), by that magpie's
+// ARNO on Discord (我在设置里关闭了"模型名称带供应商"但是接入的remote-eipgam的
+// 模型名字还是带上了…): a remote eipgam's models are named in its list with
+// its own provider after them ("DeepSeek Chat · Relay A"), by that eipgam's
 // setting, and Off here kept it. Model settings says what the agents' lists
 // show under each choice, saved on Settings: On, that label with this
 // provider after it; Off, the model's name there alone. Every language.
@@ -19,7 +19,7 @@ function serve(lang, posts, plainNames, saves = []) {
   const models = [
     { id: "relaya/deepseek-chat", name: "DeepSeek Chat · Relay A", plain: "DeepSeek Chat", by: "Relay A", on: true, efforts: [], images: false },
   ];
-  const provider = { id: "remote-magpie", name: "Remote magpie", preset: "remote-magpie", icon: "generic", chat: "http://192.168.1.20:3425/v1", responses: "http://192.168.1.20:3425/v1", anthropic: "http://192.168.1.20:3425",
+  const provider = { id: "remote-eipgam", name: "Remote eipgam", preset: "remote-eipgam", icon: "generic", chat: "http://192.168.1.20:3425/v1", responses: "http://192.168.1.20:3425/v1", anthropic: "http://192.168.1.20:3425",
     models, agents: [], key: { set: true, masked: "sk-…1234" }, ready: true };
   return async (r) => {
     const req = r.request(), url = new URL(req.url());
@@ -57,7 +57,7 @@ async function says(loc, want) {
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
-    test(`${engine} ${lang}: a remote magpie's model is named alone under Off`, async (t) => {
+    test(`${engine} ${lang}: a remote eipgam's model is named alone under Off`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium" }));
       t.after(() => browser.close());
       // narrow, as the panel is
@@ -68,10 +68,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       // Provider in model names is Settings' (joe on Discord): the editor
       // says what each saved choice shows, On and then Off
-      for (const [plain, label] of [[false, "DeepSeek Chat · Relay A · Remote magpie"], [true, "DeepSeek Chat"]]) {
+      for (const [plain, label] of [[false, "DeepSeek Chat · Relay A · Remote eipgam"], [true, "DeepSeek Chat"]]) {
         await page.unrouteAll({ behavior: "wait" });
         await page.route("**/*", serve(lang, posts, plain));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const tr = (k, vars = {}) => page.evaluate(([k, vars]) => t(k, vars), [k, vars]);
         await page.locator(".row.provider").click();
         if (!(await page.locator(".mnames:not([hidden])").count())) await page.getByRole("button", { name: await tr("Model settings"), exact: true }).click();
@@ -85,13 +85,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   }
 }
 
-// lcc580 on X: a Remote magpie's models named by the provider serving each
+// lcc580 on X: a Remote eipgam's models named by the provider serving each
 // there, so one model from two of its providers is told apart here. Its
 // editor's switch says what the agents' lists show, under On and Off
 // alike, and is saved with the provider.
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
-    test(`${engine} ${lang}: a remote magpie's model named by its provider there`, async (t) => {
+    test(`${engine} ${lang}: a remote eipgam's model named by its provider there`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium" }));
       t.after(() => browser.close());
       const page = await (await browser.newContext({ viewport: { width: 420, height: 900 }, reducedMotion: "reduce" })).newPage();
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (const plain of [false, true]) {
         const saves = [];
         served = serve(lang, posts, plain, saves);
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const tr = (k, vars = {}) => page.evaluate(([k, vars]) => t(k, vars), [k, vars]);
         await page.locator(".row.provider").click();
         if (!(await page.locator(".mnames:not([hidden])").count())) await page.getByRole("button", { name: await tr("Model settings"), exact: true }).click();
@@ -116,9 +116,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await tick.textContent()).trim(), await tr("With the provider serving it there"));
         assert.equal(await tick.locator("input").isChecked(), false);
         await tick.locator("input").check();
-        await says(sfx.locator(".hint"), await tr("Agents’ lists show “{label}”", { label: "DeepSeek Chat · Remote magpie › Relay A" }));
+        await says(sfx.locator(".hint"), await tr("Agents’ lists show “{label}”", { label: "DeepSeek Chat · Remote eipgam › Relay A" }));
         await tick.locator("input").uncheck();
-        await says(sfx.locator(".hint"), await tr("Agents’ lists show “{label}”", { label: plain ? "DeepSeek Chat" : "DeepSeek Chat · Relay A · Remote magpie" }));
+        await says(sfx.locator(".hint"), await tr("Agents’ lists show “{label}”", { label: plain ? "DeepSeek Chat" : "DeepSeek Chat · Relay A · Remote eipgam" }));
         await tick.locator("input").check();
         const ed = page.locator(".editor").filter({ has: tick });
         await Promise.all([page.waitForResponse((r) => r.url().endsWith("/api/provider/save")), ed.locator(".bar button.primary").first().click()]);

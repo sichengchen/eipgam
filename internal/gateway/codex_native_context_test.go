@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The windows the user set on the codex provider reach Codex's own entries
@@ -19,7 +19,7 @@ import (
 // the window, and the max where the window is past it; the rest of each
 // entry as the backend gave it, and a model with none set as it was.
 // Taking one away changes the ETag and the window goes back, also in a list
-// made from Codex's cache, which keeps what magpie handed it.
+// made from Codex's cache, which keeps what eipgam handed it.
 func TestCodexNativeModelsTakeSetWindows(t *testing.T) {
 	codexSignedIn(t)
 	forgetCodexLists(t)
@@ -120,9 +120,9 @@ func TestCodexNativeModelsTakeSetWindows(t *testing.T) {
 	}
 }
 
-// A ChatGPT account's model in a catalog magpie writes (model_catalog_json)
-// takes its entry from Codex's cache under magpie's id, with the window
-// magpie resolved for it, not the one the cache kept (#674).
+// A ChatGPT account's model in a catalog eipgam writes (model_catalog_json)
+// takes its entry from Codex's cache under eipgam's id, with the window
+// eipgam resolved for it, not the one the cache kept (#674).
 func TestCodexCatalogOwnEntryTakesResolvedWindow(t *testing.T) {
 	home := t.TempDir()
 	setHome(t, home)

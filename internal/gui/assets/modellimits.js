@@ -11,7 +11,7 @@ window.modelLimitsFill = function (at, m, p, changed) {
   const id = m.id;
   return [...[
     ["contexts", "Context window", m.listed || m.context, p.contexts, t("The window agents are told {id} takes; empty: the vendor's or models.dev's", { id }), (v) => t("Context window: {v} is not a length like 128k or 1m", { v })],
-    ["outputs", "Max output", m.listedOutput || m.output, p.outputs, t("The most a reply of {id} may hold, told to agents as their max tokens and kept to by magpie; empty: the vendor's or models.dev's", { id }), (v) => t("Max output: {v} is not a number of tokens like 32k", { v })],
+    ["outputs", "Max output", m.listedOutput || m.output, p.outputs, t("The most a reply of {id} may hold, told to agents as their max tokens and kept to by eipgam; empty: the vendor's or models.dev's", { id }), (v) => t("Max output: {v} is not a number of tokens like 32k", { v })],
   ].map(([k, label, listed, saved, tip, said]) => {
     const box = el("label", "msame mlimit");
     box.dataset.limit = k;
@@ -91,7 +91,7 @@ function modelSystemFill(at, m, changed) {
 }
 
 // The Same as box's picker (timfang4162 on X): a button beside it opens the
-// models of the models.dev catalog magpie has synced (/api/catalog/models) in
+// models of the models.dev catalog eipgam has synced (/api/catalog/models) in
 // the app's menu, filtered by id, name and maker. A pick fills the box, which
 // stages it as a typed one does.
 let catalogModels = null;

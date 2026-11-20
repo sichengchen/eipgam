@@ -6,13 +6,13 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // SetupPrefix begins a sync setup copied as text (WJaunita45604 on X: one
 // copy, pasted on another computer, sets sync up there the same).
-const SetupPrefix = "magpie-sync:"
+const SetupPrefix = "eipgam-sync:"
 
 // Setup is what a setup copied as text holds: the server, its password or
 // token, and what is synced. Never the passphrase: the text is sealed with
@@ -27,7 +27,7 @@ type Setup struct {
 	PathStyle bool   `json:"pathStyle,omitempty"`
 	Branch    string `json:"branch,omitempty"`
 	// Providers, Settings and Profiles are false when left out of sync;
-	// nil, as from a magpie before they could be, is synced.
+	// nil, as from a eipgam before they could be, is synced.
 	Providers *bool `json:"providers,omitempty"`
 	Settings  *bool `json:"settings,omitempty"`
 	Profiles  *bool `json:"profiles,omitempty"`
@@ -43,7 +43,7 @@ type Setup struct {
 var ErrSetupOff = errors.New("sync isn't set up on this computer")
 
 // ErrNotSetup is OpenSetupText given text that isn't a copied setup.
-var ErrNotSetup = errors.New("this isn't a sync setup copied from magpie")
+var ErrNotSetup = errors.New("this isn't a sync setup copied from eipgam")
 
 // ErrSetupPassphrase is OpenSetupText with a passphrase that doesn't open it.
 var ErrSetupPassphrase = errors.New("the passphrase doesn't open this setup: type the one sync uses on the other computer")

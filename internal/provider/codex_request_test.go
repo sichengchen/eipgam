@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/codexcat"
 )
 
 // The conversation goes in the session headers Codex CLI 0.162 sends,
@@ -453,7 +453,7 @@ func TestCodexInputDropsStatusWithID(t *testing.T) {
 	}
 }
 
-// The Codex client magpie presents is the user's choice (ouhthuo on X): Codex
+// The Codex client eipgam presents is the user's choice (ouhthuo on X): Codex
 // CLI unless "desktop" is set, and then the Codex app's originator and
 // User-Agent on a model request and on the account calls alike (/wham, the
 // token refresh), and as a test is asked as Codex asks. Anything else is

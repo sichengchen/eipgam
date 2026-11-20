@@ -11,11 +11,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// ownOutputUpstream answers every API magpie may ask on, whole, and keeps
+// ownOutputUpstream answers every API eipgam may ask on, whole, and keeps
 // each body it was sent. A Chat body naming max_tokens past refuseOver is
 // turned away as a vendor whose limit is lower than its list says does.
 type ownOutputUpstream struct {

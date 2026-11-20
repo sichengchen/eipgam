@@ -79,7 +79,7 @@ func TestIPv4Fallback(t *testing.T) {
 }
 
 // A name with an A record nobody answers and an AAAA record that served
-// before (a remote magpie that is IPv6-only) is not stuck on IPv4 after
+// before (a remote eipgam that is IPv6-only) is not stuck on IPv4 after
 // one IPv6 connection fails: the IPv4 dial fails, the mark is cleared and
 // IPv6 is tried again (ZeHeaton23141 on X).
 func TestIPv6OnlyHostRecovers(t *testing.T) {
@@ -112,7 +112,7 @@ func TestIPv6OnlyHostRecovers(t *testing.T) {
 			return d.DialContext(ctx, "tcp", v6.Addr().String())
 		},
 	}
-	addr := "magpie.example:3425"
+	addr := "eipgam.example:3425"
 	markV4(addr) // an earlier IPv6 hiccup
 	c := &http.Client{Transport: Dispatch(base)}
 	for i := 0; i < 2; i++ {

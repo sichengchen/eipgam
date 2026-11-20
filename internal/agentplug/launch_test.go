@@ -19,12 +19,12 @@ func compileSrc(t *testing.T, src string) (*Agent, error) {
 
 // What agent.launch says goes into the user's shell profiles: the command,
 // the variables' names and their values. A module can say only names a
-// shell takes as they are, and values that are magpie's address or key,
+// shell takes as they are, and values that are eipgam's address or key,
 // so no plugin puts a command of its own, or a value of its choosing
 // (LD_PRELOAD, NODE_OPTIONS), into the user's shells.
 func TestLaunchSaysOnlyWhatAShellTakesAsItIs(t *testing.T) {
 	desc := func(launch, bin string) string {
-		return `export const agent = { id: "lx", bin: "` + bin + `", config: "~/.lx.json", model: "model", prefix: "magpie/", launch: ` + launch + ` };`
+		return `export const agent = { id: "lx", bin: "` + bin + `", config: "~/.lx.json", model: "model", prefix: "eipgam/", launch: ` + launch + ` };`
 	}
 	ok := []string{
 		`{ env: { GEMINI_API_KEY: "{key}", GOOGLE_GEMINI_BASE_URL: "{url}" }, model: "--model" }`,
@@ -101,18 +101,18 @@ export function own({ config, base, model }) {
 	}
 }
 
-// agent.base, the agent's own file beside magpie's, is only for a config
+// agent.base, the agent's own file beside eipgam's, is only for a config
 // the agent is handed by agent.launch.args, and is never the config.
 func TestBaseIsForAHandedConfig(t *testing.T) {
 	src := func(base, launch string) string {
-		return `export const agent = { id: "lx", bin: "lx", config: "~/.lx/magpie.json", base: "` + base + `", model: "model", launch: ` + launch + ` };`
+		return `export const agent = { id: "lx", bin: "lx", config: "~/.lx/eipgam.json", base: "` + base + `", model: "model", launch: ` + launch + ` };`
 	}
 	if a, err := compileSrc(t, src("~/.lx/settings.json", `{ model: "-m", args: { "--settings": "{config}" } }`)); err != nil || a.Desc.Base != "~/.lx/settings.json" {
 		t.Fatalf("base: %v", err)
 	}
 	bad := map[string]string{
 		src("~/.lx/settings.json", `{ model: "-m" }`):                                     "agent.launch.args hands the agent",
-		src("~/.lx/magpie.json", `{ model: "-m", args: { "--settings": "{config}" } }`):   "agent.base is agent.config",
+		src("~/.lx/eipgam.json", `{ model: "-m", args: { "--settings": "{config}" } }`):   "agent.base is agent.config",
 		src("~/.lx/settings.yaml", `{ model: "-m", args: { "--settings": "{config}" } }`): "a file of agent.format",
 	}
 	for s, want := range bad {

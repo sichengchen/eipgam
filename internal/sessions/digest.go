@@ -21,7 +21,7 @@ func (d digest) MarshalText() ([]byte, error) {
 	return []byte(hex.EncodeToString(d[:])), nil
 }
 
-// UnmarshalText reads a digest as written, or as a magpie before it wrote
+// UnmarshalText reads a digest as written, or as a eipgam before it wrote
 // the whole hash: the 64 hex of hashHead's, or prefixHash's "sample-v1:"
 // before them, whose first 32 are this digest. A cache from before reads
 // as the same files, so nothing is read again for it. Anything else is

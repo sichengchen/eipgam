@@ -17,21 +17,21 @@ import (
 	"github.com/coder/websocket"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // The Realtime API over a WebSocket: GET /v1/realtime?model=… with
 // Upgrade: websocket, as OpenAI's Realtime API and DashScope's (Qwen's)
 // realtime models take it (gaubeebangeel on X: a Qwen Token Plan's
-// realtime voice through magpie). Alibaba sells the Token Plan's
+// realtime voice through eipgam). Alibaba sells the Token Plan's
 // realtime voice model, qwen-audio-3.0-realtime-plus, on the plan's own
 // host at /api-ws/v1/realtime with the plan's sk-sp- key.
 //
 // The session goes to one model's provider, over its keys or accounts as
-// a chat would, and is passed on frame by frame both ways; magpie reads
+// a chat would, and is passed on frame by frame both ways; eipgam reads
 // the frames only to mask what goes out (as the settings say), put the
 // masked values back in what comes in, and count each response.done's
 // usage. The upgrade comes through the whole handler, so the allow list,
@@ -119,7 +119,7 @@ func (rs *realtimeSessions) end() {
 	}
 	rs.mu.Unlock()
 	for _, c := range all {
-		go c.Close(websocket.StatusGoingAway, "magpie is restarting")
+		go c.Close(websocket.StatusGoingAway, "eipgam is restarting")
 	}
 }
 
@@ -164,11 +164,11 @@ func (s *Server) realtime(w http.ResponseWriter, r *http.Request) {
 	// is dialled): corsGuard let a page on this computer by, which a
 	// browser's WebSocket isn't held from by CORS
 	if !sameOriginSocket(r) {
-		refuse(http.StatusForbidden, "magpie opens a realtime session only for a client that isn't a web page, or a page at magpie's own address")
+		refuse(http.StatusForbidden, "eipgam opens a realtime session only for a client that isn't a web page, or a page at eipgam's own address")
 		return
 	}
 	if s.realtimes.ending() {
-		refuse(http.StatusServiceUnavailable, "magpie is restarting")
+		refuse(http.StatusServiceUnavailable, "eipgam is restarting")
 		return
 	}
 	if asked == "" {
@@ -279,7 +279,7 @@ func (s *Server) realtime(w http.ResponseWriter, r *http.Request) {
 	defer client.CloseNow()
 	client.SetReadLimit(realtimeReadLimit)
 	if !s.realtimes.add(client) {
-		client.Close(websocket.StatusGoingAway, "magpie is restarting")
+		client.Close(websocket.StatusGoingAway, "eipgam is restarting")
 		up.Close(websocket.StatusGoingAway, "")
 		return
 	}
@@ -432,7 +432,7 @@ func (s *Server) dialRealtime(ctx context.Context, r *http.Request, p provider.P
 	}
 	stampUA(dctx, p, req.Header)
 	if p.IsRemoteMagpie() {
-		req.Header.Set("User-Agent", "magpie/"+Version)
+		req.Header.Set("User-Agent", "eipgam/"+Version)
 		passOnCaller(dctx, req)
 	}
 	// OpenAI's beta Realtime API asks for its header

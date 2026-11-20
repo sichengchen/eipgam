@@ -6,12 +6,12 @@ import (
 	"os/exec"
 	"os/signal"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // startExecOS starts the agent at path and waits for it, its exit code
-// magpie's: Windows has no exec. Ctrl+C is the agent's to handle, so
-// magpie lets it pass.
+// eipgam's: Windows has no exec. Ctrl+C is the agent's to handle, so
+// eipgam lets it pass.
 func startExecOS(path, _ string, args, env []string) error {
 	cmd := proc.Command(path, args...)
 	cmd.Env = env

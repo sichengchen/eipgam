@@ -29,10 +29,10 @@ var tapJS []byte
 // tapPrefix names the folders a tap is written to, the helper's pid after
 // it; tap.js knows itself by it, to take itself out of what Claude Code
 // hands on.
-const tapPrefix = "magpie-claude-tap-"
+const tapPrefix = "eipgam-claude-tap-"
 
 // tapEnv names the file tap.js writes to.
-const tapEnv = "MAGPIE_CLAUDE_TAP"
+const tapEnv = "EIPGAM_CLAUDE_TAP"
 
 // GuardEnv names, to the helper, a file of the bridge's that holds the
 // extra body (CLAUDE_CODE_EXTRA_BODY) of the client's latest turn: tap.js
@@ -42,7 +42,7 @@ const tapEnv = "MAGPIE_CLAUDE_TAP"
 // main request at. The bridge rewrites the file as a turn brings new
 // ones, and tap.js writes <file>.live once it has seen a request it puts
 // them in.
-const GuardEnv = "MAGPIE_CLAUDE_GUARD"
+const GuardEnv = "EIPGAM_CLAUDE_GUARD"
 
 // StartValueMax bounds a value of a request's on a Claude Code run's
 // command line or in its environment: Linux refuses to start a program

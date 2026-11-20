@@ -3,13 +3,13 @@ package agent
 // An agent a plugin adds that takes the gateway only from how it is
 // started (agentplug.Launch: agy reads GEMINI_API_KEY and
 // GOOGLE_GEMINI_BASE_URL from its environment and resolves a model only
-// given with --model) is started on magpie as the built-in agy was: its
-// row gives the command, and magpie puts a function named its command in
-// each shell the user has while it is on one of magpie's models. On this
-// machine the function runs `magpie <id> run` (cli/agy_cli.go), which
+// given with --model) is started on eipgam as the built-in agy was: its
+// row gives the command, and eipgam puts a function named its command in
+// each shell the user has while it is on one of eipgam's models. On this
+// machine the function runs `eipgam <id> run` (cli/agy_cli.go), which
 // starts the real one with the variables and the model while its file's
-// model is magpie's, and as it is otherwise; PowerShell's asks `magpie
-// <id> env` for them. A WSL distro has no magpie to ask, so its function
+// model is eipgam's, and as it is otherwise; PowerShell's asks `eipgam
+// <id> env` for them. A WSL distro has no eipgam to ask, so its function
 // reads the model from the file itself (or holds it, where the file can't
 // be read so), with the variables written in.
 
@@ -19,15 +19,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agentplug"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// launchSpec is how a plugin's agent is started: its id, which `magpie
+// launchSpec is how a plugin's agent is started: its id, which `eipgam
 // <id> run` names, its command, the flag that names the model ("" none),
 // its variables, by name, the flags put before the user's arguments with
 // their values (flag then value, sorted by flag: agy's --settings and
-// magpie's settings file), and the arguments that start it as it is.
+// eipgam's settings file), and the arguments that start it as it is.
 type launchSpec struct {
 	id, bin, flag string
 	env           map[string]string // templates (agentplug.Fill)
@@ -133,7 +133,7 @@ func (l *launchSpec) posixHead() string {
 }
 
 // function is the function in this machine's shell of kind, which runs
-// prog (this magpie) to start the agent; the command on PATH when prog is
+// prog (this eipgam) to start the agent; the command on PATH when prog is
 // gone.
 func (l *launchSpec) function(kind, prog string) string {
 	switch kind {
@@ -271,10 +271,10 @@ func sedBRE(s string) string {
 }
 
 // modelSed is the sed script that prints the model of a file of format
-// at the top-level key while it starts with prefix (magpie's), for a
+// at the top-level key while it starts with prefix (eipgam's), for a
 // distro's function; "" where a script can't say (a key below another,
-// no prefix to tell magpie's by), and the function holds the model.
-// magpie writes the key on a line of its own; one on a single line is
+// no prefix to tell eipgam's by), and the function holds the model.
+// eipgam writes the key on a line of its own; one on a single line is
 // found too, so long as nothing after it has the key's name.
 func modelSed(format, key, prefix string) string {
 	if prefix == "" || key == "" || strings.ContainsAny(key, `.\`) {
@@ -293,7 +293,7 @@ func modelSed(format, key, prefix string) string {
 }
 
 // launchShell gives the shells at the place the function of l, or takes
-// it out of them: this machine's (as `magpie <id> run`), a distro's (vars
+// it out of them: this machine's (as `eipgam <id> run`), a distro's (vars
 // and the model written in, distroProfiles). What fails leaves the setting
 // as it is: the row's command still starts it.
 type launchShell struct {
@@ -356,18 +356,18 @@ func (s launchShell) stale() string {
 	return ""
 }
 
-// what an agent a plugin adds that is started on magpie says after a
+// what an agent a plugin adds that is started on eipgam says after a
 // change (notice.go)
 var (
-	noticeLaunch      = newNotice("{agent} takes magpie's gateway and model only from how it is started — start it with {command}")
-	noticeLaunchTyped = newNotice("Type {bin} in a new terminal: magpie added it to {profiles}, to start {agent} on magpie's gateway and model (in a terminal open now: {command}).")
+	noticeLaunch      = newNotice("{agent} takes eipgam's gateway and model only from how it is started — start it with {command}")
+	noticeLaunchTyped = newNotice("Type {bin} in a new terminal: eipgam added it to {profiles}, to start {agent} on eipgam's gateway and model (in a terminal open now: {command}).")
 )
 
-// Starting is what starts an agent on magpie (Agent.Start): the command
+// Starting is what starts an agent on eipgam (Agent.Start): the command
 // on PATH, the variables, the flags with their values put before the
 // user's arguments (Args, flag then value: agy's --settings <file>), and
 // the model after Flag (none when Flag is ""); Model "" while it isn't on
-// magpie's, and it starts as it is. With one of Plain among the user's
+// eipgam's, and it starts as it is. With one of Plain among the user's
 // arguments (alone or with "=value") it starts as it is too.
 type Starting struct {
 	Bin   string

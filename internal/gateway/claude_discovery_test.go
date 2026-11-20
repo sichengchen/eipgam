@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Claude Code's Gateway Model Discovery keeps only the ids that say
 // claude or anthropic (/(claude|anthropic)/i in its 2.1.316 bundle), so a
-// remote magpie's Kimi and DeepSeek were in no /model (zent00 on X). Its
+// remote eipgam's Kimi and DeepSeek were in no /model (zent00 on X). Its
 // request is shown every model by an id it keeps, each served as the model
 // it stands for; an id it keeps already, a provider named anthropic's
 // included, stays as it is; and every other client, Claude Code's turns'

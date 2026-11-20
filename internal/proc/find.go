@@ -7,15 +7,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // FindTool is the command-line tool name as a terminal would run it: on
 // PATH, else in one of the folders a user's tools are installed in
 // (UserBinDirs), else, on Windows, on the PATH the registry has now, which
-// a magpie started before the tool was installed doesn't have (#839: the
+// a eipgam started before the tool was installed doesn't have (#839: the
 // Claude sign-in said Claude Code wasn't installed, its installer having
-// put claude.exe in ~/.local/bin after magpie started). A version
+// put claude.exe in ~/.local/bin after eipgam started). A version
 // manager's wrapper script found there is given as the program it runs
 // (Unwrap). "" when none. Where it is on PATH is kept while those folders
 // are unchanged (LookPath); Unwrap keeps its own answer by the script's
@@ -35,7 +35,7 @@ func FindTool(name string) string {
 
 // sandboxVar is testenv.Marker, which proc can't import: the home a test
 // binary's testenv.Isolate made.
-const sandboxVar = "MAGPIE_TEST_SANDBOX"
+const sandboxVar = "EIPGAM_TEST_SANDBOX"
 
 // Isolated reports whether this is a test binary testenv isolated, where
 // nothing of the machine's own (its folders, its registry) is read.
@@ -75,7 +75,7 @@ func ToolIn(name string, dirs []string) string { return toolIn(name, runtime.GOO
 // CreateProcess refuses it ("%1 is not a valid Win32 application"), and
 // what npm left of its shims when an install failed partway is that sh
 // one alone (CLJY on Discord: %APPDATA%\npm\claude, 308 bytes, with no
-// claude.cmd beside it, was what magpie ran).
+// claude.cmd beside it, was what eipgam ran).
 func toolIn(name, goos string, dirs []string) string {
 	names := []string{name}
 	if goos == "windows" {

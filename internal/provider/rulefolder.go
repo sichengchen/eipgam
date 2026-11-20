@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // foldCase: folders are told apart without case, as macOS's and

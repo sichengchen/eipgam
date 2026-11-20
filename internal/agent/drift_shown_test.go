@@ -3,10 +3,10 @@ package agent
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The window's drift poll asks whether a value is one of magpie's models
+// The window's drift poll asks whether a value is one of eipgam's models
 // once while provider.StampNow stays the same, not on every poll: each ask
 // built the field's whole option list, the agents' model lists under it
 // built again once a minute. A stamp that moved asks again, and so does
@@ -22,7 +22,7 @@ func TestDriftShownAsksAValueOncePerStamp(t *testing.T) {
 	var memo valueMemo
 	for range 5 {
 		if !memo.in(a, f, "own-model", vals, fieldOptions{}) {
-			t.Fatal("own-model is magpie's")
+			t.Fatal("own-model is eipgam's")
 		}
 	}
 	if asked != 1 {

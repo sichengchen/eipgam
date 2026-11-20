@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // serve restarts into an update only once the gateway is idle: nothing in
@@ -16,7 +16,7 @@ import (
 // replaced, or a build of one's own, is never restarted.
 func TestServeFollowWaitsForIdle(t *testing.T) {
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "magpie")
+	exe := filepath.Join(dir, "eipgam")
 	if err := os.WriteFile(exe, []byte("old"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestServeFollowWaitsForIdle(t *testing.T) {
 		t.Fatal("restarted with nothing put in")
 	}
 	if a := f.answer(""); a.State != "current" {
-		t.Fatalf("magpie update's ask with nothing put in: %+v", a)
+		t.Fatalf("eipgam update's ask with nothing put in: %+v", a)
 	}
 
 	if err := os.WriteFile(exe, []byte("the new version"), 0o755); err != nil {
@@ -46,7 +46,7 @@ func TestServeFollowWaitsForIdle(t *testing.T) {
 	// (its own follow: an ask starts the bound of TestServeFollowDrainIsBounded)
 	asker := &serveFollow{exe: exe, started: st, busy: f.busy, released: true, stop: func() {}}
 	if a := asker.answer(""); a.State != "waiting" || a.Busy == nil || a.Busy.Requests != 1 {
-		t.Fatalf("magpie update's ask while busy: %+v", a)
+		t.Fatalf("eipgam update's ask while busy: %+v", a)
 	}
 	busy = gateway.Busy{Last: now.Add(-time.Second)}
 	if f.check(now) || stops != 0 {
@@ -75,11 +75,11 @@ func TestServeFollowWaitsForIdle(t *testing.T) {
 	}
 }
 
-// A restart magpie update asked for waits at most serveDrainMost, then goes
+// A restart eipgam update asked for waits at most serveDrainMost, then goes
 // ahead whatever is in flight; --force goes at once (ljlwlcz on X: a wait
 // on "N requests" that long streams never let end).
 func TestServeFollowDrainIsBounded(t *testing.T) {
-	exe := filepath.Join(t.TempDir(), "magpie")
+	exe := filepath.Join(t.TempDir(), "eipgam")
 	if err := os.WriteFile(exe, []byte("old"), 0o755); err != nil {
 		t.Fatal(err)
 	}

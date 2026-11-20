@@ -12,23 +12,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Zed has no plugin of bili's. Its README lists it with two routes: the
 // launcher (bili zed), Linux only and leaving a provider on loopback
-// direct, so magpie's gateway never passes through it; and, on every
+// direct, so eipgam's gateway never passes through it; and, on every
 // system, the /bili/ prefix its docs give for any client whose model
 // address can be edited ("Adopting unlisted clients", docs/clients.md):
 // language_models.openai_compatible.<provider>.api_url as
 // http://127.0.0.1:8787/bili/<the address>, with bili's daemon (bili start)
-// answering there. That is what magpie writes into Zed's magpie provider
+// answering there. That is what eipgam writes into Zed's eipgam provider
 // (agent.ZedThrough, which keeps it across picks and syncs and saves the
-// key for it, Zed looking that up by the address). magpie keeps a bili
+// key for it, Zed looking that up by the address). eipgam keeps a bili
 // start of its own running while such an agent is on (keepBiliServe, from
-// KeepLinked), ended with magpie; one the user started is used as it is.
+// KeepLinked), ended with eipgam; one the user started is used as it is.
 
 // biliOrigin is where bili start listens: 8787, the port bili keeps for
 // it (its lanes take 18787 and up).
@@ -38,7 +38,7 @@ const biliOrigin = "http://127.0.0.1:8787"
 const biliPrefix = biliOrigin + "/bili/"
 
 // biliURLLane is an agent bili folds through its /bili/ prefix: whether
-// its magpie provider goes through it, and putting it there (prefix
+// its eipgam provider goes through it, and putting it there (prefix
 // biliPrefix) or back on the gateway ("").
 type biliURLLane struct {
 	on  func(a *agent.Agent) bool
@@ -71,8 +71,8 @@ var biliServing = func() bool {
 	return res.StatusCode == http.StatusOK && json.NewDecoder(res.Body).Decode(&h) == nil && h.OK
 }
 
-// biliServer is the bili start magpie runs: under ctx (KeepLinked's,
-// which ends with magpie), stopped by cancel.
+// biliServer is the bili start eipgam runs: under ctx (KeepLinked's,
+// which ends with eipgam), stopped by cancel.
 var biliServer struct {
 	sync.Mutex
 	ctx    context.Context
@@ -85,7 +85,7 @@ func biliServeLog() string { return filepath.Join(settings.Dir(), "bili-start.lo
 var biliWait = 20 * time.Second
 
 // biliServe has bili start answer at biliOrigin: one there already is
-// used as it is, else magpie runs its own. A var for tests.
+// used as it is, else eipgam runs its own. A var for tests.
 var biliServe = func(bin string) error {
 	biliServer.Lock()
 	defer biliServer.Unlock()
@@ -93,7 +93,7 @@ var biliServe = func(bin string) error {
 		return nil
 	}
 	if biliServer.cancel != nil {
-		// magpie's own, which stopped answering
+		// eipgam's own, which stopped answering
 		biliServer.cancel()
 		biliServer.cancel = nil
 	}
@@ -145,7 +145,7 @@ var biliServe = func(bin string) error {
 	return fmt.Errorf("bili start didn't answer at %s: %s", biliOrigin, why)
 }
 
-// biliStop ends the bili start magpie runs, if it runs one. A var for
+// biliStop ends the bili start eipgam runs, if it runs one. A var for
 // tests.
 var biliStop = func() {
 	biliServer.Lock()
@@ -166,9 +166,9 @@ func biliURLOn(agents []*agent.Agent) bool {
 	return false
 }
 
-// setBiliURL puts an agent's magpie provider through bili's prefix, with
+// setBiliURL puts an agent's eipgam provider through bili's prefix, with
 // bili start answering there first, or back on the gateway, and ends
-// magpie's bili start when nothing goes through it any more.
+// eipgam's bili start when nothing goes through it any more.
 func setBiliURL(a *agent.Agent, agents []*agent.Agent, bin string, on bool) (*BiliView, error) {
 	b := newBackups()
 	if err := b.keep(a.ID, a.Path); err != nil {
@@ -199,8 +199,8 @@ func setBiliURL(a *agent.Agent, agents []*agent.Agent, bin string, on bool) (*Bi
 }
 
 // keepBiliServe, from KeepLinked, keeps bili start answering while an
-// agent goes through its prefix: at magpie's start, and after it stopped.
-// ctx is KeepLinked's, which ends magpie's bili start with magpie.
+// agent goes through its prefix: at eipgam's start, and after it stopped.
+// ctx is KeepLinked's, which ends eipgam's bili start with eipgam.
 func keepBiliServe(ctx context.Context) {
 	biliServer.Lock()
 	if biliServer.ctx == nil {

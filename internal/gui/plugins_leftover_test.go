@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // What a failed install left in plugins/ that no plugin is installed as
@@ -23,7 +23,7 @@ func TestPluginLeftoversReachThePage(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("EIPGAM_PLUGIN_MARKET", "off")
 	t.Setenv("PATH", t.TempDir())
 	if err := os.MkdirAll(plugin.Dir(), 0o755); err != nil {
 		t.Fatal(err)

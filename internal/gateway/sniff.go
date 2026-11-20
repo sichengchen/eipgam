@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // usageSniffer picks the usage block out of a provider reply that is being
@@ -34,7 +34,7 @@ type usageSniffer struct {
 	// found: the searches the reply ran by itself (searchTally)
 	found searchTally
 	// resp: the Responses stream's own response, as far as it went: what
-	// a response.failed magpie ends it with carries (streamFailure)
+	// a response.failed eipgam ends it with carries (streamFailure)
 	resp respTail
 }
 

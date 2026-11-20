@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// A model test through a remote magpie waits as long as a plugin's test
+// A model test through a remote eipgam waits as long as a plugin's test
 // does here (pluginTestWait), since the remote serves plugins' models and
 // retries for them, and tells the remote how long it waits (WaitHeader)
 // so the remote answers with its error inside it (plugins#827: the test
@@ -29,17 +29,17 @@ func TestRemoteMagpieProbeWait(t *testing.T) {
 		fmt.Fprint(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"hi\"}}]}\n\ndata: [DONE]\n\n")
 	}))
 	defer srv.Close()
-	p := Provider{ID: "office", Preset: RemoteMagpiePreset, Key: "sk-magpie-k", Chat: srv.URL + "/v1"}
+	p := Provider{ID: "office", Preset: RemoteMagpiePreset, Key: "sk-eipgam-k", Chat: srv.URL + "/v1"}
 	r := probe(context.Background(), p, Chat, srv.URL+"/v1/chat/completions", []byte(`{"model":"m","stream":true}`), "m", testWait)
 	if !r.OK {
-		t.Errorf("remote magpie's test given testWait only: %+v", r)
+		t.Errorf("remote eipgam's test given testWait only: %+v", r)
 	}
 	mu.Lock()
 	defer mu.Unlock()
 	if len(said) == 0 || said[0] != "4" {
 		t.Errorf("%s said %q, want the probe's own wait, 4", WaitHeader, said)
 	}
-	// a provider that isn't a remote magpie is told nothing
+	// a provider that isn't a remote eipgam is told nothing
 	said = nil
 	mu.Unlock()
 	q := Provider{ID: "relay", Key: "k", Chat: srv.URL + "/v1"}

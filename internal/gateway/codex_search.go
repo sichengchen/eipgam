@@ -12,20 +12,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // AlphaSearchPath is where Codex's own web search, its web.run tool, goes:
 // "alpha/search" under the model provider's base URL, so /v1/alpha/search
-// on magpie's provider and CodexPath+"/alpha/search" when Codex is signed in
+// on eipgam's provider and CodexPath+"/alpha/search" when Codex is signed in
 // to ChatGPT. Codex offers web.run since 0.143 for a provider that sends
-// x-openai-actor-authorization, as magpie's does, on a model whose catalog
-// entry says use_responses_lite, as a ChatGPT account's do in magpie
+// x-openai-actor-authorization, as eipgam's does, on a model whose catalog
+// entry says use_responses_lite, as a ChatGPT account's do in eipgam
 // (codexcat copies Codex's own entry). Unanswered, the 404 ended the turn:
 // Codex takes any failure of web.run as fatal (anton on Discord).
 const AlphaSearchPath = "/alpha/search"
 
-// alphaSearchRequest is the part of Codex's SearchRequest magpie reads; the
+// alphaSearchRequest is the part of Codex's SearchRequest eipgam reads; the
 // rest goes on to the ChatGPT backend as it came.
 type alphaSearchRequest struct {
 	Model    string `json:"model"`
@@ -54,7 +54,7 @@ type alphaSearchReply struct {
 // alphaSearch answers POST /v1/alpha/search. A ChatGPT account's model
 // goes to the ChatGPT backend's search, as Codex sends it there itself,
 // on the account's sign-in. Any other model's search_query is searched as
-// magpie searches for a model that can't (webSearch). What magpie can't
+// eipgam searches for a model that can't (webSearch). What eipgam can't
 // do is said in the tool's output with a 200, which the model reads; a
 // failure status would end the turn.
 func (s *Server) alphaSearch(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +68,7 @@ func (s *Server) alphaSearch(w http.ResponseWriter, r *http.Request) {
 func (s *Server) alphaSearchBody(w http.ResponseWriter, r *http.Request, body []byte) {
 	var q alphaSearchRequest
 	if err := json.Unmarshal(body, &q); err != nil {
-		writeError(w, provider.Responses, http.StatusBadRequest, "magpie couldn't read the web search request: "+err.Error())
+		writeError(w, provider.Responses, http.StatusBadRequest, "eipgam couldn't read the web search request: "+err.Error())
 		return
 	}
 	if q.Model == "" {
@@ -85,16 +85,16 @@ func (s *Server) alphaSearchBody(w http.ResponseWriter, r *http.Request, body []
 		if answered {
 			return
 		}
-		// a failure would end the turn: magpie searches in its place
+		// a failure would end the turn: eipgam searches in its place
 		log.Printf("web search on ChatGPT for %s: %s", q.Model, why)
-		note = "ChatGPT's web search failed (" + why + "); magpie searched in its place.\n\n"
+		note = "ChatGPT's web search failed (" + why + "); eipgam searched in its place.\n\n"
 	} else if ts := s.relaySearchers(r, q.Model); len(ts) > 0 {
 		answered, why := s.alphaSearchOn(w, r, body, ts)
 		if answered {
 			return
 		}
 		log.Printf("web search on %s for %s: %s", ts[0].p.Name, q.Model, why)
-		note = ts[0].p.Name + "'s web search failed (" + why + "); magpie searched in its place.\n\n"
+		note = ts[0].p.Name + "'s web search failed (" + why + "); eipgam searched in its place.\n\n"
 	}
 	s.alphaSearchHere(w, r, q, note)
 }
@@ -111,7 +111,7 @@ type searchTarget struct {
 // alpha/search under its Responses address: a key+URL provider set to
 // search the web by itself (Searches, #359), as a relay of OpenAI's API
 // or of the ChatGPT backend does. Such a relay's web.run was searched by
-// magpie, and the relay's own search never used (YIXIE233 on X).
+// eipgam, and the relay's own search never used (YIXIE233 on X).
 func upstreamSearches(p provider.Provider) bool {
 	return p.Account == nil && !p.IsPlugin() && p.Searches && p.Base(provider.Responses) != ""
 }
@@ -120,8 +120,8 @@ func upstreamSearches(p provider.Provider) bool {
 // set to search by itself serves it (upstreamSearches): the model's
 // provider, or the members of a routing group, in the order a turn of
 // the model is routed, those that search by themselves alone. None when
-// the one a turn goes to first can't, or Settings has magpie search for
-// every model (magpieSearches): magpie searches then, as before.
+// the one a turn goes to first can't, or Settings has eipgam search for
+// every model (magpieSearches): eipgam searches then, as before.
 func (s *Server) relaySearchers(r *http.Request, model string) []searchTarget {
 	who, keyHeld := keyHolds(r)
 	ref := model
@@ -155,7 +155,7 @@ func (s *Server) relaySearchers(r *http.Request, model string) []searchTarget {
 		}
 		if !upstreamSearches(c.p) || magpieSearches(r.Context(), c.p) {
 			if len(out) == 0 {
-				return nil // the turn goes to one that can't: magpie's
+				return nil // the turn goes to one that can't: eipgam's
 			}
 			continue
 		}
@@ -201,12 +201,12 @@ func chatGPTSearchers(r *http.Request, model string) ([]provider.Provider, strin
 // backend on each account, or a provider that searches by itself — the
 // next asked when one is refused, limited or fails, and relays the
 // answer as it is. It says whether one answered: when none did, nothing
-// is written, and the search is magpie's (alphaSearchHere), with why
+// is written, and the search is eipgam's (alphaSearchHere), with why
 // returned.
 func (s *Server) alphaSearchOn(w http.ResponseWriter, r *http.Request, body []byte, ts []searchTarget) (bool, string) {
 	start := time.Now()
 	// as written only when every account it may be asked on is set to go
-	// unmasked (provider.SkipsRedaction, isee1_1 on Discord); magpie's own
+	// unmasked (provider.SkipsRedaction, isee1_1 on Discord); eipgam's own
 	// search in its place masks its query itself (maskedQuery)
 	if len(ts) > 0 && !slices.ContainsFunc(ts, func(t searchTarget) bool { return !t.p.SkipsRedaction() }) {
 		return s.alphaSearchAsked(w, r, body, ts, start)
@@ -294,7 +294,7 @@ func (s *Server) alphaSearchAsked(w http.ResponseWriter, r *http.Request, body [
 }
 
 // alphaSearchHere answers a search for a model no ChatGPT account serves:
-// its search_query and image_query searched as magpie searches for a
+// its search_query and image_query searched as eipgam searches for a
 // model that can't, the findings the tool's output. Opening, clicking or
 // finding in a page is the ChatGPT backend's alone, and said so.
 func (s *Server) alphaSearchHere(w http.ResponseWriter, r *http.Request, q alphaSearchRequest, note string) {
@@ -312,7 +312,7 @@ func (s *Server) alphaSearchHere(w http.ResponseWriter, r *http.Request, q alpha
 		queries = append(queries, text)
 	}
 	if len(queries) == 0 {
-		writeJSON(w, http.StatusOK, alphaSearchReply{Output: note + "magpie can only search the web for " + q.Model + ": give web.run a search_query. Opening, clicking or finding in a page goes to the ChatGPT backend, for a ChatGPT account's model in magpie."})
+		writeJSON(w, http.StatusOK, alphaSearchReply{Output: note + "eipgam can only search the web for " + q.Model + ": give web.run a search_query. Opening, clicking or finding in a page goes to the ChatGPT backend, for a ChatGPT account's model in eipgam."})
 		return
 	}
 	ctx := withWebAccess(context.WithValue(r.Context(), searchForKey{}, &CallFor{Agent: callerOf(r).agent, Model: q.Model}), q.Settings.ExternalWebAccess)
@@ -324,9 +324,9 @@ func (s *Server) alphaSearchHere(w http.ResponseWriter, r *http.Request, q alpha
 				return
 			}
 			log.Printf("web search for %s: %v", q.Model, err)
-			msg := "magpie couldn't search the web for " + query + ": " + err.Error()
+			msg := "eipgam couldn't search the web for " + query + ": " + err.Error()
 			if errors.Is(err, errNoSearcher) {
-				msg += ": add a search API in magpie's Settings → Models → Web search (or magpie search add <api> <key>), or a provider that can search"
+				msg += ": add a search API in eipgam's Settings → Models → Web search (or eipgam search add <api> <key>), or a provider that can search"
 			}
 			said = append(said, msg)
 			continue

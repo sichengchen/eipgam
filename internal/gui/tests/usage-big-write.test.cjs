@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], asked = [];
       page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", server(lang, asked));
-      await page.goto("http://magpie.test/?view=usage&tab=requests");
+      await page.goto("http://eipgam.test/?view=usage&tab=requests");
       await page.waitForFunction(() => document.querySelectorAll("#ledWrap tbody tr.led-row").length === 3);
       const jump = page.locator("#ledSum button");
       await jump.waitFor({ state: "visible" });

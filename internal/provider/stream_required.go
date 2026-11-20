@@ -3,7 +3,7 @@ package provider
 import (
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A backend that only streams (claude-relay-service's Responses endpoint,

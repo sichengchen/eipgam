@@ -4,7 +4,7 @@
 // them to Routing, where they couldn't find the request they had clicked).
 // The page says where the request came from: the address the gateway saw,
 // "This computer" for a loopback one, "Not recorded" for a row written before
-// magpie kept it. Routing is only a link on the page. Requests ‹ and Escape
+// eipgam kept it. Routing is only a link on the page. Requests ‹ and Escape
 // go back to the list where it was left, and at the narrowest window nothing
 // scrolls sideways. Every language; no backend, the API is faked.
 const assert = require("node:assert/strict");
@@ -24,7 +24,7 @@ const ROWS = [
   { ...gw, t: at(0), client_ip: "127.0.0.1", route_id: 7, providerAccount: "team@example.com" },
   // from another computer on the network
   { ...gw, t: at(1), client_ip: "192.168.1.20", model: "gpt-6-luna", served: "gpt-6-luna" },
-  // written before magpie kept the address
+  // written before eipgam kept the address
   { ...gw, t: at(2), model: "gpt-6-terra", served: "gpt-6-terra" },
   ...Array.from({ length: 40 }, (_, i) => ({ ...gw, t: at(3 + i), client_ip: i === 30 ? "::1" : "10.0.0." + (i + 1), model: "filler-" + i, served: "filler-" + i })),
 ];
@@ -40,7 +40,7 @@ function server(lang, lookups) {
     if (url.pathname.startsWith("/api/gateway/route")) { lookups.push(url.pathname); return json({}); }
     if (url.pathname === "/api/usage/requests") return json({ period: url.searchParams.get("period"), rows: ROWS, offset: 0, total: ROWS.length, calls: ROWS.length, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, cost: 0.4, unpriced: 0, agents: [{ id: "codex", name: "Codex", icon: "codex-color" }] });
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: ROWS.length, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0.4, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: ROWS.length, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0.4, bucket: "day", series: [], agents: [], models: [], path: "~/.config/eipgam/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang, lookups));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://eipgam.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         const rows = p.locator("#ledWrap .led tbody tr.led-row");

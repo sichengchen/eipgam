@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // WorkBuddy's subscriptions (NancyTom on X, 11-04: WorkBuddy accounts used
-// through DeepSeek Harness via magpie were banned, the international build's
+// through DeepSeek Harness via eipgam were banned, the international build's
 // most): starting a sign-in first says Tencent may ban the account, and
 // nothing is asked of the backend until "Sign in anyway". Both the built-in
 // tiles and a subscription moved onto its plugin, which is how every user
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [], asked = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, asked, moved));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator("#addProvider").click();
           const sheet = page.locator("#addSheet");
           // the tile is named short, the warning in full

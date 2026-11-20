@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // desktopSealHere seals v at key k as Claude Desktop does on Windows: the
@@ -33,7 +33,7 @@ func desktopSealHere(t *testing.T, k, v string) string {
 
 func TestDesktopOpensWhatDesktopSealed(t *testing.T) {
 	k := "inferenceGatewayApiKey"
-	if got, known := desktopOpen(k, desktopSealHere(t, k, "magpie-x-claude-desktop")); !known || got != "magpie-x-claude-desktop" {
+	if got, known := desktopOpen(k, desktopSealHere(t, k, "eipgam-x-claude-desktop")); !known || got != "eipgam-x-claude-desktop" {
 		t.Errorf("opened %q %v", got, known)
 	}
 	// sealed for another key: Desktop wouldn't open it there either
@@ -42,19 +42,19 @@ func TestDesktopOpensWhatDesktopSealed(t *testing.T) {
 	}
 }
 
-// On Windows magpie opens the key Desktop sealed: magpie's own is on
-// magpie, another one sealed is a change.
+// On Windows eipgam opens the key Desktop sealed: eipgam's own is on
+// eipgam, another one sealed is a change.
 func TestClaudeDesktopSealedKeyOpened(t *testing.T) {
 	home, p := desktopSandbox(t)
 	os.MkdirAll(p.dir, 0o755)
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("magpie"); err != nil {
+	if err := a.Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	k := "inferenceGatewayApiKey"
 	edit.SetJSON(p.prof, edit.KV{Path: k, Value: desktopSealHere(t, k, agentKey("claude-desktop"))})
 	if c := a.Check(); c != "" {
-		t.Errorf("check with magpie's key sealed: %s", c)
+		t.Errorf("check with eipgam's key sealed: %s", c)
 	}
 	edit.SetJSON(p.prof, edit.KV{Path: k, Value: desktopSealHere(t, k, "sk-someone-elses")})
 	if c := a.Check(); !strings.Contains(c, "was changed") {

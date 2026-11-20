@@ -8,11 +8,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/mcpauth/mcpauthtest"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// identityHeaders are what a proxy or tunnel in front of magpie says of
+// identityHeaders are what a proxy or tunnel in front of eipgam says of
 // the caller: where it is, and with Tailscale Serve who (the user's
 // email, name and picture). A LazyCat box's ingress (lzc-ingress, in
 // front of every app on the box) says who too: the box account signed
@@ -47,14 +47,14 @@ func leakedIdentity(h http.Header) []string {
 	return out
 }
 
-// A request through a proxy in front of magpie (Tailscale Serve, a
+// A request through a proxy in front of eipgam (Tailscale Serve, a
 // Cloudflare Tunnel) reaches the vendor on the native route without what
 // the proxy said of the caller: not its address, and not the Tailscale
 // user's email, name or picture. The caller's own headers still go on.
 func TestNativeAnyDropsProxyIdentity(t *testing.T) {
 	fresh(t)
 	// the proxy here signs its clients in itself (lan.go's trustProxy)
-	t.Setenv("MAGPIE_TRUST_PROXY", "1")
+	t.Setenv("EIPGAM_TRUST_PROXY", "1")
 	up := newVendorAPI(t)
 	saveVendor(t, provider.Provider{ID: "vendor", Name: "Vendor", Chat: up.URL + "/v1", Key: "vk", Models: []string{"m"}})
 	h := nativeServe(t)
@@ -77,7 +77,7 @@ func TestNativeAnyDropsProxyIdentity(t *testing.T) {
 // to a remote MCP server.
 func TestPassthroughDropsProxyIdentity(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_TRUST_PROXY", "1")
+	t.Setenv("EIPGAM_TRUST_PROXY", "1")
 	var mu sync.Mutex
 	var got http.Header
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -142,7 +142,7 @@ func TestPassthroughDropsProxyIdentity(t *testing.T) {
 // a Chat completion and an Anthropic Messages turn to a Chat vendor.
 func TestTranslatedRoutesDropProxyIdentity(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_TRUST_PROXY", "1")
+	t.Setenv("EIPGAM_TRUST_PROXY", "1")
 	up := newVendorAPI(t)
 	saveVendor(t, provider.Provider{ID: "vendor", Name: "Vendor", Chat: up.URL + "/v1", Key: "vk", Models: []string{"m"}})
 	h := nativeServe(t)

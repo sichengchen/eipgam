@@ -4,20 +4,20 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 const { openPart } = require("./reader.cjs");
 
-// Jevik_AI on X deleted magpie's folders by hand, and Codex kept pointing
-// at a gateway that was gone. Settings › About › Uninstall magpie asks
+// Jevik_AI on X deleted eipgam's folders by hand, and Codex kept pointing
+// at a gateway that was gone. Settings › About › Uninstall eipgam asks
 // first, disconnects every agent and removes the service (POST
-// /api/uninstall), and only then has magpie quit and its files deleted
+// /api/uninstall), and only then has eipgam quit and its files deleted
 // (POST /api/uninstall/finish). A failure is said and nothing more is
-// removed; the Codex app still on the old settings is said before magpie
-// quits. magpie web never offers it.
+// removed; the Codex app still on the old settings is said before eipgam
+// quits. eipgam web never offers it.
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const words = {
-  en: { row: "Uninstall magpie", title: "Uninstall magpie?", go: "Uninstall", cancel: "Cancel", again: "Try again", quit: "Quit magpie" },
-  zh: { row: "卸载 magpie", title: "卸载 magpie？", go: "卸载", cancel: "取消" },
-  "zh-TW": { row: "解除安裝 magpie", title: "解除安裝 magpie？", go: "解除安裝", cancel: "取消" },
-  ja: { row: "magpie をアンインストール", title: "magpie をアンインストールしますか？", go: "アンインストール", cancel: "キャンセル" },
-  de: { row: "magpie deinstallieren", title: "magpie deinstallieren?", go: "Deinstallieren", cancel: "Abbrechen" },
+  en: { row: "Uninstall eipgam", title: "Uninstall eipgam?", go: "Uninstall", cancel: "Cancel", again: "Try again", quit: "Quit eipgam" },
+  zh: { row: "卸载 eipgam", title: "卸载 eipgam？", go: "卸载", cancel: "取消" },
+  "zh-TW": { row: "解除安裝 eipgam", title: "解除安裝 eipgam？", go: "解除安裝", cancel: "取消" },
+  ja: { row: "eipgam をアンインストール", title: "eipgam をアンインストールしますか？", go: "アンインストール", cancel: "キャンセル" },
+  de: { row: "eipgam deinstallieren", title: "eipgam deinstallieren?", go: "Deinstallieren", cancel: "Abbrechen" },
 };
 
 async function setup(t, engine, lang, width, { web = false, reply = { failed: false, says: [] } } = {}) {
@@ -35,14 +35,14 @@ async function setup(t, engine, lang, width, { web = false, reply = { failed: fa
     if (p === "/api/uninstall/finish") return route.fulfill({ status: 204 });
     return route.fulfill({ json: { agents: [], system: [], data: [], ...reply } });
   });
-  await page.goto("http://magpie.test/?view=gateway");
+  await page.goto("http://eipgam.test/?view=gateway");
   await page.locator("#prefs").click();
   await openPart(page, "about");
   await page.locator("#about .row").first().waitFor();
   return { page, errors, posts };
 }
 
-// the window as `magpie uninstall --window` opens it
+// the window as `eipgam uninstall --window` opens it
 async function opened(t, engine, lang, width, { web = false }) {
   const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
   t.after(() => browser.close());
@@ -58,7 +58,7 @@ async function opened(t, engine, lang, width, { web = false }) {
     if (p === "/api/uninstall/finish") return route.fulfill({ status: 204 });
     return route.fulfill({ json: { agents: [], system: [], data: [], failed: false, says: [] } });
   });
-  await page.goto("http://magpie.test/?view=settings&tab=about&uninstall=1");
+  await page.goto("http://eipgam.test/?view=settings&tab=about&uninstall=1");
   return { page, errors, posts };
 }
 
@@ -68,7 +68,7 @@ const scrolled = (page) => page.evaluate(() => document.querySelector("#view-set
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of LANGS) {
     for (const width of [1100, 420]) {
-      test(`${engine} ${lang} ${width}: Uninstall magpie asks, then disconnects and quits`, async (t) => {
+      test(`${engine} ${lang} ${width}: Uninstall eipgam asks, then disconnects and quits`, async (t) => {
         const { page, errors, posts } = await setup(t, engine, lang, width);
         const w = words[lang];
         const row = page.locator("#uninstallRow");
@@ -111,19 +111,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.deepEqual(errors, []);
   });
 
-  test(`${engine}: the Codex app on its old settings is said before magpie quits`, async (t) => {
+  test(`${engine}: the Codex app on its old settings is said before eipgam quits`, async (t) => {
     const { page, errors, posts } = await setup(t, engine, "en", 1100, { reply: { failed: false, codexApp: true, says: [] } });
     await page.locator("#uninstallRow button").click();
     await dialog(page).getByRole("button", { name: "Uninstall", exact: true }).click();
-    await dialog(page).getByRole("button", { name: "Quit magpie", exact: true }).waitFor();
+    await dialog(page).getByRole("button", { name: "Quit eipgam", exact: true }).waitFor();
     assert.deepEqual(posts, ["/api/uninstall"]);
-    await dialog(page).getByRole("button", { name: "Quit magpie", exact: true }).click();
+    await dialog(page).getByRole("button", { name: "Quit eipgam", exact: true }).click();
     await waitFor(() => posts.length === 2);
     assert.deepEqual(posts, ["/api/uninstall", "/api/uninstall/finish"]);
     assert.deepEqual(errors, []);
   });
 
-  // Windows' Installed apps › Uninstall runs `magpie uninstall --window`,
+  // Windows' Installed apps › Uninstall runs `eipgam uninstall --window`,
   // which opens the window here (uninstallView): the question is asked at
   // once, once, and nothing goes before the reader says Uninstall.
   for (const lang of ["en", "zh"]) {
@@ -150,7 +150,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     }
   }
 
-  test(`${engine}: magpie web opened at the uninstall link asks nothing`, async (t) => {
+  test(`${engine}: eipgam web opened at the uninstall link asks nothing`, async (t) => {
     const { page, errors, posts } = await opened(t, engine, "en", 1100, { web: true });
     await page.locator("#about .row").first().waitFor();
     await page.waitForTimeout(300);
@@ -159,7 +159,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.deepEqual(errors, []);
   });
 
-  test(`${engine}: magpie web never offers it`, async (t) => {
+  test(`${engine}: eipgam web never offers it`, async (t) => {
     const { page, errors } = await setup(t, engine, "en", 1100, { web: true });
     assert.equal(await page.locator("#uninstallRow").count(), 0);
     assert.doesNotMatch(await page.locator("#about").textContent(), /Uninstall/);

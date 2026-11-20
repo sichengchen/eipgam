@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // The Windows app opened from Downloads installs itself (update.Settle),
@@ -30,43 +30,43 @@ type installWords struct {
 
 var installText = map[string]installWords{
 	"en": {
-		title: "magpie", ask: "Install magpie in this folder?", install: "Install", change: "Change…",
-		pick:      "Choose where to install magpie",
-		admin:     "Only an administrator can write to %s. magpie is installed for you alone and updates itself, so choose a folder of your own.",
+		title: "eipgam", ask: "Install eipgam in this folder?", install: "Install", change: "Change…",
+		pick:      "Choose where to install eipgam",
+		admin:     "Only an administrator can write to %s. eipgam is installed for you alone and updates itself, so choose a folder of your own.",
 		downloads: "Downloads land in %s. Choose another folder.",
-		failed:    "magpie can't be installed in %s: %v",
-		keep:      "Once magpie is installed, you can delete %s.",
+		failed:    "eipgam can't be installed in %s: %v",
+		keep:      "Once eipgam is installed, you can delete %s.",
 	},
 	"zh": {
-		title: "magpie", ask: "把 magpie 安装到这个文件夹？", install: "安装", change: "更改…",
-		pick:      "选择 magpie 的安装位置",
-		admin:     "只有管理员才能写入 %s。magpie 只为你安装，并会自己更新，请选择一个你自己的文件夹。",
+		title: "eipgam", ask: "把 eipgam 安装到这个文件夹？", install: "安装", change: "更改…",
+		pick:      "选择 eipgam 的安装位置",
+		admin:     "只有管理员才能写入 %s。eipgam 只为你安装，并会自己更新，请选择一个你自己的文件夹。",
 		downloads: "%s 是下载存放的地方，请选择另一个文件夹。",
-		failed:    "magpie 无法安装到 %s：%v",
+		failed:    "eipgam 无法安装到 %s：%v",
 		keep:      "安装完成后，可以删除 %s。",
 	},
 	"zh-TW": {
-		title: "magpie", ask: "把 magpie 安裝到這個資料夾？", install: "安裝", change: "變更…",
-		pick:      "選擇 magpie 的安裝位置",
-		admin:     "只有系統管理員才能寫入 %s。magpie 只為你安裝，並會自己更新，請選擇一個你自己的資料夾。",
+		title: "eipgam", ask: "把 eipgam 安裝到這個資料夾？", install: "安裝", change: "變更…",
+		pick:      "選擇 eipgam 的安裝位置",
+		admin:     "只有系統管理員才能寫入 %s。eipgam 只為你安裝，並會自己更新，請選擇一個你自己的資料夾。",
 		downloads: "%s 是下載存放的地方，請選擇另一個資料夾。",
-		failed:    "magpie 無法安裝到 %s：%v",
+		failed:    "eipgam 無法安裝到 %s：%v",
 		keep:      "安裝完成後，可以刪除 %s。",
 	},
 	"ja": {
-		title: "magpie", ask: "このフォルダーに magpie をインストールしますか？", install: "インストール", change: "変更…",
-		pick:      "magpie のインストール先を選択",
-		admin:     "%s に書き込めるのは管理者だけです。magpie はあなた専用にインストールされ、自分で更新するので、あなた自身のフォルダーを選んでください。",
+		title: "eipgam", ask: "このフォルダーに eipgam をインストールしますか？", install: "インストール", change: "変更…",
+		pick:      "eipgam のインストール先を選択",
+		admin:     "%s に書き込めるのは管理者だけです。eipgam はあなた専用にインストールされ、自分で更新するので、あなた自身のフォルダーを選んでください。",
 		downloads: "%s はダウンロードの保存先です。別のフォルダーを選んでください。",
-		failed:    "%s に magpie をインストールできません：%v",
+		failed:    "%s に eipgam をインストールできません：%v",
 		keep:      "インストール後は %s を削除してかまいません。",
 	},
 	"de": {
-		title: "magpie", ask: "magpie in diesem Ordner installieren?", install: "Installieren", change: "Ändern…",
-		pick:      "Speicherort für magpie wählen",
-		admin:     "Nur ein Administrator darf in %s schreiben. magpie wird nur für Sie installiert und aktualisiert sich selbst, wählen Sie also einen eigenen Ordner.",
+		title: "eipgam", ask: "eipgam in diesem Ordner installieren?", install: "Installieren", change: "Ändern…",
+		pick:      "Speicherort für eipgam wählen",
+		admin:     "Nur ein Administrator darf in %s schreiben. eipgam wird nur für Sie installiert und aktualisiert sich selbst, wählen Sie also einen eigenen Ordner.",
 		downloads: "In %s landen Downloads. Wählen Sie einen anderen Ordner.",
-		failed:    "magpie kann nicht in %s installiert werden: %v",
+		failed:    "eipgam kann nicht in %s installiert werden: %v",
 		keep:      "Nach der Installation können Sie %s löschen.",
 	},
 }
@@ -81,7 +81,7 @@ func installWordsFor(lang string) installWords {
 }
 
 // footer says that exe, the download the dialog was opened from, can be
-// deleted once magpie is installed; "" when exe isn't known.
+// deleted once eipgam is installed; "" when exe isn't known.
 func (w installWords) footer(exe string) string {
 	if exe == "" {
 		return ""

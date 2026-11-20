@@ -2,7 +2,7 @@ package cli
 
 import "testing"
 
-// Only a magpie that serves pages runs plugins' page services; a command
+// Only a eipgam that serves pages runs plugins' page services; a command
 // that does its work and ends leaves them to the app (#5187).
 func TestServesPages(t *testing.T) {
 	for _, args := range [][]string{nil, {"tui"}, {"web"}, {"serve"}, {"tray"}, {"app"}, {"gui", "settings"}, {"panel"}, {"-Embedding"}} {
@@ -15,7 +15,7 @@ func TestServesPages(t *testing.T) {
 			t.Errorf("%q serves pages, want it not to", args)
 		}
 	}
-	if servesPages([]string{"magpie://import?x"}) != hasGUI {
-		t.Errorf("a magpie: link serves pages %v, want it to as the app opens it (%v)", !hasGUI, hasGUI)
+	if servesPages([]string{"eipgam://import?x"}) != hasGUI {
+		t.Errorf("a eipgam: link serves pages %v, want it to as the app opens it (%v)", !hasGUI, hasGUI)
 	}
 }

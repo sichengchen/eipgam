@@ -3,7 +3,7 @@ package netproxy
 // SSH proxies (@laiuuui on X: a VPS gives only SSH, an address, a port and
 // a password or key). A saved proxy whose address is ssh://host:port is
 // carried as `ssh -D` carries it, with no ssh command on the computer:
-// magpie logs in with golang.org/x/crypto/ssh and stands a SOCKS5 proxy on
+// eipgam logs in with golang.org/x/crypto/ssh and stands a SOCKS5 proxy on
 // loopback, with a login of its own, whose connections it opens as
 // channels of that SSH connection. The saved proxy resolves to that SOCKS
 // address (settings.SSHAddress), so every path a SOCKS proxy takes (a
@@ -33,7 +33,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func init() { settings.SSHAddress = sshAddress }
@@ -172,7 +172,7 @@ func openTunnel(p settings.NamedProxy, save bool) (*sshTunnel, error) {
 	if err != nil {
 		return nil, fmt.Errorf("the SSH proxy's local end didn't start: %w", err)
 	}
-	t := &sshTunnel{ln: ln, cfg: p, user: "magpie", pass: randomHex(16), save: save}
+	t := &sshTunnel{ln: ln, cfg: p, user: "eipgam", pass: randomHex(16), save: save}
 	t.addr = (&url.URL{Scheme: "socks5h", User: url.UserPassword(t.user, t.pass), Host: ln.Addr().String()}).String()
 	go func() {
 		for {
@@ -360,7 +360,7 @@ func SSHForwardWhy(p settings.NamedProxy, msg string) *Why {
 	w := &Why{Addr: addr, Err: textErr(msg)}
 	switch {
 	case strings.Contains(msg, "not allowed by ruleset"):
-		w.Why = "the SSH server at {addr} let magpie log in but won't forward connections: its sshd_config needs AllowTcpForwarding yes"
+		w.Why = "the SSH server at {addr} let eipgam log in but won't forward connections: its sshd_config needs AllowTcpForwarding yes"
 	case strings.Contains(msg, "connection refused"), strings.Contains(msg, "unreachable"):
 		w.Why = "the SSH server at {addr} couldn't reach the site: check that the server itself reaches the internet"
 	default:

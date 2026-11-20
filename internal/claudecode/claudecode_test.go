@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/stall"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/stall"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }

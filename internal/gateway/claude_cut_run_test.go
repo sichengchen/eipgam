@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/testenv"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // A Claude subscription run whose Claude Code exits after its reply
@@ -55,7 +55,7 @@ func TestClaudeSubscriptionRunExitedMidReplyFails(t *testing.T) {
 							// running the Claude Code it was handed
 							claudeTUIRuns = true
 							t.Cleanup(func() { claudeTUIRuns = false })
-							helper := filepath.Join(t.TempDir(), "magpie")
+							helper := filepath.Join(t.TempDir(), "eipgam")
 							testenv.Program(t, helper, "#!/bin/sh\n[ \"$1\" = \""+claudetui.Command+"\" ] || exit 9\necho start >> '"+helped+"'\nshift; claude=$1; shift\nexec \"$claude\" \"$@\"\n")
 							claudeTUIHelper = helper
 							t.Cleanup(func() { claudeTUIHelper = "" })

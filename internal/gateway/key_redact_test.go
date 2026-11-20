@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // y0ngb1n on X: each gateway key says whether Settings › Privacy's masking
@@ -53,7 +53,7 @@ func TestKeyRedactSetting(t *testing.T) {
 		}
 	}
 
-	// off through a Remote magpie: this one masks nothing and says nothing
+	// off through a Remote eipgam: this one masks nothing and says nothing
 	// was masked, so the remote masks by its own settings
 	if got := send(secrets[0], "office/fake/m1"); strings.Contains(got, "acmecorp") {
 		t.Errorf("an off key's request told the remote it was masked: %s", got)

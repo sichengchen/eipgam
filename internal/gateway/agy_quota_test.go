@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // @Airan_FS on X (11-17): an agy-cli account out of its quota answered
@@ -104,9 +104,9 @@ func TestAgyQuotaNoticeResetIsRead(t *testing.T) {
 	}
 }
 
-// BruceLu73129013 on X (magpie 0.1.4342, agy-cli 0.1.87): Opus's quota used
+// BruceLu73129013 on X (eipgam 0.1.4342, agy-cli 0.1.87): Opus's quota used
 // up, Gemini 4 Carbon on the same account, its quota left, was answered the
-// same 429 from magpie's rest (timedHeld on agy-cli@<account>). Antigravity
+// same 429 from eipgam's rest (timedHeld on agy-cli@<account>). Antigravity
 // counts quota per pool of models (Claude and GPT, Gemini apart), so its
 // refusal rests the model it was for, and the account's other models are
 // still asked. agy-cli's usage windows are display only (aside), so no

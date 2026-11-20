@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // toolSandbox is a HOME of the test's own and a real gateway in front of
-// it, which magpie tool asks.
+// it, which eipgam tool asks.
 func toolSandbox(t *testing.T) {
 	t.Helper()
 	home := t.TempDir()
@@ -25,13 +25,13 @@ func toolSandbox(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Setenv("XDG_DATA_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	gw := httptest.NewServer(gateway.New().Handler())
 	t.Cleanup(gw.Close)
-	t.Setenv("MAGPIE_GATEWAY", gw.URL)
+	t.Setenv("EIPGAM_GATEWAY", gw.URL)
 }
 
-// magpie tool memory_search failed with "isn't JSON-RPC" and exit 1, and
+// eipgam tool memory_search failed with "isn't JSON-RPC" and exit 1, and
 // memory_save said so after saving (#6049, #6392, Norethcy on X): the CLI
 // named no folder, so the memory server asked it for its roots on an event
 // stream, which the CLI read as one JSON body. It names the folder it runs
@@ -109,7 +109,7 @@ func TestToolReadsAnEventStreamAndAnswersTheServer(t *testing.T) {
 		send(map[string]any{"jsonrpc": "2.0", "method": "notifications/progress", "params": map[string]any{"progress": 1}})
 		var got []map[string]any
 		for _, ask := range []string{"roots/list", "sampling/createMessage"} {
-			send(map[string]any{"jsonrpc": "2.0", "id": "magpie-" + ask, "method": ask})
+			send(map[string]any{"jsonrpc": "2.0", "id": "eipgam-" + ask, "method": ask})
 			select {
 			case a := <-answers:
 				got = append(got, a)
@@ -122,15 +122,15 @@ func TestToolReadsAnEventStreamAndAnswersTheServer(t *testing.T) {
 		mu.Lock()
 		defer mu.Unlock()
 		roots, _ := json.Marshal(got[0]["result"])
-		if got[0]["id"] != "magpie-roots/list" || !strings.Contains(string(roots), `"uri":"file://`) || !strings.Contains(string(roots), filepath.ToSlash(filepath.Base(dir))) {
+		if got[0]["id"] != "eipgam-roots/list" || !strings.Contains(string(roots), `"uri":"file://`) || !strings.Contains(string(roots), filepath.ToSlash(filepath.Base(dir))) {
 			t.Errorf("roots/list answered %v", got[0])
 		}
-		if got[1]["id"] != "magpie-sampling/createMessage" || got[1]["error"] == nil {
+		if got[1]["id"] != "eipgam-sampling/createMessage" || got[1]["error"] == nil {
 			t.Errorf("sampling answered %v", got[1])
 		}
 	}))
 	t.Cleanup(srv.Close)
-	t.Setenv("MAGPIE_GATEWAY", srv.URL)
+	t.Setenv("EIPGAM_GATEWAY", srv.URL)
 	out, err := runOut(t, "tool", "memory_search", "--query", "anything")
 	if err != nil || strings.TrimSpace(out) != "found it" {
 		t.Fatalf("%v\n%s", err, out)

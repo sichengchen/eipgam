@@ -5,24 +5,24 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // mdwsk88: Claude Desktop lists Copilot's Claude Opus 5.5 as
-// magpie-5238445297.anthropic.claude-opus-5-5 (claudeLooking), and a
+// eipgam-5238445297.anthropic.claude-opus-5-5 (claudeLooking), and a
 // session picked on it names that id on every turn. Copilot's /models once
 // answered without its Claude models, the list was saved so, and the
 // catalog had no entry under that number for the next hour: aliased kept
-// the id, unserved took it for a model magpie doesn't serve, and every
+// the id, unserved took it for a model eipgam doesn't serve, and every
 // turn of the session went to the model another Desktop session had run
 // last (desktopPicked, movedGone) — another provider's model for 25
-// minutes, Desktop still saying Opus. The id is magpie's for the user's
+// minutes, Desktop still saying Opus. The id is eipgam's for the user's
 // opus pick, whose provider still serves it: the turn goes there, as
 // asked.
 
 // aliasFor's form for a Claude model with reasoning levels (claudeLooking)
 func desktopClaudeAlias(id, model string) string {
-	return "magpie-" + aliasNumber(id) + desktopClaudeInfix + model
+	return "eipgam-" + aliasNumber(id) + desktopClaudeInfix + model
 }
 
 // outOfCatalog saves a provider whose list leaves its opus out for now,
@@ -82,7 +82,7 @@ func TestDesktopAliasOfTierPickLeftOutOfCatalog(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	second := "magpie-" + aliasNumber(desktopTierKey(sonnet, "haiku")) + desktopClaudeInfix + "claude-sonnet-5-6"
+	second := "eipgam-" + aliasNumber(desktopTierKey(sonnet, "haiku")) + desktopClaudeInfix + "claude-sonnet-5-6"
 	if got, ok := aliased(second); !ok || got != sonnet {
 		t.Errorf("aliased(%q) = %q, %v; want %q", second, got, ok, sonnet)
 	}
@@ -95,7 +95,7 @@ func TestDesktopAliasOfTierPickLeftOutOfCatalog(t *testing.T) {
 		t.Errorf("after the haiku pick changed, aliased(%q) = %q, %v; want %q", second, got, ok, sonnet)
 	}
 
-	// an id of magpie's for a model the user picked for no tier, and the
+	// an id of eipgam's for a model the user picked for no tier, and the
 	// catalog left out, is no pick's
 	if got, ok := aliased(desktopClaudeAlias("relay/claude-opus-4-8", "claude-opus-4-8")); ok {
 		t.Errorf("an alias of no pick read as %q", got)
@@ -117,7 +117,7 @@ func TestDesktopAliasSkipsGroupPick(t *testing.T) {
 	}
 }
 
-// magpie's own id for a Claude model it can't find at all (its provider
+// eipgam's own id for a Claude model it can't find at all (its provider
 // removed, or its list without it, and picked for no tier) still names
 // the Claude model and so its tier: the model picked for that tier takes
 // it, as it takes Claude Code's own id of one (desktopTierTurn), not the
@@ -144,8 +144,8 @@ func TestDesktopClaudeAliasGoneTakesItsTier(t *testing.T) {
 			t.Errorf("%s: went to %q by %q, want the opus pick by %s", id, to, why, movedTier)
 		}
 	}
-	if !strings.HasPrefix(aliasClaude(gone), "claude-opus-") || aliasClaude("claude-opus-5-5") != "" || aliasClaude("magpie-12.anthropic.claude-opus-5-5") != "" {
-		t.Errorf("aliasClaude reads %q, %q, %q", aliasClaude(gone), aliasClaude("claude-opus-5-5"), aliasClaude("magpie-12.anthropic.claude-opus-5-5"))
+	if !strings.HasPrefix(aliasClaude(gone), "claude-opus-") || aliasClaude("claude-opus-5-5") != "" || aliasClaude("eipgam-12.anthropic.claude-opus-5-5") != "" {
+		t.Errorf("aliasClaude reads %q, %q, %q", aliasClaude(gone), aliasClaude("claude-opus-5-5"), aliasClaude("eipgam-12.anthropic.claude-opus-5-5"))
 	}
 
 	// no haiku pick: as before, the model the last turn ran on

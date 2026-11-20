@@ -37,7 +37,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsages: [], trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -92,7 +92,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.addInitScript((p) => Object.defineProperty(navigator, "platform", { get: () => p }), platform);
           await page.route("**/*", server(lang, { trayUsages: ["claude|a@b.c"], trayUsage: "claude|a@b.c" }));
-          await page.goto("http://magpie.test/?view=usage");
+          await page.goto("http://eipgam.test/?view=usage");
           await page.locator("#prefs").click();
           await openPart(page, "usage");
           const mac = platform === "MacIntel";
@@ -127,7 +127,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, { quotaReads: "asked", trayUsages: ["claude|a@b.c", "usage:today"], trayUsage: "claude|a@b.c" }));
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://eipgam.test/?view=usage");
       await page.locator("#prefs").click();
       await openPart(page, "usage");
       await page.locator("#trayUsagePick button").waitFor();

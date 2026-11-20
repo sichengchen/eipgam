@@ -56,7 +56,7 @@ func TestWriteFileSyncsBeforeRename(t *testing.T) {
 
 // A write that died between making its temp file and renaming it leaves the
 // temp beside the file: a multi-instance start-up exiting mid-write made
-// hundreds of them beside magpie's own files over a run, and nothing took
+// hundreds of them beside eipgam's own files over a run, and nothing took
 // them — edit.WriteAtomic reaps its temps beside the file it wrote, but
 // steady.WriteFile never did (#4938). A served write reaps the ones old
 // enough to belong to no write still going on, its own shape and edit's

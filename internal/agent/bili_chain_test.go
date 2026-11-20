@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 func TestChainsToGateway(t *testing.T) {
@@ -29,7 +29,7 @@ func TestChainsToGateway(t *testing.T) {
 		}
 	}
 	if !chainsToGateway("http://127.0.0.1:8787/bili/http://127.0.0.1:3425/v1", "http://127.0.0.1:3425/v1") {
-		t.Error("an OpenAI agent's /v1 through bili isn't magpie")
+		t.Error("an OpenAI agent's /v1 through bili isn't eipgam")
 	}
 }
 
@@ -68,11 +68,11 @@ func TestClaudeBehindBiliLaneKept(t *testing.T) {
 // http://127.0.0.1:18787/bili/http://127.0.0.1:3425, which forwards to the
 // gateway. The Agents page called it "配置已变更", and Reconnect would
 // have written the gateway over the user's billion-context. The lane runs
-// only beside its agent, so nothing answers GET / there as magpie: every
+// only beside its agent, so nothing answers GET / there as eipgam: every
 // agent whose address names the gateway at the end of a local proxy's
-// path still reaches magpie, with no probe, and a sync keeps the chain.
+// path still reaches eipgam, with no probe, and a sync keeps the chain.
 func TestBiliChainIsStillMagpie(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	home, _ := codexHome(t, "", "")
 	managed := claudeManaged
 	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
@@ -94,7 +94,7 @@ func TestBiliChainIsStillMagpie(t *testing.T) {
 			}
 		}
 		if want == "" {
-			t.Fatalf("%s: no field takes magpie's models", a.ID)
+			t.Fatalf("%s: no field takes eipgam's models", a.ID)
 		}
 		if err := a.Apply(key, want); err != nil {
 			t.Fatalf("%s: %v", a.ID, err)
@@ -102,7 +102,7 @@ func TestBiliChainIsStillMagpie(t *testing.T) {
 		agents = append(agents, a)
 	}
 	moved := filesWith(home, "127.0.0.1:3592")
-	// 17 with every agent magpie keeps connected here
+	// 17 with every agent eipgam keeps connected here
 	if len(moved) < 15 {
 		t.Fatalf("only %d files have the gateway's address: %v", len(moved), moved)
 	}
@@ -128,7 +128,7 @@ func TestBiliChainIsStillMagpie(t *testing.T) {
 	}
 	for _, b := range asked() {
 		if strings.Contains(b, "/bili/") {
-			t.Errorf("asked %s whether it is magpie", b)
+			t.Errorf("asked %s whether it is eipgam", b)
 		}
 	}
 

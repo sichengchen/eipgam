@@ -11,8 +11,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // openrouterWindow is a fake of OpenRouter's chat API that counts the
@@ -71,10 +71,10 @@ func TestReplyLeftOpenRouter(t *testing.T) {
 	}
 }
 
-// Codex names no max_output_tokens, magpie translates its Responses turn
+// Codex names no max_output_tokens, eipgam translates its Responses turn
 // to OpenRouter's chat API and fills in the model's own limit, which the
 // catalog gives as 943718 of a 1048576 window; OpenRouter counts it with
-// the prompt and refused every turn, and magpie did not read its words to
+// the prompt and refused every turn, and eipgam did not read its words to
 // ask again. The first ask now stays within the window, and a refusal that
 // still comes is read.
 func TestOpenRouterReplyFitsTheWindow(t *testing.T) {

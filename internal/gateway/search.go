@@ -14,18 +14,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/gwtool"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A client may offer its model the web search of the vendor it was made
 // for: Claude Code's WebSearch, Codex's web_search, a Chat client's
 // web_search_options, Gemini's googleSearch. A provider that searches by
 // itself is asked to; any other model is given a web_search tool of
-// magpie's, which a model that can search — the Claude subscription, a
+// eipgam's, which a model that can search — the Claude subscription, a
 // Codex account, OpenAI, Anthropic's API, OpenRouter — answers for it, or,
 // with none of them, a search API the user gave a key to (search_api.go).
 // A Kimi Code plan searches for its own models first, with its search
@@ -41,7 +41,7 @@ const searchRounds = 6
 // provider with it (sideDeadline, #2318).
 const searchTimeout, searchWaitMost = 2 * time.Minute, 5 * time.Minute
 
-// searchingKey marks a search magpie asks for itself, which must not
+// searchingKey marks a search eipgam asks for itself, which must not
 // search by way of another model again.
 type searchingKey struct{}
 
@@ -50,36 +50,36 @@ func searching(ctx context.Context) bool {
 	return v
 }
 
-// searchForKey holds the request magpie's searches are run for, which the
-// Routing view names by a search's row: magpie's own call, on the model it
+// searchForKey holds the request eipgam's searches are run for, which the
+// Routing view names by a search's row: eipgam's own call, on the model it
 // searches with, not the conversation's (#314).
 type searchForKey struct{}
 
-// CallFor is the request a call magpie made on its own was made for: its
+// CallFor is the request a call eipgam made on its own was made for: its
 // agent, and the model that agent asked for.
 type CallFor struct {
 	Agent string `json:"agent"`
 	Model string `json:"model"`
 	// Unknown, on an image's description, is that the model was counted
-	// text-only because nothing magpie knows says whether it sees images
+	// text-only because nothing eipgam knows says whether it sees images
 	// (blindTo), not because its list or the user says it takes text only.
 	// The Routing view says which, so a user whose model does see knows
 	// to say so (#1287).
 	Unknown bool `json:"unknown,omitempty"`
 	// Missing, on an image's description, is the Image recognition model
-	// the user picked in Settings that magpie can't find any more: the
-	// model that described is the one magpie picks in its place
+	// the user picked in Settings that eipgam can't find any more: the
+	// model that described is the one eipgam picks in its place
 	// (VisionMissing), and the Routing view names both.
 	Missing string `json:"missing,omitempty"`
 	// MCP, on a web search or an image's description, is that the agent
-	// called magpie's MCP server (SearchMCPPath, VisionMCPPath) itself, for
-	// no model of magpie's.
+	// called eipgam's MCP server (SearchMCPPath, VisionMCPPath) itself, for
+	// no model of eipgam's.
 	MCP bool `json:"mcp,omitempty"`
 	// Instead, on a web search, is the searcher asked first that failed
 	// or found nothing (Why, NothingFound): the searcher that did search
-	// was the next one magpie tried in its place, and the Routing view
+	// was the next one eipgam tried in its place, and the Routing view
 	// says so. Picked is that the first was the one picked in Settings.
-	// A fallback that said nothing read as magpie ignoring the pick
+	// A fallback that said nothing read as eipgam ignoring the pick
 	// (Gearclickist on Discord: Grok picked, Codex's model searched).
 	// NotSearched is that the first answered without searching at all
 	// (errNotSearched), apart from searching and naming no page.
@@ -95,9 +95,9 @@ func searchFor(ctx context.Context) *CallFor {
 	return f
 }
 
-// magpieSearches is whether magpie answers a client's web search for p
-// though p searches the web by itself: Settings' SearchAll, while magpie
-// can search for it. Never for magpie's own searcher request, which is
+// magpieSearches is whether eipgam answers a client's web search for p
+// though p searches the web by itself: Settings' SearchAll, while eipgam
+// can search for it. Never for eipgam's own searcher request, which is
 // the provider's search.
 func magpieSearches(ctx context.Context, p provider.Provider) bool {
 	return !searching(ctx) && settings.Shared().SearchAll && canSearchFor(p)
@@ -118,7 +118,7 @@ func searchesItself(p provider.Provider, proto provider.Protocol) bool {
 		// serves there: gpt-5.3-codex, gpt-5.4-mini, gpt-6-luna, grok-4.7
 		// and mai-code-1.1-flash each answered a request offering it with
 		// web_search_call items and cited pages (2026-10-17, a real
-		// account). Translated for magpie's search instead, Codex's every
+		// account). Translated for eipgam's search instead, Codex's every
 		// turn on Copilot lost the relay (echo_ts on Discord).
 		return (p.Account.Agent == "codex" || p.Account.Agent == "copilot" || p.ID == "grok" || p.PluginProvider() == "grok") && proto == provider.Responses ||
 			p.IsPlugin() && saidTo
@@ -141,7 +141,7 @@ func googleAccount(p provider.Provider) bool {
 // enable tool_config.include_server_side_tool_invocations to use Built-in
 // tools with Function calling", with that flag set in toolConfig too — so
 // only a request that declares none (searchesFor). One that does is given
-// magpie's search, which the account answers itself (ownSearcher, #757).
+// eipgam's search, which the account answers itself (ownSearcher, #757).
 func codeAssistSearches(p provider.Provider, proto provider.Protocol, model string) bool {
 	return proto == provider.CodeAssist && (googleAccount(p) || googlePlugin(p)) && searchModel(model)
 }
@@ -150,8 +150,8 @@ func codeAssistSearches(p provider.Provider, proto provider.Protocol, model stri
 // (its npm @ai-sdk/google) at Google's own host: the Antigravity plugin's
 // account asks daily-cloudcode-pa.googleapis.com, which runs googleSearch
 // for Gemini as a built-in Google sign-in's Code Assist does. Left to
-// magpie's search, a Gemini client's googleSearch never reached it, and
-// the web_search function magpie offered in its place kept the client's
+// eipgam's search, a Gemini client's googleSearch never reached it, and
+// the web_search function eipgam offered in its place kept the client's
 // URL context out too (daoche_wuzui on X). A plugin at another host is
 // not known to.
 func googlePlugin(p provider.Provider) bool {
@@ -166,7 +166,7 @@ func googlePlugin(p provider.Provider) bool {
 // Gemini API, the Google Gemini preset's beside its OpenAI-compatible one
 // (provider.AIStudioGemini; cocoasoda on Discord): Gemini runs googleSearch
 // there for a request that declares no function, as on Code Assist. One
-// that does — Codex's every turn, Claude Code's — is given magpie's search,
+// that does — Codex's every turn, Claude Code's — is given eipgam's search,
 // which the provider answers itself (searchesOwn), so the searches spend
 // the user's own Gemini API credit. No other vendor's API is read as one.
 func geminiKeySearches(p provider.Provider) bool {
@@ -192,7 +192,7 @@ func searchesFor(p provider.Provider, proto provider.Protocol, model string, req
 	return codeAssistSearches(p, proto, model) && (len(req.Tools) == 0 || req.ToolChoice == "none")
 }
 
-// searchesModel is searchesItself for one model: a Remote magpie searches
+// searchesModel is searchesItself for one model: a Remote eipgam searches
 // for the models its list says it does, on any API (search_remote.go).
 func searchesModel(p provider.Provider, proto provider.Protocol, model string) bool {
 	return searchesItself(p, proto) || proto != provider.Gemini && remoteSearch(p, model) != "" || modelSearches(p, proto, model)
@@ -202,7 +202,7 @@ func searchesModel(p provider.Provider, proto provider.Protocol, model string) b
 // of its models, by API: Command Code's Provider API passes the tool on to
 // the model's vendor, and 12 of its 87 models search (M3chD09's run of all
 // of them, #1590); the rest take the tool and don't search, or have it
-// stripped, so they keep magpie's searcher. Its Claude models search on
+// stripped, so they keep eipgam's searcher. Its Claude models search on
 // Messages only, the others on Responses only.
 var searchModels = map[string]map[provider.Protocol][]string{
 	"commandcode": {
@@ -264,9 +264,9 @@ func searchesAlone(p provider.Provider, model string) bool {
 // partSearcher is a provider of searchModels that searches by itself for
 // those of its models alone, on no API for every model, or a plugin's
 // that marks some of its models as ones that search (pluginSearches): one
-// magpie may search with, with those models only (searchableModel).
+// eipgam may search with, with those models only (searchableModel).
 // Command Code's searched for themselves but were left out of the
-// searcher picker and magpie's own pick (01huadalang on Discord), and so
+// searcher picker and eipgam's own pick (01huadalang on Discord), and so
 // was every plugin's, Trae's search model among them (01huadalang, 10-20).
 func partSearcher(p provider.Provider) bool {
 	if p.IsPlugin() {
@@ -304,7 +304,7 @@ func searchAsked(proto provider.Protocol, body []byte) bool {
 	return err == nil && req.WebSearch
 }
 
-// searchedForIt is whether a relayed request's web search is done by magpie
+// searchedForIt is whether a relayed request's web search is done by eipgam
 // for the provider, which can't be relayed: a body offering it to a model
 // that doesn't search by itself. What is known of the provider is asked
 // first: Codex offers web_search on every turn, and each relayed turn was
@@ -313,7 +313,7 @@ func searchedForIt(ctx context.Context, p provider.Provider, from provider.Proto
 	return (from == provider.Chat && !p.IsRemoteMagpie() || !searchesModel(p, from, model) || magpieSearches(ctx, p)) && searchAsked(from, body)
 }
 
-// searcher is the model magpie searches with: the one Settings names, while
+// searcher is the model eipgam searches with: the one Settings names, while
 // it can (chosenSearcher), else the first of the providers that search by
 // themselves, with a small model of theirs, as searching needs no more.
 // An explicit "off" leaves only the search APIs.
@@ -330,7 +330,7 @@ func searcher() (provider.Provider, string, bool) {
 // searchRank is where a provider comes among those that can search for a
 // model that can't, -1 when it can't. A relay said to search is left out:
 // it would spend the relay's quota on other models' searches, and one that
-// serves only Claude Code refuses magpie's own request, which has no
+// serves only Claude Code refuses eipgam's own request, which has no
 // metadata.user_id (#359).
 func searchRank(p provider.Provider) int {
 	p.Searches = false
@@ -356,13 +356,13 @@ func searchRank(p provider.Provider) int {
 		// (cocoasoda on Discord), by googleSearch
 		return 5
 	case remoteSearchesAny(p):
-		// another magpie, with the models it searches natively for
+		// another eipgam, with the models it searches natively for
 		return 5
 	}
 	return -1
 }
 
-// manualRelayRank is after every provider magpie picks or falls back to by
+// manualRelayRank is after every provider eipgam picks or falls back to by
 // itself: a relay said to search is offered only to be named (#359).
 const manualRelayRank = 6
 
@@ -382,10 +382,10 @@ func namedSearcherRank(p provider.Provider) (int, bool) {
 	return -1, false
 }
 
-// autoSearcher is the searcher magpie picks by itself: the first by
+// autoSearcher is the searcher eipgam picks by itself: the first by
 // searchRank that is on, with its small model. One with allowance left
 // goes before one whose every account or key is out of it (smallReady),
-// which is picked only when every searcher is, so that magpie still
+// which is picked only when every searcher is, so that eipgam still
 // offers its search (canSearch) (#1801).
 func autoSearcher() (provider.Provider, string, bool) {
 	p, m, _, ok := autoSearcherReady()
@@ -432,7 +432,7 @@ func autoSearcherReady() (provider.Provider, string, bool, bool) {
 	return best, model, bestReady, have
 }
 
-// Why the searcher Settings names isn't used, and magpie picks one itself.
+// Why the searcher Settings names isn't used, and eipgam picks one itself.
 const (
 	SearcherGone   = "gone"    // no such provider any more
 	SearcherOff    = "off"     // turned off, or signed out
@@ -486,7 +486,7 @@ func namedSearcher(v string) (*provider.Provider, string, string) {
 	return &p, "", SearcherNoneOf
 }
 
-// Searchers are the providers Settings' Searcher may name: those magpie
+// Searchers are the providers Settings' Searcher may name: those eipgam
 // would pick, then relays said to search, each with the model it would
 // search with.
 func Searchers() []SearcherChoice {
@@ -549,7 +549,7 @@ type SearcherChoice struct {
 	Own bool
 	// Search is a ChatGPT account, which searches by the ChatGPT backend's
 	// search besides its models ("<provider>/@search", codexSearchModel):
-	// magpie's own pick, and what it asks when another fails
+	// eipgam's own pick, and what it asks when another fails
 	Search bool
 }
 
@@ -626,7 +626,7 @@ type smallCand struct {
 // whether it sees. Only their "it sees" lifts the guess: a "takes no
 // images" says nothing of whether the ID is a vendor's model, and keeps
 // the guess as it was. An ID that starts a group, a found group or, on a
-// subscription, what magpie wrote into its agent, is magpie's own shape
+// subscription, what eipgam wrote into its agent, is eipgam's own shape
 // whatever the user said of it, and stays out.
 func smallCands(p provider.Provider, keep func(catalog.Model) bool) []smallCand {
 	var ms []catalog.Model
@@ -635,7 +635,7 @@ func smallCands(p provider.Provider, keep func(catalog.Model) bool) []smallCand 
 		if keep != nil && !keep(m) {
 			continue
 		}
-		// a subscription's list can have what magpie wrote into its agent
+		// a subscription's list can have what eipgam wrote into its agent
 		if strings.HasPrefix(m.ID, provider.GroupPrefix) || strings.HasPrefix(m.ID, provider.AutoPrefix) || (p.Account != nil && strings.Contains(m.ID, "/")) {
 			continue
 		}
@@ -764,7 +764,7 @@ func searcherReady(p provider.Provider) (string, bool) {
 func searchTool(tools []Tool) Tool {
 	name := "web_search"
 	for slices.ContainsFunc(tools, func(t Tool) bool { return t.Name == name }) {
-		name = "magpie_" + name
+		name = "eipgam_" + name
 	}
 	return Tool{Name: name,
 		Description: "Search the web for current information: news, releases, documentation, prices, anything after your training or that you are unsure of. Returns what the pages found say, with their URLs. Cite the URLs you use.",
@@ -780,7 +780,7 @@ const searchSystem = "You are a web search tool. Search the web for what is aske
 // first (#928): the providers then search only when none of them answers.
 // With provider search off, only the search APIs are asked.
 func (s *Server) webSearch(ctx context.Context, query string) (string, []Hit, error) {
-	// a search is magpie's own request, not the turn's provider's: the
+	// a search is eipgam's own request, not the turn's provider's: the
 	// search APIs go through the global proxy and each searcher through
 	// its own (Provider.Via), never through the proxy the turn's provider
 	// is set to (#1522: Codex asked while a "direct" provider served the
@@ -831,13 +831,13 @@ func (s *Server) webSearch(ctx context.Context, query string) (string, []Hit, er
 	return said, hits, nil
 }
 
-var errNoSearcher = errors.New("no provider that can search the web, nor a search API, is set up in magpie")
+var errNoSearcher = errors.New("no provider that can search the web, nor a search API, is set up in eipgam")
 
-// errSearchOff is a search asked of magpie while plugins/search is off.
-var errSearchOff = errors.New("magpie's web search is off: turn Web search on in magpie's Plugins › Built-in")
+// errSearchOff is a search asked of eipgam while plugins/search is off.
+var errSearchOff = errors.New("eipgam's web search is off: turn Web search on in eipgam's Plugins › Built-in")
 
-// searchServed is whether plugins/search serves magpie's web search here
-// (the gateway's tool point, gwtool): off, magpie neither offers its
+// searchServed is whether plugins/search serves eipgam's web search here
+// (the gateway's tool point, gwtool): off, eipgam neither offers its
 // web_search nor answers one, and a vendor that searches by itself still
 // does.
 func searchServed() bool { return gwtool.Served(gwtool.WebSearch) }
@@ -846,12 +846,12 @@ func searchServed() bool { return gwtool.Served(gwtool.WebSearch) }
 // before it goes to the search APIs.
 const searchersInTurn = 3
 
-// modelSearch searches the web with the searcher's model; one magpie
-// picked that fails or finds nothing gives way to the next searcher magpie
+// modelSearch searches the web with the searcher's model; one eipgam
+// picked that fails or finds nothing gives way to the next searcher eipgam
 // would pick, all of them within searchWaitMost. One Settings names gives
 // way to those named after it (SearcherThen), and, when it can't serve at
 // all — out of its allowance, refused for its quota, credit or rate
-// (errCantServe) — to the searchers magpie would pick in turn: a Codex
+// (errCantServe) — to the searchers eipgam would pick in turn: a Codex
 // account named to search for Cursor's models, used up, broke every
 // search of the turns Cursor took over from it (pedestrianz, plugins#635).
 // One that answered without searching or found nothing gives way to no
@@ -869,7 +869,7 @@ func (s *Server) modelSearch(ctx context.Context, query string) (string, []Hit, 
 	tried := []searchPick{{p.ID, model}}
 	var said string
 	var hits []Hit
-	// one magpie picked that is out of its allowance isn't asked: it
+	// one eipgam picked that is out of its allowance isn't asked: it
 	// would only be refused again (#1801); one the Settings name is, and
 	// its refusal, as one out of its allowance, hands it on (errCantServe)
 	err := searcherSpent(p, model)
@@ -883,7 +883,7 @@ func (s *Server) modelSearch(ctx context.Context, query string) (string, []Hit, 
 	}
 	if named {
 		// those Settings names after it, in their order (SearcherThen),
-		// then, when it can't serve, those magpie would pick
+		// then, when it can't serve, those eipgam would pick
 		instead, first := "", err
 		if err != nil && ctx.Err() == nil {
 			for _, v := range settings.Load().SearcherThen {
@@ -946,7 +946,7 @@ func (s *Server) modelSearch(ctx context.Context, query string) (string, []Hit, 
 	return said, hits, err
 }
 
-// turnModel is what c searches with when magpie picks it: a ChatGPT
+// turnModel is what c searches with when eipgam picks it: a ChatGPT
 // account by the backend's search, another by its small model.
 func turnModel(c SearcherChoice) string {
 	if c.Search {
@@ -958,7 +958,7 @@ func turnModel(c SearcherChoice) string {
 // searchPick is a searcher a search was asked of.
 type searchPick struct{ id, model string }
 
-// searchInTurn asks the searchers magpie would pick (Searchers), those
+// searchInTurn asks the searchers eipgam would pick (Searchers), those
 // with allowance left first, of a provider not tried yet, until one
 // searches or most have been tried in all: what it found, and which
 // searched (searcherOf). err is the failures so far, which the new ones
@@ -1139,7 +1139,7 @@ var errNotSearched = fmt.Errorf("answered without searching the web: %w", errFou
 // searching for its own models is sent none.
 func (s *Server) searchWith(ctx context.Context, p provider.Provider, model, query, effort string) (string, []Hit, error) {
 	body, _ := json.Marshal(searchBody(p, model, query, effort))
-	r, err := http.NewRequestWithContext(ownAsk(magpieChose(ctx)), http.MethodPost, "http://magpie/v1/messages", nil)
+	r, err := http.NewRequestWithContext(ownAsk(magpieChose(ctx)), http.MethodPost, "http://eipgam/v1/messages", nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -1265,8 +1265,8 @@ func searchBody(p provider.Provider, model, query, effort string) map[string]any
 	return q
 }
 
-// SearchAgent is the User-Agent of the searches magpie makes for a model.
-const SearchAgent = "magpie-search/1"
+// SearchAgent is the User-Agent of the searches eipgam makes for a model.
+const SearchAgent = "eipgam-search/1"
 
 // round asks the model once and gives its reply's events, or the status
 // and message of a failure.

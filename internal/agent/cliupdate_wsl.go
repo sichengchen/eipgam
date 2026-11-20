@@ -171,7 +171,7 @@ func wslFromNodeModules(d distro, pkg string, scripts bool, bin, real string) *u
 	case strings.Contains(lower, "/pnpm/") || strings.Contains(lower, "/.pnpm/"):
 		return &updater{via: "pnpm", pkg: pkg, wsl: d.Name, cmd: withScripts([]string{"pnpm", "add", "-g"}, "pnpm", pkg, scripts)}
 	case strings.Contains(lower, "/.volta/") || strings.Contains(lower, "/yarn/") || strings.Contains(lower, "/.yarn/"):
-		return nil // a manager of its own, which magpie leaves to it
+		return nil // a manager of its own, which eipgam leaves to it
 	}
 	lib := path.Dir(modules)
 	if path.Base(lib) != "lib" {
@@ -247,11 +247,11 @@ func (a *Agent) updateWSL() (CLI, error) {
 	spec := cliSpecs[kind]
 	w, ok := askWSLCLI(d, kind, spec)
 	if !ok {
-		return CLI{}, fmt.Errorf("magpie can't find %s's CLI in %s", a.Name, a.WSL)
+		return CLI{}, fmt.Errorf("eipgam can't find %s's CLI in %s", a.Name, a.WSL)
 	}
 	u := wslHowInstalled(d, spec, w.bin, w.real)
 	if u == nil {
-		return CLI{}, fmt.Errorf("magpie can't tell how %s was installed at %s in %s — update it the way you installed it", a.Name, w.bin, a.WSL)
+		return CLI{}, fmt.Errorf("eipgam can't tell how %s was installed at %s in %s — update it the way you installed it", a.Name, w.bin, a.WSL)
 	}
 	if _, busy := updating.LoadOrStore(a.ID, true); busy {
 		return CLI{}, fmt.Errorf("%s is already being updated", a.Name)

@@ -18,7 +18,7 @@ const skills = (n) => Array.from({ length: n }, (_, i) => ({ name: "skill-" + St
 const servers = (n) => Array.from({ length: n }, (_, i) => ({ server: { name: "srv-" + i, transport: "stdio", command: "srv-" + i + "-mcp", agents: ["codex"] } }));
 let found = skills(52), foundServers = [];
 const lib = (foundSkills) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("pi", "Pi")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers, projects: [], foundSkills,
 });
@@ -61,13 +61,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, posts, tab = "skills") => {
       const ctx = await browser.newContext({ viewport: { width: 980, height: 800 } });
-      await ctx.addInitScript((tab) => { try { localStorage.setItem("magpie.libTab", tab); } catch {} }, tab);
+      await ctx.addInitScript((tab) => { try { localStorage.setItem("eipgam.libTab", tab); } catch {} }, tab);
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.locator('button[data-view="library"]').click();
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

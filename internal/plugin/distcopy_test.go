@@ -85,14 +85,14 @@ func TestDistAddOverAHeldCopy(t *testing.T) {
 // The reporter's case on v0.1.4241 (CHENGJIAHEGOXIS on X): Bun can't
 // copy GoAnyAPI from its cache at either try ("Unexpected: failed
 // copying files from cache to destination for package …", "LICENSE is
-// missing"), or copies it short and exits 0. magpie makes the copy from
+// missing"), or copies it short and exits 0. eipgam makes the copy from
 // the tarball it verified, tagged as Bun tags it, and Bun takes it as
 // installed: the plugin is in, and a later bun command leaves its copy
 // as it is.
 func TestDistAddBunCantCopy(t *testing.T) {
 	for _, c := range []struct{ name, env, val string }{
-		{"Bun can't copy it", "MAGPIE_FAKE_BUN_HELD", "1"},
-		{"exit 0, a file missing", "MAGPIE_FAKE_BUN_LOSE", "index.js"},
+		{"Bun can't copy it", "EIPGAM_FAKE_BUN_HELD", "1"},
+		{"exit 0, a file missing", "EIPGAM_FAKE_BUN_LOSE", "index.js"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			goanyapiSandbox(t, nil, `{"plugins":[]}`, "")
@@ -112,7 +112,7 @@ func TestDistAddBunCantCopy(t *testing.T) {
 			if d := depsOf(t); d[goanyapi] != "./dist/magpie-community-tools-goanyapi-0.1.1.tgz" || !goanyapiListed() {
 				t.Fatalf("GoAnyAPI isn't in: deps %v, plugins %+v", d, Load().Plugins)
 			}
-			// Bun's next command takes magpie's copy as installed
+			// Bun's next command takes eipgam's copy as installed
 			if err := os.WriteFile(filepath.Join(goanyapiAt(), "MARK"), nil, 0o644); err != nil {
 				t.Fatal(err)
 			}
@@ -124,22 +124,22 @@ func TestDistAddBunCantCopy(t *testing.T) {
 			err = bunAdd(ctxMinute(t), bun, "./dist/magpie-community-tools-goanyapi-0.1.1.tgz", goanyapi)
 			installMu.Unlock()
 			if err != nil {
-				t.Fatalf("bun add over magpie's copy: %v", err)
+				t.Fatalf("bun add over eipgam's copy: %v", err)
 			}
 			if _, err := os.Stat(filepath.Join(goanyapiAt(), "MARK")); err != nil {
-				t.Fatalf("Bun copied over magpie's copy: %v", err)
+				t.Fatalf("Bun copied over eipgam's copy: %v", err)
 			}
 		})
 	}
 }
 
-// A copy neither Bun nor magpie can make whole is no plugin installed,
+// A copy neither Bun nor eipgam can make whole is no plugin installed,
 // whether Bun exited 0 over it or said "installed" and failed: not
 // listed, no dependency left, and the error says which file.
 func TestDistAddNeverRecordsAPartialCopy(t *testing.T) {
 	for _, c := range []struct{ name, env, val string }{
-		{"exit 0, a file missing", "MAGPIE_FAKE_BUN_LOSE", "index.js"},
-		{"held", "MAGPIE_FAKE_BUN_HELD", "1"},
+		{"exit 0, a file missing", "EIPGAM_FAKE_BUN_LOSE", "index.js"},
+		{"held", "EIPGAM_FAKE_BUN_HELD", "1"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			goanyapiSandbox(t, nil, `{"plugins":[]}`, "")
@@ -162,7 +162,7 @@ func TestDistAddNeverRecordsAPartialCopy(t *testing.T) {
 	}
 }
 
-// magpie makes a copy only of a package Bun would install nothing more
+// eipgam makes a copy only of a package Bun would install nothing more
 // for, and only inside its folder.
 func TestUnpackDistRefuses(t *testing.T) {
 	depsSandbox(t, nil, `{"plugins":[]}`)

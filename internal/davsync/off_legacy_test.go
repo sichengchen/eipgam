@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // dateLibrary puts the library's files at at: changed("library") reads
@@ -28,7 +28,7 @@ func dateLibrary(t *testing.T, at time.Time) {
 	})
 }
 
-// #3356: a state written before st.Off was recorded (a magpie upgraded
+// #3356: a state written before st.Off was recorded (a eipgam upgraded
 // from before #6428): the last sync left the library out but wrote no Off
 // mark, so re-enabling the library must still join it like a first sync —
 // the computer's older content gives way to the server's newer one, never
@@ -64,7 +64,7 @@ func TestSyncPartTurnedBackOnWithoutOffMark(t *testing.T) {
 	b.use(t)
 	syncOK(t)
 
-	// the state as a magpie before Off was recorded left it: no Off mark
+	// the state as a eipgam before Off was recorded left it: no Off mark
 	p := filepath.Join(settings.Dir(), "sync-state.json")
 	sb, err := os.ReadFile(p)
 	if err != nil {

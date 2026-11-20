@@ -8,17 +8,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// claude-magpie (baranwang on X): `magpie claude run` starts the user's
-// claude with --settings and magpie's launch file, every argument
+// claude-eipgam (baranwang on X): `eipgam claude run` starts the user's
+// claude with --settings and eipgam's launch file, every argument
 // claude's, --help too; the user's ~/.claude/settings.json is left as it
-// was, a magpie model a session's /model saved there is taken back to the
-// launch file, and claude's exit code is magpie's.
+// was, a eipgam model a session's /model saved there is taken back to the
+// launch file, and claude's exit code is eipgam's.
 func TestClaudeRun(t *testing.T) {
 	home := helpHome(t)
 	t.Setenv("CLAUDE_CONFIG_DIR", "")
@@ -65,10 +65,10 @@ func TestClaudeRun(t *testing.T) {
 		}
 	}
 	if let == 0 {
-		t.Fatal("magpie's probes and plugin hosts were left running beside claude")
+		t.Fatal("eipgam's probes and plugin hosts were left running beside claude")
 	}
 	if started == 0 {
-		t.Fatal("claude run started before magpie's start-up")
+		t.Fatal("claude run started before eipgam's start-up")
 	}
 	if v, _ := edit.GetJSON(launch, "env.ANTHROPIC_BASE_URL"); v != gateway.URL() {
 		t.Fatalf("launch file's base URL %q", v)
@@ -82,7 +82,7 @@ func TestClaudeRun(t *testing.T) {
 		t.Fatal(err)
 	}
 	if v, _ := edit.GetJSON(user, "model"); v != "opus" {
-		t.Fatalf("the user's model after a /model pick of magpie's: %q", v)
+		t.Fatalf("the user's model after a /model pick of eipgam's: %q", v)
 	}
 	if v, _ := edit.GetJSON(launch, "model"); v != "relay/glm-4.6" {
 		t.Fatalf("the launch file's model after the pick: %q", v)
@@ -96,8 +96,8 @@ func TestClaudeRun(t *testing.T) {
 	}
 
 	out, err := runOut(t, "claude", "--help")
-	if err != nil || !strings.Contains(out, "magpie claude run [args…]") || !strings.Contains(out, "fields:") {
-		t.Fatalf("magpie claude --help: %v\n%s", err, out)
+	if err != nil || !strings.Contains(out, "eipgam claude run [args…]") || !strings.Contains(out, "fields:") {
+		t.Fatalf("eipgam claude --help: %v\n%s", err, out)
 	}
 
 	claudeFind = func() string { return "" }

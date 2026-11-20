@@ -17,11 +17,11 @@ import (
 
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-// Pi's extensions and packages, for each Pi magpie knows of: this
+// Pi's extensions and packages, for each Pi eipgam knows of: this
 // machine's, and one in each WSL distro (leokon3 on Discord, who runs both
 // and moves an extension from one to the other). Everything here is read
 // and written as Pi's own package manager and `pi config` do it
@@ -42,7 +42,7 @@ import (
 //     another Pi by writing its entry there, not by copying its files.
 //
 // Pi's built-in extensions (builtin:mcp and the rest) aren't listed:
-// turning builtin:mcp off would take away the MCP servers magpie gives Pi.
+// turning builtin:mcp off would take away the MCP servers eipgam gives Pi.
 
 // PiExtensions is every Pi here, with its extensions and packages.
 type PiExtensions struct {
@@ -58,7 +58,7 @@ type PiHere struct {
 	// Asleep: its distro isn't running, and nothing in it is read, as that
 	// would start it (#3896)
 	Asleep bool `json:"asleep,omitempty"`
-	// Dir is its agent folder, as magpie opens it
+	// Dir is its agent folder, as eipgam opens it
 	Dir string `json:"dir,omitempty"`
 	// Err says why its settings.json can't be read: nothing is listed,
 	// and nothing is written to it, rather than taking it for empty
@@ -83,7 +83,7 @@ type PiExt struct {
 	Folder bool `json:"folder,omitempty"`
 
 	keys  []string // the files Pi loads of it, by their paths from the agent dir
-	files []string // those files, as magpie opens them
+	files []string // those files, as eipgam opens them
 	src   string   // what a copy copies
 }
 
@@ -109,7 +109,7 @@ type PiPackage struct {
 }
 
 // piPlace is a Pi as this file reads it: its agent folder, and where its
-// own machine's ~ and / are, as magpie opens them.
+// own machine's ~ and / are, as eipgam opens them.
 type piPlace struct {
 	a      *agent.Agent
 	dir    string
@@ -337,7 +337,7 @@ func (p piPlace) shown(f string) string {
 	return a
 }
 
-// resolve is a path settings.json names, where magpie opens it: from the
+// resolve is a path settings.json names, where eipgam opens it: from the
 // agent folder, ~ the Pi's home (resolvePathFromBase).
 func (p piPlace) resolve(e string) string {
 	e = strings.TrimSpace(e)
@@ -354,7 +354,7 @@ func (p piPlace) resolve(e string) string {
 	return filepath.Join(p.dir, filepath.FromSlash(e))
 }
 
-// open is f where magpie can open it: in a WSL distro, below a link of
+// open is f where eipgam can open it: in a WSL distro, below a link of
 // the distro's, where the link leads (agent.WSLOpen).
 func (p piPlace) open(f string) string {
 	if p.a == nil || p.a.WSL == "" {
@@ -367,7 +367,7 @@ func (p piPlace) open(f string) string {
 }
 
 // under is find's files of the folder dir, named under dir as Pi names
-// them (its path, not where a link there leads), though read where magpie
+// them (its path, not where a link there leads), though read where eipgam
 // opens it.
 func (p piPlace) under(dir string, find func(string) []string) []string {
 	o := p.open(dir)
@@ -714,7 +714,7 @@ func piPlaceOf(id string) (piPlace, error) {
 			continue
 		}
 		if p.asleep {
-			return p, fmt.Errorf("WSL %s isn't running, and magpie doesn't start it to change %s: start the distro (open its terminal), then try again", p.a.WSL, p.a.Name)
+			return p, fmt.Errorf("WSL %s isn't running, and eipgam doesn't start it to change %s: start the distro (open its terminal), then try again", p.a.WSL, p.a.Name)
 		}
 		if p.err != nil {
 			return p, p.err

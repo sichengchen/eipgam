@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
-// An agent pointed at magpie by an address other than this machine's
+// An agent pointed at eipgam by an address other than this machine's
 // loopback — this machine's Codex at Windows as WSL sees it or a forward of
 // the user's (#816), an agent in a WSL distro under NAT — is connected by
 // its config alone; whether anything answers there is another matter
@@ -38,7 +38,7 @@ var reachAge = 20 * time.Second
 var reachProbe = realReachProbe
 
 func realReachProbe(base string) bool {
-	// a certificate magpie made itself isn't one this computer trusts, and
+	// a certificate eipgam made itself isn't one this computer trusts, and
 	// whether something answers is all that is asked here
 	c := &http.Client{Timeout: 2 * time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 	res, err := c.Get(strings.TrimSuffix(base, "/") + "/v1/models")
@@ -49,8 +49,8 @@ func realReachProbe(base string) bool {
 	return true
 }
 
-// magpieProbe says whether base answers as a magpie gateway: GET base/ is
-// 200 with {"name":"magpie"} (the gateway's info), as it is through a
+// magpieProbe says whether base answers as a eipgam gateway: GET base/ is
+// 200 with {"name":"eipgam"} (the gateway's info), as it is through a
 // reverse proxy that forwards base to it. A var for tests.
 var magpieProbe = realMagpieProbe
 
@@ -69,25 +69,25 @@ func answersAsMagpie(res *http.Response) bool {
 	var info struct {
 		Name string `json:"name"`
 	}
-	return res.StatusCode == http.StatusOK && json.NewDecoder(res.Body).Decode(&info) == nil && info.Name == "magpie"
+	return res.StatusCode == http.StatusOK && json.NewDecoder(res.Body).Decode(&info) == nil && info.Name == "eipgam"
 }
 
-// magpieAt is whether base answers as magpie (magpieProbe), and whether
+// magpieAt is whether base answers as eipgam (magpieProbe), and whether
 // that is known yet: the last probe's answer, a new one started in the
 // background as reachable does, never waited for. A var for tests, which
 // are told no without a probe.
 var magpieAt = func(base string) (ok, known bool) {
-	return probed("magpie "+base, func() bool { return magpieProbe(base) })
+	return probed("eipgam "+base, func() bool { return magpieProbe(base) })
 }
 
-// proxyBase is v, the address an agent's config names where magpie wrote
+// proxyBase is v, the address an agent's config names where eipgam wrote
 // want, with want's path (/v1 where want has it) cut off its end, when
-// that can be another way to magpie: a URL on another machine or a name,
+// that can be another way to eipgam: a URL on another machine or a name,
 // such as a company's reverse proxy in front of the gateway (davisjiahao,
-// #1985: https://ai.corp.example/magpie forwarding to 127.0.0.1:3425), or
-// one on this machine's loopback with a path of its own before magpie's (a
+// #1985: https://ai.corp.example/eipgam forwarding to 127.0.0.1:3425), or
+// one on this machine's loopback with a path of its own before eipgam's (a
 // compliance proxy's http://127.0.0.1:8788/claude-code-anthropic/<route>).
-// One on loopback with none is magpie's own on an older port, never
+// One on loopback with none is eipgam's own on an older port, never
 // another way to it.
 func proxyBase(v, want string) (string, bool) {
 	w, err := url.Parse(want)
@@ -115,9 +115,9 @@ func loopbackWithPath(base string) bool {
 	return strings.Trim(u.Path, "/") != ""
 }
 
-// reachesMagpie says v reaches magpie another way (proxyBase) whose root
-// answers as magpie. Until it has been tried it is taken as reaching
-// magpie, as an address not yet tried isn't unreachable either: telling
+// reachesMagpie says v reaches eipgam another way (proxyBase) whose root
+// answers as eipgam. Until it has been tried it is taken as reaching
+// eipgam, as an address not yet tried isn't unreachable either: telling
 // drift first would offer Reconnect, which writes the proxy away.
 func reachesMagpie(v, want string) bool {
 	if chainsToGateway(v, want) {
@@ -131,9 +131,9 @@ func reachesMagpie(v, want string) bool {
 	return ok || !known
 }
 
-// surelyMagpie is reachesMagpie once magpie has answered there: what a
+// surelyMagpie is reachesMagpie once eipgam has answered there: what a
 // write that keeps the address waits for (magpieAsked), so a relay not yet
-// tried never gets magpie's model or key.
+// tried never gets eipgam's model or key.
 func surelyMagpie(v, want string) bool {
 	if chainsToGateway(v, want) {
 		return true
@@ -147,11 +147,11 @@ func surelyMagpie(v, want string) bool {
 }
 
 // chainsToGateway says v is a proxy on this machine's loopback that names
-// want, magpie's gateway, as its upstream at the end of its path:
+// want, eipgam's gateway, as its upstream at the end of its path:
 // billion-context's http://127.0.0.1:18787/bili/http://127.0.0.1:3425
 // (its Claude Code lane, which the Library's billion-context tab installs;
 // also /bili/anthropic/<upstream>, and bili start's 8787). Its requests
-// reach magpie whether or not the proxy answers GET / as magpie: a bili
+// reach eipgam whether or not the proxy answers GET / as eipgam: a bili
 // lane runs only beside its agent, and magpieProbe asked it while it was
 // down, so the Agents page told drift and Reconnect wrote the gateway over
 // the user's billion-context (33sczf on X). No probe is needed, as the
@@ -188,13 +188,13 @@ func chainsToGateway(v, want string) bool {
 
 // magpieAsked is magpieAt waited for, for a write: base, not asked yet, is
 // asked now (probedNow), so what the write
-// reads after is magpie's answer there. Unasked, surelyMagpie is no, and
-// the first write in a magpie just started, the CLI's, took a proxy to
-// magpie for the user's own endpoint (#1985). One answered before, at any
+// reads after is eipgam's answer there. Unasked, surelyMagpie is no, and
+// the first write in a eipgam just started, the CLI's, took a proxy to
+// eipgam for the user's own endpoint (#1985). One answered before, at any
 // age, is what the write goes by, as the reads do.
 func magpieAsked(base string) {
 	if _, known := magpieAt(base); !known {
-		probedNow("magpie "+base, func() bool { return magpieProbe(base) })
+		probedNow("eipgam "+base, func() bool { return magpieProbe(base) })
 	}
 }
 
@@ -310,26 +310,26 @@ func (a *Agent) unreachable(on Field, now string) *Drift {
 	d := &Drift{Kind: "unreachable", Field: on.Key, Now: now, Want: now, Addr: addr}
 	host := strings.TrimPrefix(strings.TrimPrefix(addr, "http://"), "https://")
 	if inside {
-		// magpie listens there itself (gateway/wsl.go): what keeps WSL out
+		// eipgam listens there itself (gateway/wsl.go): what keeps WSL out
 		// is Windows' firewall
-		d.Detail = a.Name + " is pointed at magpie at " + addr + ", where magpie listens for WSL, but nothing answers there from WSL " + a.WSL + ": Windows' firewall keeps WSL out. " +
-			"Allow magpie in when Windows asks, or, in PowerShell as administrator: " + wslFirewallCommand() + ". " +
-			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach magpie at 127.0.0.1 instead."
+		d.Detail = a.Name + " is pointed at eipgam at " + addr + ", where eipgam listens for WSL, but nothing answers there from WSL " + a.WSL + ": Windows' firewall keeps WSL out. " +
+			"Allow eipgam in when Windows asks, or, in PowerShell as administrator: " + wslFirewallCommand() + ". " +
+			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach eipgam at 127.0.0.1 instead."
 		if to, distro := wslMovedFrom(addr); to != "" {
 			// another of Windows' addresses answers from WSL (wslFindVia)
 			d.Move = to
-			d.Detail = a.Name + " is pointed at magpie at " + addr + ", where nothing answers from WSL " + distro + ", but magpie answers it at " + to + ": Use " + to + " points " + a.Name + " there."
+			d.Detail = a.Name + " is pointed at eipgam at " + addr + ", where nothing answers from WSL " + distro + ", but eipgam answers it at " + to + ": Use " + to + " points " + a.Name + " there."
 		}
 		return d
 	}
-	d.Detail = a.Name + " is pointed at magpie at " + addr + ", where nothing answers from this computer, though magpie answers at " + gateway.URL() + ". "
+	d.Detail = a.Name + " is pointed at eipgam at " + addr + ", where nothing answers from this computer, though eipgam answers at " + gateway.URL() + ". "
 	if a.WSL != "" || runtime.GOOS == "windows" {
-		d.Detail += "Under WSL's NAT networking, Windows as WSL sees it reaches magpie only while something listens on " + host +
-			": magpie itself with Settings › Network and sharing › Share on local network on (it then listens on every address, and asks other computers for a gateway key), or a forward of your own (netsh interface portproxy, which may need setting up again after Windows restarts). " +
+		d.Detail += "Under WSL's NAT networking, Windows as WSL sees it reaches eipgam only while something listens on " + host +
+			": eipgam itself with Settings › Network and sharing › Share on local network on (it then listens on every address, and asks other computers for a gateway key), or a forward of your own (netsh interface portproxy, which may need setting up again after Windows restarts). " +
 			"Once it answers here and WSL still can't connect, Windows' firewall may be keeping WSL out: allow the port " + gateway.Port() + " for the WSL network. " +
-			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach magpie at 127.0.0.1 instead."
+			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach eipgam at 127.0.0.1 instead."
 	} else {
-		d.Detail += "Whatever forwarded " + host + " to magpie isn't listening now; start it again, or point " + a.Name + " at " + gateway.URL() + "."
+		d.Detail += "Whatever forwarded " + host + " to eipgam isn't listening now; start it again, or point " + a.Name + " at " + gateway.URL() + "."
 	}
 	if to, distro := wslMovedFrom(addr); to != "" {
 		d.Move = to
@@ -338,16 +338,16 @@ func (a *Agent) unreachable(on Field, now string) *Drift {
 	return d
 }
 
-// wslFirewallCommand lets magpie in from WSL's networks through Windows'
+// wslFirewallCommand lets eipgam in from WSL's networks through Windows'
 // firewall, for an administrator's PowerShell. WSL's network is a Public
 // one, so a rule for Private networks only (what Windows' own prompt
 // offers ticked) doesn't do.
 func wslFirewallCommand() string {
 	exe, err := os.Executable()
 	if err != nil || exe == "" {
-		exe = "magpie.exe"
+		exe = "eipgam.exe"
 	}
-	return "New-NetFirewallRule -DisplayName 'magpie (WSL)' -Direction Inbound -Action Allow -Profile Any -InterfaceAlias 'vEthernet (WSL*)' -Program '" + strings.ReplaceAll(exe, "'", "''") + "'"
+	return "New-NetFirewallRule -DisplayName 'eipgam (WSL)' -Direction Inbound -Action Allow -Profile Any -InterfaceAlias 'vEthernet (WSL*)' -Program '" + strings.ReplaceAll(exe, "'", "''") + "'"
 }
 
 // wslMovedFrom is the address a WSL distro reaches Windows at now, when

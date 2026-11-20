@@ -23,12 +23,12 @@ function fixture(lang, { own = [], refuse = "" } = {}) {
     agents: [
       {
         id: "gemini", name: "Gemini CLI", path: "/test/.gemini/settings.json", icon: "geminicli-color", wired: true,
-        fields: [{ key: "model", label: "model", value: "magpie/glm-5", options: [{ value: "magpie/glm-5", label: "GLM-5", ref: "magpie/glm-5" }] }],
+        fields: [{ key: "model", label: "model", value: "eipgam/glm-5", options: [{ value: "eipgam/glm-5", label: "GLM-5", ref: "eipgam/glm-5" }] }],
         telemetry: { ...tel },
       },
       {
         id: "opencode", name: "OpenCode", path: "/test/.config/opencode/opencode.json", icon: "opencode", wired: true,
-        fields: [{ key: "model", label: "model", value: "magpie/glm-5", options: [{ value: "magpie/glm-5", label: "GLM-5", ref: "magpie/glm-5" }] }],
+        fields: [{ key: "model", label: "model", value: "eipgam/glm-5", options: [{ value: "eipgam/glm-5", label: "GLM-5", ref: "eipgam/glm-5" }] }],
       },
     ],
     profiles: [], settings,
@@ -81,7 +81,7 @@ async function open(engine, lang, width, opts, t) {
   const fx = fixture(lang, opts);
   await page.route("**/*", fx.serve);
   t.after(() => browser.close());
-  await page.goto("http://magpie.test/?view=agents");
+  await page.goto("http://eipgam.test/?view=agents");
   await page.locator(gm).waitFor();
   await page.locator(`${gm} .ag-link`, { hasText: W[lang].details }).click();
   await page.locator(`${gm} .ag-exp .ag-telemetry`).waitFor();
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
   }
   test(`${engine}: a refusal is said and the row goes back`, async (t) => {
-    const refuse = "/test/.gemini/settings.json sets privacy.usageStatisticsEnabled to true; magpie leaves a value of yours as it is (change it there)";
+    const refuse = "/test/.gemini/settings.json sets privacy.usageStatisticsEnabled to true; eipgam leaves a value of yours as it is (change it there)";
     const { page, fx, errors } = await open(engine, "en", 1100, { refuse }, t);
     const row = `${gm} .ag-exp .ag-telemetry`;
     await page.locator(`${row} .opt`, { hasText: "Off" }).click();

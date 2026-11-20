@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang));
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://eipgam.test/?view=routing");
           const rows = page.locator(".rt-req");
           await rows.nth(routes.length - 1).waitFor();
           // what the Requests tab says of each, from the Usage page's own rule

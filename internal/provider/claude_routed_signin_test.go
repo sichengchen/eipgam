@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-// Claude Code whose requests go through magpie's gateway stays signed in to
+// Claude Code whose requests go through eipgam's gateway stays signed in to
 // the account the user put it on when that one is spent: the gateway moves
 // its requests to another account with room by itself, and moving the
 // sign-in took away what Claude Code has as the user's main account, its
 // claude.ai connectors (MCP) among them. oreoft on Discord set it back
-// more than ten times and each time magpie moved it to the quota account
-// again. Not routed through magpie, or with magpie told only to switch
+// more than ten times and each time eipgam moved it to the quota account
+// again. Not routed through eipgam, or with eipgam told only to switch
 // its sign-in, it still moves (#208, TestClaudeSwitchedWhenSpent).
 func TestClaudeRoutedThroughMagpieKeepsItsSignIn(t *testing.T) {
 	home := claudeHome(t)
@@ -77,7 +77,7 @@ func TestClaudeRoutedThroughMagpieKeepsItsSignIn(t *testing.T) {
 	// routed: a stays signed in, spent or not, on every look
 	for range 3 {
 		if to := switched(); to != "" {
-			t.Fatalf("Claude Code routed through magpie was signed in to %s, off the account the user put it on", to)
+			t.Fatalf("Claude Code routed through eipgam was signed in to %s, off the account the user put it on", to)
 		}
 	}
 	if who := signedInAs(); who != "a@example.com" {
@@ -89,7 +89,7 @@ func TestClaudeRoutedThroughMagpieKeepsItsSignIn(t *testing.T) {
 		}
 	}
 	// told only to switch its sign-in, the gateway serves none of these
-	// accounts: moving the sign-in is all magpie does, so it moves
+	// accounts: moving the sign-in is all eipgam does, so it moves
 	if err := SetSwitchOnly("claude", true); err != nil {
 		t.Fatal(err)
 	}

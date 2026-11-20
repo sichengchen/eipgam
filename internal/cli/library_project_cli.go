@@ -9,29 +9,29 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
-const libraryProjectUsage = `magpie library project [--json]      the projects (Library › Projects) and the skills each has
-  magpie library project add <dir>         add a folder whose agents can be given library skills
-  magpie library project rm <dir> [--keep-files]   take it off; --keep-files leaves what magpie put there, yours from then on
-  magpie library project skills <dir> [--json]     its skills, for which agents, and where each is placed
-  magpie library project skill add <dir> <skill…> [agents=a,b…]   give it skills: by default for the agents its skills
+const libraryProjectUsage = `eipgam library project [--json]      the projects (Library › Projects) and the skills each has
+  eipgam library project add <dir>         add a folder whose agents can be given library skills
+  eipgam library project rm <dir> [--keep-files]   take it off; --keep-files leaves what eipgam put there, yours from then on
+  eipgam library project skills <dir> [--json]     its skills, for which agents, and where each is placed
+  eipgam library project skill add <dir> <skill…> [agents=a,b…]   give it skills: by default for the agents its skills
                                      are for already, or, with none yet, every agent here that reads a project's skills
-  magpie library project skill rm <dir> <skill…>   take skills out of it
-  magpie library project skill agents <dir> <skill> <a,b…|none>   the agents it has the skill for
-  magpie library project copy <dir> on|off copies of its skills in place of links to the library's
-  magpie library project instructions <dir> [--json]   its own instructions, the agents they're for and the files
-  magpie library project instructions <dir> text <text…>|--file <f>|-   set them ("" takes them out); written, between
-                                     magpie's two marker lines, into the project file each agent reads: by default for
+  eipgam library project skill rm <dir> <skill…>   take skills out of it
+  eipgam library project skill agents <dir> <skill> <a,b…|none>   the agents it has the skill for
+  eipgam library project copy <dir> on|off copies of its skills in place of links to the library's
+  eipgam library project instructions <dir> [--json]   its own instructions, the agents they're for and the files
+  eipgam library project instructions <dir> text <text…>|--file <f>|-   set them ("" takes them out); written, between
+                                     eipgam's two marker lines, into the project file each agent reads: by default for
                                      the agents the shared instructions are on for, else every agent here that reads one
-  magpie library project instructions <dir> agents <a,b…|none>   the agents whose project file they're written into
+  eipgam library project instructions <dir> agents <a,b…|none>   the agents whose project file they're written into
                                      <dir> may be relative, or "." for the folder you're in. A skill that couldn't be
-                                     placed (a folder there that isn't magpie's is left as it is) is named, and the
+                                     placed (a folder there that isn't eipgam's is left as it is) is named, and the
                                      command exits with status 1.
 `
 
-// libraryProjectCmd is magpie library project …: the window's Library ›
+// libraryProjectCmd is eipgam library project …: the window's Library ›
 // Projects page from a terminal (#5193), through the same library calls
 // its page makes.
 func libraryProjectCmd(args []string) error {
@@ -55,7 +55,7 @@ func libraryProjectCmd(args []string) error {
 			return err
 		}
 		fmt.Println(green.Render("✓"), dir, "is a project")
-		fmt.Println(muted.Render("  magpie library project skill add " + quoteArg(dir) + " <skill…> gives it skills"))
+		fmt.Println(muted.Render("  eipgam library project skill add " + quoteArg(dir) + " <skill…> gives it skills"))
 		return nil
 	case "rm", "remove":
 		keep := false
@@ -82,12 +82,12 @@ func libraryProjectCmd(args []string) error {
 		}
 		// what couldn't be taken out keeps the project listed
 		if p, _ := library.ProjectAt(dir); p != "" {
-			return fmt.Errorf("%s stays a project: magpie couldn't take everything it placed out of it (magpie library project skills %s)", dir, quoteArg(dir))
+			return fmt.Errorf("%s stays a project: eipgam couldn't take everything it placed out of it (eipgam library project skills %s)", dir, quoteArg(dir))
 		}
 		if keep {
-			fmt.Println(green.Render("✓"), dir, "is no project now; what magpie put there is left as it is")
+			fmt.Println(green.Render("✓"), dir, "is no project now; what eipgam put there is left as it is")
 		} else {
-			fmt.Println(green.Render("✓"), dir, "is no project now; what magpie put there is taken out")
+			fmt.Println(green.Render("✓"), dir, "is no project now; what eipgam put there is taken out")
 		}
 		return nil
 	case "skills":
@@ -240,13 +240,13 @@ func projectDir(typed string) (string, error) {
 	}
 	if dir == "" {
 		abs, _ := library.ProjectPath(typed)
-		return "", fmt.Errorf("%s isn't a project: magpie library project add %s adds it", abs, quoteArg(abs))
+		return "", fmt.Errorf("%s isn't a project: eipgam library project add %s adds it", abs, quoteArg(abs))
 	}
 	return dir, nil
 }
 
 // projectAgents is a comma list of agents (none for no agent), each by its
-// id, refused when magpie knows of no folder it reads a project's skills
+// id, refused when eipgam knows of no folder it reads a project's skills
 // from.
 func projectAgents(s string) ([]string, error) {
 	ids, err := libraryAgents(s, "skills")
@@ -255,7 +255,7 @@ func projectAgents(s string) ([]string, error) {
 	}
 	for _, id := range ids {
 		if library.ProjectSkillsDir(id) == "" {
-			return nil, fmt.Errorf("magpie knows of no folder %s reads a project's skills from", id)
+			return nil, fmt.Errorf("eipgam knows of no folder %s reads a project's skills from", id)
 		}
 	}
 	return ids, nil
@@ -333,7 +333,7 @@ func projectOutcome(dir string, names []string, res *library.Result) error {
 	return nil
 }
 
-// skillPlaces are the entries of a project's skill magpie placed, and,
+// skillPlaces are the entries of a project's skill eipgam placed, and,
 // for one its agents should have and don't, why.
 func skillPlaces(p *library.ProjectView, name string) (placed []string, why string) {
 	want := map[string]bool{}
@@ -349,7 +349,7 @@ func skillPlaces(p *library.ProjectView, name string) (placed []string, why stri
 	}
 	sort.Strings(placed)
 	if why = p.Problems[name]; why == "" && len(placed) < len(want) {
-		why = "not in the project (magpie library sync says why)"
+		why = "not in the project (eipgam library sync says why)"
 	}
 	return placed, why
 }
@@ -377,7 +377,7 @@ func listProjects(dir string, asJSON bool) error {
 		return e.Encode(ps)
 	}
 	if len(ps) == 0 {
-		fmt.Println(muted.Render("No projects yet · magpie library project add <dir>"))
+		fmt.Println(muted.Render("No projects yet · eipgam library project add <dir>"))
 		return nil
 	}
 	for _, p := range ps {
@@ -394,7 +394,7 @@ func listProjects(dir string, asJSON bool) error {
 		}
 		sort.Strings(names)
 		if len(names) == 0 {
-			fmt.Println(" ", muted.Render("no skills yet · magpie library project skill add "+quoteArg(p.Dir)+" <skill…>"))
+			fmt.Println(" ", muted.Render("no skills yet · eipgam library project skill add "+quoteArg(p.Dir)+" <skill…>"))
 		}
 		for _, n := range names {
 			placed, why := skillPlaces(&p, n)
@@ -416,7 +416,7 @@ func quoteArg(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
-// projectInstrCmd is magpie library project instructions …: the project's
+// projectInstrCmd is eipgam library project instructions …: the project's
 // own instructions, as the Instructions page's project card sets them.
 func projectInstrCmd(rest []string, usage func() error) error {
 	asJSON := slices.Contains(rest, "--json")
@@ -463,7 +463,7 @@ func projectInstrCmd(rest []string, usage func() error) error {
 		if p := projectView(v, dir); p != nil && len(p.InstrAgents) == 0 && strings.TrimSpace(text) != "" {
 			ids := defaultInstrAgents(v)
 			if len(ids) == 0 {
-				return fmt.Errorf("no agent here reads a project's instructions file magpie knows of")
+				return fmt.Errorf("no agent here reads a project's instructions file eipgam knows of")
 			}
 			c.Agents = &ids
 		}
@@ -517,11 +517,11 @@ func showProjectInstr(dir string, asJSON bool) error {
 		return e.Encode(map[string]any{"dir": p.Dir, "text": p.Instr, "agents": p.InstrAgents, "files": p.InstrFiles})
 	}
 	if p.Instr == "" {
-		fmt.Println(muted.Render("No instructions of its own · magpie library project instructions " + quoteArg(dir) + " text <text…>"))
+		fmt.Println(muted.Render("No instructions of its own · eipgam library project instructions " + quoteArg(dir) + " text <text…>"))
 		return nil
 	}
 	if len(p.InstrAgents) == 0 {
-		fmt.Println(muted.Render("for no agent · magpie library project instructions " + quoteArg(dir) + " agents <a,b…>"))
+		fmt.Println(muted.Render("for no agent · eipgam library project instructions " + quoteArg(dir) + " agents <a,b…>"))
 	} else {
 		fmt.Println(bold.Render(strings.Join(p.InstrAgents, ", ")), muted.Render(strings.Join(p.InstrFiles, " ")))
 	}
@@ -533,7 +533,7 @@ func showProjectInstr(dir string, asJSON bool) error {
 }
 
 // projectInstrAgents is a comma list of agents (none for no agent), each
-// by its id or name, refused when magpie knows of no file it reads a
+// by its id or name, refused when eipgam knows of no file it reads a
 // project's instructions from.
 func projectInstrAgents(s string) ([]string, error) {
 	out := []string{}
@@ -545,7 +545,7 @@ func projectInstrAgents(s string) ([]string, error) {
 			}
 		}
 		if library.ProjectInstrFile(id) == "" {
-			return nil, fmt.Errorf("magpie knows of no file %s reads a project's instructions from", a)
+			return nil, fmt.Errorf("eipgam knows of no file %s reads a project's instructions from", a)
 		}
 		out = addOnce(out, id)
 	}

@@ -1,22 +1,22 @@
-// magpie's plugin host: runs OpenCode (v1) server plugins under Bun and
-// answers magpie over stdin/stdout, one JSON message a line.
+// eipgam's plugin host: runs OpenCode (v1) server plugins under Bun and
+// answers eipgam over stdin/stdout, one JSON message a line.
 //
-// magpie → host: {id, method, params}; the host answers {id, result} or
+// eipgam → host: {id, method, params}; the host answers {id, result} or
 // {id, error}. A fetch streams its reply first: {id, event: "head", status,
 // headers}, then {id, event: "chunk", data} (base64) as the body comes, then
 // {id, result: null}. {method: "abort", params: {id}} cancels one, and
 // {method: "credit", params: {id, n}} gives a fetch back the n charged bytes
 // its reader took (the payload it read, and a frame's overhead once the frame
 // is done), so it may send that much more. A fetch starts with the window
-// magpie gave it and sends no more than that ahead of its reader, so a slow
+// eipgam gave it and sends no more than that ahead of its reader, so a slow
 // reader pauses its upstream instead of the host buffering without bound.
-// host → magpie, unasked: {event: "log", level, message} and {event:
+// host → eipgam, unasked: {event: "log", level, message} and {event:
 // "toast", ...} (what a plugin logs or shows), {event: "auth", provider}
 // (a sign-in the host saved or refreshed).
 //
 // The plugins get what OpenCode hands them (PluginInput): a client whose
-// auth.set saves to magpie's plugin-auth.json in OpenCode's auth.json shape,
-// tui.showToast and app.log, config.get; Bun's $; the folder magpie keeps
+// auth.set saves to eipgam's plugin-auth.json in OpenCode's auth.json shape,
+// tui.showToast and app.log, config.get; Bun's $; the folder eipgam keeps
 // its files in. What else a plugin asks the client for answers {data:
 // undefined}.
 //
@@ -170,7 +170,7 @@ const MAX_FRAME = 64 << 10
 // keeps a producer of tiny frames from filling a window with structs.
 const FRAME_OVERHEAD = 2048
 
-// HEAD_MAX and HEAD_ENTRIES are magpie's own head-envelope policy, not HTTP's:
+// HEAD_MAX and HEAD_ENTRIES are eipgam's own head-envelope policy, not HTTP's:
 // a fetch's head carries at most HEAD_MAX header bytes (the UTF-8 bytes of
 // every name and value, plus HEAD_ENTRY_COST an entry) and HEAD_ENTRIES
 // entries, counted the same by Go before it is queued, so a vendor's unbounded
@@ -217,27 +217,27 @@ function makeGate(window) {
 }
 
 // A plugin writing to stdout would break the protocol: everything it
-// prints goes to stderr, which magpie logs.
+// prints goes to stderr, which eipgam logs.
 const toErr = (...xs) => process.stderr.write(xs.map((x) => (typeof x === "string" ? x : Bun.inspect(x))).join(" ") + "\n")
 console.log = console.info = console.debug = console.warn = toErr
 process.stdout.write = (chunk, enc, cb) => process.stderr.write(chunk, enc, cb)
 
 // Nor may a program a plugin starts have them: one given the host's stdin
-// reads magpie's messages away (pi-devin-plus runs `devin auth login` with
+// reads eipgam's messages away (pi-devin-plus runs `devin auth login` with
 // stdio "inherit", which took the next requests as its answer and gave up,
 // "Login canceled"), and its stdout is the host's answers. It reads
 // nothing instead and writes to stderr. node:child_process starts every
 // program through Bun.spawn and Bun.spawnSync, so these see all of them.
 //
 // And it has the proxy the plugin's own fetches take, as a built-in's CLI
-// had magpie's (netproxy.Env): the host has its *_PROXY only as
-// MAGPIE_*_PROXY (see below), so `grok login`, which the Grok plugin runs,
+// had eipgam's (netproxy.Env): the host has its *_PROXY only as
+// EIPGAM_*_PROXY (see below), so `grok login`, which the Grok plugin runs,
 // went out with none and, where x.ai is reached only through one, printed
 // no link to open (𝕏 on Discord). One the plugin set itself is kept.
 // Node's fetch goes past *_PROXY unless NODE_USE_ENV_PROXY=1 says to take
 // them, so a plugin downloading in a Node program it starts went out with
 // none and failed where the vendor is reached only through one (larchsis
-// on 𝕏, Windows 11, a proxy set in magpie only). It is told to, unless
+// on 𝕏, Windows 11, a proxy set in eipgam only). It is told to, unless
 // the plugin said otherwise.
 const own = (v, fd) => v === "inherit" || v === fd || v === (fd ? process.stdout : process.stdin)
 const PROXY_VARS = ["HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY"]
@@ -257,13 +257,13 @@ function proxied(env) {
   return env
 }
 // And a program started with no folder of its own runs in workDir, not
-// the host's: the host runs in magpie's config folder, beside
+// the host's: the host runs in eipgam's config folder, beside
 // settings.json and providers.json, so whatever a program saved by a
 // relative name went there, and a tool told to write "providers.json"
-// would write over magpie's. The chat page plugin (magpie-chat) starts
+// would write over eipgam's. The chat page plugin (magpie-chat) starts
 // the user's MCP servers this way and runs their tools for a model,
 // whose fetched pages and saved files (jiakun_zhao on 𝕏 asked whose
-// page_<hash>.html and magpie_*.md files they had found) belong in a
+// page_<hash>.html and eipgam_*.md files they had found) belong in a
 // folder of their own. A folder the plugin gives is kept.
 const workDir = path.join(process.cwd(), "plugin-work")
 let workReady = false
@@ -348,14 +348,14 @@ let config = { provider: {} } // what the plugins' config hooks made of it
 // listing. A plugin stuck on its vendor (a sign-in answered 401 and tried
 // again, a vendor that never answers) is then given up on alone: the
 // plugins load side by side and every other one is listed meanwhile,
-// rather than all waiting behind it until magpie's own deadline fails the
-// whole host or the whole list. magpie sets both at init.
+// rather than all waiting behind it until eipgam's own deadline fails the
+// whole host or the whole list. eipgam sets both at init.
 let loadWait = 20 * 1000
 let listWait = 20 * 1000
 
 // watchHeavy says once when this host holds more than heavy.mb MiB, a
 // full collection run first so garbage not yet collected doesn't count:
-// magpie then starts a new host for the calls to come and stops this one
+// eipgam then starts a new host for the calls to come and stops this one
 // once its own are answered (host.go's heavyMB and recycle). It checks
 // every heavy.everyMillis, from heavy.afterMillis after the host started.
 function watchHeavy(heavy) {
@@ -398,14 +398,14 @@ function inTime(step, ms, what, ctl) {
 // (#237) goes through it, and so does every fetch the plugin makes for
 // it; one for a provider set to "direct" goes through none. Bun reads
 // *_PROXY once, and a fetch given no proxy option can't be told to skip
-// them, so the host is started with them as MAGPIE_*_PROXY and each
-// fetch is given magpie's own here when it has none of its own.
+// them, so the host is started with them as EIPGAM_*_PROXY and each
+// fetch is given eipgam's own here when it has none of its own.
 // Loopback never goes through one.
 const via = new AsyncLocalStorage() // the proxy: "", "direct" or its URL
 const bunFetch = globalThis.fetch
 
 function proxyVar(k) {
-  return process.env["MAGPIE_" + k] || process.env["MAGPIE_" + k.toLowerCase()] || ""
+  return process.env["EIPGAM_" + k] || process.env["EIPGAM_" + k.toLowerCase()] || ""
 }
 
 const globalProxy = {
@@ -430,9 +430,9 @@ function loopback(host) {
   return host === "localhost" || host.endsWith(".localhost") || host === "::1" || /^127\./.test(host)
 }
 
-// A host on the user's own network — another computer's magpie, an LLM
+// A host on the user's own network — another computer's eipgam, an LLM
 // relay on the NAS — is reached directly, whatever proxy the host was
-// started with, as magpie's own requests reach it (netproxy.onLAN, lan.go,
+// started with, as eipgam's own requests reach it (netproxy.onLAN, lan.go,
 // #982, #1572): a proxy is for reaching vendors; one elsewhere can't reach
 // the user's network, and one here only goes there directly itself. A
 // provider's own proxy (via) is still taken as it is. The rule is lan.go's:
@@ -535,7 +535,7 @@ function sent(input, init) {
 // A plugin's request is followed through a redirect with its headers only
 // to its own origin (the scheme, host and port it was sent to), or from
 // http to https on the same host: provider.KeepsCredentials' rule, which
-// magpie's own requests take (redirect.go, #5508). Bun follows any
+// eipgam's own requests take (redirect.go, #5508). Bun follows any
 // redirect anywhere and drops only Authorization and Cookie on a hop to
 // another origin, so x-api-key, x-goog-api-key and a vendor's own headers
 // went to wherever the vendor's Location named. A redirect elsewhere is
@@ -725,25 +725,25 @@ function asked(input, init) {
   )
 }
 
-// MAGPIE_ONLY are the headers magpie tells a plugin's fetch where the agent
+// EIPGAM_ONLY are the headers eipgam tells a plugin's fetch where the agent
 // that asked works (WorkDirHeader and WorkGitHeader in internal/provider),
 // that a queue needn't be waited out (FallbackHeader), and the session and
 // subagent the agent named (SessionToPluginHeader, SubagentToPluginHeader)
 // and the effort asked of a model with variants (EffortHeader):
 // for the plugin to read, never for its vendor, so a plugin that sends on
 // the headers it was given sends them nowhere.
-const MAGPIE_ONLY = ["x-magpie-work-dir", "x-magpie-work-git", "x-magpie-fallback", "x-magpie-session", "x-magpie-subagent", "x-magpie-effort"]
+const EIPGAM_ONLY = ["x-magpie-work-dir", "x-magpie-work-git", "x-magpie-fallback", "x-magpie-session", "x-magpie-subagent", "x-magpie-effort"]
 
 function unsaid(input, init) {
-  if (input instanceof Request && MAGPIE_ONLY.some((k) => input.headers.has(k))) {
+  if (input instanceof Request && EIPGAM_ONLY.some((k) => input.headers.has(k))) {
     const h = new Headers(input.headers)
-    for (const k of MAGPIE_ONLY) h.delete(k)
+    for (const k of EIPGAM_ONLY) h.delete(k)
     input = new Request(input, { headers: h })
   }
   if (init?.headers) {
     const h = new Headers(init.headers)
-    if (MAGPIE_ONLY.some((k) => h.has(k))) {
-      for (const k of MAGPIE_ONLY) h.delete(k)
+    if (EIPGAM_ONLY.some((k) => h.has(k))) {
+      for (const k of EIPGAM_ONLY) h.delete(k)
       init = { ...init, headers: h }
     }
   }
@@ -751,11 +751,11 @@ function unsaid(input, init) {
 }
 
 // signInSignal is the signal of the sign-in a plugin's step runs for: a
-// fetch made for it fails once magpie has given the sign-in up.
+// fetch made for it fails once eipgam has given the sign-in up.
 const signInSignal = new AsyncLocalStorage()
 
 // whileSigningIn gives a fetch made for a sign-in that sign-in's signal
-// beside its own, so a sign-in magpie gave up on stops polling its vendor
+// beside its own, so a sign-in eipgam gave up on stops polling its vendor
 // (#5016).
 function whileSigningIn(input, init) {
   const signal = signInSignal.getStore()
@@ -781,8 +781,8 @@ globalThis.fetch = Object.assign(function fetch(input, init) {
 // An HTTP/2 session a plugin opens itself goes through the proxy its
 // fetches take, as a built-in's requests on Go's transport did. Cursor's
 // plugin runs agent.v1.AgentService/Run on node:http2, which Bun connects
-// directly, *_PROXY or not: where Cursor is reached only through magpie's
-// proxy (the system's, or one set in magpie), its sign-in, models and
+// directly, *_PROXY or not: where Cursor is reached only through eipgam's
+// proxy (the system's, or one set in eipgam), its sign-in, models and
 // usage came through and every chat went out without it (#1035).
 const h2connect = http2.connect
 http2.connect = function connect(authority, options, listener) {
@@ -898,7 +898,7 @@ function tunnel(which, host, port) {
 // from its last good generation, plugin-auth.json.bak, which each write
 // keeps first; a write over one that doesn't read copies it aside
 // (plugin-auth.json.bad-<time>) first, and never writes none over it. As
-// internal/lastgood does for magpie's own files.
+// internal/lastgood does for eipgam's own files.
 
 // parseAuth is the sign-ins in text, null when it isn't one JSON object.
 function parseAuth(text) {
@@ -1131,7 +1131,7 @@ async function writeAuth(all) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // Two hosts run at once while one is restarted (the old one finishing its
-// calls), and magpie writes the file when no host runs: each change to it
+// calls), and eipgam writes the file when no host runs: each change to it
 // is made under plugin-auth.json.lock, read afresh and written back with
 // only its own accounts changed, so a host never writes another's newer
 // token away with what it read before. The change itself is synchronous;
@@ -1446,7 +1446,7 @@ function entries(target) {
     // a command alone (bin), an MCP server, is no plugin at all (#1327)
     const cmd = pkg?.bin ? ", only a command (bin). If it is an MCP server, add it under Library › MCP servers instead" : ""
     // said without a stack: there is no fault in the host to trace
-    throw Object.assign(new Error(`${pkg?.name || target} isn't an OpenCode or magpie plugin: its package names no file to load (no main or exports in package.json, no index file)${cmd}`), { plain: true })
+    throw Object.assign(new Error(`${pkg?.name || target} isn't an OpenCode or eipgam plugin: its package names no file to load (no main or exports in package.json, no index file)${cmd}`), { plain: true })
   }
   return [...new Set(out)]
 }
@@ -1473,14 +1473,14 @@ function servers(mod) {
 async function loadPlugins(list) {
   const input = {
     client: makeClient(),
-    project: { id: "magpie", worktree: directory, vcs: undefined, time: { created: Date.now() } },
+    project: { id: "eipgam", worktree: directory, vcs: undefined, time: { created: Date.now() } },
     directory,
     worktree: directory,
     experimental_workspace: { register() {} },
     serverUrl: new URL("http://127.0.0.1:4096"),
     $: Bun.$,
-    // magpie's own (OpenCode has none): the plugin's options as the user
-    // set them in magpie, read when wanted, so a change reaches the
+    // eipgam's own (OpenCode has none): the plugin's options as the user
+    // set them in eipgam, read when wanted, so a change reaches the
     // plugin without a restart (#2038)
     magpie: { option: optionValue, options: optionValues, load: reportLoad, usage: reportUsage, account: keyFor },
   }
@@ -1719,7 +1719,7 @@ async function gatewayFinish(run, p, signal) {
 }
 
 // An account that has to be signed in again, or whose sign-in ends soon,
-// told to each hook's onSignIn once, as magpie's own alert is. The event
+// told to each hook's onSignIn once, as eipgam's own alert is. The event
 // holds the provider, the account's label and the state, never a token.
 async function gatewaySignIn(p, signal) {
   const ev = p.event
@@ -1770,9 +1770,9 @@ function auths() {
 // signsIn are the provider ids the plugin spec's auth hooks name.
 const signsIn = (spec) => [...new Set(hooks.filter((h) => h.spec === spec && h.hooks.auth?.provider).map((h) => h.hooks.auth.provider))]
 
-// withProviders is a loaded plugin as init tells magpie of it: the provider
+// withProviders is a loaded plugin as init tells eipgam of it: the provider
 // ids it signs in to, and for each one another plugin serves (two plugins
-// naming one id: the host runs one), the plugin that does. magpie says so
+// naming one id: the host runs one), the plugin that does. eipgam says so
 // on the plugin's row rather than leave its provider missing. And the
 // tools it gives (toolList).
 function withProviders(l) {
@@ -1791,9 +1791,9 @@ function withProviders(l) {
 //
 // A plugin's tools are OpenCode's tool hook: {tool: {name: {description,
 // args, execute(args, ctx)}}}, args a zod shape (OpenCode's tool.schema is
-// zod) or a JSON Schema. magpie offers them to every agent through its
+// zod) or a JSON Schema. eipgam offers them to every agent through its
 // plugin tools MCP server (internal/gateway/tools_mcp.go), so each is told
-// to magpie by its name, description and a JSON Schema of its arguments.
+// to eipgam by its name, description and a JSON Schema of its arguments.
 
 const TOOL_NAME = /^[A-Za-z0-9_-]{1,48}$/
 
@@ -1945,17 +1945,17 @@ async function runTool({ spec, name, args, ms, agent }) {
 
 // ---- web search APIs --------------------------------------------------------
 //
-// A plugin's search hook adds web search APIs to magpie's own list (Tavily,
+// A plugin's search hook adds web search APIs to eipgam's own list (Tavily,
 // Brave, …): {search: {<id>: {name, keysURL?, keyOptional?, url?, execute}}}.
 // execute({query, count, key, url}, ctx) returns the pages found:
 // [{title, url, text?, age?}] (or {results: [...]}). A throw with a numeric
-// status (401, 402, 403, 429…) is the API refusing the key, which magpie
+// status (401, 402, 403, 429…) is the API refusing the key, which eipgam
 // rests as it does a built-in's; retryAfter is its Retry-After.
-// magpie keeps the keys, order and limits, and masks the query before it.
+// eipgam keeps the keys, order and limits, and masks the query before it.
 //
 // An entry may name auth: "<provider id>", one this plugin's auth hook
 // signs in to (a model provider, or an auth hook with no models of its
-// own). It then takes no key: magpie tries the provider's accounts that
+// own). It then takes no key: eipgam tries the provider's accounts that
 // are on, in their order, one per call, and the hook reads the one chosen
 // through ctx.getAuth(), renewed first if due (the wait counts within the
 // search's time). A refusal rests the account for search only, never for
@@ -2008,7 +2008,7 @@ async function runSearch({ spec, id, query, count, key, url, ms, account, proxy 
   const provider = searchAuthOf(spec, def)
   let run = () => def.execute({ query, count, key: key ?? "", url: url ?? "" }, ctx)
   if (provider) {
-    // the account magpie chose, and that one only: never the provider's
+    // the account eipgam chose, and that one only: never the provider's
     // first in its place, nor one of another provider
     if (auths().get(provider)?.spec !== spec) throw new Error(`another plugin signs in to ${provider}`)
     const k = typeof account === "string" && account && providerOf(account) === provider ? account : ""
@@ -2060,7 +2060,7 @@ function mdev() {
       const st = fs.statSync(modelsDevPath, { throwIfNoEntry: false })
       const mtime = st ? st.mtimeMs : 0
       if (modelsDev === undefined || (mtime > 0 && mtime !== modelsDevMtime) || (Object.keys(modelsDev).length === 0 && mtime > 0)) {
-        // a file caught half written (an older magpie's catalog.Sync wrote
+        // a file caught half written (an older eipgam's catalog.Sync wrote
         // it in place; it goes through a rename now)
         // reads as unknown: keep what was read before, rather than list the
         // providers without models.dev, and read it again next time
@@ -2152,8 +2152,8 @@ function fromModelsDev(p, m) {
 // info is what OpenCode knows of provider id, its models as the plugin
 // lists them for account key (the first when none); strict fails where the
 // plugin's list does, rather than keeping the list it was given.
-// quiet asks no models hook (a provider switched off in magpie): the
-// list is told as fallen back, which keeps the one magpie had. The
+// quiet asks no models hook (a provider switched off in eipgam): the
+// list is told as fallen back, which keeps the one eipgam had. The
 // listing's caller may give up (signal), which a hook is told through
 // its own options' signal too (#4678).
 // refusedLists is each account whose models hook said its vendor refused
@@ -2178,10 +2178,10 @@ async function info(id, key, strict, limit, quiet, signal) {
     options: { ...(cfg?.options ?? {}) },
     npm: cfg?.npm ?? md?.npm,
     api: cfg?.api ?? md?.api,
-    // magpie's own field: the plugin serves a decision API (System One)
+    // eipgam's own field: the plugin serves a decision API (System One)
     // for this provider, asked at its base /systemone through its fetch
     decide: cfg?.decide === true,
-    // magpie's own field: the provider's upstream answers a web search
+    // eipgam's own field: the provider's upstream answers a web search
     // tool offered on its Anthropic or Responses API by itself, so a
     // client's web_search goes to it as sent (#2027)
     searches: cfg?.searches === true,
@@ -2213,7 +2213,7 @@ async function info(id, key, strict, limit, quiet, signal) {
       // what the config itself says of the model's sampling, as Factory's
       // config models say temperature of their OpenAI route (plugins#154)
       ...(m.temperature !== undefined ? { temperature: m.temperature } : {}),
-      // magpie's own mark: a decision model, answering System One
+      // eipgam's own mark: a decision model, answering System One
       ...(typeof m.decides === "boolean" ? { decides: m.decides } : was?.decides !== undefined ? { decides: was.decides } : {}),
       // and one that searches the web by itself, asked in plain words
       ...(typeof m.searches === "boolean" ? { searches: m.searches } : was?.searches !== undefined ? { searches: was.searches } : {}),
@@ -2258,7 +2258,7 @@ async function info(id, key, strict, limit, quiet, signal) {
       const ask = () => listing.run(l, () => inScope(id, k, () => ph.models(given, { auth: authCopy(k), signal: ctl.signal })))
       const next = limit > 0 ? await inTime(ask, Math.max(limit - (Date.now() - began), 0), "the plugin's model list", ctl) : await ask()
       // a hook that asked its vendor, got no list and gave back the one it
-      // was given fell back: magpie keeps the list it had, as a built-in
+      // was given fell back: eipgam keeps the list it had, as a built-in
       // whose fetch failed keeps the one it fetched last; so does one that
       // says so, handing back a list of its own (Symbol.for("magpie.fellBack")
       // on it: Command Code's Go table, ZCode's models)
@@ -2288,7 +2288,7 @@ async function info(id, key, strict, limit, quiet, signal) {
         refusedLists.set(k, { sign, at: Date.now(), n: was?.sign === sign ? was.n + 1 : 1, error: e?.message ?? String(e) })
       }
       // a hook that threw on its vendor's failure has no list to tell:
-      // magpie keeps the one it had, as for one that gave its defaults back
+      // eipgam keeps the one it had, as for one that gave its defaults back
       out.fellBack = true
       out.listError = e?.message ?? String(e)
       // a listing the caller gave up on says its abort itself, not as if
@@ -2320,15 +2320,15 @@ function keepInfo(key, p, gen) {
   if (gen === infoGen && !p.failed && !p.late) infos.set(key, { gen, md: mdev(), info: p })
 }
 
-// shown is a plugin's string as magpie shows it: trimmed and at most n
+// shown is a plugin's string as eipgam shows it: trimmed and at most n
 // characters, "" for anything else.
 const shown = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "")
 
-// optionsOf are the switches a plugin declares for its provider, magpie's
+// optionsOf are the switches a plugin declares for its provider, eipgam's
 // own field (#2038, Vocllum): auth.options, each {key, label, description?,
 // default?, confirm?, labels?, descriptions?, confirms?, filtersModels?,
 // placement?}.
-// magpie shows each as an Off/On switch in the provider's editor and keeps
+// eipgam shows each as an Off/On switch in the provider's editor and keeps
 // what the user sets; the plugin reads it with input.magpie.option(provider,
 // key). A switch is kept and handed over, and the models listed again (one
 // may go by it); nothing else is run. Keys are [a-z0-9_-], 1–40 long, the
@@ -2336,11 +2336,11 @@ const shown = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "")
 // left out. labels, descriptions and confirms are the same words in the
 // window's other languages ({"zh": "…", "zh-TW": "…", "ja": "…", "de":
 // "…"}), as a page's titles are (plugins#590): label stays a string beside
-// them, so an older magpie still reads the option. filtersModels says the
+// them, so an older eipgam still reads the option. filtersModels says the
 // plugin's model list leaves models out while the switch is on, which the
 // editor says by the models. placement "top" draws the switch under the
 // accounts, above Routing, for one about the whole plugin (#5269); anything
-// else, or none, keeps it under the models, where an older magpie draws it.
+// else, or none, keeps it under the models, where an older eipgam draws it.
 const MAX_OPTIONS = 16
 const OPTION_KEY = /^[a-z0-9_-]{1,40}$/
 // inLanguages are words by language, each capped at n, at most 16, without
@@ -2420,16 +2420,16 @@ function reportLoad(provider, loads) {
 }
 
 // reportUsage is magpie.usage(provider, call): a request a plugin sent its
-// vendor on its own, outside any request magpie handed it (Devin's cache
+// vendor on its own, outside any request eipgam handed it (Devin's cache
 // keepalive ping, plugins#592), for the request log and the usage totals
 // to list and count. call is {kind, model, input?, output?, cacheRead?,
 // cacheWrite?, status?, ms?, error?, account?}: kind says what the
 // request was for ([a-z0-9_-], 1–40: "cache_keepalive"), model the
-// model's id as magpie handed it to the plugin; the tokens are whole
+// model's id as eipgam handed it to the plugin; the tokens are whole
 // numbers from 0 (input without the cache's), status the vendor's (0 for
 // none), ms how long it took. account is the account the request was
 // sent for, as magpie.account(provider) named it while a request of
-// magpie's was in the plugin's hands; without it, the account of the
+// eipgam's was in the plugin's hands; without it, the account of the
 // request being served now, else the provider's first. It returns true
 // when the call was sent on.
 const USAGE_KIND = /^[a-z0-9_-]{1,40}$/
@@ -2456,7 +2456,7 @@ function optionValue(provider, key) {
   return optionValues(provider)[key] === true
 }
 
-// byLang is a sign-in word by language, magpie's own field beside
+// byLang is a sign-in word by language, eipgam's own field beside
 // OpenCode's English one (a method's labels, a question's messages, a
 // choice's labels and hints: {"zh": "…", "zh-TW": "…"}), as { [name]: map }
 // to spread, or {}: codes of 1–16 characters, at most 16, empty and
@@ -2475,7 +2475,7 @@ function byLang(v, name) {
 }
 
 // methods are the auth hook's ways to sign in. An "api" one may say what
-// its key looks like (placeholder, magpie's own: OpenCode's dialog says
+// its key looks like (placeholder, eipgam's own: OpenCode's dialog says
 // "API key"); its label titles the key's field, as OpenCode's does.
 function methods(auth) {
   return (auth.methods ?? []).map((m) => ({
@@ -2490,21 +2490,21 @@ function methods(auth) {
 
 // keyAsked is whether an "api" method's own questions ask its key: it has
 // prompts and an authorize that turns their answers into the key, as
-// inkstone's and Devin's session-token method do. magpie asks no key of
+// inkstone's and Devin's session-token method do. eipgam asks no key of
 // its own beside them; one typed there went nowhere (authorize gets the
 // answers only), so the user gave the same token twice.
 function keyAsked(m) {
   return m.type === "api" && Array.isArray(m.prompts) && m.prompts.length > 0 && typeof m.authorize === "function"
 }
 
-// iconOf is the picture a plugin gives its provider, magpie's own field
+// iconOf is the picture a plugin gives its provider, eipgam's own field
 // (OpenCode's providers have none): the auth hook's icon, else
-// package.json's magpie.icon. An https URL or a data:image URI; magpie
+// package.json's magpie.icon. An https URL or a data:image URI; eipgam
 // checks and keeps it (internal/provider), nothing is fetched here.
 function iconOf(a) {
   const ok = (v) => {
     const s = typeof v === "string" ? v.trim() : ""
-    // a data URI of a picture over 1 MB, magpie's most, isn't carried
+    // a data URI of a picture over 1 MB, eipgam's most, isn't carried
     return s.length <= 3 << 19 && /^(https:\/\/|data:image\/)/i.test(s) ? s : ""
   }
   const own = ok(a.auth.icon)
@@ -2514,7 +2514,7 @@ function iconOf(a) {
 }
 
 // concurrencyOf is how many requests the plugin says each of its accounts
-// takes at once, magpie's own field: the auth hook's maxConcurrency, else
+// takes at once, eipgam's own field: the auth hook's maxConcurrency, else
 // package.json's magpie.maxConcurrency. A whole number over 0, else none
 // (0); the user's setting on the provider goes over it.
 function concurrencyOf(a) {
@@ -2522,7 +2522,7 @@ function concurrencyOf(a) {
 }
 
 // atOnceOf is how many of its accounts the plugin says may take requests
-// at the same time, magpie's own field: the auth hook's maxAccounts, else
+// at the same time, eipgam's own field: the auth hook's maxAccounts, else
 // package.json's magpie.maxAccounts, as concurrencyOf reads its own. The
 // user's setting on the provider goes over it.
 function atOnceOf(a) {
@@ -2530,7 +2530,7 @@ function atOnceOf(a) {
 }
 
 // declared is a whole number over 0 the plugin declares under key, on its
-// auth hook or else in its package.json's magpie, at most 1000; else 0.
+// auth hook or else in its package.json's eipgam, at most 1000; else 0.
 function declared(a, key) {
   const ok = (v) => (Number.isInteger(v) && v > 0 ? Math.min(v, 1000) : 0)
   const own = ok(a.auth[key])
@@ -2568,9 +2568,9 @@ function tiersOf(v) {
 // (#4678).
 async function providers({ proxies, off } = {}, signal) {
   const stored = readAuth()
-  // a provider switched off in magpie is asked nothing: its models hook
+  // a provider switched off in eipgam is asked nothing: its models hook
   // (and the sign-in renewal before it) would reach its vendor. It is
-  // told as fallen back, so magpie keeps the list it had.
+  // told as fallen back, so eipgam keeps the list it had.
   const quiet = new Set(Array.isArray(off) ? off : [])
   // every provider is listed side by side, each models hook given
   // listWait: one whose vendor is stuck holds up no other's row
@@ -2623,7 +2623,7 @@ function rowOf(id, a, keys, stored, p, own) {
     // its accounts can be brought in from a file (auth.import), and which
     // file that is, as the plugin says it
     ...importOf(a.auth),
-    // the vendor CLI its sign-in and requests run through, which magpie
+    // the vendor CLI its sign-in and requests run through, which eipgam
     // installs with the plugin's own installer when it isn't there
     ...cliOf(a.auth),
     icon: iconOf(a),
@@ -2634,7 +2634,7 @@ function rowOf(id, a, keys, stored, p, own) {
     renews: keepsAlive(a.auth),
     renewLead: keepsAlive(a.auth) ? leadOf(a.auth) : 0,
     // the vendor spends a refresh token once: renewed, the old one is
-    // refused (invalid_grant). magpie never carries such a sign-in to
+    // refused (invalid_grant). eipgam never carries such a sign-in to
     // another computer (#5583)
     rotating: a.auth.rotating === true,
     options: optionsOf(a.auth),
@@ -2677,7 +2677,7 @@ function rowOf(id, a, keys, stored, p, own) {
         outputsSaid: kindsSaid(m.capabilities?.output),
         // whether the model takes temperature and top_p, where something
         // said so (models.dev, the config, the models hook); unsaid goes
-        // to magpie as nothing, which keeps them (#2492)
+        // to eipgam as nothing, which keeps them (#2492)
         ...(typeof m.temperature === "boolean" ? { temperature: m.temperature } : {}),
         released: m.release_date ?? "",
         cost: m.cost,
@@ -2696,7 +2696,7 @@ function rowOf(id, a, keys, stored, p, own) {
         // offered as a routing group's classifier
         decides: m.decides === true,
         // a model that searches the web by itself, asked in plain
-        // words, which magpie may search with for other models
+        // words, which eipgam may search with for other models
         searches: m.searches === true,
         // the other APIs its vendor serves it on besides npm's, by their AI
         // SDK packages (Open Design's amr-link serves every model on all
@@ -2721,7 +2721,7 @@ function applies(prompt, inputs) {
 
 // nextPrompt is the method's next question for inputs so far, as
 // OpenCode's CLI asks them: in order, those whose when/condition hold. A
-// method may ask its own way (magpie's hook, which pi's sign-ins use, as
+// method may ask its own way (eipgam's hook, which pi's sign-ins use, as
 // they ask as they go): ask(inputs) → the next question, or null.
 async function nextPrompt(provider, index, inputs) {
   const m = authOf(provider).methods[index]
@@ -2794,9 +2794,9 @@ let nextSession = 1
 // come from one place from its first request on (#1663): authorize and the
 // callback that trades the code are both run under it.
 //
-// A sign-in magpie gives up on (the user cancelled it, or it timed out)
+// A sign-in eipgam gives up on (the user cancelled it, or it timed out)
 // ends here as well (#5016): signal is aborted, the fetches the plugin
-// makes for it fail, the plugin's own wait is handed it (magpie's hook:
+// makes for it fail, the plugin's own wait is handed it (eipgam's hook:
 // callback(code, { signal }), authorize(inputs, { signal }); OpenCode
 // passes none), and whatever the plugin answers after it is dropped,
 // nothing saved.
@@ -2808,7 +2808,7 @@ async function authorize({ provider, method, inputs, account, proxy }, signal) {
   // the inputs go only to a method that asks something, as OpenCode's TUI
   // (/connect) passes them: an object with none is how its CLI (opencode
   // auth login) calls, and a plugin told so asks its questions on the
-  // terminal, magpie's stdin here (opencode-antigravity-auth waited on its
+  // terminal, eipgam's stdin here (opencode-antigravity-auth waited on its
   // "Project ID" prompt, the sign-in never starting)
   const a = await signingIn(signal, proxy ?? "", provider, key, () => m.authorize(m.prompts?.length ? inputs ?? {} : undefined, { signal }))
   if (signal?.aborted) throw abortedSignIn()
@@ -2822,7 +2822,7 @@ async function authorize({ provider, method, inputs, account, proxy }, signal) {
   const session = String(nextSession++)
   sessions.set(session, { provider, key, a, inputs, proxy: proxy ?? "" })
   // opened (not OpenCode's) is a page the plugin's own CLI opened already:
-  // Grok Build's `grok login` opens it on macOS and Windows, and magpie's
+  // Grok Build's `grok login` opens it on macOS and Windows, and eipgam's
   // opening it too showed it twice (andyfmyth on X)
   return { ok: true, session, url: a.url ?? "", instructions: a.instructions ?? "", method: a.method, opened: a.opened === true }
 }
@@ -2872,8 +2872,8 @@ function keptAs(r) {
 
 // ---- accounts from a file -----------------------------------------------------
 
-// A plugin may take accounts from a file the user picks (magpie's own
-// hook, which OpenCode ignores), as magpie's "Import accounts from a
+// A plugin may take accounts from a file the user picks (eipgam's own
+// hook, which OpenCode ignores), as eipgam's "Import accounts from a
 // file…" does for its built-ins:
 //   auth.import(texts, { signal }) → what each file's text holds, checked
 //     with the vendor as a sign-in is: an array of sign-in results
@@ -2895,13 +2895,13 @@ function importOf(auth) {
 
 // ---- the vendor CLI a plugin runs through ------------------------------------
 
-// A plugin that runs its vendor's CLI may say how to install it (magpie's
-// own hook, which OpenCode ignores), so a machine without it, magpie in a
-// container above all, gets it from magpie's sign-in rather than a shell:
+// A plugin that runs its vendor's CLI may say how to install it (eipgam's
+// own hook, which OpenCode ignores), so a machine without it, eipgam in a
+// container above all, gets it from eipgam's sign-in rather than a shell:
 //   auth.cli.name: the CLI, as the sign-in names it ("Installing {name}…").
 //   auth.cli.installed(): whether it is on this machine now.
 //   auth.cli.install({ signal }): installs it, resolving once it is there;
-//     magpie's sign-in starts this when installed() is false, then asks
+//     eipgam's sign-in starts this when installed() is false, then asks
 //     the method's authorize.
 //   auth.cli.manual: how a person installs it, told when install fails.
 function cliOf(auth) {
@@ -2924,7 +2924,7 @@ async function cliInstalled({ provider }) {
 }
 
 // installCli runs the plugin's installer through the proxy the
-// subscription's requests take (#1663), ended when magpie gives it up
+// subscription's requests take (#1663), ended when eipgam gives it up
 async function installCli({ provider, proxy }, signal) {
   const c = cliHook(provider)
   const step = via.run(proxy ?? "", () => c.install({ signal }))
@@ -2978,7 +2978,7 @@ async function apiKey({ provider, method, inputs, key, account, proxy }, signal)
 
 // ---- renewing a sign-in ------------------------------------------------------
 
-// A plugin may leave renewing its accounts' tokens to magpie (magpie's own
+// A plugin may leave renewing its accounts' tokens to eipgam (eipgam's own
 // hook, which OpenCode ignores):
 //   auth.refresh(auth, provider) → the account's sign-in renewed: the
 //     fields to keep over the old ({ access, refresh, expires, … }), or
@@ -2988,7 +2988,7 @@ async function apiKey({ provider, method, inputs, key, account, proxy }, signal)
 //   auth.refreshLead: how long (ms) before expires a token is renewed,
 //     5 minutes when not said.
 //   auth.keepAlive: false leaves an account nothing uses to lapse; any
-//     other value has the magpie serving the gateway renew it in the
+//     other value has the eipgam serving the gateway renew it in the
 //     background as it comes due too (keepSignedIn, #5080).
 // An OAuth sign-in whose expires is that close is renewed before its
 // loader, models, usage or a request runs, once at a time per account: the
@@ -2998,7 +2998,7 @@ async function apiKey({ provider, method, inputs, key, account, proxy }, signal)
 // again for RENEW_RETRY, doubled for each failure in a row up to
 // RENEW_RETRY_MOST (retryAfter), or, turned away for good, till it is
 // signed in again. A refresh that gives nothing back while the sign-in is
-// due failed too: magpie-ima-auth's swallows ima's "sign in again" and
+// due failed too: eipgam-ima-auth's swallows ima's "sign in again" and
 // returns undefined, and every request, models listing and usage read
 // asked ima again, ~80 times a minute for two dead accounts
 // (JZGiVvkSOA75376 on X).
@@ -3029,7 +3029,7 @@ function leadOf(a) {
 }
 
 // renewAt is when the sign-in at key is due to be renewed, 0 for never: an
-// OAuth one with an expiry, of a plugin that renews through magpie.
+// OAuth one with an expiry, of a plugin that renews through eipgam.
 function renewAt(a, stored) {
   if (typeof a?.refresh !== "function" || stored?.type !== "oauth") return 0
   const exp = Number(stored.expires)
@@ -3053,7 +3053,7 @@ function renewal(provider, key) {
   pending++ // the host doesn't leave in the middle of it
   r = renew(provider, key, a).finally(() => {
     renewing.delete(key)
-    // nor does magpie stop it in the middle of one (host.go's stop)
+    // nor does eipgam stop it in the middle of one (host.go's stop)
     send({ event: "renewing", count: renewing.size })
     done()
   })
@@ -3079,7 +3079,7 @@ async function fresh(provider, key) {
 // uses it (#5080: OrcaTerm's WeChat token lives two hours and can't be
 // renewed once it ends). It waits for the renewal to end and says what
 // came of it: due false, it wasn't due (renewed meanwhile, no expiry, a
-// plugin that doesn't renew through magpie or said keepAlive false);
+// plugin that doesn't renew through eipgam or said keepAlive false);
 // renewed, the sign-in is a new one; error, why it couldn't be, and gone
 // whether the vendor turned it away for good (the account is marked, as a
 // request's renewal marks it). A renewal that failed lately isn't tried
@@ -3103,14 +3103,14 @@ async function keepSignedIn({ provider, account, proxy }) {
 }
 
 // keepsAlive says the plugin's sign-ins are renewed in the background as
-// they come due (keepSignedIn): any that renews through magpie, unless
+// they come due (keepSignedIn): any that renews through eipgam, unless
 // its auth hook says keepAlive: false (a renewal that costs the account
 // something, or a refresh token another client holds too).
 function keepsAlive(a) {
   return typeof a?.refresh === "function" && a?.keepAlive !== false
 }
 
-// Each magpie process runs a host of its own (the gateway, a CLI's quota
+// Each eipgam process runs a host of its own (the gateway, a CLI's quota
 // or usage, a host restarting), and each renews the same sign-in when it
 // comes due: a vendor that spends a refresh token once turned the second
 // away, and the account was marked signed out under the token the first
@@ -3201,7 +3201,7 @@ async function renewLocked(provider, key, a, was) {
     got = await inScope(provider, key, () => a.refresh(JSON.parse(JSON.stringify(was)), provider))
   } catch (e) {
     // the token was spent by a host that didn't wait for this one's lock
-    // (a magpie from before it) and saved what it got: not signed out
+    // (a eipgam from before it) and saved what it got: not signed out
     if (changed(readAuthState().all[key], was)) {
       send({ event: "log", level: "error", message: `${auths().get(provider)?.spec ?? provider}: auth.refresh: ${e?.message ?? e} (renewed elsewhere meanwhile)` })
       forgetAccount(key)
@@ -3267,7 +3267,7 @@ async function load({ provider, account, proxy }) {
 // ---- usage -------------------------------------------------------------------
 
 // usage is how much of its allowance the account at key has used, as the
-// plugin's auth.usage says (magpie's own hook, which OpenCode ignores):
+// plugin's auth.usage says (eipgam's own hook, which OpenCode ignores):
 //   auth.usage(getAuth, provider) → {
 //     plan?, user? (the account as the service names it), until?,
 //     renew?: "auto" | "off", balance?, error?,
@@ -3287,7 +3287,7 @@ async function load({ provider, account, proxy }) {
 //       belongs to: "Gemini"), pool? (the group of models sharing one
 //       allowance: "Gemini", "Claude & GPT"; on the group's own windows,
 //       with no family, and on each of its models' — the GUI shows the
-//       group's windows in place of its models', as for magpie's built-in
+//       group's windows in place of its models', as for eipgam's built-in
 //       Antigravity), aside? (using it up doesn't
 //       stop the account), runsOutAt? (ISO or ms: when the soonest
 //       credits left in it are lost, apart from its reset, as WorkBuddy's
@@ -3365,19 +3365,19 @@ async function usageOf(provider, account, signal) {
   }
 }
 
-// ---- calls made outside magpie -------------------------------------------------
+// ---- calls made outside eipgam -------------------------------------------------
 
-// calls are the account's calls made outside magpie (the vendor's own
-// editor or CLI) from since on, for magpie's Usage page, as the plugin's
-// auth.calls gives them (magpie's own hook, which OpenCode ignores):
+// calls are the account's calls made outside eipgam (the vendor's own
+// editor or CLI) from since on, for eipgam's Usage page, as the plugin's
+// auth.calls gives them (eipgam's own hook, which OpenCode ignores):
 //   auth.calls(getAuth, provider, {since, signal}) → {calls: [{
-//     rid (the vendor's id of the call: magpie counts each once),
+//     rid (the vendor's id of the call: eipgam counts each once),
 //     t (epoch ms), model, in (input tokens, cache apart), out,
 //     cache_read, cache_write, cost? (USD, as the vendor priced it),
 //     session? (the conversation it was part of)
 //   }]}
 // A call without an rid or a time is dropped. A hook that throws fails
-// the reading: magpie asks again from the same time.
+// the reading: eipgam asks again from the same time.
 // Run in the account's scope, a token it renews is saved to that account.
 async function calls({ provider, account, proxy, since }, signal) {
   return via.run(proxy ?? "", () => callsOf(provider, account, since, signal))
@@ -3445,7 +3445,7 @@ async function doFetch(id, record, params) {
 // token: plugins#618) isn't the sign-in gone. So such a 401, with the
 // access token the request began with still the stored one and not due
 // yet, makes it due (expires 1) and keeps the sign-in: the plugin's
-// loader, or magpie's auth.refresh, renews it on the next request. The
+// loader, or eipgam's auth.refresh, renews it on the next request. The
 // account is marked when the token was renewed for this request and
 // still turned away, or was due and the plugin didn't renew it; a
 // refresh the vendor refuses says so itself (signIn "expired"). A
@@ -3470,7 +3470,7 @@ async function staleAccess(key, before) {
 async function fetchAs(id, record, key, params) {
   const { controller: ctl, gate } = record
   const { provider, model, npm, url, method, headers, body, session } = params
-  // the sign-in as the request found it, before its loader or magpie
+  // the sign-in as the request found it, before its loader or eipgam
   // renewed it: a 401 is judged against it (staleAccess)
   const before = key ? readAuth()[key] : undefined
   try {
@@ -3532,7 +3532,7 @@ async function fetchAs(id, record, key, params) {
     }
     const head = headCost(rh)
     if (head.entries > HEAD_ENTRIES || head.n > HEAD_MAX) {
-      // the reply's head is past magpie's envelope: give the fetch up rather
+      // the reply's head is past eipgam's envelope: give the fetch up rather
       // than write a line the host would refuse, and let the body go
       throw new Error(`the reply's headers are past the host's head envelope (${HEAD_MAX} bytes or ${HEAD_ENTRIES} entries)`)
     }
@@ -3595,7 +3595,7 @@ const handlers = {
     if (p.loadMillis > 0) loadWait = p.loadMillis
     if (p.listMillis > 0) listWait = p.listMillis
     await loadPlugins(p.plugins ?? [])
-    // from here on, when magpie holds this host as the one calls go to
+    // from here on, when eipgam holds this host as the one calls go to
     watchHeavy(p.heavy)
     return { plugins: loaded.map(withProviders) }
   },
@@ -3683,7 +3683,7 @@ const handlers = {
   },
 }
 
-// Everything waits for init; a request is answered even when magpie has
+// Everything waits for init; a request is answered even when eipgam has
 // closed stdin behind it, the host leaving once nothing is pending.
 let ready
 let readyState
@@ -3729,7 +3729,7 @@ const done = () => {
 }
 
 const gatewayInflight = new Map() // RPC id -> AbortController
-// A sign-in's steps are given up on by magpie as a gateway request is
+// A sign-in's steps are given up on by eipgam as a gateway request is
 // (host.go's cancellable): the user cancelled it, or it timed out. Its
 // answer is then nobody's, and it counts as done at once, whether the
 // plugin's wait ends or not (#5016).
@@ -3842,7 +3842,7 @@ rl.on("line", (line) => {
     done()
     return
   }
-  // An ordinary RPC is told when magpie gives up on it, as a fetch and a
+  // An ordinary RPC is told when eipgam gives up on it, as a fetch and a
   // gateway request are: the handler is handed the signal, so the work
   // that supports stopping stops (#4678), and its answer, nobody's then,
   // is not sent. It stays pending until the handler ends all the same: a

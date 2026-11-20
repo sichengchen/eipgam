@@ -11,11 +11,11 @@ import (
 )
 
 // Two magpies that are each other's remote (cdredfox on Discord) list
-// each other's models back: a model that left this magpie through the
+// each other's models back: a model that left this eipgam through the
 // other, and comes back, is not taken again, so neither list grows a
 // level on every fetch. One only through others is kept, with the magpies
-// it passes, and so is one through this magpie alone, once: a remote that
-// is this magpie itself (hanslin1666 on Discord) has its own models once,
+// it passes, and so is one through this eipgam alone, once: a remote that
+// is this eipgam itself (hanslin1666 on Discord) has its own models once,
 // not again one level deeper on each fetch.
 func TestFetchLeavesOutWhatCameFromHere(t *testing.T) {
 	self := Self()
@@ -32,11 +32,11 @@ func TestFetchLeavesOutWhatCameFromHere(t *testing.T) {
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(rw, `{"object":"list","data":[
-		  {"id":"up/m1","magpie_via":["peer"]},
-		  {"id":"back/own/m1","magpie_via":%s},
-		  {"id":"own/m2","magpie_via":%s},
-		  {"id":"rem/own/m2","magpie_via":%s},
-		  {"id":"far/m3","magpie_via":%s},
+		  {"id":"up/m1","eipgam_via":["peer"]},
+		  {"id":"back/own/m1","eipgam_via":%s},
+		  {"id":"own/m2","eipgam_via":%s},
+		  {"id":"rem/own/m2","eipgam_via":%s},
+		  {"id":"far/m3","eipgam_via":%s},
 		  {"id":"old/m4"}]}`, q([]string{self, "peer"}), q([]string{self}), q([]string{self, self}), q(long))
 	}))
 	defer srv.Close()
@@ -49,10 +49,10 @@ func TestFetchLeavesOutWhatCameFromHere(t *testing.T) {
 		got[m.ID] = m.Via
 	}
 	if _, ok := got["back/own/m1"]; ok {
-		t.Errorf("a model that went out of this magpie and came back was taken: %v", got)
+		t.Errorf("a model that went out of this eipgam and came back was taken: %v", got)
 	}
 	if _, ok := got["rem/own/m2"]; ok {
-		t.Errorf("a model through this magpie twice (a remote that is this magpie) was taken: %v", got)
+		t.Errorf("a model through this eipgam twice (a remote that is this eipgam) was taken: %v", got)
 	}
 	if _, ok := got["far/m3"]; ok {
 		t.Errorf("a model through more than %d magpies was taken: %v", MaxVia, got)
@@ -61,15 +61,15 @@ func TestFetchLeavesOutWhatCameFromHere(t *testing.T) {
 		t.Errorf("up/m1 = %v, %v; want kept through [peer]", v, ok)
 	}
 	if v, ok := got["own/m2"]; !ok || !slices.Equal(v, []string{self}) {
-		t.Errorf("own/m2 = %v, %v; want kept through this magpie", v, ok)
+		t.Errorf("own/m2 = %v, %v; want kept through this eipgam", v, ok)
 	}
 	if v, ok := got["old/m4"]; !ok || v != nil {
-		t.Errorf("an older magpie's model = %v, %v; want kept, through nothing said", v, ok)
+		t.Errorf("an older eipgam's model = %v, %v; want kept, through nothing said", v, ok)
 	}
 }
 
-// A way that names one magpie twice came round, even through magpies this
-// one doesn't know by name: this magpie restarted since, and its old
+// A way that names one eipgam twice came round, even through magpies this
+// one doesn't know by name: this eipgam restarted since, and its old
 // name is not Self.
 func TestLoopsOnARepeatedMagpie(t *testing.T) {
 	defer SetSelfForTest("me")()

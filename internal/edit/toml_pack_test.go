@@ -16,7 +16,7 @@ func TestKeptNamesArePacked(t *testing.T) {
 		fmt.Fprintf(text, "projects.\"/Users/someone/work/project-%05d\"\x00", i)
 	}
 	names = strings.Split(strings.TrimSuffix(text.String(), "\x00"), "\x00")
-	names = append(names, "", "model_providers.magpie")
+	names = append(names, "", "model_providers.eipgam")
 	src := text.String()
 	lo, hi := uintptr(unsafe.Pointer(unsafe.StringData(src))), uintptr(unsafe.Pointer(unsafe.StringData(src)))+uintptr(len(src))
 

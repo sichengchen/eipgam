@@ -1,16 +1,16 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Aisiverto on X: Codex was wired to magpie, magpie was quit, and Codex
+// Aisiverto on X: Codex was wired to eipgam, eipgam was quit, and Codex
 // failed with "502 Bad Gateway" five times with nothing to say why. A Quit
-// the user chooses while agents go through magpie now asks first, in the
+// the user chooses while agents go through eipgam now asks first, in the
 // app's own sheet (quitask.js; AskQuit in quitask_app.go opens the window
 // on /?ask=quit or calls window.askQuit): it names each agent cut off,
-// says that closing the window keeps magpie running (the menu bar on a
+// says that closing the window keeps eipgam running (the menu bar on a
 // Mac, the system tray elsewhere), and offers Quit, Disconnect and quit,
 // and Cancel. Cancel posts nothing; Quit posts window/quit?now=1, which
 // quits without asking again; Disconnect and quit posts quit/disconnect,
 // which puts each agent back for the next start to connect again (a row's
 // Disconnect each kept them off at every start after: jtbbtnt54249 on X),
-// and then quits; one that fails keeps magpie open.
+// and then quits; one that fails keeps eipgam open.
 // With nothing connected any more it quits at once. Don't ask again
 // (zhujiu on Discord), above the buttons and unticked, goes with the Quit
 // chosen as noAsk=1 (the server saves settings.QuitNoAsk), and its tooltip
@@ -28,13 +28,13 @@ const two = [
   { id: "claude", name: "Claude Code", icon: "generic" },
 ];
 const keys = [
-  "Quit magpie?",
-  "{agent} goes through magpie, so it stops working while magpie is closed.",
-  "These agents go through magpie, so they stop working while magpie is closed.",
-  "Closing the window keeps magpie running in the menu bar.",
-  "Closing the window keeps magpie running in the system tray.",
+  "Quit eipgam?",
+  "{agent} goes through eipgam, so it stops working while eipgam is closed.",
+  "These agents go through eipgam, so they stop working while eipgam is closed.",
+  "Closing the window keeps eipgam running in the menu bar.",
+  "Closing the window keeps eipgam running in the system tray.",
   "Disconnect and quit",
-  "Puts back each agent's own settings first, so they work without magpie; magpie connects them again when it opens",
+  "Puts back each agent's own settings first, so they work without eipgam; eipgam connects them again when it opens",
   "Quit",
   "Cancel",
   "Don't ask again",
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("dialog", (d) => { dialogs.push(d.message()); d.dismiss(); });
       await page.addInitScript((p) => Object.defineProperty(navigator, "platform", { get: () => p }), platform);
       await page.route("**/*", server(lang, posts, o));
-      await page.goto("http://magpie.test" + url);
+      await page.goto("http://eipgam.test" + url);
       const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
       t.after(() => { assert.deepEqual(errors, []); assert.deepEqual(dialogs, [], "no native dialog"); });
       return { page, posts, tr };
@@ -100,11 +100,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const ask = page.locator(".editor.quit-ask");
       await ask.waitFor();
       assert.equal(new URL(page.url()).searchParams.get("ask"), null, "the ask is spent, a reload doesn't ask again");
-      assert.equal((await ask.locator(".ehead b").textContent()).trim(), await tr("Quit magpie?"));
+      assert.equal((await ask.locator(".ehead b").textContent()).trim(), await tr("Quit eipgam?"));
       assert.deepEqual(await ask.locator(".quit-agents li").allTextContents(), ["Codex", "Claude Code"]);
       const text = await ask.textContent();
-      assert.ok(text.includes(await tr("These agents go through magpie, so they stop working while magpie is closed.")));
-      assert.ok(text.includes(await tr("Closing the window keeps magpie running in the system tray.")), "off the Mac, the tray");
+      assert.ok(text.includes(await tr("These agents go through eipgam, so they stop working while eipgam is closed.")));
+      assert.ok(text.includes(await tr("Closing the window keeps eipgam running in the system tray.")), "off the Mac, the tray");
       const quit = ask.locator(".bar button.primary");
       assert.equal((await quit.textContent()).trim(), await tr("Quit"));
       assert.ok(await quit.evaluate((b) => b === document.activeElement), "Quit has the focus");
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.evaluate(() => window.askQuit());
       const ask = page.locator(".editor.quit-ask");
       await ask.waitFor();
-      assert.ok((await ask.textContent()).includes(await tr("Closing the window keeps magpie running in the menu bar.")), "on a Mac, the menu bar");
+      assert.ok((await ask.textContent()).includes(await tr("Closing the window keeps eipgam running in the menu bar.")), "on a Mac, the menu bar");
       // narrow: the bar's buttons stay inside the sheet
       const [box, bar] = await Promise.all([ask.boundingBox(), ask.locator(".bar").boundingBox()]);
       assert.ok(bar.x >= box.x - 1 && bar.x + bar.width <= box.x + box.width + 1, "the bar fits a narrow window");
@@ -144,7 +144,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await until(() => posts.length >= 2);
       assert.deepEqual(posts, ["/api/quit/disconnect", "/api/window/quit?now=1"], "put back for the next start, not each row's Disconnect");
       assert.equal(await ask.locator(".bar button", { hasText: await tr("Disconnect and quit") }).getAttribute("title"),
-        await tr("Puts back each agent's own settings first, so they work without magpie; magpie connects them again when it opens"));
+        await tr("Puts back each agent's own settings first, so they work without eipgam; eipgam connects them again when it opens"));
     });
 
     test(`${engine} ${lang}: Don't ask again goes with the Quit, narrow too`, async (t) => {
@@ -185,7 +185,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(posts, ["/api/quit/disconnect", "/api/window/quit?now=1&noAsk=1"]);
     });
 
-    test(`${engine} ${lang}: a disconnect that fails keeps magpie open`, async (t) => {
+    test(`${engine} ${lang}: a disconnect that fails keeps eipgam open`, async (t) => {
       const { page, posts, tr } = await open(t, { agents: two, fail: "Codex" });
       const ask = page.locator(".editor.quit-ask");
       await ask.waitFor();
@@ -203,8 +203,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const ask = page.locator(".editor.quit-ask");
       await ask.waitFor();
       const text = await ask.textContent();
-      assert.ok(text.includes(await tr("{agent} goes through magpie, so it stops working while magpie is closed.", { agent: "Codex" })));
-      assert.ok(text.includes(await tr("Closing the window keeps magpie running in the system tray.")));
+      assert.ok(text.includes(await tr("{agent} goes through eipgam, so it stops working while eipgam is closed.", { agent: "Codex" })));
+      assert.ok(text.includes(await tr("Closing the window keeps eipgam running in the system tray.")));
     });
 
     test(`${engine} ${lang}: nothing connected any more quits at once`, async (t) => {

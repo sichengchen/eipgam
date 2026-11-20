@@ -13,7 +13,7 @@ import (
 // turns too, every turn before it would no longer match what the vendor
 // cached, and the whole conversation would be read again at full price.
 // So a value masked in a text sent on a route is masked there again,
-// with the same placeholder, while this magpie remembers that text; a
+// with the same placeholder, while this eipgam remembers that text; a
 // new text (the next turn, another conversation) sends it as written.
 //
 // Keeping a value masked is the safe side of the user's two asks, so a

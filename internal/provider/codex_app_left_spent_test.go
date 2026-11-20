@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// magpie switched Codex back to B, its first account, and left the Codex
+// eipgam switched Codex back to B, its first account, and left the Codex
 // app running (Restart the Codex app to follow is off), so the app's
 // app-server stayed on A, the account it started on. Once A ran out the
 // app greyed Send for every model while B, the one Codex is signed in to,
@@ -73,13 +73,13 @@ func TestCodexAppLeftOnASpentAccountIsRestarted(t *testing.T) {
 	codexApp.stale, codexApp.ended = nil, nil
 	codexApp.Unlock()
 
-	// magpie signs Codex back in to B with A not spent: the app is left
+	// eipgam signs Codex back in to B with A not spent: the app is left
 	// running, on A
 	if err := switchLoginBy("codex", "b@example.com", true); err != nil {
 		t.Fatal(err)
 	}
 	if got := step(); got != nil {
-		t.Fatalf("magpie's own switch back ended %v with RestartApp off", got)
+		t.Fatalf("eipgam's own switch back ended %v with RestartApp off", got)
 	}
 	codexDaemonMu.Lock()
 	codexAppLeft = leftDaemon{pid: 7, user: "me@example.com"}

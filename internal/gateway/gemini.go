@@ -165,8 +165,8 @@ func geminiRequest(r *Request, model, agent string) (map[string]any, error) {
 	delete(wrap.Request, "stream")
 	// the rest of what a Gemini client asked, as it sent it (#3937): the
 	// Gemini API and Vertex AI speak the request's own shape, so their
-	// generationConfig carries what magpie doesn't read beside what it
-	// rebuilt — magpie's word for a field it sets stands (a draw model's
+	// generationConfig carries what eipgam doesn't read beside what it
+	// rebuilt — eipgam's word for a field it sets stands (a draw model's
 	// responseModalities).
 	if len(r.GenConfig) > 0 {
 		gen, ok := wrap.Request["generationConfig"].(map[string]any)
@@ -256,10 +256,10 @@ func snakeToCamel(s string) string {
 	return strings.Join(parts, "")
 }
 
-// genReadOrBuilt are generationConfig's keys magpie reads itself or writes
+// genReadOrBuilt are generationConfig's keys eipgam reads itself or writes
 // its own of: they are rebuilt from the request when it is sent on
 // (buildCodeAssistSent), not carried as they came (#3937). candidateCount
-// is one too: magpie reads a reply as one answer (codeAssistDecoder runs every
+// is one too: eipgam reads a reply as one answer (codeAssistDecoder runs every
 // candidate's parts into it), so a second candidate would be mixed into
 // the first.
 var genReadOrBuilt = map[string]bool{
@@ -864,7 +864,7 @@ func renderGemini(res Result, model string) []byte {
 // grounding is the searches among parts as a Gemini candidate's
 // groundingMetadata: the queries, and the pages found as its web chunks,
 // which a Gemini client lists as the answer's sources. A translated
-// reply's searches — Code Assist's googleSearch, magpie's own — reached a
+// reply's searches — Code Assist's googleSearch, eipgam's own — reached a
 // Gemini client as nothing at all. nil with no search.
 func grounding(parts []Part) map[string]any {
 	var queries []string
@@ -901,6 +901,6 @@ func grounding(parts []Part) map[string]any {
 
 // geminiModels is GET /v1beta/models: the catalog in Google's shape.
 func geminiModel(id, name string) map[string]any {
-	return map[string]any{"name": "models/" + id, "displayName": name, "description": name + " via magpie",
+	return map[string]any{"name": "models/" + id, "displayName": name, "description": name + " via eipgam",
 		"supportedGenerationMethods": []string{"generateContent", "streamGenerateContent", "countTokens"}}
 }

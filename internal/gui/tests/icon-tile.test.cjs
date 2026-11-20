@@ -109,8 +109,8 @@ for (const [engine, type] of [["chromium", chromium], ["webkit", webkit]]) {
     const browser = await type.launch();
     try {
       const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
-      await page.route("http://magpie.test/**", serve());
-      await page.goto("http://magpie.test/");
+      await page.route("http://eipgam.test/**", serve());
+      await page.goto("http://eipgam.test/");
       const size = (icon) => page.evaluate((icon) => {
         const e = document.querySelector(`.ic[data-icon="${icon}"]`);
         if (!e || !e.firstElementChild) return null;

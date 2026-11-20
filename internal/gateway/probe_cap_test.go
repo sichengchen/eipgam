@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Open Design's glm-5.3-flash, as plugins#827's log has it: a reply that
@@ -108,7 +108,7 @@ func TestGatheredProbeCapIncomplete(t *testing.T) {
 }
 
 // A client that says how long it waits (provider.WaitHeader: a model test
-// asking a remote magpie) is told a busy failure while it still waits:
+// asking a remote eipgam) is told a busy failure while it still waits:
 // no retry pause or patience round is taken that would end past it
 // (plugins#827: the test waited 20s, the server held its 502 through the
 // provider's patience, and the test said only that nothing answered).

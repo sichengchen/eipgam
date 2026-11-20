@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 // memoryView is the Library's Memory tab: every memory, newest change

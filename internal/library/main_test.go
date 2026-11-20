@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // The tests run in a home of their own, never the user's real files, with
 // a temp dir of their own: what they leave in it is theirs, and a skill's
 // download left there fails the run (#2321).
 func TestMain(m *testing.M) {
-	// started as magpie's own image, browser or memory server (Args mcp
+	// started as eipgam's own image, browser or memory server (Args mcp
 	// image, mcp browser, mcp memory): the fake server, for the hub to
 	// take it for that one
 	if len(os.Args) >= 3 && os.Args[1] == "mcp" && (os.Args[2] == "image" || os.Args[2] == "browser" || os.Args[2] == "memory") {
@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 	if os.Getenv(testenv.Marker) != "" {
 		testenv.Main(m) // started again by a test: in its temp dir already
 	}
-	tmp, err := os.MkdirTemp("", "magpie-library-test-")
+	tmp, err := os.MkdirTemp("", "eipgam-library-test-")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

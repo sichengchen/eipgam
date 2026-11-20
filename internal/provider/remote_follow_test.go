@@ -12,10 +12,10 @@ import (
 	"time"
 )
 
-// followFake is a magpie whose list is model, answered with its ETag, and
+// followFake is a eipgam whose list is model, answered with its ETag, and
 // held while a wait names that tag, as the gateway's modelsOnceChanged
 // does. waits says whether it waits at all (one from before doesn't),
-// and stripped is a magpie that tags every list reached through a proxy
+// and stripped is a eipgam that tags every list reached through a proxy
 // that drops ListWaitHeader: it answers each ask at once, 304 when the
 // tag is the list's, saying no wait.
 type followFake struct {
@@ -148,7 +148,7 @@ func followRemote(t *testing.T, f *followFake, every string) string {
 	return id
 }
 
-// A list changed on the Remote magpie is fetched here at once (KaCli), not
+// A list changed on the Remote eipgam is fetched here at once (KaCli), not
 // on the next RemoteMagpieEvery: the follower waits at the list and fetches
 // it again the moment its tag moves.
 func TestRemoteMagpieListFollowed(t *testing.T) {
@@ -172,7 +172,7 @@ func TestRemoteMagpieListFollowed(t *testing.T) {
 	}
 }
 
-// A magpie from before answers its list at once with no ETag: it is left
+// A eipgam from before answers its list at once with no ETag: it is left
 // to the schedule, asked to wait again only after followOldAgain, so it is
 // not asked over and over.
 func TestRemoteMagpieOldListNotFollowed(t *testing.T) {
@@ -181,14 +181,14 @@ func TestRemoteMagpieOldListNotFollowed(t *testing.T) {
 	followUntil(t, "asked once", func() bool { return f.asks.Load() >= 1 })
 	time.Sleep(300 * time.Millisecond)
 	if n := f.asks.Load(); n != 1 {
-		t.Errorf("an old magpie asked %d times, want once", n)
+		t.Errorf("an old eipgam asked %d times, want once", n)
 	}
 	if n := f.fetches.Load(); n != 0 {
-		t.Errorf("an old magpie's list fetched %d times by the follower, want 0: its schedule fetches it", n)
+		t.Errorf("an old eipgam's list fetched %d times by the follower, want 0: its schedule fetches it", n)
 	}
 }
 
-// A magpie that tags every list (clyzhicore), reached through a proxy
+// A eipgam that tags every list (clyzhicore), reached through a proxy
 // that drops ListWaitHeader, answers each wait at once: its first answer,
 // tagged, can't be told from a wait's, but its 304 at once that says no
 // wait is, and it is left to the schedule rather than asked each
@@ -199,12 +199,12 @@ func TestRemoteMagpieStrippedWaitNotAskedOver(t *testing.T) {
 	followUntil(t, "asked twice", func() bool { return f.asks.Load() >= 2 })
 	time.Sleep(300 * time.Millisecond)
 	if n := f.asks.Load(); n != 2 {
-		t.Errorf("a magpie that doesn't wait asked %d times in 300ms, want 2", n)
+		t.Errorf("a eipgam that doesn't wait asked %d times in 300ms, want 2", n)
 	}
 }
 
-// A Remote magpie whose user set its list to be fetched only when asked
-// is not followed: magpie's default never overrides the user's "off".
+// A Remote eipgam whose user set its list to be fetched only when asked
+// is not followed: eipgam's default never overrides the user's "off".
 func TestRemoteMagpieOffNotFollowed(t *testing.T) {
 	f := &followFake{model: "own/m1", changed: make(chan struct{}), waits: true}
 	followRemote(t, f, "off")
@@ -216,7 +216,7 @@ func TestRemoteMagpieOffNotFollowed(t *testing.T) {
 
 // A gateway that answers each wait at once with the list's tag, as one
 // does that compares tags exactly behind a proxy that made them weak
-// (W/"…"), is not asked again each followGap: y0ngb1n on X saw a magpie
+// (W/"…"), is not asked again each followGap: y0ngb1n on X saw a eipgam
 // behind Cloudflare asked for /v1/models once a second for days.
 func TestRemoteMagpieWeakTagNotAskedOver(t *testing.T) {
 	var asks atomic.Int32

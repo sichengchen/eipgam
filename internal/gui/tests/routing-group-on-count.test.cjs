@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// adorable_piglet on Discord: a group magpie found, GPT-6 Astra, In order,
+// adorable_piglet on Discord: a group eipgam found, GPT-6 Astra, In order,
 // three of its five members on (two on providers switched off). A Codex
 // conversation held to one member — here the key that compacted it
 // natively, as Strict or a sealed task would hold it — read "GPT-6 Astra ·
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       await page.locator(".rt-req").nth(routes.length - 1).waitFor();
       const tail = () => page.locator(".rt-what span").textContent();
 

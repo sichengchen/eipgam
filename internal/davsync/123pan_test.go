@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // pan123DAV answers as 123pan's WebDAV plausibly does (#4993). The
@@ -100,7 +100,7 @@ func TestDAV123panConditionalRead(t *testing.T) {
 	if _, err := d.put(ctx, []byte("v1"), ""); err != nil {
 		t.Fatal(err)
 	}
-	etag := fake.etags["/dav/magpie/magpie.magpie-backup"]
+	etag := fake.etags["/dav/eipgam/eipgam.eipgam-backup"]
 
 	// the read with the version last seen: answered 500, asked again
 	// without the conditions, and said so in the version it gives back

@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A picture a plugin gave, stored as a "file:…" one, is drawn in the menu
@@ -53,7 +53,7 @@ func TestTrayImageStoredIcon(t *testing.T) {
 	if mono || len(icon) == 0 {
 		t.Fatalf("trayIconFile(%q) = %d bytes, mono %v", kept, len(icon), mono)
 	}
-	out := os.Getenv("MAGPIE_TRAY_PREVIEW")
+	out := os.Getenv("EIPGAM_TRAY_PREVIEW")
 	for _, dark := range []bool{false, true} {
 		b, _, _ := trayImagePNG([]trayCell{{Icon: icon, Mono: mono, Rows: []string{"5%", "7%"}}}, bird, 22, 2, dark, true)
 		img, err := png.Decode(bytes.NewReader(b))

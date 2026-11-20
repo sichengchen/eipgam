@@ -9,8 +9,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Claude's thinking block is signed for the conversation it was made in
@@ -19,7 +19,7 @@ import (
 // plugin): 400 "messages.3.content.20: Invalid signature in thinking
 // block. The block is bound to a different conversation. Remove the
 // block, or set thinking.block_binding.prefix_mismatch_behavior to
-// "drop_block"" (that setting needs a beta magpie doesn't send for an
+// "drop_block"" (that setting needs a beta eipgam doesn't send for an
 // agent). Such a block comes from a conversation that moved between
 // accounts or providers (a routing group's fallback, an account switch,
 // a relay that serves Claude from more than one account of its own) or
@@ -218,9 +218,9 @@ func (s *Server) refuseBoundThinking(p provider.Provider, errBody, body []byte) 
 // Claude refuses each one, 400 "messages.1.content.0: Invalid `signature`
 // in `thinking` block" (checked on 2026-11-03), which forward mends only
 // where the refusal reaches it as Claude's own 400, and with a request
-// spent. A conversation that ran on a model magpie translates for (Grok
+// spent. A conversation that ran on a model eipgam translates for (Grok
 // on Cursor's plugin, a Chat or Responses vendor) holds thinking blocks
-// signed empty: magpie gives every block a client gets a signature, and
+// signed empty: eipgam gives every block a client gets a signature, and
 // one it has none for is "" (thinking_signature.go). Claude Code keeps
 // them through a compaction and sends them on to whatever the group
 // picks next (citricdu on Discord: Grok 4.7, then Claude Opus 5.5 on

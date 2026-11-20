@@ -4,7 +4,7 @@
 // bar, the rest under More). A row of its menu is dragged to its place, or
 // moved with Alt+↑/↓; the sidebar follows the order and leaves out its
 // groups' names, a phone's tab bar shows the first four with the rest under
-// More, the order is kept for this browser (localStorage magpie.navOrder), a
+// More, the order is kept for this browser (localStorage eipgam.navOrder), a
 // page the kept order doesn't name goes after the page it follows at home,
 // and Default order puts it all back. Chromium and WebKit, every language. No
 // backend: the API is faked.
@@ -15,7 +15,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const BASE = "http://magpie.test/";
+const BASE = "http://eipgam.test/";
 const HOME = ["agents", "sessions", "library", "providers", "routing", "groups", "gateway", "usage", "masking", "plugins"];
 const RESET = { en: "Default order", zh: "恢复默认顺序", "zh-TW": "恢復預設順序", ja: "既定の順に戻す", de: "Standardreihenfolge" };
 
@@ -59,7 +59,7 @@ const menuOrder = (page) => page.$$eval(".nav-pages-menu .nav-pages-list .pm-ite
 // the sidebar in that order: a kept order is put in place by navorder.js,
 // imported as the page starts
 const arranged = (page, want) => page.waitForFunction((w) => [...document.querySelectorAll("#nav > button[data-view]:not([data-plugin-page])")].map((b) => b.dataset.view).join() === w.join(), want);
-const kept = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("magpie.navOrder") || "null"));
+const kept = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("eipgam.navOrder") || "null"));
 // drag v's row by its grip onto the row of onto, through send(type, x, y)
 async function dragBy(page, v, onto, send, down, moving, up, below = false) {
   const g = await page.locator(`.nav-pages-menu [data-v="${v}"] .grip`).boundingBox();
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // a phone's tab bar: the first four shown, the rest under More
       const phone = await open(browser, { lang, web: true, phone: true });
       await phone.goto(BASE);
-      await phone.evaluate((o) => { localStorage.setItem("magpie.navOrder", JSON.stringify(o)); localStorage.setItem("magpie.navHidden", '["sessions"]'); }, want);
+      await phone.evaluate((o) => { localStorage.setItem("eipgam.navOrder", JSON.stringify(o)); localStorage.setItem("eipgam.navHidden", '["sessions"]'); }, want);
       await phone.goto(BASE + "?view=providers");
       await phone.waitForSelector("#nav .nav-more");
       await arranged(phone, want);
@@ -162,7 +162,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // a page the kept order doesn't name (new in an update) goes after
       // the page it follows at home
-      await page.evaluate(() => localStorage.setItem("magpie.navOrder", JSON.stringify(["routing", "providers", "agents", "sessions", "library", "gateway", "usage", "masking", "plugins"])));
+      await page.evaluate(() => localStorage.setItem("eipgam.navOrder", JSON.stringify(["routing", "providers", "agents", "sessions", "library", "gateway", "usage", "masking", "plugins"])));
       await page.goto(BASE + "?view=settings");
       await page.waitForSelector(".nav-pages-pick");
       await arranged(page, ["routing", "groups", "providers", "agents", "sessions", "library", "gateway", "usage", "masking", "plugins"]);

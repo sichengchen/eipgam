@@ -17,7 +17,7 @@ package agent
 // start, resume or fork a session when default_model is missing beside a
 // pool or isn't in it, a pool entry names no model, or default_effort is one
 // a pool model can't take (assertValidSubagentModelPool,
-// assertValidSubagentDefaultEffort). So magpie's model tables going (a
+// assertValidSubagentDefaultEffort). So eipgam's model tables going (a
 // disconnect, a model leaving the catalog) take their names out of the
 // section first. kimi-cli (Python) has no such section.
 
@@ -32,7 +32,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 const kimiSecondary = "secondary_model"
@@ -189,10 +189,10 @@ func kimiPoolLevels(pool []string, models map[string]kimiModelInfo) []string {
 }
 
 // kimiSecStashKey is where the stash keeps the subagent model the user had
-// before magpie first put one of its own models in [secondary_model].
+// before eipgam first put one of its own models in [secondary_model].
 func kimiSecStashKey(path string) string { return "kimi:" + path + ":secondary" }
 
-// kimiSecStash keeps the user's subagent model, once, as a magpie model
+// kimiSecStash keeps the user's subagent model, once, as a eipgam model
 // first goes in.
 func kimiSecStash(path string, s kimiSec) {
 	k := kimiSecStashKey(path)
@@ -297,7 +297,7 @@ func kimiSecFit(now kimiSec, models map[string]kimiModelInfo) kimiSec {
 	return now
 }
 
-// kimiPruneSecondary takes out of [secondary_model] each of magpie's
+// kimiPruneSecondary takes out of [secondary_model] each of eipgam's
 // models keep says is going: from the pool, and as the default, which goes
 // back to the one the user had (restore, while Kimi still has it), else the
 // pool's first, else none, so subagents follow the lead again. An effort
@@ -366,14 +366,14 @@ func kimiSecDropEmpty(path string) error {
 }
 
 // kimiSubagentFields are the subagents' model, pool and effort, for the new
-// Kimi Code. wired reports whether magpie's provider is in the config: a
-// magpie model can go in only then, its table there.
+// Kimi Code. wired reports whether eipgam's provider is in the config: a
+// eipgam model can go in only then, its table there.
 func kimiSubagentFields(path string, wired func() bool, own func(string) []Option) []Field {
 	read := func() (kimiSec, map[string]kimiModelInfo) {
 		s, m, _ := kimiDoc(path)
 		return s, m
 	}
-	// check refuses a name Kimi would not resolve: one of magpie's whose
+	// check refuses a name Kimi would not resolve: one of eipgam's whose
 	// table isn't there (not connected, or gone from the catalog)
 	check := func(models map[string]kimiModelInfo, names ...string) error {
 		for _, k := range names {
@@ -381,7 +381,7 @@ func kimiSubagentFields(path string, wired func() bool, own func(string) []Optio
 				continue
 			}
 			if _, ok := models[k]; !ok || !wired() {
-				return fmt.Errorf("pick a model through magpie for Kimi Code first; its subagents can then run on one of magpie's")
+				return fmt.Errorf("pick a model through eipgam for Kimi Code first; its subagents can then run on one of eipgam's")
 			}
 		}
 		return nil

@@ -1,6 +1,6 @@
 // timfang4162 (X): in a model's metadata a typed id is all the editor gave
 // for binding it to models.dev's data. The Same as box now has a picker
-// beside it: the app's own menu (never a <select>) listing the catalog magpie
+// beside it: the app's own menu (never a <select>) listing the catalog eipgam
 // has synced, with a filter over id, name and maker. A pick fills the box and
 // is staged and saved like a typed one; what the user types still wins.
 // Every language, Chromium and WebKit, at a phone's width and wide; the API
@@ -54,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [], calls = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts, calls));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const tr = (k) => page.evaluate(([l, k]) => (l === "en" ? null : I18N[l][k]) || k, [lang, k]);
         const [names, same, pickLabel, save] = await Promise.all([tr("Model settings"), tr("Same as"), tr("Pick from models.dev"), tr("Save")]);
         await page.locator('.row.provider[data-id="relay"]').click();
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [], calls = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve("en", [], calls, true));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     await page.locator('.row.provider[data-id="relay"]').click();
     await page.getByRole("button", { name: "Model settings", exact: true }).click();
     const row = page.locator(".mname", { has: page.locator("code", { hasText: "ep-2026-sol" }) });

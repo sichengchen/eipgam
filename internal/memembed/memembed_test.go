@@ -9,9 +9,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/pii/guard"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/pii/guard"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }

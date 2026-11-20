@@ -96,9 +96,9 @@ function autoBackupRows(v) {
     if (v.custom) tools.push(btn(t("Default"), (b) => autoBackupDo("set", { dir: "" }, b)));
     const dir = row(t("Backup folder"), v.dir || "", ...tools).querySelector(".sub");
     dir.classList.add("wraps", "auto-backup-dir");
-    // in magpie's own folder, the default: a reinstalled system takes the
-    // backups with it (two_2025. on Discord, magpie on C:)
-    if (v.inside) dir.after(el("div", "sub wraps auto-backup-inside", t("In magpie's own folder: a reinstalled system or a lost disk takes these backups too. Pick a folder on another disk, or one a cloud drive syncs")));
+    // in eipgam's own folder, the default: a reinstalled system takes the
+    // backups with it (two_2025. on Discord, eipgam on C:)
+    if (v.inside) dir.after(el("div", "sub wraps auto-backup-inside", t("In eipgam's own folder: a reinstalled system or a lost disk takes these backups too. Pick a folder on another disk, or one a cloud drive syncs")));
   }
   const list = v.backups || [];
   const vrow = row(t("Versions"), list.length ? t("{n} backups · newest {when}", { n: list.length, when: syncWhen(list[0].made) }) : t("None yet"),
@@ -138,9 +138,9 @@ function autoBackupRows(v) {
   return rows;
 }
 
-// Data folder (CHENGJIAHEGOXIS on X: magpie's files on an external SSD;
-// buhaodeshiyehao on X): where magpie keeps its files and cache, moved into
-// a folder on another disk and back (appdir/move.go). magpie restarts to
+// Data folder (CHENGJIAHEGOXIS on X: eipgam's files on an external SSD;
+// buhaodeshiyehao on X): where eipgam keeps its files and cache, moved into
+// a folder on another disk and back (appdir/move.go). eipgam restarts to
 // move them, so nothing is moved under the running one.
 let dataFolderView = null;
 
@@ -160,8 +160,8 @@ function dataFolderRows(d) {
   }
   r.append(who, val);
   const said = [];
-  if (d.pending) said.push([d.pending === "home" ? t("Moves back to this computer when magpie starts again") : t("Moves to {dir} when magpie starts again", { dir: d.pending })]);
-  if (d.pending && d.other) said.push([t("Another magpie serves the gateway (magpie serve): stop it, then open magpie again to move them")]);
+  if (d.pending) said.push([d.pending === "home" ? t("Moves back to this computer when eipgam starts again") : t("Moves to {dir} when eipgam starts again", { dir: d.pending })]);
+  if (d.pending && d.other) said.push([t("Another eipgam serves the gateway (eipgam serve): stop it, then open eipgam again to move them")]);
   if (d.error) said.push([t("The last move wasn't made: {error}", { error: d.error }), "bad"]);
   sub.after(...said.map(([s, bad]) => el("div", "sub wraps data-folder-said" + (bad ? " bad" : ""), s)));
   return [r];
@@ -178,16 +178,16 @@ async function dataFolderDo(action, b) {
 }
 
 // dataFolderAsk says what a move does before the folder is picked (or,
-// back, before it is made): magpie restarts for it.
+// back, before it is made): eipgam restarts for it.
 function dataFolderAsk(d, back) {
   const ed = el("div", "editor restore-ask data-folder-ask");
   const head = el("div", "ehead");
-  head.append(el("b", "", back ? t("Move magpie's files back to this computer?") : t("Move magpie's files to another disk?")));
+  head.append(el("b", "", back ? t("Move eipgam's files back to this computer?") : t("Move eipgam's files to another disk?")));
   ed.append(head);
-  if (back) ed.append(el("p", "lib-confirm", t("They go back to {dir}, and the folder on the other disk is removed. magpie restarts to move them.", { dir: d.config })));
+  if (back) ed.append(el("p", "lib-confirm", t("They go back to {dir}, and the folder on the other disk is removed. eipgam restarts to move them.", { dir: d.config })));
   else {
-    ed.append(el("p", "lib-confirm", t("Its files and cache go into a folder named magpie in the folder you pick, and a link is left where they were, so agents still find them. magpie restarts to move them.")));
-    ed.append(el("p", "lib-confirm", t("Keep that disk connected: without it magpie won't open until it is back.")));
+    ed.append(el("p", "lib-confirm", t("Its files and cache go into a folder named eipgam in the folder you pick, and a link is left where they were, so agents still find them. eipgam restarts to move them.")));
+    ed.append(el("p", "lib-confirm", t("Keep that disk connected: without it eipgam won't open until it is back.")));
   }
   const err = el("p", "editor-error", "");
   ed.append(err);

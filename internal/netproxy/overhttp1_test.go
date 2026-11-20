@@ -88,7 +88,7 @@ func TestBrokeOff(t *testing.T) {
 			t.Errorf("BrokeOff(%v) = false", err)
 		}
 	}
-	for _, err := range []error{nil, context.Canceled, fmt.Errorf("x: %w", context.DeadlineExceeded), errors.New("download magpie: 404 Not Found")} {
+	for _, err := range []error{nil, context.Canceled, fmt.Errorf("x: %w", context.DeadlineExceeded), errors.New("download eipgam: 404 Not Found")} {
 		if BrokeOff(err) {
 			t.Errorf("BrokeOff(%v) = true", err)
 		}

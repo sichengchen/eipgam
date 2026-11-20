@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // TestAgentCanceledIsNoError: an agent that cancels its request while the
@@ -119,7 +119,7 @@ func TestCodexGoneMidReplyIsNoFailure(t *testing.T) {
 	}
 }
 
-// TestCanceledTellsTheAgentFromMagpiesLimit: magpie's own limit running out
+// TestCanceledTellsTheAgentFromMagpiesLimit: eipgam's own limit running out
 // on a request it asked of itself is logged 499 as well, and stays a
 // failure (#2318); only the agent's own cancel is told as canceled.
 func TestCanceledTellsTheAgentFromMagpiesLimit(t *testing.T) {
@@ -127,7 +127,7 @@ func TestCanceledTellsTheAgentFromMagpiesLimit(t *testing.T) {
 	defer stop()
 	<-limited.Done()
 	if status, msg := canceled(limited); status != usage.StatusCanceled || usage.CanceledBy(status, msg) {
-		t.Errorf("magpie's own limit logged %d %q as the agent's cancel", status, msg)
+		t.Errorf("eipgam's own limit logged %d %q as the agent's cancel", status, msg)
 	}
 	left, leave := context.WithCancel(context.Background())
 	leave()
@@ -137,23 +137,23 @@ func TestCanceledTellsTheAgentFromMagpiesLimit(t *testing.T) {
 }
 
 // TestHistoryTellsCanceledRoutes: a day's history kept before routes said
-// canceled reads a route its agent canceled as canceled, and one magpie's
+// canceled reads a route its agent canceled as canceled, and one eipgam's
 // own limit ended as a failure, so past days count as the live trace does.
 func TestHistoryTellsCanceledRoutes(t *testing.T) {
 	routes := appendRoute(nil, []byte(`{"id":1,"time":"2026-10-27T17:26:24+08:00","agent":"claude-desktop","model":"copilot/claude-opus-5.5","provider":"copilot","order":[],"tries":[],"done":true,"status":499,"error":"the agent canceled the request","ms":27000}`))
-	routes = appendRoute(routes, []byte(`{"id":2,"time":"2026-10-27T17:30:00+08:00","agent":"claude-desktop","model":"copilot/claude-opus-5.5","provider":"copilot","order":[],"tries":[],"done":true,"status":499,"error":"magpie stopped waiting: its search had no answer in 2m0s","ms":120000}`))
+	routes = appendRoute(routes, []byte(`{"id":2,"time":"2026-10-27T17:30:00+08:00","agent":"claude-desktop","model":"copilot/claude-opus-5.5","provider":"copilot","order":[],"tries":[],"done":true,"status":499,"error":"eipgam stopped waiting: its search had no answer in 2m0s","ms":120000}`))
 	if len(routes) != 2 || !routes[0].Canceled || routes[1].Canceled {
 		var said []bool
 		for _, r := range routes {
 			said = append(said, r.Canceled)
 		}
-		t.Fatalf("history read canceled %v, want [true false]: the agent's cancel, then magpie's own limit", said)
+		t.Fatalf("history read canceled %v, want [true false]: the agent's cancel, then eipgam's own limit", said)
 	}
 }
 
 // The route-events feed (#3387) tells a request its agent canceled, and
 // its last try, as no failure, as the Routing page and the usage log
-// count it; magpie's own limit on a request it asked of itself, logged 499
+// count it; eipgam's own limit on a request it asked of itself, logged 499
 // too, stays one (#2318).
 func TestRouteEventsCanceledIsNoFailure(t *testing.T) {
 	try := Try{Status: usage.StatusCanceled, Error: usage.AgentCanceled, Done: true}
@@ -165,8 +165,8 @@ func TestRouteEventsCanceledIsNoFailure(t *testing.T) {
 	if a := activityOf(r); a.Failed {
 		t.Errorf("its last try, canceled by the agent, is told failed: %+v", a)
 	}
-	own := &Route{Done: true, Status: usage.StatusCanceled, Error: "magpie stopped waiting: its search had no answer in 2m0s"}
+	own := &Route{Done: true, Status: usage.StatusCanceled, Error: "eipgam stopped waiting: its search had no answer in 2m0s"}
 	if a := activityOf(own); !a.Failed {
-		t.Errorf("magpie's own limit is told as no failure: %+v", a)
+		t.Errorf("eipgam's own limit is told as no failure: %+v", a)
 	}
 }

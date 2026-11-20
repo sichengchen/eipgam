@@ -148,14 +148,15 @@ func TestDownloadInstalls(t *testing.T) {
 	d := t.TempDir()
 	root := filepath.Join(d, "cache")
 	wasDir, wasURL, wasSize, wasSHA := dir, modelURL, modelSize, modelSHA
-	wasTag, wasOld, wasBase, wasServe := serveTag, oldTags, serveBase, serveSHA
+	wasTag, wasOld := serveTag, oldTags
 	t.Cleanup(func() {
 		dir, modelURL, modelSize, modelSHA = wasDir, wasURL, wasSize, wasSHA
-		serveTag, oldTags, serveBase, serveSHA = wasTag, wasOld, wasBase, wasServe
+		serveTag, oldTags = wasTag, wasOld
 	})
 	dir = func() string { return root }
 	modelURL, modelSize, modelSHA = s.URL+"/model.gguf", int64(len(model)), sum(model)
-	serveTag, oldTags, serveBase, serveSHA = "pf-v9", []string{"pf-v8"}, s.URL+"/rel/", map[string]string{target(): sum(zb.Bytes())}
+	serveTag, oldTags = "pf-v9", []string{"pf-v8"}
+	serveFrom(t, s.URL, sum(zb.Bytes()))
 	// an older tag's pf-serve, left from before: the download replaces it
 	os.MkdirAll(tagDir("pf-v8"), 0o755)
 	os.WriteFile(exeIn(tagDir("pf-v8"), "pf-serve"), []byte("old"), 0o755)
@@ -209,9 +210,9 @@ func TestDownloadInstalls(t *testing.T) {
 
 // A system pf-serve isn't built for is told so, and nothing is fetched.
 func TestDownloadUnsupported(t *testing.T) {
-	was := serveSHA
-	serveSHA = map[string]string{}
-	t.Cleanup(func() { serveSHA = was })
+	was := serveTargets
+	serveTargets = map[string]bool{}
+	t.Cleanup(func() { serveTargets = was })
 	if err := Download(nil); err == nil || !strings.Contains(err.Error(), "doesn't run on") {
 		t.Fatalf("err = %v", err)
 	}
@@ -222,8 +223,8 @@ func TestDownloadUnsupported(t *testing.T) {
 // paths; it gives the stand-in's log and the server.
 func oldInstall(t *testing.T, want map[string][]byte) (string, *files) {
 	t.Helper()
-	wasTag, wasOld, wasBase, wasServe := serveTag, oldTags, serveBase, serveSHA
-	t.Cleanup(func() { serveTag, oldTags, serveBase, serveSHA = wasTag, wasOld, wasBase, wasServe })
+	wasTag, wasOld := serveTag, oldTags
+	t.Cleanup(func() { serveTag, oldTags = wasTag, wasOld })
 	serveTag = "pf-old"
 	log := fakeInstall(t, "ok", false)
 	f := &files{m: want}
@@ -233,11 +234,12 @@ func oldInstall(t *testing.T, want map[string][]byte) (string, *files) {
 	if z, ok := want["/rel/pf-new/pf-serve-"+target()+".zip"]; ok {
 		zipSum = sum(z)
 	}
-	serveTag, oldTags, serveBase, serveSHA = "pf-new", []string{"pf-old"}, s.URL+"/rel/", map[string]string{target(): zipSum}
+	serveTag, oldTags = "pf-new", []string{"pf-old"}
+	serveFrom(t, s.URL, zipSum)
 	return log, f
 }
 
-// A pf-serve of a tag pinned before magpie was updated answers while
+// A pf-serve of a tag pinned before eipgam was updated answers while
 // serveTag's is fetched; then it is ended, the next request starts
 // serveTag's, and the old one is deleted.
 func TestOldServeRunsUntilUpgraded(t *testing.T) {
@@ -304,5 +306,15 @@ func TestUpgradeThatFailsKeepsTheOld(t *testing.T) {
 	}
 	if n := len(fakeLines(t, log, "start")); n != 1 {
 		t.Fatalf("pf-serve started %d times, want once: the old one runs on", n)
+	}
+}
+
+func serveFrom(t *testing.T, url, sha string) {
+	t.Helper()
+	old := fetchServeArchive
+	t.Cleanup(func() { fetchServeArchive = old })
+	fetchServeArchive = func(ctx context.Context, tag, platform, dest string) error {
+		var received atomic.Int64
+		return fetch(ctx, url+"/rel/"+tag+"/pf-serve-"+platform+".zip", dest, -1, sha, &received)
 	}
 }

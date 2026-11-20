@@ -3,7 +3,7 @@ package provider
 // Google's subscriptions: Gemini CLI's and Antigravity's Google sign-ins.
 // Both are served by Google's Code Assist backend (cloudcode-pa), which
 // speaks Gemini's API wrapped in an envelope of its own, under a Google
-// Cloud project Code Assist gives the account. magpie signs in with each
+// Cloud project Code Assist gives the account. eipgam signs in with each
 // app's own OAuth client, keeps the tokens in logins.json and refreshes
 // them in memory; Gemini CLI's own sign-in (~/.gemini/oauth_creds.json) is
 // read, never written. The gateway speaks the envelope (gateway/codeassist.go).
@@ -39,17 +39,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/probelog"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/probelog"
 )
 
-// CodeAssist is Google's Code Assist API, which magpie only speaks
+// CodeAssist is Google's Code Assist API, which eipgam only speaks
 // upstream, to a Gemini CLI or Antigravity account. Not in Protocols: no
 // other provider serves it.
 const CodeAssist Protocol = "codeassist"
 
-// googleApp is one of Google's apps whose sign-in magpie borrows.
+// googleApp is one of Google's apps whose sign-in eipgam borrows.
 type googleApp struct {
 	agent, name, icon, website string
 	clientID, clientSecret     string
@@ -105,19 +105,19 @@ func googleAppOf(agent string) (googleApp, bool) {
 	return googleApp{}, false
 }
 
-// AntigravityRisk is what magpie says before an Antigravity account is
+// AntigravityRisk is what eipgam says before an Antigravity account is
 // added.
 const AntigravityRisk = "Google may suspend an Antigravity account it sees used outside Antigravity. Use one you can afford to lose."
 
-// ClaudeRisk is what magpie says before a Claude account is added, as the
+// ClaudeRisk is what eipgam says before a Claude account is added, as the
 // window does.
-const ClaudeRisk = "Anthropic may suspend or ban a Claude account it sees used outside its own apps. magpie sends requests through Claude Code, but Anthropic may still act on them; you use it at your own risk. Use an account you can afford to lose."
+const ClaudeRisk = "Anthropic may suspend or ban a Claude account it sees used outside its own apps. eipgam sends requests through Claude Code, but Anthropic may still act on them; you use it at your own risk. Use an account you can afford to lose."
 
-// WorkBuddyRisk is what magpie says before a WorkBuddy or WorkBuddy AI
+// WorkBuddyRisk is what eipgam says before a WorkBuddy or WorkBuddy AI
 // account is added, as the window does (WORKBUDDY_RISK in app.js).
 const WorkBuddyRisk = "Tencent may suspend a WorkBuddy account it sees used outside WorkBuddy. Accounts of the international build, WorkBuddy AI, have been banned after use through other agents (DeepSeek Harness among them), and changing an agent's prompt doesn't prevent it. Use an account you can afford to lose."
 
-// geminiCLIVersion is the Gemini CLI magpie says it is.
+// geminiCLIVersion is the Gemini CLI eipgam says it is.
 const geminiCLIVersion = "0.61.0"
 
 // googleAuth is a Google sign-in as logins.json keeps it; Gemini CLI's
@@ -209,7 +209,7 @@ func savedGoogleProject(agent, user string) string {
 	return ""
 }
 
-// googleSaved is the sign-in of an account magpie keeps.
+// googleSaved is the sign-in of an account eipgam keeps.
 func googleSaved(agent string, l savedLogin) (googleAccount, bool) {
 	var a googleAuth
 	if l.own() || json.Unmarshal(l.Auth, &a) != nil || a.RefreshToken == "" {
@@ -285,7 +285,7 @@ func forgetGoogleLogin(agent, user string) error {
 	return forgetSideLogin(agent, user, googleSide(agent), nil)
 }
 
-// addGoogleLogin keeps an account magpie just signed in.
+// addGoogleLogin keeps an account eipgam just signed in.
 func addGoogleLogin(agent, user, plan string, a googleAuth) error {
 	auth, _ := json.Marshal(a)
 	ownUser := ""
@@ -324,7 +324,7 @@ func SetGoogleProject(agent, user, project string) error {
 	})
 }
 
-// googleState is what magpie learned of each sign-in while it runs: the
+// googleState is what eipgam learned of each sign-in while it runs: the
 // access token, refreshed in memory (Google's refresh tokens don't turn
 // over, so nothing needs writing back), and the project and plan Code
 // Assist gave it.
@@ -439,7 +439,7 @@ func (g googleAccount) token(ctx context.Context) (string, error) {
 		ExpiresIn   int64  `json:"expires_in"`
 	}
 	if err := postToken(ctx, googleTokenURL, "application/x-www-form-urlencoded", []byte(form.Encode()), &fresh); err != nil || fresh.AccessToken == "" {
-		how := "sign in again from magpie"
+		how := "sign in again from eipgam"
 		if g.own {
 			how = "run gemini and sign in again"
 		}
@@ -602,10 +602,10 @@ func (g googleAccount) project(ctx context.Context) (googleProject, error) {
 
 // googleTiersFor is how long the tiers loadCodeAssist gave an Antigravity
 // account are named in its fetchAvailableModels before they are asked
-// again. They were kept for as long as magpie ran: an account that became
-// Google AI Pro or Ultra after magpie first asked went on naming the tier
+// again. They were kept for as long as eipgam ran: an account that became
+// Google AI Pro or Ultra after eipgam first asked went on naming the tier
 // it had then, and Google listed it the models of that tier, with Gemini 4
-// Argon marked disabled and so left out, until magpie restarted (rick_49551
+// Argon marked disabled and so left out, until eipgam restarted (rick_49551
 // on Discord: an Ultra account without Gemini 4). Asked again at most every
 // hour, as Gemini CLI's experiments are (flags).
 const googleTiersFor = time.Hour
@@ -770,11 +770,11 @@ func (g googleAccount) geminiProject(ctx context.Context) (googleProject, error)
 // needsProject says a Code Assist Standard or Enterprise account needs a
 // Google Cloud project named, with Google's reason when it gave one.
 func (g googleAccount) needsProject(why string) error {
-	msg := "Google serves Gemini CLI's sign-in only to Gemini Code Assist Standard and Enterprise, which bill a Google Cloud project: name it with `magpie accounts project gemini " + g.user + " <project-id>`"
+	msg := "Google serves Gemini CLI's sign-in only to Gemini Code Assist Standard and Enterprise, which bill a Google Cloud project: name it with `eipgam accounts project gemini " + g.user + " <project-id>`"
 	if g.own {
 		msg += " or GOOGLE_CLOUD_PROJECT in ~/.gemini/.env"
 	}
-	msg += ". A personal Google account is served to Antigravity instead: add it under Antigravity in magpie"
+	msg += ". A personal Google account is served to Antigravity instead: add it under Antigravity in eipgam"
 	if why != "" {
 		msg = why + " — " + msg
 	}
@@ -984,7 +984,7 @@ func (f geminiFlags) wire(model string) string {
 		return "gemini-3.5-flash-lite"
 	case !f.latestFlash && model == "gemini-3.8-flash":
 		// asked for by an account it isn't rolled out to (picked from the
-		// list magpie falls back on): Code Assist may not serve it that
+		// list eipgam falls back on): Code Assist may not serve it that
 		// account, so it goes as the Flash the account has (蒙面人: 502)
 		return "gemini-3-flash"
 	case !f.latestFlashLite && model == "gemini-3.5-flash-lite":
@@ -1119,7 +1119,7 @@ func (g googleAccount) modelInfo(ctx context.Context) ([]googleModelInfo, error)
 				// Antigravity marks a model it won't serve the account
 				// disabled, and asking for it is a 404 "Requested entity
 				// was not found": gemini-4-argon-disabled on a real
-				// account, which DeepSeek Harness offered from magpie's
+				// account, which DeepSeek Harness offered from eipgam's
 				// list (kwanyu on Discord, 10-24). It is left out, as the
 				// chat_/tab_ ids are, and comes back on the refresh after
 				// Google enables it.
@@ -1221,7 +1221,7 @@ func (g googleAccount) modelInfo(ctx context.Context) ([]googleModelInfo, error)
 	return out, nil
 }
 
-// models is the account's models for the catalog, named as magpie knows
+// models is the account's models for the catalog, named as eipgam knows
 // them where Code Assist doesn't name them. Gemini CLI's are the ones the
 // CLI offers the account, not its quota's buckets: those name the models
 // it has an allowance of, by Code Assist's ids (gemini-3-flash is the

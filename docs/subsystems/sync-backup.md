@@ -1,6 +1,6 @@
 # Sync and backup
 
-`internal/backup` collects magpie's portable setup into a passphrase-sealed
+`internal/backup` collects eipgam's portable setup into a passphrase-sealed
 bundle. `internal/davsync` keeps that bundle in a WebDAV folder, an S3 bucket
 or a GitHub repository. It merges changes between computers; it does not
 clone a working tree or synchronize arbitrary files.
@@ -10,7 +10,7 @@ clone a working tree or synchronize arbitrary files.
 - [`Config`, `Configure`, `Status` and `syncOnce`](../../internal/davsync/davsync.go)
   keep the active server in `sync.json`, and the last local/remote hashes,
   versions, notices and undo file in `sync-state.json`. These files live beside
-  magpie's settings. Secrets are local, never in the status response.
+  eipgam's settings. Secrets are local, never in the status response.
 - The [`remote`](../../internal/davsync/dav.go) interface reads a version and
   conditionally replaces it. WebDAV and S3 use ETags; GitHub uses the file's
   blob SHA. S3's conditions (`If-Match`, `If-None-Match`) go outside the
@@ -43,12 +43,12 @@ an Undo or a backup file brings settings in, and `hashes` blanks them, so
 changing one is no change to push. They are: the window's size, whether it
 was maximised and whether it is kept on top (`OnTop`), the fonts, the proxy, the gateway's port, sharing on the local
 network (`LAN`) and the addresses let in to it (`AllowIPs`), the private
-hosts magpie may download from (`FetchPrivate`), the Dock, gateway
+hosts eipgam may download from (`FetchPrivate`), the Dock, gateway
 mode, keeping awake, lightweight windows, WSL lookups, account discovery, when
 allowances are read, recording gateway conversations, the Mac terminal a
 session resumes in (`SessionTerminal`) and what the menu bar shows. Launch at
 login is the system's own setting (`internal/autostart`) and the listen
-address is `MAGPIE_ADDR`, so neither is in a bundle.
+address is `EIPGAM_ADDR`, so neither is in a bundle.
 
 The Usage page's clears (`usageCleared`, see
 [gateway sessions](gateway-sessions.md)) are a preference, not a computer's
@@ -64,11 +64,11 @@ this computer's values for a provider it has, and brings a new one without
 `KeepLoginAs`, an account signed in on the other computer; `hashes` blanks
 all three (`TestMirrorKeepsKeepLogin`, `TestKeepLoginIsNoChange`).
 
-A Remote magpie's **Use it anyway** (`KeepSelf`) is kept the same way. Sync
-carries a Remote magpie provider to the computer it names (hanslin1666 on
+A Remote eipgam's **Use it anyway** (`KeepSelf`) is kept the same way. Sync
+carries a Remote eipgam provider to the computer it names (hanslin1666 on
 Discord: B uses A through one, and on A it points at A), and there it is
-found to be this magpie and left out unless kept (see
-[providers and accounts](providers-accounts.md)). Whether it is this magpie
+found to be this eipgam and left out unless kept (see
+[providers and accounts](providers-accounts.md)). Whether it is this eipgam
 is about one computer only, so it is kept in `remote-self.json`, which no
 backup or sync carries, and `KeepSelf` is kept by `Mirror` and `Restore`
 (false for a provider new here) and blanked by `hashes`
@@ -113,7 +113,7 @@ computer, which is the implicit own fields only (`TestAgentHereThroughSync`,
 
 A provider can also be kept on one computer
 ([`Provider.ThisDevice`](../../internal/provider/provider.go): the provider
-row's menu, `magpie provider this-device <id> yes|no`), for a local model that
+row's menu, `eipgam provider this-device <id> yes|no`), for a local model that
 exists only there (treydtw on X). `collect` leaves it, and its place in the
 provider order, out of what sync sends, so changing it is no change to push
 and the other computers lose their copy of it at their next sync. When a
@@ -160,7 +160,7 @@ is retried through this same merge.
 
 A computer can follow the server instead (`Config.FollowServer`, set only
 by `SetFollowServer`: Settings → Sync → This computer → Follows the
-server, `/api/davsync/follow-server`, or `magpie <webdav|s3|github>
+server, `/api/davsync/follow-server`, or `eipgam <webdav|s3|github>
 follow on|off`; Ramon317317 on X). It takes every changed part from the
 file whichever side is newer, never writes the file (not a merged
 sign-in, not a rebuild of a damaged file), and a change made on it is
@@ -180,7 +180,7 @@ When a remote file is empty, damaged or another app's format, sync stops and
 describes it through `ServerFile`. Settings and the backend's `upload` command
 can replace it with this computer's setup, keeping the old file first.
 HTML and XML are not offered for replacement. GitHub diagnostics name the
-repository and `magpie github upload`, rather than WebDAV's recovery path.
+repository and `eipgam github upload`, rather than WebDAV's recovery path.
 
 A local file that is there but can't be read is unknown, never empty or the
 defaults. `backup.Collect` stops on an unreadable providers.json (with its groups
@@ -235,7 +235,7 @@ it does, and take it back.
   form (`PreviewWith`) is of the unsaved setup, and its Save and sync is
   the form's ordinary save, without a token. Reached by Settings → Sync →
   Preview a sync, the form's Preview, `/api/davsync/preview`,
-  `/api/davsync/sync-previewed` and `magpie <webdav|s3|github> preview`.
+  `/api/davsync/sync-previewed` and `eipgam <webdav|s3|github> preview`.
 - **Undo.** A sync that brings parts in keeps this computer's setup first
   (`keepSealed`, as a join does) and records `state.Applied`. `UndoSync`
   puts those parts back from that file, after keeping what is here now.
@@ -245,7 +245,7 @@ it does, and take it back.
   undone parts' hashes, so the next sync sends nothing and the server keeps
   the others' (`TestUndoSync`). A change made here later is an ordinary
   local change, and that whole part goes up. `/api/davsync/undo-sync`,
-  Settings → Sync → Undo the last sync, `magpie <kind> undo-sync`.
+  Settings → Sync → Undo the last sync, `eipgam <kind> undo-sync`.
   Restore's Undo (`davsync/undo`) is unchanged: it undoes a Restore.
 
 ## Backups by themselves
@@ -264,8 +264,8 @@ clock.
 - **Content:** `Collect(false, app)`, the manual export without keys, with
   the proxy settings blanked too, since nothing seals it: no passphrase is
   there on a schedule. Files are 0600 in a 0700 folder.
-- **Format:** `magpie-YYYYMMDD-HHMMSS[-n]-{auto,restore}.json`, holding the
-  bundle and its sha256. Each is written to a `.magpie-backup-*.tmp` and
+- **Format:** `eipgam-YYYYMMDD-HHMMSS[-n]-{auto,restore}.json`, holding the
+  bundle and its sha256. Each is written to a `.eipgam-backup-*.tmp` and
   renamed into place. A file whose sum doesn't match, a temp file or a name
   that doesn't match is never listed, restored or pruned.
 - **Schedule:** a backup is due `Hours` after the newest, so a restart
@@ -289,7 +289,7 @@ clock.
   case aside off Linux), the default included; Settings then says under the
   folder that a reinstalled system or a lost disk takes the backups too, and
   to pick one on another disk or a cloud drive's (two_2025. on Discord,
-  magpie on C:). Keeping everything elsewhere is the Data folder's move
+  eipgam on C:). Keeping everything elsewhere is the Data folder's move
   (below) or portable mode (`internal/appdir`); docs/start's
   `#data-folder` gives all three (`TestAutoInsideMagpiesFolder`,
   `auto-backup.test.cjs`).
@@ -299,7 +299,7 @@ clock.
   `syncOnce`'s: it keeps the names both sides had after the last sync
   (`state.Plugins`), and a name one side has since lost is removed on the other
   (`pluginPlan`, `removePlugin`), however the providers part came out. One that
-  can't be removed (its agent is on magpie) is tried again next sync. A plugin
+  can't be removed (its agent is on eipgam) is tried again next sync. A plugin
   added on one side stays (dolacmeo on X; `TestSyncPluginRemovalSpreads`). Not
   yet: an older sync with no record (`state.Plugins` empty) removes nothing.
 - **Memory:** on unless turned off (`Memory`), merged memory by memory in
@@ -308,7 +308,7 @@ clock.
 
 ## The usage history in a backup file
 
-A backup file made by `magpie backup` or Settings → Sync → Export carries the
+A backup file made by `eipgam backup` or Settings → Sync → Export carries the
 usage history unless `--no-usage` (or the Export form's tick) leaves it out
 (JasonLeeForOnly on Discord: a server moved by backup and restore lost every
 call). [`WithUsage`](../../internal/backup/backup.go) puts in `Bundle.Usage`:
@@ -320,7 +320,7 @@ join and an automatic backup carry no usage: sync shares usage by day files
 Routing history (debug data) and `usage-others` (the other computers' days)
 are never in a backup file.
 
-`Restore` with `Parts.Usage` (on in `All`; `magpie restore --no-usage` and
+`Restore` with `Parts.Usage` (on in `All`; `eipgam restore --no-usage` and
 the Import form's tick turn it off) merges, never replaces:
 [`MergeLog`](../../internal/usage/backup_log.go) appends the backup's lines
 this log doesn't have, compared byte for byte as a multiset, so a line here
@@ -347,23 +347,23 @@ and `sync-signins.test.cjs` for the forms.
 ## Data folder on another disk
 
 Settings › Sync's Data folder (CHENGJIAHEGOXIS and buhaodeshiyehao on X)
-moves magpie's own files and cache to another disk, and back.
+moves eipgam's own files and cache to another disk, and back.
 [`internal/appdir/move.go`](../../internal/appdir/move.go) does it:
 
 - **What moves:** `appdir.Config()` and `appdir.Cache()` only, into
-  `<picked>/magpie/config` and `<picked>/magpie/cache`. The agents' own
+  `<picked>/eipgam/config` and `<picked>/eipgam/cache`. The agents' own
   folders (`~/.claude`, `~/.codex`…) and their session histories stay where
   each agent reads them. A link is left at each old path (a symlink, or a
   junction on Windows when symlinks need a privilege, as in #973), so every
-  path magpie and the agents were given still works. A portable magpie is
+  path eipgam and the agents were given still works. A portable eipgam is
   never moved.
 - **Refused before anything quits** (`Target`): a relative path, a folder
-  that isn't there, a `magpie` folder there with files in it, or a folder
-  inside magpie's own folders.
-- **Never under a running magpie.** `AskMove` writes `move-to.json` in the
+  that isn't there, a `eipgam` folder there with files in it, or a folder
+  inside eipgam's own folders.
+- **Never under a running eipgam.** `AskMove` writes `move-to.json` in the
   config folder. The GUI then starts itself again (`restartSelf`, the
-  update path's relaunch) and quits; when another magpie serves the gateway
-  (`magpie serve`, a launch agent), or for magpie web, it doesn't restart,
+  update path's relaunch) and quits; when another eipgam serves the gateway
+  (`eipgam serve`, a launch agent), or for eipgam web, it doesn't restart,
   and the row says the move waits. The next start runs `MovePending` in
   `cli.Main` before anything reads a file, after the old process is gone
   and only when no gateway answers. It is made once: a failure is not asked
@@ -373,15 +373,15 @@ moves magpie's own files and cache to another disk, and back.
   failed copy removes the half copy and leaves the old folder as it was.
   Moving back takes the link away and renames the folder home; across
   disks it puts the link back, copies to `<config>.moving` and renames that
-  into place. The empty `magpie` folder on the disk is then removed. The
+  into place. The empty `eipgam` folder on the disk is then removed. The
   config moves first: a cache that fails after it says so and leaves the
   config moved.
 - **Disk gone:** a link that leads nowhere is `UnreachableError`. `cli.Main`
   stops on it, with a native alert from the app (as #989), rather than
-  starting an empty magpie that would write a new config over the link.
-- **CLI:** `magpie data` says where they are; `magpie data move <folder>`
+  starting an empty eipgam that would write a new config over the link.
+- **CLI:** `eipgam data` says where they are; `eipgam data move <folder>`
   moves at once with no gateway up, otherwise asks for it;
-  `magpie data move --home` and `magpie data cancel`.
+  `eipgam data move --home` and `eipgam data cancel`.
 
 Routes: `GET /api/datafolder`, `POST /api/datafolder/{move,home,cancel,reveal}`
 ([`datafolder.go`](../../internal/gui/datafolder.go)). Tests:
@@ -402,7 +402,7 @@ file has them only when it was made with them. Each place says beside the
 switch that anyone with the file and the passphrase can use those accounts.
 
 - **What goes:** [`provider.CollectSignIns`](../../internal/provider/signins_carry.go)
-  takes magpie's own copies only (`carried`): not an agent's own account
+  takes eipgam's own copies only (`carried`): not an agent's own account
   (`own`), not one in an agent's own home (`Home`), not a hidden row, not a
   `plugin:` row, not a retired built-in. Codex's live auth.json goes as its
   own record. Plugins' sign-ins come from [`plugin.CarriedAuth`](../../internal/plugin/carry.go).
@@ -433,7 +433,7 @@ switch that anyone with the file and the passphrase can use those accounts.
   was renewed later. Nothing here is removed. Before writing over a row it
   finds every row that could be the same account (same login, same refresh
   token, same id): with none it adds, with more than one it keeps them all,
-  and with one it keeps it when it isn't magpie's own copy, is held, or is
+  and with one it keeps it when it isn't eipgam's own copy, is held, or is
   the account the agent itself is signed in with. Codex's auth.json is
   written (temp and rename, 0600) only where Codex is signed out
   (`TestRestoreSignInsNeverWritesAnOlderTokenOver`,
@@ -462,7 +462,7 @@ switch that anyone with the file and the passphrase can use those accounts.
   them. An id names its `-plugin` sign-ins too. The choice is this
   computer's: the setup text doesn't carry it, and a setup without it
   leaves nothing out (`TestSyncSignInsExcept`, `TestSignInsExcept`,
-  `sync-signins-except.test.cjs`; `magpie webdav set sign-ins-except=claude`).
+  `sync-signins-except.test.cjs`; `eipgam webdav set sign-ins-except=claude`).
 
 ## GitHub constraints and errors
 
@@ -471,11 +471,11 @@ switch that anyone with the file and the passphrase can use those accounts.
   every sealed version to anyone to guess the passphrase against
   (`TestGitHubPublicRepositoryRefused`). In an empty repository, the first encrypted
   backup initializes its default branch through the Contents API. When that
-  API refuses it as too large, a short `README.md` in magpie's folder makes
+  API refuses it as too large, a short `README.md` in eipgam's folder makes
   the first commit and the backup follows as the second. A selected
   branch other than the default must already exist. The token needs repository
   Contents read and write.
-- Backups are `<prefix>/magpie/magpie.magpie-backup`; optional usage files
+- Backups are `<prefix>/eipgam/eipgam.eipgam-backup`; optional usage files
   live beside them under `usage/`. Each write or removal is one commit, and
   unchanged setup does not create another backup commit.
 - A repository with commits is written through the Git Data API: a blob
@@ -493,9 +493,9 @@ switch that anyone with the file and the passphrase can use those accounts.
   large to process" (Zhang-Wei, Discord), while a 19 MB file's Contents
   PUT (about 25 MB of body) went through; GitHub documents no request
   size. So a backup over 16 MiB (`githubPart`) goes up in parts, in the
-  same one commit: `magpie.magpie-backup.parts/1`, `/2`, … beside it, and
+  same one commit: `eipgam.eipgam-backup.parts/1`, `/2`, … beside it, and
   at the backup's own path a short list of them (`githubParts`: format
-  `magpie-backup`, version 2, `split: github-parts`, the total size and
+  `eipgam-backup`, version 2, `split: github-parts`, the total size and
   each part's blob SHA and size). The list's blob SHA is the version, and
   it names each part by blob SHA, so one version pins one whole set; a
   read downloads each part by that SHA, checks it, and returns the backup
@@ -504,11 +504,11 @@ switch that anyone with the file and the passphrase can use those accounts.
   the list at the head named and the new backup doesn't use, in the same
   commit, so going back to one file leaves no part behind. Backups up to
   16 MiB stay one file, as before.
-- A magpie from before parts opens the list as a backup with version 2
-  and no key derivation, and stops with "made by a newer magpie; update
-  magpie" — not `ErrCorrupt` or `ErrNotBackup`, so it neither rebuilds
+- A eipgam from before parts opens the list as a backup with version 2
+  and no key derivation, and stops with "made by a newer eipgam; update
+  eipgam" — not `ErrCorrupt` or `ErrNotBackup`, so it neither rebuilds
   over it nor offers to replace it. A backup in one file, from any
-  magpie, still reads.
+  eipgam, still reads.
 - Tokens are separate from the library's GitHub token, sent only to
   `https://api.github.com`, and must differ from the encryption passphrase.
   Repository history retains older encrypted versions.
@@ -531,8 +531,8 @@ switch that anyone with the file and the passphrase can use those accounts.
   to `RequestArchiveMB` (1 GiB unless set; synced, as every computer writes
   the one bucket) by `gateway/archive_bucket.go`: the oldest calls past it
   are removed, down to a tenth under it. Only names of `ArchiveName`'s shape
-  under `<prefix>/magpie/archive/` are counted or removed, never the backup,
-  usage or another key. The serving magpie lists the archive once, two
+  under `<prefix>/eipgam/archive/` are counted or removed, never the backup,
+  usage or another key. The serving eipgam lists the archive once, two
   minutes after it starts, whether the archive is on or off, so a bucket
   grown before the cap (18 GB in a month for an R2 user on X) is brought
   under it on update. After that uploads are counted, and the bucket is
@@ -568,7 +568,7 @@ The library part carries the library's subagents (`library.Bundle.Subagents`,
 see [library](library.md)), by sync and backup file alike: the receiving
 computer writes them into its agents when it puts the library, and records
 what it wrote there itself, so `Applied` never travels and a file the user
-edited stays theirs. A bundle from a magpie before subagents were carried
+edited stays theirs. A bundle from a eipgam before subagents were carried
 has no list and keeps this computer's; an empty list takes them out. A
 library with none hashes as it did before, so upgrading syncs nothing
 (`TestSyncSubagents`, `TestNoSubagentsHashAsBefore`,
@@ -582,14 +582,14 @@ with none hashes as before (`TestSyncHooks`, `TestNoHooksHashAsBefore`,
 
 billion-context's own config, `billion-context.json` (`library.Bundle.Bili`,
 see [library](library.md)), goes in the library part by sync and backup file
-alike: the text as written, comments kept, with magpie's summary recipe at
+alike: the text as written, comments kept, with eipgam's summary recipe at
 the canonical gateway address, put back at this computer's gateway when it
 is written, so two computers on different ports don't trade it back and
 forth. A file bili can't read, or one over 1 MiB, is not carried, so it
 never arrives as empty; a bundle without it leaves this computer's alone.
 Before a carried file replaces a different one here, this computer's is
 kept with the backups. Its credential store, `<config>.summary-credentials.json`,
-is never carried: the computer that writes magpie's recipe saves its own
+is never carried: the computer that writes eipgam's recipe saves its own
 gateway key there. A file naming a DSN is left out of a keyless backup
 file (`WithoutSecrets`). A library with no such file hashes as before, and
 running bilis are asked to reload after one is written
@@ -674,7 +674,7 @@ a blob over 24 MiB, as four parts in one commit, reads it back byte for
 byte, then goes to two parts and back to one file with no part left.
 `TestGitHubOneFileBackupStillReads` reads a 30 MB backup in one file and
 replaces it with parts; `TestGitHubPartsOlderMagpie` checks the list stops
-an older magpie as a newer magpie's backup; `TestGitHubPartsDamaged`,
+an older eipgam as a newer eipgam's backup; `TestGitHubPartsDamaged`,
 `TestGitHubPartsBranchMovedMeanwhile` and
 `TestGitHubEmptyRepositoryPartsBackup` cover a bad list or part, a moved
 head (each blob sent once) and an empty repository;

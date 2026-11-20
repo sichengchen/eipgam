@@ -16,7 +16,7 @@ const assets = path.resolve(__dirname, "../assets");
 function server(lang, web) {
   const cur = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", textSize: 100,
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false, trayUsage: "", trayUsageEvery: 3,
     visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -54,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; errors.push(e.message); });
         await page.route("**/*", server(lang, false));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         const back = page.locator("#navBack");
         const go = page.locator("#quotaHead #usageToSet");
         await go.waitFor();
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         });
         assert.ok(r.row >= r.list - 0.5, "the lit row's corners follow the list's: " + JSON.stringify(r));
         await back.waitFor();
-        const say = await page.evaluate(() => t("Back to {page}", { page: t(magpie.page("usage").title) }));
+        const say = await page.evaluate(() => t("Back to {page}", { page: t(eipgam.page("usage").title) }));
         assert.equal(await back.getAttribute("aria-label"), say);
         assert.ok(await fits(page), "fits with Back");
         // Back sits clear of the tabs and the title bar's icons
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await back.isVisible(), false, "gone once back");
 
         // Routing's Settings ›, then a page picked by hand: no Back
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator("#rtToSet").click();
         await page.locator("#view-settings #routeList .row.flash").waitFor();
         await back.waitFor();

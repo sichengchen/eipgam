@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/filelock"
 )
 
 // Two magpies — the gateway that runs all day, and one run from a
-// terminal (`magpie plugin options …`, the plugin manager) — write
+// terminal (`eipgam plugin options …`, the plugin manager) — write
 // plugins.json from separate processes, and the in-process listMu never
 // saw the other one (#4666): the later whole-list write went out with
 // what the other had saved since its read. A change is now made under
@@ -31,10 +31,10 @@ func TestPluginOptionsKeepWhatAnotherMagpieSetMeanwhile(t *testing.T) {
 	time.Sleep(300 * time.Millisecond)
 	select {
 	case err := <-done:
-		t.Fatalf("SetOptions went on while another magpie held plugins.json's lock (err %v)", err)
+		t.Fatalf("SetOptions went on while another eipgam held plugins.json's lock (err %v)", err)
 	default:
 	}
-	// the other magpie's save lands meanwhile: its own options for p-b
+	// the other eipgam's save lands meanwhile: its own options for p-b
 	other := Load()
 	for i := range other.Plugins {
 		if other.Plugins[i].Spec == "p-b" {
@@ -62,7 +62,7 @@ func TestPluginOptionsKeepWhatAnotherMagpieSetMeanwhile(t *testing.T) {
 		t.Errorf("p-a's options = %v, want ours kept", a)
 	}
 	if b == nil || b.Options["theirs"] != float64(1) {
-		t.Errorf("p-b's options = %v, want what the other magpie saved kept", b)
+		t.Errorf("p-b's options = %v, want what the other eipgam saved kept", b)
 	}
 }
 
@@ -79,10 +79,10 @@ func TestPluginPreferKeepsWhatAnotherMagpieSetMeanwhile(t *testing.T) {
 	time.Sleep(300 * time.Millisecond)
 	select {
 	case err := <-done:
-		t.Fatalf("Prefer went on while another magpie held plugins.json's lock (err %v)", err)
+		t.Fatalf("Prefer went on while another eipgam held plugins.json's lock (err %v)", err)
 	default:
 	}
-	// the other magpie's save lands meanwhile: p-b turned off
+	// the other eipgam's save lands meanwhile: p-b turned off
 	other := Load()
 	for i := range other.Plugins {
 		if other.Plugins[i].Spec == "p-b" {
@@ -110,7 +110,7 @@ func TestPluginPreferKeepsWhatAnotherMagpieSetMeanwhile(t *testing.T) {
 		t.Errorf("prefer = %v, want p-a kept", l.Prefer)
 	}
 	if b == nil || !b.Off {
-		t.Errorf("p-b off = %v, want what the other magpie saved kept", b)
+		t.Errorf("p-b off = %v, want what the other eipgam saved kept", b)
 	}
 }
 
@@ -143,7 +143,7 @@ func TestPluginPageOptionsKeepWhatAnotherMagpieSetMeanwhile(t *testing.T) {
 	time.Sleep(300 * time.Millisecond)
 	select {
 	case err := <-done:
-		t.Fatalf("SetPageOptions went on while another magpie held plugins.json's lock (err %v)", err)
+		t.Fatalf("SetPageOptions went on while another eipgam held plugins.json's lock (err %v)", err)
 	default:
 	}
 	other := Load()
@@ -173,6 +173,6 @@ func TestPluginPageOptionsKeepWhatAnotherMagpieSetMeanwhile(t *testing.T) {
 		t.Errorf("the page plugin's options = %v, want ours kept", a)
 	}
 	if b == nil || b.Options["theirs"] != float64(1) {
-		t.Errorf("p-b's options = %v, want what the other magpie saved kept", b)
+		t.Errorf("p-b's options = %v, want what the other eipgam saved kept", b)
 	}
 }

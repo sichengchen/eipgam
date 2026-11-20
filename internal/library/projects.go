@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // Project is a folder of the user's whose agents get some of the library's
@@ -24,24 +24,24 @@ type Project struct {
 	Copy bool `json:"copy,omitempty"`
 	// Skills are the library's skills the project has, and for which agents
 	Skills map[string][]string `json:"skills,omitempty"`
-	// Placed are the entries magpie put in the folder (.claude/skills/pdf),
+	// Placed are the entries eipgam put in the folder (.claude/skills/pdf),
 	// the only ones it ever takes away
 	Placed []string `json:"placed,omitempty"`
-	// Made are the folders magpie made to place them in, taken away again
+	// Made are the folders eipgam made to place them in, taken away again
 	// once they're empty; Gitignore is whether it made the .gitignore
 	Made      []string `json:"made,omitempty"`
 	Gitignore bool     `json:"gitignore,omitempty"`
 	// Servers are the library's MCP servers the project has, and for which
 	// agents (project_mcp.go)
 	Servers map[string][]string `json:"servers,omitempty"`
-	// Wrote are, by the project's file (.mcp.json), the servers magpie
+	// Wrote are, by the project's file (.mcp.json), the servers eipgam
 	// wrote in it, the only entries it ever takes out
 	Wrote map[string][]string `json:"wrote,omitempty"`
-	// Startup are, by the project's file, the startup timeout magpie
+	// Startup are, by the project's file, the startup timeout eipgam
 	// wrote in each server's entry there (Codex's startup_timeout_sec):
 	// one other than this is the user's
 	Startup map[string]map[string]float64 `json:"startup,omitempty"`
-	// MadeFiles are the files magpie made to write servers in, listed in
+	// MadeFiles are the files eipgam made to write servers in, listed in
 	// the .gitignore and taken away again once nothing's left in them
 	MadeFiles []string `json:"madeFiles,omitempty"`
 	// ServersOff and SkillsOff are global servers and skills (given to
@@ -49,25 +49,25 @@ type Project struct {
 	// (project_scope.go)
 	ServersOff map[string][]string `json:"serversOff,omitempty"`
 	SkillsOff  map[string][]string `json:"skillsOff,omitempty"`
-	// Claude is what magpie wrote in Claude Code's own record of the
+	// Claude is what eipgam wrote in Claude Code's own record of the
 	// project (~/.claude.json): the router's entry, servers turned off
 	Claude *claudeLocal `json:"claude,omitempty"`
-	// CodexOff are the servers magpie turned off in the project's
+	// CodexOff are the servers eipgam turned off in the project's
 	// .codex/config.toml, Overrides the skills it turned off in
 	// .claude/settings.local.json
 	CodexOff  []string `json:"codexOff,omitempty"`
 	Overrides []string `json:"overrides,omitempty"`
 	// Trees are the project's folder in each other worktree of its git
-	// repository, given the project's set, with what magpie put in each
+	// repository, given the project's set, with what eipgam put in each
 	Trees []*Project `json:"trees,omitempty"`
 	// Subagents are the library's subagents the project has, and for which
-	// agents; AgentFiles the files magpie wrote for them, by their hash
+	// agents; AgentFiles the files eipgam wrote for them, by their hash
 	// (project_subagents.go)
 	Subagents  map[string][]string `json:"subagents,omitempty"`
 	AgentFiles []SubagentFile      `json:"agentFiles,omitempty"`
 	// Instr is the project's own instructions, InstrAgents the agents
 	// whose project file they're written into, InstrFiles the files
-	// magpie wrote them in (project_instructions.go)
+	// eipgam wrote them in (project_instructions.go)
 	Instr       string      `json:"instr,omitempty"`
 	InstrAgents []string    `json:"instrAgents,omitempty"`
 	InstrFiles  []InstrFile `json:"instrFiles,omitempty"`
@@ -93,7 +93,7 @@ type Project struct {
 // given the shared one. A project folder inside a repository but not at
 // its root isn't read by dsh: run there, it looks in the repository's
 // root (#5172). MiMo Code, Crush,
-// ZCode and oh-my-pi say of no project folder magpie can rely on.
+// ZCode and oh-my-pi say of no project folder eipgam can rely on.
 var projectSkillsDirs = map[string]string{
 	"claude":   ".claude/skills",
 	"codex":    ".agents/skills",
@@ -108,7 +108,7 @@ var projectSkillsDirs = map[string]string{
 }
 
 // ProjectSkillsDir is the folder, in a project, an agent reads its skills
-// from: "" for one magpie can't give a project's skills to.
+// from: "" for one eipgam can't give a project's skills to.
 func ProjectSkillsDir(agent string) string { return projectSkillsDirs[agent] }
 
 func (l *Library) project(dir string) *Project {
@@ -120,10 +120,10 @@ func (l *Library) project(dir string) *Project {
 	return nil
 }
 
-// The .gitignore lines magpie keeps between these two, and only there.
+// The .gitignore lines eipgam keeps between these two, and only there.
 const (
-	ignoreBegin = "# >>> magpie: library skills placed here (magpie adds and removes these lines) >>>"
-	ignoreEnd   = "# <<< magpie <<<"
+	ignoreBegin = "# >>> eipgam: library skills placed here (eipgam adds and removes these lines) >>>"
+	ignoreEnd   = "# <<< eipgam <<<"
 )
 
 // syncProjects places the library's skills in every project as it says.
@@ -161,7 +161,7 @@ func (l *Library) syncFolder(p *Project, res *Result, hubs map[string]*Server) {
 	want := map[string]string{} // entry → the skill
 	// the entries given as copies: all of them in a project that takes
 	// copies, else those an agent reads that skips a junction
-	// (skipsJunctions), which is magpie's link on Windows without the
+	// (skipsJunctions), which is eipgam's link on Windows without the
 	// right to make a symlink
 	copies := map[string]bool{}
 	for name, agents := range p.Skills {
@@ -208,7 +208,7 @@ func (l *Library) syncFolder(p *Project, res *Result, hubs map[string]*Server) {
 		case err == nil:
 			placed = append(placed, e)
 		case errors.Is(err, errForeign):
-			fail(name, fmt.Errorf("%s is in the project already and isn't magpie's: it's left as it is", e))
+			fail(name, fmt.Errorf("%s is in the project already and isn't eipgam's: it's left as it is", e))
 		default:
 			fail(name, err)
 			if ours(filepath.Join(p.Dir, filepath.FromSlash(e)), name) {
@@ -227,10 +227,10 @@ func (l *Library) syncFolder(p *Project, res *Result, hubs map[string]*Server) {
 	p.tidy()
 }
 
-// keepOutOfGit keeps what magpie placed in the project, and in its folder
+// keepOutOfGit keeps what eipgam placed in the project, and in its folder
 // in each other worktree, out of git: in the repository's info/exclude,
 // never in a file of the project's (project_git.go). The lines an older
-// magpie wrote in the project's .gitignore come out of it, and a
+// eipgam wrote in the project's .gitignore come out of it, and a
 // .gitignore it made goes; a folder outside git gets nothing.
 func (p *Project) keepOutOfGit() error {
 	if err := p.writeIgnore(); err != nil {
@@ -247,13 +247,13 @@ func (p *Project) keepOutOfGit() error {
 	return p.writeExclude(g, entries)
 }
 
-var errForeign = errors.New("not magpie's")
+var errForeign = errors.New("not eipgam's")
 
 // place puts a skill at e in the project: a link to the library's, or a
 // copy made again whenever the library's differs from it.
 func (p *Project) place(e, name string, asCopy bool) error {
 	abs := filepath.Join(p.Dir, filepath.FromSlash(e))
-	// the entry is magpie's own link to the library: the folder it is in
+	// the entry is eipgam's own link to the library: the folder it is in
 	// is what must be the project's
 	if err := p.inside(filepath.Dir(abs)); err != nil {
 		return err
@@ -292,7 +292,7 @@ func (p *Project) place(e, name string, asCopy bool) error {
 // inside is an error when abs, links followed, isn't in the project's
 // folder. A project is often a repository someone else wrote, and a link
 // in it (CLAUDE.md to ~/.zshrc, .claude to a folder anyone can read)
-// would have magpie write the user's instructions, servers and keys
+// would have eipgam write the user's instructions, servers and keys
 // wherever the link's author chose. A link to nothing is refused too:
 // where a write through it lands can't be told before it is made.
 func (p *Project) inside(abs string) error {
@@ -314,16 +314,16 @@ func (p *Project) inside(abs string) error {
 	}
 	real, err := filepath.EvalSymlinks(q)
 	if err != nil {
-		return fmt.Errorf("%s is a link to nothing: magpie leaves it as it is", p.rel(abs))
+		return fmt.Errorf("%s is a link to nothing: eipgam leaves it as it is", p.rel(abs))
 	}
 	if real = filepath.Join(real, rest); !within(real, root) {
-		return fmt.Errorf("%s leads out of the project, to %s: magpie leaves it as it is", p.rel(abs), real)
+		return fmt.Errorf("%s leads out of the project, to %s: eipgam leaves it as it is", p.rel(abs), real)
 	}
 	return nil
 }
 
 // mkdirs makes dir and the folders above it the project hasn't, noting
-// which magpie made.
+// which eipgam made.
 func (p *Project) mkdirs(dir string) error {
 	var made []string
 	for d := dir; d != p.Dir && strings.HasPrefix(d, p.Dir+string(filepath.Separator)); d = filepath.Dir(d) {
@@ -344,7 +344,7 @@ func (p *Project) mkdirs(dir string) error {
 	return nil
 }
 
-// tidy takes away the folders magpie made that are empty now, the deepest
+// tidy takes away the folders eipgam made that are empty now, the deepest
 // first; one with anything in it stays.
 func (p *Project) tidy() {
 	sort.Slice(p.Made, func(i, j int) bool { return len(p.Made[i]) > len(p.Made[j]) })
@@ -364,9 +364,9 @@ func (p *Project) tidy() {
 	p.Made = kept
 }
 
-// writeIgnore takes the lines an older magpie kept in the project's
+// writeIgnore takes the lines an older eipgam kept in the project's
 // .gitignore, between its two lines, out of it; the rest of the file is
-// the user's and stays. A .gitignore magpie made is taken away once
+// the user's and stays. A .gitignore eipgam made is taken away once
 // nothing's left in it.
 func (p *Project) writeIgnore() error {
 	f := filepath.Join(p.Dir, ".gitignore")
@@ -398,7 +398,7 @@ func (p *Project) writeIgnore() error {
 	return edit.WriteAtomic(f, []byte(out))
 }
 
-// stripIgnore is a .gitignore without magpie's lines, and the blank line
+// stripIgnore is a .gitignore without eipgam's lines, and the blank line
 // left before them.
 func stripIgnore(s string) string { return stripBlock(s, ignoreBegin) }
 
@@ -461,7 +461,7 @@ func notGlobal(dir string) error {
 }
 
 // ProjectPath is a folder as typed on a command line (~, or relative to
-// where magpie runs) made a full path, as AddProject takes it.
+// where eipgam runs) made a full path, as AddProject takes it.
 func ProjectPath(dir string) (string, error) {
 	dir = strings.TrimSpace(dir)
 	if dir == "" {
@@ -494,10 +494,10 @@ func ProjectAt(dir string) (string, error) {
 	return "", nil
 }
 
-// RemoveProject takes every skill magpie placed out of a project, and the
+// RemoveProject takes every skill eipgam placed out of a project, and the
 // project off the list; what's left, it couldn't take away and says why.
 // keep takes the project off the list alone (#514: a project given a few
-// skills or servers once, to keep them): everything magpie put in the
+// skills or servers once, to keep them): everything eipgam put in the
 // folder — skills, servers in the agents' files, its lines in the
 // .gitignore — stays as it is, the user's from then on.
 func RemoveProject(dir string, keep bool) (*Result, error) {
@@ -510,7 +510,7 @@ func RemoveProject(dir string, keep bool) (*Result, error) {
 			l.Projects = slices.DeleteFunc(l.Projects, func(x *Project) bool { return x == p })
 			return nil
 		}
-		// a folder that's gone has nothing of magpie's on disk to take
+		// a folder that's gone has nothing of eipgam's on disk to take
 		// back: the records of what it placed and wrote go with the
 		// entry, as a skill's do when its folder is gone already (#3510).
 		// A folder that couldn't be looked at (no permission, a drive
@@ -559,7 +559,7 @@ func ProjectSkills(dir string, names, agents []string) (*Result, error) {
 		var ids []string
 		for _, id := range agents {
 			if ProjectSkillsDir(id) == "" {
-				return fmt.Errorf("magpie knows of no folder %s reads a project's skills from", id)
+				return fmt.Errorf("eipgam knows of no folder %s reads a project's skills from", id)
 			}
 			ids = set(ids, id, true)
 		}
@@ -598,7 +598,7 @@ type ProjectView struct {
 	Skills  map[string][]string `json:"skills"`
 	Placed  []string            `json:"placed"`
 	Servers map[string][]string `json:"servers"`
-	// Wrote are, by the project's file, the servers magpie wrote there
+	// Wrote are, by the project's file, the servers eipgam wrote there
 	Wrote map[string][]string `json:"wrote"`
 	// ServersOff and SkillsOff are the Library's servers and skills
 	// turned off in this project, each for the agents named
@@ -610,10 +610,10 @@ type ProjectView struct {
 	// Subagents are the library's subagents the project has, for the
 	// agents named
 	Subagents map[string][]string `json:"subagents"`
-	// AgentFiles are the project's files magpie wrote for them
+	// AgentFiles are the project's files eipgam wrote for them
 	AgentFiles []string `json:"agentFiles"`
 	// Instr is the project's own instructions, InstrAgents the agents
-	// they're for, InstrFiles the project's files magpie wrote them in
+	// they're for, InstrFiles the project's files eipgam wrote them in
 	Instr       string   `json:"instr"`
 	InstrAgents []string `json:"instrAgents"`
 	InstrFiles  []string `json:"instrFiles"`

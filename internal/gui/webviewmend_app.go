@@ -113,7 +113,7 @@ func (h *host) remakeWindow(w *application.WebviewWindow) {
 	w.Close()
 	if main && open {
 		// a new webview made while the old browser process is still
-		// going down fails, and Wails ends magpie for it
+		// going down fails, and Wails ends eipgam for it
 		awaitBrowserGone()
 		application.InvokeSync(func() {
 			if h.main == nil {

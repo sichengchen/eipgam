@@ -6,9 +6,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Pi's google-generative-ai resolves each level through thinkingLevelMap to
@@ -63,7 +63,7 @@ func TestPiFolderKeepsGeminiOnChatForRaft(t *testing.T) {
 // send Gemini requests to the gateway, with its key rather than the plugin's.
 func TestPiGooglePluginModels(t *testing.T) {
 	home := syncHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	const spec = "google-plugin-test"
 	writeFile(t, filepath.Join(settings.Dir(), "plugins.json"), `{"plugins":[{"spec":"`+spec+`"}]}`)
 	writeFile(t, filepath.Join(settings.Dir(), "plugin-auth.json"), `{"google-plugin":{"type":"api","key":"plugin-secret"}}`)
@@ -71,10 +71,10 @@ func TestPiGooglePluginModels(t *testing.T) {
 		Models: []plugin.Model{{ID: "gemini-3-flash", Name: "Gemini 3 Flash", NPM: "@ai-sdk/google"}}}})
 	t.Cleanup(plugin.Settle)
 	const gw = "http://127.0.0.1:17325"
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:17325")
+	t.Setenv("EIPGAM_ADDR", "127.0.0.1:17325")
 	for _, a := range []*Agent{pi(home)} {
 		t.Run(a.ID, func(t *testing.T) {
-			if err := a.Field("model").Set("magpie/google-plugin/gemini-3-flash"); err != nil {
+			if err := a.Field("model").Set("eipgam/google-plugin/gemini-3-flash"); err != nil {
 				t.Fatal(err)
 			}
 			path := filepath.Join(filepath.Dir(a.Path), "models.json")
@@ -85,7 +85,7 @@ func TestPiGooglePluginModels(t *testing.T) {
 				delete(m, "api")
 				delete(m, "baseUrl")
 			}
-			b, _ := json.Marshal(map[string]any{"providers": map[string]any{"magpie": p}})
+			b, _ := json.Marshal(map[string]any{"providers": map[string]any{"eipgam": p}})
 			writeFile(t, path, string(b))
 			if err := a.Sync(); err != nil {
 				t.Fatal(err)

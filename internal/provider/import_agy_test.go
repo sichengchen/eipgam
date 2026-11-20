@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func agyImportHome(t *testing.T, settings string) {
@@ -31,7 +31,7 @@ func agyImportHome(t *testing.T, settings string) {
 }
 
 // loginShell makes the login shell answer vars, as a terminal's agy has
-// them while magpie, opened from the Dock, doesn't.
+// them while eipgam, opened from the Dock, doesn't.
 func loginShell(t *testing.T, vars map[string]string) {
 	t.Helper()
 	agyLoginEnv = func(k string) string { return vars[k] }
@@ -49,7 +49,7 @@ func agyDiscovered(t *testing.T) (AppSource, bool) {
 
 // shenggxhz on X: agy set up on an AI Studio key ("modelProvider":
 // "gemini" in its settings.json, GEMINI_API_KEY exported in the shell)
-// lists Gemini 4 Carbon and Hydrogen, and nothing in magpie served that
+// lists Gemini 4 Carbon and Hydrogen, and nothing in eipgam served that
 // key. The Providers page finds it by itself, as the Google Gemini
 // provider, and imports it as one.
 func TestAgyGeminiKeyIsFound(t *testing.T) {
@@ -84,7 +84,7 @@ func TestAgyGeminiKeyIsFound(t *testing.T) {
 	}
 }
 
-// magpie's own environment comes first, as agy started from it has it.
+// eipgam's own environment comes first, as agy started from it has it.
 func TestAgyGeminiKeyFromMagpiesEnv(t *testing.T) {
 	agyImportHome(t, `{"modelProvider": "gemini"}`)
 	loginShell(t, nil)
@@ -97,7 +97,7 @@ func TestAgyGeminiKeyFromMagpiesEnv(t *testing.T) {
 
 // agy on its Google sign-in is the agy-cli subscription's, not a key's:
 // nothing is offered, a GEMINI_API_KEY in the shell for another program
-// included. Nor is a key with no setting, or one at magpie itself.
+// included. Nor is a key with no setting, or one at eipgam itself.
 func TestAgyGeminiKeyOnlyWhenAgyUsesIt(t *testing.T) {
 	for name, c := range map[string]struct {
 		settings string
@@ -108,11 +108,11 @@ func TestAgyGeminiKeyOnlyWhenAgyUsesIt(t *testing.T) {
 		"other provider": {`{"modelProvider": "vertex"}`, map[string]string{"GEMINI_API_KEY": "AIzaSy-other"}, false},
 		"empty":          {" ", map[string]string{"GEMINI_API_KEY": "AIzaSy-other"}, false},
 		"no key":         {`{"modelProvider": "gemini"}`, nil, true},
-		"magpie":         {`{"modelProvider": "gemini"}`, map[string]string{"GEMINI_API_KEY": "mp-agy", "GOOGLE_GEMINI_BASE_URL": "magpie"}, true},
+		"eipgam":         {`{"modelProvider": "gemini"}`, map[string]string{"GEMINI_API_KEY": "mp-agy", "GOOGLE_GEMINI_BASE_URL": "eipgam"}, true},
 	} {
 		t.Run(name, func(t *testing.T) {
 			agyImportHome(t, c.settings)
-			if c.vars["GOOGLE_GEMINI_BASE_URL"] == "magpie" {
+			if c.vars["GOOGLE_GEMINI_BASE_URL"] == "eipgam" {
 				c.vars["GOOGLE_GEMINI_BASE_URL"] = "http://" + settings.GatewayAddr()
 			}
 			loginShell(t, c.vars)

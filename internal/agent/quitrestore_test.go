@@ -46,7 +46,7 @@ func sameBytes(t *testing.T, files map[string][]byte) {
 func stashMark(a *Agent) { stash(map[string]string{a.ID + disconnectedKey: "1"}) }
 
 // Quitting with the setting on puts every connected agent's files back as
-// they were before magpie, byte for byte, leaves no disconnected mark, and
+// they were before eipgam, byte for byte, leaves no disconnected mark, and
 // the next start connects them again.
 func TestRestoreOnQuitAndRewireOnStart(t *testing.T) {
 	piA, km, files := quitHome(t)
@@ -96,7 +96,7 @@ func TestRestoreOnQuitLeavesUserDisconnected(t *testing.T) {
 	if km.Wired() || !km.Disconnected() {
 		t.Fatalf("Kimi Code came back: wired %v, mark %v", km.Wired(), km.Disconnected())
 	}
-	// disconnected by hand while magpie was closed
+	// disconnected by hand while eipgam was closed
 	if _, err := RestoreOnQuit(all); err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func TestRestoreOnQuitLeavesUserDisconnected(t *testing.T) {
 }
 
 // With nothing restored on quit, a start connects nothing: the setting's
-// off behaviour is that a connected agent keeps magpie.
+// off behaviour is that a connected agent keeps eipgam.
 func TestRewireOnStartWithoutRestore(t *testing.T) {
 	piA, km, _ := quitHome(t)
 	if err := km.Disconnect(); err != nil {

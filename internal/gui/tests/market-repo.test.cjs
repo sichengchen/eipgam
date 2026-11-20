@@ -2,7 +2,7 @@
 // skills.sh lists a repository's skills one by one (Ethereal499 on X:
 // mattpocock/skills' all apart). Two or more from one repository are one
 // card, the repository, where it first comes; a repository with one skill
-// listed, and magpie's own, keep their own cards. Opened, the card lists
+// listed, and eipgam's own, keep their own cards. Opened, the card lists
 // the repository's skills, the whole repository once Find skills has read
 // it, the list's ticked, and installs the ones picked in one go. A
 // repository too big to read whole keeps the list's skills, each installed
@@ -18,8 +18,8 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/tester";
 const mp = (id, installs) => ({ id: `mattpocock/skills/${id}`, name: id, source: "mattpocock/skills", skillId: id, installs, icon: "" });
 const items = [
-  { id: "magpie-community/plugins/magpie-quota", name: "magpie-quota", source: "magpie-community/plugins", skillId: "magpie-quota", installs: 0, official: true, featured: true, icon: "", description: "Check what is left of every subscription." },
-  { id: "magpie-community/plugins/magpie-setup", name: "magpie-setup", source: "magpie-community/plugins", skillId: "magpie-setup", installs: 0, official: true, featured: true, icon: "", description: "Set magpie up." },
+  { id: "magpie-community/plugins/magpie-quota", name: "eipgam-quota", source: "magpie-community/plugins", skillId: "eipgam-quota", installs: 0, official: true, featured: true, icon: "", description: "Check what is left of every subscription." },
+  { id: "magpie-community/plugins/magpie-setup", name: "eipgam-setup", source: "magpie-community/plugins", skillId: "eipgam-setup", installs: 0, official: true, featured: true, icon: "", description: "Set eipgam up." },
   mp("tdd", 3000),
   { id: "acme/skills/pdf", name: "pdf", source: "acme/skills", skillId: "pdf", installs: 1200, icon: "" },
   mp("grill-me", 2000),
@@ -51,7 +51,7 @@ function serve(lang, st) {
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     const library = () => ({
-      dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+      dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
       agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }],
       instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
     });
@@ -94,8 +94,8 @@ async function open(engine, lang, t, st) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, st));
-  await page.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
-  await page.goto("http://magpie.test/?view=library");
+  await page.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "skills"); } catch {} });
+  await page.goto("http://eipgam.test/?view=library");
   return { page, errors };
 }
 
@@ -111,7 +111,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const box = page.locator('#view-library .mk[data-market="skills"]');
       const repo = box.locator('.mk-card[data-id="repo:mattpocock/skills"]');
       await repo.waitFor();
-      // where its first skill came, after magpie's own two, before acme's
+      // where its first skill came, after eipgam's own two, before acme's
       assert.deepEqual(await box.locator(".mk-card").evaluateAll((cs) => cs.map((c) => c.dataset.id)),
         ["magpie-community/plugins/magpie-quota", "magpie-community/plugins/magpie-setup", "repo:mattpocock/skills", "acme/skills/pdf"]);
       assert.equal((await repo.locator(".mk-title").textContent()).trim(), "mattpocock/skills");

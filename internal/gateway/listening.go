@@ -8,15 +8,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
-// ListeningFile is the file in magpie's config folder where the process
+// ListeningFile is the file in eipgam's config folder where the process
 // serving the gateway writes where it listens and who it is, for a command
 // run in another shell to find it (ljlwlcz on X: a systemd service had
-// MAGPIE_ADDR=0.0.0.0:10100, and `magpie healthcheck` and `magpie update`
+// EIPGAM_ADDR=0.0.0.0:10100, and `eipgam healthcheck` and `eipgam update`
 // run without it looked at 3425), and for a watchdog to read, which can't
-// tell magpie.exe tray and magpie.exe mcp image apart by name.
+// tell eipgam.exe tray and eipgam.exe mcp image apart by name.
 const ListeningFile = "gateway.json"
 
 // Listening is what that file holds.
@@ -93,12 +93,12 @@ func loopbackURL(addr string) string {
 }
 
 // ClientURL is where a command run on this computer reaches the running
-// gateway. MAGPIE_ADDR, when the command has it, is the user's word.
+// gateway. EIPGAM_ADDR, when the command has it, is the user's word.
 // Without it, the address the running gateway wrote down (ListeningFile)
 // is used when that process answers there as itself; else URL, the port in
 // Settings. Only the gateway itself listens by URL; every client asks here.
 func ClientURL() string {
-	if os.Getenv("MAGPIE_ADDR") != "" {
+	if os.Getenv("EIPGAM_ADDR") != "" {
 		return URL()
 	}
 	if l, ok := ReadListening(); ok {

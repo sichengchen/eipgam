@@ -17,8 +17,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // The routings besides the default, smart, in order.
@@ -165,7 +165,7 @@ func SetCountFree(id string, on bool) error {
 }
 
 // SetKeepLogin keeps Codex or Claude Code signed in to the account the
-// user made first (Provider.KeepLogin), or lets magpie move it on again.
+// user made first (Provider.KeepLogin), or lets eipgam move it on again.
 // Either way it is no longer kept on one of the user's choosing
 // (KeepLoginAs): it is signed in to the first again.
 func SetKeepLogin(id string, keep bool) error {
@@ -174,7 +174,7 @@ func SetKeepLogin(id string, keep bool) error {
 		return err
 	}
 	if p.Account == nil || p.Account.Agent != p.ID || !slices.Contains(switchedAgents, p.ID) {
-		return fmt.Errorf("magpie doesn't sign %s in to another of its accounts", p.Name)
+		return fmt.Errorf("eipgam doesn't sign %s in to another of its accounts", p.Name)
 	}
 	if keep && p.SwitchOnly {
 		return errSwitchOnly(*p)
@@ -190,7 +190,7 @@ func SetKeepLogin(id string, keep bool) error {
 	return nil
 }
 
-// SetSwitchOnly has magpie only move Codex's or Claude Code's own sign-in
+// SetSwitchOnly has eipgam only move Codex's or Claude Code's own sign-in
 // between its accounts (Provider.SwitchOnly): Codex's requests never sent
 // through the gateway for account failover, Claude's accounts serving no
 // request through the gateway (KeptToAgent). Off, both are as before.
@@ -200,13 +200,13 @@ func SetSwitchOnly(id string, on bool) error {
 		return err
 	}
 	if p.Account == nil || p.Account.Agent != p.ID || p.ID != "codex" && p.ID != "claude" {
-		return fmt.Errorf("magpie doesn't route %s's own requests for account failover", p.Name)
+		return fmt.Errorf("eipgam doesn't route %s's own requests for account failover", p.Name)
 	}
 	p.SwitchOnly = on
 	return Save(*p)
 }
 
-// SetRestartApp has magpie restart the Codex app's app-server when it
+// SetRestartApp has eipgam restart the Codex app's app-server when it
 // changes Codex's account by itself, or leave the app on its account till
 // it is restarted (Provider.RestartApp).
 func SetRestartApp(id string, on bool) error {
@@ -215,19 +215,19 @@ func SetRestartApp(id string, on bool) error {
 		return err
 	}
 	if p.ID != "codex" || p.Account == nil || p.Account.Agent != p.ID {
-		return fmt.Errorf("magpie restarts no app of %s's", p.Name)
+		return fmt.Errorf("eipgam restarts no app of %s's", p.Name)
 	}
 	p.RestartApp = on
 	return Save(*p)
 }
 
 // CodexRestartsApp is codexRestartsApp, for the agent package: a change
-// of Codex's route magpie makes by itself restarts the Codex app's
+// of Codex's route eipgam makes by itself restarts the Codex app's
 // app-server (moving the chats it has open first, CodexBeforeAppEnd) only
 // when it says so.
 func CodexRestartsApp() bool { return codexRestartsApp() }
 
-// codexRestartsApp is whether the user had magpie restart the Codex app's
+// codexRestartsApp is whether the user had eipgam restart the Codex app's
 // app-server for a change it makes by itself (Provider.RestartApp). While
 // providers.json can't be read it is unknown, and the app is left be: a
 // restart missed is the user's to make, one made shows as a crash.
@@ -244,10 +244,10 @@ var codexRestartsApp = func() bool {
 	return false
 }
 
-// SwitchOnly reports whether magpie only moves agent's own sign-in between
+// SwitchOnly reports whether eipgam only moves agent's own sign-in between
 // its accounts, sending none of its requests through the gateway for
 // account failover (Provider.SwitchOnly). While providers.json can't be
-// read the user's choice is unknown, and failover, magpie's own idea, is
+// read the user's choice is unknown, and failover, eipgam's own idea, is
 // not taken up on it.
 func SwitchOnly(agent string) bool {
 	f, err := read()
@@ -301,7 +301,7 @@ var usedCache struct {
 }
 
 // firstWait is how long a request waits for an agent's allowances the
-// first time they are asked for, so the first requests after magpie
+// first time they are asked for, so the first requests after eipgam
 // starts are routed by them too; later ones never wait.
 var firstWait = 3 * time.Second
 
@@ -313,7 +313,7 @@ var unwaited atomic.Int32
 // model is there, not which account a request goes to. Every agent's model
 // list asks the gateway whether a model sees images, and the migrations at
 // start read Pi's effort, which builds its list: each agent's first ask
-// waited firstWait for its accounts' usage over the network, and magpie's
+// waited firstWait for its accounts' usage over the network, and eipgam's
 // gateway listened ~9 s after start.
 func Unwaited() (release func()) {
 	unwaited.Add(1)
@@ -1052,7 +1052,7 @@ func readAllowances(agent string) map[string]Allowance {
 
 // UsageRead is when user's allowance under agent was last read well, and
 // whether the last try to read it failed (or was held back); ok is false
-// when it hasn't been tried since magpie started. A careful provider holds
+// when it hasn't been tried since eipgam started. A careful provider holds
 // an account whose reading is too old or failed (Provider.CapCareful).
 func UsageRead(agent, user string) (at time.Time, failed, ok bool) {
 	c := &usedCache

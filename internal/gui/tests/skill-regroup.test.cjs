@@ -3,7 +3,7 @@
 // ago only 20 were grouped, the rest under On this computer, and nothing
 // to group them again by). The Skills head's ⋯ menu has Group again
 // (library-bar-more), which asks
-// magpie to trace the skills to their repositories once more and draws
+// eipgam to trace the skills to their repositories once more and draws
 // the page it answers with: the 18 join the 20, and the status says how
 // many did. While it works, the bar shows Grouping… in its place. Every language, at a narrow width too, in Chromium and WebKit;
 // the API is faked here.
@@ -16,7 +16,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/me";
 const agent = (id, name, icon) => ({ id, name, icon, skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
-// copies moved into the library: grouped by what magpie traced them to
+// copies moved into the library: grouped by what eipgam traced them to
 const copy = (repo) => (name) => ({ name, kind: "folder", source: `${HOME}/.claude/skills/${name}`, repo, description: "d", agents: ["claude"] });
 const NAMES = Array.from({ length: 38 }, (_, i) => "skill-" + String(i).padStart(2, "0"));
 
@@ -40,7 +40,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const w = L[lang];
           const state = {
             lib: {
-              dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+              dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
               agents: [agent("claude", "Claude Code", "claudecode-color")],
               instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], problems: [],
               skills: [...NAMES.slice(0, 20).map(copy("mattpocock/skills")), ...NAMES.slice(20).map(copy(""))],
@@ -74,14 +74,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           };
           const posts = [];
           const ctx = await browser.newContext({ viewport: { width, height: 760 }, reducedMotion: "reduce" });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "skills"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, state, posts));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const v = page.locator("#view-library");
           await v.locator(".lib-grouphead").first().waitFor();
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
 
           await b.click();
-          // busy on the bar while magpie fetches the repositories
+          // busy on the bar while eipgam fetches the repositories
           await page.waitForFunction(() => document.querySelector("#view-library .lib-skillshead .lib-regroup")?.disabled);
           assert.equal((await v.locator(".lib-skillshead .lib-regroup").textContent()).trim(), w.busy);
           state.answer();

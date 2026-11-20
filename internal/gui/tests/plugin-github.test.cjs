@@ -3,14 +3,14 @@
 //能否自动识别打了 magpie-plugin 的 github repo 来显示为非官方插件): Discover
 // shows them among the community's, by kind (Origin picks them alone),
 // each card saying Unreviewed, its owner and its stars. One whose package the market
-// already lists is the market's card alone. Install sends the spec magpie
+// already lists is the market's card alone. Install sends the spec eipgam
 // gave: the npm name of one its author published there from the
 // repository, else github:owner/repo; one installed by any spec naming the
 // repository reads Installed. Its page warns that nobody reviewed it and
 // says which of the two is installed, links GitHub (and npm when it is
 // npm's), shows the README and when the repository was last pushed. A
 // search finds them too. The repositories are /api/plugins/github's real
-// answer for four repositories (asked of a magpie built to search topic:opencode-plugin, as
+// answer for four repositories (asked of a eipgam built to search topic:opencode-plugin, as
 // none is tagged magpie-plugin yet); the API is faked here. English,
 // Chinese, Japanese and German, wide and 440px, nothing scrolls on a click.
 const assert = require("node:assert/strict");
@@ -67,7 +67,7 @@ function server(lang, asked) {
     if (url.pathname === "/api/open") { asked.push(["open", body()]); return route.fulfill({ status: 204 }); }
     if (url.pathname === "/api/icons/claude-auth.svg") return route.fulfill({ contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#d97757"/></svg>' });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") { asked.push(["fetched", url.href]); return route.fulfill({ status: 404, body: "" }); }
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "eipgam.test") { asked.push(["fetched", url.href]); return route.fulfill({ status: 404, body: "" }); }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -104,9 +104,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, asked));
-          await page.addInitScript(() => { try { localStorage.setItem("magpie.pluginTab", "discover"); } catch {} });
+          await page.addInitScript(() => { try { localStorage.setItem("eipgam.pluginTab", "discover"); } catch {} });
 
-          await page.goto("http://magpie.test/?view=plugins");
+          await page.goto("http://eipgam.test/?view=plugins");
           const view = page.locator("#view-plugins");
           await view.waitFor({ state: "visible" });
 
@@ -131,7 +131,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           const c = cards.filter({ hasText: "opencode-claude-auth" });
           assert.equal((await c.locator(".pm-by > span").first().innerText()).trim(), "griffinmartin");
-          // the picture its package.json gives (magpie.icon), as magpie keeps it; one that gives none, the puzzle
+          // the picture its package.json gives (magpie.icon), as eipgam keeps it; one that gives none, the puzzle
           assert.equal(await c.locator(".pm-logo img").getAttribute("src"), "/api/icons/claude-auth.svg");
           assert.equal(await cards.filter({ hasText: "agy-staff" }).locator(".pm-logo img").count(), 0);
           // a provider and a middleware part by hue (yetone: 中间件和供应商稍微有点区分吧)
@@ -156,7 +156,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           // its page: the warning, npm's and GitHub's links and the README,
           // when it was pushed
-          // a reader scrolls to a card (narrow, below the fold); magpie
+          // a reader scrolls to a card (narrow, below the fold); eipgam
           // undoes a scroll nobody asked for, so Playwright's own wouldn't do
           const reach = async (card) => {
             const box = await view.boundingBox();

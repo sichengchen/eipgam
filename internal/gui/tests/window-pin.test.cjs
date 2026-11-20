@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts, o));
-      await page.goto("http://magpie.test" + url);
+      await page.goto("http://eipgam.test" + url);
       await page.locator("#status").waitFor({ state: "attached" });
       const tr = (k) => page.evaluate((k) => t(k), k);
       t.after(() => assert.deepEqual(errors, []));
@@ -132,7 +132,7 @@ async function open0(engine, t, o, url) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server("en", [], o));
-  await page.goto("http://magpie.test" + url);
+  await page.goto("http://eipgam.test" + url);
   await page.locator("#status").waitFor({ state: "attached" });
   t.after(() => assert.deepEqual(errors, []));
   return { page };

@@ -3,15 +3,15 @@ package gateway
 import (
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Open Design Cloud's amr-link answers a request it, or the vendor behind
 // it, turns away with a 400 "[code=upstream_error]" and often no more than
 // "Provider returned error". Codex's compaction is the one request Codex
 // makes with no tools ("tools": [], codex-26.1007-compaction.json), and
-// magpie's summary ask for it adds the tool_choice and parallel_tool_calls
+// eipgam's summary ask for it adds the tool_choice and parallel_tool_calls
 // a relay of the ChatGPT backend checks for (#292): every model of the
 // plan answered that summary 400 upstream_error while the turns around it,
 // tools declared, went through (Mugenrikka on X). With no tools those two

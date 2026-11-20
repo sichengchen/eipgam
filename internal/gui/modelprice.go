@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // modelPriceJSON is a model's price from any provider (*/model), the one
-// `magpie model price '*/model'` sets: what the user said it costs, if
+// `eipgam model price '*/model'` sets: what the user said it costs, if
 // anything, and its maker's list price on models.dev, which is what the
 // sheet shows greyed while nothing is typed.
 type modelPriceJSON struct {

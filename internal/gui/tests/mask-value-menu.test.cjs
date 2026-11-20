@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, asked));
-        await page.goto("http://magpie.test/?view=masking");
+        await page.goto("http://eipgam.test/?view=masking");
         await page.locator("#maskList .msk-row").first().waitFor();
         await page.locator("#maskList .msk-row").first().click();
         const one = page.locator("#maskOne");
@@ -172,7 +172,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [], asked = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve("en", asked));
-    await page.goto("http://magpie.test/?view=masking");
+    await page.goto("http://eipgam.test/?view=masking");
     await page.locator("#maskList .msk-row").nth(1).waitFor();
     await page.locator("#maskList .msk-row").nth(1).click();
     const one = page.locator("#maskOne");

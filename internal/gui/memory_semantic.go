@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/memembed"
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/memembed"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 // keepEmbedding reads new memories for search by meaning while the

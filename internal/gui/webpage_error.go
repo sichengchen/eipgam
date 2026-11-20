@@ -4,7 +4,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 var (
@@ -12,8 +12,8 @@ var (
 	webPageTitle = lazyre.New(`(?is)<title[^>]*>(.*?)</title>`)
 )
 
-// webPageSaid is a proxy's own web page inside an error text of magpie's:
-// a request magpie made to a remote magpie or a vendor came back as
+// webPageSaid is a proxy's own web page inside an error text of eipgam's:
+// a request eipgam made to a remote eipgam or a vendor came back as
 // Cloudflare's 524 page, and the Gateway page showed "<!DOCTYPE html>
 // <!--[if lt IE 7]>…" (aiandcloud on X). It returns the text before the
 // page and the page's title, as one short line, and false for a text with

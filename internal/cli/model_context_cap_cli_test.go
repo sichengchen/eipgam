@@ -3,11 +3,11 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// magpie model context-cap 200k holds every model's window to 200K, off
+// eipgam model context-cap 200k holds every model's window to 200K, off
 // takes it away, and a value that is not a length is refused with the cap
 // as it was (WJaunita45604 on X).
 func TestModelContextCapCmd(t *testing.T) {

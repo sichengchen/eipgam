@@ -15,7 +15,7 @@ import (
 // NODE_EXTRA_CA_CERTS, which a HTTPS-inspecting tool such as dev-sidecar
 // tells its users to set. Go on macOS and Windows reads none of them, only
 // the system's store, so a root the user set there and not in the
-// keychain was refused by magpie while every other program took it.
+// keychain was refused by eipgam while every other program took it.
 var envCAFiles = []string{"SSL_CERT_FILE", "NODE_EXTRA_CA_CERTS"}
 var envCADirs = []string{"SSL_CERT_DIR"}
 

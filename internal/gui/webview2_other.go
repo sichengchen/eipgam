@@ -15,4 +15,4 @@ func webView2Check(*application.App) bool { return true }
 func webView2Prepare() {}
 
 // webView2Failed: Wails exits after this on every OS; say why.
-func webView2Failed(_ *application.App, err error) { log.Println("magpie:", err) }
+func webView2Failed(_ *application.App, err error) { log.Println("eipgam:", err) }

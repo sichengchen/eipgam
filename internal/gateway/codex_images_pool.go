@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // codexDrawsOnPool draws Codex's own images call (its image tool, sent to
 // the ChatGPT backend's /images/generations and /images/edits) on the
-// accounts the pool goes over, as the images API does, when magpie has
+// accounts the pool goes over, as the images API does, when eipgam has
 // more than the sign-in to ask. Relayed as it came, the call spent the
 // account Codex is signed in to whatever the pool's order said, and with
 // that account's image allowance used up, no image was drawn while the
@@ -19,7 +19,7 @@ import (
 // it goes to the first account that draws, past the ones whose allowance
 // is spent (drawOnAccounts), signed with that account's own token and id.
 // False leaves the call to the relay: an API key, a request signed by an
-// account magpie doesn't have, one named account, or a sign-in alone.
+// account eipgam doesn't have, one named account, or a sign-in alone.
 func (s *Server) codexDrawsOnPool(w http.ResponseWriter, r *http.Request, rest string, body []byte) bool {
 	if apiKey(r.Header) || r.Header.Get(AccountHeader) != "" {
 		return false

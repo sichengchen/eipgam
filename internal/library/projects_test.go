@@ -45,7 +45,7 @@ func gitInit(t *testing.T, dir string) {
 	write(t, filepath.Join(dir, ".git", "HEAD"), "ref: refs/heads/main\n")
 }
 
-// excluded is magpie's block in the repository's info/exclude for proj,
+// excluded is eipgam's block in the repository's info/exclude for proj,
 // and checks the project's own .gitignore is as the user wrote it.
 func excluded(t *testing.T, proj string) string {
 	t.Helper()
@@ -84,7 +84,7 @@ func TestProjectSkillsLinked(t *testing.T) {
 	}
 	ok(t)(ProjectSkill(proj, "pdf", []string{"codex"}))
 	gone(t, filepath.Join(proj, ".claude/skills/pdf"))
-	gone(t, filepath.Join(proj, ".claude")) // magpie made it, and it's empty
+	gone(t, filepath.Join(proj, ".claude")) // eipgam made it, and it's empty
 	if g := excluded(t, proj); strings.Contains(g, ".claude") || !strings.Contains(g, "/.agents/skills/pdf") {
 		t.Errorf("info/exclude:\n%s", g)
 	}
@@ -137,8 +137,8 @@ func TestProjectSkillsPickSome(t *testing.T) {
 	gone(t, filepath.Join(proj, ".agents/skills/docx"))
 }
 
-// Nothing of magpie's goes into the project's git (WhyULose0 on X): the
-// lines an earlier magpie wrote in its .gitignore come out, and what it
+// Nothing of eipgam's goes into the project's git (WhyULose0 on X): the
+// lines an earlier eipgam wrote in its .gitignore come out, and what it
 // places is listed in the repository's info/exclude, which git never
 // commits, git's and the user's lines there kept.
 func TestProjectKeptOutOfGitByExclude(t *testing.T) {
@@ -156,7 +156,7 @@ func TestProjectKeptOutOfGitByExclude(t *testing.T) {
 	}
 	gone(t, filepath.Join(proj, ".claude/skills/docx"))
 
-	// a .gitignore magpie made and nothing else is in goes
+	// a .gitignore eipgam made and nothing else is in goes
 	ok(t)(change(func(l *Library) error { l.project(proj).Gitignore = true; return nil }))
 	write(t, filepath.Join(proj, ".gitignore"), ignoreBegin+"\n/.claude/skills/pdf\n"+ignoreEnd+"\n")
 	ok(t)(ProjectSkill(proj, "docx", []string{"claude"}))
@@ -195,7 +195,7 @@ func TestProjectSkillsCopied(t *testing.T) {
 	ok(t)(ProjectSkill(proj, "pdf", []string{"claude"}))
 	p := filepath.Join(proj, ".claude/skills/pdf")
 	if isLink(t, p) || !ours(p, "pdf") {
-		t.Fatal("not magpie's copy")
+		t.Fatal("not eipgam's copy")
 	}
 	if s := read(t, filepath.Join(p, "scripts/run.sh")); s != "echo hi\n" {
 		t.Errorf("run.sh: %q", s)
@@ -247,7 +247,7 @@ func TestProjectRefusesForeignFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Problems) != 1 || r.Problems[0].Agent != proj || !strings.Contains(r.Problems[0].Error, "isn't magpie's") {
+	if len(r.Problems) != 1 || r.Problems[0].Agent != proj || !strings.Contains(r.Problems[0].Error, "isn't eipgam's") {
 		t.Fatalf("problems: %+v", r.Problems)
 	}
 	if !strings.Contains(read(t, filepath.Join(proj, ".claude/skills/pdf/SKILL.md")), "The project's own") {
@@ -259,7 +259,7 @@ func TestProjectRefusesForeignFolder(t *testing.T) {
 	if g := excluded(t, proj); strings.Contains(g, ".claude/skills/pdf") {
 		t.Errorf("the project's own is in info/exclude:\n%s", g)
 	}
-	// removing the project leaves the folder that isn't magpie's
+	// removing the project leaves the folder that isn't eipgam's
 	ok(t)(ProjectSkill(proj, "pdf", nil))
 	ok(t)(RemoveProject(proj, false))
 	if _, err := os.Stat(filepath.Join(proj, ".claude/skills/pdf/SKILL.md")); err != nil {
@@ -346,8 +346,8 @@ func TestRemoveSkillWhoseFolderIsGone(t *testing.T) {
 	}
 }
 
-// #3510: a project whose folder was deleted outside magpie comes off the
-// list when it's removed: there's nothing of magpie's on disk to take
+// #3510: a project whose folder was deleted outside eipgam comes off the
+// list when it's removed: there's nothing of eipgam's on disk to take
 // back, so the records of what it placed go with the entry, and the
 // removal says nothing failed. keep takes a gone project off the list as
 // it always did (#514).
@@ -386,7 +386,7 @@ func TestRemoveProjectWhoseFolderIsGone(t *testing.T) {
 }
 
 // A project folder that can't be looked at isn't known to be gone (#3510):
-// removing it without keep leaves its records of what magpie placed, so
+// removing it without keep leaves its records of what eipgam placed, so
 // they can still be taken back once the folder answers again.
 func TestRemoveProjectWhoseFolderCantBeRead(t *testing.T) {
 	if runtime.GOOS == "windows" || os.Geteuid() == 0 {

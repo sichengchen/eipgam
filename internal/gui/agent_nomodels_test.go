@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // Tystem on Discord: connecting Codex with no provider or subscription in
-// magpie answered "Codex can't be connected to magpie", untranslated. The
+// eipgam answered "Codex can't be connected to eipgam", untranslated. The
 // answer carries code no_models and the agent's name, which the GUI says
 // in the reader's language.
 func TestAgentConnectNoModels(t *testing.T) {
@@ -34,7 +34,7 @@ func TestAgentConnectNoModels(t *testing.T) {
 	}
 }
 
-// znuaibot (#1989): magpie has models, none left in the agent's lists. The
+// znuaibot (#1989): eipgam has models, none left in the agent's lists. The
 // answer carries code all_hidden and the agent's name, which the GUI says
 // in the reader's language, pointing at the agent's Model list.
 func TestAgentConnectAllHidden(t *testing.T) {

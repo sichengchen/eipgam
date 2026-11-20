@@ -29,7 +29,7 @@ const COMMAND_AGENTS = [
   { id: "gemini", dir: `${HOME}/.gemini/commands` },
 ];
 const lib = (commands) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("pi", "Pi"), agent("gemini", "Gemini CLI")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills: [], problems: [],
   hooks: [], hookAgents: [], subagents: [], subagentAgents: [], commands, commandAgents: COMMAND_AGENTS,
@@ -48,7 +48,7 @@ const CANDIDATES = [
   cand("ship", "Ship it", { gemini: `${HOME}/.gemini/commands/ship.toml` }, { state: "same" }),
   cand("wr", "Finish the current task end-to-end with changelog, commit, and push", { pi: pi("wr") }, { state: "taken" }),
 ];
-const LEFT = [{ path: `${HOME}/.claude/commands/Fix.md`, error: "magpie names a command with lowercase letters, digits, - and _ only" }];
+const LEFT = [{ path: `${HOME}/.claude/commands/Fix.md`, error: "eipgam names a command with lowercase letters, digits, - and _ only" }];
 
 let I18N;
 function tr(lang, key, vars = {}) {
@@ -89,7 +89,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -136,14 +136,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           ] };
           const posts = [], errors = [];
           const ctx = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "commands"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "commands"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
           await page.route("**/*", server(lang, state, posts));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const v = page.locator("#view-library");
           const card = v.locator(".lib-cmdfind");

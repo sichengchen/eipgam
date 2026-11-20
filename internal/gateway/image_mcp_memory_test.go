@@ -12,11 +12,11 @@ import (
 // Images the image MCP server draws are kept for an hour so a link can
 // download them. Kept in memory, five 12 MB drawings were 60 MB of the
 // process's heap until an hour later or the next drawing (tnt12231 on X:
-// magpie's memory at 1 GB+ while drawing). They are kept on disk, and the
+// eipgam's memory at 1 GB+ while drawing). They are kept on disk, and the
 // reply they came in is let go.
 func TestImageMCPKeepsDrawingsOffTheHeap(t *testing.T) {
 	s, _ := easeled(t)
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	heap := func() uint64 {
 		var m runtime.MemStats
 		runtime.GC()

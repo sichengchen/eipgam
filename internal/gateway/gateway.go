@@ -27,30 +27,30 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/awake"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexrelay"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/gwbudget"
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/redact"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/awake"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexrelay"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/gwbudget"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/gwtool"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/redact"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // DefaultAddr is where the gateway listens unless Settings' port or
-// MAGPIE_ADDR says otherwise.
+// EIPGAM_ADDR says otherwise.
 const DefaultAddr = "127.0.0.1:3425"
 
 // Token is the bearer token agents are told to use. The gateway only
 // listens on loopback and accepts anything, but agents insist on one.
-const Token = "magpie"
+const Token = "eipgam"
 
 // TokenFor is the token an agent that says nothing of itself in its
 // User-Agent is told to use, so the gateway still knows it: Alma's requests
@@ -78,7 +78,7 @@ func agentOf(r *http.Request) string {
 		// cursor-agent talks to Cursor's backend alone, never to a
 		// gateway: a Cursor User-Agent here is Cursor Private Inference's
 		// ("Cursor-CLI/…") sent with a key other than its own, the one
-		// typed in its Open configuration or a model's settings ("magpie"),
+		// typed in its Open configuration or a model's settings ("eipgam"),
 		// and it is shown its models as with its key (mamba on Discord)
 		return "cursor-local"
 	}
@@ -133,9 +133,9 @@ func codexRuns(r *http.Request) bool {
 	return fromCodex(r.Header) || agentOf(r) == "codex" || codexTurnHeaders(r.Header)
 }
 
-// startedByAgent says whether a request is from no agent magpie knows but
+// startedByAgent says whether a request is from no agent eipgam knows but
 // from something an agent started with its environment (a hook's script): it
-// came with the plain gateway token, not one magpie gave an agent, and
+// came with the plain gateway token, not one eipgam gave an agent, and
 // its User-Agent names no agent.
 func startedByAgent(r *http.Request, agent string) bool {
 	if pathAgent(r) != "" {
@@ -148,13 +148,13 @@ func startedByAgent(r *http.Request, agent string) bool {
 }
 
 // StandIn is the model an agent is set to use in place of one it named that
-// magpie doesn't serve it: Claude Code asks for claude-haiku-… by name for
+// eipgam doesn't serve it: Claude Code asks for claude-haiku-… by name for
 // its small tasks, whatever its haiku tier is set to, and that goes to the
 // tier's model rather than to some provider that happens to list the name.
 // "" leaves the model as asked. Set by main.
 var StandIn func(agent, model string) string
 
-// SetToGroup reports whether magpie set one of agent's fields to the
+// SetToGroup reports whether eipgam set one of agent's fields to the
 // routing group gid ("group/<id>"): the user picked that found group for
 // the agent, so a bare model's name it asks for by (#750) stays on the
 // group rather than going to the agent's own subscription (ownFirst). Set
@@ -162,11 +162,11 @@ var StandIn func(agent, model string) string
 var SetToGroup func(agent, gid string) bool
 
 // ownFirst is where a bare model's id agent asks for goes when the agent's
-// own subscription in magpie serves it (provider.OwnRoute; freefcw on X:
-// Codex's gpt-6-astra went to Devin through the group magpie found, and
+// own subscription in eipgam serves it (provider.OwnRoute; freefcw on X:
+// Codex's gpt-6-astra went to Devin through the group eipgam found, and
 // with found groups off to the first provider in the order). ok is false
 // for a key held to some models, whose own rules pick, and for a found
-// group magpie set the agent to.
+// group eipgam set the agent to.
 func ownFirst(r *http.Request, agent, m string) (string, bool) {
 	if _, held := keyHolds(r); held {
 		return "", false
@@ -184,7 +184,7 @@ func ownFirst(r *http.Request, agent, m string) (string, bool) {
 // offSpreadRefused is the error for a bare model's id several providers
 // serve, none the agent's own, while found groups are off (provider.OffSpread).
 func offSpreadRefused(model string, ids []string) string {
-	return fmt.Sprintf("%q is served by %s in Magpie and auto groups are off, so Magpie picks none of them: ask for one by its provider/model id, or turn auto groups on (magpie group auto on)", model, strings.Join(ids, ", "))
+	return fmt.Sprintf("%q is served by %s in eipgam and auto groups are off, so eipgam picks none of them: ask for one by its provider/model id, or turn auto groups on (eipgam group auto on)", model, strings.Join(ids, ", "))
 }
 
 // wiresKey carries the upstream names in force on a request's context: read
@@ -205,7 +205,7 @@ func withWires(r *http.Request) *http.Request {
 }
 
 // wiresOf is the names in force for ctx: the ones withWires read, or the
-// ones in force now for a request magpie made for itself and never carried
+// ones in force now for a request eipgam made for itself and never carried
 // them on.
 func wiresOf(ctx context.Context) map[string]string {
 	if load, ok := ctx.Value(wiresKey{}).(func() map[string]string); ok {
@@ -219,13 +219,13 @@ func wiresOf(ctx context.Context) map[string]string {
 const (
 	movedClassifier  = "classifier"   // Claude Code's auto mode classifier: the model /model moved its tier to
 	movedClaudeTier  = "claude-tier"  // Claude Code's full id of a Claude model: the model set for its tier
-	movedStandIn     = "stand-in"     // a model magpie doesn't serve: the one the agent's config names
+	movedStandIn     = "stand-in"     // a model eipgam doesn't serve: the one the agent's config names
 	movedCodexTurn   = "codex-turn"   // Codex's memory or auto-review call: its last turn's model
-	movedCodexFollow = "codex-follow" // Codex's memory call on a bare default of its own magpie serves, nothing set for it: the conversation's model
+	movedCodexFollow = "codex-follow" // Codex's memory call on a bare default of its own eipgam serves, nothing set for it: the conversation's model
 	movedPrivacy     = "privacy"      // a request masking would change: Settings › Privacy's model for it
 )
 
-// standIn is StandIn's model for one magpie shows no entry for: not a
+// standIn is StandIn's model for one eipgam shows no entry for: not a
 // catalog id or model, nor a ready provider's "provider/model".
 func standIn(agent, asked string) string {
 	if StandIn == nil || !unserved(asked) {
@@ -241,29 +241,29 @@ func standIn(agent, asked string) string {
 // claudeFamily is a full id of one of the model families Claude Code has a
 // tier for, as Claude Code or a wrapper of it names one: claude-sonnet-4-6,
 // claude-fable-5-1, claude-haiku-4-5-20251001, claude-3-5-sonnet-20241022,
-// whatever the version, matched by family so a release magpie has never
+// whatever the version, matched by family so a release eipgam has never
 // heard of is one too. A provider's "a/claude-…" is not one.
 var claudeFamily = lazyre.New(`^claude-(?:[0-9][0-9.-]*-)?(?:opus|sonnet|haiku|fable)(?:[-.@:]|$)`)
 
 // claudeTierStandIn is the model Claude Code is set to use for the tier of
-// a full Claude id it names (StandIn), even one magpie serves: Claude Code
+// a full Claude id it names (StandIn), even one eipgam serves: Claude Code
 // asks for claude-haiku-… by name for its small tasks, and a wrapper (T3
 // Code, KevinXC on Discord) asks for every model by its full id, so
-// claude-sonnet-5 went to the Claude account magpie serves it on, spent,
+// claude-sonnet-5 went to the Claude account eipgam serves it on, spent,
 // while claude-sonnet-4-6, which no provider of the user's listed, went to
 // the sonnet tier. Every id of a family now goes to its tier, as Claude
 // Code's own aliases do. A routing group of the user's own named by the id
-// still has it; one magpie found (auto-…) was never picked for it. "" when
+// still has it; one eipgam found (auto-…) was never picked for it. "" when
 // the id is no such one, the agent isn't Claude Code, or Claude Code isn't
-// routed through magpie (StandIn says nothing).
+// routed through eipgam (StandIn says nothing).
 //
-// A client magpie doesn't know as an agent (Python-urllib, an Anthropic SDK)
-// naming such an id that magpie doesn't serve is taken for one Claude Code
+// A client eipgam doesn't know as an agent (Python-urllib, an Anthropic SDK)
+// naming such an id that eipgam doesn't serve is taken for one Claude Code
 // started: a hook, statusline or plugin script inherits Claude Code's
 // ANTHROPIC_BASE_URL and token, and asks for claude-sonnet-4-6 by name,
 // which went nowhere, a 404 (tbxark on X). It gets Claude Code's tier too.
 // An id the user does serve (a Claude account, an Anthropic key) goes
-// where it is served, and an agent magpie knows keeps its own models.
+// where it is served, and an agent eipgam knows keeps its own models.
 func claudeTierStandIn(r *http.Request, agent, asked string) string {
 	if StandIn == nil || !claudeFamily.MatchString(strings.ToLower(strings.TrimSuffix(asked, "[1m]"))) {
 		return ""
@@ -284,7 +284,7 @@ func claudeTierStandIn(r *http.Request, agent, asked string) string {
 	return m
 }
 
-// unserved: magpie shows no entry for the model — not a catalog id or
+// unserved: eipgam shows no entry for the model — not a catalog id or
 // model, nor the "provider/model" of a provider that is on (a routing
 // group's id is taken as served). A switched-off provider's is unserved: a
 // session that started before it was switched off still asks for the model
@@ -325,28 +325,28 @@ func namesInCatalog() map[string]bool {
 }
 
 // switchedOff says a request for model went nowhere because p, which
-// serves it, is switched off in magpie (provider.Provider.Off), or kept to
+// serves it, is switched off in eipgam (provider.Provider.Off), or kept to
 // Claude Code's own sign-in (provider.Provider.KeptToAgent), or a Remote
-// magpie that is this one (provider.Provider.SelfLeftOut).
+// eipgam that is this one (provider.Provider.SelfLeftOut).
 func switchedOff(p provider.Provider, model string) string {
 	if p.SelfLeftOut() && !p.Off {
-		return fmt.Sprintf("%s is a Remote magpie that is this magpie itself, so %q is not served through it; ask for the model without %q in front, or tick \"Use it anyway\" on it in Magpie's Providers", p.Name, model, p.ID+"/")
+		return fmt.Sprintf("%s is a Remote eipgam that is this eipgam itself, so %q is not served through it; ask for the model without %q in front, or tick \"Use it anyway\" on it in eipgam's Providers", p.Name, model, p.ID+"/")
 	}
 	if p.KeptToAgent() {
-		return fmt.Sprintf("%s's accounts are kept to Claude Code's own sign-in in Magpie, so %q is not served; untick \"Only switch Claude Code's sign-in\" under its accounts in Magpie's Providers to use it", p.Name, model)
+		return fmt.Sprintf("%s's accounts are kept to Claude Code's own sign-in in eipgam, so %q is not served; untick \"Only switch Claude Code's sign-in\" under its accounts in eipgam's Providers to use it", p.Name, model)
 	}
-	return fmt.Sprintf("%s is switched off in Magpie, so %q is not served; switch it on again in Magpie's Providers to use it", p.Name, model)
+	return fmt.Sprintf("%s is switched off in eipgam, so %q is not served; switch it on again in eipgam's Providers to use it", p.Name, model)
 }
 
 // Version is set by main.
 var Version = "dev"
 
-// Addr is the listen address: MAGPIE_ADDR, else Settings' port on
+// Addr is the listen address: EIPGAM_ADDR, else Settings' port on
 // loopback (settings.GatewayAddr).
 func Addr() string { return settings.GatewayAddr() }
 
-// SavedURL is URL by Settings alone, MAGPIE_ADDR left aside: where the
-// installed magpie, whose settings these are, is reached.
+// SavedURL is URL by Settings alone, EIPGAM_ADDR left aside: where the
+// installed eipgam, whose settings these are, is reached.
 func SavedURL() string { return "http://" + settings.SavedAddr() }
 
 // URL is the base URL agents use, e.g. http://127.0.0.1:3425: a gateway
@@ -360,12 +360,12 @@ func URL() string {
 }
 
 // Window says this process shows the routing of the gateway it serves:
-// the app's window (a tray's too, when opened) or magpie web's page, and
-// not magpie serve, which has none. Set by the gui.
+// the app's window (a tray's too, when opened) or eipgam web's page, and
+// not eipgam serve, which has none. Set by the gui.
 var Window bool
 
 // Serves says how this process was started (app, tray, web, serve or tui):
-// the Routing page of another magpie on this computer, which shows this
+// the Routing page of another eipgam on this computer, which shows this
 // one's routing, names it (#2606). Set by the cli.
 var Serves = "app"
 
@@ -375,33 +375,33 @@ func Running() bool {
 	return running
 }
 
-// Serving asks the address what answers there: whether a magpie gateway
-// does, and whether the magpie serving it has a window its routing can be
+// Serving asks the address what answers there: whether a eipgam gateway
+// does, and whether the eipgam serving it has a window its routing can be
 // watched in (#110).
 func Serving() (running, window bool) {
 	s := ServedBy()
 	return s.Running, s.Window
 }
 
-// Served is what the magpie answering at the gateway's address says of
+// Served is what the eipgam answering at the gateway's address says of
 // itself.
 type Served struct {
-	Running bool   // a magpie gateway answers
+	Running bool   // a eipgam gateway answers
 	Window  bool   // its routing can be watched in its window (#110)
 	Version string // its version; "" from one that doesn't say
 	Pid     int    // its process id; 0 from one that doesn't say
 	Serves  string // how it was started: app, tray, web, serve or tui; "" from one that doesn't say
 }
 
-// ServedBy asks the address which magpie answers there. Another magpie can
-// keep the port after this one is updated (a magpie serve left running, a
+// ServedBy asks the address which eipgam answers there. Another eipgam can
+// keep the port after this one is updated (a eipgam serve left running, a
 // second copy, one that didn't quit), and every agent's request is then
 // still that one's to send: in #506 a Factory 403 came worded as v0.1.550
-// and earlier word it to two people whose magpie said v0.1.630, so none of
+// and earlier word it to two people whose eipgam said v0.1.630, so none of
 // the fixes since reached their requests. Its version tells it apart.
 func ServedBy() Served { return ServedAt(URL()) }
 
-// servedAt is ServedBy for the magpie at base.
+// servedAt is ServedBy for the eipgam at base.
 func ServedAt(base string) Served {
 	c := &http.Client{Timeout: 700 * time.Millisecond}
 	res, err := c.Get(base + "/")
@@ -417,20 +417,20 @@ func ServedAt(base string) Served {
 		Pid     int    `json:"pid"`
 		Serves  string `json:"serves"`
 	}
-	if decodeJSON(b, &info) != nil || info.Name != "magpie" {
-		return Served{Running: bodyHas(b, `"magpie"`), Window: bodyHas(b, `"window":true`)}
+	if decodeJSON(b, &info) != nil || info.Name != "eipgam" {
+		return Served{Running: bodyHas(b, `"eipgam"`), Window: bodyHas(b, `"window":true`)}
 	}
 	return Served{Running: true, Window: info.Window, Version: info.Version, Pid: info.Pid, Serves: info.Serves}
 }
 
-// ServedBusy is what the magpie serving the gateway has in flight, as its
-// /v1/magpie/concurrency tells it: agent requests (those waiting for a
+// ServedBusy is what the eipgam serving the gateway has in flight, as its
+// /v1/eipgam/concurrency tells it: agent requests (those waiting for a
 // slot among them) and Claude Code turns waiting on their caller's tools.
-// ok is false when it doesn't say (a magpie from before 3b6ca0557, a
+// ok is false when it doesn't say (a eipgam from before 3b6ca0557, a
 // refusal, no answer in time): unknown, which is never idle.
 func ServedBusy() (n int, ok bool) {
 	c := &http.Client{Timeout: 700 * time.Millisecond}
-	res, err := c.Get(URL() + "/v1/magpie/concurrency")
+	res, err := c.Get(URL() + "/v1/eipgam/concurrency")
 	if err != nil {
 		return 0, false
 	}
@@ -460,7 +460,7 @@ func ServedBusy() (n int, ok bool) {
 
 // Taken reports whether anything accepts connections at the gateway's
 // address, whether or not it answers ServedBy's question in time: a
-// magpie busy starting, or slow on a small server, still holds the port.
+// eipgam busy starting, or slow on a small server, still holds the port.
 func Taken() bool {
 	c, err := net.DialTimeout("tcp", strings.TrimPrefix(URL(), "http://"), 500*time.Millisecond)
 	if err != nil {
@@ -480,11 +480,11 @@ type Call struct {
 	Route int64     `json:"route,omitempty"`
 	Time  time.Time `json:"time"`
 	Agent string    `json:"agent"`         // who called, from the client's User-Agent
-	Via   string    `json:"via,omitempty"` // the computer a remote magpie's request came from (AgentHeader)
+	Via   string    `json:"via,omitempty"` // the computer a remote eipgam's request came from (AgentHeader)
 	// Kind: what the agent made the call for, when it isn't its turn —
 	// a Codex subagent's (callKind) — "" for a turn
 	Kind string `json:"kind,omitempty"`
-	// For: the request a call of magpie's own (a web search) was made for
+	// For: the request a call of eipgam's own (a web search) was made for
 	For *CallFor `json:"for,omitempty"`
 	// Masked: what masking swapped in it, nil for nothing
 	Masked   *Masked           `json:"masked,omitempty"`
@@ -556,7 +556,7 @@ type Server struct {
 	sessionsSaved   chan struct{} // closed after the predecessor has persisted its Claude sessions
 	// imageStore is the image MCP server's jobs and images (image_mcp.go)
 	imageStore imageMCPStore
-	// browser is the Magpie Browser extensions connected (browser.go)
+	// browser is the eipgam Browser extensions connected (browser.go)
 	browser      browserRelay
 	debug        bool
 	trace        trace // what routing did with each request, for the Gateway view
@@ -590,10 +590,10 @@ type Server struct {
 	// front is Front's handler, built once
 	frontOnce sync.Once
 	front     http.Handler
-	// handedOff: another magpie serves the port now, and this one's end
+	// handedOff: another eipgam serves the port now, and this one's end
 	// waits for its requests in flight to finish (handover.go)
 	handedOff atomic.Bool
-	// notAccepting: this one let its listener go, for the magpie serving
+	// notAccepting: this one let its listener go, for the eipgam serving
 	// the port after it to take every connection (stopAccepting); its
 	// Serve ending then waits for the drain
 	notAccepting atomic.Bool
@@ -665,7 +665,7 @@ func New() *Server {
 		unfit:         make(map[string]bool),
 		subscription:  newSubscriptionBridge(),
 		sessionsSaved: make(chan struct{}),
-		debug:         os.Getenv("MAGPIE_DEBUG") != "",
+		debug:         os.Getenv("EIPGAM_DEBUG") != "",
 		sightFile:     sightsPath(),
 	}
 	s.loadSights()
@@ -807,14 +807,14 @@ func keepRecent(ring []Call, c Call) []Call {
 	return append(ring, c)
 }
 
-// WhileServing is work only the magpie serving the gateway does, begun
+// WhileServing is work only the eipgam serving the gateway does, begun
 // once it is bound and ended with it: one of the magpies running, never
 // two at once.
 var WhileServing []func(context.Context)
 
 // ListenAndServe runs the gateway until ctx ends, and returns once the
 // requests in flight then have finished: within 2s, or, handing over, as
-// long as a stream takes. A bind error means another magpie is already
+// long as a stream takes. A bind error means another eipgam is already
 // serving, which is fine for the caller to ignore.
 func (s *Server) ListenAndServe(ctx context.Context) error {
 	migrateLANKeyBestEffort()
@@ -826,7 +826,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	s.lnMu.Lock()
 	s.tls = cfg
 	s.lnMu.Unlock()
-	// the Codex relay a magpie quitting left at the port (codexrelay)
+	// the Codex relay a eipgam quitting left at the port (codexrelay)
 	// lets go of it, finishing the turns it streams
 	if !Handover && !Inherited() {
 		codexrelay.Leave()
@@ -847,17 +847,17 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	s.lnMu.Unlock()
 	recordListening(ln.Addr())
 	defer forgetListening()
-	// the keys out of credit a magpie before this one rested go on
+	// the keys out of credit a eipgam before this one rested go on
 	// resting, and climb on from their rung (rest_store.go)
 	loadRests()
-	// a socket handed over (handover.go): the magpie that had it stops
+	// a socket handed over (handover.go): the eipgam that had it stops
 	// accepting once told this one serves on it
 	if ack := takeAck(); ack != nil {
 		go ack()
 	}
 	// the observers plugins registered (usage.Observer) run while this
 	// process serves, and plugins turned on or off elsewhere (the window,
-	// `magpie plugin builtin`) come and go here too
+	// `eipgam plugin builtin`) come and go here too
 	stopObservers := usage.ServeObservers()
 	defer stopObservers()
 	// and the user's own routing groups are served while plugins/groups is
@@ -869,7 +869,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		}
 	})
 	defer stopGroups()
-	// and magpie's own tools (its web search) are offered and answered
+	// and eipgam's own tools (its web search) are offered and answered
 	// while the plugin serving each is on (gwtool)
 	stopTools := gwtool.Gate()
 	defer stopTools()
@@ -903,7 +903,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	go func() { defer close(pruned); keepHubPruned(freshCtx) }()
 	defer func() { stopFresh(); <-pruned }()
 	srv := &http.Server{Handler: s.closesWhenHandedOff(s.Front()), ReadHeaderTimeout: 30 * time.Second, IdleTimeout: 5 * time.Minute, ConnState: s.unread.note}
-	// the magpie serving the gateway, and only it, keeps the saved accounts
+	// the eipgam serving the gateway, and only it, keeps the saved accounts
 	// signed in, so two never refresh one sign-in at once
 	go provider.KeepLoginsAlive(ctx)
 	// and tells the request hooks of an account to sign in again
@@ -911,7 +911,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	// and signs Codex and Claude Code in to their next account when the
 	// one they are on is spent
 	go provider.KeepOnAnAccountWithRoom(ctx)
-	// and has the Codex app read its provider again as magpie becomes it
+	// and has the Codex app read its provider again as eipgam becomes it
 	// for a used-up ChatGPT account, and after (its Send greys otherwise)
 	go provider.KeepCodexAppOnItsProvider(ctx, s.CodexBusy)
 	// and, when settings say to, starts its accounts' next windows as the last reset
@@ -920,19 +920,19 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	// and spends a Codex reset about to run out unused, for the accounts
 	// that let it
 	go provider.KeepResetsFromRunningOut(ctx)
-	// and counts the calls the plugins' accounts made outside magpie
+	// and counts the calls the plugins' accounts made outside eipgam
 	// (Cursor's editor and cursor-agent) on the Usage page
 	go usage.KeepOutsideCallsRead(ctx)
 	// and moves the built-in subscriptions being retired onto their plugins
 	go provider.KeepRetiringMoved(ctx)
-	go provider.KeepPluginsListed(ctx) // models a plugin's vendor drops or adds, while magpie runs
+	go provider.KeepPluginsListed(ctx) // models a plugin's vendor drops or adds, while eipgam runs
 	// and renews the plugins' sign-ins as they come due, used or not (#5080)
 	go provider.KeepPluginsSignedIn(ctx)
 	// and those a signed-in account's vendor adds (a ChatGPT plan's new GPT)
 	go provider.KeepAccountsListed(ctx)
 	// and fetches the lists of the providers the user asked to keep fresh (#2135)
 	go provider.KeepListsFresh(ctx)
-	// and follows a Remote magpie's list as it changes there (KaCli)
+	// and follows a Remote eipgam's list as it changes there (KaCli)
 	go provider.KeepRemoteListsFollowed(ctx)
 	// and keeps the community's plugins up to date, noting others' updates, and the Bun they run on
 	go plugin.KeepUpdated(ctx)
@@ -966,7 +966,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		c, cancel := context.WithTimeout(context.Background(), s.drainFor())
 		defer cancel()
 		if s.handingOver() {
-			// another magpie takes every connection from here: this one
+			// another eipgam takes every connection from here: this one
 			// stops taking them, and each one it took, new or kept alive,
 			// has its next request read before Shutdown, which closes one
 			// it reads after it began unanswered (#3568, #3451)
@@ -996,7 +996,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		s.subscription.abortAll()
 		close(s.sessionsSaved)
 		provider.FlushServed() // what answered last, kept for the next start and the CLI
-		flushSticks()          // who answered which conversation, for the next start or the magpie handed over to
+		flushSticks()          // who answered which conversation, for the next start or the eipgam handed over to
 		// the MCP servers the hub started end with the gateway
 		StopHub()
 	}()
@@ -1046,7 +1046,7 @@ func (s *Server) routes() *routeMux {
 	// Claude Desktop's third-party gateway looks for one here before it
 	// takes the address
 	mux.HandleFunc("GET /api/hello", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, map[string]any{"name": "magpie", "version": Version})
+		writeJSON(w, 200, map[string]any{"name": "eipgam", "version": Version})
 	})
 	// the Ollama API's model routes, for a client that takes a custom
 	// endpoint only as an Ollama server (ollama.go)
@@ -1057,25 +1057,25 @@ func (s *Server) routes() *routeMux {
 	// (Zed's Ollama provider; ollama_chat.go)
 	mux.HandleFunc("POST /api/chat", s.ollamaChat(false))
 	mux.HandleFunc("POST /api/generate", s.ollamaChat(true))
-	mux.HandleFunc("GET /v1/magpie/quotas", s.quotas)
-	mux.HandleFunc("GET /v1/magpie/usage", s.usageSummary)
-	mux.HandleFunc("GET /v1/magpie/usage/requests", s.usageRequests)
-	mux.HandleFunc("POST /v1/magpie/usage/requests", s.usageIngest)
-	mux.HandleFunc("GET /v1/magpie/quotas/history", s.quotasHistory)
+	mux.HandleFunc("GET /v1/eipgam/quotas", s.quotas)
+	mux.HandleFunc("GET /v1/eipgam/usage", s.usageSummary)
+	mux.HandleFunc("GET /v1/eipgam/usage/requests", s.usageRequests)
+	mux.HandleFunc("POST /v1/eipgam/usage/requests", s.usageIngest)
+	mux.HandleFunc("GET /v1/eipgam/quotas/history", s.quotasHistory)
 	mux.HandleFunc("GET "+provider.RemoteCardsPath, s.quotaCards)
 	mux.HandleFunc("GET "+provider.RemoteLibraryPath, s.sharedLibrary)
 	mux.HandleFunc("GET "+provider.RemoteAgentModelsPath, s.sharedAgentModels)
 	mux.HandleFunc("POST "+provider.RemoteRefreshPath, s.quotaCardsRefresh)
 	mux.HandleFunc("POST "+provider.RemoteCodexResetPath, s.codexReset)
-	mux.HandleFunc("GET /v1/magpie/route", s.sessionRoute)
+	mux.HandleFunc("GET /v1/eipgam/route", s.sessionRoute)
 	mux.HandleFunc("GET "+StatuslinePath, s.statusline)
 	mux.HandleFunc("POST "+StatuslinePath, s.statusline)
-	mux.HandleFunc("GET /v1/magpie/trace", s.gatewayTrace)
+	mux.HandleFunc("GET /v1/eipgam/trace", s.gatewayTrace)
 	mux.HandleFunc("GET "+routeSnapshotPath, s.routeSnapshot)
 	mux.HandleFunc("GET "+routeEventsPath, s.routeEvents)
-	mux.HandleFunc("GET /v1/magpie/concurrency", s.concurrency)
-	mux.HandleFunc("GET /v1/magpie/limit", s.keyLimit)
-	// the management API, for a key that may manage magpie (admin.go)
+	mux.HandleFunc("GET /v1/eipgam/concurrency", s.concurrency)
+	mux.HandleFunc("GET /v1/eipgam/limit", s.keyLimit)
+	// the management API, for a key that may manage eipgam (admin.go)
 	mux.HandleFunc(AdminPath, s.admin)
 	mux.HandleFunc("GET "+OwnMCPPath, s.ownMCPList)
 	// short-lived keys, issued by a key let issue them or from loopback
@@ -1086,12 +1086,12 @@ func (s *Server) routes() *routeMux {
 	// and one traded for an OIDC token, by a rule the user wrote
 	// (oidc_keys.go)
 	mux.HandleFunc("POST "+OIDCKeysPath, s.oidcIssueKey)
-	// a magpie's proof that it holds a gateway key, asked with no key by
-	// another magpie looking for it at a new address (remote_prove.go)
+	// a eipgam's proof that it holds a gateway key, asked with no key by
+	// another eipgam looking for it at a new address (remote_prove.go)
 	mux.HandleFunc("POST "+provider.RemoteProvePath, s.prove)
 	mux.HandleFunc("GET "+KeyPagePath, s.keyPage)
 	// DeepSeek's chat page (deepseek-ai/chat-demo), served with any of
-	// magpie's models, its search and link reading magpie's (chatpage.go)
+	// eipgam's models, its search and link reading eipgam's (chatpage.go)
 	mux.HandleFunc("GET "+ChatPagePath, s.chatPage)
 	mux.HandleFunc("GET "+ChatPagePath+"/{path...}", s.chatPage)
 	mux.HandleFunc("GET "+ChatPagePath+"/models", s.chatPageModels)
@@ -1107,23 +1107,23 @@ func (s *Server) routes() *routeMux {
 	mux.HandleFunc("GET "+JoinPagePath, s.joinPage)
 	mux.HandleFunc("GET "+joinData, s.joinOpen)
 	mux.HandleFunc("POST "+joinData, s.joinKey)
-	// the Claude Code processes the Claude subscription runs, for magpie
+	// the Claude Code processes the Claude subscription runs, for eipgam
 	// claude-code runs (loopback only)
 	mux.HandleFunc("GET "+ClaudeRunsPath, s.claudeRuns)
-	// a heap profile of this process, for magpie heap (loopback only)
+	// a heap profile of this process, for eipgam heap (loopback only)
 	mux.HandleFunc("GET "+HeapPath, s.heapProfile)
-	// a CPU profile of this process over some seconds, for magpie cpu
+	// a CPU profile of this process over some seconds, for eipgam cpu
 	// (loopback only)
 	mux.HandleFunc("GET "+CPUPath, s.cpuProfile)
-	// every goroutine's stack and wait, for magpie goroutines (loopback
+	// every goroutine's stack and wait, for eipgam goroutines (loopback
 	// only)
 	mux.HandleFunc("GET "+GoroutinesPath, s.goroutineDump)
-	// a restart into the version magpie update put in (loopback only)
+	// a restart into the version eipgam update put in (loopback only)
 	mux.HandleFunc("POST "+RestartPath, s.restartToUpdate)
-	// an update another magpie using this one asks for (a full-access key)
+	// an update another eipgam using this one asks for (a full-access key)
 	mux.HandleFunc("POST "+provider.RemoteUpdatePath, s.remoteUpdate)
-	mux.HandleFunc("GET /v1/magpie/omarchy", s.omarchyTheme)
-	mux.HandleFunc("OPTIONS /v1/magpie/omarchy", s.omarchyTheme)
+	mux.HandleFunc("GET /v1/eipgam/omarchy", s.omarchyTheme)
+	mux.HandleFunc("OPTIONS /v1/eipgam/omarchy", s.omarchyTheme)
 	mux.HandleFunc("POST /v1/chat/completions", s.handle(provider.Chat))
 	mux.HandleFunc("POST /chat/completions", s.handle(provider.Chat))
 	mux.HandleFunc("POST /v1/responses", s.handle(provider.Responses))
@@ -1188,7 +1188,7 @@ func (s *Server) routes() *routeMux {
 	mux.HandleFunc("GET /v1beta/models", s.geminiModels)
 	mux.HandleFunc("POST /v1beta/models/{call...}", s.gemini)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		writeError(w, provider.Chat, http.StatusNotFound, "magpie serves /v1/chat/completions, /v1/responses, /v1/messages, /v1/systemone, /v1/images/generations, /v1/images/edits, /v1/videos, /v1/embeddings, /v1/rerank, /v1/decisions, /v1/audio/transcriptions, /v1/audio/translations, /v1/audio/speech, /v1/realtime (WebSocket) and /v1beta/models/*")
+		writeError(w, provider.Chat, http.StatusNotFound, "eipgam serves /v1/chat/completions, /v1/responses, /v1/messages, /v1/systemone, /v1/images/generations, /v1/images/edits, /v1/videos, /v1/embeddings, /v1/rerank, /v1/decisions, /v1/audio/transcriptions, /v1/audio/translations, /v1/audio/speech, /v1/realtime (WebSocket) and /v1beta/models/*")
 	})
 	return mux
 }
@@ -1201,7 +1201,7 @@ func (s *Server) responsesOverHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
-		writeError(w, provider.Responses, http.StatusUpgradeRequired, "magpie relays Responses over HTTP only: send POST /v1/responses (streamed as SSE); Responses over a WebSocket is not served")
+		writeError(w, provider.Responses, http.StatusUpgradeRequired, "eipgam relays Responses over HTTP only: send POST /v1/responses (streamed as SSE); Responses over a WebSocket is not served")
 		return
 	}
 	w.Header().Set("Allow", "POST")
@@ -1209,22 +1209,22 @@ func (s *Server) responsesOverHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // catalogSize is how many models the catalog has, as info says, kept by
-// provider.StampNow: every magpie on this computer asks another which
+// provider.StampNow: every eipgam on this computer asks another which
 // it is (ServedBy, a window's every 15s, each look at its state while it
 // doesn't serve), and each question built the whole catalog to count it,
 // 5.4 GB of a day's 36 GB of allocations.
 var catalogSize stamped[struct{}, int]
 
 func (s *Server) info(w http.ResponseWriter, r *http.Request) {
-	out := map[string]any{"name": "magpie", "version": Version, "models": catalogSize.get(struct{}{}, func() int { return len(provider.Catalog()) }), "window": Window,
-		"apis": []string{"/v1/chat/completions", "/v1/responses", "/v1/messages", "/v1/systemone", "/v1beta/models/{model}:generateContent", "/v1/images/generations", "/v1/images/edits", "/v1/videos", NativePath + "{provider}/{path}", "/v1/embeddings", "/v1/rerank", "/v1/decisions", "/v1/audio/transcriptions", "/v1/audio/translations", "/v1/audio/speech", "/v1/realtime", "/v1/magpie/quotas", "/v1/magpie/quotas/history", "/v1/magpie/usage", "/v1/magpie/usage/requests", "/v1/magpie/route", StatuslinePath, "/v1/magpie/trace", OwnMCPPath, SearchMCPPath, VisionMCPPath, MemoryMCPPath, SessionsMCPPath, ImageMCPPath, BrowserMCPPath, ToolsMCPPath, HubMCPAll, HubMCPPath + "{agent}"}}
-	// which process serves, for another magpie on this computer to name it
+	out := map[string]any{"name": "eipgam", "version": Version, "models": catalogSize.get(struct{}{}, func() int { return len(provider.Catalog()) }), "window": Window,
+		"apis": []string{"/v1/chat/completions", "/v1/responses", "/v1/messages", "/v1/systemone", "/v1beta/models/{model}:generateContent", "/v1/images/generations", "/v1/images/edits", "/v1/videos", NativePath + "{provider}/{path}", "/v1/embeddings", "/v1/rerank", "/v1/decisions", "/v1/audio/transcriptions", "/v1/audio/translations", "/v1/audio/speech", "/v1/realtime", "/v1/eipgam/quotas", "/v1/eipgam/quotas/history", "/v1/eipgam/usage", "/v1/eipgam/usage/requests", "/v1/eipgam/route", StatuslinePath, "/v1/eipgam/trace", OwnMCPPath, SearchMCPPath, VisionMCPPath, MemoryMCPPath, SessionsMCPPath, ImageMCPPath, BrowserMCPPath, ToolsMCPPath, HubMCPAll, HubMCPPath + "{agent}"}}
+	// which process serves, for another eipgam on this computer to name it
 	// on its Routing page (#2606); not told to another machine
 	if local(r) {
 		out["pid"], out["serves"] = os.Getpid(), Serves
 	}
-	// its MCP router has a server to give, for another magpie that has
-	// this one as a Remote magpie to give it a server of its own
+	// its MCP router has a server to give, for another eipgam that has
+	// this one as a Remote eipgam to give it a server of its own
 	// (provider/remote_hub.go); told to whoever the router answers
 	if (local(r) || sharedWith(r)) && hubServes() {
 		out["mcp_hub"] = true
@@ -1232,25 +1232,25 @@ func (s *Server) info(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, out)
 }
 
-// quotas is what is left of every subscription, plan and key magpie has,
-// for an agent choosing where to send its work (magpie quota --json is the
+// quotas is what is left of every subscription, plan and key eipgam has,
+// for an agent choosing where to send its work (eipgam quota --json is the
 // same). It names the accounts and their balances, so it answers this
 // machine, and another only with an enabled gateway key, which lanGuard
-// asks of it while the gateway is shared or MAGPIE_ADDR puts it on the
+// asks of it while the gateway is shared or EIPGAM_ADDR puts it on the
 // network. A key held to a budget, models or accounts is someone else's
 // to use and is told none of it (refuseHeld), as are quotasHistory,
 // quotaCards, quotaCardsRefresh and concurrency; one its owner lets be
 // told its quotas is told those of what it may use (scopeQuotas, #2216).
 func (s *Server) quotas(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's quotas are told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's quotas are told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
 	if !ok {
 		return
 	}
-	// ?kept=1: what was last read, no vendor asked (magpie statusline,
+	// ?kept=1: what was last read, no vendor asked (eipgam statusline,
 	// run on every message, #1997)
 	if r.URL.Query().Get("kept") == "1" {
 		writeJSON(w, 200, map[string]any{"object": "list", "data": scope.quotas(provider.KeptQuotaReport(time.Now()))})
@@ -1262,12 +1262,12 @@ func (s *Server) quotas(w http.ResponseWriter, r *http.Request) {
 }
 
 // quotasHistory is what was left of each account's windows over time, as
-// this magpie (and the computers sharing usage with it) read them (#651):
+// this eipgam (and the computers sharing usage with it) read them (#651):
 // ?days= back (45 at most), ?provider= and ?user= to pick an account.
-// /v1/magpie/quotas stays the snapshot.
+// /v1/eipgam/quotas stays the snapshot.
 func (s *Server) quotasHistory(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's quotas are told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's quotas are told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -1278,12 +1278,12 @@ func (s *Server) quotasHistory(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"object": "list", "data": scope.histories(provider.QuotaHistories(provider.QuotaHistorySince(q.Get("days"), time.Now()), q.Get("provider"), q.Get("user")))})
 }
 
-// quotaCards is the Usage page's cards as this magpie last read them, for
-// another magpie that has this one as its provider (remote-magpie) to
+// quotaCards is the Usage page's cards as this eipgam last read them, for
+// another eipgam that has this one as its provider (remote-eipgam) to
 // show: its own cache, however old, and no vendor asked for it.
 func (s *Server) quotaCards(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's quotas are told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's quotas are told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -1293,18 +1293,18 @@ func (s *Server) quotaCards(w http.ResponseWriter, r *http.Request) {
 	writeCards(w, r, scope)
 }
 
-// SharedLibrary is the Library as another magpie is told it (JSON), set
+// SharedLibrary is the Library as another eipgam is told it (JSON), set
 // by the app: the gateway doesn't know the library package.
 var SharedLibrary func() ([]byte, error)
 
-// sharedLibrary tells another magpie that has this one as its provider
+// sharedLibrary tells another eipgam that has this one as its provider
 // the skills and prompts of the Library, to use them as its own (KoiLx0
-// on X). Only to this computer and to a full-access key of a magpie
+// on X). Only to this computer and to a full-access key of a eipgam
 // shared on the local network: a key held to models, a budget or
 // accounts is the user's limit on what that caller may use.
 func (s *Server) sharedLibrary(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's Library is told to another machine only when magpie is shared on the local network (Settings → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's Library is told to another machine only when eipgam is shared on the local network (Settings → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	if heldKey(access.Caller(r.Context())) {
@@ -1312,7 +1312,7 @@ func (s *Server) sharedLibrary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if SharedLibrary == nil {
-		writeError(w, provider.Chat, http.StatusNotFound, "this magpie has no Library to tell")
+		writeError(w, provider.Chat, http.StatusNotFound, "this eipgam has no Library to tell")
 		return
 	}
 	b, err := SharedLibrary()
@@ -1325,19 +1325,19 @@ func (s *Server) sharedLibrary(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-// SharedAgentModels is the models this magpie's agents are on as another
-// magpie is told them (JSON, provider.AgentModels), set by the agent
+// SharedAgentModels is the models this eipgam's agents are on as another
+// eipgam is told them (JSON, provider.AgentModels), set by the agent
 // package: the gateway doesn't read agents' configs.
 var SharedAgentModels func() ([]byte, error)
 
-// sharedAgentModels tells another magpie that has this one as its
+// sharedAgentModels tells another eipgam that has this one as its
 // provider the models this computer's agents are on, so its own agents
 // start on them and follow a change made here (KoiLx0 on X). Asked as the
-// Library is: this computer, or a full-access key of a magpie shared on
+// Library is: this computer, or a full-access key of a eipgam shared on
 // the local network.
 func (s *Server) sharedAgentModels(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's agent models are told to another machine only when magpie is shared on the local network (Settings → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's agent models are told to another machine only when eipgam is shared on the local network (Settings → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	if heldKey(access.Caller(r.Context())) {
@@ -1345,7 +1345,7 @@ func (s *Server) sharedAgentModels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if SharedAgentModels == nil {
-		writeError(w, provider.Chat, http.StatusNotFound, "this magpie has no agents to tell")
+		writeError(w, provider.Chat, http.StatusNotFound, "this eipgam has no agents to tell")
 		return
 	}
 	b, err := SharedAgentModels()
@@ -1358,7 +1358,7 @@ func (s *Server) sharedAgentModels(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-// remoteRefreshes is when another magpie last had each card read again
+// remoteRefreshes is when another eipgam last had each card read again
 // here: one refreshed by hand is read at most once in remoteRefreshGap,
 // however often it is asked, so the vendor sees no more than this
 // computer's own refresh button would make it.
@@ -1369,12 +1369,12 @@ var remoteRefreshes = struct {
 
 const remoteRefreshGap = 30 * time.Second
 
-// quotaCardsRefresh is a card's refresh pressed on another magpie: the
+// quotaCardsRefresh is a card's refresh pressed on another eipgam: the
 // card (?provider=, &user=) is read again here, or every card when none
 // is named, then the cards are answered as quotaCards answers them.
 func (s *Server) quotaCardsRefresh(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's quotas are told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's quotas are told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -1382,12 +1382,12 @@ func (s *Server) quotaCardsRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id, user := r.URL.Query().Get("provider"), r.URL.Query().Get("user")
-	// a card this magpie has from a Remote magpie of its own, which it
+	// a card this eipgam has from a Remote eipgam of its own, which it
 	// passes on (provider.CachedCards), is read again there; the card
 	// standing for that remote itself, and any other id with a "/", is
-	// none this magpie tells
+	// none this eipgam tells
 	if remote := provider.IsRemoteCard(id); strings.Contains(id, "/") && !remote || remote && !strings.Contains(id, "/") {
-		writeError(w, provider.Chat, http.StatusBadRequest, "this magpie reads again only the cards it tells")
+		writeError(w, provider.Chat, http.StatusBadRequest, "this eipgam reads again only the cards it tells")
 		return
 	}
 	// a key told only some cards (#2216) has only those read again: a
@@ -1429,7 +1429,7 @@ var codexResetsAsked = struct {
 
 // codexReset spends one of a Codex account's rate-limit resets, as the
 // Usage page's "Use a reset" does (provider.SpendCodexReset, the same
-// code), asked by another magpie's card or an app holding a gateway key
+// code), asked by another eipgam's card or an app holding a gateway key
 // (#3850, prgrmrwy). A reset can't be undone, so beyond what
 // quotaCardsRefresh asks it takes a gateway key, from this computer too,
 // never one that is read-only (readOnlyGuard refuses that before here)
@@ -1440,18 +1440,18 @@ var codexResetsAsked = struct {
 // can't see; ?credit= picks one of its resets.each.
 func (s *Server) codexReset(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's quotas are told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's quotas are told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	who := access.Caller(r.Context())
 	if who.KeyID == "" || who.ReadOnly {
-		writeError(w, provider.Chat, http.StatusUnauthorized, "using a Codex reset can't be undone, so it takes an enabled magpie gateway key with full access (Gateway → Gateway keys), sent as Authorization: Bearer <key> or x-api-key, from this computer too; or use it on this computer's Usage page")
+		writeError(w, provider.Chat, http.StatusUnauthorized, "using a Codex reset can't be undone, so it takes an enabled eipgam gateway key with full access (Gateway → Gateway keys), sent as Authorization: Bearer <key> or x-api-key, from this computer too; or use it on this computer's Usage page")
 		return
 	}
 	// a key held to a budget, models or accounts is someone else's to
 	// use: told some cards (#2216) or none, it spends no reset of the
 	// owner's
-	if refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it uses none of this magpie's Codex resets: use a key with full access") {
+	if refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it uses none of this eipgam's Codex resets: use a key with full access") {
 		return
 	}
 	q := r.URL.Query()
@@ -1510,7 +1510,7 @@ func modelObject(e provider.Entry) map[string]any {
 		"owned_by": e.Provider.ID, "display_name": e.PlainName(), "reasoning": e.Thinks(), "supported_reasoning_levels": levels,
 		"reasoning_levels": flat}
 	// the window, as the names clients read it by: a group's context
-	// (magpie group set … context=) included
+	// (eipgam group set … context=) included
 	if e.Context > 0 {
 		m["context_window"], m["context_length"], m["max_input_tokens"] = e.Context, e.Context, e.Context
 	}
@@ -1519,7 +1519,7 @@ func modelObject(e provider.Entry) map[string]any {
 	if out := e.PublishedOutput(); out > 0 {
 		m["max_output_tokens"] = out
 	}
-	// for another magpie that has this one as its provider (remote-magpie):
+	// for another eipgam that has this one as its provider (remote-eipgam):
 	// the APIs a request for the model goes on as it is, so it sends each
 	// one on an API of these rather than having it translated twice, and
 	// whether it takes images
@@ -1548,7 +1548,7 @@ func modelObject(e provider.Entry) map[string]any {
 // offer a model their tools. Without either, a client that matches what a
 // model can do by its id (psikent on Discord: an SSH client) found none
 // for a routing group, whose id is the user's own name, and wouldn't hand
-// it a tool. Every chat model magpie lists takes tools — the gateway reads
+// it a tool. Every chat model eipgam lists takes tools — the gateway reads
 // one written as text back as a call (textcalls.go) — so a group, all of
 // whose members do, says so as well. The decision models and Claude
 // Desktop's and Claude Science's lists, shaped for their own readers, are
@@ -1622,7 +1622,7 @@ func cursorLocalModel(m map[string]any, e provider.Entry) {
 	m["capabilities"] = c
 }
 
-// drawerObjects are the image models magpie draws with, as another magpie
+// drawerObjects are the image models eipgam draws with, as another eipgam
 // asks for them in its list (provider.DrawersHeader): "kind": "image",
 // which an agent's list never has, so it takes none for a model to chat
 // with. A gateway key held to some models is told of those alone, as its
@@ -1641,9 +1641,9 @@ func drawerObjects(r *http.Request) []map[string]any {
 			}
 			name := cmp.Or(m.Name, m.ID)
 			o := map[string]any{"id": p.ID + "/" + m.ID, "object": "model", "type": "model", "kind": "image", "created": 0,
-				"owned_by": p.ID, "display_name": name, "magpie_label": name + " · " + p.Name,
+				"owned_by": p.ID, "display_name": name, "eipgam_label": name + " · " + p.Name,
 				"modalities": map[string]any{"input": []string{"text"}, "output": []string{"image"}},
-				"magpie_via": catalog.ViaHere(m.Via)}
+				"eipgam_via": catalog.ViaHere(m.Via)}
 			// the endpoints it is drawn through, in new-api's words, which
 			// Cherry Studio's new-api provider reads its kind from
 			// (listModels.ts newApiFetcher): image-generation first
@@ -1659,8 +1659,8 @@ func drawerObjects(r *http.Request) []map[string]any {
 	return out
 }
 
-// videomakerObjects are the video models magpie makes videos with, as
-// another magpie asks for them (provider.VideomakersHeader): "kind": "video".
+// videomakerObjects are the video models eipgam makes videos with, as
+// another eipgam asks for them (provider.VideomakersHeader): "kind": "video".
 // A gateway key held to some models or accounts is told of those alone,
 // as its chat list is (#2579).
 func videomakerObjects(r *http.Request) []map[string]any {
@@ -1676,21 +1676,21 @@ func videomakerObjects(r *http.Request) []map[string]any {
 			}
 			name := cmp.Or(m.Name, m.ID)
 			out = append(out, map[string]any{"id": p.ID + "/" + m.ID, "object": "model", "type": "model", "kind": "video", "created": 0,
-				"owned_by": p.ID, "display_name": name, "magpie_label": name + " · " + p.Name,
+				"owned_by": p.ID, "display_name": name, "eipgam_label": name + " · " + p.Name,
 				"modalities":               map[string]any{"input": []string{"text", "image"}, "output": []string{"video"}},
 				"supported_endpoint_types": []string{"openai-video"},
-				"magpie_via":               catalog.ViaHere(m.Via)})
+				"eipgam_via":               catalog.ViaHere(m.Via)})
 		}
 	}
 	return out
 }
 
 // viaOf is the magpies e's model passes through after this one, as the
-// remote magpie serving it listed them; nil for a provider's own model.
+// remote eipgam serving it listed them; nil for a provider's own model.
 // A routing group's are its members' together: a group with a remote
-// magpie's group in it (two magpies each the other's remote, each with an
-// auto/ group of the model) reaches every magpie that one does (catalog's
-// magpie_via.go).
+// eipgam's group in it (two magpies each the other's remote, each with an
+// auto/ group of the model) reaches every eipgam that one does (catalog's
+// eipgam_via.go).
 func viaOf(e provider.Entry) []string {
 	if e.Group == "" {
 		return e.Provider.RemoteVia(e.Model)
@@ -1714,7 +1714,7 @@ func catalogFor(r *http.Request) []provider.Entry {
 	return keyListed(r, shown, provider.ModelOff(agent))
 }
 
-// listKinds is which of magpie's models a /v1/models call lists: its chat
+// listKinds is which of eipgam's models a /v1/models call lists: its chat
 // models alone, unless it names the kinds it wants in ?kind= (chat, image,
 // video, comma separated; all for the three). Image and video models are
 // listed only when asked for, each marked "kind" (drawerObjects,
@@ -1726,13 +1726,13 @@ func catalogFor(r *http.Request) []provider.Entry {
 // it doesn't know is refused, not read as none.
 //
 // Cherry Studio is the exception: it can't ask, and it tells an image model
-// from a chat one itself. Its provider of magpie (an OpenAI-compatible one)
+// from a chat one itself. Its provider of eipgam (an OpenAI-compatible one)
 // reads only each id, then looks the id's last segment up in its own model
 // registry (provider-registry's models.json, by normalizeModelId), which
 // marks gpt-image-2, dall-e-3, the gemini-*-image, imagen, seedream and
 // grok-imagine models as image generation: those go to its Paintings page,
 // not its chat picker (isNonChatModel). Without them listed, Paintings had
-// no model of magpie's (pingqipai3 on X). So it is listed every kind.
+// no model of eipgam's (pingqipai3 on X). So it is listed every kind.
 func listKinds(r *http.Request) (chat, image, video bool, err error) {
 	q, ok := r.URL.Query()["kind"]
 	if !ok {
@@ -1759,7 +1759,7 @@ func listKinds(r *http.Request) (chat, image, video bool, err error) {
 	return chat, image, video, nil
 }
 
-// cherryStudio is a request of Cherry Studio's: with the key magpie's link
+// cherryStudio is a request of Cherry Studio's: with the key eipgam's link
 // gives it (agentOf), or a key the user typed in by hand, by its User-Agent,
 // Electron's own with the app's name in it ("Mozilla/5.0 (…)
 // CherryStudio/2.1.2 Chrome/… Electron/…").
@@ -1773,13 +1773,13 @@ func (s *Server) models(w http.ResponseWriter, r *http.Request) {
 		antigravityModels(w, r)
 		return
 	}
-	// OpenCode's magpie plugin's (opencode_models.go)
+	// OpenCode's eipgam plugin's (opencode_models.go)
 	if f := r.URL.Query().Get("format"); f == OpenCodeFormat || f == OpenCode2Format {
 		openCodeModels(w, r, f == OpenCode2Format)
 		return
 	}
 	if waitsForList(r) {
-		// another magpie waiting for the list to change (models_wait.go)
+		// another eipgam waiting for the list to change (models_wait.go)
 		s.modelsOnceChanged(w, r)
 		return
 	}
@@ -1803,16 +1803,16 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 			data = scienceModels(shown)
 		} else {
 			labels := provider.LabelsFor(agent, shown)
-			// for another magpie: how it searches the web for each model
-			magpie := r.Header.Get(provider.DrawersHeader) != ""
-			searches := magpie && canSearch()
-			// for another magpie, what each model costs here, so its usage
+			// for another eipgam: how it searches the web for each model
+			eipgam := r.Header.Get(provider.DrawersHeader) != ""
+			searches := eipgam && canSearch()
+			// for another eipgam, what each model costs here, so its usage
 			// there is counted at the same price: told only to this computer
-			// and to one this magpie is shared with by a gateway key, as the
+			// and to one this eipgam is shared with by a gateway key, as the
 			// prices are the user's own settings
 			//
 			// and to any client, OpenRouter's pricing for each model it knows
-			// a price of (cleary5779 on Discord: an agent built on magpie
+			// a price of (cleary5779 on Discord: an agent built on eipgam
 			// shows what a call costs), told to the same callers: the price is
 			// what the Usage page counts the model at, the user's own included.
 			// The settings, groups and providers are read once for the list
@@ -1824,23 +1824,23 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 				priceOf = provider.EntryPricer(settings.Load(), provider.GroupFinder())
 			}
 			// the tiers Codex here is offered on each model (#1234), for every
-			// client: another magpie offers them to its own Codex, and Cindy
+			// client: another eipgam offers them to its own Codex, and Cindy
 			// shows its Fast switch on a model whose tiers hold priority
 			// (#1914). A model with none says nothing
 			tiers := codexTiers(shown)
 			// each model by its bare id as well, after the provider/model ids,
 			// when the user asked for it (settings.BareModelIDs): a client
 			// moved from another proxy asks for gpt-5.6-sol (love1sbug on X).
-			// Never for another magpie, whose provider would list each twice.
+			// Never for another eipgam, whose provider would list each twice.
 			// Each row is the entry the bare id reaches, its label that one's.
 			//
 			// Or by its bare id alone, in place of the provider/model ids
 			// it stands for, when the user asked for that
-			// (settings.BareModelIDsOnly): a client of a Docker magpie
+			// (settings.BareModelIDsOnly): a client of a Docker eipgam
 			// listed every model twice, and a gateway has no Agents page
 			// to pick its models on (qQianye on X)
 			rows, ids, only := slices.Clip(shown), map[int]string{}, false
-			if !magpie && provider.BareModelIDs() {
+			if !eipgam && provider.BareModelIDs() {
 				bares := provider.BareEntries(shown)
 				if only = provider.BareOnly(); only {
 					at, bare := provider.OnlyBare(shown, bares)
@@ -1863,7 +1863,7 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 			}
 			// for Claude Code's Gateway Model Discovery: an id it keeps
 			// (claude_discovery.go)
-			discovers, who := !magpie && claudeCodeDiscovers(r), access.Caller(r.Context())
+			discovers, who := !eipgam && claudeCodeDiscovers(r), access.Caller(r.Context())
 			for i, e := range rows {
 				m := modelObject(e)
 				toolsTold(m, e)
@@ -1877,18 +1877,18 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 						continue
 					}
 				}
-				if magpie {
+				if eipgam {
 					if how := webSearchOf(e, searches); how != "" {
 						m["web_search"] = how
 					}
 					// the magpies it goes through, this one last, so a
-					// magpie that is this one's remote too doesn't take
-					// back its own models (catalog's magpie_via.go)
-					m["magpie_via"] = catalog.ViaHere(viaOf(e))
+					// eipgam that is this one's remote too doesn't take
+					// back its own models (catalog's eipgam_via.go)
+					m["eipgam_via"] = catalog.ViaHere(viaOf(e))
 					// the provider serving it, the first in a chain of
 					// magpies, for one that names its models by it
 					// (provider.UpstreamNames, lcc580 on X)
-					m["magpie_by"] = e.ServedBy()
+					m["eipgam_by"] = e.ServedBy()
 				}
 				if ts := tiers[e.ID]; len(ts) > 0 {
 					m["service_tiers"] = ts
@@ -1897,28 +1897,28 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 					if pr, ok := priceOf(e); ok {
 						m["pricing"] = catalog.OpenRouterPricing(pr)
 						if prices {
-							m["magpie_price"] = pr
+							m["eipgam_price"] = pr
 						}
 					}
 				}
-				// for another magpie: its name as the agents' lists here call
+				// for another eipgam: its name as the agents' lists here call
 				// it, with its provider's after it unless the user wants it
 				// plain, so two providers' models of one name are told apart
 				// there as they are here
-				m["magpie_label"] = labels[i]
+				m["eipgam_label"] = labels[i]
 				// for DeepSeek Harness: the same name as its name. Its
 				// Models page's model discovery (llm-pi-ai's readListing)
 				// names a row by name, then display_name, and display_name
 				// is the name alone, so two providers' models of one name
 				// read the same there, Kimi-K3.1-Pro of WorkBuddy and of
-				// Qoder CN (LeiWang_2000 on X), where the route magpie
+				// Qoder CN (LeiWang_2000 on X), where the route eipgam
 				// writes for it names them as its list does (dshKindConfig)
 				if agent == "dsh" {
 					m["name"] = labels[i]
 				}
 				// for Cindy: the same name as its display_name, which its
 				// model discovery (parseModelsListResponse) names a row by
-				// before name, so magpie's GLM-5.3-Flash of three providers
+				// before name, so eipgam's GLM-5.3-Flash of three providers
 				// read three times the same in its picker (cdredfox on X);
 				// and for Claude Code's discovery, whose /model names a row
 				// by display_name alone
@@ -1941,7 +1941,7 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get(provider.DecidersHeader) != "" {
 		// the decision models its own pickers offer: of a provider with
 		// picks (OpenRouter's twenty-odd), the picked ones, so another
-		// magpie lists what its Gateway page shows (GokoShiki on Discord)
+		// eipgam lists what its Gateway page shows (GokoShiki on Discord)
 		deciders := keyAllowed(r, provider.OfferedDeciders(nil))
 		for i := range deciders {
 			deciders[i].Name = cmp.Or(deciders[i].Name, deciders[i].Model)
@@ -1949,10 +1949,10 @@ func (s *Server) listModels(w http.ResponseWriter, r *http.Request) {
 		labels := provider.LabelsFor(agentOf(r), deciders)
 		for i, e := range deciders {
 			m := modelObject(e)
-			m["kind"], m["magpie_label"] = "decision", labels[i]
+			m["kind"], m["eipgam_label"] = "decision", labels[i]
 			m["native_endpoints"] = []string{"/v1/systemone"}
-			m["magpie_via"] = catalog.ViaHere(viaOf(e))
-			m["magpie_by"] = e.ServedBy()
+			m["eipgam_via"] = catalog.ViaHere(viaOf(e))
+			m["eipgam_by"] = e.ServedBy()
 			data = append(data, m)
 		}
 	}
@@ -2010,12 +2010,12 @@ func (s *Server) model(w http.ResponseWriter, r *http.Request) {
 	writeError(w, provider.Chat, 404, "unknown model "+id)
 }
 
-// unprefixed is the model magpie serves by an id Claude Desktop was given
-// for it (claudeLooking): anthropic/magpie-<number>, mythos-magpie-<number>,
-// magpie-<number>.anthropic.<Claude model>, or, as it listed them
-// before, "anthropic/" put in front of magpie's id — or by its flat
+// unprefixed is the model eipgam serves by an id Claude Desktop was given
+// for it (claudeLooking): anthropic/eipgam-<number>, mythos-eipgam-<number>,
+// eipgam-<number>.anthropic.<Claude model>, or, as it listed them
+// before, "anthropic/" put in front of eipgam's id — or by its flat
 // spelling (unflat) or its Claude version dashed (provider.ClaudeUndashed).
-// An id that is magpie's as it stands (a provider named
+// An id that is eipgam's as it stands (a provider named
 // anthropic) is left alone.
 func unprefixed(id string) string {
 	if real, ok := aliased(id); ok {
@@ -2041,7 +2041,7 @@ func unprefixed(id string) string {
 }
 
 // askedAt splits a model asked for at an effort of its own,
-// "<model>:<level>" (before a [1m] mark) — a Claude Code tier magpie set one
+// "<model>:<level>" (before a [1m] mark) — a Claude Code tier eipgam set one
 // on (#536) — into the model and the level, "" for none. As a routing
 // group's member is read (#189), only a level's name after the last colon is
 // one, and a model a provider has by the whole id ("x:high") is taken whole.
@@ -2162,7 +2162,7 @@ func (s *Server) countTokens(w http.ResponseWriter, r *http.Request) {
 	// then (#3973)
 	if _, ms, isGroup := provider.FindGroup(id); !ok || !unredactedRoute(p, model, isGroup, ms) {
 		if fp, before := maskedBefore(r); before {
-			// masked by the magpie that passed it on (serve)
+			// masked by the eipgam that passed it on (serve)
 			r = withMaskedAs(r, fp)
 		} else {
 			rw, b, done, hits, err := redactedHits(maskedFor(r.Context(), p, model, isGroup, ms), w, body)
@@ -2329,14 +2329,14 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 		if from == provider.Responses || from == provider.Chat {
 			body = fastTier(body)
 		}
-		// a Claude Code Message Thread magpie keeps no history for: sent
+		// a Claude Code Message Thread eipgam keeps no history for: sent
 		// again whole, without it (message_threads.go, #2480)
 		if from == provider.Anthropic && namesThread(body) {
 			refuseThread(w)
 			return
 		}
-		// a thread Codex started on magpie, on one of Codex's own models
-		// magpie serves nothing for: on Codex's own sign-in, as the
+		// a thread Codex started on eipgam, on one of Codex's own models
+		// eipgam serves nothing for: on Codex's own sign-in, as the
 		// ChatGPT backend's route sends it (codexOwnOffMagpie)
 		if from == provider.Responses {
 			if r2, why := codexOwnOffMagpie(r, body, model); r2 != nil {
@@ -2347,7 +2347,7 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 				return
 			}
 		}
-		// Codex with magpie as its provider: spawn_agent names every
+		// Codex with eipgam as its provider: spawn_agent names every
 		// model a subagent may be put on, not only Codex's first five
 		// (Gearclickist on Discord), Codex run by an app under the app's
 		// own name too (LobeHub's app-server, @m0eaki on X)
@@ -2388,11 +2388,11 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 					seen[k] = vs
 				}
 			}
-			// Claude Code's own, from another magpie too
+			// Claude Code's own, from another eipgam too
 			seen.Set("User-Agent", agentUA(r.Context(), r.Header))
 			provider.SawClient(provider.ClientClaudeCode, seen)
 		}
-		// Codex with magpie as its provider asks for a thread's title
+		// Codex with eipgam as its provider asks for a thread's title
 		// here (#743)
 		if from == provider.Responses {
 			// on the conversation's model, not the one the app chose
@@ -2420,8 +2420,8 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 			}
 			// Codex compacts remotely, a compaction_trigger here, on a
 			// provider table named "OpenAI" (CC Switch's relay tables,
-			// which magpie points here, #1301): the summary is magpie's to
-			// make, as on CodexPath, and magpie's summaries go back as text;
+			// which eipgam points here, #1301): the summary is eipgam's to
+			// make, as on CodexPath, and eipgam's summaries go back as text;
 			// a provider set to compact natively is asked Codex's own (#1099)
 			if bodyHas(body, `"compaction`) {
 				var compact bool
@@ -2529,7 +2529,7 @@ func estimate(req *Request) int {
 // serve routes one parsed-enough request to its provider.
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte) {
 	start := time.Now()
-	// a client's "off" is magpie's none, for every route and check below
+	// a client's "off" is eipgam's none, for every route and check below
 	// that reads the body's effort (plugins#334)
 	body = offAsNone(from, body)
 	// inline base64 goes in the standard alphabet, padded, which every
@@ -2595,11 +2595,11 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	holdBody(r.Context(), plain)
 	capture := &captureResponseWriter{ResponseWriter: w}
 	if wholeBodies {
-		capture.whole = &spool{limit: wholeBodyLimit, pattern: "magpie-whole-*"}
+		capture.whole = &spool{limit: wholeBodyLimit, pattern: "eipgam-whole-*"}
 	}
 	w = capture
 	// the agent it is recorded as, the one on the computer it was passed
-	// on from for a remote magpie's request; agent the one that sent it,
+	// on from for a remote eipgam's request; agent the one that sent it,
 	// which what is done with it goes by
 	who, agent := callerOf(r), agentOf(r)
 	metadata := requestSessionMetadata(r.Header, body)
@@ -2738,14 +2738,14 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	grouped := func(m string) string {
 		if id, ok := ownFirst(r, agent, m); ok {
 			// a bare name the agent's own subscription serves: there,
-			// before a group magpie found or another vendor
+			// before a group eipgam found or another vendor
 			return id
 		}
 		if id, ok := keyGroupFor(r, m); ok {
 			return id
 		}
 		if id, ok := provider.AutoStandInFor(agent, m); ok {
-			// a group magpie found, while the user has those off: its
+			// a group eipgam found, while the user has those off: its
 			// model from one provider, rather than refused
 			return id
 		}
@@ -2759,7 +2759,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	} else if m := claudeTierStandIn(r, agent, asked); m != "" {
 		// Claude Code (or a wrapper, T3 Code) naming one of Anthropic's
 		// models by its full id: the model it is set to use for that tier,
-		// whether or not magpie serves the id too
+		// whether or not eipgam serves the id too
 		asked = grouped(at(m))
 		move(m, movedClaudeTier)
 	} else if g := grouped(asked); g != asked {
@@ -2790,7 +2790,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	}
 	// the Codex app's prompt suggestions on the model set for them, not
 	// the one its server names, which falls back to the provider's
-	// default ("auto") on magpie; one the ChatGPT backend's route already
+	// default ("auto") on eipgam; one the ChatGPT backend's route already
 	// put there is recorded as asked for the model it was
 	if was := suggestionsAskedOf(r); was != "" && was != call.Model {
 		to := call.Model
@@ -2858,7 +2858,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		msg := unknownModel(call.Model, "")
 		if g, ok := provider.DisabledGroup(asked); ok {
 			call.Error = "group switched off"
-			msg = fmt.Sprintf("the routing group %s is switched off in Magpie, so %q is not served; switch it on again on Magpie's Routing page to use it", g.Name, call.Model)
+			msg = fmt.Sprintf("the routing group %s is switched off in eipgam, so %q is not served; switch it on again on eipgam's Routing page to use it", g.Name, call.Model)
 		} else if g, _, ok := provider.FindGroup(asked); ok && g.Decides() {
 			// a group of decision models answers System One, not this
 			call.Status, call.Error = 400, "a decision group"
@@ -2893,9 +2893,9 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// when it is first handed one, after the try (maskIn, #3973)
 	if sentWhole = unredactedRoute(p, model, isGroup, ms); !sentWhole {
 		if fp, before := maskedBefore(r); before {
-			// masked by the magpie that passed it on, by the same
-			// settings: it goes on as it came, that magpie puts its
-			// values back, and a further magpie is told so too
+			// masked by the eipgam that passed it on, by the same
+			// settings: it goes on as it came, that eipgam puts its
+			// values back, and a further eipgam is told so too
 			r = withMaskedAs(r, fp)
 		} else {
 			rw, b, done, hits, err := redactedHits(maskedFor(r.Context(), p, model, isGroup, ms), capture.ResponseWriter, body)
@@ -3055,7 +3055,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// as a model's check does.
 	var ask classifier
 	if r.Header.Get("User-Agent") != RouterAgent && !desktopCheck {
-		// a wait magpie knows of, before a route is begun (unrouted.go),
+		// a wait eipgam knows of, before a route is begun (unrouted.go),
 		// one for every group the request goes through
 		ask = s.askWaited(r.Context())
 	}
@@ -3098,7 +3098,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// agents are told: while one describes images they are told every
 	// model takes them, and send the images on to be described
 	//
-	// One that turned an image away since magpie started is text-only
+	// One that turned an image away since eipgam started is text-only
 	// whatever its list or models.dev says, with a model to describe the
 	// image: the model picked is given the description, not left to fail
 	// over to the same model at another provider that sees (xyenon)
@@ -3208,7 +3208,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			// the groups the user built with this model in them go on from
 			// it, as a request to the group would (the Codex app asks
 			// Codex's own model, never the group). Not for a request that
-			// named the provider itself ("claude/…", another magpie's
+			// named the provider itself ("claude/…", another eipgam's
 			// call): that one is answered the cap's 429 unless the
 			// provider has fallbacks of its own (Anotiaww on X)
 			// Codex's auto-review on codex-auto-review, which no group has,
@@ -3289,7 +3289,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		who := keyWho
 		var members map[string]bool
 		if chose {
-			// magpie's own call for the key — a web search, a picture
+			// eipgam's own call for the key — a web search, a picture
 			// described, a Codex title: of the models the user picked, so
 			// the models don't hold it, but the spend lands on an account,
 			// and the accounts hold it too
@@ -3349,7 +3349,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		} else {
 			msg, back = cappedError(call.Model, held, time.Now())
 			if strictHeld != nil {
-				msg += ". The conversation stays strictly on that account (Stays: Strict), so magpie doesn't move it to another"
+				msg += ". The conversation stays strictly on that account (Stays: Strict), so eipgam doesn't move it to another"
 			}
 			record = cappedRecord(held)
 		}
@@ -3474,7 +3474,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	}
 	if isGroup && seenGroup == nil {
 		// without a model to describe it, a new image goes only to the
-		// members that see it (#756) — to members magpie knows nothing
+		// members that see it (#756) — to members eipgam knows nothing
 		// of when none is known to see, as a model of its own would be
 		// sent it. With one, the members keep their order, a text-only
 		// one given it described.
@@ -3504,7 +3504,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	}
 	if isGroup && hasCurrentVideo(from, body) {
 		// a video goes only to the members that take one, else to those
-		// magpie knows nothing of, else is turned away: a member that takes
+		// eipgam knows nothing of, else is turned away: a member that takes
 		// none would answer the words alone (#6135)
 		var takes, unknown []candidate
 		var takesAt, unknownAt []Weighed
@@ -3646,7 +3646,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		kept = k
 	}
 	var sentMs int64 // ms from the request to its answering try going to the vendor
-	// of it, magpie's own, the tries that failed first and the wait for a
+	// of it, eipgam's own, the tries that failed first and the wait for a
 	// slot (usage.Record.Own, Retried, Queued: #1532)
 	var ownMs, retriedMs, queuedMs int64
 	var firstBegan time.Time // when the first try began
@@ -3700,7 +3700,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// before it moves (keptAgain, jiabubu)
 	keptAsked := false
 	// ended is when the last try's reply ended: the request's ms end there,
-	// not after what magpie writes down of it once it has (#1939: sticks
+	// not after what eipgam writes down of it once it has (#1939: sticks
 	// and the provider's last answer, saved to disk, took seconds on a busy
 	// disk, and the reply's speed counted them as its own)
 	var ended time.Time
@@ -3756,7 +3756,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		}
 		c := cands[i]
 		if q, ok := provider.Readdressed(c.p); ok {
-			// a Remote magpie saved at another address since the
+			// a Remote eipgam saved at another address since the
 			// request read it is asked there, a retry of it too
 			// (le13ure on X)
 			c.p = q
@@ -4159,7 +4159,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			}
 		}
 		if fixed == "" && ruled == "" && effort == "" && agentPick != "" && !agyLevelAsked(agent, from, attemptBody) && c.p.Thinks(c.model) {
-			// the effort picked in magpie for an agent whose config can't
+			// the effort picked in eipgam for an agent whose config can't
 			// carry one (Cursor Private Inference, #1003), in place of the
 			// level it sent, on a model that reasons; a member fixed at
 			// one, a suffix and the turn's pick are more particular
@@ -4168,7 +4168,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		// a member that sends another level than the one asked (its
 		// EffortMaps, LuckymanJC on Discord: one vendor's high is
 		// another's xhigh) is sent that, whoever asked: a suffix, the
-		// agent's pick in magpie, the turn's pick or the agent itself. A
+		// agent's pick in eipgam, the turn's pick or the agent itself. A
 		// rule's effort is the user's for this member already
 		mappedFrom, mapped := "", ""
 		if c.effort == "" && ruled == "" && len(c.effortMap) > 0 {
@@ -4344,7 +4344,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			// told to ask then rather than at once
 			msg := fmt.Sprintf("%s (out of its allowance: not asked again before %s)", rested.said, heldClock(back, time.Now()))
 			held, heldBack, call.Status, call.Error = true, back, rested.Status, c.p.Name+": "+msg
-			// the answer names who held it, as one asked would: a magpie
+			// the answer names who held it, as one asked would: a eipgam
 			// using this one rests that model of it alone (remoteModelRest)
 			noteMember(hw, r, c.p, c.model)
 			writeError(hw, from, call.Status, msg)
@@ -4401,7 +4401,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			}
 			hw.stop, hw.name = stop, c.p.Name
 			if magpieAsks(r) {
-				// another magpie asked: its log is told the tier this
+				// another eipgam asked: its log is told the tier this
 				// one sent (stampTier)
 				p := c.p
 				hw.tierStamp = func(h http.Header) { stampTier(h, p, at.tier) }
@@ -4420,7 +4420,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			// when the request last went out to the vendor, its body
 			// written: what came after is the vendor's (Record.Sent).
 			// Before it, from when it began to go out, is connecting and
-			// sending the body, and before that magpie's (#1532); and each
+			// sending the body, and before that eipgam's (#1532); and each
 			// step of its way out, for the Routing page to say whose time
 			// a slow turn was (TryNet)
 			ctx = httptrace.WithClientTrace(ctx, nt.hooks(&asking, &asked, &wrote))
@@ -4630,7 +4630,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		}
 		wentTier = at.tier
 		if t, ok := hw.sentThere(); ok && c.p.IsRemoteMagpie() {
-			// the tier the remote magpie sent its vendor (stampTier)
+			// the tier the remote eipgam sent its vendor (stampTier)
 			wentTier = t
 		}
 		ended = time.Now()
@@ -5484,7 +5484,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 				waitFrom = time.Now()
 			}
 			if waitsOf(c.patience, patienceFallback) > 0 && !lastSpent && !routedThere(hw.header) {
-				// (another magpie's routed answer isn't asked again:
+				// (another eipgam's routed answer isn't asked again:
 				// its own patience had its turn, routedThere)
 				busyNow = noteBusy(busyNow, c, hw.header)
 			}
@@ -5618,7 +5618,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		}
 		if !hw.passing && hw.code() == http.StatusTooManyRequests && hw.header.Get("Retry-After") == "" {
 			// the vendor said nothing of when: the agent is told when
-			// magpie asks again, the first of those it rested back
+			// eipgam asks again, the first of those it rested back
 			if heldBack.IsZero() {
 				heldBack, _ = soonestBack(cands[:i+1])
 			}
@@ -5916,7 +5916,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 		// translation and a plugin's fetch alike
 		body = chatCallIDs(body)
 	}
-	// a response the request named that magpie doesn't hold goes only to
+	// a response the request named that eipgam doesn't hold goes only to
 	// a provider it is relayed to as written (prev_response.go): Claude's
 	// and the ChatGPT backend's accounts drop it, as a translation does
 	noteAnswered(r, "", "")
@@ -5968,7 +5968,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	if relay && from != provider.Anthropic && p.OnMessages(model) && slices.Contains(s.usable(p, model), provider.Anthropic) {
 		relay = false
 	}
-	// a web search offered is done by the provider, or by magpie for it,
+	// a web search offered is done by the provider, or by eipgam for it,
 	// which a relayed request can't. The request is translated on the
 	// client's own API all the same, not on Chat: Codex offers web_search
 	// on every turn, and on a provider serving Responses each went out as
@@ -5984,7 +5984,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	if relay && searchedForIt(r.Context(), p, from, model, body) && !(sealed || codexAsSent(p, r.Header)) {
 		relay, ownAPI = false, true
 	}
-	// Claude Code's advisor, which magpie runs for a model whose upstream
+	// Claude Code's advisor, which eipgam runs for a model whose upstream
 	// can't (advisor_serve.go): a relay would leave it out (advisorTools)
 	if relay && advisedHere(p, from, from, model, body, wiresOf(r.Context())) {
 		relay, ownAPI = false, true
@@ -6006,7 +6006,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	// (upstreamPath). A client that asked for one JSON body is translated,
 	// which reads that SSE and writes the JSON. Relaying it would hand the
 	// client the data: lines under a 200. Vertex AI answers generateContent
-	// whole, and a translation would drop what the client asked that magpie
+	// whole, and a translation would drop what the client asked that eipgam
 	// doesn't read (its safetySettings, topK, schema, thinkingBudget 0)
 	if relay && from == provider.Gemini && !streamOf(body) && !p.IsVertex() {
 		relay = false
@@ -6024,7 +6024,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	// must be set to false for non-streaming calls". One asked for whole is
 	// asked streamed on Chat and given back whole, its thinking as the
 	// model would have done it (ZekeXiao on X: a group's classifier on the
-	// Qwen Token Plan, which magpie asks for one body)
+	// Qwen Token Plan, which eipgam asks for one body)
 	if relay && from == provider.Chat && !streamOf(body) && dashScope(p) {
 		relay, ownAPI = false, true
 	}
@@ -6043,7 +6043,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 		// custom tool (#3392), and Copilot's answer says no more than the
 		// status — "422 Unprocessable Entity: Unprocessable Entity"
 		// (#2951, #4374: six requests of one turn, all refused) — so
-		// nothing tells magpie what to learn from. They go as functions
+		// nothing tells eipgam what to learn from. They go as functions
 		// from the first ask.
 		if p.Account != nil && p.Account.Agent == "copilot" && grokModel(model) {
 			return true
@@ -6073,7 +6073,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	}
 	if relay {
 		call.To = from
-		// a web search magpie ran for the model, replayed to a provider
+		// a web search eipgam ran for the model, replayed to a provider
 		// that runs none: left out, as a translation leaves it, since the
 		// provider's own chat form answers it with nothing (withoutSearchCalls).
 		// A relay Codex's turns go to as sent, and a native compaction,
@@ -6210,7 +6210,7 @@ func (s *Server) forward(ctx context.Context, p provider.Provider, to provider.P
 	}
 	res, err = s.forwardOnce(ctx, p, to, path, body, in)
 	if err != nil {
-		// a Remote magpie whose computer came back at another address
+		// a Remote eipgam whose computer came back at another address
 		// is asked there (provider's remote_moved.go)
 		if q, ok := provider.SeekMoved(ctx, p, err); ok {
 			p = q
@@ -6427,7 +6427,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 	defer provider.LetGo(req)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json, text/event-stream")
-	// the agent's own where the provider passes it on, else magpie's
+	// the agent's own where the provider passes it on, else eipgam's
 	// (#1851); a signed-in account's signing, a client the vendor serves
 	// (OpenCode's, Cline's, Kilo's) and the user's own header put theirs
 	// on after
@@ -6446,9 +6446,9 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		if p.Account == nil && claudeCodeUA(ua) {
 			// a relay that serves only Claude Code (#179: "only accessible
 			// via the official Claude CLI") knows it by its own headers,
-			// which go on as it sent them; its key to magpie never does.
+			// which go on as it sent them; its key to eipgam never does.
 			// Its User-Agent is the agent's (agentUA): from another
-			// magpie, the one that magpie named, not magpie's own
+			// eipgam, the one that eipgam named, not eipgam's own
 			for k, vs := range in {
 				if claudeCodeHeader(k) {
 					req.Header[k] = slices.Clone(vs)
@@ -6467,7 +6467,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		// allows Codex official clients") knows it by its User-Agent,
 		// originator and x-codex- headers, which go on as Codex sent them,
 		// as they do when Codex talks to the relay itself; its key to
-		// magpie never does. A test asked as Codex asks with them
+		// eipgam never does. A test asked as Codex asks with them
 		// (provider.TestAs)
 		seen := http.Header{}
 		lite := liteKept(p, to, true, modelOf(body))
@@ -6482,8 +6482,8 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 			}
 		}
 		if ua != "" {
-			// the agent's, as agentUA has it: from another magpie, the
-			// one that magpie named, not magpie's own
+			// the agent's, as agentUA has it: from another eipgam, the
+			// one that eipgam named, not eipgam's own
 			req.Header.Set("User-Agent", ua)
 			seen.Set("User-Agent", ua)
 		}
@@ -6524,7 +6524,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		// it works in
 		provider.OpenCodeClient(req.Header, openCodeSeed(in, body), openCodeDir(factsOf(to, body).dir))
 		if v := in.Get("x-opencode-project"); v != "" {
-			// OpenCode's own, asking through magpie
+			// OpenCode's own, asking through eipgam
 			req.Header.Set("x-opencode-project", v)
 		}
 	}
@@ -6567,10 +6567,10 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		}
 	}
 	if p.IsRemoteMagpie() {
-		// as magpie, whatever a copy above put on (Claude Code's or
-		// Codex's own, #179): the other magpie takes X-Magpie-* — the
+		// as eipgam, whatever a copy above put on (Claude Code's or
+		// Codex's own, #179): the other eipgam takes X-eipgam-* — the
 		// agent, the computer, the hops that stop a loop, the cache
-		// lifetime, the agent's User-Agent — only from a magpie's request
+		// lifetime, the agent's User-Agent — only from a eipgam's request
 		// (magpieAsks; linkaww)
 		req.Header.Set("User-Agent", magpieUA())
 		passOnCaller(ctx, req)
@@ -6598,7 +6598,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		s.fitUserBetas(p, req.Header)
 	}
 	sent := len(body)
-	// to another magpie, against a body it kept before (remote_dict.go)
+	// to another eipgam, against a body it kept before (remote_dict.go)
 	dict, dsent := sendDict(p, req, body)
 	if dict != nil {
 		sent = dsent
@@ -6626,7 +6626,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 	// what comes back is counted as it is read, as what went is (#4456)
 	res = gotDown(ctx, res)
 	if dict != nil {
-		// a body the other magpie couldn't decode goes again whole
+		// a body the other eipgam couldn't decode goes again whole
 		res, err = dict.after(req, res, err, again)
 	}
 	if err == nil && res.StatusCode >= 400 && provider.OpenCodeURL(req.URL.String()) {
@@ -6694,7 +6694,7 @@ func claudeCodeUA(ua string) bool {
 }
 
 // claudeCodeAsks is whether r is Claude Code's: by its User-Agent, or,
-// from another magpie, by the agent's that magpie named (agentUA).
+// from another eipgam, by the agent's that eipgam named (agentUA).
 func claudeCodeAsks(r *http.Request) bool {
 	return claudeCodeUA(agentUA(r.Context(), r.Header))
 }
@@ -6723,7 +6723,7 @@ func claudeCodeHeader(k string) bool {
 // vscode_agent_host, which Codex sends as both: those are Codex's turns
 // too, though they are counted under VS Code (agent.vscodeAgentHostUA).
 // Without it one of Codex's own models asked there was answered 404
-// "magpie knows no model" rather than going on Codex's sign-in
+// "eipgam knows no model" rather than going on Codex's sign-in
 // (codexOwnOffMagpie; justruman on Discord).
 func fromCodex(in http.Header) bool {
 	return codexNamed(in) || hostedCodex(in)
@@ -6811,7 +6811,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		body = withMistralCacheKey(p, r.Header, body)
 	}
 	if proto == provider.Responses {
-		// Claude's blocks magpie gave a Responses client go back to Claude
+		// Claude's blocks eipgam gave a Responses client go back to Claude
 		// alone; to this API the item is its summary, as before
 		body = withoutClaudeSeals(body)
 	}
@@ -6825,7 +6825,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 	searchFn := false            // Codex's tool search sent as a function
 	geminiWhole := false         // a Gemini client's generateContent
 	var toolSeen map[string]bool // the call ids the client holds (tool_use_ids.go)
-	advisor := ""                // magpie's id of the advisor model asked for
+	advisor := ""                // eipgam's id of the advisor model asked for
 	// a model that wants its reasoning text back (#388, #1104)
 	replay := proto == provider.Responses && (replaysReasoning(model, p.VendorHost()) || replaysReasoning(upstream, p.VendorHost()))
 	switch proto {
@@ -6858,7 +6858,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 			body = withReasoningText(body)
 		} else {
 			if strings.HasSuffix(p.VendorHost(), "openai.com") || p.IsAzure() || !s.fits(p.ID, bareReasoningRefused(model), proto) {
-				// reasoning magpie gave Codex, an id with nothing sealed in
+				// reasoning eipgam gave Codex, an id with nothing sealed in
 				// it, which they'd look up and not find (#1008), nor does an
 				// upstream that has turned it away before (#1044)
 				body = withoutBareReasoning(body)
@@ -6990,7 +6990,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		// Anthropic turns the whole request away for, and every later
 		// one of the conversation with it (tool_blocks_paired.go)
 		body = toolBlocksPaired(body)
-		// Claude Code's advisor, named by magpie's id (advisor.go); its
+		// Claude Code's advisor, named by eipgam's id (advisor.go); its
 		// calls' usage rows go by that id (advisorRows)
 		advisor = advisorKeyModel(advisorAsked(provider.Anthropic, body))
 		body = advisorTools(body, p, upstream, wiresOf(r.Context()), keyAllows(r, p))
@@ -7132,7 +7132,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		if body, delta = prevDelta(r, p, body); !delta {
 			body = sentWhole
 		}
-		// and to another magpie, which Codex's store false would leave
+		// and to another eipgam, which Codex's store false would leave
 		// sent whole each turn: asked to keep it, and sent the input after
 		// the turn it kept last (remote_delta.go)
 		if remote = remoteTurnFor(r, p, body); !delta && remote != nil {
@@ -7146,7 +7146,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 	}
 	if res.StatusCode == http.StatusBadRequest && (proto == provider.Chat || proto == provider.Gemini) && (signaturesReach(p, proto, upstream) || proto == provider.Chat && bodyHasBytes(body, thoughtSignatureField)) {
 		// a signature Google won't take (signatureRefused), one given
-		// before magpie noted whose it was: asked again once without
+		// before eipgam noted whose it was: asked again once without
 		b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
 		res.Body.Close()
 		res.Body = io.NopCloser(bytes.NewReader(b))
@@ -7166,7 +7166,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 	if (delta || proto == provider.Responses && (prevHeld(r) || prevClientWhole(r))) && (badRequest(res.StatusCode) || res.StatusCode == http.StatusNotFound) {
 		// one it no longer holds: the conversation whole; and one another
 		// of its resources made (prevForeign): the whole, with the items
-		// magpie brought back naming nothing — or, for a conversation the
+		// eipgam brought back naming nothing — or, for a conversation the
 		// client replayed whole itself, the ids it echoes taken out
 		// (#6320). Asked again once, and only with a body that differs.
 		b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
@@ -7199,7 +7199,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 	if res.StatusCode >= 400 && p.PassesErrors() {
 		// the user leaves its errors to the client (errors=pass): the
 		// vendor's error goes as it came, and nothing is asked again in
-		// another shape. Above, magpie only took back its own: a
+		// another shape. Above, eipgam only took back its own: a
 		// signature it gave, the previous response it named
 		defer res.Body.Close()
 		u.RequestID = requestID(res.Header)
@@ -7600,7 +7600,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		return writeVendorErrorFrom(w, proto, proto, p, res, msg, b), msg, true
 	}
 	if remote != nil && res.Header.Get(KeptTurnHeader) != "" {
-		// the other magpie kept the turn: what it answered is kept here
+		// the other eipgam kept the turn: what it answered is kept here
 		// once relayed, for the next turn's delta (remote_delta.go)
 		var kept func()
 		res.Body, kept = remote.tee(res.Body, res.Header.Get("Content-Type"))
@@ -7679,9 +7679,9 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		spaces = &nsTidy{named: named, back: renamed, sse: sse}
 	}
 	// a reasoning item another vendor wrote with its text in it, in a reply
-	// relayed as it came, made into one magpie could have (#2855): the
+	// relayed as it came, made into one eipgam could have (#2855): the
 	// client stores what it is handed and replays it where OpenAI's rules
-	// hold, on magpie or off it
+	// hold, on eipgam or off it
 	var made *reasoningTidy
 	if proto == provider.Responses {
 		made = &reasoningTidy{sse: sse}
@@ -7832,7 +7832,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		pending = pending[:0]
 		atLine = true
 	}
-	// apart is what goes before an event magpie appends: a blank line,
+	// apart is what goes before an event eipgam appends: a blank line,
 	// after the line still pending if the upstream's last write stopped
 	// inside one
 	apart := func() []byte {
@@ -8447,7 +8447,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		}
 		// the tier the client asked for goes to a provider the user added
 		// by its address as it was asked (Request.Tier), and to another
-		// magpie, which offered it and serves it as its own Codex would be
+		// eipgam, which offered it and serves it as its own Codex would be
 		// (#1234), and to a provider plugin, on its Chat or Responses, when
 		// it is one the plugin says the model is served at (#2514)
 		own := p.Preset == "" && p.Account == nil || p.IsRemoteMagpie()
@@ -8471,7 +8471,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		}
 		if p.IsRemoteMagpie() && req.Tier == "" && req.Fast && (to == provider.Chat || to == provider.Responses) {
 			// fast mode in Claude's words (a fast pick from an agent on
-			// its API, littlekk88 on Discord) is the tier another magpie
+			// its API, littlekk88 on Discord) is the tier another eipgam
 			// offers it at: priority, or ultrafast for a pick sent
 			// Ultrafast where it offers that. Its Chat or Responses reads
 			// service_tier alone
@@ -8572,7 +8572,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 			body = withoutLoneToolChoice(body)
 		}
 		if to == provider.Chat && req.WebSearch && p.IsRemoteMagpie() {
-			// the other magpie searches for it (search_remote.go)
+			// the other eipgam searches for it (search_remote.go)
 			body = withFields(body, map[string]any{"web_search_options": map[string]any{}})
 		}
 		if to == provider.Responses && !s.fits(p.ID, idlessReasoningRefused(model), to) {
@@ -8597,12 +8597,12 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		if to == provider.CodeAssist && p.Account != nil {
 			// the envelope is named in there, where the id it carries is
 			// known: on Antigravity that is the variant the effort picked,
-			// not the model magpie knows
+			// not the model eipgam knows
 			body = codeAssistBody(p, req, model, wires)
 		} else if wire != model {
 			// the vendor's own name for the model goes in the model field
 			// and nowhere else: everything above shaped the request from
-			// the model magpie knows, which is what those decisions are
+			// the model eipgam knows, which is what those decisions are
 			// about
 			body = rewriteModel(body, wire)
 		}
@@ -8719,7 +8719,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		if req.endsWithAssistant() && refusesPrefill(res.StatusCode, b) {
 			// the model takes no prefill (#1447), remembered for it alone.
 			// A conversation the client ended with the assistant's message
-			// is asked again with a user turn after it; magpie's own
+			// is asked again with a user turn after it; eipgam's own
 			// continuation of a cut reply isn't (streamTranslated)
 			s.markUnfit(p.ID, prefillRefused(model), to)
 			if req.LastIsTurn && !req.Resume {
@@ -8810,7 +8810,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		}
 		if req.OwnEffort {
 			if refused, value := ownEffortRefused(res.StatusCode, b, req.Effort); refused {
-				// the effort magpie added for auto mode's classifier
+				// the effort eipgam added for auto mode's classifier
 				// (fitAutoModeClassifier) turned away: none, by a model
 				// that reasons, is asked again at low; any other refusal,
 				// the field's, without it, as before. Remembered either way
@@ -8828,7 +8828,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		}
 		if res.StatusCode == http.StatusBadRequest && (signaturesReach(p, to, model) || to == provider.Chat && signsOwn(req, p.ID)) && signatureRefused.Match(b) {
 			// a signature Google won't take (a client changed it, or
-			// another provider gave it before magpie noted whose it was):
+			// another provider gave it before eipgam noted whose it was):
 			// the calls waved through instead, for this request
 			if r, had := withoutSignatures(req); had {
 				req = r
@@ -8875,7 +8875,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 			r.Tier, req = "", &r
 			continue
 		}
-		// magpie's own key is what a refusal is about only when it says so:
+		// eipgam's own key is what a refusal is about only when it says so:
 		// another 400 is not asked again for it
 		ownKeyKept := ownKey != "" && req.CacheKey == ownKey && !refusesField(res.StatusCode, b, cacheKeyField)
 		if req.CacheKey != "" && !ownKeyKept && badRequest(res.StatusCode) && !wrongEndpoint(res.StatusCode, b) && !provider.CopilotRefusal(b) {
@@ -9078,7 +9078,7 @@ func withMistralCacheKey(p provider.Provider, in http.Header, body []byte) []byt
 // of: the session the client names (sessionOf), else its first user
 // message, which every later turn repeats, hashed into a UUID's shape, so
 // it is the same for every turn and names nothing of the client, the
-// user or magpie.
+// user or eipgam.
 func cacheKeyOf(in http.Header, req *Request) string {
 	h := sha256.New()
 	if v := sessionOf(in); v != "" {
@@ -9107,7 +9107,7 @@ func refusesField(status int, body []byte, field string) bool {
 }
 
 // hourMarksRefused is an upstream that turned away the hour-long cache
-// marks magpie adds (Request.hourMarks), as remembered in unfit.
+// marks eipgam adds (Request.hourMarks), as remembered in unfit.
 const hourMarksRefused = "cache_control.ttl"
 
 // hourMarksRefusal is a 400 over a cache mark's ttl: a relay that knows no
@@ -9471,7 +9471,7 @@ func (s *Server) translate(w http.ResponseWriter, r *http.Request, p provider.Pr
 		msg := "input_image without image_url cannot be translated; send an image_url or use a native Responses route"
 		return writeError(w, from, 400, msg), msg
 	}
-	// Claude Code's advisor, run by magpie for a model whose upstream
+	// Claude Code's advisor, run by eipgam for a model whose upstream
 	// can't (advisor_serve.go)
 	advised := advisedHere(p, from, to, model, body, wiresOf(r.Context()))
 	request, err := parseTranslated(from, to, body, advised)
@@ -9480,7 +9480,7 @@ func (s *Server) translate(w http.ResponseWriter, r *http.Request, p provider.Pr
 	}
 	if request.WebSearch {
 		// an API on which the provider searches by itself comes first;
-		// without one, its model is given magpie's search. A searcher
+		// without one, its model is given eipgam's search. A searcher
 		// asked for another model goes there too: on its first API
 		// (DeepSeek's Chat) it had no search tool and answered from
 		// nothing (#669)
@@ -9645,7 +9645,7 @@ func (s *Server) translate(w http.ResponseWriter, r *http.Request, p provider.Pr
 			}
 		}
 		// a request the vendor refused in its stream is answered as
-		// refused, with its code (magpie-releases#18); anything else is
+		// refused, with its code (eipgam-releases#18); anything else is
 		// the vendor failing, with the status its words would have come
 		// with: a minute limit in a 200 stream is a 429, not a 502
 		return writeVendorError(w, from, cmp.Or(col.errStatus, streamStatus(said)), p.Name+": "+said, col.errSaid), said
@@ -10017,21 +10017,21 @@ var keepaliveGap = time.Second
 var keepaliveEvery, keepaliveLongest = 15 * time.Second, 5 * time.Minute
 
 // translatedQuietLongest is how long a translated reply's upstream may
-// say nothing at all, its stream open, while magpie keeps the client
+// say nothing at all, its stream open, while eipgam keeps the client
 // alive every keepaliveEvery (keepThroughSilence), and a reply passed
 // through or held is kept so too (keepQuiet). A reply that comes in
 // one burst at its end (claude-opus-5-5 at effort max, a relay that
 // buffers) is silent for its whole generation, which runs past 10
-// minutes, longer than the 10 minutes magpie gives a vendor for its
+// minutes, longer than the 10 minutes eipgam gives a vendor for its
 // headers (upstreamHeaderWait); a dead connection ends sooner by itself
 // (HTTP2Health, TCP keepalive). Past it the client's own idle timeout
 // ends the wait: Claude Code's, 300s after its last ping counted.
 var translatedQuietLongest = 30 * time.Minute
 
 // pingEvery is the least time between two of Anthropic's ping events
-// magpie sends one client; a keepalive due sooner is a comment. Claude
+// eipgam sends one client; a keepalive due sooner is a comment. Claude
 // Code (2.1.311) starts its 300s stream watchdog again on a ping only
-// for 30 in a row (Gcr): pings a second apart, as magpie sent them
+// for 30 in a row (Gcr): pings a second apart, as eipgam sent them
 // while an upstream sent its own keepalives, spend those in 30s, and the
 // watchdog ends the reply 300s later. One a minute lasts
 // translatedQuietLongest,
@@ -10346,7 +10346,7 @@ const SessionHeader = "X-Magpie-Session"
 // user (an email, a login) or its id in the routing trace, percent-encoded
 // when it isn't ASCII (pinnedName): only it is tried, and when it can't take the request the caller is told why rather
 // than another account answering — a probe of one account needs that one.
-// It goes no further than magpie.
+// It goes no further than eipgam.
 const AccountHeader = "X-Magpie-Account"
 
 // sessionOf is the session a request names, "" when it names none.
@@ -10382,7 +10382,7 @@ func subOf(in http.Header) string {
 	return sub
 }
 
-// nativeSessionOf keeps the client session even when magpie's header overrides it.
+// nativeSessionOf keeps the client session even when eipgam's header overrides it.
 func nativeSessionOf(in http.Header) string {
 	for _, h := range sessionHeaders {
 		if v := strings.TrimSpace(in.Get(h)); v != "" {
@@ -10403,7 +10403,7 @@ func nativeSessionOf(in http.Header) string {
 // affinityID is the conversation a turn's account is kept for: an agent's
 // own session (conversationID), else the caller's X-Magpie-Session, else
 // the conversation's hash. Two callers that send the same opening with
-// their own X-Magpie-Session are two conversations (#5242). It is magpie's
+// their own X-Magpie-Session are two conversations (#5242). It is eipgam's
 // own key and never goes upstream: conversationID, which a vendor or a
 // plugin is sent (Kilo, ConversationHeader), doesn't read X-Magpie-Session.
 func affinityID(in http.Header, body []byte) string {
@@ -10473,7 +10473,7 @@ func conversationID(in http.Header, body []byte) string {
 		}
 		w.Flush()
 	}
-	return "magpie-" + hex.EncodeToString(h.Sum(nil)[:12])
+	return "eipgam-" + hex.EncodeToString(h.Sum(nil)[:12])
 }
 
 // dshLastConvs are the ids of the user messages a dsh request's turn
@@ -10534,7 +10534,7 @@ func dshLastConvs(agent string, body []byte) []string {
 			t = c
 		}
 		sum := sha256.Sum256(joinBytes(`{"role":"user","content":`, t, `}`))
-		out = append(out, "magpie-"+hex.EncodeToString(sum[:12]))
+		out = append(out, "eipgam-"+hex.EncodeToString(sum[:12]))
 	}
 	return out
 }
@@ -10767,7 +10767,7 @@ func userOpens(msg []byte) (theirs, result bool) {
 func offSpelled(e string) bool { return strings.EqualFold(strings.TrimSpace(e), "off") }
 
 // offAsNone is a Chat or Responses body asking reasoning "off"
-// (reasoning_effort, or reasoning.effort) asking for magpie's own off
+// (reasoning_effort, or reasoning.effort) asking for eipgam's own off
 // level, none, instead: what every check and route reads the effort by,
 // and what fitEffort fits to the model's own off level, or its least
 // where it has none, as "none" asked is. A body with no such field goes
@@ -10879,7 +10879,7 @@ func forcesTool(choice string) bool {
 // schema; and a vendor that holds the forced tool to strict mode instead
 // answers `tools.N.custom: For 'object' type, 'additionalProperties' must
 // be explicitly set to false` (#668), which Anthropic says only of a
-// strict tool, and magpie sends none.
+// strict tool, and eipgam sends none.
 var toolChoiceRefused = lazyre.New(`(?i)tool_choice\W+type\W+tool\W+and\W+any\W+are not supported|tools\.\d+\.custom\W+for\W+object\W+type\W+additionalProperties\W+must be explicitly set to false`)
 
 // unforced is req with its forced tool_choice left to the model: a named
@@ -11172,7 +11172,7 @@ func streamError(w http.ResponseWriter, proto provider.Protocol, model string, s
 		// reads as the model at capacity and stops on (codex-rs codex-api
 		// sse/responses_error.rs). A busy status told once Codex has the
 		// stream's headers went as server_error, which Codex retries as a
-		// dropped stream: five more turns, each asked again by magpie,
+		// dropped stream: five more turns, each asked again by eipgam,
 		// "reconnecting 5/5" and the last error alone (wjh66 on Discord)
 		ev.Code = "server_is_overloaded"
 	}
@@ -11258,7 +11258,7 @@ var busyWords = lazyre.New(`(?i)concurrency limit|too many (pending|concurrent|i
 
 // spentWords say an account is out of what it pays for, which no retry
 // clears: Pi's own deny-list keeps such a text from being asked again, and
-// magpie doesn't tell it otherwise.
+// eipgam doesn't tell it otherwise.
 var spentWords = lazyre.New(`(?i)quota|insufficient|balance|credit|billing|budget|usage.?limit|余额|额度|欠费|套餐|用量`)
 
 // saysBusy is msg, a request error's text (400, 409, 422), with "you can
@@ -11288,7 +11288,7 @@ func writeError(w http.ResponseWriter, proto provider.Protocol, status int, msg 
 // shape, as writeError does, keeping the code and param the vendor named
 // (an OpenAI-shaped error's strings) for a client of OpenAI's shape: the
 // ChatGPT backend's invalid_access_program on access_programs.cyber
-// (magpie-releases#18) reaches the agent as the backend said it.
+// (eipgam-releases#18) reaches the agent as the backend said it.
 func writeVendorError(w http.ResponseWriter, proto provider.Protocol, status int, msg string, body []byte) int {
 	var code, param any
 	if e := gjson.GetBytes(body, "error"); e.IsObject() {
@@ -11441,13 +11441,13 @@ func tooLong(status int, msg string) bool {
 var paceWords = lazyre.New(`(?i)rate.?limit|per (minute|hour|day)|\bTP[MD]\b|please wait|try again later|throttl|速率|频繁|频率|限流|并发|每(秒|分钟|小时|天|日)|稍后(再试|重试)`)
 
 // splitSent tells what of sent, the ms from the request (start) to its
-// answering try's body written, was magpie's own work, the tries that
+// answering try's body written, was eipgam's own work, the tries that
 // failed first with their pauses (from the first try's start to this
 // one's), and this try's wait for a slot (queued). asked is when the
 // request that went out began to (GetConn, UnixNano; 0 when unknown):
 // after it is connecting and sending the body, which is neither. #1532:
 // OpenCode Go held a try ~100 s before its 503, and the detail called the
-// whole of it magpie's.
+// whole of it eipgam's.
 func splitSent(sent int64, start, firstBegan, began time.Time, asked, queued int64) (own, retried, waited int64) {
 	retried = min(max(began.Sub(firstBegan).Milliseconds(), 0), sent)
 	waited = min(max(queued, 0), sent-retried)

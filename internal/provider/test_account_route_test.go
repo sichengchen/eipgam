@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A model's test asks the account a request for it goes to (#4992,
@@ -31,7 +31,7 @@ func twoAccountPlugin(t *testing.T, ctx context.Context, first map[string]any) (
 	t.Helper()
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Setenv("FAKE_GROK", "1")
 	t.Cleanup(plugin.Settle)
 	var mu sync.Mutex

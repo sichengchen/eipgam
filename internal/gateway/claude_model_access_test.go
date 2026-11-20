@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // claudeMythosAccounts signs Claude Code in to a@example.com, with
@@ -69,7 +69,7 @@ func claudeMythosAccounts(t *testing.T, bOffers bool) (asks string) {
 		{"agent": "claude", "user": "b@example.com", "plan": "max", "on": true, "seen": time.Now(), "auth": oauth("tok-b"),
 			"profile": map[string]any{"emailAddress": "b@example.com", "accountUuid": "u-b"}},
 	}), 0o600)
-	// B's own config directory, as magpie names it (claudeAccountDir)
+	// B's own config directory, as eipgam names it (claudeAccountDir)
 	sum := sha256.Sum256([]byte("b@example.com"))
 	bdir := filepath.Join(filepath.Dir(provider.Path()), "claude-accounts", hex.EncodeToString(sum[:])[:16])
 	os.MkdirAll(bdir, 0o700)

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // manyHubTools are n tools of two servers, github's create_issue among
@@ -183,7 +183,7 @@ func listedSpecs(t *testing.T, body string) map[string]string {
 // as the hub lists and describes them.
 func imageAndNotes(agent string, n int) *fakeHub {
 	img := []HubTool{
-		{Server: "magpie-image", Tool: "generate_image", Spec: map[string]json.RawMessage{
+		{Server: "eipgam-image", Tool: "generate_image", Spec: map[string]json.RawMessage{
 			"name":        json.RawMessage(`"generate_image"`),
 			"description": json.RawMessage(`"Generate an image from a text prompt, saved in the project."`),
 			"inputSchema": json.RawMessage(`{"type":"object","properties":{"prompt":{"type":"string"}},"required":["prompt"]}`),
@@ -197,7 +197,7 @@ func imageAndNotes(agent string, n int) *fakeHub {
 		notes.Tools = append(notes.Tools, HubToolNote{Name: name, About: "Does " + name})
 	}
 	return &fakeHub{on: true, tools: map[string][]HubTool{agent: ts}, servers: map[string][]HubServer{agent: {
-		{Name: "magpie-image", About: "Generate and edit images", Known: true, Tools: []HubToolNote{{Name: "generate_image", About: "Generate an image from a text prompt"}}},
+		{Name: "eipgam-image", About: "Generate and edit images", Known: true, Tools: []HubToolNote{{Name: "generate_image", About: "Generate an image from a text prompt"}}},
 		notes,
 	}}}
 }
@@ -219,7 +219,7 @@ func TestHubFindToolsSaysWhatIsBehind(t *testing.T) {
 		t.Fatalf("listed %v", specs)
 	}
 	first, _, _ := strings.Cut(find, "\n")
-	if !strings.Contains(first, "magpie-image (Generate and edit images)") || !strings.Contains(first, "notes") {
+	if !strings.Contains(first, "eipgam-image (Generate and edit images)") || !strings.Contains(first, "notes") {
 		t.Fatalf("find_tools' first line doesn't say what is behind it: %q", first)
 	}
 	for _, x := range []string{"generate_image (Generate an image from a text prompt)", "note_op12", "query"} {

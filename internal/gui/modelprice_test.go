@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func modelPriceAsk(t *testing.T, mux *http.ServeMux, method, target, body string) (int, modelPriceJSON) {
@@ -25,7 +25,7 @@ func modelPriceAsk(t *testing.T, mux *http.ServeMux, method, target, body string
 
 // The Usage page's Set price… (soilzhu80 on X) prices a model no provider
 // lists: it is kept as the model's price from any provider (*/model), the
-// key `magpie model price '*/model'` writes and a session's model is
+// key `eipgam model price '*/model'` writes and a session's model is
 // counted at, and a null price takes it away again.
 func TestModelPriceFromAnyProvider(t *testing.T) {
 	sandboxHome(t)

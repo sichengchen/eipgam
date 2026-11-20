@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_QUIET_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_QUIET_ASSETS || path.resolve(__dirname, "../assets"));
 const H = 3600e3;
 const iso = (ms) => new Date(ms).toISOString();
 const midnight = new Date();
@@ -28,7 +28,7 @@ function overview() {
     calls: 28, errors: 0, input: 22400, output: 5600, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0.28, bucket: "day", series,
     agents: Array.from({ length: 14 }, (_, i) => row(i, i % 2 ? "codex-color" : "claude-color")),
     models: Array.from({ length: 14 }, (_, i) => row(100 + i, "openai")),
-    path: "~/.config/magpie/usage.jsonl",
+    path: "~/.config/eipgam/usage.jsonl",
   };
 }
 function cards(now) {
@@ -122,7 +122,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.on("pageerror", (e) => errors.push(e.message));
         const st = { usage: 0, quotas: 0, quotasDone: 0, now: Date.now(), usageGate: null, quotaGate: null };
         await p.route("**/*", serve(lang, st));
-        await p.goto("http://magpie.test/?view=usage");
+        await p.goto("http://eipgam.test/?view=usage");
         await p.locator("#subscriptionUsage .subscription-card:not(.skeleton-card)").nth(2).waitFor();
         await p.locator("#usageModels .row").nth(13).waitFor();
         await p.waitForTimeout(500);

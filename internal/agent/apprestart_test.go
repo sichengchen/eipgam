@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // restartSandbox is a home with a provider in it; the system is said to be
@@ -75,7 +75,7 @@ func TestRestartAppsOnWindows(t *testing.T) {
 	}
 	for _, gone := range []string{"workbuddy", "workbuddy-ai", "openmausbot", "zcode"} {
 		if _, ok := restartApps[gone]; ok {
-			t.Errorf("%s is no agent of magpie's, yet it has a Restart", gone)
+			t.Errorf("%s is no agent of eipgam's, yet it has a Restart", gone)
 		}
 	}
 	if _, ok := restartApps["codex"]; ok {

@@ -13,7 +13,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { test } = require("node:test");
 
-const source = fs.readFileSync(process.env.MAGPIE_APP_JS || path.resolve(__dirname, "../assets/app.js"), "utf8").replace(/\r\n/g, "\n");
+const source = fs.readFileSync(process.env.EIPGAM_APP_JS || path.resolve(__dirname, "../assets/app.js"), "utf8").replace(/\r\n/g, "\n");
 function section(start, end) {
   const a = source.indexOf(start), b = source.indexOf(end, a);
   assert(a >= 0 && b > a, `missing ${start}`);
@@ -144,7 +144,7 @@ test("a window held by a longer one used up counts as nothing left", () => {
 });
 
 test("a Mistral Studio month never adds up with a Vibe month (dhanyqaz on Discord)", () => {
-  // the two keys of one Student organization, as magpie reads them: the
+  // the two keys of one Student organization, as eipgam reads them: the
   // Vibe key's vibe_budget and the Studio key's api_budget, both in USD
   const mistral = (user, w) => ({ provider: "mistral", name: "Mistral", user, plan: "Student", windows: [w] });
   const r = merge([

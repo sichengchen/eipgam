@@ -12,12 +12,12 @@ import (
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
-// appPath is where Win+R and `start magpie` look magpie.exe up: the user's
+// appPath is where Win+R and `start eipgam` look eipgam.exe up: the user's
 // own, no administrator needed. A var so the test writes a key of its own.
-var appPath = `Software\Microsoft\Windows\CurrentVersion\App Paths\magpie.exe`
+var appPath = `Software\Microsoft\Windows\CurrentVersion\App Paths\eipgam.exe`
 
 func registerAppPath(exe string) {
 	if k, _, err := registry.CreateKey(registry.CURRENT_USER, appPath, registry.SET_VALUE); err == nil {
@@ -28,14 +28,14 @@ func registerAppPath(exe string) {
 	registerUninstall(exe)
 }
 
-// uninstallKey is magpie's entry in Settings › Apps › Installed apps (and
+// uninstallKey is eipgam's entry in Settings › Apps › Installed apps (and
 // Control Panel's Programs and Features), the user's own. With none,
-// Windows' own way to remove a program didn't list magpie, so it was
+// Windows' own way to remove a program didn't list eipgam, so it was
 // deleted by hand, which runs no code: Codex kept openai_base_url on a
-// gateway that was gone (Jevik_AI on X). Its Uninstall runs magpie's own
+// gateway that was gone (Jevik_AI on X). Its Uninstall runs eipgam's own
 // (UninstallCommand), which puts every agent back first. A var so the
 // test writes a key of its own.
-var uninstallKey = `Software\Microsoft\Windows\CurrentVersion\Uninstall\magpie`
+var uninstallKey = `Software\Microsoft\Windows\CurrentVersion\Uninstall\eipgam`
 
 // registerUninstall writes the entry for exe, at every start, so it
 // follows an exe that was moved.
@@ -51,7 +51,7 @@ func registerUninstall(exe string) {
 		"Publisher":       Name,
 		"InstallLocation": filepath.Dir(exe),
 		"UninstallString": UninstallCommand(exe),
-		"URLInfoAbout":    "https://usemagpie.ai",
+		"URLInfoAbout":    "https://github.com/sichengchen/eipgam",
 	} {
 		_ = k.SetStringValue(name, v)
 	}
@@ -61,7 +61,7 @@ func registerUninstall(exe string) {
 }
 
 // unregisterUninstall takes the entry out while it is exe's, or its exe
-// is gone; another magpie's stays.
+// is gone; another eipgam's stays.
 func unregisterUninstall(exe string) error {
 	k, err := registry.OpenKey(registry.CURRENT_USER, uninstallKey, registry.QUERY_VALUE)
 	if err != nil {
@@ -72,7 +72,7 @@ func unregisterUninstall(exe string) error {
 	v = strings.TrimSuffix(v, ",0")
 	if err == nil && v != "" && !strings.EqualFold(filepath.Clean(v), filepath.Clean(exe)) {
 		if _, err := os.Stat(v); err == nil {
-			return nil // another magpie's
+			return nil // another eipgam's
 		}
 	}
 	return registry.DeleteKey(registry.CURRENT_USER, uninstallKey)
@@ -174,7 +174,7 @@ func write(lnk, exe string) (bool, error) {
 	return true, nil
 }
 
-// unregisterAppPath takes magpie's App Paths entry out while it opens exe,
+// unregisterAppPath takes eipgam's App Paths entry out while it opens exe,
 // or an exe that is gone, and its Installed apps entry the same way.
 func unregisterAppPath(exe string) error {
 	uerr := unregisterUninstall(exe)
@@ -186,7 +186,7 @@ func unregisterAppPath(exe string) error {
 	k.Close()
 	if err == nil && v != "" && !strings.EqualFold(filepath.Clean(v), filepath.Clean(exe)) {
 		if _, err := os.Stat(v); err == nil {
-			return uerr // another magpie's
+			return uerr // another eipgam's
 		}
 	}
 	return errors.Join(uerr, registry.DeleteKey(registry.CURRENT_USER, appPath))

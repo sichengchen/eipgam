@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // fakeBili stands in for bili 0.1.213's plugin installer and remover, for
@@ -122,7 +122,7 @@ func (f *fakeBili) run(args ...string) (string, error) {
 		write(f.t, filepath.Join(f.h, ".claude", "commands", "acp-cache.md"), "acp cache\n")
 	case "remove claude":
 		bak := map[string]any{}
-		f.write(p, m) // the backup taken again, when magpie wrote since
+		f.write(p, m) // the backup taken again, when eipgam wrote since
 		_ = json.Unmarshal([]byte(read(f.t, p+".bili-bak")), &bak)
 		env, _ := m["env"].(map[string]any)
 		delete(env, "ANTHROPIC_BASE_URL")
@@ -165,8 +165,8 @@ func TestBiliOnOffExact(t *testing.T) {
 	f := newFakeBili(t, h)
 	pi := filepath.Join(h, ".pi", "agent", "settings.json")
 	cc := filepath.Join(h, ".claude", "settings.json")
-	piWas := "{\n    \"defaultModel\": \"magpie/gpt-5\",   \"theme\": \"dark\"\n}\n"
-	ccWas := "{\"model\":\"opus\",\n \"env\": {\"ANTHROPIC_BASE_URL\": \"http://127.0.0.1:3425\", \"ANTHROPIC_AUTH_TOKEN\": \"magpie\"}}"
+	piWas := "{\n    \"defaultModel\": \"eipgam/gpt-5\",   \"theme\": \"dark\"\n}\n"
+	ccWas := "{\"model\":\"opus\",\n \"env\": {\"ANTHROPIC_BASE_URL\": \"http://127.0.0.1:3425\", \"ANTHROPIC_AUTH_TOKEN\": \"eipgam\"}}"
 	write(t, pi, piWas)
 	write(t, cc, ccWas)
 
@@ -233,26 +233,26 @@ func filter(runs []string, prefixes ...string) []string {
 	return out
 }
 
-// TestBiliClaudeKeepsMagpiesRoute: magpie rewrote Claude Code's
+// TestBiliClaudeKeepsMagpiesRoute: eipgam rewrote Claude Code's
 // settings.json while bili was on (another model picked). bili's remove
 // then takes ANTHROPIC_BASE_URL out, which would send Claude Code to
 // Anthropic, and puts back the DISABLE_AUTO_COMPACT it added; switched off,
-// Claude Code goes to magpie again, without that, with the model picked.
+// Claude Code goes to eipgam again, without that, with the model picked.
 func TestBiliClaudeKeepsMagpiesRoute(t *testing.T) {
 	h := sandbox(t)
 	newFakeBili(t, h)
 	cc := filepath.Join(h, ".claude", "settings.json")
-	write(t, cc, `{"model":"opus","env":{"ANTHROPIC_BASE_URL":"http://127.0.0.1:3425","ANTHROPIC_AUTH_TOKEN":"magpie"},"permissions":{"allow":["Bash"]}}`)
+	write(t, cc, `{"model":"opus","env":{"ANTHROPIC_BASE_URL":"http://127.0.0.1:3425","ANTHROPIC_AUTH_TOKEN":"eipgam"},"permissions":{"allow":["Bash"]}}`)
 	if _, err := SetBili("claude", true); err != nil {
 		t.Fatal(err)
 	}
-	// magpie picks another model, keeping bili's address in front of it
+	// eipgam picks another model, keeping bili's address in front of it
 	m := map[string]any{}
 	if err := json.Unmarshal([]byte(read(t, cc)), &m); err != nil {
 		t.Fatal(err)
 	}
-	m["model"] = "magpie/glm-5"
-	m["env"].(map[string]any)["ANTHROPIC_MODEL"] = "magpie/glm-5"
+	m["model"] = "eipgam/glm-5"
+	m["env"].(map[string]any)["ANTHROPIC_MODEL"] = "eipgam/glm-5"
 	b, _ := json.MarshalIndent(m, "", "\t")
 	write(t, cc, string(b))
 
@@ -265,7 +265,7 @@ func TestBiliClaudeKeepsMagpiesRoute(t *testing.T) {
 	}
 	env, _ := got["env"].(map[string]any)
 	if env["ANTHROPIC_BASE_URL"] != "http://127.0.0.1:3425" {
-		t.Fatalf("ANTHROPIC_BASE_URL = %v, want magpie's:\n%s", env["ANTHROPIC_BASE_URL"], read(t, cc))
+		t.Fatalf("ANTHROPIC_BASE_URL = %v, want eipgam's:\n%s", env["ANTHROPIC_BASE_URL"], read(t, cc))
 	}
 	if _, ok := env["DISABLE_AUTO_COMPACT"]; ok {
 		t.Fatalf("DISABLE_AUTO_COMPACT left:\n%s", read(t, cc))
@@ -273,14 +273,14 @@ func TestBiliClaudeKeepsMagpiesRoute(t *testing.T) {
 	if _, ok := got["hooks"]; ok {
 		t.Fatalf("hooks left:\n%s", read(t, cc))
 	}
-	if got["model"] != "magpie/glm-5" || env["ANTHROPIC_MODEL"] != "magpie/glm-5" || env["ANTHROPIC_AUTH_TOKEN"] != "magpie" || got["permissions"] == nil {
-		t.Fatalf("magpie's and the user's own values lost:\n%s", read(t, cc))
+	if got["model"] != "eipgam/glm-5" || env["ANTHROPIC_MODEL"] != "eipgam/glm-5" || env["ANTHROPIC_AUTH_TOKEN"] != "eipgam" || got["permissions"] == nil {
+		t.Fatalf("eipgam's and the user's own values lost:\n%s", read(t, cc))
 	}
 }
 
-// TestBiliOffWithoutRecord: a plugin put in outside magpie, with no record
+// TestBiliOffWithoutRecord: a plugin put in outside eipgam, with no record
 // of the file before it: bili's remove takes Claude Code's
-// ANTHROPIC_BASE_URL out, and magpie puts back the address bili forwarded to.
+// ANTHROPIC_BASE_URL out, and eipgam puts back the address bili forwarded to.
 func TestBiliOffWithoutRecord(t *testing.T) {
 	h := sandbox(t)
 	f := newFakeBili(t, h)
@@ -383,7 +383,7 @@ func TestBiliMergeJSON(t *testing.T) {
 // TestBiliClaudeKeepsAutoCompact: Kling__Lab's "Prompt is too long". bili's
 // install turns Claude Code's auto-compaction off, and a session bili
 // doesn't compress (Claude Desktop's Code tab, past its proxy) then stops
-// at the window for good. magpie puts it back on, takes that away again
+// at the window for good. eipgam puts it back on, takes that away again
 // with the plugin, and leaves a value the user had before as theirs.
 func TestBiliClaudeKeepsAutoCompact(t *testing.T) {
 	compact := func(cc string) (any, bool) {
@@ -399,7 +399,7 @@ func TestBiliClaudeKeepsAutoCompact(t *testing.T) {
 		h := sandbox(t)
 		f := newFakeBili(t, h)
 		cc := filepath.Join(h, ".claude", "settings.json")
-		write(t, cc, `{"env":{"ANTHROPIC_BASE_URL":"http://127.0.0.1:3425","ANTHROPIC_AUTH_TOKEN":"magpie"}}`)
+		write(t, cc, `{"env":{"ANTHROPIC_BASE_URL":"http://127.0.0.1:3425","ANTHROPIC_AUTH_TOKEN":"eipgam"}}`)
 		if _, err := SetBili("claude", true); err != nil {
 			t.Fatal(err)
 		}
@@ -440,7 +440,7 @@ func TestBiliClaudeKeepsAutoCompact(t *testing.T) {
 		}
 	})
 	t.Run("installed before", func(t *testing.T) {
-		// a plugin magpie installed before this: the record has bili's "1"
+		// a plugin eipgam installed before this: the record has bili's "1"
 		h := sandbox(t)
 		f := newFakeBili(t, h)
 		cc := filepath.Join(h, ".claude", "settings.json")
@@ -455,7 +455,7 @@ func TestBiliClaudeKeepsAutoCompact(t *testing.T) {
 		}
 		keepBiliCompact()
 		if v, _ := compact(cc); v != "0" {
-			t.Fatalf("DISABLE_AUTO_COMPACT = %v after magpie started, want \"0\":\n%s", v, read(t, cc))
+			t.Fatalf("DISABLE_AUTO_COMPACT = %v after eipgam started, want \"0\":\n%s", v, read(t, cc))
 		}
 		if _, err := SetBili("claude", false); err != nil {
 			t.Fatal(err)
@@ -470,19 +470,19 @@ func TestBiliClaudeKeepsAutoCompact(t *testing.T) {
 }
 
 // TestBiliZedThroughPrefix: Zed has no plugin of bili's; it's offered,
-// and switched on its magpie provider's api_url goes through bili's
+// and switched on its eipgam provider's api_url goes through bili's
 // /bili/ prefix with bili start answering there, no plugin installed.
-// Off, the provider is back on the gateway and magpie's bili start ends.
+// Off, the provider is back on the gateway and eipgam's bili start ends.
 // While it's on, KeepLinked starts bili start again when it doesn't
 // answer.
 func TestBiliZedThroughPrefix(t *testing.T) {
 	h := sandbox(t)
 	f := newFakeBili(t, h)
 	dir := filepath.Join(h, "zed-config")
-	t.Setenv("MAGPIE_ZED_CONFIG_DIR", dir)
+	t.Setenv("EIPGAM_ZED_CONFIG_DIR", dir)
 	zs := filepath.Join(dir, "settings.json")
 	gw := gateway.URL() + "/v1"
-	write(t, zs, `{"theme":"One Dark","language_models":{"openai_compatible":{"magpie":{"api_url":"`+gw+`","available_models":[]}}}}`)
+	write(t, zs, `{"theme":"One Dark","language_models":{"openai_compatible":{"eipgam":{"api_url":"`+gw+`","available_models":[]}}}}`)
 
 	serving, served, stopped := false, 0, 0
 	through := []string{}
@@ -494,7 +494,7 @@ func TestBiliZedThroughPrefix(t *testing.T) {
 		if err := json.Unmarshal(b, &m); err != nil {
 			return err
 		}
-		m["language_models"].(map[string]any)["openai_compatible"].(map[string]any)["magpie"].(map[string]any)["api_url"] = prefix + gw
+		m["language_models"].(map[string]any)["openai_compatible"].(map[string]any)["eipgam"].(map[string]any)["api_url"] = prefix + gw
 		out, _ := json.Marshal(m)
 		return os.WriteFile(a.Path, out, 0o600)
 	}
@@ -524,7 +524,7 @@ func TestBiliZedThroughPrefix(t *testing.T) {
 	if !biliOnFor(t)["zed"] {
 		t.Fatal("Zed isn't shown on")
 	}
-	// magpie restarted, bili start isn't answering: it's started again
+	// eipgam restarted, bili start isn't answering: it's started again
 	serving = false
 	keepBiliServe(context.Background())
 	if served != 2 {

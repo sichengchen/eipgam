@@ -9,14 +9,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 func TestPublicURL(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3499")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	if err := os.Unsetenv("MAGPIE_PUBLIC_URL"); err != nil {
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3499")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	if err := os.Unsetenv("EIPGAM_PUBLIC_URL"); err != nil {
 		t.Fatal(err)
 	}
 	if got := PublicURL(); got != "" {
@@ -24,31 +24,31 @@ func TestPublicURL(t *testing.T) {
 	}
 	for _, c := range []struct{ public, want string }{
 		{"", ""},
-		{"https://magpie.example.com", "https://magpie.example.com"},
-		{"https://magpie.example.com/", "https://magpie.example.com"},
-		{"https://magpie.example.com/magpie///", "https://magpie.example.com/magpie"},
-		{"http://magpie.example.com:3425/", "http://magpie.example.com:3425"},
+		{"https://eipgam.example.com", "https://eipgam.example.com"},
+		{"https://eipgam.example.com/", "https://eipgam.example.com"},
+		{"https://eipgam.example.com/eipgam///", "https://eipgam.example.com/eipgam"},
+		{"http://eipgam.example.com:3425/", "http://eipgam.example.com:3425"},
 		{"http://[::1]:3425/", "http://[::1]:3425"},
-		{"magpie.example.com", "http://magpie.example.com"},
+		{"eipgam.example.com", "http://eipgam.example.com"},
 		{"nas.lan:3425///", "http://nas.lan:3425"},
 		{"[fd00::20]:3425", "http://[fd00::20]:3425"},
 		{"///", ""},
-		{"ftp://magpie.example.com", ""},
-		{"//magpie.example.com", ""},
-		{"https:///magpie", ""},
+		{"ftp://eipgam.example.com", ""},
+		{"//eipgam.example.com", ""},
+		{"https:///eipgam", ""},
 		{"http://", ""},
 		{"https:///", ""},
 		{"ftp://", ""},
-		{"https://magpie.example.com:bad", ""},
-		{"https://magpie.example.com/%zz", ""},
-		{" https://magpie.example.com", "https://magpie.example.com"},
-		{"\thttps://magpie.example.com/magpie/ ", "https://magpie.example.com/magpie"},
-		{"https://magpie.example.com/magpie?x=1", ""},
-		{"https://magpie.example.com/magpie#frag", ""},
-		{"https://user:pass@magpie.example.com", ""},
+		{"https://eipgam.example.com:bad", ""},
+		{"https://eipgam.example.com/%zz", ""},
+		{" https://eipgam.example.com", "https://eipgam.example.com"},
+		{"\thttps://eipgam.example.com/eipgam/ ", "https://eipgam.example.com/eipgam"},
+		{"https://eipgam.example.com/eipgam?x=1", ""},
+		{"https://eipgam.example.com/eipgam#frag", ""},
+		{"https://user:pass@eipgam.example.com", ""},
 	} {
 		t.Run(c.public, func(t *testing.T) {
-			t.Setenv("MAGPIE_PUBLIC_URL", c.public)
+			t.Setenv("EIPGAM_PUBLIC_URL", c.public)
 			if got := PublicURL(); got != c.want {
 				t.Errorf("%q, want %q", got, c.want)
 			}
@@ -95,27 +95,27 @@ func TestPublicURLWarningOnce(t *testing.T) {
 	writer := log.Writer()
 	log.SetOutput(&logs)
 	t.Cleanup(func() { log.SetOutput(writer) })
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3499")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "127.0.0.1:3499")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	PublicURL()
 	if logs.Len() != 0 {
 		t.Fatalf("unset URL warned: %q", logs.String())
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "nas.lan:3425")
+	t.Setenv("EIPGAM_PUBLIC_URL", "nas.lan:3425")
 	PublicURL()
 	if logs.Len() != 0 {
 		t.Fatalf("valid URL warned: %q", logs.String())
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "ftp://nas.lan")
+	t.Setenv("EIPGAM_PUBLIC_URL", "ftp://nas.lan")
 	if got := PublicURL(); got != "" {
 		t.Fatalf("invalid URL: %q, want no public URL", got)
 	}
-	if got := strings.Count(logs.String(), "ignoring invalid MAGPIE_PUBLIC_URL"); got != 1 {
+	if got := strings.Count(logs.String(), "ignoring invalid EIPGAM_PUBLIC_URL"); got != 1 {
 		t.Fatalf("first invalid URL: %q, want exactly one warning", logs.String())
 	}
 	logs.Reset()
-	for _, u := range []string{"ftp://nas.lan", "https:///magpie", "https://nas.lan:bad"} {
-		t.Setenv("MAGPIE_PUBLIC_URL", u)
+	for _, u := range []string{"ftp://nas.lan", "https:///eipgam", "https://nas.lan:bad"} {
+		t.Setenv("EIPGAM_PUBLIC_URL", u)
 		for range 3 {
 			PublicURL()
 			PublicHost()
@@ -128,7 +128,7 @@ func TestPublicURLWarningOnce(t *testing.T) {
 	}
 }
 
-// OnNetwork: MAGPIE_ADDR puts the gateway beyond loopback, shared or not,
+// OnNetwork: EIPGAM_ADDR puts the gateway beyond loopback, shared or not,
 // so callers from elsewhere need a gateway key — the console says so, as
 // keyNote does.
 func TestOnNetwork(t *testing.T) {
@@ -152,7 +152,7 @@ func TestOnNetwork(t *testing.T) {
 		{"10.0.0.5:3425", false, true},
 		{"10.0.0.5:3425", true, true},
 	} {
-		t.Setenv("MAGPIE_ADDR", c.addr)
+		t.Setenv("EIPGAM_ADDR", c.addr)
 		if err := settings.Save(settings.Settings{LAN: c.lan}); err != nil {
 			t.Fatal(err)
 		}

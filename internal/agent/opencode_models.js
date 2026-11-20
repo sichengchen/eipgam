@@ -1,12 +1,12 @@
-// magpie: written by magpie; it is rewritten as magpie's models change and removed with magpie's provider
+// eipgam: written by eipgam; it is rewritten as eipgam's models change and removed with eipgam's provider
 //
-// Fills the models of magpie's provider from magpie itself as OpenCode
+// Fills the models of eipgam's provider from eipgam itself as OpenCode
 // starts: OpenCode 1 through its config hook, OpenCode 2 through a model
-// transform. A model in opencode.json under magpie's provider is the
-// user's: its fields win over magpie's, and one magpie doesn't list stays.
-// With magpie not answering, the list magpie had when it wrote this file.
+// transform. A model in opencode.json under eipgam's provider is the
+// user's: its fields win over eipgam's, and one eipgam doesn't list stays.
+// With eipgam not answering, the list eipgam had when it wrote this file.
 const M = __MAGPIE__
-const ID = "magpie"
+const ID = "eipgam"
 
 const plain = (v) => v !== null && typeof v === "object" && !Array.isArray(v)
 
@@ -18,7 +18,7 @@ const merge = (base, over) => {
   return out
 }
 
-// magpie's models as [{id, entry}] in its order, null when it can't say
+// eipgam's models as [{id, entry}] in its order, null when it can't say
 const fetchList = async (baseURL, apiKey, format) => {
   if (typeof baseURL !== "string" || !baseURL) return null
   try {
@@ -35,7 +35,7 @@ const fetchList = async (baseURL, apiKey, format) => {
 }
 
 export default {
-  id: "magpie.models",
+  id: "eipgam.models",
 
   // OpenCode 1: the config hook runs before OpenCode reads its providers
   server: async () => ({

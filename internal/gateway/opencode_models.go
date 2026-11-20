@@ -3,15 +3,15 @@ package gateway
 import (
 	"net/http"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The /v1/models formats OpenCode's magpie plugin reads (the agent
-// package's opencode_models.js): each of magpie's models for OpenCode as
-// opencode.json would list it under magpie's provider, in OpenCode 1's
+// The /v1/models formats OpenCode's eipgam plugin reads (the agent
+// package's opencode_models.js): each of eipgam's models for OpenCode as
+// opencode.json would list it under eipgam's provider, in OpenCode 1's
 // words (OpenCodeFormat) or OpenCode 2's (OpenCode2Format). The plugin
-// fills magpie's provider with them as OpenCode starts, so OpenCode
-// follows magpie's models without a list of them in its config
+// fills eipgam's provider with them as OpenCode starts, so OpenCode
+// follows eipgam's models without a list of them in its config
 // (chawyehsu on X).
 const (
 	OpenCodeFormat  = "opencode"
@@ -25,12 +25,12 @@ type OpenCodeModel struct {
 	Entry any    `json:"entry"`
 }
 
-// OpenCodeModels is magpie's models for OpenCode, in OpenCode 2's words
+// OpenCodeModels is eipgam's models for OpenCode, in OpenCode 2's words
 // when two; set by the agent package, which writes OpenCode's config.
 var OpenCodeModels func(two bool) []OpenCodeModel
 
 // openCodeModels answers /v1/models?format=opencode and =opencode2:
-// {"models": [{"id", "entry"}]}, a list so the order stays magpie's (a
+// {"models": [{"id", "entry"}]}, a list so the order stays eipgam's (a
 // JSON object's integer-like keys come first in JavaScript). Only the
 // models of OpenCode's catalog the key asking may use (keyListed).
 func openCodeModels(w http.ResponseWriter, r *http.Request, two bool) {

@@ -6,14 +6,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // The terminal serves the gateway while it is open, as the app does, when
-// no magpie has it: in WSL with only magpie tui, the agents it connected to
-// magpie asked an address nothing listened at, and Claude Code said
-// ECONNREFUSED (gnayiab on X). Another magpie that has it (the app, magpie
-// web, magpie serve) keeps it, and this one takes it up once that one is
+// no eipgam has it: in WSL with only eipgam tui, the agents it connected to
+// eipgam asked an address nothing listened at, and Claude Code said
+// ECONNREFUSED (gnayiab on X). Another eipgam that has it (the app, eipgam
+// web, eipgam serve) keeps it, and this one takes it up once that one is
 // gone.
 
 // gw is who serves the gateway, for the status line.
@@ -27,9 +27,9 @@ var gw struct {
 var serving atomic.Pointer[func()]
 
 // StopGateway ends the gateway the terminal serves, its idle Claude
-// sessions saved for the next magpie, and returns once it has drained: what
+// sessions saved for the next eipgam, and returns once it has drained: what
 // the terminal closing (SIGHUP, which bubbletea doesn't handle) runs before
-// magpie dies of it. Nothing when the terminal serves none.
+// eipgam dies of it. Nothing when the terminal serves none.
 func StopGateway() {
 	if f := serving.Load(); f != nil {
 		(*f)()
@@ -39,7 +39,7 @@ func StopGateway() {
 // gatewayWatch is how often the terminal looks for a gateway gone.
 var gatewayWatch = 15 * time.Second
 
-// serveGateway serves the gateway here until ctx ends whenever no magpie
+// serveGateway serves the gateway here until ctx ends whenever no eipgam
 // answers at its address, and returns a wait for the one it serves to have
 // stopped.
 func serveGateway(ctx context.Context) (wait func()) {
@@ -96,7 +96,7 @@ func serveGateway(ctx context.Context) (wait func()) {
 // nothing else to say: served here, or why agents can't reach it.
 func gatewayStatus() string {
 	if gw.here.Load() {
-		return sMuted.Render("● " + trf("gateway %s · served while magpie tui is open", gateway.URL()))
+		return sMuted.Render("● " + trf("gateway %s · served while eipgam tui is open", gateway.URL()))
 	}
 	if e := gw.err.Load(); e != nil && *e != "" {
 		return sBad.Render("✗ ") + sText.Render(trf("gateway not running: %s", *e))
@@ -106,5 +106,5 @@ func gatewayStatus() string {
 
 // gatewayGoneNote is said as the terminal quits having served the gateway.
 func gatewayGoneNote() string {
-	return tr("magpie: the gateway stopped with magpie tui; agents connected to magpie reach it while magpie tui, magpie web or magpie serve runs")
+	return tr("eipgam: the gateway stopped with eipgam tui; agents connected to eipgam reach it while eipgam tui, eipgam web or eipgam serve runs")
 }

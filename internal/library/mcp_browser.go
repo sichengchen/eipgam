@@ -1,12 +1,12 @@
 package library
 
 // A server that drives a Chrome it starts itself, Chrome DevTools' or
-// Playwright's, starts in magpie's container and lists its tools, and then
+// Playwright's, starts in eipgam's container and lists its tools, and then
 // every one of them fails: "Could not find Google Chrome executable for
 // channel 'stable' at: /opt/google/chrome/chrome" (Passings_z on X). The
 // image ships no browser, which would add some 300 MB for every user of
 // it, so the check tells such a server as one with no browser to start
-// (Why "nobrowser"), and the page says what works there instead: Magpie
+// (Why "nobrowser"), and the page says what works there instead: eipgam
 // Browser, which drives the user's own Chrome through its extension, or
 // the server's own option for a Chrome it can reach (Detail).
 
@@ -15,7 +15,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // browserNeed is a package that starts Chrome on its own: the option that
@@ -39,7 +39,7 @@ var browserNeeds = map[string]browserNeed{
 		"cdpendpoint": true, "executablepath": true, "browser": true, "extension": true}},
 }
 
-// Where both look for Chrome on Linux, and whether magpie runs in a
+// Where both look for Chrome on Linux, and whether eipgam runs in a
 // container; vars for tests.
 var (
 	linuxChrome  = "/opt/google/chrome/chrome"

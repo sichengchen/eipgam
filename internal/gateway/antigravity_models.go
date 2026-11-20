@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // AntigravityFormat is the /v1/models format Antigravity's app reads as its
@@ -24,7 +24,7 @@ const AntigravityFormat = "antigravity"
 // field of the OpenAI list is read for it, context_window and
 // context_length included. Its catalog (models.listSource, or models.list
 // inline) is read first and takes a window per model as maxTokens, and a
-// name as displayName, which its picker shows. A field magpie doesn't know
+// name as displayName, which its picker shows. A field eipgam doesn't know
 // is left out, and the app's family default stands for it.
 //
 // The app's picker (2.29.0, the model selector in its main.js) has an
@@ -74,7 +74,7 @@ func antigravityLevels(efforts []string) []string {
 }
 
 // AntigravityModel is the id Antigravity's app is started on for ref, a
-// model or routing group of magpie's (without a level): ref at want, fitted
+// model or routing group of eipgam's (without a level): ref at want, fitted
 // to the levels the app's picker offers it (antigravityLevels), else at the
 // level the picker itself starts it on, medium or its weakest; ref as it
 // is when the picker offers it none, as its catalog lists it so.

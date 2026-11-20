@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // openRouterHarness403 is OpenRouter's refusal of a free model to a

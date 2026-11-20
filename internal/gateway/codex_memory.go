@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // isMemoryKind: a call Codex makes to write or consolidate its memories,
@@ -24,7 +24,7 @@ func codexTurnKey(r *http.Request, who string) string {
 }
 
 // rememberCodexTurn keeps the model a turn of Codex's own conversation
-// was asked on, one magpie serves, for its memory calls.
+// was asked on, one eipgam serves, for its memory calls.
 func (s *Server) rememberCodexTurn(r *http.Request, who, agent, kind, asked string) {
 	if agent != "codex" || kind != "" {
 		return
@@ -47,24 +47,24 @@ func isReviewCall(kind, asked string) bool {
 // follow too).
 func freeOnChatGPT(model, plan string) bool { return provider.ChatGPTReviewFree(model, plan) }
 
-// codexMemoryStandIn is the model a Codex memory call goes to when magpie
+// codexMemoryStandIn is the model a Codex memory call goes to when eipgam
 // knows none by the name it came with (#742): Codex writes and
 // consolidates its memories on models of its own (memories.extract_model
 // and consolidation_model; by default gpt-6-luna and gpt-6.1-terra from
 // Codex 0.167.0, gpt-5.6-luna and gpt-5.6-terra before) by
-// their bare names, whatever it is set to, so with magpie as its provider
+// their bare names, whatever it is set to, so with eipgam as its provider
 // every one was turned away as an unknown model before it was routed. It
 // goes to the model that Codex's own turns go to — the last one it had
 // answered here, else the last in the ledger (a week back) from the same
 // agent with the same key — so it is routed, and in the views, as the
 // memory call it is. Its auto-review (isReviewCall) goes there too when
-// Codex's config names no model magpie serves (StandIn): Codex reviews on
+// Codex's config names no model eipgam serves (StandIn): Codex reviews on
 // the conversation's model when it has no reviewer, and a Codex whose
-// config magpie doesn't read as its own — on magpie through another
+// config eipgam doesn't read as its own — on eipgam through another
 // provider table or a profile, under a CODEX_HOME of its own, or on
-// another computer — was answered 404 "magpie knows no model
+// another computer — was answered 404 "eipgam knows no model
 // \"codex-auto-review\"" (Adam on Discord). "" for any other call, a model
-// magpie serves, or a Codex that has had no turn answered here.
+// eipgam serves, or a Codex that has had no turn answered here.
 //
 // Codex starts its memories with each turn of a conversation, so a memory
 // call can come before the turn it was started with, the first after the
@@ -73,28 +73,28 @@ func freeOnChatGPT(model, plan string) bool { return provider.ChatGPTReviewFree(
 // (cybercaius on Discord).
 //
 // why is the move's reason for the trace: movedCodexFollow for a bare
-// default magpie serves that went on the conversation's model instead,
-// movedCodexTurn for a model magpie doesn't serve.
+// default eipgam serves that went on the conversation's model instead,
+// movedCodexTurn for a model eipgam doesn't serve.
 func (s *Server) codexMemoryStandIn(r *http.Request, who, agent, kind, asked string, body []byte) (to, why string) {
 	if agent != "codex" || !isMemoryKind(kind) && !isReviewCall(kind, asked) {
 		return "", ""
 	}
 	if _, _, ok := provider.Resolve(asked); ok {
 		// A memory call on one of Codex's own bare defaults that a
-		// provider of magpie's happens to serve under the same name:
+		// provider of eipgam's happens to serve under the same name:
 		// the name is Codex's own, not a pick of that provider's model,
 		// and the account it resolves to may refuse the model outright
 		// (400, three tries, the memory lost, #4765). With Codex's
 		// config naming no model for its memories, the call follows the
 		// conversation's, as it does on the ChatGPT backend's path
 		// (codexFollowTo). "" keeps it where the name resolves: any
-		// other call, the config's own pick, a call whose config magpie
-		// can't read, or no conversation of magpie's to follow.
+		// other call, the config's own pick, a call whose config eipgam
+		// can't read, or no conversation of eipgam's to follow.
 		//
 		// A "provider/model" id is never one of Codex's defaults, which
 		// are bare: it is the user's pick in memories.extract_model or
 		// consolidation_model, and goes as it came, whatever the config
-		// here says — a Remote magpie can't read the Codex config on the
+		// here says — a Remote eipgam can't read the Codex config on the
 		// computer the call came from, and a Codex on a profile or a
 		// CODEX_HOME of its own has its config elsewhere too (#5413).
 		if !isMemoryKind(kind) || strings.Contains(asked, "/") || CodexSideSet == nil || CodexSideSet("memories") {

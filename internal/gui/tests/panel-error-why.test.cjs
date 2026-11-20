@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const WHY = "Get \"https://api.deepseek.com/user/balance\": dial tcp: lookup api.deepseek.com: no such host";
 
@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?mode=panel");
+        await page.goto("http://eipgam.test/?mode=panel");
         await page.locator('#ptabs [data-ptab="usage"]').click();
         const card = page.locator('.pq-card[data-card="deepseek|main"]');
         const say = card.locator(".pq-say");

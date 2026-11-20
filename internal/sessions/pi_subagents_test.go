@@ -19,7 +19,7 @@ import (
 // folders written /work/sub and /home/u/.pi/agent). The lead's tool result
 // carries the scout's usage summed. The scout's two calls are the lead
 // session's, once, on the scout's model and provider, on Usage and on
-// Sessions, whatever the lead runs on: magpie's own entry (the reporter's
+// Sessions, whatever the lead runs on: eipgam's own entry (the reporter's
 // case, its calls the gateway's to count) included.
 func TestPiSubagentCalls(t *testing.T) {
 	const lead = "01a1d480-175f-7297-b482-4707b3e6e44c"
@@ -44,7 +44,7 @@ func TestPiSubagentCalls(t *testing.T) {
 				name = "in defaultSessionDir"
 			}
 			if gateway {
-				name += ", the lead on magpie"
+				name += ", the lead on eipgam"
 			}
 			t.Run(name, func(t *testing.T) {
 				claude, _ := setup(t)
@@ -52,15 +52,15 @@ func TestPiSubagentCalls(t *testing.T) {
 				pi := filepath.Join(filepath.Dir(claude), "pi")
 				copyTree(t, "testdata/pi-subagents", pi)
 				if gateway {
-					// the lead on magpie's entry, the scout on a provider
+					// the lead on eipgam's entry, the scout on a provider
 					// of its own
 					p := filepath.Join(pi, leadFile)
 					b, err := os.ReadFile(p)
 					if err != nil {
 						t.Fatal(err)
 					}
-					s := strings.ReplaceAll(string(b), `"provider":"relay","model":"deepseek/deepseek-flash"`, `"provider":"magpie","model":"gpt-6-astra"`)
-					s = strings.ReplaceAll(s, `"provider":"relay","modelId":"deepseek/deepseek-flash"`, `"provider":"magpie","modelId":"gpt-6-astra"`)
+					s := strings.ReplaceAll(string(b), `"provider":"relay","model":"deepseek/deepseek-flash"`, `"provider":"eipgam","model":"gpt-6-astra"`)
+					s = strings.ReplaceAll(s, `"provider":"relay","modelId":"deepseek/deepseek-flash"`, `"provider":"eipgam","modelId":"gpt-6-astra"`)
 					if strings.Contains(s, `"relay"`) {
 						t.Fatal("the lead's file still names relay")
 					}
@@ -133,7 +133,7 @@ func TestPiSubagentCalls(t *testing.T) {
 					if !seen {
 						t.Errorf("no deepseek on Sessions: %+v", s.Models)
 					}
-					// a scout on magpie's entry sends its header's id; the gateway's
+					// a scout on eipgam's entry sends its header's id; the gateway's
 					// pi|<that id> is the lead's row (GatewayKeys)
 					if !slices.Contains(s.Subs, "01a1d480-2447-77e7-b4d4-1747dc3bd17c") {
 						t.Errorf("Subs %v, want the scout's session id", s.Subs)

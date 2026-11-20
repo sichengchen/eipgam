@@ -7,9 +7,9 @@
 
 // renderPort: the gateway's address on this computer (Magic_zero on Discord:
 // 3425 taken by another program, or one easier to tell apart). Only its
-// port, 1024 up, is typed here; magpie moves its gateway there and every
+// port, 1024 up, is typed here; eipgam moves its gateway there and every
 // agent it connected with it, or says why it can't (another program has
-// it). MAGPIE_ADDR, a whole host:port, comes first and the field shows it,
+// it). EIPGAM_ADDR, a whole host:port, comes first and the field shows it,
 // off, the row titled an address then (Chicring on Discord: the row was
 // titled a port while it showed one).
 let portDraft = { value: null, err: "" };
@@ -18,7 +18,7 @@ let portDraft = { value: null, err: "" };
 function portSays(m) {
   let x;
   if ((x = /^port (\d+) is in use by another program/.exec(m))) return t("Port {p} is in use by another program: pick another one", { p: x[1] });
-  if ((x = /^another magpie serves the gateway at (\S+):/.exec(m))) return t("Another magpie serves the gateway at {url}: set its port there, or quit it first", { url: x[1] });
+  if ((x = /^another eipgam serves the gateway at (\S+):/.exec(m))) return t("Another eipgam serves the gateway at {url}: set its port there, or quit it first", { url: x[1] });
   if (/from 1024 to 65535/.test(m)) return t("A port is a number from 1024 to 65535");
   return t(m);
 }
@@ -26,7 +26,7 @@ function renderPort(s) {
   const box = $("#portList");
   const r = el("div", "row pref port-row");
   const who = el("div", "who");
-  // a port is all that is typed here, so it is called one; MAGPIE_ADDR's
+  // a port is all that is typed here, so it is called one; EIPGAM_ADDR's
   // whole host:port is an address (the owner, 11-12: the row titled an
   // address over a field that takes 3425)
   const title = t(s.addrEnv ? "Gateway address" : "Gateway port");
@@ -42,11 +42,11 @@ function renderPort(s) {
   if (s.addrEnv) {
     field.value = s.addrEnv;
     field.disabled = save.disabled = true;
-    sub.textContent = t("MAGPIE_ADDR={addr} sets the gateway’s whole address, host:port: unset it to set the port here", { addr: s.addrEnv });
+    sub.textContent = t("EIPGAM_ADDR={addr} sets the gateway’s whole address, host:port: unset it to set the port here", { addr: s.addrEnv });
   } else if (d.err) {
     sub.textContent = d.err;
     sub.classList.add("err");
-  } else sub.textContent = t("Only the port is set here, 1024 to 65535; MAGPIE_ADDR=host:port sets the whole address instead. Agents magpie connected move with it. Now {url}", { url: s.gateway || "" });
+  } else sub.textContent = t("Only the port is set here, 1024 to 65535; EIPGAM_ADDR=host:port sets the whole address instead. Agents eipgam connected move with it. Now {url}", { url: s.gateway || "" });
   who.append(sub);
   save.onclick = () => {
     const p = Number(field.value.trim());
@@ -84,7 +84,7 @@ function renderPort(s) {
 // lists each model by its own id as well, gpt-5.6-sol beside
 // codex/gpt-5.6-sol. Only lists it by that id alone, in place of the
 // provider/model ids it stands for (settings.bareModelIDsOnly, qQianye on
-// X: a Docker magpie's client listed every model twice, and a gateway has
+// X: a Docker eipgam's client listed every model twice, and a gateway has
 // no Agents page to pick models on). Posted on its own; off by default.
 function renderBareIds(s) {
   renderBusyLoad(s); // Models › Routing's row
@@ -190,13 +190,13 @@ let corsDraft = { value: "", err: "" };
 // corsSays is the gateway's word on an origin it didn't take, in the
 // page's language
 function corsSays(m) {
-  if (/wildcard/.test(m)) return t("Name each origin: a wildcard would let every web page use magpie");
+  if (/wildcard/.test(m)) return t("Name each origin: a wildcard would let every web page use eipgam");
   if (/is not an (extension's )?origin/.test(m)) return t("Write an origin as http://localhost:3000 or https://app.example.com, or a browser extension's as chrome-extension://, moz-extension:// or safari-web-extension:// followed by its ID");
   return t(m);
 }
 function renderCORS(s) {
   renderWebPage(); // Browser access, the section under this one
-  renderRemote(); // Another magpie, under that
+  renderRemote(); // Another eipgam, under that
   const box = $("#corsList");
   box.replaceChildren();
   const origins = s.corsOrigins || [];
@@ -219,7 +219,7 @@ function renderCORS(s) {
   field.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") add.onclick(); };
   const r = el("div", "row pref rule-row");
   const who = el("div", "who");
-  who.append(el("div", "name", t("Web pages that may call magpie")),
+  who.append(el("div", "name", t("Web pages that may call eipgam")),
     el("div", "sub" + (d.err ? " err" : ""), d.err || t("Scripts on these origins can call the gateway from a browser, each request with a gateway key from Gateway. A page from any other site is refused; pages on this computer are not")));
   // where those keys are: the Gateway page shows them once a page is listed
   const nav = $('#nav [data-view="gateway"]');
@@ -248,13 +248,13 @@ function renderCORS(s) {
   }
 }
 
-// renderAllow: the addresses other computers may reach magpie from at
-// all (lc on Discord: magpie in Docker on a public host), as IPs and CIDR
+// renderAllow: the addresses other computers may reach eipgam from at
+// all (lc on Discord: eipgam in Docker on a public host), as IPs and CIDR
 // ranges, under Share on local network — a row to add one, and one row
 // each to take it away. None listed lets every address in, with a gateway
-// key, as before; this computer is always let in. MAGPIE_ALLOW_IPS, where
+// key, as before; this computer is always let in. EIPGAM_ALLOW_IPS, where
 // set, is the list, shown and not edited here.
-// A list that would shut out the page saving it names the address magpie
+// A list that would shut out the page saving it names the address eipgam
 // sees the page from (Mathresearcher on Discord: which address?), and
 // offers to add it to the list that was refused; behind Docker or a proxy
 // that is the proxy's, not the user's computer's (gateway.peerAddr).
@@ -262,8 +262,8 @@ let allowDraft = { value: "", err: "", addr: "", tried: null };
 function allowSays(m) {
   if (/is not an IP address/.test(m)) return t("Write an address as 203.0.113.7, or a range as 10.0.0.0/8 or 2001:db8::/32");
   const out = /shut out (\S+), the address/.exec(m);
-  if (out) return t("That list leaves out {addr}, the address magpie sees this page open from: add it first, or this page can’t reach magpie", { addr: out[1] });
-  if (/MAGPIE_ALLOW_IPS/.test(m)) return t("MAGPIE_ALLOW_IPS sets this list; change it there");
+  if (out) return t("That list leaves out {addr}, the address eipgam sees this page open from: add it first, or this page can’t reach eipgam", { addr: out[1] });
+  if (/EIPGAM_ALLOW_IPS/.test(m)) return t("EIPGAM_ALLOW_IPS sets this list; change it there");
   return t(m);
 }
 function renderAllow(s) {
@@ -283,8 +283,8 @@ function renderAllow(s) {
     });
   const r = el("div", "row pref rule-row");
   const who = el("div", "who");
-  const sub = d.err || (env ? t("Set by MAGPIE_ALLOW_IPS. Other computers reach magpie only from these addresses, even with a gateway key; this computer always can")
-    : t("Other computers reach magpie only from these addresses or ranges (CIDR), even with a gateway key; this computer always can. None listed lets every address in"));
+  const sub = d.err || (env ? t("Set by EIPGAM_ALLOW_IPS. Other computers reach eipgam only from these addresses, even with a gateway key; this computer always can")
+    : t("Other computers reach eipgam only from these addresses or ranges (CIDR), even with a gateway key; this computer always can. None listed lets every address in"));
   who.append(el("div", "name", t("Allowed addresses")), el("div", "sub" + (d.err ? " err" : ""), sub));
   // the address the refusal named, added to the list that was refused in
   // one click
@@ -332,14 +332,14 @@ function renderAllow(s) {
 }
 
 // renderMTLS: client certificates (mTLS; hhdaxia on X, #5596), under
-// Allowed addresses. On, other computers reach magpie over https:// only
+// Allowed addresses. On, other computers reach eipgam over https:// only
 // with a certificate issued here, a gateway key or not; this computer
 // always can. A device's certificate is issued by name and saved to
 // Downloads (client.pem, client-key.pem, ca.pem), one row each to revoke.
 let mtlsDraft = { value: "", err: "" };
 function mtlsSays(m) {
-  if (/^this page is open from another computer/.test(m)) return t("This page is open from another computer without a certificate, so turning this on would shut it out: turn it on from the computer magpie runs on");
-  if (/^this page came with that certificate/.test(m)) return t("This page uses that certificate, so it would be shut out: do this from another device, or from the computer magpie runs on");
+  if (/^this page is open from another computer/.test(m)) return t("This page is open from another computer without a certificate, so turning this on would shut it out: turn it on from the computer eipgam runs on");
+  if (/^this page came with that certificate/.test(m)) return t("This page uses that certificate, so it would be shut out: do this from another device, or from the computer eipgam runs on");
   if (/a name can.t hold/.test(m)) return t("A name can’t hold / \\ : * ? \" < > |");
   return t(m);
 }
@@ -367,7 +367,7 @@ function renderMTLS(s) {
     return r;
   };
   row("mtls-row", t("Require a client certificate"),
-    d.err ? el("div", "sub err", d.err) : t("Other computers reach magpie over HTTPS only with a certificate issued here, even with a gateway key; this computer always can"),
+    d.err ? el("div", "sub err", d.err) : t("Other computers reach eipgam over HTTPS only with a certificate issued here, even with a gateway key; this computer always can"),
     segs([["off", t("Off")], ["on", t("On")]], s.mtls ? "on" : "off", (v) => post("", { on: v === "on" })));
   const field = input(d.value, t("Device name"));
   field.className = "words rule-match mtls-name";
@@ -386,7 +386,7 @@ function renderMTLS(s) {
   const add = el("div", "val rule-add");
   add.append(field, issue);
   const r = row("rule-row mtls-issue", t("Client certificates"),
-    s.mtlsError ? el("div", "sub err", t(s.mtlsError)) : t("Saved to Downloads for the device: the certificate, its key and magpie’s CA"));
+    s.mtlsError ? el("div", "sub err", t(s.mtlsError)) : t("Saved to Downloads for the device: the certificate, its key and eipgam’s CA"));
   r.querySelector(".val").replaceWith(add);
   for (const c of s.mtlsCerts || []) {
     const until = new Date(c.expires).toLocaleDateString(intlLang(), { year: "numeric", month: "short", day: "numeric" });
@@ -398,15 +398,15 @@ function renderMTLS(s) {
 }
 
 // renderHTTPS: HTTPS for other computers (zhangly1 on X: Claude on another
-// computer on the LAN needed magpie at https://), under Share on local
+// computer on the LAN needed eipgam at https://), under Share on local
 // network. On, other computers get the certificate imported here, or one
-// magpie's own CA signs; then the CA's row saves it to Downloads, and the
+// eipgam's own CA signs; then the CA's row saves it to Downloads, and the
 // rows under it say how another computer fetches and trusts it. Asked of
-// its own route (https.go), as Browser access is; drawn while magpie
+// its own route (https.go), as Browser access is; drawn while eipgam
 // answers other computers or the switch is on.
 let httpsState = null;
 function httpsSays(m) {
-  if (/^this page is open from another computer/.test(m)) return t("This page is open from another computer: turn HTTPS on or off from the computer magpie runs on");
+  if (/^this page is open from another computer/.test(m)) return t("This page is open from another computer: turn HTTPS on or off from the computer eipgam runs on");
   if (/^a certificate but no private key/.test(m)) return t("A certificate but no private key: choose the key’s file too");
   if (/^a private key but no certificate/.test(m)) return t("A private key but no certificate: choose the certificate’s file too");
   if (/^the private key belongs to none/.test(m)) return t("The private key belongs to none of the certificates");
@@ -442,12 +442,12 @@ function renderHTTPS(s, asked) {
     return r;
   };
   row("https-row", "HTTPS",
-    h.served && !h.on ? t("Already served over https:// by Require a client certificate or --tls-cert") : t("Other computers call magpie at https://; this computer can still use http://"),
+    h.served && !h.on ? t("Already served over https:// by Require a client certificate or --tls-cert") : t("Other computers call eipgam at https://; this computer can still use http://"),
     segs([["off", t("Off")], ["on", t("On")]], h.on ? "on" : "off", (v) => post("", { on: v === "on" })));
   if (h.served) {
     const c = h.cert;
     const until = c && new Date(c.until).toLocaleDateString(intlLang(), { year: "numeric", month: "short", day: "numeric" });
-    const from = !c ? "" : c.from === "files" ? "--tls-cert " + c.file : c.from === "imported" ? t("Your certificate") : t("Signed by magpie’s CA");
+    const from = !c ? "" : c.from === "files" ? "--tls-cert " + c.file : c.from === "imported" ? t("Your certificate") : t("Signed by eipgam’s CA");
     const sub = h.certError ? el("div", "sub err", t(h.certError))
       : el("div", "sub", [from, (c.names || []).join(", "), t("Until {date}", { date: until })].filter(Boolean).join(" · "));
     sub.title = sub.textContent;
@@ -480,16 +480,16 @@ function renderHTTPS(s, asked) {
     const save = el("button", "text", t("Save"));
     save.type = "button";
     save.onclick = () => post("/ca", {});
-    const sub = el("div", "sub wraps", t("Trust it once on each computer that calls magpie · SHA-256 {fp}", { fp: h.ca }));
-    row("https-ca", t("magpie’s CA"), sub, save);
+    const sub = el("div", "sub wraps", t("Trust it once on each computer that calls eipgam · SHA-256 {fp}", { fp: h.ca }));
+    row("https-ca", t("eipgam’s CA"), sub, save);
     // the address picked under Share on local network, else the first
     const at = (h.caURLs || []).find((u) => u.startsWith(lanSelectedURL + "/")) || h.caURLs?.[0];
     const steps = [
       at && [t("Download"), "curl -kO " + at],
-      ["macOS", "sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain magpie-ca.crt"],
-      ["Windows", "certutil -addstore -f Root magpie-ca.crt"],
-      ["Linux", "sudo cp magpie-ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates"],
-      [t("Claude Code and other Node apps"), "NODE_EXTRA_CA_CERTS=/path/to/magpie-ca.crt"],
+      ["macOS", "sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain eipgam-ca.crt"],
+      ["Windows", "certutil -addstore -f Root eipgam-ca.crt"],
+      ["Linux", "sudo cp eipgam-ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates"],
+      [t("Claude Code and other Node apps"), "NODE_EXTRA_CA_CERTS=/path/to/eipgam-ca.crt"],
     ];
     for (const [name, cmd] of steps.filter(Boolean)) {
       const code = el("code", "sub https-cmd", cmd);
@@ -505,11 +505,11 @@ function renderHTTPS(s, asked) {
 let lanSelectedURL = "", lanProtocol = "openai";
 // the address picked under Share on local network is kept like Connect's
 let lanWant = "";
-try { lanWant = localStorage.getItem("magpie.lanAddress") || ""; } catch {}
+try { lanWant = localStorage.getItem("eipgam.lanAddress") || ""; } catch {}
 // lanShown: the addresses the gateway is offered at beyond this computer,
 // those of them for other containers on this host, and a line on them
-// when magpie runs in a container, for Settings, Gateway, Connect, the
-// sidebar and the key page alike. In a container magpie finds only its
+// when eipgam runs in a container, for Settings, Gateway, Connect, the
+// sidebar and the key page alike. In a container eipgam finds only its
 // own addresses; the page opened over the network was reached at the
 // host's, so the gateway is offered there, on its port. Other containers
 // on the host reach it at the host's Docker bridge address, the
@@ -526,18 +526,18 @@ function lanShown(urls, container, bridge, lazy = {}) {
   if (lazy.url && !lazy.box) {
     const port = lazyPort();
     return { urls, others: [], head: t("LazyCat"),
-      sub: t("Only devices with the LazyCat client reach this address. For other devices to use the box’s LAN IP on port {port}, forward port {port} to Magpie in LazyCat’s LAN port forwarding app", { port }) };
+      sub: t("Only devices with the LazyCat client reach this address. For other devices to use the box’s LAN IP on port {port}, forward port {port} to eipgam in LazyCat’s LAN port forwarding app", { port }) };
   }
   const others = bridge ? [bridge] : [];
   if (!container) return { urls: [...urls, ...others.filter((u) => !urls.includes(u))], others, sub: "" };
   const host = location.hostname, at = urls[0] || bridge ? new URL(urls[0] || bridge) : null;
   if (web && host && at?.port && !/^(localhost|127\.|\[::1\]$)/.test(host))
     return { urls: [at.protocol + "//" + host + ":" + at.port, ...others], others, // an IPv6 hostname comes bracketed
-      sub: others.length ? t("Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; MAGPIE_PUBLIC_URL sets another")
-        : t("Where this page was opened, on the gateway’s port; MAGPIE_PUBLIC_URL sets another") };
+      sub: others.length ? t("Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; EIPGAM_PUBLIC_URL sets another")
+        : t("Where this page was opened, on the gateway’s port; EIPGAM_PUBLIC_URL sets another") };
   if (others.length) return { urls: others, others,
-    sub: t("Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which MAGPIE_PUBLIC_URL puts here") };
-  return { urls, others, sub: t("The container’s own addresses, which other devices can’t reach: set MAGPIE_PUBLIC_URL to the host’s") };
+    sub: t("Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which EIPGAM_PUBLIC_URL puts here") };
+  return { urls, others, sub: t("The container’s own addresses, which other devices can’t reach: set EIPGAM_PUBLIC_URL to the host’s") };
 }
 // gwLAN: lanShown for the gateway's read (providers', or boot.js's line),
 // which says whether its addresses are a container's and where other
@@ -555,7 +555,7 @@ function lazyPort() {
 // addrWho: the words every list of the gateway's addresses names one by,
 // for g (providers' gateway, or Settings' read as one): this computer's,
 // the one other containers on this host use, one on the internet, and
-// MAGPIE_PUBLIC_URL by its kind, a private address being the local
+// EIPGAM_PUBLIC_URL by its kind, a private address being the local
 // network's like the rest. jiezhengj on Discord: Connect called the NAS's
 // 192.168.31.218 "Public address" (公网地址) and the Docker bridge's
 // 172.17.0.1 "Local network", while the list above it said otherwise.
@@ -567,7 +567,7 @@ function addrWho(g, u, others = []) {
   if (u === g.publicURL && g.publicKind !== "local") return t("Public address");
   return t("Local network");
 }
-// pubWho: About's MAGPIE_PUBLIC_URL row, from /api/settings, by addrWho
+// pubWho: About's EIPGAM_PUBLIC_URL row, from /api/settings, by addrWho
 // (a private address is the local network's; jiezhengj on Discord)
 function pubWho(s) {
   return addrWho({ url: s.gateway, publicURL: s.publicURL, publicKind: s.publicKind, lanPublic: s.lanPublic, lazyCat: s.lanLazyCat }, s.publicURL,
@@ -580,17 +580,17 @@ function gwFar(g) {
   return far.length ? far : urls;
 }
 // sideLAN: where other machines reach the gateway while it is shared, for
-// the sidebar's line (coeo91 on Discord): MAGPIE_PUBLIC_URL, else the
+// the sidebar's line (coeo91 on Discord): EIPGAM_PUBLIC_URL, else the
 // address picked here, else the first
 function sideLAN(g) {
   const u = gwFar(g);
-  // a LazyCat app's domain is MAGPIE_PUBLIC_URL's too, and the box's LAN
+  // a LazyCat app's domain is EIPGAM_PUBLIC_URL's too, and the box's LAN
   // address before it is the one other devices use
   const pub = g.publicURL && !(g.lazyCatBox && g.publicURL === g.lazyCat) ? g.publicURL : "";
   return u[0] && (pub || (u.includes(lanWant) ? lanWant : u[0]));
 }
 // mcpFar: where other machines reach the gateway, from Settings' read, and
-// how it is named (addrWho); none while magpie isn't shared (xzhih on X:
+// how it is named (addrWho); none while eipgam isn't shared (xzhih on X:
 // Settings' MCP server addresses said 127.0.0.1 on a server)
 function mcpFar(s) {
   const g = { ...s, url: s.gateway, container: s.lanContainer, containerHost: s.lanContainerHost, lazyCat: s.lanLazyCat, lazyCatBox: s.lanLazyCatBox };
@@ -600,7 +600,7 @@ function mcpFar(s) {
 // mcpLan: whether Settings' MCP servers are shown at the far address: the
 // pick of mcpWhere, a page other machines opened starting there
 function mcpLan() {
-  try { return (localStorage.getItem("magpie.mcpWhere") || (web ? "lan" : "this")) === "lan"; } catch { return web; }
+  try { return (localStorage.getItem("eipgam.mcpWhere") || (web ? "lan" : "this")) === "lan"; } catch { return web; }
 }
 // mcpBase: the gateway's address for Settings' MCP servers; "" when there
 // is no far address, and mcpAddress goes on as before
@@ -612,7 +612,7 @@ function mcpBase(s) {
 // address, none while there is only one; redo draws the page again
 function mcpWhere(s, redo) {
   const far = mcpFar(s);
-  return far ? [segs([["this", t("This computer")], ["lan", far.who]], mcpLan() ? "lan" : "this", (v) => { keepPick("magpie.mcpWhere", v); redo(); })] : [];
+  return far ? [segs([["this", t("This computer")], ["lan", far.who]], mcpLan() ? "lan" : "this", (v) => { keepPick("eipgam.mcpWhere", v); redo(); })] : [];
 }
 // mcpRows: Image recognition's and Image generation's MCP servers, each with
 // its address (mcpWhere's pick); Settings › Models, under the image rows
@@ -626,8 +626,8 @@ function mcpRows(s, box) {
     r.id = id;
     box.append(r);
   };
-  mcpRow("visionMcpRow", "/mcp/magpie/vision", t("Image recognition MCP server"), t("Agents can add image recognition as an MCP server (Streamable HTTP) with one analyze_image tool, which reads an image with the Image recognition model from a file path, a URL or a data URL. From another computer, send a gateway key as Authorization: Bearer <key> and the image as a URL or data URL."));
-  mcpRow("imageMcpRow", "/mcp/magpie/image", t("Image generation MCP server"), t("Agents can add image generation as an MCP server (Streamable HTTP) with generate_image, generate_video and generation_result tools, which draw with the Image generation model. An image comes back in the answer and at a URL kept for an hour, a video at a URL; nothing is saved in the agent's project. From another computer, send a gateway key as Authorization: Bearer <key>."));
+  mcpRow("visionMcpRow", "/mcp/eipgam/vision", t("Image recognition MCP server"), t("Agents can add image recognition as an MCP server (Streamable HTTP) with one analyze_image tool, which reads an image with the Image recognition model from a file path, a URL or a data URL. From another computer, send a gateway key as Authorization: Bearer <key> and the image as a URL or data URL."));
+  mcpRow("imageMcpRow", "/mcp/eipgam/image", t("Image generation MCP server"), t("Agents can add image generation as an MCP server (Streamable HTTP) with generate_image, generate_video and generation_result tools, which draw with the Image generation model. An image comes back in the answer and at a URL kept for an hour, a video at a URL; nothing is saved in the agent's project. From another computer, send a gateway key as Authorization: Bearer <key>."));
 }
 // the line was drawn from boot.js before this script came
 if (sideGwAt) renderSideGw();
@@ -653,7 +653,7 @@ function renderLAN(s) {
     if (ns.rekeyed) status(ns.rekeyed, "err");
   })
     .catch((e) => { status(t(e.message), "err"); renderSettings(); });
-  row(t("Share on local network"), t("Agents on other computers on this network, or through a tunnel to this one such as Cloudflare Tunnel, can use magpie’s models with a gateway key from Gateway"), "",
+  row(t("Share on local network"), t("Agents on other computers on this network, or through a tunnel to this one such as Cloudflare Tunnel, can use eipgam’s models with a gateway key from Gateway"), "",
     segs([["off", t("Off")], ["on", t("On")]], s.lan ? "on" : "off", (v) => set({ on: v === "on" })));
   if (!s.lan) return;
   const { urls, others, sub, head } = lanShown(s.lanURLs || [], s.lanContainer, s.lanContainerHost,
@@ -675,7 +675,7 @@ function renderLAN(s) {
         if (address.classList.contains("open")) return closeProtoMenu();
         const suffix = lanProtocol === "openai" ? "/v1" : "";
         openProtoMenu(address, urls.map((u) => ({ v: u, name: u + suffix, note: far.has(u) ? t("On the internet") : others.includes(u) ? t("Other containers on this host") : u === s.lanLazyCat ? t("LazyCat client") : "" })), lanSelectedURL,
-          (v) => { lanSelectedURL = lanWant = v; keepPick("magpie.lanAddress", v); update(); renderSideGw(); }, "Address", "lan-address-menu");
+          (v) => { lanSelectedURL = lanWant = v; keepPick("eipgam.lanAddress", v); update(); renderSideGw(); }, "Address", "lan-address-menu");
       };
     }
     const copyControl = el("span", "lan-copy");
@@ -694,7 +694,7 @@ function renderLAN(s) {
       who.querySelector(".sub")?.remove();
       if (far.has(lanSelectedURL)) who.append(el("div", "sub", listed
         ? t("An internet address: only the addresses under Allowed addresses get in")
-        : t("An internet address: anyone online can reach magpie here with a gateway key. To keep it to this network, list its range under Allowed addresses")));
+        : t("An internet address: anyone online can reach eipgam here with a gateway key. To keep it to this network, list its range under Allowed addresses")));
     };
     controls.append(segs([["openai", "OpenAI"], ["anthropic", "Anthropic"]], lanProtocol,
       (v) => { lanProtocol = v; update(); }), address, copyControl);
@@ -758,8 +758,8 @@ function renderJoin(s, box) {
 }
 
 // renderWebPage: Browser access, the app's own page served to a browser
-// (apppage.go; jiakun_zhao on X managed magpie through a Cloudflare tunnel
-// with `magpie web` kept running in a terminal beside the app). Off, this
+// (apppage.go; jiakun_zhao on X managed eipgam through a Cloudflare tunnel
+// with `eipgam web` kept running in a terminal beside the app). Off, this
 // computer alone (for a tunnel or an SSH forward to reach), or the local
 // network. The page always asks for its key: the link carries it, and a
 // browser without it gets nothing. The app's windows alone draw it; a
@@ -790,11 +790,11 @@ function renderWebPage(asked) {
     rows.push(r);
     return r;
   };
-  row(t("Open magpie in a browser"),
-    t("The app serves this window’s page with a key in its link, as magpie web does, while it runs. For a tunnel such as Cloudflare Tunnel, point it at http://127.0.0.1:{port}", { port: s.port }),
+  row(t("Open eipgam in a browser"),
+    t("The app serves this window’s page with a key in its link, as eipgam web does, while it runs. For a tunnel such as Cloudflare Tunnel, point it at http://127.0.0.1:{port}", { port: s.port }),
     segs([["", t("Off")], ["local", t("This computer")], ["lan", t("Local network")]], s.mode || "", (mode) => set({ mode }))).classList.add("web-page-mode");
   if (s.mode) {
-    const why = s.error ? el("div", "sub err", s.error.startsWith("port ") ? t("Port {p} is taken by another program, magpie web perhaps: magpie tries again every few seconds", { p: s.port }) : t(s.error))
+    const why = s.error ? el("div", "sub err", s.error.startsWith("port ") ? t("Port {p} is taken by another program, eipgam web perhaps: eipgam tries again every few seconds", { p: s.port }) : t(s.error))
       : el("div", "sub say", s.serving ? t("Served; anyone with this link can change every setting") : t("Starting…"));
     const links = [s.link, ...(s.mode === "lan" ? s.network || [] : [])].filter(Boolean);
     const box2 = el("div", "web-page-links");
@@ -827,24 +827,24 @@ function renderWebPage(asked) {
   box.replaceChildren(...rows);
 }
 
-// renderRemote: Another magpie, a magpie on a server (magpie daemon install
-// --web, magpie web, or an app's Browser access) opened in a window of the
+// renderRemote: Another eipgam, a eipgam on a server (eipgam daemon install
+// --web, eipgam web, or an app's Browser access) opened in a window of the
 // app's own (xuanwo on X: its routing and usage, read from the desktop).
-// The window is that magpie's web page, signed in with the key in its link
+// The window is that eipgam's web page, signed in with the key in its link
 // as a browser is; the app checks the key before opening it and keeps the
 // address and key on this computer alone (remote.go). The key is never
 // read back into the page. The app's windows alone draw it.
 let remoteState = null, remoteDraft = { url: null, key: "" };
 function remoteSays(m) {
   let x;
-  if (/^type the other magpie's address/.test(m)) return t("Type the other magpie’s address");
-  if (/^type that magpie's key/.test(m)) return t("Type that magpie’s key: the k= in the link it printed, or its MAGPIE_WEB_KEY");
-  if (/turned the key away/.test(m)) return t("That magpie turned the key away: use the key in the link it printed");
-  if (/doesn't let this computer in/.test(m)) return t("That magpie doesn’t let this computer in: add this computer’s address to its allowed addresses");
+  if (/^type the other eipgam's address/.test(m)) return t("Type the other eipgam’s address");
+  if (/^type that eipgam's key/.test(m)) return t("Type that eipgam’s key: the k= in the link it printed, or its EIPGAM_WEB_KEY");
+  if (/turned the key away/.test(m)) return t("That eipgam turned the key away: use the key in the link it printed");
+  if (/doesn't let this computer in/.test(m)) return t("That eipgam doesn’t let this computer in: add this computer’s address to its allowed addresses");
   if ((x = /^(\S+) is a name on the internet/.exec(m))) return t("{host} is a name on the internet: open it over https://, or the key crosses the network unencrypted", { host: x[1] });
   if ((x = /^(\S+)'s certificate isn't trusted/.exec(m))) return t("{host}’s certificate isn’t trusted by this computer", { host: x[1] });
   if ((x = /^(\S+) doesn't answer/.exec(m))) return t("{host} doesn’t answer", { host: x[1] });
-  if ((x = /^(\S+) answered .*not as a magpie page/.exec(m))) return t("{host} doesn’t answer as a magpie page: check the address and port (magpie web’s is 3430)", { host: x[1] });
+  if ((x = /^(\S+) answered .*not as a eipgam page/.exec(m))) return t("{host} doesn’t answer as a eipgam page: check the address and port (eipgam web’s is 3430)", { host: x[1] });
   if (/^the key is \d+ characters/.test(m)) return t("The key is too short");
   if (/^the key takes letters/.test(m)) return t("The key takes letters, digits and - . _ ~ only");
   return t(m);
@@ -866,7 +866,7 @@ function renderRemote(asked) {
     r.append(who, val);
     return r;
   };
-  const addr = input(remoteDraft.url ?? s.url, "https://magpie.example.com");
+  const addr = input(remoteDraft.url ?? s.url, "https://eipgam.example.com");
   addr.className = "words remote-url";
   addr.setAttribute("aria-label", t("Address"));
   addr.oninput = () => { remoteDraft.url = addr.value; };

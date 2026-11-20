@@ -3,7 +3,7 @@
 // addresses, turns on Require a client certificate, issues a device's
 // certificate (saved to Downloads, the path said) and revokes one. A page
 // that would shut itself out is refused in its own language. Hidden while
-// magpie answers only this computer. The provider editor's Advanced holds
+// eipgam answers only this computer. The provider editor's Advanced holds
 // a Client certificate row (certificate, key, server CA) for a provider of
 // the user's at https://, saved with Save; none at http:// or for a
 // preset's. English and Chinese, Chromium and WebKit, 390px; the strings
@@ -23,11 +23,11 @@ const file = async (route, url) => {
 };
 const boot = (route, lang) => route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
 
-const LOCKOUT = "this page is open from another computer without a client certificate this magpie issued, so turning this on would shut it out: issue one, install it in this browser, and open the page again over https://, or turn it on from the computer magpie runs on";
+const LOCKOUT = "this page is open from another computer without a client certificate this eipgam issued, so turning this on would shut it out: issue one, install it in this browser, and open the page again over https://, or turn it on from the computer eipgam runs on";
 
 function settingsServer(lang, posts, over) {
   const s = {
-    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "/config/magpie",
+    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "/config/eipgam",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], allowIPs: [],
     lan: true, lanURLs: ["http://192.168.1.20:3425"], mtls: false, mtlsCerts: [],
@@ -51,7 +51,7 @@ function settingsServer(lang, posts, over) {
       } else if (url.pathname.endsWith("/issue")) {
         n++;
         s.mtlsCerts = [...s.mtlsCerts, { name: body.name, serial: "ab" + n, expires: "2028-11-10T00:00:00Z" }];
-        s.mtlsSaved = "~/Downloads/magpie-" + body.name;
+        s.mtlsSaved = "~/Downloads/eipgam-" + body.name;
       } else {
         s.mtlsCerts = s.mtlsCerts.filter((c) => c.serial !== body.serial);
       }
@@ -67,12 +67,12 @@ function settingsServer(lang, posts, over) {
 
 const en = {
   name: "Require a client certificate",
-  sub: "Other computers reach magpie over HTTPS only with a certificate issued here, even with a gateway key; this computer always can",
+  sub: "Other computers reach eipgam over HTTPS only with a certificate issued here, even with a gateway key; this computer always can",
   certs: "Client certificates",
-  certsSub: "Saved to Downloads for the device: the certificate, its key and magpie’s CA",
+  certsSub: "Saved to Downloads for the device: the certificate, its key and eipgam’s CA",
   field: "Device name", issue: "Issue", revoke: "Revoke",
-  lockout: "This page is open from another computer without a certificate, so turning this on would shut it out: turn it on from the computer magpie runs on",
-  own: "This page uses that certificate, so it would be shut out: do this from another device, or from the computer magpie runs on",
+  lockout: "This page is open from another computer without a certificate, so turning this on would shut it out: turn it on from the computer eipgam runs on",
+  own: "This page uses that certificate, so it would be shut out: do this from another device, or from the computer eipgam runs on",
   cert: "Client certificate", ca: "Server CA", hint: "PEM files, for a server that asks for one (mTLS)",
 };
 const zh = { name: "要求客户端证书" };
@@ -115,7 +115,7 @@ const base = {
   models: [{ id: "m", name: "m", on: true }], agents: [], fallback: [], headers: {},
   key: { set: true, masked: "mk-…one" }, keyList: [], balanceToken: { takes: false, set: false }, proxy: "",
 };
-const home = { ...base, id: "home", name: "Home Magpie", chat: "https://home.example:3425/v1", takesClientCert: true };
+const home = { ...base, id: "home", name: "Home eipgam", chat: "https://home.example:3425/v1", takesClientCert: true };
 const kept = { ...base, id: "kept", name: "Kept Box", chat: "https://box.example/v1", takesClientCert: true, clientCert: "~/c/client.pem", clientKey: "~/c/client-key.pem", serverCA: "~/c/ca.pem" };
 const plain = { ...base, id: "plain", name: "Plain Box", chat: "http://192.168.1.21:8000/v1", takesClientCert: true };
 const openai = { ...base, id: "openai", name: "OpenAI", preset: "openai", chat: "https://api.openai.example/v1", takesClientCert: false };
@@ -159,7 +159,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.context().close();
     });
 
-    await t.test("hidden while magpie answers only this computer", async () => {
+    await t.test("hidden while eipgam answers only this computer", async () => {
       const { page, errors } = await openSettings(browser, "en", [], { lan: false, lanURLs: [] });
       await page.locator("#lanList .row").first().waitFor();
       assert.equal(await page.locator("#mtlsList .row").count(), 0);
@@ -244,7 +244,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const { page, errors } = await newPage(browser, 420, 760);
           const posts = [];
           await page.route("**/*", providersServer(lang, posts));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator(".row.provider", { hasText: name }).click();
           await page.locator(".editor .bar").waitFor();
           const adv = page.locator(".editor details.advanced");
@@ -253,7 +253,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const w = await (async () => {
           const { page } = await newPage(browser);
           await page.route("**/*", providersServer(lang, []));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.waitForFunction(() => typeof t === "function");
           const out = await page.evaluate((ks) => Object.fromEntries(ks.map((k) => [k, t(k)])), [en.cert, en.hint, "Save"]);
           await page.context().close();
@@ -267,15 +267,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
 
         {
-          const { page, errors, posts, adv } = await open("Home Magpie");
+          const { page, errors, posts, adv } = await open("Home eipgam");
           assert.equal(await adv.evaluate((d) => d.open), false, "folded with nothing set");
           await adv.locator(":scope > summary").click();
           const box = page.locator(".editor .client-cert");
           await box.waitFor();
           assert.ok(await page.locator(".editor", { hasText: w[en.hint] }).count() > 0);
-          await box.locator("input.cert-clientCert").fill("~/magpie-laptop/client.pem");
-          await box.locator("input.cert-clientKey").fill("~/magpie-laptop/client-key.pem");
-          await box.locator("input.cert-serverCA").fill("~/magpie-laptop/ca.pem ");
+          await box.locator("input.cert-clientCert").fill("~/eipgam-laptop/client.pem");
+          await box.locator("input.cert-clientKey").fill("~/eipgam-laptop/client-key.pem");
+          await box.locator("input.cert-serverCA").fill("~/eipgam-laptop/ca.pem ");
           for (const i of await box.locator("input").all()) {
             const r = await i.boundingBox();
             assert.ok(r.width > 120 && r.x + r.width <= 420, "fits: " + JSON.stringify(r));
@@ -283,9 +283,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "no sideways scroll");
           const saved = await save(page, posts);
           assert.equal(saved.action, "save");
-          assert.equal(saved.body.clientCert, "~/magpie-laptop/client.pem");
-          assert.equal(saved.body.clientKey, "~/magpie-laptop/client-key.pem");
-          assert.equal(saved.body.serverCA, "~/magpie-laptop/ca.pem");
+          assert.equal(saved.body.clientCert, "~/eipgam-laptop/client.pem");
+          assert.equal(saved.body.clientKey, "~/eipgam-laptop/client-key.pem");
+          assert.equal(saved.body.serverCA, "~/eipgam-laptop/ca.pem");
           assert.deepEqual(errors, []);
           await page.context().close();
         }

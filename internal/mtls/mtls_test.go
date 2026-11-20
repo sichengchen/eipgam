@@ -190,7 +190,7 @@ func TestExport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if filepath.Base(d1) != "magpie-my-phone" {
+	if filepath.Base(d1) != "eipgam-my-phone" {
 		t.Fatalf("folder %s", d1)
 	}
 	d2, _ := Export(iss, out)

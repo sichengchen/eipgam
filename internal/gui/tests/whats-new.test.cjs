@@ -3,7 +3,7 @@
 // whether their issue was fixed). After an upgrade the window opens a dialog
 // with the notes of every release since, newest first, once: the app is told
 // they were seen, and a reload doesn't show them again. A fresh install shows
-// nothing, nor does the tray's panel; magpie web's page shows it as the
+// nothing, nor does the tray's panel; eipgam web's page shows it as the
 // window does, and opens its links in a tab. #464 links the issue and opens it in
 // the browser through the app, as markdown links do; a javascript: link is
 // text, and HTML in the notes is shown as text, never run. Settings' What's new
@@ -36,7 +36,7 @@ const NOTES_604 = [
 const RELEASES = [
   { version: "0.1.604", notes: NOTES_604, url: "https://github.com/yetone/magpie-releases/releases/tag/v0.1.604" },
   // the Chinese notes' translation words a heading its own way, or keeps
-  // the English (Wei He on Discord); a heading magpie doesn't know reads as
+  // the English (Wei He on Discord); a heading eipgam doesn't know reads as
   // written
   { version: "0.1.603", notes: "## 缺陷修复\n\n- Fixed reading Kimi keys. (#446)\n\n## Bug fixes:\n\n- Another.\n\n## Thanks\n\n- @someone" },
 ];
@@ -47,14 +47,14 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.604", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.604", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
 }
 
-// ctl.upgraded: magpie started on a newer version than it last ran
+// ctl.upgraded: eipgam started on a newer version than it last ran
 function serve(lang, ctl) {
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("dialog", (d) => { errors.push("dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", serve(lang, ctl));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/" + q);
+        await page.goto("http://eipgam.test/" + q);
         await settingsDrawn(page); // rows found are the ones that stay (#1659)
         await page.locator("#agents").waitFor({ state: "attached" });
         return { page, errors };
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.close();
       }
 
-      // magpie web's page shows it too, and opens a link in a tab of its own
+      // eipgam web's page shows it too, and opens a link in a tab of its own
       {
         const ctl = fresh({ upgraded: true, web: true });
         const { page, errors } = await open(ctl);
@@ -142,7 +142,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.evaluate(() => { window.open = (u) => { window.__opened = u; return null; }; });
         await dialog(page).getByRole("link", { name: "#446" }).click();
         assert.equal(await page.evaluate(() => window.__opened), "https://github.com/yetone/magpie/issues/446");
-        assert.equal(page.url(), "http://magpie.test/");
+        assert.equal(page.url(), "http://eipgam.test/");
         assert.equal(ctl.seen, 1);
         assert.deepEqual(errors, []);
         await page.close();
@@ -209,7 +209,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (let i = 0; i < 40 && !ctl.opened.length; i++) await page.waitForTimeout(25);
       assert.deepEqual(ctl.opened, ["https://github.com/yetone/magpie/issues/464"]);
       assert.deepEqual(await body.evaluate((e) => [e.scrollTop, document.scrollingElement.scrollTop]), before, "the click moved the page");
-      assert.equal(page.url(), "http://magpie.test/", "the page didn't navigate");
+      assert.equal(page.url(), "http://eipgam.test/", "the page didn't navigate");
       assert.equal(await page.evaluate(() => window.__pwned), undefined, "nothing in the notes ran");
       const border = await page.evaluate(() => [...document.querySelectorAll("#modal .whatsnew, #modal .whatsnew *")].map((e) => getComputedStyle(e).borderLeftWidth).filter((b) => parseFloat(b) > 1));
       assert.deepEqual(border, [], "no left-border accent");
@@ -244,7 +244,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         { version: "0.1.605", notes: "- Five.", pending: true },
       ];
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=about");
+      await page.goto("http://eipgam.test/?view=settings&tab=about");
       await settingsDrawn(page); // rows found are the ones that stay (#1659)
       const notesRow = page.locator("#about .row.pref.whatsnew-row");
       assert.equal(await notesRow.locator(".name").textContent(), w.again);

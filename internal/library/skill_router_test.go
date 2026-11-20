@@ -10,7 +10,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // routerView is the page's view, failing the test on an error.
@@ -35,7 +35,7 @@ func agentView(t *testing.T, v *View, id string) AgentView {
 }
 
 // With the skill router on, Claude Code's skills folder has one skill,
-// magpie-skills, in place of a link of each skill ticked for it: its
+// eipgam-skills, in place of a link of each skill ticked for it: its
 // SKILL.md lists each with its description and a path, through the
 // agent's own folder, that leads to the skill's SKILL.md. A skill kept
 // direct, or one only for the user to type, keeps its link; off, every
@@ -55,7 +55,7 @@ func TestSkillRouter(t *testing.T) {
 		}
 	}
 	if _, err := os.Lstat(entry); err == nil {
-		t.Fatal("router off, yet magpie-skills is there")
+		t.Fatal("router off, yet eipgam-skills is there")
 	}
 
 	settingsAt := filepath.Join(h, ".claude", "settings.json")
@@ -99,7 +99,7 @@ func TestSkillRouter(t *testing.T) {
 		t.Fatal("a skill only for the user to type lost its link")
 	}
 	if !routerOurs(entry) {
-		t.Fatal("no magpie-skills entry of magpie's")
+		t.Fatal("no eipgam-skills entry of eipgam's")
 	}
 	md := read(t, filepath.Join(entry, "SKILL.md"))
 	m := parseMeta([]byte(md))
@@ -127,9 +127,9 @@ func TestSkillRouter(t *testing.T) {
 	if !v.SkillRouter || agentView(t, v, "claude").SkillRouter != "on" {
 		t.Fatalf("view: %v %q", v.SkillRouter, agentView(t, v, "claude").SkillRouter)
 	}
-	// magpie's own entry isn't a skill of the agent's to bring in
+	// eipgam's own entry isn't a skill of the agent's to bring in
 	if slices.ContainsFunc(v.FoundSkills, func(f FoundSkill) bool { return f.Name == RouterSkill }) {
-		t.Fatal("magpie-skills is offered as a skill found in an agent")
+		t.Fatal("eipgam-skills is offered as a skill found in an agent")
 	}
 	// a sync that changes nothing writes nothing
 	if r := ok(t)(Sync()); slices.Contains(r.Changed, "claude") {
@@ -162,7 +162,7 @@ func TestSkillRouter(t *testing.T) {
 		}
 	}
 	if _, err := os.Lstat(entry); err == nil {
-		t.Fatal("router off, magpie-skills stays")
+		t.Fatal("router off, eipgam-skills stays")
 	}
 	if _, err := os.Stat(routerDir(dir)); err == nil {
 		t.Fatal("router off, its folder stays")
@@ -307,27 +307,27 @@ func TestSkillRouterLastSkillUnticked(t *testing.T) {
 	}
 }
 
-// A magpie-skills of the user's own in the agent's folder is left as it
+// A eipgam-skills of the user's own in the agent's folder is left as it
 // is, and the agent keeps each skill's link, which the page says.
 func TestSkillRouterLeavesTheUsersOwn(t *testing.T) {
 	h := sandbox(t)
 	skill(t, filepath.Join(h, "src/pdf"), "pdf", "Read PDFs")
 	ok(t)(InstallSkills(filepath.Join(h, "src"), []string{"pdf"}, []string{"claude"}))
 	own := filepath.Join(h, ".claude", "skills", RouterSkill)
-	write(t, filepath.Join(own, "SKILL.md"), "---\nname: magpie-skills\ndescription: mine\n---\n")
+	write(t, filepath.Join(own, "SKILL.md"), "---\nname: eipgam-skills\ndescription: mine\n---\n")
 	ok(t)(SetSkillRouter(true))
 	if got := read(t, filepath.Join(own, "SKILL.md")); !strings.Contains(got, "description: mine") {
-		t.Fatalf("the user's own magpie-skills was written over: %q", got)
+		t.Fatalf("the user's own eipgam-skills was written over: %q", got)
 	}
 	if !ours(filepath.Join(h, ".claude", "skills", "pdf"), "pdf") {
-		t.Fatal("with a magpie-skills of its own, claude lost pdf's link")
+		t.Fatal("with a eipgam-skills of its own, claude lost pdf's link")
 	}
 	if why := agentView(t, routerView(t), "claude").SkillRouter; why != routerOwn {
 		t.Fatalf("why: %q", why)
 	}
 	ok(t)(SetSkillRouter(false))
 	if _, err := os.Stat(filepath.Join(own, "SKILL.md")); err != nil {
-		t.Fatal("router off took the user's own magpie-skills")
+		t.Fatal("router off took the user's own eipgam-skills")
 	}
 }
 
@@ -417,7 +417,7 @@ func TestSkillRouterKeepsSlashCommands(t *testing.T) {
 	if read(t, mine) != "my own docx command\n" {
 		t.Fatal("the user's own docx command was written over")
 	}
-	// Codex has no such folder of magpie's: nothing written for it
+	// Codex has no such folder of eipgam's: nothing written for it
 	if es, _ := os.ReadDir(filepath.Join(h, ".codex", "prompts")); len(es) != 0 {
 		t.Fatalf("codex was given stubs: %v", es)
 	}

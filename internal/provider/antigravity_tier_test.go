@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // A Google AI Pro account as loadCodeAssist answers it (CLIProxyAPI
@@ -75,11 +75,11 @@ func antigravityModelIDs(t *testing.T, agent string) []string {
 	return ids
 }
 
-// A Google AI Pro account's Antigravity has Claude (Discord: magpie 0.1.770
+// A Google AI Pro account's Antigravity has Claude (Discord: eipgam 0.1.770
 // listed a Pro account's models without any, while Antigravity's picker
 // had Claude 5.5): fetchAvailableModels names the plan the account pays for
 // in entitlement.userTier, as Antigravity's language server does, and the
-// log says what Google answered and what magpie left out.
+// log says what Google answered and what eipgam left out.
 func TestAntigravityProAccountNamesItsTier(t *testing.T) {
 	t.Cleanup(AntigravityBuiltinForTest()) // the retired built-in route
 	f := &fakeGoogle{load: proLoad, modelsFor: tierModels("g1-pro-tier")}
@@ -174,7 +174,7 @@ func TestAntigravityTierFreeAndKeptProject(t *testing.T) {
 
 // A model Antigravity marks disabled isn't served: a real account's
 // fetchAvailableModels had gemini-4-argon-disabled with disabled true,
-// magpie listed it, DeepSeek Harness offered it, and asking for it was a
+// eipgam listed it, DeepSeek Harness offered it, and asking for it was a
 // 404 "Requested entity was not found" (kwanyu on Discord, 10-24). It is
 // left out of the list for every client; the models beside it, and their
 // ids, are as Google sent them.
@@ -202,7 +202,7 @@ func TestAntigravityDisabledModelLeftOut(t *testing.T) {
 // #1553 (AnxForever): a Google AI Pro account that loadCodeAssist has on
 // free-tier, paying for g1-pro-tier, in aicode-consumers. Google answered
 // its fetchAvailableModels with g1-pro-tier named "Request contains an
-// invalid argument." magpie then asks again with {project} alone, which is
+// invalid argument." eipgam then asks again with {project} alone, which is
 // all the open-source clients that serve Pro accounts send (CLIProxyAPI,
 // sub2api, Antigravity-Manager), and lists what that gives. Should that
 // fail too, the log says so and the account keeps the list it had.
@@ -389,12 +389,12 @@ func TestAntigravityTierNotRestedForOtherFailures(t *testing.T) {
 	}
 }
 
-// An account that becomes Google AI Ultra while magpie runs gets Ultra's
+// An account that becomes Google AI Ultra while eipgam runs gets Ultra's
 // models on the next list, without a restart (rick_49551 on Discord: an
 // Ultra account without Gemini 4). The tiers loadCodeAssist gave were kept
-// for as long as magpie ran, so every hourly list went on naming none, and
+// for as long as eipgam ran, so every hourly list went on naming none, and
 // Google went on listing gemini-4-argon-disabled, as it does a free
-// account (magpie's own log on 11-04: "disabled [gemini-4-argon-disabled]").
+// account (eipgam's own log on 11-04: "disabled [gemini-4-argon-disabled]").
 // Now they are asked again once an hour old, as Gemini CLI's experiments
 // are, and a list names the tier the account has now.
 func TestAntigravityTierAskedAgainAfterUpgrade(t *testing.T) {

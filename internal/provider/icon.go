@@ -17,9 +17,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/iconproxy"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/netguard"
+	"github.com/sichengchen/eipgam/internal/iconproxy"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/netguard"
 )
 
 // A provider's own picture lives in the icons folder beside providers.json,
@@ -27,7 +27,7 @@ import (
 // built-in icons are plain names ("deepseek-color").
 const iconPrefix = "file:"
 
-// MaxIcon is the largest picture magpie keeps for a provider.
+// MaxIcon is the largest picture eipgam keeps for a provider.
 const MaxIcon = 1 << 20
 
 var iconName = lazyre.New(`^[0-9a-f]{16}\.(png|jpg|gif|webp|ico|svg)$`)
@@ -55,7 +55,7 @@ func StoreIcon(data []byte) (string, error) {
 	}
 	ext := iconExt(data)
 	if ext == "" {
-		return "", errors.New("not a picture magpie can show: use PNG, JPEG, GIF, WebP, ICO or SVG")
+		return "", errors.New("not a picture eipgam can show: use PNG, JPEG, GIF, WebP, ICO or SVG")
 	}
 	sum := sha256.Sum256(data)
 	name := hex.EncodeToString(sum[:8]) + "." + ext
@@ -71,10 +71,10 @@ func StoreIcon(data []byte) (string, error) {
 // FetchIcon downloads the picture an import link named and keeps it like
 // any other, returning the Icon value that points at it. It runs when the
 // user confirms the import, never at parse time; the URL is re-checked here
-// so a crafted request can't point magpie at anything but a public https
+// so a crafted request can't point eipgam at anything but a public https
 // picture, and the read stops one byte past MaxIcon so a huge body is
-// refused rather than buffered. The picture is asked for through
-// usemagpie.ai's icon proxy, so its host never sees the user's IP.
+// refused rather than buffered. An explicitly configured icon proxy is used
+// when available.
 func FetchIcon(ctx context.Context, rawURL string) (string, error) {
 	u, err := iconURL(rawURL)
 	if err != nil {
@@ -84,7 +84,10 @@ func FetchIcon(ctx context.Context, rawURL string) (string, error) {
 	// the client is this fetch's alone: the connection it made, left idle
 	// in the transport's pool, is dropped by nobody else (#4824)
 	defer c.CloseIdleConnections()
-	return fetchIcon(ctx, c, iconproxy.URL(u))
+	if proxyURL := iconproxy.URL(u); proxyURL != "" {
+		u = proxyURL
+	}
+	return fetchIcon(ctx, c, u)
 }
 
 // iconClient is the client FetchIcon uses; tests point it at a local proxy.
@@ -96,7 +99,7 @@ var iconClient = guardClient
 // Through a proxy the connection goes to the proxy, often on this computer
 // (Clash's 127.0.0.1:7890), so the proxy's own address is dialed as it is;
 // the site's name is judged before the proxy is asked for, since the proxy
-// resolves it where magpie can't see.
+// resolves it where eipgam can't see.
 func guardClient() *http.Client {
 	c := *http.DefaultClient
 	t := http.DefaultTransport.(*http.Transport).Clone()

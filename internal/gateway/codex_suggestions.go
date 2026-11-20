@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // movedCodexSuggestions is the reason Codex's prompt suggestions went on
@@ -18,7 +18,7 @@ const movedCodexSuggestions = "codex-suggestions"
 // calls (thread_source ambient_suggestions, and the safety check of what
 // they found, ambient_suggestion_safety) goes on: the one set for them,
 // "" to leave it on asked. The app asks for a model of OpenAI's that its
-// server names (gpt-6-luna) and, on magpie as its provider, falls back to
+// server names (gpt-6-luna) and, on eipgam as its provider, falls back to
 // the provider's default model, so the suggestions, a long agentic turn
 // that reads the project, ran on whatever "auto" picked (@0xcb198609 on
 // X: 76.9k tokens on deepseek-v4-pro). Codex has no setting for their

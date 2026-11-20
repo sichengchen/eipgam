@@ -12,17 +12,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/desktopdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/desktopdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Claude Desktop reads what magpie writes for it as it starts (微雨南山 and
+// Claude Desktop reads what eipgam writes for it as it starts (微雨南山 and
 // stones on Discord, 10-24: a provider added showed up there only after a
 // restart), and asks the gateway for its models once, at start. While such an app
-// runs on what it read before magpie's last change, its Agents row offers
-// a Restart. magpie never restarts one unasked: the button asks first, in
-// magpie's own dialog, and only then quits the app as its own Quit does
+// runs on what it read before eipgam's last change, its Agents row offers
+// a Restart. eipgam never restarts one unasked: the button asks first, in
+// eipgam's own dialog, and only then quits the app as its own Quit does
 // and opens it again. The Codex app on macOS has its own Restart on its
 // stale-copy line (codex_app.go), behind the same question.
 
@@ -34,7 +34,7 @@ type restartable struct {
 	winExe string
 	win    func(image string) bool
 	// macCmd, when set, says a main process of the bundle is the copy
-	// magpie wires: Claude Desktop runs twice with the isolated one on
+	// eipgam wires: Claude Desktop runs twice with the isolated one on
 	// (desktopInstance)
 	macCmd func(cmd string) bool
 }
@@ -267,17 +267,17 @@ func bundleExecutable(b, id string) string {
 	return strings.TrimSpace(string(exe[1]))
 }
 
-// AppRun is a desktop app running on what it read before magpie's last
+// AppRun is a desktop app running on what it read before eipgam's last
 // change to it: when it started, for the row to offer a Restart.
 type AppRun struct {
 	Since time.Time `json:"since"`
 }
 
 // AppBehind is the agent's desktop app when it runs here and started
-// before magpie last changed what it reads at start; nil when it isn't
-// running, has started since, or magpie doesn't restart it here. Only for
-// an agent connected to magpie, or one disconnected from it in magpie:
-// those are the changes magpie made.
+// before eipgam last changed what it reads at start; nil when it isn't
+// running, has started since, or eipgam doesn't restart it here. Only for
+// an agent connected to eipgam, or one disconnected from it in eipgam:
+// those are the changes eipgam made.
 func (a *Agent) AppBehind() *AppRun {
 	r, ok := restartApps[a.ID]
 	if !ok || a.WSL != "" {
@@ -301,12 +301,12 @@ func (a *Agent) AppBehind() *AppRun {
 	return &AppRun{Since: c.since}
 }
 
-// appReads are the files the agent's desktop app reads magpie's part from
+// appReads are the files the agent's desktop app reads eipgam's part from
 // at start, and that part. Claude Desktop: deploymentMode, the profile
-// applied and magpie's profile (or the user's for magpie's gateway), with the models the gateway lists it.
-// WorkBuddy: magpie's models in its models.json (workbuddyPart).
-// OpenMausBot: magpie's engine in its config.json (ombPart).
-// ZCode: magpie's provider in config.json and its rules in
+// applied and eipgam's profile (or the user's for eipgam's gateway), with the models the gateway lists it.
+// WorkBuddy: eipgam's models in its models.json (workbuddyPart).
+// OpenMausBot: eipgam's engine in its config.json (ombPart).
+// ZCode: eipgam's provider in config.json and its rules in
 // provider_config.json (zcodePart).
 func (a *Agent) appReads() (files []string, reads func() string) {
 	switch a.ID {
@@ -336,8 +336,8 @@ func (a *Agent) appReads() (files []string, reads func() string) {
 				b.WriteString(mode + "\n" + id + "\n")
 				b.Write(prof)
 				b.WriteString("\n")
-				// a profile of the user's for magpie's gateway, applied
-				// instead of magpie's (desktopKeyApplied)
+				// a profile of the user's for eipgam's gateway, applied
+				// instead of eipgam's (desktopKeyApplied)
 				if f := desktopAppliedGateway(p); f != "" {
 					theirs, _ := edit.Read(f)
 					b.Write(theirs)
@@ -368,9 +368,9 @@ var restarting sync.Map
 // (tNotice): an app not on the old settings any more was quit or
 // restarted meanwhile.
 var (
-	noticeRestartNotHere    = newNotice("magpie doesn't restart {agent} on this computer.")
+	noticeRestartNotHere    = newNotice("eipgam doesn't restart {agent} on this computer.")
 	noticeRestartCurrent    = newNotice("{agent} isn't running on the old settings any more.")
-	noticeRestartAsk        = newNotice("magpie couldn't ask {agent} to quit. Quit it yourself, then open it again.")
+	noticeRestartAsk        = newNotice("eipgam couldn't ask {agent} to quit. Quit it yourself, then open it again.")
 	noticeRestartStillOpen  = newNotice("{agent} is still open; it may be asking something in its window. Answer it there, or quit it, then open it again.")
 	noticeRestartStillThere = newNotice("{agent} is still running. Quit it, then open it again.")
 	noticeRestartNoOpen     = newNotice("{agent} quit, but didn't open again. Open it yourself.")
@@ -379,7 +379,7 @@ var (
 func restartErr(n notice, a *Agent) error { return errors.New(n.say("agent", a.Name)) }
 
 // RestartApp quits the agent's desktop app and opens it again, so it reads
-// what magpie wrote. Only the Agents row's Restart calls it, after the
+// what eipgam wrote. Only the Agents row's Restart calls it, after the
 // user confirmed, and only an app AppBehind lists is quit. macOS: asked to
 // quit as ⌘Q does, every process of its bundle waited for (but a script
 // run on it, runsScript); one still open

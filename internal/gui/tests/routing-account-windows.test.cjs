@@ -99,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [], asks = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang, asks));
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://eipgam.test/?view=routing");
             const act = page.locator(".rt-act", { hasText: "work@example.com" }).first();
             const team = page.locator(".rt-act", { hasText: "team@example.com" }).first();
             // each window a line of its own on every row, whichever one

@@ -11,13 +11,13 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The Codex app's picker follows the order dragged on the Agents page
 // (Codex's list, Order), for every kind of entry in it: the account's own
 // models the backend lists, the account's own the backend's list for the
-// app lacks yet (handed by magpie's id, codex/<slug>, "· Codex"), routing
+// app lacks yet (handed by eipgam's id, codex/<slug>, "· Codex"), routing
 // groups and another provider's models (Wangalan167673 on X: GPT-6.2 Astra
 // and Sol last, Gemini 4 Hydrogen before Argon, the groups after GPT-6.1
 // Sol).
@@ -107,7 +107,7 @@ func TestCodexDesktopCatalogInUsersOrder(t *testing.T) {
 			continue
 		}
 		slug := m["slug"].(string)
-		// the account's own the app's list lacks goes by magpie's id
+		// the account's own the app's list lacks goes by eipgam's id
 		slug = strings.TrimPrefix(slug, "codex/")
 		shown = append(shown, slug)
 	}

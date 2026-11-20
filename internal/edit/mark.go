@@ -6,10 +6,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Mark, when set, is the note a line magpie writes into an agent's TOML,
+// Mark, when set, is the note a line eipgam writes into an agent's TOML,
 // YAML or dotenv config gets, as a comment line of its own just above it:
 // what wrote it and how to undo it, for someone reading the file after
-// magpie is gone (Jevik_AI on X: a Codex config left pointing at a gateway
+// eipgam is gone (Jevik_AI on X: a Codex config left pointing at a gateway
 // that no longer ran). table is the TOML table or the YAML mapping's
 // dotted path the key is in, "" at the top level; value is the value as
 // read. "" leaves the line without a note. JSON has no comments, so
@@ -17,15 +17,15 @@ import (
 // bytes sees none.
 //
 // A note goes on a line this write adds or changes, and stays on one that
-// had it; a line of the user's own that magpie leaves as it is gets none.
+// had it; a line of the user's own that eipgam leaves as it is gets none.
 // It is a line of its own, never a comment after the value: an agent that
 // reads its config line by line (Grok App's providers.rs) takes the rest
 // of a line for the value, but skips a line that starts with #.
 var Mark func(table, key, value string) string
 
 // MarkTag starts every note: a comment line that starts with it is
-// magpie's, and is written again, or taken out, with the line under it.
-const MarkTag = "magpie: "
+// eipgam's, and is written again, or taken out, with the line under it.
+const MarkTag = "eipgam: "
 
 const markComment = "# " + MarkTag
 
@@ -36,12 +36,12 @@ func noteOf(table, key, value string) string {
 	return Mark(table, key, value)
 }
 
-// IsNote says whether line is one of magpie's notes.
+// IsNote says whether line is one of eipgam's notes.
 func IsNote(line string) bool {
 	return strings.HasPrefix(strings.TrimSpace(line), markComment)
 }
 
-// withoutNotes is lines without magpie's notes.
+// withoutNotes is lines without eipgam's notes.
 func withoutNotes(lines []string) []string {
 	var out []string
 	for _, l := range lines {
@@ -55,7 +55,7 @@ func withoutNotes(lines []string) []string {
 	return out
 }
 
-// noted is, for each line of orig, whether a note of magpie's was over it
+// noted is, for each line of orig, whether a note of eipgam's was over it
 func noted(orig string) map[string]bool {
 	m := map[string]bool{}
 	prev := false

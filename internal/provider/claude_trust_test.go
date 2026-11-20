@@ -10,7 +10,7 @@ import (
 
 // mydosu's saved account (#4830, Windows, Claude Code 2.1.316) had a
 // .claude.json with no projects at all, so Claude Code asked whether to
-// trust magpie's work folder on every /usage read. ClaudeTrustFolder puts
+// trust eipgam's work folder on every /usage read. ClaudeTrustFolder puts
 // the entry there as Claude Code keeps it, every other key and the
 // project's own fields kept, and writes nothing once it is there.
 func TestClaudeTrustFolderRecordsMagpiesFolder(t *testing.T) {
@@ -20,8 +20,8 @@ func TestClaudeTrustFolderRecordsMagpiesFolder(t *testing.T) {
 		t.Fatal(err)
 	}
 	profile := filepath.Join(dir, ".claude.json")
-	key := "C:/Users/me/AppData/Local/Temp/magpie-claude-work"
-	// onboarding done, magpie's folder there untrusted; a big number as
+	key := "C:/Users/me/AppData/Local/Temp/eipgam-claude-work"
+	// onboarding done, eipgam's folder there untrusted; a big number as
 	// Claude Code writes them
 	stale := `{"hasCompletedOnboarding": true, "numStartups": 3, "big": 12345678901234567890,
   "projects": {"C:/elsewhere": {"allowedTools": [], "hasTrustDialogAccepted": false},
@@ -70,7 +70,7 @@ func TestClaudeTrustFolderRecordsMagpiesFolder(t *testing.T) {
 // ~/.claude.json, nor a file Claude Code may be half way through writing.
 func TestClaudeTrustFolderOnlyMagpiesAccounts(t *testing.T) {
 	home := claudeHome(t)
-	key := "/tmp/magpie-claude-work-501"
+	key := "/tmp/eipgam-claude-work-501"
 	for _, dir := range []string{home, filepath.Join(home, ".claude"), claudeDirsRoot(), filepath.Join(claudeAccountDir("a"), "x")} {
 		if err := os.MkdirAll(dir, 0o700); err != nil {
 			t.Fatal(err)

@@ -1,35 +1,35 @@
 package appdir
 
-// Moving magpie's folders to another disk (CHENGJIAHEGOXIS on X: from the
+// Moving eipgam's folders to another disk (CHENGJIAHEGOXIS on X: from the
 // Mac's own disk to an external SSD; buhaodeshiyehao on X: personal data
-// kept on another disk). The folder magpie keeps its files in (Config) and
+// kept on another disk). The folder eipgam keeps its files in (Config) and
 // the one for what it can fetch again (Cache) go into a folder named
-// "magpie" in the one the user picks, as config and cache, and where each
+// "eipgam" in the one the user picks, as config and cache, and where each
 // was is left a link to it: a symlink, or on Windows a junction when the
-// user may not make symlinks (#973). Nothing else changes: every path magpie
-// reads is the one it always was, and so is every path magpie has written
+// user may not make symlinks (#973). Nothing else changes: every path eipgam
+// reads is the one it always was, and so is every path eipgam has written
 // into an agent's config, a skill link or an MCP server's command, all of
 // which keep working through the link.
 //
-// A move is never made under a running magpie: the app asks for it
-// (AskMove), quits, and the magpie it starts again makes it (MovePending,
+// A move is never made under a running eipgam: the app asks for it
+// (AskMove), quits, and the eipgam it starts again makes it (MovePending,
 // from the cli's startUp, once the one it replaces has exited and before
-// anything is read or written). `magpie data move` makes it at once when no
-// magpie answers at the gateway's address. Within one disk it is a rename;
+// anything is read or written). `eipgam data move` makes it at once when no
+// eipgam answers at the gateway's address. Within one disk it is a rename;
 // across disks a copy, and what was here is deleted only once the link is
 // in place. A copy that fails (the disk full, a file unreadable) is deleted
 // and everything stays where it was.
 //
 // Moving back (AskMove("")) copies the files home and takes the link away.
 //
-// The other disk unplugged is not a new magpie: a link that leads nowhere
+// The other disk unplugged is not a new eipgam: a link that leads nowhere
 // is Unreachable, and main stops with that error rather than start an
 // empty setup in its place, which would read as everything lost and then
 // be written over by whatever the user did next (#989). Connecting the
 // disk again is the fix; the files never left it.
 //
-// A portable magpie isn't moved: its data folder is already wherever the
-// user puts magpie.
+// A portable eipgam isn't moved: its data folder is already wherever the
+// user puts eipgam.
 
 import (
 	"encoding/json"
@@ -47,30 +47,30 @@ import (
 
 // MoveName is the folder made in the one the user picks: config and cache
 // go into it.
-const MoveName = "magpie"
+const MoveName = "eipgam"
 
 const (
 	moveAsked  = "move-to.json"     // in Config: a move made at the next start
 	moveResult = "move-result.json" // in Config: why the last one wasn't made
 )
 
-// Place is where magpie's folders are.
+// Place is where eipgam's folders are.
 type Place struct {
-	Config   string `json:"config"`             // where magpie reaches its files (~/.config/magpie)
-	Cache    string `json:"cache"`              // and its cache (~/.cache/magpie)
+	Config   string `json:"config"`             // where eipgam reaches its files (~/.config/eipgam)
+	Cache    string `json:"cache"`              // and its cache (~/.cache/eipgam)
 	ConfigAt string `json:"configAt,omitempty"` // the folder Config links to, "" when it is no link
 	CacheAt  string `json:"cacheAt,omitempty"`
 	// Moved is the folder they were moved into (Dir(ConfigAt)), "" when
-	// they are where magpie keeps them by default
+	// they are where eipgam keeps them by default
 	Moved    string `json:"moved,omitempty"`
-	Portable bool   `json:"portable,omitempty"` // a portable magpie, never moved
+	Portable bool   `json:"portable,omitempty"` // a portable eipgam, never moved
 	// Pending is the folder a move asked for goes into at the next start,
 	// "home" for back to the default; "" when none is asked for
 	Pending string `json:"pending,omitempty"`
 	Error   string `json:"error,omitempty"` // why the last move wasn't made
 }
 
-// Where says where magpie's folders are.
+// Where says where eipgam's folders are.
 func Where() Place {
 	p := Place{Config: Config(), Cache: Cache(), Portable: Portable() != ""}
 	if t, ok := linkOf(p.Config); ok {
@@ -115,18 +115,18 @@ func readAsked() (*asked, error) {
 	return &a, nil
 }
 
-// Target is the folder magpie's folders go into when the user picks dir,
+// Target is the folder eipgam's folders go into when the user picks dir,
 // checked: an absolute folder that is there and can be written in, whose
-// "magpie" folder is empty or not there yet (or is where they are now),
-// and that is neither in magpie's folders nor holds them. "" is home.
+// "eipgam" folder is empty or not there yet (or is where they are now),
+// and that is neither in eipgam's folders nor holds them. "" is home.
 func Target(dir string) (string, error) {
 	if Portable() != "" {
-		return "", errors.New("this magpie is portable: its files are in the data folder beside it, which moves with it")
+		return "", errors.New("this eipgam is portable: its files are in the data folder beside it, which moves with it")
 	}
 	if dir == "" {
 		if _, ok := linkOf(Config()); !ok {
 			if _, ok := linkOf(Cache()); !ok {
-				return "", errors.New("magpie's files are in their default folder already")
+				return "", errors.New("eipgam's files are in their default folder already")
 			}
 		}
 		return "", nil
@@ -147,7 +147,7 @@ func Target(dir string) (string, error) {
 	}
 	root := filepath.Join(dir, MoveName)
 	if cur, ok := linkOf(Config()); ok && same(filepath.Dir(cur), root) {
-		return "", fmt.Errorf("magpie's files are in %s already", root)
+		return "", fmt.Errorf("eipgam's files are in %s already", root)
 	}
 	real := func(p string) string {
 		if r, err := filepath.EvalSymlinks(p); err == nil {
@@ -158,7 +158,7 @@ func Target(dir string) (string, error) {
 	d := real(dir)
 	for _, at := range []string{Config(), Cache()} {
 		if a := real(at); same(a, d) || within(d, a) {
-			return "", fmt.Errorf("%s is in magpie's folder %s", dir, at)
+			return "", fmt.Errorf("%s is in eipgam's folder %s", dir, at)
 		}
 	}
 	if err := emptyOrNone(root); err != nil {
@@ -169,7 +169,7 @@ func Target(dir string) (string, error) {
 
 // canWrite says whether a file can be made in dir.
 func canWrite(dir string) error {
-	f, err := os.CreateTemp(dir, ".magpie-write-*")
+	f, err := os.CreateTemp(dir, ".eipgam-write-*")
 	if err != nil {
 		return fmt.Errorf("can't write in %s: %w", dir, err)
 	}
@@ -193,9 +193,9 @@ func emptyOrNone(dir string) error {
 	return nil
 }
 
-// AskMove has magpie's folders moved into the folder named "magpie" in
-// dir, or home for "", when magpie next starts. It checks the folder now,
-// so the user hears what is wrong with it before magpie quits.
+// AskMove has eipgam's folders moved into the folder named "eipgam" in
+// dir, or home for "", when eipgam next starts. It checks the folder now,
+// so the user hears what is wrong with it before eipgam quits.
 func AskMove(dir string) (string, error) {
 	root, err := Target(dir)
 	if err != nil {
@@ -225,9 +225,9 @@ func CancelMove() error {
 }
 
 // MovePending makes the move AskMove asked for, if one was. It is made
-// once: the request is taken away first, so a move that fails, or a magpie
+// once: the request is taken away first, so a move that fails, or a eipgam
 // that dies in it, isn't tried at every start. Why it failed is kept for
-// Settings to say. The caller makes sure no other magpie is running.
+// Settings to say. The caller makes sure no other eipgam is running.
 func MovePending() (bool, error) {
 	a, err := readAsked()
 	if a == nil && err == nil {
@@ -240,19 +240,19 @@ func MovePending() (bool, error) {
 	if err != nil {
 		b, _ := json.Marshal(map[string]string{"error": err.Error()})
 		os.WriteFile(filepath.Join(Config(), moveResult), b, 0o600)
-		log.Printf("appdir: magpie's folders weren't moved: %v", err)
+		log.Printf("appdir: eipgam's folders weren't moved: %v", err)
 		return false, err
 	}
 	os.Remove(filepath.Join(Config(), moveResult))
-	log.Printf("appdir: magpie's folders are in %s now", Where().Moved)
+	log.Printf("appdir: eipgam's folders are in %s now", Where().Moved)
 	return true, nil
 }
 
-// Move moves magpie's folders into root (root/config and root/cache), or
-// home for "", now. Nothing of magpie's may be running.
+// Move moves eipgam's folders into root (root/config and root/cache), or
+// home for "", now. Nothing of eipgam's may be running.
 func Move(root string) error {
 	if Portable() != "" {
-		return errors.New("this magpie is portable: its files are in the data folder beside it, which moves with it")
+		return errors.New("this eipgam is portable: its files are in the data folder beside it, which moves with it")
 	}
 	cfg, cache := Config(), Cache()
 	prev, _ := linkOf(cfg) // the folder on the other disk, for a move home
@@ -264,7 +264,7 @@ func Move(root string) error {
 		return err
 	}
 	if err := moveOne(cache, cacheTo); err != nil {
-		return fmt.Errorf("magpie's files moved, but its cache didn't: %w", err)
+		return fmt.Errorf("eipgam's files moved, but its cache didn't: %w", err)
 	}
 	if root == "" && prev != "" {
 		// the folder they were in on the other disk, if nothing else is in it
@@ -273,7 +273,7 @@ func Move(root string) error {
 	return nil
 }
 
-// moveOne moves the folder magpie reaches at at so that it is at to: to
+// moveOne moves the folder eipgam reaches at at so that it is at to: to
 // another disk with a link left at at, or home (to == at), the link
 // replaced by the folder.
 func moveOne(at, to string) error {
@@ -306,7 +306,7 @@ func moveOne(at, to string) error {
 			return fmt.Errorf("can't link %s to %s again: %w", at, cur, err)
 		}
 		tmp := at + ".moving"
-		os.RemoveAll(tmp) // a copy a magpie that died in this left; the folder itself is still there
+		os.RemoveAll(tmp) // a copy a eipgam that died in this left; the folder itself is still there
 		if err := copyTree(cur, tmp); err != nil {
 			os.RemoveAll(tmp)
 			return err
@@ -456,19 +456,19 @@ func copyFile(from, to string, mode fs.FileMode) error {
 	return out.Close()
 }
 
-// UnreachableError is one of magpie's folders moved to a folder that isn't
+// UnreachableError is one of eipgam's folders moved to a folder that isn't
 // there now: the disk it is on isn't connected.
 type UnreachableError struct {
 	Link, Target string
 }
 
 func (e *UnreachableError) Error() string {
-	return fmt.Sprintf("magpie's files were moved to %s, which isn't there now: connect the disk it is on, then open magpie again (%s links to it)", e.Target, e.Link)
+	return fmt.Sprintf("eipgam's files were moved to %s, which isn't there now: connect the disk it is on, then open eipgam again (%s links to it)", e.Target, e.Link)
 }
 
-// Unreachable is an UnreachableError when magpie's folder, or its cache,
+// Unreachable is an UnreachableError when eipgam's folder, or its cache,
 // is a link to a folder that isn't there; nil otherwise. main stops on it
-// before anything is read or written: magpie started on an empty folder in
+// before anything is read or written: eipgam started on an empty folder in
 // its place would look like a setup lost.
 func Unreachable() error {
 	for _, at := range []string{Config(), Cache()} {

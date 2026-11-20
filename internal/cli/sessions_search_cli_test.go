@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 const fixClaude = "claude:11111111-2222-3333-4444-555555555555"
@@ -26,7 +26,7 @@ func runSearch(t *testing.T, show bool, args ...string) (string, error) {
 	return b.String(), err
 }
 
-// magpie sessions search (yansheng1003 on X): the Sessions page's search
+// eipgam sessions search (yansheng1003 on X): the Sessions page's search
 // over every agent's sessions, from the command line, as the sessions
 // MCP server writes it, each hit named so that show reads it.
 func TestSessionsSearch(t *testing.T) {
@@ -35,7 +35,7 @@ func TestSessionsSearch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantAll(t, out, `1 session says "login bug":`, "1. "+fixClaude, "/work/app · ", "user: Fix the [login bug] in auth.go", "magpie sessions show <agent:id> --find")
+	wantAll(t, out, `1 session says "login bug":`, "1. "+fixClaude, "/work/app · ", "user: Fix the [login bug] in auth.go", "eipgam sessions show <agent:id> --find")
 	if strings.Contains(out, "codex:") {
 		t.Errorf("a Codex session doesn't say it:\n%s", out)
 	}
@@ -75,7 +75,7 @@ func TestSessionsSearch(t *testing.T) {
 	}
 }
 
-// magpie sessions show reads one session as text, from where the words
+// eipgam sessions show reads one session as text, from where the words
 // were said, or as the page's transcript in --json; an id alone is
 // enough when one agent has it.
 func TestSessionsShow(t *testing.T) {
@@ -110,7 +110,7 @@ func TestSessionsShow(t *testing.T) {
 
 // A flag either command doesn't know, or one missing its value, is
 // refused with the usage, never taken for words or a session (LESSONS:
-// magpie snow --help wrote "--help" into a profile); --help prints the
+// eipgam snow --help wrote "--help" into a profile); --help prints the
 // command's own usage.
 func TestSessionsSearchFlags(t *testing.T) {
 	sessionsHome(t)
@@ -152,7 +152,7 @@ func TestSessionsSearchFlags(t *testing.T) {
 	}
 }
 
-// Until the user answers which agents' sessions magpie may read, search
+// Until the user answers which agents' sessions eipgam may read, search
 // and show read nothing, not even to index, and say how to allow it.
 func TestSessionsSearchNotAsked(t *testing.T) {
 	sessionsHome(t)

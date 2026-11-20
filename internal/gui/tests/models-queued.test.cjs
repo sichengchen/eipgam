@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultNavigationTimeout(60000);
     const posts = [];
     await page.route("**/*", serve("en", posts));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     const editor = page.locator("#modal:not([hidden]) .editor");
     await page.locator(".row.provider", { hasText: "Mixed Relay" }).click();
     await editor.locator(".mchips .mchip").first().waitFor();
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve("en", []));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     const editor = page.locator("#modal:not([hidden]) .editor");
     await page.locator(".row.provider", { hasText: "Mixed Relay" }).click();
     const chip = editor.locator(".mchips .mchip", { hasText: "glm-5" });

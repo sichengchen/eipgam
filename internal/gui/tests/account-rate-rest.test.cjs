@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.route("**/*", serve(lang));
 
         // Providers: the account's row
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "WorkBuddy" }).first().click();
         const acc = page.locator(`.editor .accts .acc[data-account-id="${USER}"]`);
         await acc.waitFor();
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(!(await sideways(page)), `${width}px: Providers scrolls sideways`);
 
         // Routing: the stage row and the Accounts line
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-act").first().waitFor();
         const row = page.locator("li", { has: page.locator("code.mdl", { hasText: new RegExp(`^${MODEL.replace(/\./g, "\\.")}$`) }) }).filter({ has: page.locator(".who", { hasText: USER }) });
         await row.first().evaluate((e) => new Promise((done) => { const ok = () => e.classList.contains("rest") ? done() : requestAnimationFrame(ok); setTimeout(done, 5000); ok(); }));

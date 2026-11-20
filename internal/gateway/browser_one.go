@@ -12,7 +12,7 @@ import (
 
 	"golang.org/x/image/draw"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // The browser MCP server lists one tool, browser, whose action names what
@@ -75,7 +75,7 @@ func browserOneTool() map[string]any {
 	return map[string]any{
 		"name":  "browser",
 		"title": "Browser",
-		"description": "Act in the user's own browser, in tabs of your own opened behind the one they are looking at, in your Magpie tab group; a tab of the user's you name has its page opened in one of yours. Actions, with the arguments each takes:\n" +
+		"description": "Act in the user's own browser, in tabs of your own opened behind the one they are looking at, in your eipgam tab group; a tab of the user's you name has its page opened in one of yours. Actions, with the arguments each takes:\n" +
 			"tabs: list them. tab_new [url, front]. tab_select [tab]. tab_close [tab]. browsers: the connected ones. use_browser [browser].\n" +
 			"navigate [url]. back. forward. reload.\n" +
 			"snapshot [interactive, ref, maxChars]: the page as an accessibility tree, a ref on each element you can act on.\n" +

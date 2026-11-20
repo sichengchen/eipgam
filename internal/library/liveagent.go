@@ -16,7 +16,7 @@ package library
 // description, docsUrl, cwd, timeoutMs, workspaceRoots, policy and auth,
 // kept as they are. A non-empty selected is the only servers whose tools
 // are used (LiveManager.ToolsFor). Until that file is there K-brain reads
-// config.json's "mcp" object instead (settingsFromConfigs), so magpie's
+// config.json's "mcp" object instead (settingsFromConfigs), so eipgam's
 // first write carries those servers over, as K-brain's own first save
 // does. The app holds the list in memory once started and saves it whole
 // (src/lib/settings/storage.ts persistSettings), so a server written while
@@ -27,7 +27,7 @@ package library
 // picked in skills-settings.json's global.selected (Manager.Effective).
 // K-brain refuses a link anywhere in a skill's path (safePath) and walks
 // past one (ScanDetailed's e.IsDir), so LiveAgent gets copies (Copy), and
-// each copy magpie makes is picked for it once (syncLiveAgentPicks).
+// each copy eipgam makes is picked for it once (syncLiveAgentPicks).
 
 import (
 	"bytes"
@@ -43,8 +43,8 @@ import (
 
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // liveAgentPicked is K-brain's file of the skills picked in its folder.
@@ -108,7 +108,7 @@ func liveAgentRead(path string) (*liveAgentDoc, error) {
 		return d, nil
 	}
 	// K-brain reads it as plain JSON (loadLiveSettings): a file it can't
-	// read isn't one magpie writes over
+	// read isn't one eipgam writes over
 	if err := json.Unmarshal(raw, &d.rest); err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
@@ -259,7 +259,7 @@ func liveAgentPut(path, name string, o ordered) error {
 		d.servers = append(d.servers, b)
 	}
 	// an empty selected is every server; one the user narrowed gets
-	// magpie's too, or it would be there with no tools
+	// eipgam's too, or it would be there with no tools
 	if sel := d.selected(); len(sel) > 0 && !slices.Contains(sel, name) {
 		raw, _ := json.Marshal(append(sel, name))
 		d.rest["selected"] = raw
@@ -293,9 +293,9 @@ func liveAgentDel(path, name string) error {
 }
 
 // syncLiveAgentPicks picks, in K-brain's skills-settings.json, each copy
-// of the library's magpie made in LiveAgent's folder, the first time it
-// is there, and takes out of the picks one magpie picked when its copy is
-// gone. One the user unpicked in LiveAgent stays unpicked: magpie picks a
+// of the library's eipgam made in LiveAgent's folder, the first time it
+// is there, and takes out of the picks one eipgam picked when its copy is
+// gone. One the user unpicked in LiveAgent stays unpicked: eipgam picks a
 // skill once (Applied.Picked), not at every sync.
 func (l *Library) syncLiveAgentPicks(t *Target, res *Result) {
 	if t.Agent.ID != "liveagent" || t.Skills == "" || res.unreached(t) {

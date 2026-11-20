@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/dirent"
+	"github.com/sichengchen/eipgam/internal/dirent"
 )
 
 // cacheIdle is how long the parses of every session file stay in memory
 // after the last read of them. They are kept on disk too (sessions.json,
-// written saveGap after a change), and they were the largest thing magpie
+// written saveGap after a change), and they were the largest thing eipgam
 // held while nobody looked: ~14.5 MB of a 58 MB idle heap for a real
 // history of 24.6 MB on disk, kept for the life of the process after one
 // visit to the Sessions or Usage page. Read again, they come back from

@@ -5,14 +5,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// #2380: Trae CN's kimi-k3-max thinks with no levels magpie knows, and
+// #2380: Trae CN's kimi-k3-max thinks with no levels eipgam knows, and
 // /v1/models said reasoning: true for it, but Pi's models.json was written
 // reasoning: false (the export read the levels alone), so Pi offered off
-// alone and `magpie pi effort high` was clamped to off. Every export that
+// alone and `eipgam pi effort high` was clamped to off. Every export that
 // writes a reasoning flag says what /v1/models says.
 func TestThinkingWithoutLevelsReachesTheExports(t *testing.T) {
 	syncHome(t)
@@ -39,10 +39,10 @@ func TestThinkingWithoutLevelsReachesTheExports(t *testing.T) {
 		t.Fatalf("the fixture is a model that thinks with no levels, as /v1/models says it: %+v", entry)
 	}
 
-	if got := piOffered("pi", "magpie/"+id); !reflect.DeepEqual(got, []string{"off", "minimal", "low", "medium", "high"}) {
+	if got := piOffered("pi", "eipgam/"+id); !reflect.DeepEqual(got, []string{"off", "minimal", "low", "medium", "high"}) {
 		t.Fatalf("Pi offers %v for %s, want its own off to high", got, id)
 	}
-	if got := piClamp("high", piOffered("pi", "magpie/"+id)); got != "high" {
-		t.Fatalf("magpie pi effort high runs at %q", got)
+	if got := piClamp("high", piOffered("pi", "eipgam/"+id)); got != "high" {
+		t.Fatalf("eipgam pi effort high runs at %q", got)
 	}
 }

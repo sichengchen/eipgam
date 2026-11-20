@@ -4,7 +4,7 @@ import (
 	"cmp"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // advisorRows are the usage rows of the advisor calls a reply says its
@@ -15,9 +15,9 @@ import (
 // so a row of the request's model held only part of what was spent: an
 // Opus advisor's tokens beside a Sonnet executor were in no row at all
 // (#6977, Refeccd on Discord). Each row is under the advisor's model, by
-// magpie's id the request named it by (advisedAs), else the vendor's name
+// eipgam's id the request named it by (advisedAs), else the vendor's name
 // for it, its Served the vendor's; nothing is taken from rec. It is its
-// own request, as an advisor call magpie runs itself is (advise): Kind
+// own request, as an advisor call eipgam runs itself is (advise): Kind
 // says it is the advisor's, and it has the request's route, agent,
 // account and session. It has no timing of its own (the vendor's stream
 // tells none), and its status is the call's, which the reply listed as

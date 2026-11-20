@@ -12,7 +12,7 @@ import (
 // the API (#5339): an embedding, a rerank, a speech and a transcription
 // model. They were dropped before, so no route could find them under a
 // group. They stay out of the chat models (Chat), and a moderation model,
-// which no route of magpie's serves, is still dropped.
+// which no route of eipgam's serves, is still dropped.
 func TestFetchKeepsModelsOfOtherAPIs(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.Write([]byte(`{"object":"list","data":[{"id":"chat-model"},{"id":"text-embedding-3-small"},{"id":"BAAI/bge-reranker-v2-m3"},{"id":"tts-1"},{"id":"whisper-1"},{"id":"omni-moderation-latest"}]}`))

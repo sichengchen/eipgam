@@ -17,9 +17,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
 // The Codex desktop app (26.1103 and on) keeps its sidebar's projects per
@@ -28,7 +28,7 @@ import (
 // globals}}}. The owner's projects sit at the file's top level; each other
 // identity's are parked under inactive, keyed by the sha256 hex of
 // JSON.stringify([chatgpt_user_id, chatgpt_account_id]). When the app's
-// account changes (magpie's switch: auth.json, then the app-server's
+// account changes (eipgam's switch: auth.json, then the app-server's
 // restart) it parks the old identity's projects and loads the new one's,
 // and an identity that never had the app open has none: the user's
 // projects "disappear" on every switch to another account
@@ -36,7 +36,7 @@ import (
 //
 // The app reads the file only as it starts and holds it in memory, so a
 // write while it runs is lost (it writes its own over it). So while the
-// app is closed magpie gives every identity, those of its saved Codex
+// app is closed eipgam gives every identity, those of its saved Codex
 // logins and those the file has, one list (shareCodexProjects): each
 // identity's projects together, a folder once, less what the user
 // removed. A project a look saw on an identity and the next look doesn't
@@ -44,7 +44,7 @@ import (
 // back from another (codex-projects.json keeps what was seen). The app
 // then loads the list on its next switch to any account. Projects added
 // or removed while the app runs reach the other accounts once it is
-// closed. With no account at all (magpie's takeover, when Codex's
+// closed. With no account at all (eipgam's takeover, when Codex's
 // provider takes no ChatGPT account) the app shows no projects, by its
 // own rule; they come back with the account.
 
@@ -134,7 +134,7 @@ func codexGlobalStatePath(home string) string {
 
 // errCodexStateUnknown is a state file that isn't the shape this reads:
 // nothing is written to it.
-var errCodexStateUnknown = errors.New("the Codex app's state file isn't the shape magpie knows")
+var errCodexStateUnknown = errors.New("the Codex app's state file isn't the shape eipgam knows")
 
 // codexProjectsRecordPath is what shareCodexProjects last saw of each
 // identity's projects, so a project the user removed is told apart from
@@ -445,8 +445,8 @@ func shareCodexProjects(home string, auths [][]byte, recordPath string) (int, er
 	if fi, err := os.Stat(target); err == nil {
 		mode = fi.Mode().Perm()
 	}
-	// the file as it was, once, beside it: magpie's write can be undone
-	backup := target + ".magpie-before-projects"
+	// the file as it was, once, beside it: eipgam's write can be undone
+	backup := target + ".eipgam-before-projects"
 	if _, err := os.Lstat(backup); errors.Is(err, os.ErrNotExist) {
 		if err := steady.WriteFile(backup, raw, mode); err != nil {
 			return 0, err
@@ -464,7 +464,7 @@ func shareCodexProjects(home string, auths [][]byte, recordPath string) (int, er
 }
 
 // sharedGlobals is globals g of identity h (who: its ChatGPT identity,
-// zero when magpie has no login for it) with the shared list: its own
+// zero when eipgam has no login for it) with the shared list: its own
 // projects that are gone dropped with every tie to them, and each project
 // of union it hasn't got added with the ties the other identities have
 // to it. A project of a folder it has already is that one. did is whether
@@ -752,7 +752,7 @@ func withoutChatGPTProjects(v json.RawMessage) json.RawMessage {
 	return v
 }
 
-// codexProjectAuths is the auth.json of every Codex identity magpie knows
+// codexProjectAuths is the auth.json of every Codex identity eipgam knows
 // on this computer: the one signed in now and each saved login's.
 func codexProjectAuths() [][]byte {
 	var out [][]byte
@@ -838,7 +838,7 @@ func codexProjectsStep(ctx context.Context) {
 // projects than its identities have together: the folders of the owner's
 // local projects (the identity the app is on, whose list is the file's
 // own) against those parked under the other identities. owner is that
-// identity's key; ok is false when the file isn't the shape magpie knows
+// identity's key; ok is false when the file isn't the shape eipgam knows
 // or has no per-identity state.
 func codexProjectsShort(home string) (owner string, short, ok bool) {
 	raw, err := os.ReadFile(codexGlobalStatePath(home))

@@ -16,17 +16,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // Pi's package market (nineruiing on X). Pi's gallery, pi.dev/packages, is
 // npm's packages with the keyword "pi-package", drawn on its server with no
-// API of its own; magpie reads the same list from npm's search, kept as
+// API of its own; eipgam reads the same list from npm's search, kept as
 // the skills market keeps skills.sh's: six hours in memory, on disk for
-// when npm can't be reached, else the snapshot magpie shipped with.
+// when npm can't be reached, else the snapshot eipgam shipped with.
 //
 // A package is installed and removed by Pi's own `pi install npm:<name>`
 // and `pi remove`, run with PI_CODING_AGENT_DIR set to that Pi's agent
@@ -34,7 +34,7 @@ import (
 // core/package-manager.js: installAndPersist installs it under
 // <agent dir>/npm and adds its source to settings.json; removeAndPersist
 // uninstalls it and takes out every entry of the same identity). A Pi
-// whose command magpie can't run here, one in WSL or one without its CLI
+// whose command eipgam can't run here, one in WSL or one without its CLI
 // found, is given the entry alone, which Pi installs when it next starts
 // (resolve → installMissing), as a copy from another Pi is.
 
@@ -262,7 +262,7 @@ type PiInstalled struct {
 	Pending bool `json:"pending,omitempty"`
 }
 
-// piBin is the pi command magpie runs for p, "" when it can't run one: a
+// piBin is the pi command eipgam runs for p, "" when it can't run one: a
 // Pi in WSL, or one whose CLI isn't found; a var for tests.
 var piBin = func(p piPlace) string {
 	if p.a.WSL != "" {

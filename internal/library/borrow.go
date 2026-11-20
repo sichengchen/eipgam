@@ -16,9 +16,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func init() {
@@ -46,12 +46,12 @@ func keepBorrowed(ctx context.Context) {
 	UseRemoteLibraries(ctx)
 }
 
-// A Remote magpie's Library, used here (KoiLx0 on X: prompts and skills
+// A Remote eipgam's Library, used here (KoiLx0 on X: prompts and skills
 // kept on one computer, not set up again on every client). The remote
 // tells its skills and instruction sets (Shared, GET
 // provider.RemoteLibraryPath); with the editor's switch on, this
-// magpie keeps them as items of its own Library, and the agents get them
-// as any other. Its MCP servers are the Remote magpie's other switch
+// eipgam keeps them as items of its own Library, and the agents get them
+// as any other. Its MCP servers are the Remote eipgam's other switch
 // (bridge_mcp.go): they run there, behind its router.
 //
 //   - Nothing the user has is written over. A skill whose name the
@@ -70,7 +70,7 @@ func keepBorrowed(ctx context.Context) {
 //   - What was taken is recorded with a hash, per item, to tell the
 //     user's change from the remote's.
 
-// Borrowed is what this computer took from one Remote magpie's Library:
+// Borrowed is what this computer took from one Remote eipgam's Library:
 // by name the hash of each skill as taken, and by id that of each set.
 type Borrowed struct {
 	Name   string            `json:"name,omitempty"`
@@ -79,14 +79,14 @@ type Borrowed struct {
 }
 
 // maxShared is how much of the skills' files a Library tells another
-// magpie, and the most of one file: base64 in JSON, it stays under what
+// eipgam, and the most of one file: base64 in JSON, it stays under what
 // a remote reads (provider.maxRemoteLibrary).
 const (
 	maxSharedAll  = 24 << 20
 	maxSharedFile = 8 << 20
 )
 
-// Shared is the Library as another magpie is told it: the instruction
+// Shared is the Library as another eipgam is told it: the instruction
 // sets with their texts and the skills with their files. The servers, the
 // hooks and what each agent gets besides are this computer's; a skill
 // linked to a folder here comes as its files.
@@ -102,7 +102,7 @@ func Shared() (*Bundle, error) {
 	b := &Bundle{NoAgents: none, Instructions: Instructions{Agents: orNone(slices.Sorted(slices.Values(l.Instructions.Agents))), Active: l.Instructions.Active},
 		Texts: map[string]string{}, MCP: []*Server{}, Skills: []*CarriedSkill{}}
 	for _, s := range l.Instructions.Sets {
-		if strings.HasPrefix(s.ID, borrowedPrefix) { // taken from a magpie: not passed on
+		if strings.HasPrefix(s.ID, borrowedPrefix) { // taken from a eipgam: not passed on
 			continue
 		}
 		s.File = ""
@@ -123,7 +123,7 @@ func Shared() (*Bundle, error) {
 	var names []*Skill
 	var dirs []string
 	for _, s := range skills {
-		if l.borrowedSkill(s.Name) { // taken from a magpie: not passed on
+		if l.borrowedSkill(s.Name) { // taken from a eipgam: not passed on
 			continue
 		}
 		names = append(names, s)
@@ -138,7 +138,7 @@ func Shared() (*Bundle, error) {
 
 // NoAgentsShown says the page shows no agent to tick a skill or the
 // shared prompts for (the gui package's gateway mode: a container, a NAS,
-// magpie web --gateway). Unset, a magpie with no agent here has none.
+// eipgam web --gateway). Unset, a eipgam with no agent here has none.
 var NoAgentsShown func() bool
 
 func noAgentsShown() bool {
@@ -166,7 +166,7 @@ var givenHere = func(kind string) []string {
 	return out
 }
 
-// borrowedPrefix starts the id of a set taken from a Remote magpie.
+// borrowedPrefix starts the id of a set taken from a Remote eipgam.
 const borrowedPrefix = "remote-"
 
 func (l *Library) borrowedSkill(name string) bool {
@@ -210,7 +210,7 @@ func BorrowedOn() map[string]bool {
 	return on
 }
 
-// SetBorrow turns the switch of the Remote magpie id on or off. On, its
+// SetBorrow turns the switch of the Remote eipgam id on or off. On, its
 // Library is read at once (UseRemoteLibraries); off, what was taken from
 // it and not changed since is taken out.
 func SetBorrow(id string, on bool) (*Result, error) {
@@ -299,7 +299,7 @@ func readSum(name string) string {
 	return skillSum(readSkills([]string{realDir(skillDir(name))})[0])
 }
 
-// BorrowResult says what a read of a Remote magpie's Library did.
+// BorrowResult says what a read of a Remote eipgam's Library did.
 type BorrowResult struct {
 	Added   []string // skills and sets taken in
 	Updated []string
@@ -307,13 +307,13 @@ type BorrowResult struct {
 	Kept    []string // the user's own by the same name, left as they are
 }
 
-// Borrow keeps the Library b of the Remote magpie id (called name) here,
+// Borrow keeps the Library b of the Remote eipgam id (called name) here,
 // as the notes above say.
 func Borrow(id, name string, b *Bundle) (*BorrowResult, error) {
 	if err := b.check(); err != nil {
 		return nil, err
 	}
-	// a magpie that shows no agent ticks its skills and prompts for none:
+	// a eipgam that shows no agent ticks its skills and prompts for none:
 	// here they go to the agents a new one would (a container's Library,
 	// fenglian980510 on X)
 	var skillsTo, promptsTo []string
@@ -469,14 +469,14 @@ func Borrow(id, name string, b *Bundle) (*BorrowResult, error) {
 	return out, nil
 }
 
-// borrowNotes are, per Remote magpie, what its last read said: "" when it
+// borrowNotes are, per Remote eipgam, what its last read said: "" when it
 // went well. In memory only.
 var borrowNotes = struct {
 	sync.Mutex
 	m map[string]string
 }{m: map[string]string{}}
 
-// BorrowNote is what the last read of the Remote magpie id's Library
+// BorrowNote is what the last read of the Remote eipgam id's Library
 // said went wrong, and the names it left as the user's.
 func BorrowNote(id string) string {
 	borrowNotes.Lock()
@@ -490,7 +490,7 @@ func setBorrowNote(id, note string) {
 	borrowNotes.Unlock()
 }
 
-// UseRemoteLibrary reads the Library of the Remote magpie id and keeps it
+// UseRemoteLibrary reads the Library of the Remote eipgam id and keeps it
 // here (Borrow).
 func UseRemoteLibrary(ctx context.Context, id string) (*BorrowResult, error) {
 	body, name, err := provider.RemoteLibrary(ctx, id)
@@ -518,7 +518,7 @@ func UseRemoteLibrary(ctx context.Context, id string) (*BorrowResult, error) {
 	return r, nil
 }
 
-// UseRemoteLibraries reads the Library of every Remote magpie switched
+// UseRemoteLibraries reads the Library of every Remote eipgam switched
 // on.
 func UseRemoteLibraries(ctx context.Context) {
 	for _, id := range slices.Sorted(maps.Keys(BorrowedOn())) {

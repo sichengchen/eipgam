@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // The tests run in a home of their own, never the user's real files.
@@ -14,7 +14,7 @@ func TestIs(t *testing.T) {
 	for l, want := range map[string]bool{
 		"ccswitch://v1/import?resource=provider&app=claude&name=x": true,
 		"CCSwitch://v1/import":     true,
-		"magpie://import?preset=x": false,
+		"eipgam://import?preset=x": false,
 		"https://ccswitch.io":      false,
 		"":                         false,
 	} {
@@ -22,7 +22,7 @@ func TestIs(t *testing.T) {
 			t.Errorf("Is(%q) = %v", l, !want)
 		}
 	}
-	if err := Forward("magpie://import?preset=x"); err == nil || errors.Is(err, ErrNotInstalled) {
-		t.Fatalf("a magpie:// link was taken: %v", err)
+	if err := Forward("eipgam://import?preset=x"); err == nil || errors.Is(err, ErrNotInstalled) {
+		t.Fatalf("a eipgam:// link was taken: %v", err)
 	}
 }

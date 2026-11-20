@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Codex's Ultra is not a level an API takes: Codex sends the model its max
@@ -14,7 +14,7 @@ import (
 // (codex-rs core/src/session/multi_agents.rs). Codex offers it on a model
 // whose entry lists "ultra"; its own catalog (models-manager/models.json)
 // lists it for these alone — GPT-6 Luna and GPT-5.6 Luna stop at max — so
-// magpie offers it on them wherever they are served (Copilot's, a key's, a
+// eipgam offers it on them wherever they are served (Copilot's, a key's, a
 // relay's: #656), never on every model that reaches max. GPT-6.1 Terra
 // carries it since #4909.
 var ultraModels = []string{"gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-6.1-terra"}

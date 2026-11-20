@@ -10,24 +10,24 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 // A caller on another computer, by any gateway key, is never given a
-// server that acts as this computer's user (Magpie Browser, magpie's image
-// server, another magpie's router), which /mcp/magpie/browser and the key's
+// server that acts as this computer's user (eipgam Browser, eipgam's image
+// server, another eipgam's router), which /mcp/eipgam/browser and the key's
 // image models refuse it directly; one by a key held to some models,
 // accounts or a spend limit isn't given a program run here either. Neither
 // is listed, and neither runs when called by name.
 func TestHubKeepsThisComputersOwnServersHere(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	servers := []HubServer{
-		{Name: "magpie-browser", HereOnly: true, Program: true},
-		{Name: "magpie-image", HereOnly: true, Program: true},
-		{Name: "home-magpie", HereOnly: true, Bridge: true},
+		{Name: "eipgam-browser", HereOnly: true, Program: true},
+		{Name: "eipgam-image", HereOnly: true, Program: true},
+		{Name: "home-eipgam", HereOnly: true, Bridge: true},
 		{Name: "shell", Program: true},
 		{Name: "docs"},
 	}
@@ -55,7 +55,7 @@ func TestHubKeepsThisComputersOwnServersHere(t *testing.T) {
 	}
 	full := []string{"Authorization", "Bearer " + secrets[0]}
 	narrow := []string{"Authorization", "Bearer " + secrets[1]}
-	if got, want := listed(here), []string{"docs", "home-magpie", "magpie-browser", "magpie-image", "shell"}; !slices.Equal(got, want) {
+	if got, want := listed(here), []string{"docs", "home-eipgam", "eipgam-browser", "eipgam-image", "shell"}; !slices.Equal(got, want) {
 		t.Errorf("this computer is given %v, want %v", got, want)
 	}
 	if got, want := listed(there, full...), []string{"docs", "shell"}; !slices.Equal(got, want) {
@@ -71,8 +71,8 @@ func TestHubKeepsThisComputersOwnServersHere(t *testing.T) {
 		name string
 		auth []string
 	}{
-		{"magpie-browser", full}, {"magpie-image", full}, {"home-magpie", full},
-		{"magpie-browser", narrow}, {"shell", narrow},
+		{"eipgam-browser", full}, {"eipgam-image", full}, {"home-eipgam", full},
+		{"eipgam-browser", narrow}, {"shell", narrow},
 	} {
 		m := readMCP(t, hubPostAt(h, HubMCPAll, there, toolsCall(c.name+hubSep+"do", `{"action":"tabs"}`), c.auth...))
 		if m.Error == nil && !m.Result.IsError {
@@ -92,16 +92,16 @@ func TestHubKeepsThisComputersOwnServersHere(t *testing.T) {
 	}
 }
 
-// Magpie Browser is given to a keyed caller from elsewhere too, and its
+// eipgam Browser is given to a keyed caller from elsewhere too, and its
 // call goes under the key's session (browser.go), whatever session the
 // caller names; never to one from elsewhere with no key, nor to a page.
 func TestHubGivesAKeyItsBrowser(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
-	servers := []HubServer{{Name: "magpie-browser", HereOnly: true, Program: true, Keyed: true}}
-	f := &fakeHub{on: true, tools: map[string][]HubTool{"": {{Server: "magpie-browser", Tool: "do", Spec: hubSpec("do")}}}, servers: map[string][]HubServer{"": servers}}
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
+	servers := []HubServer{{Name: "eipgam-browser", HereOnly: true, Program: true, Keyed: true}}
+	f := &fakeHub{on: true, tools: map[string][]HubTool{"": {{Server: "eipgam-browser", Tool: "do", Spec: hubSpec("do")}}}, servers: map[string][]HubServer{"": servers}}
 	var mu sync.Mutex
 	var seen []string
 	f.call = func(ctx context.Context, server, tool string) (json.RawMessage, error) {
@@ -117,7 +117,7 @@ func TestHubGivesAKeyItsBrowser(t *testing.T) {
 		t.Fatal(err)
 	}
 	const there = "192.0.2.7:4000"
-	call := toolsCall("magpie-browser"+hubSep+"do", `{}`)
+	call := toolsCall("eipgam-browser"+hubSep+"do", `{}`)
 	for i, auth := range [][]string{{"Authorization", "Bearer " + secrets[0], "Mcp-Session-Id", "abc"}, {"Authorization", "Bearer " + secrets[1]}} {
 		m := readMCP(t, hubPostAt(h, HubMCPAll, there, call, auth...))
 		if m.Error != nil || m.Result.IsError {
@@ -139,25 +139,25 @@ func TestHubGivesAKeyItsBrowser(t *testing.T) {
 	}
 	for _, v := range []HubVisitor{{Away: true}, {Away: true, Held: true}} {
 		if v.Gives(servers[0]) {
-			t.Errorf("%+v is given Magpie Browser", v)
+			t.Errorf("%+v is given eipgam Browser", v)
 		}
 	}
-	if (HubVisitor{Away: true, Key: "k"}).Gives(HubServer{Name: "magpie-image", HereOnly: true}) {
-		t.Error("a key from elsewhere is given magpie's image server")
+	if (HubVisitor{Away: true, Key: "k"}).Gives(HubServer{Name: "eipgam-image", HereOnly: true}) {
+		t.Error("a key from elsewhere is given eipgam's image server")
 	}
 }
 
 // Alma's MCP client is Node's fetch: Sec-Fetch-Mode: cors, no Origin, no
 // Sec-Fetch-Site, no browser agent. It is this computer's own agent and is
-// given magpie's image server (the Alma report, chang_lochuan on X). A web
+// given eipgam's image server (the Alma report, chang_lochuan on X). A web
 // page, whatever Origin a browser can send it with, still isn't, with no
 // key.
 func TestHubGivesAlmaItsHereOnlyServersNotAPage(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
-	servers := []HubServer{{Name: "magpie-image", HereOnly: true, Program: true}, {Name: "magpie-vision"}}
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
+	servers := []HubServer{{Name: "eipgam-image", HereOnly: true, Program: true}, {Name: "eipgam-vision"}}
 	var tools []HubTool
 	for _, s := range servers {
 		tools = append(tools, HubTool{Server: s.Name, Tool: "do", Spec: hubSpec("do")})
@@ -187,7 +187,7 @@ func TestHubGivesAlmaItsHereOnlyServersNotAPage(t *testing.T) {
 		slices.Sort(out)
 		return w.Code, out
 	}
-	if code, got := listed("", "Sec-Fetch-Mode", "cors", "User-Agent", "node"); code != 200 || !slices.Equal(got, []string{"magpie-image", "magpie-vision"}) {
+	if code, got := listed("", "Sec-Fetch-Mode", "cors", "User-Agent", "node"); code != 200 || !slices.Equal(got, []string{"eipgam-image", "eipgam-vision"}) {
 		t.Errorf("Alma's fetch is given %d %v", code, got)
 	}
 	pages := [][]string{
@@ -205,19 +205,19 @@ func TestHubGivesAlmaItsHereOnlyServersNotAPage(t *testing.T) {
 		{"User-Agent", "Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Safari/605.1.15", "Sec-Fetch-Mode", "cors"},
 	}
 	for _, hdr := range pages {
-		if _, got := listed("", hdr...); slices.Contains(got, "magpie-image") {
+		if _, got := listed("", hdr...); slices.Contains(got, "eipgam-image") {
 			t.Errorf("a page %v is given %v", hdr, got)
 		}
-		w := hubPostAt(h, HubMCPPath+"alma", here, toolsCall("magpie-image"+hubSep+"do", `{}`), hdr...)
+		w := hubPostAt(h, HubMCPPath+"alma", here, toolsCall("eipgam-image"+hubSep+"do", `{}`), hdr...)
 		if w.Code == http.StatusOK {
 			if m := readMCP(t, w); m.Error == nil && !m.Result.IsError {
-				t.Errorf("a page %v ran magpie-image", hdr)
+				t.Errorf("a page %v ran eipgam-image", hdr)
 			}
 		}
 	}
 	// a page rebound to 127.0.0.1 under its own name, with and without an Origin
 	for _, hdr := range [][]string{{"Origin", "http://rebind.example:3425", "Sec-Fetch-Site", "same-origin"}, {"Sec-Fetch-Mode", "cors", "User-Agent", "Mozilla/5.0"}, {"Origin", "http://rebind.example:3425"}} {
-		if _, got := listed("rebind.example:3425", hdr...); slices.Contains(got, "magpie-image") {
+		if _, got := listed("rebind.example:3425", hdr...); slices.Contains(got, "eipgam-image") {
 			t.Errorf("a rebound page %v is given %v", hdr, got)
 		}
 	}

@@ -14,15 +14,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
-// SearchAPI is a web search API the user gave magpie a key to.
+// SearchAPI is a web search API the user gave eipgam a key to.
 type SearchAPI struct {
 	Vendor string `json:"vendor"` // one of SearchVendors
 	// Key is its key, or several separated by commas (Keys), each tried
 	// when the one before is refused (#1477): the keys that are on, so a
-	// magpie that knows no KeyList asks just those.
+	// eipgam that knows no KeyList asks just those.
 	Key string `json:"key,omitempty"`
 	// KeyList is every key in the list's order, those switched off too
 	// (辰林鸭~ on Discord: keys added, removed, put in order and switched
@@ -55,7 +55,7 @@ const (
 	SearchPickOrder = "order" // the first until it is refused
 )
 
-// SearchVendor is a search API magpie can ask.
+// SearchVendor is a search API eipgam can ask.
 type SearchVendor struct {
 	ID, Name string
 	Base     string // its address, "" for one the user runs
@@ -63,12 +63,12 @@ type SearchVendor struct {
 	// KeyOptional: it answers with no key too (a SearXNG; You.com's free
 	// search, YouFreeSearch)
 	KeyOptional bool
-	// Paths are what magpie puts after its base URL to search (the
+	// Paths are what eipgam puts after its base URL to search (the
 	// gateway's askSearchAPI): a base URL given ending in one of them is
 	// that base, so the path isn't asked twice (/search/search, #509)
 	Paths []string
 	// Plugin is the spec of the plugin that gives this API (its search
-	// hook), "" for one of magpie's own; PluginID is its id there. The
+	// hook), "" for one of eipgam's own; PluginID is its id there. The
 	// plugin asks it (plugin.RunSearch); ID is plugin.PluginSearch.VendorID.
 	Plugin, PluginID string
 	// NeedURL: a plugin's API the user gives an address for, as a SearXNG
@@ -88,7 +88,7 @@ func (v SearchVendor) WantsURL() bool { return v.Base == "" && (v.Plugin == "" |
 // asked at its Base, ydc-index.io, instead.
 const YouFreeSearch = "https://api.you.com/v1/agents/search"
 
-// SearchVendors are the search APIs magpie can ask, in the order offered.
+// SearchVendors are the search APIs eipgam can ask, in the order offered.
 var SearchVendors = []SearchVendor{
 	{ID: "tavily", Name: "Tavily", Base: "https://api.tavily.com", KeysURL: "https://app.tavily.com/home", Paths: []string{"/search"}},
 	{ID: "brave", Name: "Brave Search", Base: "https://api.search.brave.com", KeysURL: "https://api-dashboard.search.brave.com/app/keys", Paths: []string{"/res/v1/web/search"}},
@@ -115,7 +115,7 @@ func AllSearchVendors() []SearchVendor {
 	return out
 }
 
-// SearchVendorOf is the vendor by its id: one of magpie's, or a plugin's.
+// SearchVendorOf is the vendor by its id: one of eipgam's, or a plugin's.
 func SearchVendorOf(id string) (SearchVendor, bool) {
 	i := slices.IndexFunc(SearchVendors, func(v SearchVendor) bool { return v.ID == id })
 	if i >= 0 {
@@ -159,7 +159,7 @@ func SearchKeyRef(key string) string {
 
 // SearchKeys is every key of the API in its list's order, each on or
 // off. KeyList is the list while its keys that are on are Key's; a Key
-// written by something that knows no KeyList (an older magpie, or one
+// written by something that knows no KeyList (an older eipgam, or one
 // it syncs with) wins: its keys are the ones on, in its order, and a
 // key the list has off that Key doesn't name stays, off, after them.
 func (a SearchAPI) SearchKeys() []SearchKey {
@@ -265,7 +265,7 @@ func (a SearchAPI) Base() string {
 }
 
 // ownBase is URL without a slash at its end, nor the vendor's path at
-// its end (…/search for Tavily): magpie puts that path after it.
+// its end (…/search for Tavily): eipgam puts that path after it.
 func (a SearchAPI) ownBase() string {
 	u := strings.TrimRight(a.URL, "/")
 	v, _ := SearchVendorOf(a.Vendor)
@@ -277,7 +277,7 @@ func (a SearchAPI) ownBase() string {
 	return u
 }
 
-// Ready is whether it can be asked: a vendor magpie knows, at an address,
+// Ready is whether it can be asked: a vendor eipgam knows, at an address,
 // with a key where it needs one (a SearXNG, You.com, may not; one that
 // signs in never does: signed out, a search says so and the next API is
 // asked).

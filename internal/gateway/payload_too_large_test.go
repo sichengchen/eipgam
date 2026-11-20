@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A byte-size refusal alone is not evidence of a token-window overflow.
@@ -182,7 +182,7 @@ func TestPayloadTooLargeErrorShapes(t *testing.T) {
 			if strings.Count(immediate.Body.String(), "byte limit") != 1 {
 				t.Fatal("final unheld byte refusal lost its hint")
 			}
-			for range 2 { // another Magpie can relay a message already carrying the hint
+			for range 2 { // another eipgam can relay a message already carrying the hint
 				w := httptest.NewRecorder()
 				status := writeError(w, proto, 413, msg)
 				var body struct {

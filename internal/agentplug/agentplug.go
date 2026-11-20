@@ -1,13 +1,13 @@
 // Package agentplug runs the agents plugins add: a module, named by a
-// plugin's package.json magpie.agent, that says where an agent magpie has
+// plugin's package.json eipgam.agent, that says where an agent eipgam has
 // no wiring of its own keeps its model, and what else to write there for
-// it to use magpie's gateway. internal/agent makes each one an Agent.
+// it to use eipgam's gateway. internal/agent makes each one an Agent.
 //
 // A module exports
 //
 //	export const agent = {
 //	  id: "aider", name: "Aider",
-//	  config: "~/.aider.conf.yml", // the file magpie edits
+//	  config: "~/.aider.conf.yml", // the file eipgam edits
 //	  model: "model",              // the key path of the model in it
 //	  prefix: "openai/",           // what the agent wants before the id
 //	}
@@ -15,16 +15,16 @@
 //	  return { "openai-api-base": gateway.v1, "openai-api-key": gateway.key }
 //	}
 //
-// and it runs in moejs in magpie's own process, as gateway middleware
+// and it runs in moejs in eipgam's own process, as gateway middleware
 // does: there is no Node here, so a package it imports is bundled into it.
-// connect's input also has decisionModels, magpie's decision models and
+// connect's input also has decisionModels, eipgam's decision models and
 // their routing groups, which models (chat models) leaves out, each with
 // the gateway paths it is asked on (internal/agent's
 // pluggedDecisionModels).
 //
 // An agent whose model is picked in the agent itself (Raycast's own
 // picker, among the models connect writes) leaves model out: it is connect
-// only, a switch on the Agents page as an app whose one setting is magpie
+// only, a switch on the Agents page as an app whose one setting is eipgam
 // as its provider is, and connect is called without a model (#2374).
 //
 // An agent that keeps the model a new session starts on in a file apart
@@ -32,16 +32,16 @@
 // models.json, defaultProvider and defaultModel in settings.json) says so
 // with startup, and model stays out: the row picks the model, written into
 // startup's file with startup's keys beside it, and connect writes the
-// rest into config. A magpie without startup reads the same module as
-// connect only, so a plugin can say it to every magpie.
+// rest into config. A eipgam without startup reads the same module as
+// connect only, so a plugin can say it to every eipgam.
 //
 //	startup: {
 //	  config: "~/.pig/agent/settings.json",
 //	  model: "defaultModel",
-//	  keys: { defaultProvider: "magpie" },
+//	  keys: { defaultProvider: "eipgam" },
 //	}
 //
-// The agent export may also say where its agent reads what magpie's
+// The agent export may also say where its agent reads what eipgam's
 // Library gives (internal/library): an instructions file, an MCP file in
 // one of MCPFormats, and a skills folder; each is optional.
 //
@@ -54,9 +54,9 @@
 // An agent that takes the gateway only from how it is started (agy reads
 // GEMINI_API_KEY and GOOGLE_GEMINI_BASE_URL from its environment, and
 // resolves a model only given on its command line) says so with launch,
-// beside model and bin. While it is on one of magpie's models its row
-// gives the command, and magpie puts a function named bin in the user's
-// shells that runs `magpie <id> run`: the agent started with env, each
+// beside model and bin. While it is on one of eipgam's models its row
+// gives the command, and eipgam puts a function named bin in the user's
+// shells that runs `eipgam <id> run`: the agent started with env, each
 // {url}, {v1} and {key} the gateway's, and the model after launch.model's
 // flag (none when the user gives that flag).
 //
@@ -65,26 +65,26 @@
 //	  model: "--model",
 //	}
 //
-// merge names keys whose object connect returns only magpie's members of:
+// merge names keys whose object connect returns only eipgam's members of:
 // each member is written on its own beside the user's, and taken out
-// again when magpie steps out (agy's customModelsConfig.customModels).
-// effort: true gives its row a field for how hard magpie's models reason,
+// again when eipgam steps out (agy's customModelsConfig.customModels).
+// effort: true gives its row a field for how hard eipgam's models reason,
 // which the gateway asks its requests for (an agent with no setting of
 // its own for it). wsl: true, for an agent that takes a built-in's place
-// (magpie's agentMovers), has it wired in WSL distros too where the
+// (eipgam's agentMovers), has it wired in WSL distros too where the
 // built-in was; aliases are other names it is typed as.
 //
-// An agent that reads a settings file of magpie's own only when it is so
+// An agent that reads a settings file of eipgam's own only when it is so
 // started (agy's --settings) names it as config, the flag that hands it
-// over in launch.args, and its own settings file as base: magpie writes
-// only config, which it removes when magpie steps out, and the user's
+// over in launch.args, and its own settings file as base: eipgam writes
+// only config, which it removes when eipgam steps out, and the user's
 // own model goes in base. connect's input and own's have base, parsed,
 // so connect can carry the user's own entries over (agy takes
 // customModels whole from the --settings file). launch.plain are the
 // arguments that start it as it is (agy's remote-control, which needs
 // its Google sign-in).
 //
-//	config: "~/.gemini/antigravity-cli/magpie-settings.json",
+//	config: "~/.gemini/antigravity-cli/eipgam-settings.json",
 //	base: "~/.gemini/antigravity-cli/settings.json",
 //	launch: { env: {…}, model: "--model", args: { "--settings": "{config}" }, plain: ["remote-control", "--remote-control"] },
 //
@@ -92,7 +92,7 @@
 // file (and base) as parsed JSON ({} for none) and the model it is on
 // now, returning the agent's own models for its picker, each { value,
 // model, direct }: the value written, the model's name for its picture,
-// and the vendor it goes to without magpie.
+// and the vendor it goes to without eipgam.
 package agentplug
 
 import (
@@ -111,9 +111,9 @@ import (
 	"time"
 
 	"github.com/MoeForge/moejs"
-	"github.com/yetone/magpie/internal/jsmod"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/jsmod"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // Formats are the config files an agent plugin's file may be, by the
@@ -156,18 +156,18 @@ type Desc struct {
 	// keeps it in config (Model) or picks it itself
 	Startup *Startup `json:"startup"`
 	// Base is the agent's own settings file, for one whose config is a
-	// file of magpie's alone (launch.args names it): the user's model is
-	// there off magpie, and connect and own are given it as base; magpie
+	// file of eipgam's alone (launch.args names it): the user's model is
+	// there off eipgam, and connect and own are given it as base; eipgam
 	// never writes it but for the user's own model picked in its row
 	Base string `json:"base"`
-	// Launch is how the agent is started on magpie, for one that takes the
+	// Launch is how the agent is started on eipgam, for one that takes the
 	// gateway only from its environment and command line; nil for one its
 	// config file connects
 	Launch *Launch `json:"launch"`
-	// Merge are key paths whose object connect returns magpie's members
+	// Merge are key paths whose object connect returns eipgam's members
 	// of, each written beside the user's own (json only)
 	Merge []string `json:"merge"`
-	// Effort gives the agent's row magpie's effort field
+	// Effort gives the agent's row eipgam's effort field
 	Effort bool `json:"effort"`
 	// WSL has the agent in WSL distros too
 	WSL bool `json:"wsl"`
@@ -184,10 +184,10 @@ type Launch struct {
 	Model string            `json:"model"`
 	// Args are flags put before the user's arguments, each with its value
 	// "{config}", the path of agent.config: agy's --settings, for a config
-	// that is magpie's own file the agent reads only when so started
+	// that is eipgam's own file the agent reads only when so started
 	Args map[string]string `json:"args"`
 	// Plain are arguments (a subcommand or a flag, alone or with
-	// "=value") with which the agent starts as it is, off magpie: agy's
+	// "=value") with which the agent starts as it is, off eipgam: agy's
 	// remote-control, which needs its own sign-in
 	Plain []string `json:"plain"`
 }
@@ -264,7 +264,7 @@ var (
 	flagOK = lazyre.New(`^--?[A-Za-z0-9][A-Za-z0-9-]{0,63}$`)
 	// a plain argument: a subcommand or a flag
 	plainOK = lazyre.New(`^-{0,2}[A-Za-z0-9][A-Za-z0-9-]{0,63}$`)
-	// a launch variable's value is magpie's address or key, a path under
+	// a launch variable's value is eipgam's address or key, a path under
 	// the address at most: it goes into the user's shell profiles, and a
 	// variable such as LD_PRELOAD or NODE_OPTIONS gets nothing a plugin
 	// chose
@@ -418,7 +418,7 @@ func Compile(spec, file string) (*Agent, error) {
 			}
 		}
 	}
-	// connect only: with no model key, connect's keys are all magpie
+	// connect only: with no model key, connect's keys are all eipgam
 	// writes, so a module with neither would write nothing
 	if a.Desc.Startup != nil && !a.has {
 		return nil, errors.New("agent.startup names the model, but there is no connect to write the gateway into agent.config")
@@ -530,7 +530,7 @@ func (d *Desc) check() error {
 	if d.Base = strings.TrimSpace(d.Base); d.Base != "" {
 		switch {
 		case d.Launch == nil || !slices.Contains(slices.Collect(maps.Values(d.Launch.Args)), "{config}"):
-			return errors.New("agent.base is for an agent.config that agent.launch.args hands the agent, as magpie's own file")
+			return errors.New("agent.base is for an agent.config that agent.launch.args hands the agent, as eipgam's own file")
 		case d.Base == strings.TrimSpace(d.Config):
 			return errors.New("agent.base is agent.config")
 		case FormatOf(d.Base) != "" && FormatOf(d.Base) != d.Format:

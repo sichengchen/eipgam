@@ -11,21 +11,18 @@ import (
 	"time"
 )
 
-// The Discover list, built for magpie. Reading it takes a topic search and
+// The Discover list, built for eipgam. Reading it takes a topic search and
 // a package.json, an npm answer and an entry file for each of ~400
 // repositories, all at GitHub (and npm), which a desktop that can't reach
 // GitHub or is rate-limited there never gets through (River_WLan on X). The
 // community repo's `tagged` workflow reads them every half hour instead,
 // onto its dist branch (scripts/tagged.mjs there, the same reading as
-// readTagged), and usemagpie.ai passes the file on. magpie asks there
-// first, then the dist branch itself, and reads GitHub only when neither
-// answers.
+// readTagged). eipgam reads that dist branch before searching GitHub.
 
 // catalogURLs is where the list is asked, in order; moved by tests.
-// MAGPIE_PLUGIN_CATALOG puts one address in front, and "off" keeps to
+// EIPGAM_PLUGIN_CATALOG puts one address in front, and "off" keeps to
 // GitHub.
 var catalogURLs = []string{
-	"https://usemagpie.ai/api/plugins/tagged",
 	"https://raw.githubusercontent.com/magpie-community/plugins/dist/tagged.json",
 }
 
@@ -87,7 +84,7 @@ func parseCatalog(b []byte, now time.Time) ([]Tagged, error) {
 // answers.
 func askCatalog(ctx context.Context) ([]Tagged, error) {
 	urls := catalogURLs
-	switch v := os.Getenv("MAGPIE_PLUGIN_CATALOG"); v {
+	switch v := os.Getenv("EIPGAM_PLUGIN_CATALOG"); v {
 	case "off":
 		return nil, errors.New("catalog is off")
 	case "":

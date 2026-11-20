@@ -58,7 +58,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posted = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posted));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const T = (s, v) => page.evaluate(([s, v]) => t(s, v), [s, v || {}]);
         const imp = await T("Import accounts from a file…");
         const ed = page.locator("#modal .editor");

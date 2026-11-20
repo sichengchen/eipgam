@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/mtls"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// mtlsCert is a client certificate magpie issued (hhdaxia on X, #5596),
+// mtlsCert is a client certificate eipgam issued (hhdaxia on X, #5596),
 // for Settings → Network and sharing: one still good, the newest last.
 type mtlsCert struct {
 	Name    string    `json:"name"`
@@ -39,7 +39,7 @@ func mtlsCerts() ([]mtlsCert, string) {
 	return out, ""
 }
 
-// pageCert is the client certificate a browser page came with (magpie
+// pageCert is the client certificate a browser page came with (eipgam
 // web, or the app's page, opened from another computer): revoking it, or
 // issuing its name again, would shut that page out at its next request.
 func pageCert(w Windows, r *http.Request) *x509.Certificate {
@@ -49,11 +49,11 @@ func pageCert(w Windows, r *http.Request) *x509.Certificate {
 	return r.TLS.PeerCertificates[0]
 }
 
-var errOwnCert = errors.New("this page came with that certificate, so it would be shut out: do this from another device, or from the computer magpie runs on")
+var errOwnCert = errors.New("this page came with that certificate, so it would be shut out: do this from another device, or from the computer eipgam runs on")
 
 func mtlsRoutes(mux *http.ServeMux, w Windows) {
 	// on or off: on makes the CA first. A page open from another computer
-	// without a certificate this magpie issued can't turn it on, which
+	// without a certificate this eipgam issued can't turn it on, which
 	// would shut that page out at its next request.
 	mux.HandleFunc("POST /api/settings/mtls", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ On bool }
@@ -63,7 +63,7 @@ func mtlsRoutes(mux *http.ServeMux, w Windows) {
 		}
 		if in.On {
 			if isWeb(w) && gateway.NeedsClientCert(r) != "" {
-				fail(rw, errors.New("this page is open from another computer without a client certificate this magpie issued, so turning this on would shut it out: issue one, install it in this browser, and open the page again over https://, or turn it on from the computer magpie runs on"))
+				fail(rw, errors.New("this page is open from another computer without a client certificate this eipgam issued, so turning this on would shut it out: issue one, install it in this browser, and open the page again over https://, or turn it on from the computer eipgam runs on"))
 				return
 			}
 			if _, _, err := gateway.MTLSStore().CA(); err != nil {
@@ -77,7 +77,7 @@ func mtlsRoutes(mux *http.ServeMux, w Windows) {
 		}
 		writeJSON(rw, settingsState())
 	})
-	// a certificate for a device, saved to Downloads as magpie-<name>:
+	// a certificate for a device, saved to Downloads as eipgam-<name>:
 	// client.pem, client-key.pem and ca.pem; the key is kept nowhere else
 	mux.HandleFunc("POST /api/settings/mtls/issue", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Name string }

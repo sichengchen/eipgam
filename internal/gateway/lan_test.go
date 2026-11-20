@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Sharing gates remote access; each authorized remote call carries the same
@@ -41,7 +41,7 @@ func TestLANGuard(t *testing.T) {
 	}
 	keys, _ := access.List()
 	keyID := keys[0].ID
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	if c := call("192.168.1.9:5000", "x-api-key", secret); c != http.StatusForbidden {
 		t.Fatal("unshared remote", c)
 	}
@@ -56,12 +56,12 @@ func TestLANGuard(t *testing.T) {
 	if addr := listenAddr(); addr != "0.0.0.0:"+Port() {
 		t.Fatal(addr)
 	}
-	for _, hdr := range [][]string{nil, {"Authorization", "Bearer magpie"}, {"x-api-key", "wrong"}} {
+	for _, hdr := range [][]string{nil, {"Authorization", "Bearer eipgam"}, {"x-api-key", "wrong"}} {
 		if c := call("192.168.1.9:5000", hdr...); c != http.StatusUnauthorized {
 			t.Fatal("unauthorized remote", hdr, c)
 		}
 	}
-	if c := call("192.168.1.9:5000", "x-api-key", secret); c != 200 || id != keyID || got != "Bearer magpie|magpie" {
+	if c := call("192.168.1.9:5000", "x-api-key", secret); c != 200 || id != keyID || got != "Bearer eipgam|eipgam" {
 		t.Fatal(c, id, got)
 	}
 	if c := call("127.0.0.1:5000", "Authorization", "Bearer "+secret); c != 200 || id != keyID {
@@ -78,13 +78,13 @@ func TestLANGuard(t *testing.T) {
 	}
 	s.LAN = false
 	settings.Save(s)
-	// MAGPIE_ADDR on the network, not shared (the Docker image): another
+	// EIPGAM_ADDR on the network, not shared (the Docker image): another
 	// machine, a container's host among them, needs an enabled key too
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3499")
-	for _, hdr := range [][]string{nil, {"Authorization", "Bearer magpie"}, {"x-api-key", "wrong"}} {
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3499")
+	for _, hdr := range [][]string{nil, {"Authorization", "Bearer eipgam"}, {"x-api-key", "wrong"}} {
 		for _, from := range []string{"192.168.1.9:5000", "172.17.0.1:40312", "[fd00::1]:5000"} {
 			if c := call(from, hdr...); c != http.StatusUnauthorized || id != "" {
-				t.Fatal("MAGPIE_ADDR on the network, not shared:", from, hdr, c)
+				t.Fatal("EIPGAM_ADDR on the network, not shared:", from, hdr, c)
 			}
 		}
 	}
@@ -92,21 +92,21 @@ func TestLANGuard(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c := call("172.17.0.1:40312", "Authorization", "Bearer "+secret); c != 200 || id == "" || got != "Bearer magpie|" {
-		t.Fatal("MAGPIE_ADDR on the network, with a key:", c, id, got)
+	if c := call("172.17.0.1:40312", "Authorization", "Bearer "+secret); c != 200 || id == "" || got != "Bearer eipgam|" {
+		t.Fatal("EIPGAM_ADDR on the network, with a key:", c, id, got)
 	}
 	if c := call("127.0.0.1:5000", "Authorization", "Bearer anything"); c != 200 {
-		t.Fatal("loopback, MAGPIE_ADDR on the network:", c)
+		t.Fatal("loopback, EIPGAM_ADDR on the network:", c)
 	}
 }
 
 // A gateway on every interface is reached here on loopback.
 func TestURLOfWildcard(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3499")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3499")
 	if u := URL(); u != "http://127.0.0.1:3499" {
 		t.Fatal(u)
 	}
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	if u := URL(); u != "http://127.0.0.1:3425" {
 		t.Fatal(u)
 	}
@@ -119,7 +119,7 @@ func TestAgentOf(t *testing.T) {
 		{"Bearer " + TokenFor("alma"), "", "ai-sdk/openai/2.0.52 ai-sdk/provider-utils/3.0.12 runtime/node.js/v22", "alma"},
 		// alma-server's (Alma 0.4's @ai-sdk/openai 4.0.15 under Node 22,
 		// whose navigator.userAgent the AI SDK appends): Alma's by the key
-		// magpie gives its provider, the AI SDK's without it (Lutra.x)
+		// eipgam gives its provider, the AI SDK's without it (Lutra.x)
 		{"Bearer " + TokenFor("alma"), "", "ai-sdk/openai/4.0.15 ai-sdk/provider-utils/5.0.10 runtime/node.js/22", "alma"},
 		{"Bearer " + Token, "", "ai-sdk/openai/4.0.15 ai-sdk/provider-utils/5.0.10 runtime/node.js/22", "ai-sdk"},
 		{"", TokenFor("alma"), "ai-sdk/anthropic/2.0.1", "alma"},
@@ -143,37 +143,37 @@ func TestAgentOf(t *testing.T) {
 	}
 }
 
-// In a container magpie's own addresses are the container's (Docker's
+// In a container eipgam's own addresses are the container's (Docker's
 // bridge, 172.17.x), which a NAS's other devices can't reach: set,
-// MAGPIE_PUBLIC_URL is the address shared, and its host the one printed
+// EIPGAM_PUBLIC_URL is the address shared, and its host the one printed
 // for the web page.
 func TestPublicURLShared(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3425")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3425")
 	for _, c := range []struct{ env, want, host string }{
 		{"http://192.168.1.20:3425", "http://192.168.1.20:3425", "192.168.1.20"},
-		{"https://nas.example.com/magpie/", "https://nas.example.com/magpie", "nas.example.com"},
+		{"https://nas.example.com/eipgam/", "https://nas.example.com/eipgam", "nas.example.com"},
 		{"nas.local:13425", "http://nas.local:13425", "nas.local"},
 		{"http://[fd00::20]:13425", "http://[fd00::20]:13425", "fd00::20"},
 	} {
-		t.Setenv("MAGPIE_PUBLIC_URL", c.env)
+		t.Setenv("EIPGAM_PUBLIC_URL", c.env)
 		if got := LANURLs(); len(got) != 1 || got[0] != c.want {
-			t.Errorf("MAGPIE_PUBLIC_URL=%q: %v, want %s", c.env, got, c.want)
+			t.Errorf("EIPGAM_PUBLIC_URL=%q: %v, want %s", c.env, got, c.want)
 		}
 		if got := PublicHost(); got != c.host {
-			t.Errorf("MAGPIE_PUBLIC_URL=%q: host %q, want %s", c.env, got, c.host)
+			t.Errorf("EIPGAM_PUBLIC_URL=%q: host %q, want %s", c.env, got, c.host)
 		}
 		if ContainerAddrs() {
-			t.Errorf("MAGPIE_PUBLIC_URL=%q still says the addresses are a container's", c.env)
+			t.Errorf("EIPGAM_PUBLIC_URL=%q still says the addresses are a container's", c.env)
 		}
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	if PublicHost() != "" {
 		t.Error("unset, a host:", PublicHost())
 	}
 }
 
 // A container is known by Docker's or Podman's marker file, a runtime in
-// PID 1's cgroup, a container's init or magpie as PID 1, or a cgroup v2
+// PID 1's cgroup, a container's init or eipgam as PID 1, or a cgroup v2
 // namespace's root on an overlay root filesystem (Docker's default under
 // cgroup v2 names no runtime, and a NAS's runtime may write no marker:
 // mtoolstec on X, LazyCat). A plain system has none of them, a systemd
@@ -210,7 +210,7 @@ func TestInContainer(t *testing.T) {
 		{"cgroup v1 docker", map[string]string{"proc/1/cgroup": "12:pids:/docker/4f1c…\n"}, true},
 		{"kubepods", map[string]string{"proc/1/cgroup": "0::/kubepods/besteffort/pod1\n"}, true},
 		{"cgroup v2 namespace on overlay", map[string]string{"proc/1/cgroup": "0::/\n", "proc/1/comm": "sh\n", "proc/1/mountinfo": overlay}, true},
-		{"magpie as PID 1", map[string]string{"proc/1/cgroup": "0::/\n", "proc/1/comm": "magpie\n", "proc/1/mountinfo": btrfs}, true},
+		{"eipgam as PID 1", map[string]string{"proc/1/cgroup": "0::/\n", "proc/1/comm": "eipgam\n", "proc/1/mountinfo": btrfs}, true},
 		{"docker --init", map[string]string{"proc/1/comm": "docker-init\n"}, true},
 		{"tini", map[string]string{"proc/1/comm": "tini\n"}, true},
 	} {
@@ -220,37 +220,37 @@ func TestInContainer(t *testing.T) {
 	}
 }
 
-// In a LazyCat (懒猫微服) app magpie sees only its container's address,
+// In a LazyCat (懒猫微服) app eipgam sees only its container's address,
 // and Settings offered http://172.28.3.65:3425 under "Share on local
 // network" (mtoolstec on X). LazyCat names the app's domain in
 // LAZYCAT_APP_DOMAIN, and the app is reached there over HTTPS: it is the
-// address shared, unless MAGPIE_PUBLIC_URL names another. A package's
-// MAGPIE_PUBLIC_URL template a system didn't render is no address, and
+// address shared, unless EIPGAM_PUBLIC_URL names another. A package's
+// EIPGAM_PUBLIC_URL template a system didn't render is no address, and
 // LazyCat's is used instead.
 func TestLazyCatPublicURL(t *testing.T) {
 	// an app's container on the box's bridge (lazycat_test.go)
 	lazyCatNet(t, []string{"lo", "eth0"}, map[string][]string{"eth0": {"172.28.3.66"}}, bridgeRoutes, "172.28.3.65")
 	inThisContainer = func() bool { return inContainer("/") }
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3425")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3425")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	t.Setenv("LAZYCAT_APP_DOMAIN", "")
 	if got := PublicURL(); got != "" {
 		t.Fatalf("outside LazyCat: %q", got)
 	}
 	for _, c := range []struct{ public, domain, want string }{
-		{"", "magpie.snyht3.heiyu.space", "https://magpie.snyht3.heiyu.space"},
-		{"", " Magpie.Snyht3.heiyu.space\n", "https://magpie.snyht3.heiyu.space"},
-		{"https://{{.S.AppDomain}}", "magpie.snyht3.heiyu.space", "https://magpie.snyht3.heiyu.space"},
-		{"https://ai.example.com", "magpie.snyht3.heiyu.space", "https://ai.example.com"},
-		{"", "https://magpie.snyht3.heiyu.space", ""},
-		{"", "magpie", ""},
-		{"", "magpie.box.heiyu.space/x", ""},
+		{"", "eipgam.snyht3.heiyu.space", "https://eipgam.snyht3.heiyu.space"},
+		{"", " eipgam.Snyht3.heiyu.space\n", "https://eipgam.snyht3.heiyu.space"},
+		{"https://{{.S.AppDomain}}", "eipgam.snyht3.heiyu.space", "https://eipgam.snyht3.heiyu.space"},
+		{"https://ai.example.com", "eipgam.snyht3.heiyu.space", "https://ai.example.com"},
+		{"", "https://eipgam.snyht3.heiyu.space", ""},
+		{"", "eipgam", ""},
+		{"", "eipgam.box.heiyu.space/x", ""},
 		{"", "-a.heiyu.space", ""},
 	} {
-		t.Setenv("MAGPIE_PUBLIC_URL", c.public)
+		t.Setenv("EIPGAM_PUBLIC_URL", c.public)
 		t.Setenv("LAZYCAT_APP_DOMAIN", c.domain)
 		if got := PublicURL(); got != c.want {
-			t.Errorf("MAGPIE_PUBLIC_URL=%q LAZYCAT_APP_DOMAIN=%q: %q, want %q", c.public, c.domain, got, c.want)
+			t.Errorf("EIPGAM_PUBLIC_URL=%q LAZYCAT_APP_DOMAIN=%q: %q, want %q", c.public, c.domain, got, c.want)
 			continue
 		}
 		if c.want == "" {
@@ -272,7 +272,7 @@ func TestLazyCatPublicURL(t *testing.T) {
 // offer) sees the host's interfaces, Docker's bridges among them, and its
 // addresses are the host's: they aren't said to be a container's own. A
 // container on a bridge network has its eth0 alone (jiezhengj on Discord:
-// magpie in Docker on a NAS).
+// eipgam in Docker on a NAS).
 func TestHostNetwork(t *testing.T) {
 	for _, c := range []struct {
 		names []string
@@ -291,7 +291,7 @@ func TestHostNetwork(t *testing.T) {
 	}
 	was := ifaceNames
 	t.Cleanup(func() { ifaceNames = was })
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	ifaceNames = func() []string { return []string{"lo", "eth0", "docker0"} }
 	if ContainerAddrs() {
 		t.Error("on the host's network, the addresses are said to be a container's")
@@ -301,13 +301,13 @@ func TestHostNetwork(t *testing.T) {
 // Another computer lists the models with the key it was given whatever
 // else its client sends beside it: an empty or placeholder Authorization
 // with the key in x-api-key, a stale token there, "bearer" in lower case
-// (悠悠哥 on Discord: a client's model list from magpie shared on a NAS
-// failed, while from magpie on 127.0.0.1, which takes any token, it came).
+// (悠悠哥 on Discord: a client's model list from eipgam shared on a NAS
+// failed, while from eipgam on 127.0.0.1, which takes any token, it came).
 // The request comes as it would from the network: another address, the
 // NAS's address as its Host.
 func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	keys, secrets := newCaller(t, "PC")
 	key := secrets[0]
 	var who string
@@ -332,9 +332,9 @@ func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 		{"x-api-key", key, "Authorization", "Bearer "},
 		{"x-api-key", key, "Authorization", "Bearer"},
 		{"x-api-key", key, "Authorization", "Bearer undefined"},
-		{"x-api-key", key, "Authorization", "Bearer magpie"},
+		{"x-api-key", key, "Authorization", "Bearer eipgam"},
 		{"Authorization", "bearer " + key},
-		{"Authorization", "Bearer magpie", "x-goog-api-key", key},
+		{"Authorization", "Bearer eipgam", "x-goog-api-key", key},
 	} {
 		for _, path := range []string{"/v1/models", "/models", "/v1/models?limit=1000"} {
 			c, b := list("192.168.0.9:50123", path, hdr...)
@@ -348,7 +348,7 @@ func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 	}
 	// a key the gateway doesn't have is refused wherever it is sent
 	for _, hdr := range [][]string{
-		{"x-api-key", "sk-magpie-wrong", "Authorization", "Bearer magpie"},
+		{"x-api-key", "sk-eipgam-wrong", "Authorization", "Bearer eipgam"},
 		{"Authorization", "Bearer "},
 		{"x-api-key", key + "x"},
 	} {
@@ -363,14 +363,14 @@ func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 }
 
 // ZCode's custom provider asks no model list; its models are typed one a
-// line (悠悠哥 on Discord: from magpie on a NAS nothing filled it, while a
-// magpie on this computer writes its models into ZCode's own config).
+// line (悠悠哥 on Discord: from eipgam on a NAS nothing filled it, while a
+// eipgam on this computer writes its models into ZCode's own config).
 // /v1/models?format=text gives the ids one a line to paste there, opened
 // in a browser on another computer with the key as ?key=; without a key it
 // is refused as the list is.
 func TestLANModelsAsText(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	_, secrets := newCaller(t, "PC")
 	h := lanGuard(New().Handler())
 	get := func(path string) *httptest.ResponseRecorder {
@@ -410,13 +410,13 @@ func TestLANModelsAsText(t *testing.T) {
 // One, the Responses websocket, images, retrieval, videos, Gemini, the MCP
 // sign-ins, Codex's backend and catalog, the quotas, the route and the
 // rest — refuses another machine without an enabled gateway key, when
-// MAGPIE_ADDR puts the gateway on the network and it isn't shared (the
+// EIPGAM_ADDR puts the gateway on the network and it isn't shared (the
 // Docker image, whose host reaches it from Docker's bridge). Through the
 // whole server stack, lanGuard in front of Handler.
 func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3425")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3425")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	if err := settings.Save(settings.Settings{LAN: false}); err != nil {
 		t.Fatal(err)
 	}
@@ -430,10 +430,10 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 		{"GET", "/"}, {"GET", "/v1"}, {"GET", "/v1/models"}, {"GET", "/models"}, {"GET", "/v1/models/x"},
 		{"GET", "/muse-code/models"}, {"GET", "/api/hello"},
 		{"GET", "/api/version"}, {"GET", "/api/tags"}, {"POST", "/api/show"},
-		{"GET", "/v1/magpie/quotas"}, {"GET", "/v1/magpie/quotas/history"},
+		{"GET", "/v1/eipgam/quotas"}, {"GET", "/v1/eipgam/quotas/history"},
 		{"GET", provider.RemoteCardsPath}, {"POST", provider.RemoteRefreshPath}, {"GET", provider.RemoteAgentModelsPath},
 		{"POST", provider.RemoteCodexResetPath + "?user=me@example.com"},
-		{"GET", "/v1/magpie/route?session=s"}, {"GET", "/v1/magpie/concurrency"}, {"GET", "/v1/magpie/limit"},
+		{"GET", "/v1/eipgam/route?session=s"}, {"GET", "/v1/eipgam/concurrency"}, {"GET", "/v1/eipgam/limit"},
 		{"POST", "/v1/chat/completions"}, {"POST", "/chat/completions"},
 		{"POST", "/v1/responses"}, {"POST", "/responses"}, {"GET", "/v1/responses"}, {"GET", "/responses"},
 		{"POST", "/v1/messages"}, {"POST", "/messages"}, {"POST", "/v1/messages/count_tokens"},
@@ -443,7 +443,7 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 		{"POST", "/v1/audio/transcriptions"}, {"POST", "/v1/audio/translations"}, {"POST", "/v1/audio/speech"},
 		{"GET", "/v1/realtime?model=m"}, {"GET", "/realtime?model=m"},
 		{"POST", "/v1/videos"}, {"GET", "/v1/videos/v1"}, {"GET", "/v1/videos/v1/content"},
-		{"POST", "/_magpie/claude-mcp/tok"}, {"POST", "/mcp/neon"},
+		{"POST", "/_eipgam/claude-mcp/tok"}, {"POST", "/mcp/neon"},
 		{"POST", CodexPath + "/responses"}, {"GET", CodexCatalogPath},
 		{"GET", "/v1beta/models"}, {"POST", "/v1beta/models/m:generateContent"},
 		{"GET", "/nowhere"},
@@ -466,7 +466,7 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 	}
 	for _, rt := range routes {
 		for _, from := range []string{"172.17.0.1:40312", "192.168.1.9:5000"} {
-			for _, hdr := range [][]string{nil, {"Authorization", "Bearer magpie"}, {"x-api-key", "anything"}, {"x-goog-api-key", "magpie"}, {"Authorization", "Bearer " + live}} {
+			for _, hdr := range [][]string{nil, {"Authorization", "Bearer eipgam"}, {"x-api-key", "anything"}, {"x-goog-api-key", "eipgam"}, {"Authorization", "Bearer " + live}} {
 				resetAuthThrottle() // test each route's own guard, not the flood limiter that would 429 later tries
 				if c, b := call(rt[0], rt[1], from, hdr...); c != http.StatusUnauthorized || !strings.Contains(b, "gateway key") {
 					t.Errorf("%s %s from %s with %v: %d %.120s", rt[0], rt[1], from, hdr, c, b)
@@ -476,17 +476,17 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 	}
 	// a gateway key gets past the guard; loopback still takes any token
 	_, secrets := newCaller(t, "Host")
-	settings.Save(settings.Settings{LAN: false}) // newCaller shares magpie
+	settings.Save(settings.Settings{LAN: false}) // newCaller shares eipgam
 	if c, b := call("GET", "/v1/models", "172.17.0.1:40312", "Authorization", "Bearer "+secrets[0]); c != 200 {
 		t.Fatal("with the key:", c, b)
 	}
-	if c, b := call("GET", "/v1/magpie/quotas", "172.17.0.1:40312", "x-api-key", secrets[0]); c != 200 {
+	if c, b := call("GET", "/v1/eipgam/quotas", "172.17.0.1:40312", "x-api-key", secrets[0]); c != 200 {
 		t.Fatal("quotas with the key:", c, b)
 	}
-	if c, b := call("GET", "/v1/models", "127.0.0.1:5000", "Authorization", "Bearer magpie"); c != 200 {
+	if c, b := call("GET", "/v1/models", "127.0.0.1:5000", "Authorization", "Bearer eipgam"); c != 200 {
 		t.Fatal("loopback:", c, b)
 	}
-	// the agents' models, to a magpie with this one as its provider
+	// the agents' models, to a eipgam with this one as its provider
 	was := SharedAgentModels
 	SharedAgentModels = func() ([]byte, error) { return []byte(`{"agents":{"claude":{"model":"group/smart"}}}`), nil }
 	t.Cleanup(func() { SharedAgentModels = was })
@@ -550,7 +550,7 @@ func TestURLKind(t *testing.T) {
 		"http://[fd12:3456::1]:3425":    "local",
 		"http://203.0.113.9:3425":       "internet",
 		"http://[2001:4860::8888]:3425": "internet",
-		"https://magpie.example.com":    "",
+		"https://eipgam.example.com":    "",
 		"http://nas.local:3425":         "",
 		"":                              "",
 	} {

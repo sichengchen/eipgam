@@ -11,7 +11,7 @@ import (
 )
 
 // WalterAIBuilder on X: Codex's subscription routed Until used up, two
-// accounts. The first used up, magpie signed Codex in to the second, and
+// accounts. The first used up, eipgam signed Codex in to the second, and
 // signed it back in to the first once that had room again, while the
 // gateway, routed Until used up, kept requests on the second as that
 // routing says: Codex and the accounts list showed the first in use while
@@ -78,7 +78,7 @@ func TestCodexDrainSignInStaysOnTheNext(t *testing.T) {
 				t.Fatalf("switched to %q, Codex signed in with %q", to, signedIn())
 			}
 			// the accounts list marks the first as the one gone back to
-			// only where magpie goes back to it
+			// only where eipgam goes back to it
 			if returns() != c.back {
 				t.Fatalf("first marked to go back to: %v, want %v", returns(), c.back)
 			}

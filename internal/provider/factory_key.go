@@ -20,8 +20,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // factoryKeyPrefix is droid's Uh: what a Factory API key starts with.

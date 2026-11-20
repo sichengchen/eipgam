@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Claude Desktop's Code tab on the user's own subscription sends the model
@@ -72,14 +72,14 @@ func TestClaudeModelVariablesAreAnthropicsOwnIDs(t *testing.T) {
 	if got := get("ANTHROPIC_DEFAULT_HAIKU_MODEL"); strings.HasSuffix(got, "[1m]") {
 		t.Errorf("haiku has no 1M window to mark: %q", got)
 	}
-	// magpie reads them back as the subscription's models
+	// eipgam reads them back as the subscription's models
 	if got := a.Field("haiku").Get(); got != "claude/claude-haiku-4-5" {
 		t.Errorf("haiku shown as %q", got)
 	}
 	if got := claudeMain(path); got != main {
 		t.Errorf("main read as %q", got)
 	}
-	// a settings.json an older magpie wrote is rewritten by the next sync
+	// a settings.json an older eipgam wrote is rewritten by the next sync
 	for k, v := range map[string]string{
 		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude/claude-haiku-4-5[1m]",
 		"ANTHROPIC_SMALL_FAST_MODEL":    "claude/claude-haiku-4-5[1m]",
@@ -97,7 +97,7 @@ func TestClaudeModelVariablesAreAnthropicsOwnIDs(t *testing.T) {
 			t.Errorf("after Sync %s is still %q", k, v)
 		}
 	}
-	// the user's own bare model on a tier magpie doesn't hold stays theirs
+	// the user's own bare model on a tier eipgam doesn't hold stays theirs
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}

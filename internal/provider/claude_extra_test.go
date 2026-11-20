@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // noExtraUsage turns Claude's Extra usage off (ClaudeNoExtraUsage) for
@@ -36,7 +36,7 @@ func claudeRead(five, week, spent float64, now time.Time) []QuotaWindow {
 }
 
 // baksili_ on X: a Claude account past its plan goes on at Anthropic's
-// extra usage, billed. With Extra usage off in magpie (off by default:
+// extra usage, billed. With Extra usage off in eipgam (off by default:
 // nothing changes for anyone who didn't turn it off) every Claude account
 // is held at 100% of a plan window, as a Codex account set not to spend
 // its credits is, while what its plan has left is still used; a Codex

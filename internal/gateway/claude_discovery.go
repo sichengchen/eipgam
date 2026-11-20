@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Claude Code lists a gateway's models in /model when the user sets
@@ -19,12 +19,12 @@ import (
 // on GET <ANTHROPIC_BASE_URL>/v1/models?limit=1000, sent with
 // "anthropic-version: 2023-06-01" and its own User-Agent
 // ("claude-code/2.1.316", Xs(), not the claude-cli/ one its turns carry).
-// A remote magpie's Kimi, GLM and DeepSeek were left out of /model whole
+// A remote eipgam's Kimi, GLM and DeepSeek were left out of /model whole
 // (zent00 on X). Shown to that request, a model whose id says neither is
-// listed by the alias Claude Desktop is shown it by, anthropic/magpie-<n>
+// listed by the alias Claude Desktop is shown it by, anthropic/eipgam-<n>
 // (aliasFor), which no Claude model's id says and which unprefixed
 // serves as the model for every client, before any provider's model of
-// that spelling. "anthropic/" put in front of magpie's id would read better,
+// that spelling. "anthropic/" put in front of eipgam's id would read better,
 // but a provider named anthropic (the Anthropic preset's id) serves any
 // model asked of it by that spelling. Its label is display_name, the name
 // the agents' lists give the model. Every other client, and Claude Code

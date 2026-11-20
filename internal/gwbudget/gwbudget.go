@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 // Refusal is why a key's request was turned away, as the client is told.
@@ -103,7 +103,7 @@ func ForgetRefreshForTest() { lastAsk.Store(0) }
 
 // ErrUnlimited is the error a key's request gets when the key is held to
 // a limit and nothing can hold it.
-var ErrUnlimited = errors.New("this gateway key is held to a limit, but magpie's Key limits built-in isn't serving it, so nothing was sent; turn it on in magpie's Plugins › Built-in")
+var ErrUnlimited = errors.New("this gateway key is held to a limit, but eipgam's Key limits built-in isn't serving it, so nothing was sent; turn it on in eipgam's Plugins › Built-in")
 
 // Limiting is the limiter for who's request: nil, nil when who has no
 // limit; ErrUnlimited when it has one and none serves. With none, one

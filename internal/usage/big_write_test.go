@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // recih on X (#6199): a page's cache totals hide one request that wrote a

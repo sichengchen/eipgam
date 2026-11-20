@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Via is ctx for requests made on the provider's behalf: they go through
@@ -262,7 +262,7 @@ func ProxyUses(id string) []ProxyUse {
 
 // ProxyGone is the name of a saved proxy p chooses (its own, or an
 // account's) that isn't on this computer, "" when none is missing: what a
-// sync from a magpie that didn't bring the proxy list leaves.
+// sync from a eipgam that didn't bring the proxy list leaves.
 func ProxyGone(p Provider) string {
 	gone := func(v string) string {
 		v = strings.TrimSpace(v)
@@ -287,10 +287,10 @@ func ProxyGone(p Provider) string {
 }
 
 // ViaRemoteMagpieAt is ctx for a request to u made on behalf of the
-// Remote magpie whose gateway u is on (its scheme and host): Via of that
+// Remote eipgam whose gateway u is on (its scheme and host): Via of that
 // provider, so the Library's connection to its MCP router goes as its
 // model calls do (hhdaxia on X: a client certificate the remote asks for
-// went with the model calls alone). ctx as it is when no Remote magpie
+// went with the model calls alone). ctx as it is when no Remote eipgam
 // is at u.
 func ViaRemoteMagpieAt(ctx context.Context, u *url.URL) context.Context {
 	if u == nil || u.Host == "" {

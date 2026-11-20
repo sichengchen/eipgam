@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       const group = page.locator(".rt-group").first();
       await group.waitFor({ state: "attached" });
 
@@ -206,7 +206,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, [], [morning]));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       // the caption under the stage tells it
       const said = () => document.body.innerText + "\n" + (document.querySelector(".rt-cap")?.textContent || "");
       await page.waitForFunction((s) => (document.body.innerText + "\n" + (document.querySelector(".rt-cap")?.textContent || "")).includes(s), w.over)

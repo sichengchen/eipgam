@@ -10,26 +10,26 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // yuyong_id on Discord: magpie1 holds a Codex (ChatGPT) sign-in, magpie2
-// uses magpie1 as a Remote magpie, and magpie3 uses magpie2. magpie2
+// uses magpie1 as a Remote eipgam, and magpie3 uses magpie2. magpie2
 // showed magpie1's Codex card; magpie3 showed none of it, as magpie2
-// told another magpie only the cards of its own accounts. Every kind of
+// told another eipgam only the cards of its own accounts. Every kind of
 // card magpie1 tells comes through to magpie3 now, named after both
 // magpies; a refresh pressed at magpie3 reaches magpie1; a card that
-// comes round to a magpie it went through is left out.
+// comes round to a eipgam it went through is left out.
 func TestRemoteChainPassesOnCards(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	// magpie1, as its gateway answers (CachedCards): its own cards, each
 	// with the way it came by, magpie1 alone
 	var mu sync.Mutex
 	var refreshes []string
 	m1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("x-api-key") != "sk-magpie-m1" {
+		if r.Header.Get("x-api-key") != "sk-eipgam-m1" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -53,10 +53,10 @@ func TestRemoteChainPassesOnCards(t *testing.T) {
 	}))
 	defer m1.Close()
 
-	// magpie2: this process's gateway, magpie1 its Remote magpie
+	// magpie2: this process's gateway, magpie1 its Remote eipgam
 	gw := httptest.NewServer(lanGuard(New().Handler()))
 	defer gw.Close()
-	if err := provider.Save(provider.Provider{ID: "m1", Name: "M1", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-m1", Chat: m1.URL}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "m1", Name: "M1", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-m1", Chat: m1.URL}); err != nil {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
@@ -85,7 +85,7 @@ func TestRemoteChainPassesOnCards(t *testing.T) {
 	// what magpie2 tells magpie3, through its real handler
 	told := get(provider.RemoteCardsPath)
 
-	// magpie3: another magpie, with magpie2 as its Remote magpie, told
+	// magpie3: another eipgam, with magpie2 as its Remote eipgam, told
 	// what magpie2's gateway told
 	defer catalog.SetSelfForTest("m3")()
 	m2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -98,12 +98,12 @@ func TestRemoteChainPassesOnCards(t *testing.T) {
 	defer m2.Close()
 	// one process plays both magpies; magpie3 knows magpie2 alone, as the
 	// same account by two paths would be shown once
-	m1Saved := provider.Provider{ID: "m1", Name: "M1", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-m1", Chat: m1.URL}
+	m1Saved := provider.Provider{ID: "m1", Name: "M1", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-m1", Chat: m1.URL}
 	if err := provider.Delete("m1"); err != nil {
 		t.Fatal(err)
 	}
 	provider.ForgetRemoteCardsForTest()
-	if err := provider.Save(provider.Provider{ID: "m2", Name: "M2", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-m2", Chat: m2.URL}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "m2", Name: "M2", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-m2", Chat: m2.URL}); err != nil {
 		t.Fatal(err)
 	}
 	byID := map[string]provider.SubscriptionQuota{}
@@ -115,7 +115,7 @@ func TestRemoteChainPassesOnCards(t *testing.T) {
 		len(c.Windows) != 2 || c.Windows[0].Used != 37 || c.Windows[1].Used != 12 {
 		t.Fatalf("magpie1's Codex card at magpie3: %+v (all: %+v)", c, byID)
 	}
-	// a reset is spent on the magpie next door only (UseRemoteCodexReset)
+	// a reset is spent on the eipgam next door only (UseRemoteCodexReset)
 	if c.Resets != nil {
 		t.Errorf("a reset two magpies away is offered: %+v", c.Resets)
 	}
@@ -162,7 +162,7 @@ func TestRemoteChainPassesOnCards(t *testing.T) {
 		t.Errorf("magpie3's refresh of m1/codex: %d, magpie1 asked %v", res.StatusCode, got)
 	}
 
-	// a card that went through this magpie before is left out: magpie3
+	// a card that went through this eipgam before is left out: magpie3
 	// told a card that came m3 → m2 shows nothing of it
 	told = []byte(`{"object":"list","data":[{"provider":"m2/codex","name":"Codex · M2","from":"M2","kind":"subscription","user":"loop@x.com","via":["m3","m2x"],"windows":[]}]}`)
 	provider.ForgetRemoteCardsForTest()
@@ -173,21 +173,21 @@ func TestRemoteChainPassesOnCards(t *testing.T) {
 	}
 }
 
-// magpie2's status line (GET /v1/magpie/quotas?kept=1, KeptQuotaReport)
-// is told its Remote magpie's cards as last read, as its Usage page shows
-// them: a magpie whose Codex is another's had none on its status line.
+// magpie2's status line (GET /v1/eipgam/quotas?kept=1, KeptQuotaReport)
+// is told its Remote eipgam's cards as last read, as its Usage page shows
+// them: a eipgam whose Codex is another's had none on its status line.
 func TestKeptReportHasRemoteCards(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	m1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, `{"object":"list","data":[{"provider":"codex","name":"Codex","user":"a@x.com","kind":"subscription","via":["m1"],"windows":[{"name":"5h","used":37}]}]}`)
 	}))
 	defer m1.Close()
-	if err := provider.Save(provider.Provider{ID: "m1", Name: "M1", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-m1", Chat: m1.URL}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "m1", Name: "M1", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-m1", Chat: m1.URL}); err != nil {
 		t.Fatal(err)
 	}
 	provider.RemoteCards(context.Background())
-	r := httptest.NewRequest("GET", "/v1/magpie/quotas?kept=1", nil)
+	r := httptest.NewRequest("GET", "/v1/eipgam/quotas?kept=1", nil)
 	r.RemoteAddr = "127.0.0.1:5000"
 	w := httptest.NewRecorder()
 	lanGuard(New().Handler()).ServeHTTP(w, r)

@@ -21,17 +21,17 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // billion-context's own settings file (billion-context.json): the few of
 // its settings the Library's billion-context tab changes, carried by a
 // sync with the rest of the library, and every running bili told to read
-// it again once it changes. bili reads it as JSON or JSONC; magpie edits
+// it again once it changes. bili reads it as JSON or JSONC; eipgam edits
 // it the way it edits an agent's JSONC file (edit.PatchJSON), so comments,
-// key order and every key magpie doesn't know stay as they were.
+// key order and every key eipgam doesn't know stay as they were.
 
 // BiliConfigFile is billion-context.json where bili itself looks for it
 // (src/paths.ts): BILI_CONFIG_FILE, else billion-context/ under
@@ -58,29 +58,29 @@ func BiliConfigFile() string {
 // computer's and never carried.
 func biliCredFile() string { return BiliConfigFile() + ".summary-credentials.json" }
 
-// biliRecipe is the name of the recipe magpie adds to billion-context.json
-// for a summary model magpie serves, and of its key in bili's private
-// store: bili sends the summary requests to magpie's gateway.
-const biliRecipe = "magpie"
+// biliRecipe is the name of the recipe eipgam adds to billion-context.json
+// for a summary model eipgam serves, and of its key in bili's private
+// store: bili sends the summary requests to eipgam's gateway.
+const biliRecipe = "eipgam"
 
-// biliRecipeAgent is the agent magpie's gateway counts those requests
+// biliRecipeAgent is the agent eipgam's gateway counts those requests
 // under (gateway.TokenFor).
 const biliRecipeAgent = "billion-context"
 
 // biliCarriedURL is the gateway address a carried billion-context.json
-// names in magpie's recipe: each computer's own gateway goes in when it is
+// names in eipgam's recipe: each computer's own gateway goes in when it is
 // written there (biliLocal), so two computers on different ports carry the
 // same bytes and don't sync it back and forth.
 const biliCarriedURL = "http://" + gateway.DefaultAddr + "/v1"
 
-// biliGatewayURL is this computer's gateway, as magpie's recipe names it.
+// biliGatewayURL is this computer's gateway, as eipgam's recipe names it.
 var biliGatewayURL = func() string { return gateway.URL() + "/v1" }
 
 // maxBiliCarried is the largest billion-context.json a sync carries; a
 // bigger one isn't a settings file anyone typed.
 const maxBiliCarried = 1 << 20
 
-// biliCfgMu keeps two of magpie's own edits of the file apart.
+// biliCfgMu keeps two of eipgam's own edits of the file apart.
 var biliCfgMu sync.Mutex
 
 // biliText is the file's text and whether it is there; an error is a file
@@ -113,7 +113,7 @@ func biliParse(text string) (gjson.Result, bool) {
 	return r, true
 }
 
-// biliOurs is whether the file's recipe under biliRecipe is the one magpie
+// biliOurs is whether the file's recipe under biliRecipe is the one eipgam
 // writes: its key from bili's store under that name, sent to this
 // computer. A recipe of the user's by that name is left alone.
 func biliOurs(r gjson.Result) bool {
@@ -124,8 +124,8 @@ func biliOurs(r gjson.Result) bool {
 	return p.Get("credentialRef").String() == biliRecipe && !p.Get("apiKeyEnv").Exists() && biliLoopback(strings.TrimSuffix(strings.TrimSuffix(p.Get("baseUrl").String(), "/"), "/v1"))
 }
 
-// biliAt is text with magpie's recipe sent to url; text as it was when
-// the recipe isn't magpie's or is sent there already.
+// biliAt is text with eipgam's recipe sent to url; text as it was when
+// the recipe isn't eipgam's or is sent there already.
 func biliAt(text, url string) string {
 	r, ok := biliParse(text)
 	if !ok || !biliOurs(r) || r.Get("providers."+biliRecipe+".baseUrl").String() == url {
@@ -163,7 +163,7 @@ func biliChanged() time.Time {
 }
 
 // putBili writes a carried billion-context.json here, with this
-// computer's gateway in magpie's recipe and its key in bili's store; the
+// computer's gateway in eipgam's recipe and its key in bili's store; the
 // file it replaces is kept with the change's backups. It says whether it
 // wrote the file. One bili couldn't read is not written.
 func putBili(text string, kept *backups) (bool, error) {
@@ -200,9 +200,9 @@ func putBili(text string, kept *backups) (bool, error) {
 	return wrote, nil
 }
 
-// biliKey puts the key magpie's recipe is sent with into bili's private
+// biliKey puts the key eipgam's recipe is sent with into bili's private
 // store, the way bili writes it: under the store's lock file, a 0600 file
-// renamed in, every other entry as it was. Magpie's gateway takes any key
+// renamed in, every other entry as it was. eipgam's gateway takes any key
 // from this computer, so the key only says who is asking.
 func biliKey() error {
 	p := biliCredFile()
@@ -338,7 +338,7 @@ type BiliSettings struct {
 	Summary bool     `json:"summary"`
 	Targets []string `json:"targets"`
 	// Recipes are the "recipe/model" a target can be from the file's own
-	// recipes, magpie's left out
+	// recipes, eipgam's left out
 	Recipes []string `json:"recipes"`
 	// Philosophy is compress.prompts.compressPhilosophy, used by bili
 	// only with compress.acknowledgePromptsRisk (Risk)
@@ -415,7 +415,7 @@ type BiliChange struct {
 	// Target is the summary model, first of the targets: "recipe/model"
 	// from the file's recipes, or Model
 	Target *string `json:"target"`
-	// Model is a model magpie serves, as the target: magpie's recipe sends
+	// Model is a model eipgam serves, as the target: eipgam's recipe sends
 	// it to this computer's gateway
 	Model *string `json:"model"`
 	// Philosophy "" takes it out; one set turns acknowledgePromptsRisk on,
@@ -448,7 +448,7 @@ func setBiliSettings(p string, c BiliChange) (string, error) {
 	}
 	r, ok := biliParse(text)
 	if !ok {
-		return "", errors.New("billion-context.json isn't JSON billion-context can read, so magpie leaves it alone: " + p)
+		return "", errors.New("billion-context.json isn't JSON billion-context can read, so eipgam leaves it alone: " + p)
 	}
 	var set []edit.KV
 	var del []string
@@ -482,7 +482,7 @@ func setBiliSettings(p string, c BiliChange) (string, error) {
 		}
 		rp := r.Get("providers." + biliRecipe)
 		if rp.Exists() && !biliOurs(r) {
-			return "", errors.New(`billion-context.json has a provider of yours named "magpie", so magpie can't add its own there`)
+			return "", errors.New(`billion-context.json has a provider of yours named "eipgam", so eipgam can't add its own there`)
 		}
 		if !rp.Exists() {
 			set = append(set, edit.KV{Path: "providers." + biliRecipe, Value: map[string]any{

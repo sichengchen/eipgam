@@ -1,11 +1,11 @@
 package provider
 
-// A signed-in account's model list is fetched once by FetchNew, when magpie
+// A signed-in account's model list is fetched once by FetchNew, when eipgam
 // has none for it yet, and after that only when Refresh is pressed. A model
-// the vendor adds to the plan later never reached a magpie left running, nor
+// the vendor adds to the plan later never reached a eipgam left running, nor
 // one restarted, as the list it had was not new: OpenAI served GPT-6.1 Terra
-// to ChatGPT accounts on 10-26, and Codex routed through magpie still listed
-// what the ChatGPT backend had on 10-12 (cliff_26651 on Discord). The magpie
+// to ChatGPT accounts on 10-26, and Codex routed through eipgam still listed
+// what the ChatGPT backend had on 10-12 (cliff_26651 on Discord). The eipgam
 // serving the gateway now asks each account's vendor again once the list it
 // has is accountListAge old, as KeepPluginsListed does for a plugin's.
 
@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// accountRelistEvery is how often the gateway's magpie looks for an
+// accountRelistEvery is how often the gateway's eipgam looks for an
 // account's list that is due; accountRelistFirst is how long after it
 // starts it first does (FetchNew lists the new accounts meanwhile);
 // accountListAge is how old a list is before it is asked for again.
@@ -26,7 +26,7 @@ var (
 )
 
 // KeepAccountsListed fetches each signed-in account's list again once it
-// is accountListAge old, in the magpie serving the gateway.
+// is accountListAge old, in the eipgam serving the gateway.
 func KeepAccountsListed(ctx context.Context) {
 	t := time.NewTimer(accountRelistFirst)
 	defer t.Stop()

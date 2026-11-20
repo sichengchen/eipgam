@@ -7,8 +7,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // advisorKey is a gateway key whose models are models, and its secret.
@@ -32,8 +32,8 @@ func sendAs(t *testing.T, s *Server, secret, body string) *httptest.ResponseReco
 }
 
 // Claude Code's advisor names a second model inside the request. A key
-// held to some models may not reach another through it: magpie asks the
-// advisor model as the caller (not as a model magpie chose), so the key's
+// held to some models may not reach another through it: eipgam asks the
+// advisor model as the caller (not as a model eipgam chose), so the key's
 // models hold it, and the advisor fails as an advisor does.
 func TestAdvisorHeldToTheKeysModels(t *testing.T) {
 	u := advisedSetup(t)

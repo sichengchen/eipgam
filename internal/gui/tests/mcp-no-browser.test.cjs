@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Passings_z on X: in magpie's Docker image, Chrome DevTools' MCP server
+// Passings_z on X: in eipgam's Docker image, Chrome DevTools' MCP server
 // listed its tools and each one failed, for want of a Chrome the image
 // doesn't ship. Its row says there is no Chrome there, in red, and its
-// tooltip says what works instead: Magpie Browser, or the server's option
+// tooltip says what works instead: eipgam Browser, or the server's option
 // for a Chrome it can reach. A server beside it that is fine is unchanged.
 // Every language, Chromium and WebKit, 1100 and 390 wide; nothing scrolls
 // sideways. No backend: the API is faked here.
@@ -21,7 +21,7 @@ const agents = [
 ];
 const WORDS = [
   "no Chrome here",
-  "It lists its {n} tools, but they drive a Chrome it starts itself, and there is none where magpie runs. Magpie Browser, in the Library, uses your own Chrome instead; or start it with {opt} at a Chrome it can reach",
+  "It lists its {n} tools, but they drive a Chrome it starts itself, and there is none where eipgam runs. eipgam Browser, in the Library, uses your own Chrome instead; or start it with {opt} at a Chrome it can reach",
 ];
 const found = {
   "chrome-devtools": { state: "error", why: "nobrowser", detail: "--browserUrl", tools: 33 },
@@ -30,8 +30,8 @@ const found = {
 
 function server(lang, calls) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
-    agents, mcpHub: false, hubPath: "/mcp/magpie/hub/",
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
+    agents, mcpHub: false, hubPath: "/mcp/eipgam/hub/",
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [
       { name: "chrome-devtools", transport: "stdio", command: "npx", args: ["-y", "chrome-devtools-mcp@latest"], agents: ["claude"] },
@@ -82,13 +82,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const w = (s, v) => tr(lang, s, v);
           if (lang !== "en") for (const s of WORDS) assert.ok(I18N[lang][s], `${lang}: ${s}`);
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, []));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const status = (name) => page.locator(`#view-library .lib-health[data-server="${name}"]`);
           await page.waitForFunction(() => document.querySelectorAll("#view-library .lib-health").length === 2 && !document.querySelector("#view-library .lib-health.checking"));

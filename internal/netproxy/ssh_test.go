@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy/sshtest"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy/sshtest"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // sshVia gets target with the proxy choice, as a vendor request takes it.
@@ -149,7 +149,7 @@ func TestSSHProxySaysWhyItFailed(t *testing.T) {
 	}
 }
 
-// The tunnel's SOCKS end takes only magpie's own login: another program
+// The tunnel's SOCKS end takes only eipgam's own login: another program
 // on this computer can't send through the user's server.
 func TestSSHProxyLocalEndNeedsItsLogin(t *testing.T) {
 	clearProxyEnv(t)
@@ -165,7 +165,7 @@ func TestSSHProxyLocalEndNeedsItsLogin(t *testing.T) {
 	} else {
 		c.Close()
 	}
-	for _, who := range []*url.Userinfo{nil, url.UserPassword("magpie", "guess")} {
+	for _, who := range []*url.Userinfo{nil, url.UserPassword("eipgam", "guess")} {
 		bad := *u
 		bad.User = who
 		if c, err := DialSOCKS(context.Background(), &bad, "vendor.example:80"); err == nil {

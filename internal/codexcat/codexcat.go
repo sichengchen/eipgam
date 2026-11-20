@@ -1,5 +1,5 @@
 // Package codexcat renders models the way Codex describes them: the entries
-// of its models.json, for `model_catalog_json` and for the model list magpie
+// of its models.json, for `model_catalog_json` and for the model list eipgam
 // hands Codex in place of the ChatGPT backend's.
 package codexcat
 
@@ -18,12 +18,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Prompt is what Codex itself sends as the instructions of a model its
@@ -48,7 +48,7 @@ var Prompt string
 var bundledJSON []byte
 
 // It is read the first time a model asks, not at launch: ~0.5 MB a
-// launch that writes no Codex catalog (`magpie statusline`) never uses.
+// launch that writes no Codex catalog (`eipgam statusline`) never uses.
 var bundled = sync.OnceValue(func() map[string]string {
 	var b struct {
 		Instructions map[string]string `json:"instructions"`
@@ -74,8 +74,8 @@ func longestPrefix(id string, slugs func(func(string) bool)) string {
 }
 
 // officialFor is the instructions official Codex sends for the model a
-// magpie model serves, and the model_messages they come with, never a
-// word of magpie's. The model is the id's own model (mycpa/gpt-6-astra,
+// eipgam model serves, and the model_messages they come with, never a
+// word of eipgam's. The model is the id's own model (mycpa/gpt-6-astra,
 // openai/gpt-6-astra on a relay, a found auto/gpt-6.1-sol), matched as
 // Codex matches a slug (longestPrefix) against Codex's own entries: those
 // of the ChatGPT account it last listed (models_cache.json, own), which
@@ -128,7 +128,7 @@ func DefaultEffort(e []string) string {
 
 // NewSessionEffort is the effort a new Codex session starts at, as the
 // top of this machine's Codex config.toml says it (model_reasoning_effort,
-// magpie's "New sessions" effort, or the one Codex's own picker last
+// eipgam's "New sessions" effort, or the one Codex's own picker last
 // saved); "" when it is unset or the config can't be read.
 func NewSessionEffort() string {
 	v, _ := edit.GetTOMLTop(filepath.Join(catalog.CodexHome(), "config.toml"), "model_reasoning_effort")
@@ -158,7 +158,7 @@ func ModelDefault(levels []string, chosen string) string {
 // the default_reasoning_level of the entry it reads for it. Codex's own
 // model and a ChatGPT account's (codex/) keep their entry from Codex's
 // models_cache.json, so it is that entry's (gpt-6.1-sol: low); one of
-// magpie's other models takes the one Entries writes. "" when the model
+// eipgam's other models takes the one Entries writes. "" when the model
 // has no levels, or Codex's entry names none.
 func TakesEffort(ms []catalog.Model, id string) string {
 	e := catalog.Efforts(ms, id)
@@ -176,7 +176,7 @@ func TakesEffort(ms []catalog.Model, id string) string {
 // models, read again only when models_cache.json changes: the window's
 // Codex effort field asks TakesEffort per model every 15s poll, and
 // reading and decoding the whole cache each time was 238 MB of what a
-// live magpie allocated in 37 minutes. Shared: read only.
+// live eipgam allocated in 37 minutes. Shared: read only.
 func cacheLevels() map[string]string {
 	levels, _ := filememo.Read("codex cache levels", catalog.CodexModelsCache(), func(b []byte) (map[string]string, error) {
 		var cache struct {
@@ -228,8 +228,8 @@ func CatalogUsed(ms []catalog.Model, effort string, used []string) []byte {
 }
 
 // ChatGPTOwn reports whether slug is a ChatGPT account's own model in
-// magpie's list for Codex (codex/<slug>): Codex's own GPT models, for a
-// Codex that reaches them through magpie, which FitOwn keeps in the first
+// eipgam's list for Codex (codex/<slug>): Codex's own GPT models, for a
+// Codex that reaches them through eipgam, which FitOwn keeps in the first
 // AppList.
 func ChatGPTOwn(slug string) bool { return strings.HasPrefix(slug, "codex/") }
 
@@ -283,7 +283,7 @@ type model struct {
 	// before it. Until 10-30 the threshold went in Context, so a 1M
 	// model showed 258K in Codex (01huadalang on Discord).
 	AutoCompact *int `json:"auto_compact_token_limit,omitempty"`
-	// never written now; kept a field so it is one magpie owns, and
+	// never written now; kept a field so it is one eipgam owns, and
 	// Keep doesn't carry an old catalog's over
 	MaxContext *int   `json:"max_context_window,omitempty"`
 	Tiers      []tier `json:"service_tiers"`
@@ -291,7 +291,7 @@ type model struct {
 	// ChatGPT sign-in's apps' among them) in every request, 190K
 	// tokens before the first word (#258); with it, they are named in
 	// tool_search's description and handed over when searched for,
-	// as Codex does for its own models. Magpie serves the search to
+	// as Codex does for its own models. eipgam serves the search to
 	// any model as a function (gateway/toolsearch.go). Code mode and
 	// Responses Lite stay off: the one has the model write JavaScript
 	// against Codex's tools, the other moves the tools and
@@ -316,7 +316,7 @@ type model struct {
 	// entry (see V1); "v2" on a model offering Ultra that no ChatGPT
 	// account answers for (catalog.Model.AgentsV2), as Codex's own
 	// entry for it says: Ultra hands work to Codex's agents in V2
-	// alone, and a magpie-served lead writes their tasks as text.
+	// alone, and a eipgam-served lead writes their tasks as text.
 	MultiAgent string `json:"multi_agent_version,omitempty"`
 	// the effort Codex's Ultra sends the model, as Codex's own entry
 	// for the same model says it (see agentsEffort); without it Codex
@@ -366,9 +366,9 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 	for i, m := range ms {
 		if raw, ok := own[strings.TrimPrefix(m.ID, "codex/")]; ok && strings.HasPrefix(m.ID, "codex/") {
 			e := ownEntry(raw, m.ID, shownName(m), after+i+1)
-			// the window as magpie resolves it — the one the user set,
+			// the window as eipgam resolves it — the one the user set,
 			// else the account's list's — not the cache's, which is what
-			// magpie last handed Codex (#674)
+			// eipgam last handed Codex (#674)
 			Window(e, m.Context, 0)
 			if v1 {
 				Stamp(e)
@@ -383,7 +383,7 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 		}
 		text, msgs := officialFor(own, m.ID)
 		e := model{
-			Slug: m.ID, DisplayName: shownName(m), Description: m.Name + " via magpie",
+			Slug: m.ID, DisplayName: shownName(m), Description: m.Name + " via eipgam",
 			Instructions: text, Messages: msgs, Efforts: []level{},
 			Shell: "unified_exec", Visibility: "list", InAPI: true, Priority: after + i + 1,
 			ApplyPatch: "freeform", Tools: []string{}, Modalities: []string{"text"},
@@ -401,7 +401,7 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 		} else if m.OwnTier && (len(m.Tiers) == 0 || len(ownTiers(own, m)) > 0) {
 			e.Tiers = ownTiers(own, m)
 		} else if len(m.Tiers) > 0 {
-			// another magpie's model: the tiers it offers its own Codex
+			// another eipgam's model: the tiers it offers its own Codex
 			// (#1234)
 			e.Tiers = namedTiers(own, m.Tiers)
 		}
@@ -419,10 +419,10 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 		} else if !strings.HasPrefix(m.ID, "group/") && !strings.HasPrefix(m.ID, "auto/") { // a routing group, a found one as auto/<model>
 			// Codex turns a pasted image away itself, saying only that the
 			// model doesn't take images; /model says where that is changed
-			// (KimYx0207 on X). The description still ends " via magpie",
+			// (KimYx0207 on X). The description still ends " via eipgam",
 			// which is how its entry is told from Codex's own
 			// (catalog.MagpieAdded)
-			e.Description = m.Name + " (text only: Accepts images is in its provider's Model settings in magpie) via magpie"
+			e.Description = m.Name + " (text only: Accepts images is in its provider's Model settings in eipgam) via eipgam"
 		}
 		if c := m.Context; c > 0 {
 			// the model's or its provider's threshold, else the one for
@@ -431,7 +431,7 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 			// Terra's 500K, @flower__daisy on X); one at or above c is
 			// its whole window.
 			// A DeepSeek model too, though DeepSeek's own Codex setup
-			// compacts at none of its 1M: magpie's 272K came of a
+			// compacts at none of its 1M: eipgam's 272K came of a
 			// DeepSeek report (e950eb080: turns of ~550K waited 70-90s
 			// for a first token), and Full window or the model's own
 			// Compact at gives it the whole window
@@ -444,7 +444,7 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 				e.AutoCompact = &w
 			}
 		} else if w := cmp.Or(m.Compact, unknownWorking(work, m.ID)); w > 0 {
-			// a window magpie doesn't know (a relay listing none, a
+			// a window eipgam doesn't know (a relay listing none, a
 			// model models.dev lacks): Codex compacts at no point on an
 			// entry with neither a window nor a limit, and after the
 			// vendor's "too long" it only errors again until a manual
@@ -461,7 +461,7 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 			// no reasoning summary asked for (DeepSeek streams its
 			// reasoning as text); Codex's agents in V2; an image at its
 			// original detail. Its prompt (base_instructions) is not
-			// taken: magpie never rewrites a model's Codex prompt.
+			// taken: eipgam never rewrites a model's Codex prompt.
 			e.Shell = "shell_command"
 			low := "low"
 			e.Verbosity, e.DefVerbosity = true, &low
@@ -482,7 +482,7 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 			// resolve_reasoning_effort), so the model is asked nothing it
 			// doesn't take, and in V2 its lead hands parts of the task to
 			// agents of its own unasked (multi_agents.rs: Proactive at
-			// Ultra, ExplicitRequestOnly otherwise). A magpie-served lead
+			// Ultra, ExplicitRequestOnly otherwise). A eipgam-served lead
 			// writes their tasks as text, as Copilot's Ultra does (#656)
 			levels = append(slices.Clone(levels), "ultra")
 			e.MultiAgent = "v2"
@@ -501,7 +501,7 @@ func entriesAt(ms []catalog.Model, after int, effort string) []any {
 	return entries
 }
 
-// ultraHere reports whether magpie's entry for m offers Codex's Ultra
+// ultraHere reports whether eipgam's entry for m offers Codex's Ultra
 // beside its levels: a model that reasons, of a vendor other than OpenAI.
 // An OpenAI model has Ultra where OpenAI's own catalog gives it
 // (provider.OffersUltra), never added here: GPT-6 Luna stops at max there.
@@ -522,12 +522,12 @@ func openAIModel(id string) bool {
 	return gptModel.MatchString(slug) || strings.Contains(slug, "gpt-") || strings.Contains(slug, "codex")
 }
 
-// owned are the keys of an entry magpie writes, or leaves out on purpose:
+// owned are the keys of an entry eipgam writes, or leaves out on purpose:
 // every field of model, and the two ownEntry takes out of Codex's own.
 // keepTrue are those of them where a true the user set by hand stays over
-// magpie's false (keep:"true"). A field tagged keep:"unset" is not owned:
+// eipgam's false (keep:"true"). A field tagged keep:"unset" is not owned:
 // written on some models only, the user's own on the rest stays, as
-// before magpie wrote it anywhere.
+// before eipgam wrote it anywhere.
 var owned, keepTrue = func() (own, yes map[string]bool) {
 	own = map[string]bool{"availability_nux": true, "upgrade": true}
 	yes = map[string]bool{}
@@ -550,12 +550,12 @@ var owned, keepTrue = func() (own, yes map[string]bool) {
 }()
 
 // Keep is the catalog b, as Catalog renders it, with what the user added by
-// hand to the entries of cur, the catalog on disk magpie is about to write
-// over: a key of an entry of the same slug that magpie doesn't own, and a
-// true where magpie says false of a keepTrue key — supports_reasoning_
+// hand to the entries of cur, the catalog on disk eipgam is about to write
+// over: a key of an entry of the same slug that eipgam doesn't own, and a
+// true where eipgam says false of a keepTrue key — supports_reasoning_
 // summaries, put in for Codex to send a model's effort and show its
-// thinking (#1450). Another key magpie writes takes magpie's value; the
-// entry of a model magpie no longer serves goes. b as it is when there is
+// thinking (#1450). Another key eipgam writes takes eipgam's value; the
+// entry of a model eipgam no longer serves goes. b as it is when there is
 // nothing to keep, or cur isn't a catalog.
 func Keep(cur, b []byte) []byte {
 	type list struct {
@@ -618,7 +618,7 @@ var datedSuffix = lazyre.New(`-(\d{4}-\d{2}-\d{2}|\d{8})$`)
 // agentsEffort is the multi_agent_reasoning_effort of Codex's own entry for
 // the model a third-party one serves (s2a/gpt-6-astra, openai/gpt-6-astra on
 // a relay, a dated snapshot): Codex's Ultra sends that effort, and max when
-// an entry has none, so the same model under magpie's id would otherwise
+// an entry has none, so the same model under eipgam's id would otherwise
 // run at max where OpenAI's runs at xhigh (#1108). Only a model offering
 // Ultra and the effort itself gets it; "" otherwise.
 func agentsEffort(own map[string]map[string]any, m catalog.Model) string {
@@ -658,7 +658,7 @@ func OwnOffers(id, tier string) bool {
 }
 
 // parseOwnTiers is each of Codex's own entries' service tier ids, by slug;
-// one magpie added to the cache is not Codex's own.
+// one eipgam added to the cache is not Codex's own.
 func parseOwnTiers(b []byte) (map[string][]string, error) {
 	var cache struct {
 		ETag   string `json:"etag"`
@@ -749,7 +749,7 @@ func namedTiers(own map[string]map[string]any, ids []string) []tier {
 }
 
 // ServiceTiers are the service tiers Entries offers Codex on each of ms,
-// by id, where it offers any: what this magpie's list tells another magpie
+// by id, where it offers any: what this eipgam's list tells another eipgam
 // that has it as its provider, so that one's Codex is offered them too
 // (#1234).
 func ServiceTiers(ms []catalog.Model) map[string][]tier {
@@ -783,7 +783,7 @@ func ServiceTiers(ms []catalog.Model) map[string][]tier {
 }
 
 // Order ranks entries — Codex's own, as the backend gives them, and
-// magpie's from Entries — in the order the user put them in (#855): Codex
+// eipgam's from Entries — in the order the user put them in (#855): Codex
 // lists its models by priority, lowest first. The ones at names go first,
 // by their place there; the others after them, as they stood. The slice is
 // put in that order too.
@@ -838,7 +838,7 @@ func Order(entries []any, at map[string]int) {
 // chosen there. The CLI's /model lists every one.
 const AppList = 100
 
-// Fit ranks entries, Codex's own and magpie's, so the first AppList by
+// Fit ranks entries, Codex's own and eipgam's, so the first AppList by
 // priority are ones the Codex app can show and the user wants: a hidden
 // entry, which no picker shows, goes after every listed one; and when more
 // than AppList are listed, the ones used (slugs, most recent first, as
@@ -852,7 +852,7 @@ func Fit(entries []any, used []string) { FitOwn(entries, used, nil) }
 // in the first AppList ahead of the ones used, wherever the user's order
 // (Order) put them: Codex lists them itself, so a user who didn't take
 // them out of its list expects them in the app. An order set while the
-// list had none of them names only magpie's, and put every one past the
+// list had none of them names only eipgam's, and put every one past the
 // 100th (maiya on Discord). A hidden one still goes last.
 func FitOwn(entries []any, used []string, own func(slug string) bool) {
 	type ranked struct {
@@ -910,7 +910,7 @@ func FitOwn(entries []any, used []string, own func(slug string) bool) {
 		at := map[string]int{}
 		for i, r := range rs[:listed] {
 			at[r.slug] = i
-			// a ChatGPT account's own model, which magpie's records name
+			// a ChatGPT account's own model, which eipgam's records name
 			// as codex/<slug>
 			if _, ok := at["codex/"+r.slug]; !ok {
 				at["codex/"+r.slug] = i
@@ -971,7 +971,7 @@ func CacheEntries() map[string]map[string]any {
 		}
 	}
 	if MarkedV1(cache.ETag) {
-		// the versions in it are magpie's, written over the backend's: the
+		// the versions in it are eipgam's, written over the backend's: the
 		// backend's go back, so a list made from this cache after the
 		// setting is turned off says what the backend did
 		was := originals()
@@ -996,18 +996,18 @@ func CacheEntries() map[string]map[string]any {
 // Codex picks a thread's multi-agent tools by its model's entry: its
 // multi_agent_version ("v1", "v2") unless features.multi_agent_v2 is on,
 // which makes it V2 whatever the entry says. In V2 OpenAI's server seals a
-// subagent's task, so a GPT lead can't hand one to a magpie-served
+// subagent's task, so a GPT lead can't hand one to a eipgam-served
 // subagent; in V1 the task goes as text (#141). With settings.CodexAgentsV1
-// the OpenAI entries magpie hands Codex say "v1"; nothing else in them
+// the OpenAI entries eipgam hands Codex say "v1"; nothing else in them
 // changes. Codex's own features.multi_agent_v2 still wins over the entry, so
-// where it is on in the config magpie routes the setting can't reach Codex:
-// magpie says so (internal/agent/codex.go, and the Settings row) and leaves
+// where it is on in the config eipgam routes the setting can't reach Codex:
+// eipgam says so (internal/agent/codex.go, and the Settings row) and leaves
 // the config alone — turning the key off there is the user's. Codex keeps
 // what it was handed in models_cache.json, versions and all, so what the
 // backend itself said is kept aside (originals) and put back when the cache
 // is read again (CacheEntries).
 
-// V1 reports whether the OpenAI models magpie hands Codex say "v1".
+// V1 reports whether the OpenAI models eipgam hands Codex say "v1".
 func V1() bool { return settings.Load().CodexAgentsV1 }
 
 // Stamp has an entry say multi-agent V1.
@@ -1026,8 +1026,8 @@ func unstamp(e map[string]any, was string) {
 // place) runs on the auto_review_model_override of the conversation's
 // model's entry, else on codex-auto-review when the list has it, else on the
 // conversation's model at low effort (#938). With settings.CodexAutoReview
-// every entry magpie hands Codex names that model; set to
-// settings.CodexAutoReviewSession, each of magpie's names itself and Codex's
+// every entry eipgam hands Codex names that model; set to
+// settings.CodexAutoReviewSession, each of eipgam's names itself and Codex's
 // own are left as OpenAI gave them, so the review runs on the session's
 // model.
 
@@ -1043,7 +1043,7 @@ var SignInPlan func() string
 // for being free on a ChatGPT sign-in (#1593, from a paid account); on a
 // Free plan it is not (cybercaius on Discord measured it spending the
 // plan's allowance), so there it follows the session as Codex's other
-// side calls do. A plan magpie can't read keeps Codex's pick.
+// side calls do. A plan eipgam can't read keeps Codex's pick.
 func AutoReviewModel() string {
 	v := settings.Shared().CodexAutoReview
 	if v == "" && SignInPlan != nil && strings.EqualFold(strings.TrimSpace(SignInPlan()), "free") {
@@ -1054,7 +1054,7 @@ func AutoReviewModel() string {
 
 // AutoReview has one of Codex's own entries name the auto-review model in
 // effect, v (AutoReviewModel, read once for a whole list: it reads Codex's
-// sign-in). With none picked, one magpie put there before — a magpie id,
+// sign-in). With none picked, one eipgam put there before — a eipgam id,
 // which has a "/" where OpenAI's slugs have none, kept in Codex's cache — is
 // taken out, and one OpenAI gave it is left.
 func AutoReview(e map[string]any, v string) {
@@ -1077,7 +1077,7 @@ func PolicyTag(tag string) string {
 	return tag
 }
 
-// MarkedV1 reports whether an ETag is of a list magpie stamped V1.
+// MarkedV1 reports whether an ETag is of a list eipgam stamped V1.
 func MarkedV1(etag string) bool { return strings.Contains(etag, tagMark+v1Mark) }
 
 // versionsPath keeps the multi_agent_version the backend gave each of the
@@ -1116,9 +1116,9 @@ func Remember(entries []any) {
 	}
 }
 
-// ownEntry is one of Codex's own models, reached through magpie with the
+// ownEntry is one of Codex's own models, reached through eipgam with the
 // ChatGPT sign-in: its entry as Codex has it (images, context window, tools,
-// instructions), under magpie's id. The start-up notice and the upgrade
+// instructions), under eipgam's id. The start-up notice and the upgrade
 // prompt are left out; they name slugs the catalog does not have.
 // effectivePct is the effective_context_window_percent of Codex's own
 // entries.
@@ -1150,7 +1150,7 @@ func ownEntry(raw map[string]any, id, name string, priority int) map[string]any 
 
 // shownName is the name Codex's picker shows m by: its Name, with what
 // tells it from another entry of that name after it (catalog.Model.Apart).
-// The picker alone shows it: the description, and the names magpie adds
+// The picker alone shows it: the description, and the names eipgam adds
 // to spawn_agent, which go upstream, keep Name.
 func shownName(m catalog.Model) string {
 	if m.Apart == "" {
@@ -1160,14 +1160,14 @@ func shownName(m catalog.Model) string {
 }
 
 // listedEntry is the entry m's vendor lists it under in Codex's own shape
-// (catalog.Model.Codex, a sub2api's), under magpie's id: as the vendor
+// (catalog.Model.Codex, a sub2api's), under eipgam's id: as the vendor
 // gave it — its instructions, tools, truncation, tiers and the rest, which
-// magpie neither guesses nor rewrites — but for what the user set. A
+// eipgam neither guesses nor rewrites — but for what the user set. A
 // window, compaction or levels the user gave the model, its images
-// switched, and the auto-review model picked in magpie, are said as the
-// entries magpie makes say them; with none of them it is the vendor's
-// entry, its description ending " via magpie" so it is told from Codex's
-// own (catalog.MagpieAdded). False when m has none, or one magpie can't
+// switched, and the auto-review model picked in eipgam, are said as the
+// entries eipgam makes say them; with none of them it is the vendor's
+// entry, its description ending " via eipgam" so it is told from Codex's
+// own (catalog.MagpieAdded). False when m has none, or one eipgam can't
 // read, which is then made as any other model's.
 func listedEntry(m catalog.Model, priority int, work settings.Settings, autoReview string, v1 bool, effort string) (map[string]any, bool) {
 	var raw map[string]any
@@ -1176,11 +1176,11 @@ func listedEntry(m catalog.Model, priority int, work settings.Settings, autoRevi
 	}
 	e := ownEntry(raw, m.ID, shownName(m), priority)
 	desc, _ := e["description"].(string)
-	e["description"] = cmp.Or(strings.TrimSpace(desc), m.Name) + " via magpie"
+	e["description"] = cmp.Or(strings.TrimSpace(desc), m.Name) + " via eipgam"
 	if c := m.Context; c > 0 {
-		// the window magpie resolves (the user's, else this entry's own),
+		// the window eipgam resolves (the user's, else this entry's own),
 		// and where the user has Codex compact it, theirs alone: not
-		// magpie's default working window, as the vendor said its own
+		// eipgam's default working window, as the vendor said its own
 		Window(e, c, 0)
 		w := c
 		if m.Compact > 0 {
@@ -1193,7 +1193,7 @@ func listedEntry(m catalog.Model, priority int, work settings.Settings, autoRevi
 		}
 	} else if w := m.Compact; w > 0 || work.CompactAt > 0 && !work.FullContext {
 		w = cmp.Or(w, work.CompactAt)
-		// no window magpie knows: the user's threshold still holds,
+		// no window eipgam knows: the user's threshold still holds,
 		// under the vendor's own window and limit where it says them
 		if n, ok := e["context_window"].(float64); ok && n > 0 && int(n) <= w {
 			w = 0
@@ -1251,7 +1251,7 @@ func listedEntry(m catalog.Model, priority int, work settings.Settings, autoRevi
 		ef, _ := o["effort"].(string)
 		o["description"] = effortLabel(ef)
 	}
-	// images, where the user's say (or magpie describing them) differs
+	// images, where the user's say (or eipgam describing them) differs
 	if in, ok := e["input_modalities"].([]any); ok {
 		has := slices.Contains(in, any("image"))
 		if m.Images && !has {
@@ -1332,11 +1332,11 @@ func Cap(e map[string]any, n int) {
 // list's ETag, and asks again only once the cache has aged (minutes) — or
 // when a reply's X-Models-Etag differs from it; the same one only makes the
 // cache young again. Passed on as the ChatGPT backend gave it, the ETag
-// said nothing of magpie's models, so a provider added since stayed out of
-// Codex's /model for as long as Codex kept getting replies. The ETag magpie
+// said nothing of eipgam's models, so a provider added since stayed out of
+// Codex's /model for as long as Codex kept getting replies. The ETag eipgam
 // hands on carries a tag of its models too.
 
-// Tag names a list of magpie's models: another list, another tag.
+// Tag names a list of eipgam's models: another list, another tag.
 func Tag(ms []catalog.Model) string {
 	b, _ := json.Marshal(ms)
 	b = append(b, catalogFormat...)
@@ -1355,17 +1355,17 @@ func UsedTag(used []string) string {
 }
 
 // catalogFormat changes when the entries made of the same models change
-// shape, so a Codex holding the list magpie gave before asks again: v2 put
+// shape, so a Codex holding the list eipgam gave before asks again: v2 put
 // the window in context_window and the threshold in
 // auto_compact_token_limit (10-30); v3 offered Ultra on another vendor's
 // models that reason (ultraHere).
 const catalogFormat = "v3"
 
-// tagMark is where a tag starts in an ETag magpie made.
-const tagMark = "+magpie-"
+// tagMark is where a tag starts in an ETag eipgam made.
+const tagMark = "+eipgam-"
 
-// WithTag is an ETag of the backend's (or none) with magpie's tag in it:
-// W/"abc" becomes W/"abc+magpie-<tag>".
+// WithTag is an ETag of the backend's (or none) with eipgam's tag in it:
+// W/"abc" becomes W/"abc+eipgam-<tag>".
 func WithTag(etag, tag string) string {
 	if strings.HasSuffix(etag, `"`) && len(etag) > 1 {
 		return strings.TrimSuffix(etag, `"`) + tagMark + tag + `"`

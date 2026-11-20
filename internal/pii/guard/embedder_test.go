@@ -14,9 +14,9 @@ import (
 // a step now and then; ONNX Runtime's own graph optimizations move its
 // result 0.9965, and its int8 is 0.988 to 0.993 from float32.
 func TestEmbedderMatchesONNXRuntime(t *testing.T) {
-	d := os.Getenv("MAGPIE_EMBED_DIR")
+	d := os.Getenv("EIPGAM_EMBED_DIR")
 	if d == "" {
-		t.Skip("MAGPIE_EMBED_DIR is not set")
+		t.Skip("EIPGAM_EMBED_DIR is not set")
 	}
 	e, err := LoadEmbedder(d)
 	if err != nil {

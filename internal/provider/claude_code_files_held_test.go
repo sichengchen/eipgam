@@ -31,7 +31,7 @@ func TestClaudeCodeFilesListedOncePerHold(t *testing.T) {
 	if len(first) != 2 {
 		t.Fatalf("listed %v", first)
 	}
-	saved("b") // written behind magpie's back: not a write the hold sees
+	saved("b") // written behind eipgam's back: not a write the hold sees
 	if again := claudeCodeFiles(); len(again) != len(first) || &again[0] != &first[0] {
 		t.Fatalf("listed again within one hold: %v then %v", first, again)
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 // An "api" method whose own questions ask its key (inkstone's API key way,
-// Devin's session token in plugins#928) was asked a key of magpie's beside
+// Devin's session token in plugins#928) was asked a key of eipgam's beside
 // them, which went nowhere, and every answer was copied into the
 // account's metadata, so the token sat there a second time in plain text.
 // Such a method is marked keyAsked, signs in with no key, and keeps only

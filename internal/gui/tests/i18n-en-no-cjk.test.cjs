@@ -1,7 +1,7 @@
 // Run with Node's test runner; needs no browser. English is the key of
 // every string (t() falls back to it), so a Chinese word left in one shows
 // to every English reader (fangleeway on Discord: taking Claude Code off
-// magpie said "「接入」 goes off" in the English window). No English string
+// eipgam said "「接入」 goes off" in the English window). No English string
 // holds Chinese, Japanese or Korean text or their punctuation: the keys of
 // i18n.js and of each plugin's i18n.js, the advice templates (NOTICES), the
 // literals passed to t() in app.js and the plugins' scripts, and

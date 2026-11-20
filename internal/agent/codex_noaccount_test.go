@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // codexNoAccount says Codex's provider takes no ChatGPT account, so an
 // account switch restarts nothing (danzi002 on Discord), only for a
-// provider table without requires_openai_auth = true: magpie API beside a
-// ChatGPT sign-in with room has magpie write true, and the Codex app keeps
+// provider table without requires_openai_auth = true: eipgam API beside a
+// ChatGPT sign-in with room has eipgam write true, and the Codex app keeps
 // that account, so a switch there still restarts it. The user's own false
 // stays through Sync and counts.
 func TestCodexNoAccountFollowsRequiresOpenAIAuth(t *testing.T) {
@@ -28,7 +28,7 @@ func TestCodexNoAccountFollowsRequiresOpenAIAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 	if codexNoAccount() {
-		t.Fatalf("magpie API with requires_openai_auth = true takes no account:\n%s", read())
+		t.Fatalf("eipgam API with requires_openai_auth = true takes no account:\n%s", read())
 	}
 	if err := edit.SetTOMLKey(path, "model_providers."+magpieID, "requires_openai_auth", false); err != nil {
 		t.Fatal(err)
@@ -59,11 +59,11 @@ func TestCodexNoAccountOfEachConfig(t *testing.T) {
 		{"none", "", false},
 		{"openai", "model_provider = \"openai\"\n", false},
 		{"no table", "model_provider = \"ollama\"\n", false},
-		{"magpie false", "model_provider = \"magpie\"\n[model_providers.magpie]\nbase_url = \"http://127.0.0.1:3425/v1\"\nrequires_openai_auth = false\n", true},
-		{"magpie unset", "model_provider = \"magpie\"\n[model_providers.magpie]\nbase_url = \"http://127.0.0.1:3425/v1\"\n", true},
-		{"magpie true", "model_provider = \"magpie\"\n[model_providers.magpie]\nbase_url = \"http://127.0.0.1:3425/v1\"\nrequires_openai_auth = true\n", false},
+		{"eipgam false", "model_provider = \"eipgam\"\n[model_providers.eipgam]\nbase_url = \"http://127.0.0.1:3425/v1\"\nrequires_openai_auth = false\n", true},
+		{"eipgam unset", "model_provider = \"eipgam\"\n[model_providers.eipgam]\nbase_url = \"http://127.0.0.1:3425/v1\"\n", true},
+		{"eipgam true", "model_provider = \"eipgam\"\n[model_providers.eipgam]\nbase_url = \"http://127.0.0.1:3425/v1\"\nrequires_openai_auth = true\n", false},
 		{"theirs false", "model_provider = \"relay\"\n[model_providers.relay]\nbase_url = \"https://relay.example/v1\"\nrequires_openai_auth = false\n", true},
-		{"table only", "[model_providers.magpie]\nrequires_openai_auth = false\n", false},
+		{"table only", "[model_providers.eipgam]\nrequires_openai_auth = false\n", false},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, c.config)
@@ -73,7 +73,7 @@ func TestCodexNoAccountOfEachConfig(t *testing.T) {
 		})
 	}
 	t.Run("unreadable", func(t *testing.T) {
-		home, _ := codexHome(t, "", "model_provider = \"magpie\"\n[model_providers.magpie]\nrequires_openai_auth = false\n")
+		home, _ := codexHome(t, "", "model_provider = \"eipgam\"\n[model_providers.eipgam]\nrequires_openai_auth = false\n")
 		path := filepath.Join(home, ".codex", "config.toml")
 		if err := os.Remove(path); err != nil {
 			t.Fatal(err)

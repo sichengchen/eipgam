@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A custom provider can be given a Gemini API (#1346): Google's own at

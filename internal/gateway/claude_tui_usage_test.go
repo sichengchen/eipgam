@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A /usage read never starts the interactive Claude Code, the
@@ -27,7 +27,7 @@ func TestClaudeUsageStartsNoInteractiveRun(t *testing.T) {
 	t.Setenv("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC", "1")
 	os.Unsetenv("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC")
 	started := filepath.Join(t.TempDir(), "started")
-	helper := filepath.Join(t.TempDir(), "magpie")
+	helper := filepath.Join(t.TempDir(), "eipgam")
 	testenv.Program(t, helper, `#!/bin/sh
 echo "$@" >> '`+started+`'
 printf '%s\n' '{"type":"result","subtype":"success","is_error":false,"local_command":"usage","result":"`+text+`"}'

@@ -7,18 +7,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/browserext"
+	"github.com/sichengchen/eipgam/internal/browserext"
 )
 
-// An extension older than magpie's keeps running its old code until it is
-// reloaded, though magpie rewrote its folder: the first answer on that
+// An extension older than eipgam's keeps running its old code until it is
+// reloaded, though eipgam rewrote its folder: the first answer on that
 // connection tells the agent to have the user reload it (or, for one
 // connected with a key, download it again), and only the first.
 func TestBrowserSaysTheExtensionIsOlder(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	s := New()
 	const testPeer = "X-Test-Peer"
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +74,7 @@ func TestBrowserSaysTheExtensionIsOlder(t *testing.T) {
 	}
 	mine := []string{"Authorization", "Bearer " + secrets[0], BrowserSessionHeader, "s1"}
 	got = call("172.17.0.1:40000", mine...)
-	if len(got) != 2 || !strings.Contains(got[0], "downloaded again from magpie's Library → Magpie Browser") {
+	if len(got) != 2 || !strings.Contains(got[0], "downloaded again from eipgam's Library → eipgam Browser") {
 		t.Fatalf("the keyed one's first answer: %q", got)
 	}
 	if got := call("172.17.0.1:40000", mine...); len(got) != 1 {
@@ -82,7 +82,7 @@ func TestBrowserSaysTheExtensionIsOlder(t *testing.T) {
 	}
 }
 
-// One as new as magpie's is never told about.
+// One as new as eipgam's is never told about.
 func TestBrowserSaysNothingOfACurrentExtension(t *testing.T) {
 	fresh(t)
 	s := New()

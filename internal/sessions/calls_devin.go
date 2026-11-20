@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Devin CLI's calls (aohan0905 on X: Usage counted none of them). Devin's
@@ -38,7 +38,7 @@ import (
 // output_tokens, cache_read_tokens, cache_creation_tokens, ttft_ms and
 // total_time_ms. Devin writes each reply as two nodes with one request_id,
 // so a call is counted once by it, across both stores too (Msg). Devin
-// talks to its own backend, never through magpie's gateway, so there is no
+// talks to its own backend, never through eipgam's gateway, so there is no
 // gateway record to pair a call with.
 
 // DevinCLIDirs are the folders Devin's CLI may keep sessions in.

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // WaiooT on X (Tencent Cloud Token Plan, deepseek-v4.1-flash): a memory tool

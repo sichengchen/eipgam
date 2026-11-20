@@ -120,7 +120,7 @@ func TestNoteCodexLimitsHoldsTheCap(t *testing.T) {
 // replies tell of its week, until a reading tells it: kept as not known,
 // Use before expiry counted it a whole week ahead and Smart put it after
 // every account known, so with ten others it was never sent a request
-// while the week magpie's own turns started ran out unspent
+// while the week eipgam's own turns started ran out unspent
 // (peterpark8527 on Discord, 11 ChatGPT accounts). A reply telling the
 // five hours alone makes nothing up; a reading that comes back wins.
 func TestNoteCodexLimitsKnowsAnUnreadAccount(t *testing.T) {

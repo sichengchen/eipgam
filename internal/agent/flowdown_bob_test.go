@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // shannnnnks on X asked for FlowDown's and Bob's icons: their requests

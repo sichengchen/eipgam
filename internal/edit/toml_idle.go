@@ -10,13 +10,13 @@ import (
 	"time"
 	"weak"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // A file's whole parse is let go once nothing has needed it for
 // tomlIdle. Codex's config.toml keeps a table for every project it was
 // trusted in: 1.5 MB, ~11k tables, 4.5 MB parsed, kept for as long as
-// magpie ran because the Codex app's route is looked at every 3s
+// eipgam ran because the Codex app's route is looked at every 3s
 // (codexAppRoute). What those looks ask, a top-level key or one table's
 // scalars, is kept beside it as tomlAnswers, which is what stays.
 const tomlIdle = time.Minute
@@ -60,7 +60,7 @@ func tomlIdleCheck() {
 
 // dropTOMLParses lets go of every file's whole parse, tomlAnswers kept,
 // and gives the memory back to the system: left to the scavenger, a
-// let-go parse stayed in magpie's footprint.
+// let-go parse stayed in eipgam's footprint.
 func dropTOMLParses() {
 	filememo.DropKind("toml file")
 	debug.FreeOSMemory()
@@ -143,7 +143,7 @@ func (a *tomlAnswers) getNames() ([]string, bool) {
 
 // setNames keeps a copy of names that holds no piece of the file's text.
 // The copies share one buffer: Codex's config.toml names ~11k tables, one
-// allocation each, rounded up to its size class, for as long as magpie
+// allocation each, rounded up to its size class, for as long as eipgam
 // runs (#2278).
 func (a *tomlAnswers) setNames(names []string) {
 	var kept []string
@@ -159,7 +159,7 @@ func (a *tomlAnswers) setNames(names []string) {
 // A file's kept table names are let go too once no one has listed them
 // for namesIdle: Codex's ~11k are 1.2 MB, listed by a one-time rename at
 // start and then only by the Agents page and a sync, and were held for
-// as long as magpie ran. The next list parses the file again: 9 ms and
+// as long as eipgam ran. The next list parses the file again: 9 ms and
 // 21 MB of garbage for that config on an M5 Pro.
 const namesIdle = 5 * time.Minute
 

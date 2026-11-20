@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/yetone/magpie/internal/conptypair"
+	"github.com/sichengchen/eipgam/internal/conptypair"
 )
 
 const out = "internal/conptypair"

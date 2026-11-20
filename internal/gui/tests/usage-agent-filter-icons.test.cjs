@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Usage's agent filters show each agent's icon beside its name (the owner:
 // "这里应该有Agent的icon"), on Requests and on Sessions: an agent's own
-// logo, the generic one for a client magpie doesn't know (AsyncOpenAI,
+// logo, the generic one for a client eipgam doesn't know (AsyncOpenAI,
 // Go-http-client), and the All row keeps the icon's room blank, so every
 // name starts at one x. Each icon sits on its name's line. English and
 // Chinese, Chromium and WebKit; the API is faked here.
@@ -28,9 +28,9 @@ function serve(lang) {
     if (url.pathname === "/api/gateway/trace") return json({ mine: false, seq: 0, routes: [], totals: { requests: 0, rerouted: 0, errors: 0 }, now: new Date().toISOString() });
     if (url.pathname === "/api/state") return json({ agents: [{ id: "pi", name: "Pi", icon: "pi", path: "/x/pi", fields: [] }], profiles: [], settings: { lang, theme: "light" } });
     if (url.pathname === "/api/usage/requests") return json({ period: "all", rows, offset: 0, total: rows.length, calls: rows.length, errors: 0, input: 4000, output: 400, cost: 0.004, agents: LED_AGENTS });
-    if (url.pathname === "/api/usage") return json({ calls: 4, input: 4000, output: 400, cost: 0.004, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 4, input: 4000, output: 400, cost: 0.004, bucket: "day", series: [], agents: [], models: [], path: "~/.config/eipgam/usage.jsonl" });
     if (url.pathname === "/api/sessions/progress") return json({ indexing: false });
-    // claude from a session's own icon, pi (no session here) from the agents magpie knows
+    // claude from a session's own icon, pi (no session here) from the agents eipgam knows
     if (url.pathname === "/api/sessions") return json({ sessions: [{ id: "s1", agent: "claude", name: "Claude Code", icon: "claudecode-color", cwd: "/w", title: "a", updated: new Date(now).toISOString() }], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: today, to: today, agents: { claude: "Claude Code", pi: "Pi", odd: "Odd" },
       days: [{ date: today, active: [], usage: ["claude", "pi", "odd"].map((a) => ({ agent: a, cwd: "/w", model: "m", input: 1000, output: 100, cache_read: 0, cache_write: 0, cost: 0.1, priced: true })) }] });
@@ -74,9 +74,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.addInitScript((tab) => { localStorage.setItem("magpie.usageTab", tab); localStorage.setItem("magpie.sessRange", "all"); localStorage.setItem("magpie.usageEvery", "0"); }, tab);
-        // as a user comes to it: magpie open, its agents read, then Usage
-        await page.goto("http://magpie.test/");
+        await page.addInitScript((tab) => { localStorage.setItem("eipgam.usageTab", tab); localStorage.setItem("eipgam.sessRange", "all"); localStorage.setItem("eipgam.usageEvery", "0"); }, tab);
+        // as a user comes to it: eipgam open, its agents read, then Usage
+        await page.goto("http://eipgam.test/");
         await page.waitForFunction(() => state.agents.length > 0);
         await page.locator('[data-view="usage"]').first().click();
         return page;

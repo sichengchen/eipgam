@@ -10,7 +10,7 @@
 // the reads that lay the page out after a write (forced layouts) and the
 // reads of those sibling-walking getters, in both engines and every
 // language, and holds each to the same at 160 accounts as at 40; and every
-// thumb under its option. MAGPIE_THUMB_ASSETS points the page at an older
+// thumb under its option. EIPGAM_THUMB_ASSETS points the page at an older
 // asset tree, to watch this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -18,7 +18,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, process.env.MAGPIE_THUMB_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.EIPGAM_THUMB_ASSETS || "../assets");
 const at = (ms) => new Date(Date.now() + ms).toISOString();
 
 function serve(lang, n) {
@@ -92,7 +92,7 @@ async function opening(browser, lang, n) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.addInitScript(watch);
   await page.route("**/*", serve(lang, n));
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://eipgam.test/?view=providers");
   const row = page.locator(".row.provider", { hasText: "Claude" }).first();
   await row.waitFor();
   await page.evaluate(async () => {

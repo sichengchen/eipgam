@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 func balCard(user, balance string) SubscriptionQuota {
@@ -122,7 +122,7 @@ func TestBalanceHistoryTwoCurrencies(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t0 := time.Date(2026, 10, 8, 8, 0, 0, 0, time.UTC)
 	key := quotaHistKey("deepseek", "main")
-	// what an earlier magpie kept: whichever amount came first
+	// what an earlier eipgam kept: whichever amount came first
 	writeBalanceHist(balanceHist{key: {{t0.Add(-30 * time.Minute), 11.2}, {t0.Add(-20 * time.Minute), -0.05}, {t0.Add(-10 * time.Minute), 11.15}}})
 	var last []SubscriptionQuota
 	for i, v := range []string{"11.12", "11.10", "11.08", "11.05"} {

@@ -10,7 +10,7 @@
 // app's own dialog, saying what is here is backed up first; Cancel posts
 // nothing, Restore posts the version's name, and the list then says what
 // was put back and which version undoes it. The default folder, in
-// magpie's own, says a reinstalled system takes the backups too. In all
+// eipgam's own, says a reinstalled system takes the backups too. In all
 // five languages, at 1100 and 420px, Chromium and WebKit, with nothing wider than the window. The
 // API is faked; nothing is backed up.
 const assert = require("node:assert/strict");
@@ -32,17 +32,17 @@ const tr = (lang, k, vars = {}) => {
 const hourAgo = new Date(Date.now() - 3600e3).toISOString();
 const dayAgo = new Date(Date.now() - 86400e3).toISOString();
 const backups = [
-  { name: "magpie-20261102-010000-auto.json", made: hourAgo, reason: "auto", providers: 3, size: 900 },
-  { name: "magpie-20261101-010000-restore.json", made: dayAgo, reason: "restore", providers: 1, size: 700 },
+  { name: "eipgam-20261102-010000-auto.json", made: hourAgo, reason: "auto", providers: 3, size: 900 },
+  { name: "eipgam-20261101-010000-restore.json", made: dayAgo, reason: "restore", providers: 1, size: 700 },
 ];
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/eipgam",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
-  let view = { on: true, hours: 24, keep: 7, dir: "~/Library/Application Support/magpie/auto-backups-with-a-long-folder-name-to-wrap", custom: true, backups };
+  let view = { on: true, hours: 24, keep: 7, dir: "~/Library/Application Support/eipgam/auto-backups-with-a-long-folder-name-to-wrap", custom: true, backups };
   return async (route) => {
     const request = route.request();
     const pathname = new URL(request.url()).pathname;
@@ -64,10 +64,10 @@ function serve(lang, posts) {
         if (body.on !== undefined) view = { ...view, on: body.on };
         if (body.hours) view = { ...view, hours: body.hours };
         if (body.keep) view = { ...view, keep: body.keep };
-        if (body.dir === "") view = { ...view, custom: false, inside: true, dir: "~/Library/Application Support/magpie/auto-backups" };
+        if (body.dir === "") view = { ...view, custom: false, inside: true, dir: "~/Library/Application Support/eipgam/auto-backups" };
       }
       if (action === "restore") {
-        const before = { name: "magpie-20261102-020000-restore.json", made: new Date().toISOString(), reason: "restore", providers: 3, size: 900 };
+        const before = { name: "eipgam-20261102-020000-restore.json", made: new Date().toISOString(), reason: "restore", providers: 3, size: 900 };
         view = { ...view, backups: [before, ...view.backups] };
         return json({ view, before: before.name, result: { Added: 0, Replaced: 2, Profiles: 1, Agents: 0, Settings: true } });
       }
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
 
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator("#prefs").click();
         await openPart(page, "sync");
         const list = page.locator("#syncList");
@@ -122,8 +122,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const folder = rowNamed(w("Backup folder"));
         assert.match(await sub(folder), /auto-backups-with-a-long/);
         for (const b of ["Change…", "Show", "Default"]) await folder.locator("button", { hasText: w(b) }).waitFor();
-        const insideSaid = w("In magpie's own folder: a reinstalled system or a lost disk takes these backups too. Pick a folder on another disk, or one a cloud drive syncs");
-        assert.equal(await list.locator(".auto-backup-inside").count(), 0, "a folder picked elsewhere says nothing of magpie's");
+        const insideSaid = w("In eipgam's own folder: a reinstalled system or a lost disk takes these backups too. Pick a folder on another disk, or one a cloud drive syncs");
+        assert.equal(await list.locator(".auto-backup-inside").count(), 0, "a folder picked elsewhere says nothing of eipgam's");
         const versions = rowNamed(w("Versions"));
         assert.ok((await sub(versions)).startsWith(w("{n} backups · newest {when}", { n: 2, when: "" }).trim().replace(/\s*$/, "")), await sub(versions));
         // folded (chen2652 on Discord: a long list): Versions says how many
@@ -180,8 +180,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction(() => [...document.querySelectorAll("#syncList .auto-backup-dir")].some((s) => s.textContent.endsWith("/auto-backups")));
         assert.deepEqual(posts.at(-1), { action: "set", body: { dir: "" } });
         assert.equal(await rowNamed(w("Backup folder")).locator("button", { hasText: w("Default") }).count(), 0, "Default is gone with the default folder");
-        // the default folder is in magpie's own: said under its path
-        // (two_2025. on Discord, magpie on C: lost on a reinstall)
+        // the default folder is in eipgam's own: said under its path
+        // (two_2025. on Discord, eipgam on C: lost on a reinstall)
         assert.deepEqual(await rowNamed(w("Backup folder")).locator(".auto-backup-inside").allTextContents(), [insideSaid]);
         await rowNamed(w("Back up by itself")).locator(".segs .opt", { hasText: w("Off") }).click();
         await page.waitForFunction((s) => [...document.querySelectorAll("#syncList .auto-backup .sub")].some((x) => x.textContent === s), w("Off: no backups are made by themselves"));
@@ -238,7 +238,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
-    await page.goto("http://magpie.test/");
+    await page.goto("http://eipgam.test/");
     await page.locator("#prefs").click();
     await openPart(page, "sync");
     await page.locator("#syncList .row.pref").first().waitFor({ state: "visible" });

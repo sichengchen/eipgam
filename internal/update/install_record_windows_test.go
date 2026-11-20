@@ -11,19 +11,19 @@ import (
 // The copy kept uninstalled is read back as written, and uninstalling
 // takes it out with the folder chosen, and the key with them.
 func TestDeclinedRecord(t *testing.T) {
-	installKey = fmt.Sprintf(`Software\magpie-test-%d`, os.Getpid())
+	installKey = fmt.Sprintf(`Software\eipgam-test-%d`, os.Getpid())
 	t.Cleanup(func() {
 		registry.DeleteKey(registry.CURRENT_USER, installKey)
-		installKey = `Software\magpie`
+		installKey = `Software\eipgam`
 	})
 	if got := readDeclined(); got != "" {
 		t.Fatalf("declined %q with no key", got)
 	}
-	const kept = `D:\下载\magpie-windows-amd64.exe`
+	const kept = `D:\下载\eipgam-windows-amd64.exe`
 	if err := writeDeclined(kept); err != nil {
 		t.Fatal(err)
 	}
-	if err := writeInstallDir(`D:\Apps\magpie`); err != nil {
+	if err := writeInstallDir(`D:\Apps\eipgam`); err != nil {
 		t.Fatal(err)
 	}
 	if got := readDeclined(); got != kept {

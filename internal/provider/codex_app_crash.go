@@ -9,28 +9,28 @@ import (
 )
 
 // A signed-in ChatGPT app (26.1021 and on) can't always take the
-// app-server magpie ended: the one it starts in its place answers its
+// app-server eipgam ended: the one it starts in its place answers its
 // handshake, and then the app's own Hosted AppServerManager finds the
 // account it had cached cleared with the old connection ("Hosted
 // AppServerManager identity is not ready"), logs fatal_error_broadcasted
 // and shows "ChatGPT hit a snag / Please try again" over the whole window
 // till it is quit and opened again (ysm119 on Discord, #4550: sljdxde,
-// wang9262, Indekkusu545). That is in the app, out of magpie's reach; the
+// wang9262, Indekkusu545). That is in the app, out of eipgam's reach; the
 // app-server's own exit is clean (code 0, which it counts expected).
 //
-// So for codexAppCrashWait after magpie ends an app-server, its logs are
+// So for codexAppCrashWait after eipgam ends an app-server, its logs are
 // read for that line (CodexAppCrashed, the agent package's: the app's own
 // log folder, a line stamped after the end). When the app shows the page
-// and no Codex turn has started since nor a request gone through magpie
-// (the page has no composer: one that ran means it came back), magpie
+// and no Codex turn has started since nor a request gone through eipgam
+// (the page has no composer: one that ran means it came back), eipgam
 // quits the app and opens it again, once (CodexAppRelaunch: ⌘Q's quit on
 // macOS, never forced; the Agents row's Restart on Windows). After an end
-// for a used-up account (crashSpent) that follows magpie's account switch
+// for a used-up account (crashSpent) that follows eipgam's account switch
 // itself, with nothing to turn on: the page is all the window shows, the
-// switch is what the user asked magpie for, and only a quit and open
+// switch is what the user asked eipgam for, and only a quit and open
 // clears it (RealZeroP27 on X: "只能通过手动重启 codex 解决"). After any
 // other end it needs the user's "Restart the Codex app" (RestartApp):
-// unasked, a quit of a working app read as magpie force-restarting it
+// unasked, a quit of a working app read as eipgam force-restarting it
 // (Michael25651150 on X). Where it is off or can't be done, or the app
 // didn't quit, the Agents row says to (snag, CodexAppSnagged) until the
 // app-servers seen then are gone.
@@ -66,7 +66,7 @@ func watchCodexAppCrashLocked(now time.Time) {
 }
 
 // CodexAppSnagged is whether the Codex app showed the page it shows when
-// it can't go on after magpie restarted its app-server, and magpie
+// it can't go on after eipgam restarted its app-server, and eipgam
 // couldn't reopen it: the user quits it and opens it again.
 func CodexAppSnagged() bool {
 	c := &codexApp
@@ -126,12 +126,12 @@ func codexAppCrashStep(ctx context.Context, now time.Time, busy func() (int, tim
 	// came back (its Try again) and is in use, never cut short
 	if busy != nil {
 		if n, last := busy(); n > 0 || last.After(at) {
-			log.Printf("codex: the Codex app showed its error page after magpie restarted its app-server, and has sent since; left as it is")
+			log.Printf("codex: the Codex app showed its error page after eipgam restarted its app-server, and has sent since; left as it is")
 			return
 		}
 	}
 	if codexTurnRunning(home, now, at) {
-		log.Printf("codex: the Codex app showed its error page after magpie restarted its app-server, and a Codex turn runs since; left as it is")
+		log.Printf("codex: the Codex app showed its error page after eipgam restarted its app-server, and a Codex turn runs since; left as it is")
 		return
 	}
 	lctx, cancel := context.WithTimeout(ctx, codexAppListWait)
@@ -149,10 +149,10 @@ func codexAppCrashStep(ctx context.Context, now time.Time, busy func() (int, tim
 		err = CodexAppRelaunch(ctx)
 	}
 	if err == nil {
-		log.Printf("codex: the Codex app showed its error page after magpie restarted its app-server; quit it and opened it again")
+		log.Printf("codex: the Codex app showed its error page after eipgam restarted its app-server; quit it and opened it again")
 		return
 	}
-	log.Printf("codex: the Codex app showed its error page after magpie restarted its app-server; reopening it: %v", err)
+	log.Printf("codex: the Codex app showed its error page after eipgam restarted its app-server; reopening it: %v", err)
 	c.Lock()
 	c.snag, c.snagPids = true, pids
 	c.Unlock()
@@ -166,6 +166,6 @@ func codexAppUnsnag() {
 }
 
 var (
-	errNoRelaunch  = errors.New("magpie doesn't reopen the Codex app here")
-	errRelaunchOff = errors.New("left to the user: Restart the Codex app when magpie switches its account is off")
+	errNoRelaunch  = errors.New("eipgam doesn't reopen the Codex app here")
+	errRelaunchOff = errors.New("left to the user: Restart the Codex app when eipgam switches its account is off")
 )

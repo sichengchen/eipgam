@@ -1,7 +1,7 @@
 package usage
 
 // The request feed (rdsaltbo on X, #6060: a WakaToken plugin keeping its own
-// ledger of what magpie reads). GET /v1/magpie/usage/requests?cursor= reads
+// ledger of what eipgam reads). GET /v1/eipgam/usage/requests?cursor= reads
 // the ledger as changes, not as pages of a time-sorted list.
 //
 // Every row of the whole ledger (the gateway's calls, the calls read from
@@ -40,7 +40,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // FeedKeep is how long a tombstone is kept, and so how long a client may be
@@ -54,7 +54,7 @@ const (
 	FeedNow   = "now"
 )
 
-// FeedError is a cursor magpie can't resume from. Code is one of
+// FeedError is a cursor eipgam can't resume from. Code is one of
 // cursor_invalid, cursor_expired, cursor_reset and cursor_filter_changed.
 type FeedError struct{ Code, Message string }
 
@@ -241,15 +241,15 @@ func FeedRead(req FeedRequest) (FeedPage, error) {
 		epoch, seq, want, ok := feedParse(req.Cursor)
 		switch {
 		case !ok:
-			return FeedPage{}, &FeedError{"cursor_invalid", "this cursor is not one magpie gave; start again with cursor=start, or cursor=now for what comes after this moment"}
+			return FeedPage{}, &FeedError{"cursor_invalid", "this cursor is not one eipgam gave; start again with cursor=start, or cursor=now for what comes after this moment"}
 		case epoch != feed.epoch:
-			return FeedPage{}, &FeedError{"cursor_reset", "this cursor is of another feed (magpie's usage-feed.jsonl was lost or replaced); read the ledger again with cursor=start and drop what you hold of it"}
+			return FeedPage{}, &FeedError{"cursor_reset", "this cursor is of another feed (eipgam's usage-feed.jsonl was lost or replaced); read the ledger again with cursor=start and drop what you hold of it"}
 		case want != fp:
 			return FeedPage{}, &FeedError{"cursor_filter_changed", "this cursor was given for other filters (or another key); a cursor is read with the filters it was given with, start again with cursor=start for new ones"}
 		case seq < feed.floor:
-			return FeedPage{}, &FeedError{"cursor_expired", "this cursor is older than the changes magpie keeps; read the ledger again with cursor=start and drop what you hold of it"}
+			return FeedPage{}, &FeedError{"cursor_expired", "this cursor is older than the changes eipgam keeps; read the ledger again with cursor=start and drop what you hold of it"}
 		case seq > feed.seq:
-			return FeedPage{}, &FeedError{"cursor_invalid", "this cursor is ahead of this magpie's feed; start again with cursor=start"}
+			return FeedPage{}, &FeedError{"cursor_invalid", "this cursor is ahead of this eipgam's feed; start again with cursor=start"}
 		}
 		after = seq
 	}

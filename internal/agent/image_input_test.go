@@ -8,9 +8,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 func imageInputBool(v bool) *bool { return &v }
@@ -111,20 +111,20 @@ func TestConfiguredModelsAdvertiseImageInput(t *testing.T) {
 		return result
 	}
 
-	// a config magpie wrote before #2209 has attachment on its models;
+	// a config eipgam wrote before #2209 has attachment on its models;
 	// the next write takes it away
 	ocPath := filepath.Join(home, ".config", "opencode", "opencode.json")
 	if err := os.MkdirAll(filepath.Dir(ocPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(ocPath, []byte(`{"provider":{"magpie":{"models":{"vision/image":{"name":"image","attachment":true}}}}}`), 0o644); err != nil {
+	if err := os.WriteFile(ocPath, []byte(`{"provider":{"eipgam":{"models":{"vision/image":{"name":"image","attachment":true}}}}}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("magpie/vision/image"); err != nil {
+	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("eipgam/vision/image"); err != nil {
 		t.Fatal(err)
 	}
 	oc := read(filepath.Join(home, ".config", "opencode", "opencode.json"))
-	ocModels := oc["provider"].(map[string]any)["magpie"].(map[string]any)["models"].(map[string]any)
+	ocModels := oc["provider"].(map[string]any)["eipgam"].(map[string]any)["models"].(map[string]any)
 	image := ocModels["vision/image"].(map[string]any)
 	// OpenCode 2 warns on attachment, a V1 field it ignores (#2209)
 	if _, ok := image["attachment"]; ok {
@@ -141,11 +141,11 @@ func TestConfiguredModelsAdvertiseImageInput(t *testing.T) {
 		}
 	}
 
-	if err := pi(home).Field("model").Set("magpie/vision/image"); err != nil {
+	if err := pi(home).Field("model").Set("eipgam/vision/image"); err != nil {
 		t.Fatal(err)
 	}
 	pm := read(filepath.Join(home, ".pi", "agent", "models.json"))
-	piModels := pm["providers"].(map[string]any)["magpie"].(map[string]any)["models"].([]any)
+	piModels := pm["providers"].(map[string]any)["eipgam"].(map[string]any)["models"].([]any)
 	if len(piModels) != 3 {
 		t.Fatalf("Pi models: %v", piModels)
 	}

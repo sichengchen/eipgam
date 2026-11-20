@@ -16,15 +16,15 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
-// A closed NSWindow keeps its WKWebView's document visible unless magpie
+// A closed NSWindow keeps its WKWebView's document visible unless eipgam
 // says otherwise. The page here records what it saw as it was hidden, and
 // reports that record once it is shown again; without hideWebview's signal
 // it remains a visible page with running animations.
 //
-// The page reads document.hidden as app.js does, from magpie's signal.
+// The page reads document.hidden as app.js does, from eipgam's signal.
 // WebKit does turn an ordered-out window's document.hidden on, but in its
 // own time and without a visibilitychange of its own, so a page reading
-// WebKit's value saw itself visible whenever magpie's signal arrived first,
+// WebKit's value saw itself visible whenever eipgam's signal arrived first,
 // recorded nothing, and the window was shown again after a fixed pause with
 // nothing to report (#4924). The window is now shown again only once the
 // page has said it saw itself hidden.
@@ -38,33 +38,33 @@ import (
 // visibilitychange outside the shown signal counts as a hiding now.
 //
 // On mica (macOS 26) WebKit fired a visibilitychange of its own as the
-// panel ordered out, hidden by its own value and before magpie's signal
+// panel ordered out, hidden by its own value and before eipgam's signal
 // was in. The page took it for the hiding, and the host showed the panel
 // again before the page was ever told: 4 of 6 runs failed with
 // marked=false play="running" (#6203). Only a visibilitychange once
-// magpie's signal says hidden counts now; without that signal the host
+// eipgam's signal says hidden counts now; without that signal the host
 // still waits in vain and the test fails.
 func TestClosingWindowMarksPageOutOfSight(t *testing.T) {
-	out, err := runAppKit(t, 2*time.Minute, []string{"MAGPIE_TEST_WINDOW_VISIBILITY=1"})
+	out, err := runAppKit(t, 2*time.Minute, []string{"EIPGAM_TEST_WINDOW_VISIBILITY=1"})
 	if err != nil || !strings.Contains(string(out), "window visibility: ok") {
 		t.Fatalf("window visibility: %v\n%s", err, out)
 	}
 }
 
-// The tray panel is hidden by Wails itself more often than by magpie: on a
+// The tray panel is hidden by Wails itself more often than by eipgam: on a
 // click elsewhere (HideOnFocusLost) and on Escape, a plain Hide that
 // hideWebview never sees. Its page is told all the same, or it is never
 // told it is back and keeps what it was drawn with: Settings' currency and
 // number units never reached it (blrbrzkj on Discord).
 func TestPanelHiddenByWailsMarksPageOutOfSight(t *testing.T) {
-	out, err := runAppKit(t, 2*time.Minute, []string{"MAGPIE_TEST_WINDOW_VISIBILITY=panel"})
+	out, err := runAppKit(t, 2*time.Minute, []string{"EIPGAM_TEST_WINDOW_VISIBILITY=panel"})
 	if err != nil || !strings.Contains(string(out), "window visibility: ok") {
 		t.Fatalf("panel visibility: %v\n%s", err, out)
 	}
 }
 
 func init() {
-	which := os.Getenv("MAGPIE_TEST_WINDOW_VISIBILITY")
+	which := os.Getenv("EIPGAM_TEST_WINDOW_VISIBILITY")
 	if which != "1" && which != "panel" {
 		return
 	}
@@ -72,7 +72,7 @@ func init() {
 	hidden := make(chan url.Values, 1)
 	reports := make(chan url.Values, 1)
 	app := application.New(application.Options{
-		Name: "magpie window visibility regression",
+		Name: "eipgam window visibility regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyProhibited},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.URL.Path {
@@ -80,10 +80,10 @@ func init() {
 				w.Header().Set("Content-Type", "text/html")
 				fmt.Fprint(w, `<!doctype html><script type="module">import "/wails/runtime.js";</script><style>
 #probe{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(1turn)}}
-html.magpie-out-of-sight #probe{animation-play-state:paused!important}
+html.eipgam-out-of-sight #probe{animation-play-state:paused!important}
 </style><i id="probe"></i><script>
 const probe = document.querySelector("#probe");
-// as app.js: hidden while magpie says so
+// as app.js: hidden while eipgam says so
 let outOfSight = false;
 for (const [k, off] of [["hidden", true], ["visibilityState", "hidden"]]) {
   const own = Object.getOwnPropertyDescriptor(Document.prototype, k)?.get;
@@ -99,20 +99,20 @@ window.magpieWindowVisibility = (visible) => {
     fetch("/report?probe=" + encodeURIComponent(seen));
   }
   outOfSight = !visible;
-  document.documentElement.classList.toggle("magpie-out-of-sight", !visible);
+  document.documentElement.classList.toggle("eipgam-out-of-sight", !visible);
   showing = visible;
   document.dispatchEvent(new Event("visibilitychange"));
   showing = false;
 };
-// a hiding is what follows magpie's hide signal: the shown signal's own
+// a hiding is what follows eipgam's hide signal: the shown signal's own
 // event is not one, and neither is WebKit's own, which it may fire as the
-// window orders out before magpie's signal is in
+// window orders out before eipgam's signal is in
 document.addEventListener("visibilitychange", () => {
   if (outOfSight && !showing) {
     localStorage.setItem("hiddenProbe", JSON.stringify({
       hidden: document.hidden,
       state: document.visibilityState,
-      marked: document.documentElement.classList.contains("magpie-out-of-sight"),
+      marked: document.documentElement.classList.contains("eipgam-out-of-sight"),
       play: getComputedStyle(probe).animationPlayState,
     }));
     // once a hiding: the host shows the window again only after this
@@ -161,7 +161,7 @@ fetch("/ready");
 			return nil
 		}
 	}
-	// each way the window is closed: the main window by magpie; the panel
+	// each way the window is closed: the main window by eipgam; the panel
 	// by Wails, on a click elsewhere and on Escape
 	closes := map[string][]func(*host, *application.WebviewWindow){
 		"1": {func(h *host, _ *application.WebviewWindow) { application.InvokeSync(h.hideMain) }},

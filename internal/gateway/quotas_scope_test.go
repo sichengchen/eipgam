@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// #2216 (Kenoia): a key held to models or accounts on a shared magpie was
-// told no quota at all (#1981), so the remote magpie it was set up on
+// #2216 (Kenoia): a key held to models or accounts on a shared eipgam was
+// told no quota at all (#1981), so the remote eipgam it was set up on
 // showed none of the providers it may use. A key whose owner turns its
 // quotas on is told the cards of the providers whose every model it may
 // use, of the accounts and keys it may use, and nothing else: not another
@@ -26,7 +26,7 @@ import (
 // account's it may not use.
 func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	seedKeptBalances(t)
 
 	ref := func(id, user string) string {
@@ -99,7 +99,7 @@ func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 		// key's (Linka on Discord), so alpha's cards are not its
 		"BetaKey": {"beta:"},
 	}
-	for _, path := range []string{"/v1/magpie/quotas?kept=1", provider.RemoteCardsPath} {
+	for _, path := range []string{"/v1/eipgam/quotas?kept=1", provider.RemoteCardsPath} {
 		for i, s := range secrets {
 			name := keys[i].Name
 			c, b := do("GET", path, s)
@@ -115,8 +115,8 @@ func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 					}
 				}
 			case "Nothing":
-				// told no card here: the other magpie shows its own limit,
-				// not "nothing read on that magpie yet"
+				// told no card here: the other eipgam shows its own limit,
+				// not "nothing read on that eipgam yet"
 				if path == provider.RemoteCardsPath {
 					if c != http.StatusForbidden || !strings.Contains(b, provider.KeyHeldCode) {
 						t.Errorf("%s %s: %d %s", name, path, c, b)
@@ -139,7 +139,7 @@ func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 		}
 	}
 	// the history and the report read afresh go by the same cards
-	for _, path := range []string{"/v1/magpie/quotas", "/v1/magpie/quotas/history"} {
+	for _, path := range []string{"/v1/eipgam/quotas", "/v1/eipgam/quotas/history"} {
 		for i, s := range secrets[1:5] {
 			name := keys[i+1].Name
 			c, b := do("GET", path, s)
@@ -221,14 +221,14 @@ func seedKeptBalances(t *testing.T) {
 
 }
 
-// #2216 from the other side: a magpie with that magpie as its provider,
+// #2216 from the other side: a eipgam with that eipgam as its provider,
 // through a key let see its quotas, shows the cards of what the key may
 // use beside the key's own; a key told none is answered as held, so it
 // shows its own card and the remote's saying why (yi_time), not "nothing
-// read on that magpie yet", which a refresh wouldn't change.
+// read on that eipgam yet", which a refresh wouldn't change.
 func TestRemoteMagpieShowsHeldKeyItsQuotas(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	seedKeptBalances(t)
 	keys, secrets := newCaller(t, "AlphaTwo", "Nothing")
 	p, err := provider.Find("alpha")
@@ -280,7 +280,7 @@ func TestRemoteMagpieShowsHeldKeyItsQuotas(t *testing.T) {
 		t.Errorf("a key held to alpha's Two: %v", got)
 	}
 	if got := shown(secrets[1]); len(got) != 2 || got[0] != "office/~keys:" ||
-		!strings.HasPrefix(got[1], "office::remote magpie tells this key none of its quotas") {
+		!strings.HasPrefix(got[1], "office::remote eipgam tells this key none of its quotas") {
 		t.Errorf("a key told no card: %v", got)
 	}
 }

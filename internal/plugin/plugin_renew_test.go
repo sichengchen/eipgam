@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A plugin with auth.refresh leaves renewing its sign-ins to magpie: a
@@ -21,7 +21,7 @@ import (
 // expiry, isn't renewed; one the vendor turns away is marked expired and
 // not tried again, and one that can't be renewed goes with the old token
 // and isn't tried again at once, nor is one whose refresh gives nothing
-// back while it is due (magpie-ima-auth's, JZGiVvkSOA75376 on X).
+// back while it is due (eipgam-ima-auth's, JZGiVvkSOA75376 on X).
 func TestPluginRenewsSignIns(t *testing.T) {
 	sandbox(t)
 	var mu sync.Mutex

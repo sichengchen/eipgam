@@ -4,23 +4,23 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// claude-magpie (baranwang on X): Claude Code started through magpie while
+// claude-eipgam (baranwang on X): Claude Code started through eipgam while
 // a plain `claude` stays on the user's own account, with nothing switched
-// back and forth. magpie keeps a settings file of its own,
+// back and forth. eipgam keeps a settings file of its own,
 // <config>/claude-launch/settings.json, wired as it would wire Claude
-// Code's (its gateway, key, models and tiers), and `magpie claude run`
+// Code's (its gateway, key, models and tiers), and `eipgam claude run`
 // starts claude with --settings and that file. Claude Code puts a
 // --settings file over the user's settings.json, its env key by key over
 // the user's env and the shell's (tried with Claude Code 2.1.318: a
 // claude.ai sign-in, the user's own base URL and token, a shell
 // ANTHROPIC_BASE_URL all lost to it), so ~/.claude/settings.json is never
-// written. What could still take a request past magpie, an
+// written. What could still take a request past eipgam, an
 // ANTHROPIC_API_KEY or a cloud switch from the user's file or the shell,
 // is blanked in the file (claudeLaunchBlanks).
 
@@ -32,7 +32,7 @@ const ClaudeLaunchID = "claude#launch"
 // put it in their own folder.
 var claudeLaunchDir = func() string { return filepath.Join(appdir.Config(), "claude-launch") }
 
-// ClaudeLaunchPath is the settings file `magpie claude run` hands claude.
+// ClaudeLaunchPath is the settings file `eipgam claude run` hands claude.
 func ClaudeLaunchPath() string { return filepath.Join(claudeLaunchDir(), "settings.json") }
 
 // claudeLaunch is the launch file as an agent: Claude Code at this home,
@@ -41,15 +41,15 @@ func ClaudeLaunchPath() string { return filepath.Join(claudeLaunchDir(), "settin
 func claudeLaunch(home string) *Agent {
 	a := claudeIn(place{home: home, id: ClaudeLaunchID, dir: claudeLaunchDir()})
 	a.ID = ClaudeLaunchID
-	a.Name = "claude-magpie"
+	a.Name = "claude-eipgam"
 	a.Aliases = nil
 	return a
 }
 
 // claudeLaunchBlanks are the variables the launch file sets to "", each
 // over the user's settings.json and the shell: an API key would go to
-// magpie beside its own key (x-api-key), and a cloud switch takes Claude
-// Code to Bedrock, Vertex and the like, past magpie.
+// eipgam beside its own key (x-api-key), and a cloud switch takes Claude
+// Code to Bedrock, Vertex and the like, past eipgam.
 func claudeLaunchBlanks() []string {
 	return append([]string{"ANTHROPIC_API_KEY"}, agentenv.ClaudeProviders...)
 }
@@ -68,7 +68,7 @@ func ClaudeLaunch(home string) (string, error) {
 			return "", err
 		}
 	case claudeLaunchStale(a, path):
-		// the gateway moved (another port, MAGPIE_ADDR) or wants another
+		// the gateway moved (another port, EIPGAM_ADDR) or wants another
 		// key (LAN sharing) since: set again at the address and key of
 		// now, as Rewire does. The Agents page reads a Claude Code on an
 		// older address as wired still; the launch file is set at once
@@ -108,7 +108,7 @@ func claudeLaunchStale(a *Agent, path string) bool {
 }
 
 // ClaudeModelMark is what the user's settings.json says of its model
-// before a claude-magpie session, for ClaudeLaunchAfter.
+// before a claude-eipgam session, for ClaudeLaunchAfter.
 type ClaudeModelMark struct {
 	model string
 	has   bool
@@ -124,12 +124,12 @@ func claudeUserSettings(home string) string {
 	return filepath.Join(here(home).claudeDir(), "settings.json")
 }
 
-// ClaudeLaunchAfter is what a claude-magpie session's /model leaves:
+// ClaudeLaunchAfter is what a claude-eipgam session's /model leaves:
 // Claude Code saves a pick there to the user's settings.json, never to a
-// --settings file (tried with 2.1.318). A model of magpie's picked goes
-// to the launch file, for claude-magpie's next session, and the user's
-// file gets its model back while magpie isn't wired into it: a plain
-// `claude` would ask Anthropic for a model only magpie serves. A Claude
+// --settings file (tried with 2.1.318). A model of eipgam's picked goes
+// to the launch file, for claude-eipgam's next session, and the user's
+// file gets its model back while eipgam isn't wired into it: a plain
+// `claude` would ask Anthropic for a model only eipgam serves. A Claude
 // model of its own (sonnet) is a pick plain claude can run, and stays.
 func ClaudeLaunchAfter(home string, was ClaudeModelMark) error {
 	user := claudeUserSettings(home)
@@ -161,7 +161,7 @@ func ClaudeLaunchAfter(home string, was ClaudeModelMark) error {
 }
 
 // claudeLaunchRewrote says now is Claude Code's own rewrite of the user's
-// model at a claude-magpie start, not a pick: with the launch file's opus
+// model at a claude-eipgam start, not a pick: with the launch file's opus
 // tier on 1M, Claude Code 2.1.318 turns a user's "opus" into "opus[1m]"
 // in their settings.json once (migration_opus_to_opus1m, which asks
 // whether the opus it would run is opted in to 1M). Plain claude, on the
@@ -170,7 +170,7 @@ func claudeLaunchRewrote(was ClaudeModelMark, now string) bool {
 	return was.has && !strings.HasSuffix(was.model, "[1m]") && now == was.model+"[1m]"
 }
 
-// claudeLaunchStandIn is StandIn for a claude-magpie session: the launch
+// claudeLaunchStandIn is StandIn for a claude-eipgam session: the launch
 // file's main model and tiers, while it is on this gateway.
 func claudeLaunchStandIn(model string) string {
 	return claudeStandIn(ClaudeLaunchPath(), model)

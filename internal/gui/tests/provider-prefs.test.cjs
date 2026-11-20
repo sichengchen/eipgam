@@ -91,13 +91,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await box.locator("#codexWarmList, #codexResetList").count(), 0);
 
         // a subscription with none of them: no box
-        await page.goto("http://magpie.test/?view=providers&edit=relayco");
+        await page.goto("http://eipgam.test/?view=providers&edit=relayco");
         await page.locator(".editor").first().waitFor();
         assert.equal(await page.locator(".editor .prov-prefs:not([hidden])").count(), 0, "nothing for RelayCo");
 
         // Settings › Allowances has none of them, and its search still finds them
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=settings&tab=usage");
+        await page.goto("http://eipgam.test/?view=settings&tab=usage");
         await settingsDrawn(page);
         assert.equal(await page.locator("#setPage-usage #warmSegs, #setPage-usage #codexAutoResetRow").count(), 0, "none left in Settings");
         assert.equal(await page.locator("#provPrefLinks").isVisible(), false, "the links show only while searching");

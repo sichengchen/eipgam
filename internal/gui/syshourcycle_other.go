@@ -5,7 +5,7 @@ package gui
 import (
 	"os"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // readHourCycle asks GNOME (and what follows its setting: Cinnamon,

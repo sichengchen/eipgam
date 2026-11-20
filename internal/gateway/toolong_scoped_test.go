@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A custom API-key relay's failure reaches the agent as the relay said it:
 // its status and its words, whatever the request's size, on every route a
 // client asks by and every protocol the relay speaks, held or streamed.
-// magpie only translates the protocol; it never makes it an overflow the
+// eipgam only translates the protocol; it never makes it an overflow the
 // relay didn't say (#5486, NEKO-CwC: ne9ko9's Responses relay had a 502 at
 // 385K told to Codex as more than gpt-6-astra's 272K, and the 400/413/422
 // inference stayed for every provider after v0.1.3141).

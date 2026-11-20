@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settingsapi"
+	"github.com/sichengchen/eipgam/internal/settingsapi"
 )
 
 // The window and the CLI do the same things (#4745). These tests hold the
-// two together: every setting the Settings page saves is one `magpie
+// two together: every setting the Settings page saves is one `eipgam
 // settings` sets, and every /api route the window's pages call has a
 // command, or is named below as not having one yet, with why. A route or a
 // setting added on one side only fails here.
@@ -82,7 +82,7 @@ func balanced(src string) int {
 	return len(src)
 }
 
-// Every key the pages send POST /api/settings is one `magpie settings`
+// Every key the pages send POST /api/settings is one `eipgam settings`
 // sets, and every one it sets is one the pages send.
 func TestSettingsCLISetsWhatTheWindowSaves(t *testing.T) {
 	gui := guiSettingsKeys(t)
@@ -90,13 +90,13 @@ func TestSettingsCLISetsWhatTheWindowSaves(t *testing.T) {
 	notKeys := []string{"keep", "change"}
 	for _, k := range gui {
 		if !slices.Contains(notKeys, k) && !settingsapi.Known(k) {
-			t.Errorf("the window saves %q, which `magpie settings` can't set: add it to settingsapi.Keys", k)
+			t.Errorf("the window saves %q, which `eipgam settings` can't set: add it to settingsapi.Keys", k)
 		}
 	}
 	pages := pagesSource(t)
 	for k, own := range ownRoute {
 		if !settingsapi.Known(k) {
-			t.Errorf("ownRoute names %q, which `magpie settings` can't set: take it out", k)
+			t.Errorf("ownRoute names %q, which `eipgam settings` can't set: take it out", k)
 		}
 		saved := false
 		for rest := pages; ; {
@@ -121,15 +121,15 @@ func TestSettingsCLISetsWhatTheWindowSaves(t *testing.T) {
 	}
 	for _, k := range settingsapi.Keys {
 		if _, own := ownRoute[k]; !own && !slices.Contains(gui, k) {
-			t.Errorf("`magpie settings` sets %q, which no page sends", k)
+			t.Errorf("`eipgam settings` sets %q, which no page sends", k)
 		}
 	}
 }
 
-// ownRoute are the settings `magpie settings` sets that a page saves
+// ownRoute are the settings `eipgam settings` sets that a page saves
 // through a route of its own instead of POST /api/settings, with the call
 // that does it: the Routing groups page's defaults for every group
-// (settings.SetGroupDefaults), which `magpie settings set` sets too. field
+// (settings.SetGroupDefaults), which `eipgam settings set` sets too. field
 // is the key the call's body sends it as.
 var ownRoute = map[string]struct{ call, field string }{
 	"groupSink":       {`api("groups/defaults"`, "sink"},
@@ -169,76 +169,76 @@ const (
 	// P: providers, accounts, sign-ins and plugins past what the
 	// provider, accounts and plugin commands do, stage 2
 	P = "stage 2: providers, accounts and sign-ins"
-	// L: the library past `magpie library`, stage 3
+	// L: the library past `eipgam library`, stage 3
 	L = "stage 3: the library"
-	// U: usage, sessions, masking records and traces past `magpie
+	// U: usage, sessions, masking records and traces past `eipgam
 	// usage`, `quota` and `sessions`, stage 3
 	U = "stage 3: usage, sessions and traces"
 	// A: connecting agents and the rest, stage 3
 	A = "stage 3: agents and the rest"
 )
 
-// cliForRoute is the command that does what a route does, as `magpie …`.
+// cliForRoute is the command that does what a route does, as `eipgam …`.
 var cliForRoute = map[string]string{
-	"GET /api/agent-models/{id}":           "magpie models",
-	"GET /api/settings":                    "magpie settings list",
-	"POST /api/settings":                   "magpie settings set",
-	"POST /api/settings/account-discovery": "magpie accounts discovery",
-	"POST /api/settings/search-api":        "magpie search",
-	"POST /api/settings/search-key":        "magpie search",
-	"POST /api/settings/search-count":      "magpie search count",
-	"POST /api/settings/update-mirror":     "magpie update mirror",
-	"POST /api/sync":                       "magpie sync",
-	"GET /api/davsync":                     "magpie webdav",
-	"POST /api/backup/export":              "magpie backup",
-	"POST /api/backup/import":              "magpie restore",
-	"GET /api/datafolder":                  "magpie data",
-	"POST /api/datafolder/{action}":        "magpie data move",
-	"POST /api/davsync/{action}":           "magpie webdav",
-	"GET /api/caller-keys":                 "magpie gateway-key list",
-	"POST /api/caller-keys/{action}":       "magpie gateway-key",
-	"GET /api/caller-keys/account-windows": "magpie quota", // the windows `gateway-key limit <id> account` takes
-	"GET /api/account-groups":              "magpie gateway-key groups",
-	"POST /api/account-groups/{action}":    "magpie gateway-key groups",
-	"GET /api/groups":                      "magpie groups",
-	"POST /api/groups/{action}":            "magpie group",
-	"GET /api/import/{id}":                 "magpie import",
-	"GET /api/settings/https":              "magpie https",
-	"POST /api/settings/https":             "magpie https on",
-	"POST /api/settings/https/ca":          "magpie https ca",
-	"POST /api/settings/https/import":      "magpie https import",
-	"POST /api/settings/https/remove":      "magpie https remove",
-	"POST /api/settings/mtls":              "magpie mtls on",
-	"POST /api/settings/mtls/issue":        "magpie mtls issue",
-	"POST /api/settings/mtls/revoke":       "magpie mtls revoke",
-	"GET /api/library":                     "magpie library",
-	"POST /api/library/{what}/{action}":    "magpie library",
-	"GET /api/plugins":                     "magpie plugin",
-	"POST /api/plugins/{op}":               "magpie plugin",
-	"GET /api/login/usage":                 "magpie quota",
-	"GET /api/providers":                   "magpie providers",
-	"POST /api/provider/{action}":          "magpie provider",
-	"POST /api/providers/delete":           "magpie provider rm",
-	"GET /api/sessions/reads":              "magpie sessions read",
-	"POST /api/sessions/reads":             "magpie sessions read",
-	"GET /api/sessions":                    "magpie sessions",
-	"GET /api/sessions/said":               "magpie sessions search",
-	"GET /api/sessions/transcript":         "magpie sessions show",
-	"POST /api/uninstall":                  "magpie uninstall",
-	"GET /api/usage":                       "magpie usage",
-	"GET /api/usage/quotas":                "magpie quota",
-	"GET /api/usage/quotas/history":        "magpie quota history",
-	"GET /api/usage/requests.csv":          "magpie usage --csv",
-	"GET /api/update":                      "magpie update check",
-	"POST /api/update/check":               "magpie update check",
-	"POST /api/settings/agent-compact":     "magpie model compact",
-	"POST /api/settings/agent-contexts":    "magpie model window",
-	"POST /api/settings/agent-suffix":      "magpie model suffix",
-	"POST /api/settings/context-cap":       "magpie model context-cap",
-	"POST /api/settings/context-cap-mode":  "magpie model context-cap",
-	"POST /api/update/install":             "magpie update",
-	"GET /api/model-price":                 "magpie model price",
-	"POST /api/model-price":                "magpie model price",
+	"GET /api/agent-models/{id}":           "eipgam models",
+	"GET /api/settings":                    "eipgam settings list",
+	"POST /api/settings":                   "eipgam settings set",
+	"POST /api/settings/account-discovery": "eipgam accounts discovery",
+	"POST /api/settings/search-api":        "eipgam search",
+	"POST /api/settings/search-key":        "eipgam search",
+	"POST /api/settings/search-count":      "eipgam search count",
+	"POST /api/settings/update-mirror":     "eipgam update mirror",
+	"POST /api/sync":                       "eipgam sync",
+	"GET /api/davsync":                     "eipgam webdav",
+	"POST /api/backup/export":              "eipgam backup",
+	"POST /api/backup/import":              "eipgam restore",
+	"GET /api/datafolder":                  "eipgam data",
+	"POST /api/datafolder/{action}":        "eipgam data move",
+	"POST /api/davsync/{action}":           "eipgam webdav",
+	"GET /api/caller-keys":                 "eipgam gateway-key list",
+	"POST /api/caller-keys/{action}":       "eipgam gateway-key",
+	"GET /api/caller-keys/account-windows": "eipgam quota", // the windows `gateway-key limit <id> account` takes
+	"GET /api/account-groups":              "eipgam gateway-key groups",
+	"POST /api/account-groups/{action}":    "eipgam gateway-key groups",
+	"GET /api/groups":                      "eipgam groups",
+	"POST /api/groups/{action}":            "eipgam group",
+	"GET /api/import/{id}":                 "eipgam import",
+	"GET /api/settings/https":              "eipgam https",
+	"POST /api/settings/https":             "eipgam https on",
+	"POST /api/settings/https/ca":          "eipgam https ca",
+	"POST /api/settings/https/import":      "eipgam https import",
+	"POST /api/settings/https/remove":      "eipgam https remove",
+	"POST /api/settings/mtls":              "eipgam mtls on",
+	"POST /api/settings/mtls/issue":        "eipgam mtls issue",
+	"POST /api/settings/mtls/revoke":       "eipgam mtls revoke",
+	"GET /api/library":                     "eipgam library",
+	"POST /api/library/{what}/{action}":    "eipgam library",
+	"GET /api/plugins":                     "eipgam plugin",
+	"POST /api/plugins/{op}":               "eipgam plugin",
+	"GET /api/login/usage":                 "eipgam quota",
+	"GET /api/providers":                   "eipgam providers",
+	"POST /api/provider/{action}":          "eipgam provider",
+	"POST /api/providers/delete":           "eipgam provider rm",
+	"GET /api/sessions/reads":              "eipgam sessions read",
+	"POST /api/sessions/reads":             "eipgam sessions read",
+	"GET /api/sessions":                    "eipgam sessions",
+	"GET /api/sessions/said":               "eipgam sessions search",
+	"GET /api/sessions/transcript":         "eipgam sessions show",
+	"POST /api/uninstall":                  "eipgam uninstall",
+	"GET /api/usage":                       "eipgam usage",
+	"GET /api/usage/quotas":                "eipgam quota",
+	"GET /api/usage/quotas/history":        "eipgam quota history",
+	"GET /api/usage/requests.csv":          "eipgam usage --csv",
+	"GET /api/update":                      "eipgam update check",
+	"POST /api/update/check":               "eipgam update check",
+	"POST /api/settings/agent-compact":     "eipgam model compact",
+	"POST /api/settings/agent-contexts":    "eipgam model window",
+	"POST /api/settings/agent-suffix":      "eipgam model suffix",
+	"POST /api/settings/context-cap":       "eipgam model context-cap",
+	"POST /api/settings/context-cap-mode":  "eipgam model context-cap",
+	"POST /api/update/install":             "eipgam update",
+	"GET /api/model-price":                 "eipgam model price",
+	"POST /api/model-price":                "eipgam model price",
 }
 
 var notYet = map[string]string{
@@ -252,14 +252,14 @@ var notYet = map[string]string{
 	"GET /api/notices":                           W,  // api.go
 	"GET /api/feedback":                          W,  // feedback.go: Settings › About's Report a problem, which opens a page
 	"GET /api/omarchy":                           W,  // api.go
-	"GET /api/appearance/css":                    W,  // appearance.go: the stylesheet of the accent and the picture behind the pages; the accent is `magpie settings set accent`
+	"GET /api/appearance/css":                    W,  // appearance.go: the stylesheet of the accent and the picture behind the pages; the accent is `eipgam settings set accent`
 	"GET /api/appearance/wallpaper":              W,  // appearance.go
 	"POST /api/appearance/wallpaper":             W,  // appearance.go: the picture comes from the window's file picker
 	"GET /api/quit":                              W,  // api.go: the window's Quit question
 	"POST /api/quit/disconnect":                  W,  // api.go: the Quit question's Disconnect and quit, which quits the app
-	"POST /api/restart":                          W,  // restart.go: the app starting itself again, as the tray's Restart magpie does
+	"POST /api/restart":                          W,  // restart.go: the app starting itself again, as the tray's Restart eipgam does
 	"POST /api/page-away":                        W,  // api.go: the page says it went from view, so its caches can go
-	"GET /api/remote":                            W,  // remote.go: another magpie opened in a window of the app
+	"GET /api/remote":                            W,  // remote.go: another eipgam opened in a window of the app
 	"POST /api/remote":                           W,  // remote.go
 	"POST /api/remote/forget":                    W,  // remote.go
 	"GET /api/state":                             W,  // api.go
@@ -307,8 +307,8 @@ var notYet = map[string]string{
 	"POST /api/settings/codex-titles":            S2, // api.go
 	"POST /api/settings/codex-warm-at":           S2, // api.go
 	"POST /api/settings/cors":                    S2, // api.go
-	"POST /api/settings/desktop-isolated":        A,  // api.go; `magpie claude-desktop launcher`, an agent's form this check can't read
-	"POST /api/settings/desktop-isolated-claude": A,  // api.go; `magpie claude-desktop launcher claude-dir`, an agent's form this check can't read
+	"POST /api/settings/desktop-isolated":        A,  // api.go; `eipgam claude-desktop launcher`, an agent's form this check can't read
+	"POST /api/settings/desktop-isolated-claude": A,  // api.go; `eipgam claude-desktop launcher claude-dir`, an agent's form this check can't read
 	"POST /api/settings/desktop-longest":         S2, // api.go
 	"POST /api/settings/disabled-models":         S2, // api.go
 	"POST /api/settings/full-context":            S2, // api.go
@@ -356,7 +356,7 @@ var notYet = map[string]string{
 	"POST /api/library/browser/drag":             L,  // browser.go
 	"POST /api/library/browser/extension":        L,  // browser.go
 	"GET /api/caller-keys/models":                P,  // caller_keys.go
-	"GET /api/caller-keys/mcp":                   L,  // caller_keys.go: the servers `magpie gateway-key mcp` takes
+	"GET /api/caller-keys/mcp":                   L,  // caller_keys.go: the servers `eipgam gateway-key mcp` takes
 	"POST /api/config/repair":                    A,  // config_repair.go
 	"GET /api/context":                           U,  // context.go
 	"GET /api/context/text":                      W,  // context.go
@@ -565,7 +565,7 @@ func guiRoutes(t *testing.T) []string {
 
 // Every route the window serves has a command, or is named in notYet;
 // none is in both, and neither names a route that's gone. Every command
-// named is one magpie has.
+// named is one eipgam has.
 func TestEveryRouteHasACommandOrIsNamed(t *testing.T) {
 	routes := guiRoutes(t)
 	cmds := runCommands(t)
@@ -584,8 +584,8 @@ func TestEveryRouteHasACommandOrIsNamed(t *testing.T) {
 			t.Errorf("cliForRoute names %s, which internal/gui doesn't serve", r)
 		}
 		f := strings.Fields(cmd)
-		if len(f) < 2 || f[0] != "magpie" || !slices.Contains(cmds, f[1]) {
-			t.Errorf("%s: %q isn't a magpie command", r, cmd)
+		if len(f) < 2 || f[0] != "eipgam" || !slices.Contains(cmds, f[1]) {
+			t.Errorf("%s: %q isn't a eipgam command", r, cmd)
 		}
 	}
 	for r := range notYet {

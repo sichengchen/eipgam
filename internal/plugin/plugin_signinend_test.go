@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // signInEnd adds testdata/signinend, whose sign-ins wait on $HOME/go as
@@ -64,7 +64,7 @@ func cancelledFinish(t *testing.T, ctx context.Context, method int, waiting <-ch
 	}
 }
 
-// #5016: a sign-in cancelled in magpie saved the account all the same
+// #5016: a sign-in cancelled in eipgam saved the account all the same
 // when the plugin's wait came true after it. What the plugin answers once
 // the sign-in is given up is dropped.
 func TestCancelledSignInSavesNothing(t *testing.T) {
@@ -97,7 +97,7 @@ func TestCancelledSignInSavesNothing(t *testing.T) {
 	}
 }
 
-// #5016: the plugin's wait is told the sign-in is over (magpie's hook:
+// #5016: the plugin's wait is told the sign-in is over (eipgam's hook:
 // callback(code, { signal })), so it stops instead of waiting out its own
 // minutes.
 func TestCancelledSignInEndsThePluginsWait(t *testing.T) {

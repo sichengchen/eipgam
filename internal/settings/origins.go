@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // CleanOrigins is the web origins a user typed for CORSOrigins, as a
@@ -37,7 +37,7 @@ func cleanOrigin(raw string) (string, error) {
 		return "", nil
 	}
 	if strings.Contains(raw, "*") {
-		return "", fmt.Errorf("%q: name each origin; a wildcard would let every web page use magpie", raw)
+		return "", fmt.Errorf("%q: name each origin; a wildcard would let every web page use eipgam", raw)
 	}
 	if o, ok, err := extensionOrigin(raw); ok {
 		return o, err

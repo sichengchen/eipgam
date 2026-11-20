@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // sessionsCall is one tools/call of the sessions server from this
@@ -95,7 +95,7 @@ func TestSessionsMCPSearch(t *testing.T) {
 
 // read_session with find starts a few messages before the words, says
 // what it left out, and goes on with from; an agent Settings doesn't let
-// magpie read is not read.
+// eipgam read is not read.
 func TestSessionsMCPReadAtTheWords(t *testing.T) {
 	fresh(t)
 	home := os.Getenv("HOME")

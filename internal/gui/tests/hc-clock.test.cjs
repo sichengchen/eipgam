@@ -48,7 +48,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(c.hc, c.sys));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.waitForFunction(() => typeof intlLang === "function");
       const out = await page.evaluate(() => {
         const at = new Date(Date.UTC(2026, 9, 12, 15, 5, 7));

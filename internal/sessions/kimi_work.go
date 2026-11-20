@@ -11,8 +11,8 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // Kimi's desktop app's Work (CNSA0422 on X: its calls never reached
@@ -34,7 +34,7 @@ import (
 // Two things differ. A record's model is Daimon's alias ("daimon-kimi-code"
 // by default), the key of a [models."<alias>"] table in the config.toml
 // Daimon writes for the runtime beside home; its model (k2p6-agent on Kimi's
-// coding endpoint) is the call's model. And magpie's kimi-desktop
+// coding endpoint) is the call's model. And eipgam's kimi-desktop
 // agent plugin points the alias's provider at a bridge on this computer
 // that forwards to the gateway, which logs those calls itself: a call made
 // while that config.toml's base_url is a loopback address is the

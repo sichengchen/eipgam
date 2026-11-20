@@ -160,7 +160,7 @@ func TestClaudeCode(t *testing.T) {
 // mode from a folder beside it.
 func TestIsolated(t *testing.T) {
 	home := t.TempDir()
-	want := filepath.Join(home, "Library", "Application Support", "Claude-Magpie-3p")
+	want := filepath.Join(home, "Library", "Application Support", "Claude-eipgam-3p")
 	if got := Isolated("darwin", home); got != want {
 		t.Fatalf("darwin: %q", got)
 	}

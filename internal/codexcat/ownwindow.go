@@ -4,8 +4,8 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // bundledWindows is the context_window of each model in Codex's own
@@ -55,7 +55,7 @@ func OwnWindow(id string) int {
 	return 0
 }
 
-// Working is where magpie has Codex compact a conversation on model id, of
+// Working is where eipgam has Codex compact a conversation on model id, of
 // a window of c tokens, when neither the model nor its provider sets a
 // threshold: Long conversations' (st.Working). Its default, the working
 // window, is the 272K Codex holds OpenAI's models to, so an OpenAI model
@@ -72,7 +72,7 @@ func Working(st settings.Settings, id string, c int) int {
 	return w
 }
 
-// unknownWorking is Working for a model whose window magpie doesn't know:
+// unknownWorking is Working for a model whose window eipgam doesn't know:
 // Long conversations' threshold, which by default is the window Codex's
 // own catalog holds an OpenAI model to when that is more.
 func unknownWorking(st settings.Settings, id string) int {

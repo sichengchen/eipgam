@@ -19,7 +19,7 @@ import (
 // answers.
 func TestDownloadRetriesABusyHost(t *testing.T) {
 	quickRetries(t)
-	body := []byte(strings.Repeat("magpie", 4096))
+	body := []byte(strings.Repeat("eipgam", 4096))
 	sum := sha256.Sum256(body)
 	for _, code := range []int{http.StatusGatewayTimeout, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusInternalServerError, http.StatusTooManyRequests} {
 		var tries atomic.Int32
@@ -30,7 +30,7 @@ func TestDownloadRetriesABusyHost(t *testing.T) {
 			}
 			w.Write(body)
 		}))
-		path := filepath.Join(t.TempDir(), "magpie.zip")
+		path := filepath.Join(t.TempDir(), "eipgam.zip")
 		err := download(context.Background(), Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path)
 		srv.Close()
 		if err != nil {
@@ -59,7 +59,7 @@ func TestDownloadBusyEveryTryAndMissingOnce(t *testing.T) {
 			tries.Add(1)
 			w.WriteHeader(c.code)
 		}))
-		path := filepath.Join(t.TempDir(), "magpie-darwin-arm64.zip")
+		path := filepath.Join(t.TempDir(), "eipgam-darwin-arm64.zip")
 		err := download(context.Background(), Asset{URL: srv.URL, SHA256: strings.Repeat("0", 64)}, path)
 		srv.Close()
 		if err == nil {
@@ -71,7 +71,7 @@ func TestDownloadBusyEveryTryAndMissingOnce(t *testing.T) {
 		if Network(err) != c.network {
 			t.Fatalf("%d: Network = %v, want %v (%v)", c.code, Network(err), c.network, err)
 		}
-		if msg := err.Error(); !strings.Contains(msg, "magpie-darwin-arm64.zip") || !strings.Contains(msg, http.StatusText(c.code)) {
+		if msg := err.Error(); !strings.Contains(msg, "eipgam-darwin-arm64.zip") || !strings.Contains(msg, http.StatusText(c.code)) {
 			t.Fatalf("%d: error %q names neither the file nor the status", c.code, msg)
 		}
 		if _, err := os.Stat(path); !os.IsNotExist(err) {

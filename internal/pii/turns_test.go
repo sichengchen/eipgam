@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/pii/guard"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/sichengchen/eipgam/internal/pii/guard"
+	"github.com/sichengchen/eipgam/internal/redact"
 )
 
 // gateFinder is a model whose reads wait at a gate, counting how many

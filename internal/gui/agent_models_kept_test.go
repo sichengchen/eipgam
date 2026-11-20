@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// whysugarsweet on X: Claude Desktop narrowed to some providers (magpie
+// whysugarsweet on X: Claude Desktop narrowed to some providers (eipgam
 // visible, from the terminal) never listed OpenCode Go added after, while
 // Pi listed it, and the Agents page's list had no way to it. The models
 // the visibility keeps are in the list, off; ticking one shows the agent

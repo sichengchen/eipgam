@@ -10,13 +10,13 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A Remote magpie that is this magpie (hanslin1666 on Discord: B uses A
+// A Remote eipgam that is this eipgam (hanslin1666 on Discord: B uses A
 // through one, and sync carried it to A, where it points at A) is left
-// out: its models are not listed beside this magpie's own, a found group
+// out: its models are not listed beside this eipgam's own, a found group
 // doesn't take them, and a request naming one (an agent's pick synced
 // from B) is served here at once, not passed through the gateway again.
 // "Use it anyway" (KeepSelf) has it back.
@@ -61,7 +61,7 @@ func TestRemoteMagpieThatIsThisOneIsLeftOut(t *testing.T) {
 	}
 	rem, _ = provider.Find(id)
 	if !rem.SelfAnswered() || !rem.SelfLeftOut() || rem.On() {
-		t.Fatalf("a Remote magpie at this magpie's own address: answered as self %v, left out %v, on %v; want true, true, false", rem.SelfAnswered(), rem.SelfLeftOut(), rem.On())
+		t.Fatalf("a Remote eipgam at this eipgam's own address: answered as self %v, left out %v, on %v; want true, true, false", rem.SelfAnswered(), rem.SelfLeftOut(), rem.On())
 	}
 
 	listed := func() map[string]bool {
@@ -91,7 +91,7 @@ func TestRemoteMagpieThatIsThisOneIsLeftOut(t *testing.T) {
 	}
 	for _, e := range provider.Catalog() {
 		if e.Provider.ID == "rem" {
-			t.Errorf("the catalog has %s through this magpie's own Remote magpie", e.ID)
+			t.Errorf("the catalog has %s through this eipgam's own Remote eipgam", e.ID)
 		}
 	}
 

@@ -8,7 +8,7 @@ import (
 
 // A registry entry's docker options are its publisher's, and the market
 // shows the server as "docker" alone: one that reaches past the container
-// (the host's network, where magpie's gateway takes a request as the
+// (the host's network, where eipgam's gateway takes a request as the
 // owner's; privileges; a folder, docker.sock or an env file of this
 // computer's) is left out of the line, and a server that needs one isn't
 // offered. A named volume, the environment and the entrypoint go as
@@ -31,7 +31,7 @@ func TestRegistryDockerOptionsStayInTheContainer(t *testing.T) {
 		{"host network", named("--network", "host"), ""},
 		{"host network, positional", pos("--network=host"), ""},
 		{"host network, short", named("--net", "host"), ""},
-		{"another container's network", named("--network", "container:magpie"), ""},
+		{"another container's network", named("--network", "container:eipgam"), ""},
 		{"privileged", named("--privileged", "true"), ""},
 		{"privileged, positional", pos("--privileged"), ""},
 		{"a capability", named("--cap-add", "SYS_ADMIN"), ""},

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // TestLedgerTellsCanceledRows: the Requests page reads a request its agent

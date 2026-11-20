@@ -8,17 +8,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/beat"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/beat"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The Codex app's picker shows only the models of Codex's list that a
 // flag of OpenAI's names, for Codex on its built-in provider, unless Codex
 // reads its list from a file (model_catalog_json): beside the ChatGPT
-// sign-in it showed GPT alone, magpie's models in the list it was handed
+// sign-in it showed GPT alone, eipgam's models in the list it was handed
 // all the same (laddieyao on Discord). The CLI shows the whole list. So
-// where the Codex app is installed, magpie writes the list it hands Codex
+// where the Codex app is installed, eipgam writes the list it hands Codex
 // into a file for Codex to read (agent.CodexDesktopList), and Codex asks
 // for no list then: the backend's part of it is asked for here, with
 // Codex's sign-in, and kept.
@@ -43,7 +43,7 @@ var (
 	codexDeskBehind  = provider.CodexVersionBehind
 )
 
-// codexDeskListed is what the sign-in's own list, as magpie keeps it for
+// codexDeskListed is what the sign-in's own list, as eipgam keeps it for
 // the codex provider, has and when it was asked for (a test's stands in).
 var codexDeskListed = provider.CodexSignInListed
 
@@ -55,7 +55,7 @@ const (
 	codexDeskWait  = 30 * time.Second
 )
 
-// codexDeskLook is how often the magpie serving the gateway looks whether
+// codexDeskLook is how often the eipgam serving the gateway looks whether
 // the list is due (KeepCodexDeskFresh); a var so tests can look sooner.
 var codexDeskLook = time.Minute
 
@@ -80,10 +80,10 @@ var codexDesk struct {
 }
 
 // codexDeskDue says the list kept for who is to be asked for again: none
-// kept, an hour old, asked for an older Codex than magpie asks as now, or
-// older than the sign-in's own list magpie keeps for the codex provider
+// kept, an hour old, asked for an older Codex than eipgam asks as now, or
+// older than the sign-in's own list eipgam keeps for the codex provider
 // while that lists a model it lacks. The backend's list is the same for
-// both, asked apart: OpenAI listed GPT-6.2 Astra on 11-17, magpie's
+// both, asked apart: OpenAI listed GPT-6.2 Astra on 11-17, eipgam's
 // pickers had it, and the Codex app's file didn't (ANAGABRIELRLki on X).
 // Called with codexDesk held; behind and listed are read before it is.
 func codexDeskDue(who string, behind func(string) bool, listed []string, listedAt time.Time) bool {
@@ -122,10 +122,10 @@ func codexDeskInputs() (behind func(string) bool, listed []string, listedAt time
 }
 
 // KeepCodexDeskFresh asks for the Codex app's list again whenever it is
-// due (codexDeskDue), once the list was wanted, run by the magpie serving
-// the gateway. The list was asked for only as magpie wrote the agents'
+// due (codexDeskDue), once the list was wanted, run by the eipgam serving
+// the gateway. The list was asked for only as eipgam wrote the agents'
 // files (CodexDesktopCatalog, from agent.SyncCatalog), which nothing does
-// on a quiet magpie: a model OpenAI listed since stayed out of the file,
+// on a quiet eipgam: a model OpenAI listed since stayed out of the file,
 // and with model_catalog_json named Codex asks for no list of its own.
 // A list that changed is told (CodexDesktopChanged), and the file is
 // written again.
@@ -158,17 +158,17 @@ func init() { WhileServing = append(WhileServing, KeepCodexDeskFresh) }
 // CodexDesktopCatalog is the list a Codex beside its ChatGPT sign-in is
 // handed (/backend-api/codex/models), as a file Codex reads with
 // model_catalog_json: the backend's entries as it sent them, narrowed and
-// set as the codex provider has them, magpie's after them. ok is false
+// set as the codex provider has them, eipgam's after them. ok is false
 // while the backend's list is not known: none asked for yet, or none it
 // gave. That is unknown, never an empty list, and the file as it was
 // stands. The backend is asked again in the background when its list is
 // old, CodexDesktopChanged told when it changed.
 //
 // A sign-in the backend calls revoked, with no list of its from before,
-// is handed Codex's last list of its own and magpie's models, as
+// is handed Codex's last list of its own and eipgam's models, as
 // codexModels answers Codex then (#4308): the backend has said all it
 // will for that sign-in, and without it the app's picker had none of
-// magpie's models until the user signed in again.
+// eipgam's models until the user signed in again.
 //
 // The list is the list of the account Codex is signed in to, and a Pro
 // account lists models a Plus one doesn't. Once Codex is on another
@@ -196,7 +196,7 @@ func CodexDesktopCatalog() (b []byte, ok bool) {
 		// the backend can't be asked (not reachable from here: a Windows
 		// box behind a firewall): Codex's own last list, from its
 		// models_cache.json, stands in. With none of it, the file stays
-		// as it was rather than hold magpie's models alone.
+		// as it was rather than hold eipgam's models alone.
 		if !revoked && len(own) == 0 {
 			return nil, false
 		}

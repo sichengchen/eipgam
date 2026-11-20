@@ -12,7 +12,7 @@ package gateway
 //
 // answered with data.image_base64 (or data.image_urls), metadata's
 // success_count and failed_count (those blocked as unsafe), and base_resp
-// {status_code, status_msg}, 0 when it went well. magpie sent image-01 to
+// {status_code, status_msg}, 0 when it went well. eipgam sent image-01 to
 // chat completions, whose answer was "invalid params, unknown model
 // 'image-01' (2013)" (rocbomb123 on X, minimax-cn).
 
@@ -27,8 +27,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // minimaxDrawModels are the image models every MiniMax API key draws with.

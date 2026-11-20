@@ -33,10 +33,10 @@ package provider
 // other.
 //
 // The cap reads the vendor's own count of the window, so what the account
-// spent outside magpie (the vendor's app, another machine) counts toward
-// it as the vendor reports it; magpie can only hold back its own requests.
+// spent outside eipgam (the vendor's app, another machine) counts toward
+// it as the vendor reports it; eipgam can only hold back its own requests.
 //
-// A key whose own windows magpie reads has the same cap (key_allowance.go),
+// A key whose own windows eipgam reads has the same cap (key_allowance.go),
 // set by the key's id: once a window is at or past it, routing goes on to
 // the provider's other keys and its fallbacks, and the key is back when the
 // window renews. A key whose windows aren't known (not read yet, or the
@@ -263,7 +263,7 @@ func SetWindowCaps(id, ref string, windows []string, cap int) error {
 		return err
 	}
 	if !p.TakesUsageCap() {
-		return fmt.Errorf("%s has keys with no usage windows magpie reads, not subscription accounts with windows to cap", p.Name)
+		return fmt.Errorf("%s has keys with no usage windows eipgam reads, not subscription accounts with windows to cap", p.Name)
 	}
 	r, ok := p.accountRef(ref)
 	if !ok {
@@ -318,7 +318,7 @@ func SetWindowAmount(id, ref string, windows []string, amount float64) error {
 		return err
 	}
 	if !p.TakesUsageCap() {
-		return fmt.Errorf("%s has keys with no usage windows magpie reads, not subscription accounts with windows to cap", p.Name)
+		return fmt.Errorf("%s has keys with no usage windows eipgam reads, not subscription accounts with windows to cap", p.Name)
 	}
 	r, ok := p.accountRef(ref)
 	if !ok {
@@ -396,7 +396,7 @@ func SetAccountCap(id, ref string, cap int) error {
 		return err
 	}
 	if !p.TakesUsageCap() {
-		return fmt.Errorf("%s has keys with no usage windows magpie reads, not subscription accounts with windows to cap", p.Name)
+		return fmt.Errorf("%s has keys with no usage windows eipgam reads, not subscription accounts with windows to cap", p.Name)
 	}
 	r, ok := p.accountRef(ref)
 	if !ok {

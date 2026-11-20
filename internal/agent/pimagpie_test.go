@@ -6,13 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// With the pi-magpie extension installed, magpie's own providers.magpie
-// block in models.json is taken out (a copy kept), the user's other
-// providers stay, and a block that is not magpie's stays too.
-func TestPiMagpieExtensionTakesOverTheBlock(t *testing.T) {
+func TestPiKeepsBothProviderIDsWithMagpieExtension(t *testing.T) {
 	home := syncHome(t)
 	dir := filepath.Join(home, ".pi", "agent")
 	os.MkdirAll(dir, 0o755)
@@ -23,34 +21,28 @@ func TestPiMagpieExtensionTakesOverTheBlock(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "p", Name: "P", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m"}}); err != nil {
 		t.Fatal(err)
 	}
-	// plain Pi: the block is written
-	if err := pi(home).Field("model").Set("magpie/p/m"); err != nil {
+	if err := pi(home).Field("model").Set("eipgam/p/m"); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(readFile(models), `"magpie"`) {
-		t.Fatalf("without the extension the block is written: %s", readFile(models))
+	if !strings.Contains(readFile(models), `"eipgam"`) {
+		t.Fatalf("eipgam provider is missing: %s", readFile(models))
 	}
-	// the extension installed: the next sync drops it
-	os.WriteFile(settings, []byte(`{"packages":["npm:pi-magpie"],"defaultProvider":"magpie"}`), 0o644)
+	if err := edit.SetJSON(models, edit.KV{Path: "providers.magpie", Value: map[string]any{"baseUrl": "http://other.example/v1"}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(settings, []byte(`{"packages":["npm:pi-magpie"],"defaultProvider":"eipgam"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	if err := pi(home).Sync(); err != nil {
 		t.Fatal(err)
 	}
 	got := readFile(models)
-	if strings.Contains(got, `"magpie"`) || !strings.Contains(got, `"mine"`) {
-		t.Fatalf("block not dropped or mine lost: %s", got)
-	}
-	if _, err := os.Stat(models + ".before-pi-magpie"); err != nil {
-		t.Fatalf("no backup: %v", err)
+	for _, name := range []string{`"eipgam"`, `"magpie"`, `"mine"`} {
+		if !strings.Contains(got, name) {
+			t.Fatalf("%s provider is missing: %s", name, got)
+		}
 	}
 	if msg := pi(home).Check(); msg != "" {
 		t.Fatalf("check: %s", msg)
-	}
-	// a block the user wrote (another address) is left alone
-	os.WriteFile(models, []byte(`{"providers":{"magpie":{"baseUrl":"http://example.com/v1","apiKey":"theirs"}}}`), 0o644)
-	if err := pi(home).Sync(); err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(readFile(models), "example.com") {
-		t.Fatalf("user's block removed: %s", readFile(models))
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/yetone/magpie/internal/stats"
+	"github.com/sichengchen/eipgam/internal/stats"
 )
 
 // Discover's counts, and the Library market's servers', are asked once

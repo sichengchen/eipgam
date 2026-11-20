@@ -7,17 +7,17 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // maomao_00001 on Discord: in the Codex app, a relay's GPT model offered
 // low, medium and high alone, none of the levels above. A relay names a
 // known model as OpenAI's own list does, by a dated snapshot
 // (gpt-6.1-sol-2026-09-29), or renames it (codex-gpt-6.1-sol, a tag in
-// brackets, one the user said is gpt-6.1-sol in magpie): each is offered
-// that model's levels in magpie-models.json, Ultra on one Codex offers it
+// brackets, one the user said is gpt-6.1-sol in eipgam): each is offered
+// that model's levels in eipgam-models.json, Ultra on one Codex offers it
 // on. A model nothing knows keeps low, medium and high, and another
 // vendor's model and a model that stops at max keep their own.
 func TestCodexCatalogRelaysKnownModelsLevels(t *testing.T) {
@@ -52,7 +52,7 @@ func TestCodexCatalogRelaysKnownModelsLevels(t *testing.T) {
 			} `json:"supported_reasoning_levels"`
 		} `json:"models"`
 	}
-	raw := readFile(filepath.Join(home, ".codex", "magpie-models.json"))
+	raw := readFile(filepath.Join(home, ".codex", "eipgam-models.json"))
 	if err := json.Unmarshal([]byte(raw), &got); err != nil {
 		t.Fatalf("%v: %s", err, raw)
 	}
@@ -86,6 +86,6 @@ func TestCodexCatalogRelaysKnownModelsLevels(t *testing.T) {
 		}
 	}
 	if len(seen) != len(want) {
-		t.Errorf("%d of %d of the relay's models in magpie-models.json: %s", len(seen), len(want), raw)
+		t.Errorf("%d of %d of the relay's models in eipgam-models.json: %s", len(seen), len(want), raw)
 	}
 }

@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/agentplug"
 )
 
-// agyLaunchDesc is agent-agy's launch: the gateway in env, magpie's own
+// agyLaunchDesc is agent-agy's launch: the gateway in env, eipgam's own
 // settings file through --settings, and remote-control as agy is.
 func agyLaunchDesc() agentplug.Desc {
-	return agentplug.Desc{ID: "agy", Bin: "agy", Format: "json", Model: "model", Prefix: "magpie/",
+	return agentplug.Desc{ID: "agy", Bin: "agy", Format: "json", Model: "model", Prefix: "eipgam/",
 		Launch: &agentplug.Launch{Env: map[string]string{"GEMINI_API_KEY": "{key}"}, Model: "--model",
 			Args: map[string]string{"--settings": "{config}"}, Plain: []string{"remote-control", "--remote-control", "-remote-control"}}}
 }
@@ -27,13 +27,13 @@ func TestPluggedDistroFunctionArgsAndPlain(t *testing.T) {
 		t.Skip("the distro's shells")
 	}
 	dir := t.TempDir()
-	cfg := filepath.Join(dir, "magpie settings.json")
-	writeFile(t, cfg, `{"model": "magpie/relay/glm"}`)
+	cfg := filepath.Join(dir, "eipgam settings.json")
+	writeFile(t, cfg, `{"model": "eipgam/relay/glm"}`)
 	bin := t.TempDir()
 	writeFile(t, filepath.Join(bin, "agy"), "#!/bin/sh\necho \"key=$GEMINI_API_KEY args=$*\"\n")
 	os.Chmod(filepath.Join(bin, "agy"), 0o755)
 	l := newLaunch(agyLaunchDesc(), cfg)
-	read := modelSed("json", "model", "magpie/")
+	read := modelSed("json", "model", "eipgam/")
 	vars := l.vars("http://gw", "k1")
 	for _, sh := range []string{"bash", "zsh", "fish"} {
 		path, err := exec.LookPath(sh)
@@ -59,7 +59,7 @@ func TestPluggedDistroFunctionArgsAndPlain(t *testing.T) {
 		}
 		on := "key=k1 args=--settings " + cfg + " "
 		for args, want := range map[string]string{
-			"-p hi":                  on + "--model magpie/relay/glm -p hi",
+			"-p hi":                  on + "--model eipgam/relay/glm -p hi",
 			"--model=own -p hi":      on + "--model=own -p hi",
 			"remote-control start":   "key= args=remote-control start",
 			"--remote-control":       "key= args=--remote-control",
@@ -69,17 +69,17 @@ func TestPluggedDistroFunctionArgsAndPlain(t *testing.T) {
 				t.Errorf("%s agy %s:\n got %s\nwant %s", sh, args, got, want)
 			}
 		}
-		// off magpie: as it is
+		// off eipgam: as it is
 		writeFile(t, cfg, `{"model": "gemini-3-pro"}`)
 		if got := run("-p hi"); got != "key= args=-p hi" {
-			t.Errorf("%s off magpie: %s", sh, got)
+			t.Errorf("%s off eipgam: %s", sh, got)
 		}
-		writeFile(t, cfg, `{"model": "magpie/relay/glm"}`)
+		writeFile(t, cfg, `{"model": "eipgam/relay/glm"}`)
 	}
 }
 
 // The PowerShell function starts the agent with launch.args from what
-// `magpie <id> env` prints (settings=…), and runs a plain argument as the
+// `eipgam <id> env` prints (settings=…), and runs a plain argument as the
 // agent is.
 func TestPluggedPowerShellFunctionArgsAndPlain(t *testing.T) {
 	ps, err := exec.LookPath("pwsh")
@@ -89,15 +89,15 @@ func TestPluggedPowerShellFunctionArgsAndPlain(t *testing.T) {
 		}
 	}
 	dir := t.TempDir()
-	cfg := filepath.Join(dir, "magpie settings.json")
+	cfg := filepath.Join(dir, "eipgam settings.json")
 	var prog string
 	if runtime.GOOS == "windows" {
-		prog = filepath.Join(dir, "magpie.cmd")
-		writeFile(t, prog, "@echo GEMINI_API_KEY=k1\r\n@echo settings="+cfg+"\r\n@echo model=magpie/relay/glm\r\n")
+		prog = filepath.Join(dir, "eipgam.cmd")
+		writeFile(t, prog, "@echo GEMINI_API_KEY=k1\r\n@echo settings="+cfg+"\r\n@echo model=eipgam/relay/glm\r\n")
 		writeFile(t, filepath.Join(dir, "agy.cmd"), "@echo key=%GEMINI_API_KEY% args=%*\r\n")
 	} else {
-		prog = filepath.Join(dir, "magpie")
-		writeFile(t, prog, "#!/bin/sh\necho GEMINI_API_KEY=k1\necho 'settings="+cfg+"'\necho model=magpie/relay/glm\n")
+		prog = filepath.Join(dir, "eipgam")
+		writeFile(t, prog, "#!/bin/sh\necho GEMINI_API_KEY=k1\necho 'settings="+cfg+"'\necho model=eipgam/relay/glm\n")
 		writeFile(t, filepath.Join(dir, "agy"), "#!/bin/sh\necho \"key=$GEMINI_API_KEY args=$*\"\n")
 		os.Chmod(prog, 0o755)
 		os.Chmod(filepath.Join(dir, "agy"), 0o755)
@@ -116,7 +116,7 @@ func TestPluggedPowerShellFunctionArgsAndPlain(t *testing.T) {
 		return strings.Join(strings.Fields(strings.ReplaceAll(string(out), `"`, "")), " ")
 	}
 	for args, want := range map[string]string{
-		"-p hi":                "key=k1 args=--settings " + cfg + " --model magpie/relay/glm -p hi",
+		"-p hi":                "key=k1 args=--settings " + cfg + " --model eipgam/relay/glm -p hi",
 		"--model=own -p hi":    "key=k1 args=--settings " + cfg + " --model=own -p hi",
 		"remote-control start": "key= args=remote-control start",
 		"--remote-control":     "key= args=--remote-control",

@@ -63,11 +63,11 @@ type KeyInfo struct {
 	UsageCap bool         `json:"usageCap,omitempty"`
 	CapHeld  *KeyCapState `json:"capHeld,omitempty"`
 	// Balance is the balance the user typed for it and what is left of
-	// it by magpie's count (key_balance_own.go); nil with none.
+	// it by eipgam's count (key_balance_own.go); nil with none.
 	Balance *BalanceEstimate `json:"balance,omitempty"`
 }
 
-// KeySpend is a key's spend cap as its row tells it: the cap, what magpie
+// KeySpend is a key's spend cap as its row tells it: the cap, what eipgam
 // counted spent in its period, when that renews (none for a cap in all),
 // and whether routing holds the key at it now.
 type KeySpend struct {
@@ -269,11 +269,11 @@ func SplitKeys(text string) []string {
 }
 
 // AllKeys is every key a provider holds, on or off, in the order its
-// list shows them, each once: what Copy all keys and `magpie provider
-// keys <id>` give, one a line, for another magpie's Paste several or
-// `magpie provider keys <id> add` to take (@emilochen on X: one
-// provider's keys from this computer to a magpie in the cloud). Only
-// the keys go: their names, protocols and plans are this magpie's.
+// list shows them, each once: what Copy all keys and `eipgam provider
+// keys <id>` give, one a line, for another eipgam's Paste several or
+// `eipgam provider keys <id> add` to take (@emilochen on X: one
+// provider's keys from this computer to a eipgam in the cloud). Only
+// the keys go: their names, protocols and plans are this eipgam's.
 // A signed-in account has none to give.
 func AllKeys(id string) ([]string, error) {
 	p, err := Find(id)

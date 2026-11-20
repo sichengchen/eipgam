@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // EastonXvii on X: a ChatGPT account can be kept "access token only", so
-// magpie never renews its sign-in and another computer signed in to it
+// eipgam never renews its sign-in and another computer signed in to it
 // stays signed in. The import box offers it for ChatGPT and says the
 // source stays signed in; the Import posts it. A saved account that isn't
 // the one Codex is on offers it under ⋯ and posts login/access-only; one
-// kept so says "magpie only" in place of Use, and once its token has run
+// kept so says "eipgam only" in place of Use, and once its token has run
 // out, "Access expired" with Import again, which opens the import with it
 // ticked. In English and Chinese, Chromium and WebKit, every string in
 // every language.
@@ -16,7 +16,7 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const file = '{"auth_mode":"chatgpt","tokens":{"access_token":"a","id_token":"i"}}';
-const lapse = "kept's access token has expired, and it is kept access token only, so magpie doesn't renew it — import it again, or sign in to it again";
+const lapse = "kept's access token has expired, and it is kept access token only, so eipgam doesn't renew it — import it again, or sign in to it again";
 const account = () => ({
   id: "codex", name: "ChatGPT", icon: "openai", chat: "", responses: "", anthropic: "", catalog: "",
   models: [{ id: "gpt-6", name: "GPT-6", on: true }], agents: [], fallback: [], headers: {}, keyList: [],
@@ -55,8 +55,8 @@ function serve(lang, posted) {
 
 const strings = [
   "Access expired", "Import again", "Access token only",
-  "Kept access token only: requests through magpie use it until it expires; Codex itself isn't signed in to it, as Codex would renew it",
-  "magpie never renews this sign-in, so another computer signed in to it stays signed in. Once its access token expires, import it again.",
+  "Kept access token only: requests through eipgam use it until it expires; Codex itself isn't signed in to it, as Codex would renew it",
+  "eipgam never renews this sign-in, so another computer signed in to it stays signed in. Once its access token expires, import it again.",
   "Each account is kept with the file's access token and never renewed, so the tool it came from stays signed in. Once that token expires, import it again.",
 ];
 
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posted));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "ChatGPT" }).click();
       await page.locator(".editor .acc").first().waitFor();
       const T = (s) => page.evaluate((s) => t(s), s);
@@ -116,9 +116,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (let i = 0; i < 100 && !posted.length; i++) await page.waitForTimeout(20);
       assert.deepEqual(posted[0], ["/api/login/access-only", { agent: "codex", user: "spare@example.com" }]);
 
-      // kept so: "magpie only", never Use, and its tick shows on its line
+      // kept so: "eipgam only", never Use, and its tick shows on its line
       const kept = row("kept@example.com");
-      assert.equal(await kept.locator(".acc-line .using").textContent(), await T("magpie only"));
+      assert.equal(await kept.locator(".acc-line .using").textContent(), await T("eipgam only"));
       assert.equal(await kept.locator(".acc-line button.text:not(.quiet)").count(), 0, "no Use");
       assert.equal(await kept.locator(".acc-line .acc-access-only input").isChecked(), true);
 

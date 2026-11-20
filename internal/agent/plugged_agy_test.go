@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // agyPluginSrc is @magpie-community/agent-agy's agy.agent.js, as published
@@ -22,17 +22,17 @@ const agyPluginSrc = `
 // ~/.gemini/antigravity-cli/settings.json, and the models it can pick in
 // customModelsConfig.customModels, each {apiProvider, modelName}. It takes
 // the address and key of a Gemini endpoint only from how it is started,
-// so magpie starts it: the function agy magpie puts in your shells runs
-// ` + "`" + `magpie agy run` + "`" + `, which gives agy GEMINI_API_KEY, GOOGLE_GEMINI_BASE_URL,
-// --settings magpie-settings.json and --model while its model is one of
-// magpie's.
+// so eipgam starts it: the function agy eipgam puts in your shells runs
+// ` + "`" + `eipgam agy run` + "`" + `, which gives agy GEMINI_API_KEY, GOOGLE_GEMINI_BASE_URL,
+// --settings eipgam-settings.json and --model while its model is one of
+// eipgam's.
 //
-// magpie writes only magpie-settings.json, a file of its own beside
+// eipgam writes only eipgam-settings.json, a file of its own beside
 // settings.json, which agy reads for the one session started with
 // --settings: "modelProvider": "gemini" in settings.json would make every
 // agy an API-key session, with no Google account and so no remote
 // control. agy takes customModels whole from that file, so the user's own
-// custom models are carried into it beside magpie's. remote-control runs
+// custom models are carried into it beside eipgam's. remote-control runs
 // as agy is, on the user's sign-in.
 export const agent = {
   id: "agy",
@@ -41,11 +41,11 @@ export const agent = {
   aliases: ["antigravity-cli"],
   bin: "agy",
   dir: "~/.gemini/antigravity-cli",
-  config: "~/.gemini/antigravity-cli/magpie-settings.json",
+  config: "~/.gemini/antigravity-cli/eipgam-settings.json",
   base: "~/.gemini/antigravity-cli/settings.json",
   format: "json",
   model: "model",
-  prefix: "magpie/",
+  prefix: "eipgam/",
   launch: {
     env: { GEMINI_API_KEY: "{key}", GOOGLE_GEMINI_BASE_URL: "{url}" },
     model: "--model",
@@ -62,24 +62,24 @@ const GEMINI = "API_PROVIDER_GOOGLE_GEMINI"
 const ownModels = (base) => {
   const out = {}
   for (const [k, v] of Object.entries(base?.customModelsConfig?.customModels ?? {})) {
-    if (!k.startsWith("magpie/")) out[k] = v
+    if (!k.startsWith("eipgam/")) out[k] = v
   }
   return out
 }
 
 export function connect({ models, base }) {
   const custom = ownModels(base)
-  for (const m of models) custom[` + "`" + `magpie/${m.id}` + "`" + `] = { apiProvider: GEMINI, modelName: m.id }
+  for (const m of models) custom[` + "`" + `eipgam/${m.id}` + "`" + `] = { apiProvider: GEMINI, modelName: m.id }
   return { modelProvider: "gemini", "customModelsConfig.customModels": custom }
 }
 
 // the user's own models, which go to their provider rather than through
-// magpie, and the one agy is on when it isn't listed
+// eipgam, and the one agy is on when it isn't listed
 export function own({ base, model }) {
   const custom = base?.customModelsConfig?.customModels ?? {}
   const out = []
   for (const [k, v] of Object.entries(custom)) {
-    if (k.startsWith("magpie/")) continue
+    if (k.startsWith("eipgam/")) continue
     const p = String(v?.apiProvider ?? "")
     const direct = p.includes("ANTHROPIC") ? "Anthropic" : p.includes("OPENAI") ? "OpenAI" : "Google"
     out.push({ value: k, model: String(v?.modelName ?? k), direct })
@@ -110,7 +110,7 @@ func agyPluginHome(t *testing.T, settings string) (home, path, mine string, rcs 
 	return
 }
 
-// overOf is magpie's own settings file beside settings.json at path.
+// overOf is eipgam's own settings file beside settings.json at path.
 func overOf(path string) string { return filepath.Join(filepath.Dir(path), agyOverride) }
 
 func fileGone(t *testing.T, path string) {
@@ -151,8 +151,8 @@ func profilesAre(t *testing.T, home, mine string, rcs []string) {
 
 // agy as the agent-agy plugin does what the built-in did: one agy in the
 // list, found by its alias too; the user's own custom models offered as
-// going to their provider; magpie's model written with modelProvider and
-// magpie's custom models beside the user's; the function agy in every
+// going to their provider; eipgam's model written with modelProvider and
+// eipgam's custom models beside the user's; the function agy in every
 // shell, which starts it with the variables and --model; and its own model
 // again, or Disconnect, puts settings.json and the profiles back as they
 // were.
@@ -185,17 +185,17 @@ func TestAgyPlugin(t *testing.T) {
 	for _, o := range opts {
 		direct[o.Value] = o.Direct
 	}
-	if direct["my-claude"] != "Anthropic" || direct["gemini-3-pro"] != "Google" || !containsOption(opts, "magpie/deepseek/pro") {
+	if direct["my-claude"] != "Anthropic" || direct["gemini-3-pro"] != "Google" || !containsOption(opts, "eipgam/deepseek/pro") {
 		t.Fatalf("options: %+v", opts)
 	}
 	if a.Field("effort") == nil {
 		t.Fatal("no effort field")
 	}
 
-	if err := f.Set("magpie/deepseek/pro"); err != nil {
+	if err := f.Set("eipgam/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
-	// settings.json is left as it was; magpie's file has the model, the
+	// settings.json is left as it was; eipgam's file has the model, the
 	// provider and every custom model, the user's own carried in
 	if c := settingsOf(t, path); !reflect.DeepEqual(c, want) {
 		t.Fatalf("settings.json: %v", c)
@@ -203,16 +203,16 @@ func TestAgyPlugin(t *testing.T) {
 	over := overOf(path)
 	c := settingsOf(t, over)
 	custom, _ := c["customModelsConfig"].(map[string]any)["customModels"].(map[string]any)
-	if c["model"] != "magpie/deepseek/pro" || c["modelProvider"] != "gemini" || custom["my-claude"] == nil ||
-		!reflect.DeepEqual(custom["magpie/deepseek/pro"], map[string]any{"apiProvider": "API_PROVIDER_GOOGLE_GEMINI", "modelName": "deepseek/pro"}) ||
-		custom["magpie/deepseek/flash"] == nil {
+	if c["model"] != "eipgam/deepseek/pro" || c["modelProvider"] != "gemini" || custom["my-claude"] == nil ||
+		!reflect.DeepEqual(custom["eipgam/deepseek/pro"], map[string]any{"apiProvider": "API_PROVIDER_GOOGLE_GEMINI", "modelName": "deepseek/pro"}) ||
+		custom["eipgam/deepseek/flash"] == nil {
 		t.Fatalf("wired: %v", c)
 	}
-	if f.Get() != "magpie/deepseek/pro" || a.Check() != "" {
+	if f.Get() != "eipgam/deepseek/pro" || a.Check() != "" {
 		t.Fatalf("get %q, check %q", f.Get(), a.Check())
 	}
 	s := a.Start()
-	if s.Bin != "agy" || s.Flag != "--model" || s.Model != "magpie/deepseek/pro" ||
+	if s.Bin != "agy" || s.Flag != "--model" || s.Model != "eipgam/deepseek/pro" ||
 		!slices.Equal(s.Env, []string{"GEMINI_API_KEY=" + gateway.TokenFor("agy"), "GOOGLE_GEMINI_BASE_URL=" + gateway.URL()}) ||
 		!slices.Equal(s.Args, []string{"--settings", over}) {
 		t.Fatalf("start: %+v", s)
@@ -241,25 +241,25 @@ func TestAgyPlugin(t *testing.T) {
 	}
 	for _, p := range in {
 		b, _ := os.ReadFile(p)
-		if s := string(b); !strings.HasPrefix(s, mine+"\n# >>> magpie agy >>>\n"+agyPosixHead) || !strings.Contains(s, ` agy run "$@"; else command agy "$@"; fi`) {
+		if s := string(b); !strings.HasPrefix(s, mine+"\n# >>> eipgam agy >>>\n"+agyPosixHead) || !strings.Contains(s, ` agy run "$@"; else command agy "$@"; fi`) {
 			t.Fatalf("%s:\n%s", p, s)
 		}
 	}
-	if a.Typed() != "agy" || !strings.HasPrefix(a.Notice(), "Type agy in a new terminal: magpie added it to ~/") {
+	if a.Typed() != "agy" || !strings.HasPrefix(a.Notice(), "Type agy in a new terminal: eipgam added it to ~/") {
 		t.Fatalf("typed %q, notice %q", a.Typed(), a.Notice())
 	}
-	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + " GOOGLE_GEMINI_BASE_URL=" + gateway.URL() + " agy --settings " + posixQuote(over) + " --model 'magpie/deepseek/pro'"; a.Launch() != want {
+	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + " GOOGLE_GEMINI_BASE_URL=" + gateway.URL() + " agy --settings " + posixQuote(over) + " --model 'eipgam/deepseek/pro'"; a.Launch() != want {
 		t.Fatalf("launch %q, want %q", a.Launch(), want)
 	}
-	// another of magpie's models
-	if err := f.Set("magpie/deepseek/flash"); err != nil {
+	// another of eipgam's models
+	if err := f.Set("eipgam/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
-	if a.Start().Model != "magpie/deepseek/flash" {
+	if a.Start().Model != "eipgam/deepseek/flash" {
 		t.Fatal("flash")
 	}
 
-	// its own again: magpie's file gone, settings.json as it was
+	// its own again: eipgam's file gone, settings.json as it was
 	if err := f.Set("gemini-3-pro"); err != nil {
 		t.Fatal(err)
 	}
@@ -268,11 +268,11 @@ func TestAgyPlugin(t *testing.T) {
 		t.Fatalf("own: %v", c)
 	}
 	if f.Get() != "gemini-3-pro" {
-		t.Fatalf("get off magpie %q", f.Get())
+		t.Fatalf("get off eipgam %q", f.Get())
 	}
 	profilesAre(t, home, mine, rcs)
 	if s := a.Start(); s.Model != "" || s.Env != nil || s.Args != nil {
-		t.Fatalf("start off magpie: %+v", s)
+		t.Fatalf("start off eipgam: %+v", s)
 	}
 	// another of the user's own, written into settings.json
 	if err := f.Set("my-claude"); err != nil {
@@ -284,8 +284,8 @@ func TestAgyPlugin(t *testing.T) {
 	fileGone(t, over)
 	os.WriteFile(path, []byte(before), 0o644)
 
-	// Disconnect: magpie's file gone, settings.json untouched
-	if err := f.Set("magpie/deepseek/pro"); err != nil {
+	// Disconnect: eipgam's file gone, settings.json untouched
+	if err := f.Set("eipgam/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Unwire(); err != nil {
@@ -299,8 +299,8 @@ func TestAgyPlugin(t *testing.T) {
 }
 
 // A user the built-in agy wired keeps their setup when agy moves onto the
-// plugin: the plugin's agy reads as connected on magpie's model, started
-// with magpie's file, and its own model again takes magpie's file and the
+// plugin: the plugin's agy reads as connected on eipgam's model, started
+// with eipgam's file, and its own model again takes eipgam's file and the
 // function away, settings.json as the user had it. With the plugin gone,
 // the built-in is agy again.
 func TestAgyHandedToPlugin(t *testing.T) {
@@ -313,7 +313,7 @@ func TestAgyHandedToPlugin(t *testing.T) {
 	if err != nil || b.Plugin != "" {
 		t.Fatalf("built-in: %+v %v", b, err)
 	}
-	if err := b.Apply("model", "magpie/deepseek/pro"); err != nil {
+	if err := b.Apply("model", "eipgam/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if len(update.ShellFunctionIn("agy")) == 0 {
@@ -326,7 +326,7 @@ func TestAgyHandedToPlugin(t *testing.T) {
 		t.Fatalf("moved: %+v %v", a, err)
 	}
 	f := a.Field("model")
-	if f.Get() != "magpie/deepseek/pro" || a.Check() != "" || a.Start().Model != "magpie/deepseek/pro" {
+	if f.Get() != "eipgam/deepseek/pro" || a.Check() != "" || a.Start().Model != "eipgam/deepseek/pro" {
 		t.Fatalf("handed over: get %q, check %q", f.Get(), a.Check())
 	}
 	if err := a.Sync(); err != nil {
@@ -352,10 +352,10 @@ func TestAgyHandedToPlugin(t *testing.T) {
 }
 
 // A settings.json an older built-in wired (model, modelProvider and
-// magpie's custom models in it, the user's own stashed) is given back when
-// the plugin takes agy over, and magpie's model moves into magpie's file.
+// eipgam's custom models in it, the user's own stashed) is given back when
+// the plugin takes agy over, and eipgam's model moves into eipgam's file.
 func TestAgyOldWiringHandedToPlugin(t *testing.T) {
-	const old = `{"model": "magpie/deepseek/pro", "modelProvider": "gemini", "theme": "dark", "customModelsConfig": {"customModels": {"mine": {"apiProvider": "API_PROVIDER_ANTHROPIC", "modelName": "claude-sonnet-4-5"}, "magpie/deepseek/pro": {"apiProvider": "API_PROVIDER_GOOGLE_GEMINI", "modelName": "deepseek/pro"}}}}`
+	const old = `{"model": "eipgam/deepseek/pro", "modelProvider": "gemini", "theme": "dark", "customModelsConfig": {"customModels": {"mine": {"apiProvider": "API_PROVIDER_ANTHROPIC", "modelName": "claude-sonnet-4-5"}, "eipgam/deepseek/pro": {"apiProvider": "API_PROVIDER_GOOGLE_GEMINI", "modelName": "deepseek/pro"}}}}`
 	home, path, mine, rcs := agyPluginHome(t, old)
 	stash(map[string]string{"agy:" + path + ":model": "gemini-3-pro", "agy:" + path + ":modelProvider": "vertex"})
 	moveAgy(t, home)
@@ -364,7 +364,7 @@ func TestAgyOldWiringHandedToPlugin(t *testing.T) {
 		t.Fatal("not moved")
 	}
 	f := a.Field("model")
-	if f.Get() != "magpie/deepseek/pro" || a.Check() != "" {
+	if f.Get() != "eipgam/deepseek/pro" || a.Check() != "" {
 		t.Fatalf("handed over: get %q, check %q", f.Get(), a.Check())
 	}
 	want := map[string]any{"model": "gemini-3-pro", "modelProvider": "vertex", "theme": "dark", "customModelsConfig": map[string]any{"customModels": map[string]any{"mine": map[string]any{"apiProvider": "API_PROVIDER_ANTHROPIC", "modelName": "claude-sonnet-4-5"}}}}
@@ -373,8 +373,8 @@ func TestAgyOldWiringHandedToPlugin(t *testing.T) {
 	}
 	c := settingsOf(t, overOf(path))
 	custom, _ := c["customModelsConfig"].(map[string]any)["customModels"].(map[string]any)
-	if c["model"] != "magpie/deepseek/pro" || c["modelProvider"] != "gemini" || custom["mine"] == nil {
-		t.Fatalf("magpie's file: %v", c)
+	if c["model"] != "eipgam/deepseek/pro" || c["modelProvider"] != "gemini" || custom["mine"] == nil {
+		t.Fatalf("eipgam's file: %v", c)
 	}
 	if err := a.Unwire(); err != nil {
 		t.Fatal(err)
@@ -387,11 +387,11 @@ func TestAgyOldWiringHandedToPlugin(t *testing.T) {
 }
 
 // A user the built-in wired with no settings.json of their own: Disconnect
-// on the plugin takes magpie's file away and makes no settings.json.
+// on the plugin takes eipgam's file away and makes no settings.json.
 func TestAgyHandedOverUnwire(t *testing.T) {
 	home, path, mine, rcs := agyPluginHome(t, "")
 	b, _ := Find("agy")
-	if err := b.Apply("model", "magpie/deepseek/pro"); err != nil {
+	if err := b.Apply("model", "eipgam/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	moveAgy(t, home)

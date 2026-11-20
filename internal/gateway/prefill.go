@@ -3,7 +3,7 @@ package gateway
 import (
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A model that won't go on from a conversation ending with the
@@ -17,7 +17,7 @@ import (
 // the refusal is remembered for that model on that provider and API, in
 // unfit, and nowhere else.
 //
-// Such a conversation reaches the upstream two ways. magpie's own
+// Such a conversation reaches the upstream two ways. eipgam's own
 // continuation of a reply cut mid-way (continuation.go) is not asked of
 // that model again: the reply ends with the cut's own error, as it did
 // before continuations, not with the refusal. A conversation the client

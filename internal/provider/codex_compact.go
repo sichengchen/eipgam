@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// CodexCompactModel is the model Codex's compactions made by magpie are
+// CodexCompactModel is the model Codex's compactions made by eipgam are
 // put on, "" for the session's own. A provider renamed since it was set is
 // named by its new id (RenamedRef).
 func CodexCompactModel() string {
@@ -19,13 +19,13 @@ func CodexCompactModel() string {
 }
 
 // SetCodexCompactModel puts Codex's compactions on id, a model or routing
-// group of magpie's (provider/model, group/<id>); "" leaves each on the
-// session's model. One magpie doesn't serve now is kept all the same: the
+// group of eipgam's (provider/model, group/<id>); "" leaves each on the
+// session's model. One eipgam doesn't serve now is kept all the same: the
 // gateway leaves compactions where they are until it is served.
 func SetCodexCompactModel(id string) error {
 	id = strings.TrimSpace(id)
 	if pid, model, ok := strings.Cut(id, "/"); id != "" && (!ok || pid == "" || model == "") {
-		return fmt.Errorf("Codex's compaction can't be put on %q: pick one of magpie's models (provider/model)", id)
+		return fmt.Errorf("Codex's compaction can't be put on %q: pick one of eipgam's models (provider/model)", id)
 	}
 	s := settings.Load()
 	if s.CodexCompactModel == id {

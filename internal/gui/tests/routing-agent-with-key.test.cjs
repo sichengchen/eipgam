@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A request from an agent magpie knows, sent with a named gateway key, is
+// A request from an agent eipgam knows, sent with a named gateway key, is
 // drawn with the agent's icon and reads "agent · key" (Yayoi_no_yume on X:
-// DimCode on another computer, calling a Docker magpie by a key named
-// "Magpie", read as the cube and "Magpie" alone). A script's key keeps the
+// DimCode on another computer, calling a Docker eipgam by a key named
+// "eipgam", read as the cube and "eipgam" alone). A script's key keeps the
 // key's name alone, as before (acezan). The request's story names the
 // agent, and the tray panel's stage and rows read the same. In every
 // language, at 1100 and 420; the API is faked, and the icon is the file
@@ -24,11 +24,11 @@ function fixture() {
     group: { name: "Step 5 Preview", members: [] },
     done: false, status: 0 });
   return [
-    req(1, "dimcode", { id: "k-magpie", name: "Magpie" }),
+    req(1, "dimcode", { id: "k-eipgam", name: "eipgam" }),
     req(2, "Python-urllib", { id: "k-nightly", name: "nightly" }),
   ];
 }
-const keys = [{ id: "k-magpie", name: "Magpie" }, { id: "k-nightly", name: "nightly" }];
+const keys = [{ id: "k-eipgam", name: "eipgam" }, { id: "k-nightly", name: "nightly" }];
 const clients = [{ id: "claude", name: "Claude Code", icon: "claude-color" }, { id: "dimcode", name: "DimCode", icon: "dim-color" }];
 
 function serve(lang) {
@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.waitForFunction(() => document.querySelectorAll(".rt-src").length === 2);
         // the icon is drawn once its file has loaded
         await page.waitForFunction(() => [...document.querySelectorAll(".rt-src .ic img")].some((i) => i.complete && i.naturalWidth > 0));
@@ -78,8 +78,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const dim = nodes.find((n) => n.icon === "dim-color");
         assert(dim, "DimCode's node has its icon: " + JSON.stringify(nodes));
         assert(dim.loaded, "dim-color.svg is served");
-        assert.equal(dim.name, "DimCode · Magpie");
-        assert.match(dim.title, /^DimCode · Magpie\nauto\/step-5-preview/, "the agent once under the pointer");
+        assert.equal(dim.name, "DimCode · eipgam");
+        assert.match(dim.title, /^DimCode · eipgam\nauto\/step-5-preview/, "the agent once under the pointer");
         const script = nodes.find((n) => n !== dim);
         assert.equal(script.name, "nightly", "a script's key alone");
         assert.equal(script.icon, "generic");
@@ -109,20 +109,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const ctx = await browser.newContext({ viewport: { width: 360, height: 560 }, reducedMotion: "no-preference" });
-    await ctx.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "routing"); } catch {} });
+    await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "routing"); } catch {} });
     const page = await ctx.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve("en"));
-    await page.goto("http://magpie.test/?mode=panel");
+    await page.goto("http://eipgam.test/?mode=panel");
     await page.locator("#panelRouting .pr-req").nth(1).waitFor();
     const who = await page.locator("#panelRouting .pr-who").allTextContents();
-    assert.deepEqual(who.slice().sort(), ["DimCode · Magpie", "nightly"].sort(), JSON.stringify(who));
+    assert.deepEqual(who.slice().sort(), ["DimCode · eipgam", "nightly"].sort(), JSON.stringify(who));
     await page.waitForFunction(() => document.querySelectorAll("#panelRouting .ps-ag").length === 2);
     const ag = await page.locator("#panelRouting .ps-ag").evaluateAll((es) => es.map((e) => [e.querySelector(".ps-name").textContent, e.querySelector(".ic")?.dataset.icon]));
-    assert.deepEqual(ag.slice().sort(), [["DimCode · Magpie", "dim-color"], ["nightly", "generic"]].sort(), JSON.stringify(ag));
+    assert.deepEqual(ag.slice().sort(), [["DimCode · eipgam", "dim-color"], ["nightly", "generic"]].sort(), JSON.stringify(ag));
     assert.deepEqual(errors, []);
   });
 }

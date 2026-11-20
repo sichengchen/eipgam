@@ -12,13 +12,13 @@ import (
 // came and Claude Desktop asked again with it — is neither a failure nor an
 // answer. The Requests card's failed count, its Failed filter and the CSV's
 // error column leave it out, it is counted apart, and no first-token time
-// or speed is read from it, as before. magpie's own limit running out on a
+// or speed is read from it, as before. eipgam's own limit running out on a
 // request it asked of itself is logged 499 too, and stays a failure (#2318).
 func TestAgentCanceledIsNoFailure(t *testing.T) {
 	now := time.Now()
 	canceled := Record{Time: now, Agent: "claude-desktop", Model: "m", Status: StatusCanceled, Error: AgentCanceled, Millis: 25000, TTFT: 1300, RouteID: 1}
 	afterTry := Record{Time: now, Agent: "claude-desktop", Model: "m", Status: StatusCanceled, Error: AgentCanceled, Tries: 2, Millis: 9000, RouteID: 2}
-	sideLimit := Record{Time: now, Agent: "claude-desktop", Model: "m", Status: StatusCanceled, Error: "magpie stopped waiting: its search had no answer in 2m0s", RouteID: 3}
+	sideLimit := Record{Time: now, Agent: "claude-desktop", Model: "m", Status: StatusCanceled, Error: "eipgam stopped waiting: its search had no answer in 2m0s", RouteID: 3}
 	refused := Record{Time: now, Agent: "claude-desktop", Model: "m", Status: 400, Error: "Copilot: unsupported beta header(s): tool-search-tool-2025-10-19", RouteID: 4}
 	answered := Record{Time: now, Agent: "claude-desktop", Model: "m", Status: 200, TTFT: 900, FirstText: 950, Millis: 5000, Output: 400, RouteID: 5}
 	// a record logged with its error type keeps being the agent's cancel
@@ -31,7 +31,7 @@ func TestAgentCanceledIsNoFailure(t *testing.T) {
 	}{
 		{"canceled", canceled, false, true, false, false, false},
 		{"canceled after a failed try", afterTry, false, true, false, false, false},
-		{"magpie's own limit", sideLimit, true, false, false, true, false},
+		{"eipgam's own limit", sideLimit, true, false, false, true, false},
 		{"refused", refused, true, false, false, true, false},
 		{"answered", answered, false, false, true, false, false},
 		{"canceled, by its error type", typed, false, true, false, false, false},
@@ -51,7 +51,7 @@ func TestAgentCanceledIsNoFailure(t *testing.T) {
 		rows = append(rows, Row{Record: r})
 	}
 	if tot.Calls != 5 || tot.Errors != 2 || tot.Canceled != 2 || tot.Retried != 0 {
-		t.Errorf("calls %d errors %d canceled %d retried %d, want 5, 2 (the refusal and magpie's own limit), 2, 0", tot.Calls, tot.Errors, tot.Canceled, tot.Retried)
+		t.Errorf("calls %d errors %d canceled %d retried %d, want 5, 2 (the refusal and eipgam's own limit), 2, 0", tot.Calls, tot.Errors, tot.Canceled, tot.Retried)
 	}
 	if tot.Timed != 1 {
 		t.Errorf("%d first-token times counted, want the answered one's only", tot.Timed)

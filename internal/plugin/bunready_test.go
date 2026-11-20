@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // heldBunReleases serves a Bun release whose zip (holding exe) is held
@@ -196,9 +196,9 @@ func TestHostAfterBunDownloadFailedSaysWhy(t *testing.T) {
 	}
 }
 
-// When the download fails, a Bun on PATH is taken when it is one magpie
+// When the download fails, a Bun on PATH is taken when it is one eipgam
 // would run (at least BunVersion, not set aside, passing its try), copied
-// in as magpie-bun; an older one is not.
+// in as eipgam-bun; an older one is not.
 func TestBunOnPathAfterDownloadFailed(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("the bun on PATH is a shell script")

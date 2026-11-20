@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 func TestLangOfEachLanguage(t *testing.T) {
@@ -69,7 +69,7 @@ func TestConversationLangReadsTheUsersWords(t *testing.T) {
 
 // tenacious_eagle_96548 on Discord: a Chinese conversation's loop is told
 // in Chinese, and every other language in its own, on every protocol;
-// the notice names neither magpie nor a quota, since it goes upstream with
+// the notice names neither eipgam nor a quota, since it goes upstream with
 // the next turn.
 func TestToolLoopNoticeInTheConversationsLanguage(t *testing.T) {
 	asks := map[string]struct{ ask, says string }{
@@ -82,7 +82,7 @@ func TestToolLoopNoticeInTheConversationsLanguage(t *testing.T) {
 	}
 	for lang, a := range asks {
 		f := toolLoopNotices[lang]
-		if strings.Contains(strings.ToLower(f), "magpie") || strings.Contains(strings.ToLower(f), "quota") || strings.Count(f, "%d") != 1 || strings.Count(f, "%s") != 1 {
+		if strings.Contains(strings.ToLower(f), "eipgam") || strings.Contains(strings.ToLower(f), "quota") || strings.Count(f, "%d") != 1 || strings.Count(f, "%s") != 1 {
 			t.Fatalf("%s notice: %q", lang, f)
 		}
 		for _, x := range toolLoopAsks {

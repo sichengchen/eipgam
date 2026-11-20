@@ -12,26 +12,26 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// JoinPagePath is the join page (EV_John_Liu on X): on a magpie shared on
+// JoinPagePath is the join page (EV_John_Liu on X): on a eipgam shared on
 // the network with a join password set (Settings → Network and sharing →
 // Join with a password), another computer opens <address>/join, types the
 // password and a name for itself, and gets a gateway key of its own, made
 // then and listed in Gateway keys under that name, where it is limited or
 // removed as any other key. The page then shows that key's setup for
-// Claude Code, Codex, another magpie or any OpenAI-compatible app, as the
+// Claude Code, Codex, another eipgam or any OpenAI-compatible app, as the
 // key page (/me) does: it is the same page.
 const JoinPagePath = "/join"
 
 // joinData is the join's own route: GET says whether joining is open,
 // POST {password, name} makes the key.
-const joinData = "/v1/magpie/join"
+const joinData = "/v1/eipgam/join"
 
 // joinPageOpen: r asks for the join page itself, the key page's bytes,
-// which lanGuard serves to another machine without a key while magpie is
+// which lanGuard serves to another machine without a key while eipgam is
 // shared.
 func joinPageOpen(r *http.Request) bool {
 	return r.URL.Path == JoinPagePath && r.URL.RawPath == "" && (r.Method == http.MethodGet || r.Method == http.MethodHead)
@@ -99,7 +99,7 @@ func (s *Server) joinOpen(w http.ResponseWriter, r *http.Request) {
 // joinRefusal: why a browser's join isn't one its own page sent, or "".
 // A browser's POST carries an Origin, which must be the page's own address
 // (the Host it called), at a name of this computer's (ownHost): an IP,
-// localhost, MAGPIE_PUBLIC_URL's or its own host name. So a page elsewhere
+// localhost, EIPGAM_PUBLIC_URL's or its own host name. So a page elsewhere
 // can't make keys through a visitor's browser, neither by its own Origin,
 // by Origin "null" from a sandboxed frame, at a localhost subdomain WebKit
 // asks the DNS for, nor by a name of its own rebound to this computer. A
@@ -110,7 +110,7 @@ func joinRefusal(r *http.Request) string {
 		return ""
 	}
 	if !ownHost(r.Host) {
-		return "open the join page at this computer's address (an IP, or MAGPIE_PUBLIC_URL's name), not " + r.Host
+		return "open the join page at this computer's address (an IP, or EIPGAM_PUBLIC_URL's name), not " + r.Host
 	}
 	origin := r.Header.Get("Origin")
 	if origin == "" || origin == "null" {
@@ -138,7 +138,7 @@ func (s *Server) joinKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !access.JoinOn() {
-		writeError(w, provider.Chat, http.StatusNotFound, "joining with a password is off on this magpie")
+		writeError(w, provider.Chat, http.StatusNotFound, "joining with a password is off on this eipgam")
 		return
 	}
 	if !local(r) {

@@ -44,9 +44,9 @@ package agent
 // the file doesn't have and remembers it in the stash; a key the user has
 // already written is theirs: one that already turns telemetry off is left
 // as it is, and one that keeps it on is never written over (off is
-// refused, naming it). On takes out only what magpie wrote, as magpie
+// refused, naming it). On takes out only what eipgam wrote, as eipgam
 // wrote it. Connecting or disconnecting the agent leaves it alone: it is
-// about the agent's vendor, not about magpie.
+// about the agent's vendor, not about eipgam.
 //
 // Only an agent on this computer has it: a WSL distro's file isn't read on
 // each look, which would start a stopped distro (#3896).
@@ -62,9 +62,9 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // TelemetryState is an agent's telemetry as its config has it.
@@ -96,7 +96,7 @@ type Telemetry struct {
 }
 
 // telemetryKey is one key of a switch: name as the file spells it (a
-// dotted path in JSON; "table.key" in TOML), value what magpie writes, off
+// dotted path in JSON; "table.key" in TOML), value what eipgam writes, off
 // whether a value the file has keeps telemetry off.
 type telemetryKey struct {
 	name  string
@@ -128,7 +128,7 @@ func anyValue(v any) bool {
 }
 
 // telemetrySwitch is the switch over keys in f; stashKey is where what
-// magpie wrote is kept.
+// eipgam wrote is kept.
 func telemetrySwitch(at place, f telemetryFile, stashKey string, keys ...telemetryKey) *Telemetry {
 	if at.spell != nil || at.cold {
 		return nil
@@ -194,7 +194,7 @@ func telemetrySwitch(at place, f telemetryFile, stashKey string, keys ...telemet
 					missing = append(missing, k)
 				case !k.off(v):
 					b, _ := json.Marshal(v)
-					return fmt.Errorf("%s sets %s to %s; magpie leaves a value of yours as it is (change it there)", at.native(f.path), k.name, b)
+					return fmt.Errorf("%s sets %s to %s; eipgam leaves a value of yours as it is (change it there)", at.native(f.path), k.name, b)
 				case !ours(k, v):
 					delete(mine, k.name) // the user's, as it is now
 				}
@@ -239,7 +239,7 @@ func telemetrySwitch(at place, f telemetryFile, stashKey string, keys ...telemet
 			return err
 		}
 		if st.Off {
-			return fmt.Errorf("%s turns it off itself (%s); magpie leaves a value of yours as it is (take it out there)", at.native(f.path), strings.Join(st.Own, ", "))
+			return fmt.Errorf("%s turns it off itself (%s); eipgam leaves a value of yours as it is (take it out there)", at.native(f.path), strings.Join(st.Own, ", "))
 		}
 		return nil
 	}
@@ -353,14 +353,14 @@ func codexTelemetry(at place, path string) *Telemetry {
 		set: func(k telemetryKey) error {
 			table, key, _ := strings.Cut(k.name, ".")
 			// written inline or as dotted keys, the table is the user's
-			// spelling, where a [analytics] of magpie's would define it
+			// spelling, where a [analytics] of eipgam's would define it
 			// twice
 			if doc, err := codexTopOf(path); err != nil {
 				return fmt.Errorf("%s: %w", path, err)
 			} else if t, err := edit.GetTOMLTable(path, table); err != nil {
 				return err
 			} else if t == nil && doc.Analytics != nil {
-				return fmt.Errorf("%s has %s written in a way magpie doesn't add to; set %s there", at.native(path), table, k.name)
+				return fmt.Errorf("%s has %s written in a way eipgam doesn't add to; set %s there", at.native(path), table, k.name)
 			}
 			return edit.SetTOMLKey(path, table, key, k.value)
 		},
@@ -399,8 +399,8 @@ func piTelemetry(at place, path string) *Telemetry {
 		telemetryKey{name: "enableInstallTelemetry", value: false, off: isFalse})
 }
 
-// ErrNoTelemetry: the agent has no telemetry switch magpie knows.
-var ErrNoTelemetry = errors.New("magpie knows no switch for this agent's telemetry")
+// ErrNoTelemetry: the agent has no telemetry switch eipgam knows.
+var ErrNoTelemetry = errors.New("eipgam knows no switch for this agent's telemetry")
 
 // SetTelemetry turns a's own telemetry off, or back to what it was.
 func (a *Agent) SetTelemetry(off bool) error {

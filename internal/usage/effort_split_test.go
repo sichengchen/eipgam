@@ -8,7 +8,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // Codex's effort before the last days is kept in effort-v1.json: a start

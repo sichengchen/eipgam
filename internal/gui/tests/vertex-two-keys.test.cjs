@@ -10,7 +10,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const save = { en: "Save", zh: "保存", "zh-TW": "儲存", ja: "保存", de: "Speichern" };
 
 function server(lang, keys, posts) {
@@ -50,7 +50,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, keys, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator('#providers .row.provider[data-id="google-vertex"]').click();
       const modal = page.locator("#modal");
       await modal.locator(".vertex-project").waitFor();

@@ -34,7 +34,7 @@ func TestClaudeHandoverWaitsForSavedSession(t *testing.T) {
 	asked := make(chan struct{})
 	release := make(chan struct{})
 	srv := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/_magpie/claude-ready" {
+		if r.URL.Path != "/_eipgam/claude-ready" {
 			http.NotFound(w, r)
 			return
 		}

@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("native dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const row = (name) => page.locator("#view-providers .row.provider", { hasText: name });
         await row("Relay A").waitFor();
         // a switched-off row's name carries its badge; the name itself leads

@@ -15,12 +15,12 @@ const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, openAgentSettings } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-// Codex's field options as internal/agent builds them: a magpie model's
+// Codex's field options as internal/agent builds them: a eipgam model's
 // group is its provider's name, a routing group's "Routing groups"
 const opts = [
-  { value: "gpt-5.5", label: "GPT-5.5", note: "OpenAI · via magpie", group: "OpenAI", ref: "openai/gpt-5.5", icon: "openai" },
-  { value: "mygw/gpt-6-luna", label: "GPT-6 Luna", note: "MyGateway · via magpie", group: "MyGateway", ref: "mygw/gpt-6-luna", icon: "openai" },
-  { value: "group/cheap", label: "cheap", note: "routing group · via magpie", group: "Routing groups", ref: "group/cheap" },
+  { value: "gpt-5.5", label: "GPT-5.5", note: "OpenAI · via eipgam", group: "OpenAI", ref: "openai/gpt-5.5", icon: "openai" },
+  { value: "mygw/gpt-6-luna", label: "GPT-6 Luna", note: "MyGateway · via eipgam", group: "MyGateway", ref: "mygw/gpt-6-luna", icon: "openai" },
+  { value: "group/cheap", label: "cheap", note: "routing group · via eipgam", group: "Routing groups", ref: "group/cheap" },
 ];
 const agents = (memories, sub) => [{
   id: "codex", name: "Codex", path: "/test/config.toml", icon: "codex-color", wired: true,
@@ -37,7 +37,7 @@ const settings = (lang) => ({
   dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
   codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
   trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-  version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+  version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
   proxyNow: "none", proxySource: "none", login: false,
   visionModels: [], imageGenModels: [], lanURLs: [], titleModels,
   codexPredictions: "mygw/gpt-6-luna", codexAutoReview: "mygw/gpt-6-luna",
@@ -94,7 +94,7 @@ async function open(engine, width, lang, memories, sub, t) {
     await browser.close();
   });
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=agents");
+  await page.goto("http://eipgam.test/?view=agents");
   await openAgentSettings(page);
   await page.locator("#codexMemoriesPick button").waitFor();
   return { page, errors };

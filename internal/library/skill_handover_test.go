@@ -265,8 +265,8 @@ func TestSharedUnderAnotherName(t *testing.T) {
 }
 
 // ConatusMoon2222 on X: with every skill kept in ~/.agents/skills by the
-// setting, handing skills over left magpie's links there (the sync made
-// them again). The setting goes off, magpie's links go, the user's own
+// setting, handing skills over left eipgam's links there (the sync made
+// them again). The setting goes off, eipgam's links go, the user's own
 // entries stay.
 func TestHandOverWithSharedSetting(t *testing.T) {
 	h := sandbox(t)
@@ -286,7 +286,7 @@ func TestHandOverWithSharedSetting(t *testing.T) {
 		t.Fatalf("a link is left in ~/.agents/skills: %v", err)
 	}
 	if _, err := os.Lstat(filepath.Join(shared, "other")); !os.IsNotExist(err) {
-		t.Errorf("magpie's link to another skill is left: %v", err)
+		t.Errorf("eipgam's link to another skill is left: %v", err)
 	}
 	if !realFolder(own) {
 		t.Error("the user's own folder went")

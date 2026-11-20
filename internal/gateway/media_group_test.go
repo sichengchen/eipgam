@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // busyVendor answers every request 429, out of quota, and counts them.
@@ -86,7 +86,7 @@ func TestMediaGroupOfProvidersWithChatPicks(t *testing.T) {
 		t.Fatalf("speech: %d %.200s", code, raw)
 	}
 	body, ctype := audioFormBody(t, "model", "group/stt")
-	if code, _, raw := postAudio(t, s, "/v1/audio/transcriptions", ctype, body); code != 200 || !strings.Contains(raw, "Hello from the magpie.") {
+	if code, _, raw := postAudio(t, s, "/v1/audio/transcriptions", ctype, body); code != 200 || !strings.Contains(raw, "Hello from the eipgam.") {
 		t.Fatalf("transcription: %d %s", code, raw)
 	}
 	want := []string{"POST /v1/embeddings", "POST /v1/rerank", "POST /v1/audio/speech", "POST /v1/audio/transcriptions"}

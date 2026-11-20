@@ -46,7 +46,7 @@ func TestPluginInFrontOfMistralIsMistral(t *testing.T) {
 	h := New().Handler()
 	ask := func(path, body string) (int, string) {
 		req := httptest.NewRequest("POST", path, strings.NewReader(body))
-		req.Header.Set("Authorization", "Bearer magpie")
+		req.Header.Set("Authorization", "Bearer eipgam")
 		req.Header.Set("anthropic-version", "2023-06-01")
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
@@ -105,7 +105,7 @@ func TestPluginOnAnUnknownAPIIsNoVendor(t *testing.T) {
 		{"role":"user","content":"Is 91 prime?"},
 		{"role":"assistant","content":[{"type":"thinking","thinking":"7*13=91.","signature":""},{"type":"text","text":"91 = 7 x 13."}]},
 		{"role":"user","content":"And 97?"}]}`))
-	req.Header.Set("Authorization", "Bearer magpie")
+	req.Header.Set("Authorization", "Bearer eipgam")
 	rec := httptest.NewRecorder()
 	New().Handler().ServeHTTP(rec, req)
 	if rec.Code != 200 {

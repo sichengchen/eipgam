@@ -1,71 +1,71 @@
-// magpie speaks English. Other languages' tables would go in I18N, by
+// eipgam speaks English. Other languages' tables would go in I18N, by
 // language, with the English strings as written in app.js and index.html
 // as keys; a missing key or language falls back to English. {name} slots
 // are filled by t(str, vars).
 const I18N = {};
 
-// Every notice magpie's agents give after a change (Notices in
+// Every notice eipgam's agents give after a change (Notices in
 // internal/agent/notice.go), as tNotice matches them; each has its
 // translation above. TestEveryNoticeIsTranslated keeps the two the same.
 const NOTICES = [
-  "Start Codex with codex -p magpie; plain codex keeps its own provider.",
-  "Claude Desktop reads this at start-up — quit and reopen it to run on magpie (Code and Cowork, no Anthropic sign-in).",
+  "Start Codex with codex -p eipgam; plain codex keeps its own provider.",
+  "Claude Desktop reads this at start-up — quit and reopen it to run on eipgam (Code and Cowork, no Anthropic sign-in).",
   "Claude Desktop reads this at start-up — quit and reopen it to sign in with Anthropic again.",
-  "Chats and projects from your Anthropic sign-in stay in Desktop's own profile, not shown on magpie; nothing is deleted, and turning this off brings them back.",
+  "Chats and projects from your Anthropic sign-in stay in Desktop's own profile, not shown on eipgam; nothing is deleted, and turning this off brings them back.",
   "Your chats and projects from before are back there.",
-  "To go on with them on magpie, open Settings → Import in Desktop: it can copy in your Claude.ai chats and projects and this computer's earlier sessions, and leaves the originals as they are.",
-  "Open Claude Magpie from Applications to use Claude Desktop on magpie. Your own Claude Desktop stays signed in with Anthropic.",
-  "Quit Claude Magpie if it is open: it no longer runs on magpie.",
+  "To go on with them on eipgam, open Settings → Import in Desktop: it can copy in your Claude.ai chats and projects and this computer's earlier sessions, and leaves the originals as they are.",
+  "Open Claude eipgam from Applications to use Claude Desktop on eipgam. Your own Claude Desktop stays signed in with Anthropic.",
+  "Quit Claude eipgam if it is open: it no longer runs on eipgam.",
   "Codex builds its model list at start-up — restart the Codex app, open codex sessions and the app-server they share ({command}) to see this.",
-  "Codex builds its model list at start-up, and the app-server open codex sessions share started before this: restart it (Restart on magpie's Agents page, or {command}) and the Codex app to see this.",
-  "Codex's own multi_agent_v2 is on in the config magpie routes, which takes over the multi-agent V1 magpie's models ask for; turn it off in Codex's config to run subagents on magpie's models.",
-  "Codex's multi-agent V1 is on, but magpie couldn't read Codex's config to check its own multi_agent_v2.",
+  "Codex builds its model list at start-up, and the app-server open codex sessions share started before this: restart it (Restart on eipgam's Agents page, or {command}) and the Codex app to see this.",
+  "Codex's own multi_agent_v2 is on in the config eipgam routes, which takes over the multi-agent V1 eipgam's models ask for; turn it off in Codex's config to run subagents on eipgam's models.",
+  "Codex's multi-agent V1 is on, but eipgam couldn't read Codex's config to check its own multi_agent_v2.",
   "Devin reads its model at start-up — restart open Devin sessions to use this.",
   "Gemini CLI reads its settings at start-up — restart open gemini sessions to see this.",
   "Grok Build reads its settings at start-up — restart open grok sessions to use this.",
-  "Install GitHub Copilot Chat in {agent} to see magpie's models in its Chat.",
+  "Install GitHub Copilot Chat in {agent} to see eipgam's models in its Chat.",
   "Kimi Code reads its settings at start-up — restart open kimi sessions to use this.",
   "Kimi Code reads this as it runs; in its web or desktop app, reopen Settings › Providers or reload the page to see new models.",
-  "Magpie is a custom provider in Grok App's Settings › Account. A chat can pick magpie's models in its model picker, and Grok App stays on its current route until you press Use on magpie there.",
+  "eipgam is a custom provider in Grok App's Settings › Account. A chat can pick eipgam's models in its model picker, and Grok App stays on its current route until you press Use on eipgam there.",
   "Muse Code reads its settings at start-up — restart open muse sessions to use this.",
-  "Restart Zed if it still asks for an API key: magpie has configured its gateway credential in the system credential store.",
-  "WSL {distro} is in {net} networking with localhostForwarding=false in %UserProfile%\\.wslconfig, so 127.0.0.1 there, where its {agent} was pointed, isn't relayed to Windows, where magpie listens. Remove localhostForwarding=false under [wsl2] (it is on by default) and run wsl --shutdown.",
-  "WSL {distro} is in {net} networking, not mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; magpie listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.",
-  "WSL {distro} isn't running: magpie shows what it last saw there, and starts it only to change something.",
-  "{agent} takes magpie's gateway and model only from how it is started — start it with {command}",
-  "Type {bin} in a new terminal: magpie added it to {profiles}, to start {agent} on magpie's gateway and model (in a terminal open now: {command}).",
-  "agy takes magpie's gateway and model only from how it is started — start it with {command}",
-  "Type agy in a new terminal: magpie added it to {profiles}, to start agy on magpie's gateway and model (in a terminal open now: {command}).",
+  "Restart Zed if it still asks for an API key: eipgam has configured its gateway credential in the system credential store.",
+  "WSL {distro} is in {net} networking with localhostForwarding=false in %UserProfile%\\.wslconfig, so 127.0.0.1 there, where its {agent} was pointed, isn't relayed to Windows, where eipgam listens. Remove localhostForwarding=false under [wsl2] (it is on by default) and run wsl --shutdown.",
+  "WSL {distro} is in {net} networking, not mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; eipgam listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.",
+  "WSL {distro} isn't running: eipgam shows what it last saw there, and starts it only to change something.",
+  "{agent} takes eipgam's gateway and model only from how it is started — start it with {command}",
+  "Type {bin} in a new terminal: eipgam added it to {profiles}, to start {agent} on eipgam's gateway and model (in a terminal open now: {command}).",
+  "agy takes eipgam's gateway and model only from how it is started — start it with {command}",
+  "Type agy in a new terminal: eipgam added it to {profiles}, to start agy on eipgam's gateway and model (in a terminal open now: {command}).",
   "an open Claude Code session keeps the effort it started with — restart it to use this.",
   "an open Claude Code session keeps the ultracode it started with — restart it to use this.",
-  "magpie couldn't ask WSL {distro} its networking mode (it has no wslinfo) and %UserProfile%\\.wslconfig doesn't set it to mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; magpie listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.",
-  "magpie restarted the app-server codex sessions share, which none was on, so new codex sessions have this; restart the Codex app, if it is open, to see it there.",
-  "magpie's models are in {agent}'s Chat model picker under magpie, from GitHub Copilot Chat {version}'s OpenAI Compatible provider, which it offers only while it is signed in to GitHub with a personal Copilot plan.",
-  "magpie's models are in {agent}'s Chat model picker, under magpie, in each of its profiles (VS Code 1.122 or later). If they don't show, run Developer: Reload Window in {agent}.",
+  "eipgam couldn't ask WSL {distro} its networking mode (it has no wslinfo) and %UserProfile%\\.wslconfig doesn't set it to mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; eipgam listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.",
+  "eipgam restarted the app-server codex sessions share, which none was on, so new codex sessions have this; restart the Codex app, if it is open, to see it there.",
+  "eipgam's models are in {agent}'s Chat model picker under eipgam, from GitHub Copilot Chat {version}'s OpenAI Compatible provider, which it offers only while it is signed in to GitHub with a personal Copilot plan.",
+  "eipgam's models are in {agent}'s Chat model picker, under eipgam, in each of its profiles (VS Code 1.122 or later). If they don't show, run Developer: Reload Window in {agent}.",
   "{agent} in WSL {distro} builds its model list at start-up — restart it, the app-server its sessions share ({command} there) and the Codex app's WSL connection to see this.",
   "{agent} in WSL {distro} reads its config at start-up — restart open opencode sessions to use this.",
   "{agent} in WSL {distro} reads its settings at start-up — restart open gemini sessions to see this.",
   "{agent} in WSL {distro} reads its settings at start-up — restart open grok sessions to use this.",
   "{agent} in WSL {distro} reads its settings at start-up — restart open kimi sessions to use this.",
   "{agent} in WSL {distro} reads this as it runs; in its web or desktop app, reopen Settings › Providers or reload the page to see new models.",
-  "{agent} in WSL {distro} takes magpie's gateway and model only from how it is started — type agy in a new terminal there: magpie put it in the shell's profile.",
+  "{agent} in WSL {distro} takes eipgam's gateway and model only from how it is started — type agy in a new terminal there: eipgam put it in the shell's profile.",
   "{agent} in WSL {distro} reads its settings at start-up — restart open muse sessions to use this.",
-  "{agent} reads magpie's gateway from CURSOR_LOCAL_AGENT_BASE_URL and CURSOR_LOCAL_AGENT_API_KEY, now set for your user: quit it (the app, not only its window) and open it again, as it keeps the model list it was first given until it quits. A base URL or API key set in its Open configuration or a model's settings comes first, so leave both empty (or set the base URL to {url} and the key to {key}).",
+  "{agent} reads eipgam's gateway from CURSOR_LOCAL_AGENT_BASE_URL and CURSOR_LOCAL_AGENT_API_KEY, now set for your user: quit it (the app, not only its window) and open it again, as it keeps the model list it was first given until it quits. A base URL or API key set in its Open configuration or a model's settings comes first, so leave both empty (or set the base URL to {url} and the key to {key}).",
   "{agent}'s Chat features must be enabled (chat.disableAIFeatures=false) and its product.json must include defaultChatAgent and trustedExtensionAuthAccess for GitHub.copilot-chat. Then run Developer: Reload Window in {agent}.",
-  "{agent}'s GitHub Copilot Chat {version} has neither a Custom Endpoint nor an OpenAI Compatible provider, so it can't list magpie's models.",
-  "{agent}'s daemon runs on magpie's gateway: open {agent} again (reload its window if it is open). It still needs you signed in with your Claude account, which magpie never sends on; pick a model of magpie's in its model menu.",
-  "{file} sets {var}, so Claude Code sends its requests to {cloud}, not to magpie: take it out there to go through magpie.",
-  "{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to magpie: take it out of your shell's profile to go through magpie.",
-  "magpie doesn't restart {agent} on this computer.",
+  "{agent}'s GitHub Copilot Chat {version} has neither a Custom Endpoint nor an OpenAI Compatible provider, so it can't list eipgam's models.",
+  "{agent}'s daemon runs on eipgam's gateway: open {agent} again (reload its window if it is open). It still needs you signed in with your Claude account, which eipgam never sends on; pick a model of eipgam's in its model menu.",
+  "{file} sets {var}, so Claude Code sends its requests to {cloud}, not to eipgam: take it out there to go through eipgam.",
+  "{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to eipgam: take it out of your shell's profile to go through eipgam.",
+  "eipgam doesn't restart {agent} on this computer.",
   "{agent} isn't running on the old settings any more.",
-  "magpie couldn't ask {agent} to quit. Quit it yourself, then open it again.",
+  "eipgam couldn't ask {agent} to quit. Quit it yourself, then open it again.",
   "{agent} is still open; it may be asking something in its window. Answer it there, or quit it, then open it again.",
   "{agent} is still running. Quit it, then open it again.",
   "{agent} quit, but didn't open again. Open it yourself.",
   "The {agent} app isn't running any more. It opens on the new account.",
-  "magpie couldn't restart the {agent} app's app-server. Quit the app and open it again.",
+  "eipgam couldn't restart the {agent} app's app-server. Quit the app and open it again.",
   "The {agent} app's app-server ended, but the app didn't start another. Quit the app and open it again.",
-  "magpie couldn't tell whether the {agent} app restarted. Quit the app and open it again.",
+  "eipgam couldn't tell whether the {agent} app restarted. Quit the app and open it again.",
 ];
 
 // The active language: a ?locale= URL parameter wins, then the saved
@@ -128,7 +128,7 @@ function t(s, vars) {
 }
 
 // tNotice is an agent's advice after a change (state.notice) in the
-// reader's language (#1508). magpie writes it from the templates in
+// reader's language (#1508). eipgam writes it from the templates in
 // NOTICES, with names, paths and commands in their {slots}, and may join
 // several with a space: each is matched back to its template, the longest
 // first, and translated. One that doesn't match whole (a plugin's own
@@ -218,6 +218,6 @@ function translateStatic() {
     e.placeholder = t(e.dataset.enPlaceholder);
   }
   // another language makes the tabs wider in the header as it was fitted, and
-  // they ran under the magpie and the window's buttons (kiwiflysky on X)
+  // they ran under the eipgam and the window's buttons (kiwiflysky on X)
   window.fitTop?.();
 }

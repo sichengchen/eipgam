@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // observed is a request the registered observers watch (usage.Observer,
@@ -31,7 +31,7 @@ func observeRequest(r *http.Request, kind string, body []byte) (*http.Request, *
 	if len(observers) == 0 {
 		return r, nil
 	}
-	// the agent it is recorded as, another magpie's own (callerFrom)
+	// the agent it is recorded as, another eipgam's own (callerFrom)
 	agent := callerOf(r).agent
 	who := access.Caller(r.Context())
 	q := usage.Request{Header: r.Header, Agent: agent, Session: observedSession(r.Header), Kind: observedKind(agent, kind, body),

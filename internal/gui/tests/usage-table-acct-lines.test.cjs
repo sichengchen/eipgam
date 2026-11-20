@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.waitForSelector("#quotaView .opt");
         await page.locator("#quotaView .opt", { hasText: TABLE[lang] }).click();
         await page.waitForSelector("#subscriptionUsage .qt tbody tr");

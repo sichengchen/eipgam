@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // /api/update says quiet only while the pill's dismissal holds ("红点都快

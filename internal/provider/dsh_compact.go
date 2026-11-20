@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // DeepSeek Harness compacts its context on the model of the session's
@@ -29,14 +29,14 @@ func DshCompactModel() string {
 }
 
 // SetDshCompactModel puts DSH's compactions on id, a model or routing
-// group of magpie's (provider/model, group/<id>); "" leaves each on the
-// model it asks for. One magpie doesn't serve now is kept all the same,
+// group of eipgam's (provider/model, group/<id>); "" leaves each on the
+// model it asks for. One eipgam doesn't serve now is kept all the same,
 // as Desktop's subagent model is: the gateway leaves compactions where
 // they are until it is served.
 func SetDshCompactModel(id string) error {
 	id = strings.TrimSpace(id)
 	if pid, model, ok := strings.Cut(id, "/"); id != "" && (!ok || pid == "" || model == "") {
-		return fmt.Errorf("DeepSeek Harness's compaction can't be put on %q: pick one of magpie's models (provider/model)", id)
+		return fmt.Errorf("DeepSeek Harness's compaction can't be put on %q: pick one of eipgam's models (provider/model)", id)
 	}
 	s := settings.Load()
 	if s.DshCompactModel == id {

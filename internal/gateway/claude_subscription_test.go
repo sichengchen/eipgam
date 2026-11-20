@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 func TestClaudeSubscriptionPromptKeepsForeignHarnessOutOfSystem(t *testing.T) {
@@ -436,14 +436,14 @@ func TestSweepBridgeProjectsTakesOnlyTheBridgesFolders(t *testing.T) {
 	claudeDir := filepath.Join(base, "claude")
 	projects := filepath.Join(claudeDir, "projects")
 	gone := []string{
-		claudeProjectName(filepath.Join(real, "magpie-claude-1097091858")),
-		claudeProjectName(filepath.Join(link, "T", "magpie-claude-42")),
+		claudeProjectName(filepath.Join(real, "eipgam-claude-1097091858")),
+		claudeProjectName(filepath.Join(link, "T", "eipgam-claude-42")),
 	}
 	kept := []string{
-		claudeProjectName(filepath.Join(real, "magpie-claude-")),
-		claudeProjectName(filepath.Join(real, "magpie-claude-12-x")),
+		claudeProjectName(filepath.Join(real, "eipgam-claude-")),
+		claudeProjectName(filepath.Join(real, "eipgam-claude-12-x")),
 		claudeProjectName(filepath.Join(real, "other")),
-		claudeProjectName("/Users/me/code/magpie-claude-7"),
+		claudeProjectName("/Users/me/code/eipgam-claude-7"),
 	}
 	for _, d := range append(append([]string{}, gone...), kept...) {
 		if err := os.MkdirAll(filepath.Join(projects, d), 0o755); err != nil {
@@ -489,12 +489,12 @@ func TestBridgeTempsSwept(t *testing.T) {
 		}
 		return dir
 	}
-	gone := []string{mk("magpie-claude-1097091858", true), mk("magpie-claude-42", true)}
+	gone := []string{mk("eipgam-claude-1097091858", true), mk("eipgam-claude-42", true)}
 	kept := []string{
-		mk("magpie-claude-777", false), // a run still going
-		mk("magpie-claude-work-501", true),
-		mk("magpie-claude-", true),
-		mk("magpie-claude-12-x", true),
+		mk("eipgam-claude-777", false), // a run still going
+		mk("eipgam-claude-work-501", true),
+		mk("eipgam-claude-", true),
+		mk("eipgam-claude-12-x", true),
 		mk("other-1", true),
 	}
 	sweepBridgeTemps(tmp)
@@ -631,7 +631,7 @@ done
 	}
 }
 
-// A run's Claude Code has the caller's tools only as mcp__magpie__<Name>:
+// A run's Claude Code has the caller's tools only as mcp__eipgam__<Name>:
 // its built-ins are off. A run started anew on a long conversation was told
 // every past call by its bare name ([tool call Bash …]), so the model
 // called Bash, Claude Code answered "Bash is disabled for this session, in
@@ -660,8 +660,8 @@ func TestClaudePromptTellsPastCallsByTheRunsNames(t *testing.T) {
 	}
 	check := func(what, got string) {
 		t.Helper()
-		if !strings.Contains(got, "[tool call mcp__magpie__Bash id=toolu_1 ") || strings.Contains(got, "[tool call Bash ") {
-			t.Errorf("%s: a call of the caller's Bash isn't told as the run's mcp__magpie__Bash: %q", what, got)
+		if !strings.Contains(got, "[tool call mcp__eipgam__Bash id=toolu_1 ") || strings.Contains(got, "[tool call Bash ") {
+			t.Errorf("%s: a call of the caller's Bash isn't told as the run's mcp__eipgam__Bash: %q", what, got)
 		}
 		if !strings.Contains(got, "[tool call team_sync id=toolu_2 ") {
 			t.Errorf("%s: a call of a tool the caller doesn't offer lost its name: %q", what, got)
@@ -675,7 +675,7 @@ func TestClaudePromptTellsPastCallsByTheRunsNames(t *testing.T) {
 	check("next turn", text(renderClaudeTurn(msgs[1:], tools)))
 
 	blocks, _ = renderClaudePrompt(&Request{Messages: msgs[:1], Tools: tools, ToolChoice: "name:Read"})
-	if got := text(blocks); !strings.Contains(got, "You must call the mcp__magpie__Read tool.") {
+	if got := text(blocks); !strings.Contains(got, "You must call the mcp__eipgam__Read tool.") {
 		t.Errorf("a forced tool is named as the caller has it, not as the run can call it: %q", got)
 	}
 }

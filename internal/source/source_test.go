@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 func TestMain(m *testing.M) {
@@ -29,13 +29,13 @@ func (d *down) RoundTrip(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// magpie asks no mirror of its own: npm's registry, Bun's releases, the
+// eipgam asks no mirror of its own: npm's registry, Bun's releases, the
 // community plugin list, GitHub's API and the masking models' files are
 // asked of their official addresses alone, and an official address that
-// fails gives its own answer back. MAGPIE_MIRRORS, which once turned on a
+// fails gives its own answer back. EIPGAM_MIRRORS, which once turned on a
 // fallback to npmmirror and gh-proxy, does nothing.
 func TestDoAsksTheOfficialAddressAlone(t *testing.T) {
-	t.Setenv("MAGPIE_MIRRORS", "on")
+	t.Setenv("EIPGAM_MIRRORS", "on")
 	for _, raw := range []string{
 		"https://registry.npmjs.org/@magpie-community%2fopencode-kiro-auth",
 		"https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-darwin-aarch64.zip",

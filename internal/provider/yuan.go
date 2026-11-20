@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // PricesInYuan is whether p sells in China's yuan, for Settings' currency

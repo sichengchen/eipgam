@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, web, feed));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-req").nth(feed.routes.length - 1).waitFor();
         // its first bytes come in: the numbers a request in flight shows
         for (let i = 0; i < 100 && !feed.next; i++) await page.waitForTimeout(20);

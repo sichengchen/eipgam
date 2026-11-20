@@ -97,7 +97,7 @@ func TestTaggedReposFromTheBuiltList(t *testing.T) {
 
 	// off keeps to GitHub
 	forget()
-	t.Setenv("MAGPIE_PLUGIN_CATALOG", "off")
+	t.Setenv("EIPGAM_PLUGIN_CATALOG", "off")
 	before := gh.Load()
 	if _, err := TaggedRepos(context.Background()); err == nil || gh.Load() == before {
 		t.Fatalf("off still read the list: err %v", err)

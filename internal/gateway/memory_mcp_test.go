@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // memPost sends one tools/call of the memory server through h, from this
@@ -83,8 +83,8 @@ func TestMemoryMCPSharedAcrossAgents(t *testing.T) {
 	fresh(t)
 	h := lanGuard(New().Handler())
 	d := t.TempDir()
-	clone := gitRepo(t, filepath.Join(d, "magpie"), "git@github.com:yetone/magpie.git")
-	other := gitRepo(t, filepath.Join(d, "copy"), "https://github.com/yetone/magpie")
+	clone := gitRepo(t, filepath.Join(d, "eipgam"), "git@github.com:yetone/eipgam.git")
+	other := gitRepo(t, filepath.Join(d, "copy"), "https://github.com/sichengchen/eipgam")
 	elsewhere := gitRepo(t, filepath.Join(d, "site"), "https://github.com/yetone/site.git")
 	claude := []string{"User-Agent", "claude-cli/2.1.314 (external, cli)", MemoryCwdHeader, filepath.Join(clone, "internal")}
 
@@ -97,7 +97,7 @@ func TestMemoryMCPSharedAcrossAgents(t *testing.T) {
 		t.Fatalf("save a project fact: %s", said)
 	}
 	all, _, _ := memory.All()
-	// "claude" in magpie, where package agent names it
+	// "claude" in eipgam, where package agent names it
 	if len(all) != 2 || all[0].Sources[0].Agent != usage.AgentOf("claude-cli/2.1.314") || all[0].Sources[0].Agent == "" {
 		t.Fatalf("kept %+v", all)
 	}
@@ -132,9 +132,9 @@ func TestMemoryMCPHubMetaNamesTheProject(t *testing.T) {
 	fresh(t)
 	h := lanGuard(New().Handler())
 	d := t.TempDir()
-	repo := gitRepo(t, filepath.Join(d, "magpie"), "https://github.com/yetone/magpie.git")
+	repo := gitRepo(t, filepath.Join(d, "eipgam"), "https://github.com/sichengchen/eipgam.git")
 	body := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"memory_save","arguments":{"text":"Use bun for scripts","kind":"rule","scope":"agent"},` +
-		`"_meta":{"magpie/roots":["` + fileURI(repo) + `"],"magpie/client":"claude-code/2.1.314"}}}`
+		`"_meta":{"eipgam/roots":["` + fileURI(repo) + `"],"eipgam/client":"claude-code/2.1.314"}}}`
 	said, bad := memSend(t, h, body, MemoryCwdHeader, d)
 	if bad || !strings.Contains(said, "only for you") {
 		t.Fatalf("hub save: %s", said)
@@ -147,7 +147,7 @@ func TestMemoryMCPHubMetaNamesTheProject(t *testing.T) {
 	if said, bad := memSend(t, h, body, MemoryCwdHeader, d); bad || !strings.Contains(said, "this project") {
 		t.Fatalf("hub project save: %s", said)
 	}
-	if all, _, _ := memory.All(); all[0].Scope != "project:github.com/yetone/magpie" {
+	if all, _, _ := memory.All(); all[0].Scope != "project:github.com/sichengchen/eipgam" {
 		t.Fatalf("kept in %s", all[0].Scope)
 	}
 }
@@ -192,8 +192,8 @@ func TestMemoryMCPSaysWhatItCantKnow(t *testing.T) {
 // none of them reads, saves or forgets a memory.
 func TestMemoryMCPGuarded(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	h := lanGuard(New().Handler())
 	if said, isErr := memPost(t, h, memorySaveTool, `{"text":"The user's bank PIN hint is the cat's name","kind":"profile","scope":"global"}`); isErr {
 		t.Fatal(said)
@@ -206,7 +206,7 @@ func TestMemoryMCPGuarded(t *testing.T) {
 			t.Fatalf("not shared: %d %s", w.Code, w.Body.String())
 		}
 	}
-	_, secrets := newCaller(t, "Friend") // shares magpie
+	_, secrets := newCaller(t, "Friend") // shares eipgam
 	for _, body := range []string{search, save} {
 		w := mcpPostTo(h, MemoryMCPPath, there, body, "Authorization", "Bearer "+secrets[0])
 		if w.Code != http.StatusForbidden || strings.Contains(w.Body.String(), "PIN") {
@@ -298,7 +298,7 @@ func TestMemoryMCPAgentFromTheSessionsInitialize(t *testing.T) {
 		}
 	}
 	// another client's session is not Codex's, and none still can't tell
-	w := mcpPostTo(h, MemoryMCPPath, "127.0.0.1:50000", `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"memory_save","arguments":{"scope":"agent","text":"x"}}}`, "User-Agent", "curl/8", "Accept", "application/json", "Mcp-Session-Id", "magpie-other")
+	w := mcpPostTo(h, MemoryMCPPath, "127.0.0.1:50000", `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"memory_save","arguments":{"scope":"agent","text":"x"}}}`, "User-Agent", "curl/8", "Accept", "application/json", "Mcp-Session-Id", "eipgam-other")
 	if m := readMCP(t, w); !m.Result.IsError || !strings.Contains(m.Result.Content[0].Text, "which agent") {
 		t.Fatalf("unknown session: %s", w.Body.String())
 	}

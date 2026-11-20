@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"regexp"
 
-	"github.com/yetone/magpie/internal/capre"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/capre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // An agent that loads its tools when it needs them (pi's and T3 Code's

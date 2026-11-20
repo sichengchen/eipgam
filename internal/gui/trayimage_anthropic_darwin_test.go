@@ -13,7 +13,7 @@ import (
 
 // AppKit draws the A\ mark where Claude's logo was, in the bar's ink on
 // light and dark bars alike: the logo's square differs from Claude's, and
-// the digits beside it are where they were. MAGPIE_TRAY_PNG names a folder
+// the digits beside it are where they were. EIPGAM_TRAY_PNG names a folder
 // to write the images to, to look at them.
 func TestTrayImageAnthropicMark(t *testing.T) {
 	cells, _, _ := trayUsageView(trayCards()[:2], time.Now(), false, false)
@@ -24,7 +24,7 @@ func TestTrayImageAnthropicMark(t *testing.T) {
 		if cw != aw || ch != ah {
 			t.Fatalf("dark %v: %dx%d with Claude's logo, %dx%d with the mark", dark, cw, ch, aw, ah)
 		}
-		if dir := os.Getenv("MAGPIE_TRAY_PNG"); dir != "" {
+		if dir := os.Getenv("EIPGAM_TRAY_PNG"); dir != "" {
 			name := map[bool]string{false: "light", true: "dark"}[dark]
 			os.WriteFile(dir+"/claude-"+name+".png", cb, 0o644)
 			os.WriteFile(dir+"/anthropic-"+name+".png", ab, 0o644)

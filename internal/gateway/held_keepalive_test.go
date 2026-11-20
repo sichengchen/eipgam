@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // thinkingOn serves Claude thinking at length: its first events, then
@@ -173,7 +173,7 @@ func TestClientGoneRecordedAsCanceled(t *testing.T) {
 	var u Usage
 	s.serveClaudeSubscription(h, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body)).WithContext(ctx), provider.Anthropic, p, "claude-sonnet-5", []byte(body), &u)
 	got := rec.Body.String()
-	if !strings.Contains(got, "thinking it over") || !strings.Contains(got, "event: message_stop") && !strings.Contains(got, "ended by magpie before it ended its reply") {
+	if !strings.Contains(got, "thinking it over") || !strings.Contains(got, "event: message_stop") && !strings.Contains(got, "ended by eipgam before it ended its reply") {
 		t.Fatalf("the run's reply: %q", got)
 	}
 	if h.ended {

@@ -56,7 +56,7 @@ func TestDigestPartsAndBudget(t *testing.T) {
 		t.Fatal(err)
 	}
 	save(t, "only codex sees this", Rule, "agent:codex")
-	p := &Project{Key: "github.com/yetone/magpie", Name: "magpie", Roots: []string{"/w/magpie"}}
+	p := &Project{Key: "github.com/sichengchen/eipgam", Name: "eipgam", Roots: []string{"/w/eipgam"}}
 	if _, _, err := Save(Input{Text: str("tests run on mote"), Kind: str(Rule), Scope: str(ScopeOf(p))}, FromAgent, nil, p); err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestDigestPartsAndBudget(t *testing.T) {
 		t.Fatal(err)
 	}
 	d, _ := Digest("codex")
-	for _, want := range []string{"pinned one", strings.Repeat("b", 60), "Only for you:\n" + "Rules:\n- only codex sees this", "When working in /w/magpie:\nRules:\n- tests run on mote"} {
+	for _, want := range []string{"pinned one", strings.Repeat("b", 60), "Only for you:\n" + "Rules:\n- only codex sees this", "When working in /w/eipgam:\nRules:\n- tests run on mote"} {
 		if !strings.Contains(d, want) {
 			t.Errorf("digest lacks %q:\n%s", want, d)
 		}
@@ -82,7 +82,7 @@ func TestDigestPartsAndBudget(t *testing.T) {
 	if other, _ := Digest("claude"); strings.Contains(other, "only codex") {
 		t.Errorf("another agent got codex's own:\n%s", other)
 	}
-	for _, name := range []string{"magpie", "Magpie", "OpenAI", "Anthropic"} {
+	for _, name := range []string{"eipgam", "eipgam", "OpenAI", "Anthropic"} {
 		if strings.Contains(strings.SplitN(d, "\n\n", 3)[1], name) {
 			t.Errorf("the digest's header names %s", name)
 		}

@@ -11,29 +11,29 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// magpie healthcheck, a container's HEALTHCHECK, passes only while a
-// magpie gateway answers at MAGPIE_ADDR.
+// eipgam healthcheck, a container's HEALTHCHECK, passes only while a
+// eipgam gateway answers at EIPGAM_ADDR.
 func TestHealthcheck(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	magpie := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"name":"magpie","version":"dev"}`))
+	eipgam := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"name":"eipgam","version":"dev"}`))
 	}))
-	defer magpie.Close()
-	t.Setenv("MAGPIE_ADDR", strings.TrimPrefix(magpie.URL, "http://"))
+	defer eipgam.Close()
+	t.Setenv("EIPGAM_ADDR", strings.TrimPrefix(eipgam.URL, "http://"))
 	if err := run([]string{"healthcheck"}); err != nil {
-		t.Fatal("magpie answering:", err)
+		t.Fatal("eipgam answering:", err)
 	}
 
 	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"name":"nginx"}`))
 	}))
 	defer other.Close()
-	t.Setenv("MAGPIE_ADDR", strings.TrimPrefix(other.URL, "http://"))
+	t.Setenv("EIPGAM_ADDR", strings.TrimPrefix(other.URL, "http://"))
 	if err := run([]string{"healthcheck"}); err == nil {
 		t.Error("something else answering passed")
 	}
@@ -44,20 +44,20 @@ func TestHealthcheck(t *testing.T) {
 	}
 	addr := ln.Addr().String()
 	ln.Close()
-	t.Setenv("MAGPIE_ADDR", addr)
+	t.Setenv("EIPGAM_ADDR", addr)
 	if err := run([]string{"healthcheck"}); err == nil {
 		t.Error("nothing listening passed")
 	}
 }
 
 // The Docker image sets HOME and the XDG folders inside its volume, which
-// a volume an older image made doesn't have yet: magpie makes them.
+// a volume an older image made doesn't have yet: eipgam makes them.
 func TestMakeDirs(t *testing.T) {
 	vol := t.TempDir()
 	for k, d := range map[string]string{"HOME": "home", "XDG_CONFIG_HOME": "config", "XDG_CACHE_HOME": "cache", "XDG_DATA_HOME": "data", "XDG_STATE_HOME": "state"} {
 		t.Setenv(k, filepath.Join(vol, d))
 	}
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:1")
+	t.Setenv("EIPGAM_ADDR", "127.0.0.1:1")
 	if err := run([]string{"version"}); err != nil {
 		t.Fatal(err)
 	}
@@ -68,11 +68,11 @@ func TestMakeDirs(t *testing.T) {
 	}
 }
 
-// writeListening is a running magpie's note of where it listens
+// writeListening is a running eipgam's note of where it listens
 // (gateway.ListeningFile), for a command run in another shell.
 func writeListening(t *testing.T, addr string, pid int) {
 	t.Helper()
-	dir := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "magpie")
+	dir := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "eipgam")
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -82,27 +82,27 @@ func writeListening(t *testing.T, addr string, pid int) {
 	}
 }
 
-// fakeServing answers as the magpie with pid, at a port that isn't Settings'.
+// fakeServing answers as the eipgam with pid, at a port that isn't Settings'.
 func fakeServing(t *testing.T, pid int) string {
 	t.Helper()
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	m := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			w.Write([]byte(`{"state":"restarting","version":"v9.9.9"}`))
 			return
 		}
-		fmt.Fprintf(w, `{"name":"magpie","version":"v9.9.9","pid":%d,"serves":"web"}`, pid)
+		fmt.Fprintf(w, `{"name":"eipgam","version":"v9.9.9","pid":%d,"serves":"web"}`, pid)
 	}))
 	t.Cleanup(m.Close)
 	return strings.TrimPrefix(m.URL, "http://")
 }
 
-// ljlwlcz on X: a service started with MAGPIE_ADDR=0.0.0.0:10100, and
-// `magpie healthcheck` run in a shell without it looked at 3425 and
-// exited 1. The running magpie's own note says where it listens.
+// ljlwlcz on X: a service started with EIPGAM_ADDR=0.0.0.0:10100, and
+// `eipgam healthcheck` run in a shell without it looked at 3425 and
+// exited 1. The running eipgam's own note says where it listens.
 func TestHealthcheckFindsTheRunningGatewayWithoutMagpieAddr(t *testing.T) {
 	addr := fakeServing(t, 4242)
 	writeListening(t, addr, 4242)
@@ -133,27 +133,27 @@ func TestHealthcheckRefusesWhatItDoesNotKnow(t *testing.T) {
 		{"healthcheck", "--addr", "nonsense"}, {"healthcheck", "--addr", "127.0.0.1:0"}, {"healthcheck", "--addr", "127.0.0.1:99999"},
 	} {
 		if err := run(args); err == nil || strings.Contains(err.Error(), "no gateway at") {
-			t.Errorf("magpie %v: %v", args, err)
+			t.Errorf("eipgam %v: %v", args, err)
 		}
 	}
 }
 
-// `magpie update` asked the address it knew and said "magpie isn't running"
+// `eipgam update` asked the address it knew and said "eipgam isn't running"
 // while the service served on another one: its restart now goes where the
-// running magpie says it listens.
+// running eipgam says it listens.
 func TestUpdateRestartsTheGatewayItFindsWithoutMagpieAddr(t *testing.T) {
 	addr := fakeServing(t, 4242)
 	writeListening(t, addr, 4242)
 	if got := restartRunning(gateway.ClientURL(), "v9.9.10"); !strings.Contains(got, "restarts into v9.9.10") {
-		t.Errorf("update found no running magpie: %q", got)
+		t.Errorf("update found no running eipgam: %q", got)
 	}
 	if got := restartRunning(gateway.URL(), "v9.9.10"); !strings.Contains(got, "isn't running") {
 		t.Errorf("the address Settings has is not where the fake serves: %q", got)
 	}
 }
 
-// magpie status says the role, pid and address of the magpie that serves
-// (a watchdog can't tell magpie.exe tray from magpie.exe mcp image by name).
+// eipgam status says the role, pid and address of the eipgam that serves
+// (a watchdog can't tell eipgam.exe tray from eipgam.exe mcp image by name).
 func TestStatusJSON(t *testing.T) {
 	addr := fakeServing(t, 4242)
 	writeListening(t, addr, 4242)
@@ -176,7 +176,7 @@ func TestStatusJSON(t *testing.T) {
 	}
 	// none running: said so, as JSON
 	writeListening(t, "127.0.0.1:1", 4242)
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:1")
+	t.Setenv("EIPGAM_ADDR", "127.0.0.1:1")
 	out, err = runOut(t, "status", "--json")
 	if err != nil || !strings.Contains(out, `"running": false`) {
 		t.Errorf("nothing serving: %v %q", err, out)

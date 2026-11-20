@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/proc"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/proc"
 )
 
 // Antigravity's CLI, agy, on a Gemini API key of the user's own: with
@@ -17,13 +17,13 @@ import (
 // skips the Google sign-in and asks the Gemini API with GEMINI_API_KEY
 // from its environment (GOOGLE_GEMINI_BASE_URL for another endpoint), and
 // `agy models` lists the Gemini API's models, Gemini 4 Carbon and Hydrogen
-// among them. magpie's agy-cli subscription runs agy on its Google
+// among them. eipgam's agy-cli subscription runs agy on its Google
 // sign-in, whose models are the account's in Antigravity, so that key is
-// served nowhere in magpie (shenggxhz on X: agy listed Gemini 4, magpie's
+// served nowhere in eipgam (shenggxhz on X: agy listed Gemini 4, eipgam's
 // refresh didn't). The key is a Gemini API key, and the Providers page
 // offers it as the Google Gemini provider, which serves those models.
 //
-// The variables are agy's environment: magpie's own, else the login
+// The variables are agy's environment: eipgam's own, else the login
 // shell's (proc.GeminiKeyVars), as a terminal's agy has them. They are
 // only read.
 

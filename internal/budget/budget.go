@@ -57,11 +57,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gwbudget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gwbudget"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // sums is what a key's calls came to in a window.
@@ -153,7 +153,7 @@ func slot(keyID string) string { return usage.Path() + "\x00" + keyID }
 
 // counts reports whether r is a call a key's budget counts.
 // A call an app reported itself (#1874) never counts: it didn't go through
-// magpie, and may be a backfill of calls long past. Nor does an MCP tool
+// eipgam, and may be a backfill of calls long past. Nor does an MCP tool
 // call (usage.SourceMCP): the model requests it made are calls of their own.
 func counts(r usage.Record) bool {
 	return !r.IsRejected() && !r.IsReported() && !r.IsProbe() && r.Computer == ""
@@ -502,7 +502,7 @@ type keptSums struct {
 // spent, the one that resets last, as the key is refused until then;
 // else the one with the most of a cap used. Nil for none. A limit of
 // some models holds the key only when it has no limit of the whole key:
-// one spent leaves the key's other models served, and a magpie using this
+// one spent leaves the key's other models served, and a eipgam using this
 // one as a remote reads this one as the key's.
 func Binding(all []Status) *Status {
 	whole := slices.ContainsFunc(all, func(st Status) bool { return len(st.Models) == 0 })
@@ -567,17 +567,17 @@ func (r *Refusal) Error() string {
 		on = " on " + strings.Join(r.Models, ", ")
 	}
 	if r.Period == "total" {
-		return fmt.Sprintf("magpie gateway key %q has used %s%s of its total limit; it stays refused until the limit is reset or raised", r.Key, what, on)
+		return fmt.Sprintf("eipgam gateway key %q has used %s%s of its total limit; it stays refused until the limit is reset or raised", r.Key, what, on)
 	}
 	if r.Period == "account" && r.Reset.IsZero() {
-		return fmt.Sprintf("magpie gateway key %q has used %s%s for this %s window of %s; it resets when that window does, which magpie can't read now",
+		return fmt.Sprintf("eipgam gateway key %q has used %s%s for this %s window of %s; it resets when that window does, which eipgam can't read now",
 			r.Key, what, on, r.AccountWindow, r.Account)
 	}
 	if r.Period == "account" {
-		return fmt.Sprintf("magpie gateway key %q has used %s%s for this %s window of %s; it resets at %s",
+		return fmt.Sprintf("eipgam gateway key %q has used %s%s for this %s window of %s; it resets at %s",
 			r.Key, what, on, r.AccountWindow, r.Account, r.Reset.Format("2006-01-02 15:04 MST"))
 	}
-	return fmt.Sprintf("magpie gateway key %q has used %s%s for this %s; it resets at %s",
+	return fmt.Sprintf("eipgam gateway key %q has used %s%s for this %s; it resets at %s",
 		r.Key, what, on, (&access.Limit{Period: r.Period, Days: r.Days, Hours: r.Hours}).Per(), r.Reset.Format("2006-01-02 15:04 MST"))
 }
 
@@ -731,7 +731,7 @@ func reserve(who access.Identity, body int64, model string, now time.Time) (rele
 
 // servedAs is the ids a request for model would be answered by, as
 // "<provider>/<model>" with the provider's id of it and the user's own:
-// none for a routing group, an auto/ model or a name magpie doesn't serve,
+// none for a routing group, an auto/ model or a name eipgam doesn't serve,
 // whose models routing decides.
 func servedAs(model string) []string {
 	if model == "" || provider.IsGroupRef(model) {

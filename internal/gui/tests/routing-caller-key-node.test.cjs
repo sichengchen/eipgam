@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         // Server is the name /api/caller-keys gives once it is read
         await page.waitForFunction(() => [...document.querySelectorAll(".rt-src b")].some((b) => b.textContent === "Server"));
         const nodes = await page.locator(".rt-src").evaluateAll((es) => es.map((e) => ({
@@ -107,14 +107,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const ctx = await browser.newContext({ viewport: { width: 360, height: 560 }, reducedMotion: "no-preference" });
-    await ctx.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "routing"); } catch {} });
+    await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "routing"); } catch {} });
     const page = await ctx.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve("en"));
-    await page.goto("http://magpie.test/?mode=panel");
+    await page.goto("http://eipgam.test/?mode=panel");
     await page.locator("#panelRouting .pr-req").nth(3).waitFor();
     const who = await page.locator("#panelRouting .pr-who").allTextContents();
     // the panel reads no key list: a key by the name its route kept

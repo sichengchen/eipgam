@@ -6,22 +6,22 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/autostart"
-	"github.com/yetone/magpie/internal/daemon"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/autostart"
+	"github.com/sichengchen/eipgam/internal/daemon"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // On Linux with no desktop session (a WSL distro, a server over SSH)
-// nothing opens magpie at login, so once magpie tui quit, the agents it had
+// nothing opens eipgam at login, so once eipgam tui quit, the agents it had
 // connected asked a gateway that was gone: Codex in WSL "连接会失败，没自动
-// 启动magpie的网关" (zaidu259434 on X, with magpie installed in WSL and
-// pointed at Windows' magpie as a remote one). As it quits having served
+// 启动eipgam的网关" (zaidu259434 on X, with eipgam installed in WSL and
+// pointed at Windows' eipgam as a remote one). As it quits having served
 // the gateway with an agent connected, the terminal hands the gateway on:
-// to magpie's service (magpie daemon), installed now where systemd runs it
+// to eipgam's service (eipgam daemon), installed now where systemd runs it
 // and the user never removed it, which starts it with the system or the
-// user's login from then on; else to a `magpie serve` of its own, in the
+// user's login from then on; else to a `eipgam serve` of its own, in the
 // background until the system stops.
 
 // keeper is what keepGateway asks and does; a var for the tests.
@@ -61,11 +61,11 @@ func keepGateway(connected bool) string {
 	switch {
 	case err == nil && st.Installed:
 		if err := k.start(); err == nil {
-			return tr("magpie: the gateway goes on in magpie's service (magpie daemon status)")
+			return tr("eipgam: the gateway goes on in eipgam's service (eipgam daemon status)")
 		}
 	case err == nil && !k.removed():
 		if err := k.install(); err == nil {
-			msg := tr("magpie: the gateway goes on in magpie's service, which now starts with this system or your login, so agents connected to magpie reach it with magpie tui closed; magpie daemon uninstall removes it")
+			msg := tr("eipgam: the gateway goes on in eipgam's service, which now starts with this system or your login, so agents connected to eipgam reach it with eipgam tui closed; eipgam daemon uninstall removes it")
 			if l := k.linger(); l != "" {
 				msg += " (" + l + ")"
 			}
@@ -74,32 +74,32 @@ func keepGateway(connected bool) string {
 	}
 	pid, log, err := k.background()
 	if err != nil {
-		return gatewayGoneNote() + " " + trf("(couldn't start magpie serve in the background: %s)", err.Error())
+		return gatewayGoneNote() + " " + trf("(couldn't start eipgam serve in the background: %s)", err.Error())
 	}
-	msg := trf("magpie: the gateway goes on in the background (magpie serve, pid %d, log %s) until this system stops", pid, log)
+	msg := trf("eipgam: the gateway goes on in the background (eipgam serve, pid %d, log %s) until this system stops", pid, log)
 	if wslHere() {
-		msg += tr("; for it to start with WSL, turn systemd on with [boot] systemd=true in /etc/wsl.conf and run magpie daemon install")
+		msg += tr("; for it to start with WSL, turn systemd on with [boot] systemd=true in /etc/wsl.conf and run eipgam daemon install")
 	} else {
-		msg += tr("; magpie daemon install starts it with the system")
+		msg += tr("; eipgam daemon install starts it with the system")
 	}
 	return msg
 }
 
-// atLoginNote is said where magpie opens at login, so the terminal left
+// atLoginNote is said where eipgam opens at login, so the terminal left
 // the gateway to the app. On Linux that can be a package's own autostart
 // entry on a box no desktop logs into (NixOS-WSL, a server over SSH),
 // which nothing ever starts (#3756): the note says the switch that has the
 // terminal hand the gateway on instead.
 func atLoginNote() string {
-	return gatewayGoneNote() + tr("; magpie opens at login and serves it then. Where no desktop logs in here, `magpie autostart off` has magpie tui hand it on as it quits")
+	return gatewayGoneNote() + tr("; eipgam opens at login and serves it then. Where no desktop logs in here, `eipgam autostart off` has eipgam tui hand it on as it quits")
 }
 
-// BackgroundLog is the log of a magpie serve that magpie tui left
+// BackgroundLog is the log of a eipgam serve that eipgam tui left
 // running as it quit (serveInBackground).
 func BackgroundLog() string { return filepath.Join(appdir.Cache(), "serve.log") }
 
-// serveInBackground starts `magpie serve` on its own, outliving this
-// process and its terminal, its output in a log in magpie's cache.
+// serveInBackground starts `eipgam serve` on its own, outliving this
+// process and its terminal, its output in a log in eipgam's cache.
 func serveInBackground() (int, string, error) {
 	exe, err := os.Executable()
 	if err != nil {
@@ -131,7 +131,7 @@ func wslHere() bool {
 	return strings.Contains(strings.ToLower(string(b)), "microsoft")
 }
 
-// connected says one of agents is connected to magpie.
+// connected says one of agents is connected to eipgam.
 func connected(agents []*agent.Agent) bool {
 	for _, a := range agents {
 		if a.Routed != nil && a.Routed() {

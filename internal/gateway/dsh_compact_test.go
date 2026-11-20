@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // dshUA is DSH 0.2.2's User-Agent (llm's attributionHeaders), which its
-// llm-pi-ai routes, magpie's among them, send with nothing else of its own.
+// llm-pi-ai routes, eipgam's among them, send with nothing else of its own.
 const dshUA = "deepseek-harness/0.2.2-rc.1 (+https://github.com/deepseek-ai/deepseek-harness)"
 
 // dshCompactAsk is the first line of compaction-basic's
@@ -67,7 +67,7 @@ func fakeServing(t *testing.T) *desktopSubagentUpstream {
 	return u
 }
 
-// dshAsk sends a request shaped like DSH's through magpie's llm-pi-ai route:
+// dshAsk sends a request shaped like DSH's through eipgam's llm-pi-ai route:
 // its User-Agent, no compaction mark, on the protocol at path, ending with
 // last. It carries key, the token of the agent it is from: the gateway's
 // tests set no agent list, so DSH's User-Agent names no agent here (the
@@ -131,7 +131,7 @@ func TestDshCompactMoved(t *testing.T) {
 }
 
 // Nothing set, another agent's compaction, the model set asked for itself,
-// and a model set that magpie doesn't serve or the user disabled: the
+// and a model set that eipgam doesn't serve or the user disabled: the
 // compaction goes on as asked.
 func TestDshCompactLeft(t *testing.T) {
 	for _, tc := range []struct{ name, target, key string }{
@@ -163,7 +163,7 @@ func TestDshCompactLeft(t *testing.T) {
 	}
 }
 
-// A bare name names no model of magpie's.
+// A bare name names no model of eipgam's.
 func TestDshCompactModelRefusesBareName(t *testing.T) {
 	fresh(t)
 	if err := provider.SetDshCompactModel("deepseek-flash"); err == nil {

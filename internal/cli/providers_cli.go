@@ -17,33 +17,33 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/daemon"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/daemon"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 var amber = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#B45309", Dark: "#F2B544"})
 
 const providerUsage = `usage:
-  magpie providers                        list providers, keys and who uses them
-  magpie presets                          list the vendors magpie knows out of the box
-  magpie provider <id>                    show one provider and its models
-  magpie provider add <preset> <key>      add a preset vendor   e.g. magpie provider add moonshot sk-…
+  eipgam providers                        list providers, keys and who uses them
+  eipgam presets                          list the vendors eipgam knows out of the box
+  eipgam provider <id>                    show one provider and its models
+  eipgam provider add <preset> <key>      add a preset vendor   e.g. eipgam provider add moonshot sk-…
                                           again, it adds another (moonshot-2); k=v pairs too: id, name, header.X-Foo
-  magpie provider add <name> k=v…         add a custom vendor   k: url, anthropic, responses, gemini, decide, key, models, catalog, icon, header.X-Foo, balance, balance.path, balance.method, balance.token, models.url, list, search, user-agent,
+  eipgam provider add <name> k=v…         add a custom vendor   k: url, anthropic, responses, gemini, decide, key, models, catalog, icon, header.X-Foo, balance, balance.path, balance.method, balance.token, models.url, list, search, user-agent,
                                           access.key, access.secret (a Tencent Cloud SecretId and SecretKey, or an Alibaba Cloud AccessKey, for its plan's windows)
-  magpie provider set <id> k=v…           change a provider's settings, with the same k=v pairs as add;
+  eipgam provider set <id> k=v…           change a provider's settings, with the same k=v pairs as add;
                                           codex=as-sent sends Codex's Responses requests as Codex sent them
                                           (a relay that checks they are Codex's own), codex=default fits them;
                                           user-agent=agent, the default, sends the User-Agent the agent gave
-                                          (pi, opencode…); user-agent=magpie sends magpie's in its place;
+                                          (pi, opencode…); user-agent=eipgam sends eipgam's in its place;
                                           compaction=native asks the provider Codex's own compaction and hands
                                           Codex its sealed item as it came (a Responses API, a ChatGPT account,
-                                          Copilot), compaction=magpie, the default, has magpie summarise
+                                          Copilot), compaction=eipgam, the default, has eipgam summarise
                                           routing=smart|order|rotate|usage|pace|weight|free|fast|drain spreads requests
                                           over its keys or accounts (fast: the one that answered fastest lately first;
                                           drain: one until it is used up, then the next, never back to an earlier one);
@@ -54,13 +54,13 @@ const providerUsage = `usage:
                                           Responses API where it was loaded (an additional_tools item, which
                                           keeps the cache); OpenAI's API and a ChatGPT (Codex) account do so by
                                           default; additional-tools=off puts it with the other tools,
-                                          additional-tools=default is magpie's
+                                          additional-tools=default is eipgam's
                                           resolve.<host>=<IP>[,dns:<name>…] connects a host of its base URLs there
                                           (curl --resolve: the URL's name stays for TLS and Host); empty takes the
                                           host's out, resolve= clears them all
-                                          upstream-providers=on, on a Remote magpie, names its models by the
+                                          upstream-providers=on, on a Remote eipgam, names its models by the
                                           provider serving each there (Claude · Office › RelayA); off, the
-                                          default, as that magpie's own list names them
+                                          default, as that eipgam's own list names them
                                           patience=2m keeps a request to it alone (not through a group) that long
                                           while it is busy or briefly rate limited, asking again after a pause
                                           (at most 4m); patience=off hands the agent the error at once;
@@ -71,146 +71,146 @@ const providerUsage = `usage:
                                           over HTTP alone; socket=default, auto on api.openai.com, else off
                                           errors=pass sends the agent its errors as the vendor sent them:
                                           asked once, nothing read into them, no other provider tried;
-                                          errors=magpie, the default, has magpie handle them
-  magpie provider key <id> <key>          change the API key
-  magpie provider keys <id> [add [key…|-]]   print every key, one a line, or add keys (as words,
-                                          or one a line on stdin), to carry them to another magpie
-  magpie provider icon <id> <file|name>   give a custom provider a picture (PNG, JPEG, SVG…) or a built-in icon
-  magpie provider fallback <id> <provider/model>…   where requests go when it's out of quota or down (none clears)
-  magpie provider models <id> [ids…]      fetch the vendor's model list, or choose which models to expose:
+                                          errors=eipgam, the default, has eipgam handle them
+  eipgam provider key <id> <key>          change the API key
+  eipgam provider keys <id> [add [key…|-]]   print every key, one a line, or add keys (as words,
+                                          or one a line on stdin), to carry them to another eipgam
+  eipgam provider icon <id> <file|name>   give a custom provider a picture (PNG, JPEG, SVG…) or a built-in icon
+  eipgam provider fallback <id> <provider/model>…   where requests go when it's out of quota or down (none clears)
+  eipgam provider models <id> [ids…]      fetch the vendor's model list, or choose which models to expose:
                                           ids… replace the list, +id adds one, -id takes one out, all: the default,
                                           none: serve none of them, its balance and usage still shown,
                                           best: only the newest of each family it lists (Opus 5.6 replaces 5.5 once listed)
-  magpie provider refresh <id>            fetch the vendor's model list again (as the app's Fetch models)
-  magpie provider refresh-every <id> [6h|1d|off]
-                                          have the gateway (magpie serve, the app) fetch the list again by itself
+  eipgam provider refresh <id>            fetch the vendor's model list again (as the app's Fetch models)
+  eipgam provider refresh-every <id> [6h|1d|off]
+                                          have the gateway (eipgam serve, the app) fetch the list again by itself
                                           once it is that old (at least 10m; off: only when asked)
-  magpie provider auto-include <id> [rule…|none]
+  eipgam provider auto-include <id> [rule…|none]
                                           rules over a model's id, in any case (a glob with *, e.g. 'gpt-*' '*claude*',
                                           or 're:…' a regular expression, where (?-i) makes case matter): the listed models one matches are exposed
                                           now, and each one a later fetch newly lists; picks are only added to
-  magpie provider account-models <id> [account|key [ids…|all]]
+  eipgam provider account-models <id> [account|key [ids…|all]]
                                           the models one account or key alone serves; all: every model the provider has
-  magpie provider account-cap <id> [account [percent|off]]
+  eipgam provider account-cap <id> [account [percent|off]]
                                           use a subscription account up to a share of each usage window (e.g. 70):
                                           at it, routing takes the account for used up until the window renews
-  magpie provider account-cap <id> <account> --window <name> [percent|none|default]
+  eipgam provider account-cap <id> <account> --window <name> [percent|none|default]
                                           a share for one window alone (e.g. "5 hours" 50): none is no cap on it,
                                           default has it follow the account's cap
-  magpie provider account-cap <id> <account> --window <name> --amount <n|off>
+  eipgam provider account-cap <id> <account> --window <name> --amount <n|off>
                                           a fixed amount of a window counted in a unit (e.g. "Daily credits" 300),
-                                          by the vendor's count, spending outside magpie included
-  magpie provider pool <id> [--accounts a,b,…] [--cap percent|off] [--stop on|off] [--careful on|off]
+                                          by the vendor's count, spending outside eipgam included
+  eipgam provider pool <id> [--accounts a,b,…] [--cap percent|off] [--stop on|off] [--careful on|off]
                                           a subscription's accounts as one pool: which are in use and in what order,
                                           each one's cap, --stop: answer 429 at the caps rather than go on to the
                                           fallbacks, --careful: read usage again near a cap, holding what can't be read
-  magpie provider account-concurrency <id> [account|key [n|off|default]]
+  eipgam provider account-concurrency <id> [account|key [n|off|default]]
                                           how many requests one account or key has out at once, over every model,
                                           routing group and agent: its own, off for none, default for the provider's
-  magpie provider spend-cap <id> [key [usd [day|month|total]|off]]
+  eipgam provider spend-cap <id> [key [usd [day|month|total]|off]]
                                           how much an API key may spend, in USD as the Usage page prices its calls,
                                           a day (the default), a month or in all from now: at it, routing takes the
                                           key for used up and goes on to the other keys and the fallbacks
-  magpie provider key-rate <id> [key [rate|default]]
+  eipgam provider key-rate <id> [key [rate|default]]
                                           the price rate one API key bills at against the official price, as a relay
                                           bills its key groups apart (e.g. 0.5): the Usage page counts that key's calls
                                           at it; default has it bill at the provider's rate
-  magpie provider key-balance <id> [key [usd|¥cny|off] [--refill monthly[:day]|weekly[:mon…sun]|daily|off] [--expiring amount@yyyy-mm-dd|off]… [--expiring-remove [amount@]yyyy-mm-dd]…]
+  eipgam provider key-balance <id> [key [usd|¥cny|off] [--refill monthly[:day]|weekly[:mon…sun]|daily|off] [--expiring amount@yyyy-mm-dd|off]… [--expiring-remove [amount@]yyyy-mm-dd]…]
                                           the balance on an API key whose vendor tells none, typed from its own page
-                                          in USD or in yuan (¥100): the Usage page shows it less what magpie prices the
+                                          in USD or in yuan (¥100): the Usage page shows it less what eipgam prices the
                                           key's calls at since; with --refill it is whole again each month or week;
                                           --expiring adds credit that counts through a day and is spent first
                                           (each one a grant, the soonest spent first; off takes every one off)
-  magpie provider account-weight <id> [account [n|default]]
+  eipgam provider account-weight <id> [account [n|default]]
                                           a subscription account's share of the requests with routing=weight:
                                           one weighing 3 takes three for each one weighing 1 takes (default 1)
-  magpie provider queue <id> [length [seconds]]
+  eipgam provider queue <id> [length [seconds]]
                                           how many may wait for each account or key past its limit, and how long;
                                           past either a request is turned away with a 429 (0: no bound)
-  magpie provider rpm <id> [n|off]        how many requests each account or key sends the vendor in any minute;
+  eipgam provider rpm <id> [n|off]        how many requests each account or key sends the vendor in any minute;
                                           one more waits for room, up to 2 minutes, then is turned away with a 429
-  magpie provider at-once <id> [n|off|default]
+  eipgam provider at-once <id> [n|off|default]
                                           how many of its accounts or keys take requests at the same time, the first
                                           in the list; the next takes over when one runs out or fails (off: no limit,
                                           default: what its plugin says)
-  magpie provider quota-rest <id> [30m|6h|7d|until 08:00|until 00:00+08:00|default]
+  eipgam provider quota-rest <id> [30m|6h|7d|until 08:00|until 00:00+08:00|default]
                                           how long a key sits out once the vendor says it is out of its allowance
                                           without saying when it is back (default: 15 minutes; at most 8 days),
                                           or until the time of day a daily allowance comes back, on this
                                           computer's clock or at the vendor's offset from UTC
-  magpie provider rest-cap <id> [1m|30m|6h|1d|off|default]
+  eipgam provider rest-cap <id> [1m|30m|6h|1d|off|default]
                                           the most a key or account sits out while it keeps failing or being
                                           rate limited, its rest doubling each time from a minute (default:
                                           10 minutes for a failure, 30 for a rate limit; at most 8 days);
                                           off: one that fails without saying why (a relay's 5xx) doesn't
                                           rest at all, while out of quota, its key refused or rate limited
                                           still rests it
-  magpie provider listed <id> yes|no      no: its models serve only through routing groups, not in the list
-  magpie provider this-device <id> yes|no
+  eipgam provider listed <id> yes|no      no: its models serve only through routing groups, not in the list
+  eipgam provider this-device <id> yes|no
                                           yes: kept on this computer; sync neither sends it out nor lets
                                           another computer's copy replace or remove it
-  magpie provider off|on <id>             switch it off (kept, but no agent or request uses it), or on again
-  magpie provider test <id> [--as codex|claude-code] [model…]
+  eipgam provider off|on <id>             switch it off (kept, but no agent or request uses it), or on again
+  eipgam provider test <id> [--as codex|claude-code] [model…]
                                           send a tiny request through each endpoint, or to each model;
                                           --as asks it as that agent does, for a relay that serves only it
-  magpie provider rm <id>                 remove a provider
+  eipgam provider rm <id>                 remove a provider
 
-  e.g. magpie provider add "My Relay" url=https://relay.example.com/v1 key=sk-…
-       magpie provider add "Own Claude" anthropic=https://gw.example.com key=sk-… catalog=anthropic
-       magpie provider add "My Relay" url=https://relay.example.com/v1 key=sk-… header.X-Org-Id=acme
-       magpie provider add remote-magpie sk-magpie-… url=http://192.168.1.20:3425 id=office
-                                   (another computer's magpie, shared on its network: its models and routing
+  e.g. eipgam provider add "My Relay" url=https://relay.example.com/v1 key=sk-…
+       eipgam provider add "Own Claude" anthropic=https://gw.example.com key=sk-… catalog=anthropic
+       eipgam provider add "My Relay" url=https://relay.example.com/v1 key=sk-… header.X-Org-Id=acme
+       eipgam provider add remote-eipgam sk-eipgam-… url=http://192.168.1.20:3425 id=office
+                                   (another computer's eipgam, shared on its network: its models and routing
                                     groups as office/…, each request sent on in the API the agent spoke)
-       magpie provider add qwencloud sk-ws-… region=us-east-1   (Qwen Cloud, Alibaba's international platform, pay as you go;
+       eipgam provider add qwencloud sk-ws-… region=us-east-1   (Qwen Cloud, Alibaba's international platform, pay as you go;
                                     qwencloud-token-plan sk-sp-… is its Token Plan)
-       magpie provider add google-vertex project=my-project impersonate=vertex@my-project.iam.gserviceaccount.com
+       eipgam provider add google-vertex project=my-project impersonate=vertex@my-project.iam.gserviceaccount.com
                                    (Google Vertex AI in your Google Cloud project, with no key: signed with gcloud's
                                     Application Default Credentials (gcloud auth application-default login) unless
                                     credentials=<file> names another, a service account key too; impersonate= needs
                                     roles/iam.serviceAccountTokenCreator on that account; location= global (the
                                     default), us, eu or a region such as us-central1; set changes them, empty clears)
-       magpie provider add google-vertex AQ.Ab8R…   (Vertex AI express mode: an API key, no project or gcloud; Gemini
+       eipgam provider add google-vertex AQ.Ab8R…   (Vertex AI express mode: an API key, no project or gcloud; Gemini
                                     models only. project= beside it asks that project's address with the key;
                                     url=https://my-proxy.example.com asks a gateway that answers as Vertex AI does)
-       magpie provider add "My Decider" decide=https://decide.example.com/v1 key=sk-… models=my-decision-model
+       eipgam provider add "My Decider" decide=https://decide.example.com/v1 key=sk-… models=my-decision-model
                                    (a System One API, POST …/systemone: it routes groups, its models are never an agent's)
-       magpie provider add anthropic sk-… id=anthropic-ws2 name="Anthropic WS2" header.anthropic-workspace-id=wrkspc_…
-       magpie provider set my-relay models.url=https://relay.example.com/api/models catalog=
-       magpie provider set my-relay list=off models=my-model-1
+       eipgam provider add anthropic sk-… id=anthropic-ws2 name="Anthropic WS2" header.anthropic-workspace-id=wrkspc_…
+       eipgam provider set my-relay models.url=https://relay.example.com/api/models catalog=
+       eipgam provider set my-relay list=off models=my-model-1
                                    (its model list is never asked for: only the models given by id are served)
-       magpie provider set my-relay resolve.relay.example.com=10.0.0.5,dns:gw.corp.example
+       eipgam provider set my-relay resolve.relay.example.com=10.0.0.5,dns:gw.corp.example
                                    (Advanced › Connect to: connects to 10.0.0.5, then gw.corp.example's
                                     address, while TLS and Host still say relay.example.com)
-       magpie provider set my-relay search=yes
+       eipgam provider set my-relay search=yes
                                    (the relay answers Claude Code's WebSearch and Codex's web search itself, web_search
-                                    and web.run's /alpha/search: those go to it as sent, not through magpie's search)
-       magpie provider add lmstudio address=http://192.168.1.5:1234
-       magpie provider set lmstudio address=192.168.1.5:1234
+                                    and web.run's /alpha/search: those go to it as sent, not through eipgam's search)
+       eipgam provider add lmstudio address=http://192.168.1.5:1234
+       eipgam provider set lmstudio address=192.168.1.5:1234
                                    (Ollama, LM Studio, oMLX or MLX-Serve on another port or computer: each of its
                                     URLs moves there, keeping its path; address= alone puts it back at the default)
-       magpie provider set ollama unmasked=yes
+       eipgam provider set ollama unmasked=yes
                                    (Settings' redaction leaves its requests as written, at any address: your call,
                                     so mind a relay that passes them on to a vendor; a subscription or a plugin's
-                                    provider too, whose vendor gets them so; never another magpie)
-       magpie provider set claude fallback-for-others=no
+                                    provider too, whose vendor gets them so; never another eipgam)
+       eipgam provider set claude fallback-for-others=no
                                    (no other model's fallback, nor a routing group's next after one:
                                     a local model that is down or full doesn't send its requests on to it)
-       magpie provider set modelscope free=yes
+       eipgam provider set modelscope free=yes
                                    (every model of it counts as free, so a Free first routing spends it before
                                     paid ones, as a free daily quota; prices and Usage's costs stay as listed)
-       magpie provider set my-relay billing=plan
+       eipgam provider set my-relay billing=plan
                                    (marks it on a plan, or billing=payg pay as you go, on Providers and Routing;
-                                    billing=auto goes back to magpie's reading of its endpoints)
-       magpie provider set 100milionseek max-images=8 max-images.gemini-3-flash=10
+                                    billing=auto goes back to eipgam's reading of its endpoints)
+       eipgam provider set 100milionseek max-images=8 max-images.gemini-3-flash=10
                                    (the most images one request to it may carry, counted over the whole
                                     conversation: past it the oldest are left out, each replaced by a line
                                     of text, the latest message's images kept; max-images.<model> for one
                                     of its models; 0 or empty clears it)
-       magpie provider add "My Relay" url=https://relay.example.com/v1 key=sk-… balance=https://relay.example.com/api/usage/token balance.path='$data.total_available / 500000'
-       magpie provider set my-relay balance.path='(1 - credits.monthlyCredits / 70) %'
-       magpie provider set my-relay balance.method=POST
+       eipgam provider add "My Relay" url=https://relay.example.com/v1 key=sk-… balance=https://relay.example.com/api/usage/token balance.path='$data.total_available / 500000'
+       eipgam provider set my-relay balance.path='(1 - credits.monthlyCredits / 70) %'
+       eipgam provider set my-relay balance.method=POST
                                    (a balance endpoint that answers only a POST: asked with no body)
-       magpie provider set my-relay balance=https://relay.example.com/api/user/self balance.path='$data.quota / 500000' balance.token=<access token> header.New-Api-User=<user id>
+       eipgam provider set my-relay balance=https://relay.example.com/api/user/self balance.path='$data.quota / 500000' balance.token=<access token> header.New-Api-User=<user id>
                                    (a new-api relay's whole account: its access token and user id, from its personal settings)
                                    (balance.path: where the amount is in the reply, or a sum of those with + - * / and
                                     brackets; $ or ¥ in front adds the sign, % after it shows a percent of 1;
@@ -218,14 +218,14 @@ const providerUsage = `usage:
                                     a list's items are a.*.used, or a[status=active].used for those that match,
                                     in sum() max() min() count(): 'sum(a.*.used) / sum(a.*.cap) %'; one the reply
                                     hasn't shows — and the others still show)
-       magpie provider set my-relay context=272k context.gpt-6=1m
+       eipgam provider set my-relay context=272k context.gpt-6=1m
                                    (context: how long a request agents are told the models take, over what the
                                     vendor or models.dev says; context.<model> for one of them; empty clears)
-       magpie provider set opencode-go family=ocgo
-       magpie provider set my-relay id=relay   (renames it: groups and agents on my-relay/… move to relay/…)
-                                   (family: a tag for which agents are shown its models, see magpie visible)`
+       eipgam provider set opencode-go family=ocgo
+       eipgam provider set my-relay id=relay   (renames it: groups and agents on my-relay/… move to relay/…)
+                                   (family: a tag for which agents are shown its models, see eipgam visible)`
 
-// keyColumn is what magpie providers says of p's key or account.
+// keyColumn is what eipgam providers says of p's key or account.
 func keyColumn(p provider.Provider) string {
 	switch {
 	case p.Off:
@@ -262,7 +262,7 @@ func keyColumn(p provider.Provider) string {
 // signedOut is Provider.SignedOut, for a test to stand in for.
 var signedOut = provider.Provider.SignedOut
 
-// providers: `magpie providers`
+// providers: `eipgam providers`
 func providers() error {
 	all := provider.All()
 	// a providers.json that can't be read is not "no providers yet": what
@@ -272,7 +272,7 @@ func providers() error {
 		if bad != nil {
 			return bad
 		}
-		fmt.Println(muted.Render("no providers yet ·"), "magpie provider add moonshot sk-…", muted.Render("· magpie presets lists the vendors"))
+		fmt.Println(muted.Render("no providers yet ·"), "eipgam provider add moonshot sk-…", muted.Render("· eipgam presets lists the vendors"))
 		return nil
 	}
 	uses := usesByProvider()
@@ -297,7 +297,7 @@ func providers() error {
 		if p.Off {
 			// the user's own switch, kept as they set it: how to undo it
 			// is said beside it, never done for them
-			r.uses = strings.TrimSpace(muted.Render("magpie provider on "+p.ID) + "  " + r.uses)
+			r.uses = strings.TrimSpace(muted.Render("eipgam provider on "+p.ID) + "  " + r.uses)
 		}
 		if e := p.ListError(); e != "" {
 			r.uses += amber.Render("  ! couldn't list its models: " + e)
@@ -327,7 +327,7 @@ func providers() error {
 		}
 		back := ""
 		if x.Provider != "" {
-			back = " · magpie provider add " + x.Provider + " brings it back"
+			back = " · eipgam provider add " + x.Provider + " brings it back"
 		}
 		fmt.Println(" ", muted.Render(name+" is signed in but not offered: "+x.Why+back))
 	}
@@ -342,7 +342,7 @@ func usesByProvider() map[string][]string {
 			continue
 		}
 		v := a.Fields[0].Get()
-		v = strings.TrimPrefix(v, "magpie/")
+		v = strings.TrimPrefix(v, "eipgam/")
 		if provider.IsGroupRef(v) {
 			continue // a routing group, of no one provider
 		}
@@ -353,7 +353,7 @@ func usesByProvider() map[string][]string {
 	return out
 }
 
-// presets: `magpie presets`
+// presets: `eipgam presets`
 func presets() error {
 	have := map[string]bool{}
 	for _, p := range provider.All() {
@@ -363,15 +363,15 @@ func presets() error {
 	for _, pr := range provider.Presets() {
 		if pr.Kind != kind {
 			kind = pr.Kind
-			fmt.Println(faint.Render("  " + map[provider.Kind]string{provider.KindVendor: "vendors", provider.KindRelay: "relays", provider.KindLocal: "local", provider.KindRemote: "another computer's magpie"}[kind]))
+			fmt.Println(faint.Render("  " + map[provider.Kind]string{provider.KindVendor: "vendors", provider.KindRelay: "relays", provider.KindLocal: "local", provider.KindRemote: "another computer's eipgam"}[kind]))
 		}
 		name := bold.Render(pr.Name)
-		state := muted.Render("magpie provider add " + pr.ID + " <key>")
+		state := muted.Render("eipgam provider add " + pr.ID + " <key>")
 		if pr.NoKey {
-			state = muted.Render("magpie provider add " + pr.ID)
+			state = muted.Render("eipgam provider add " + pr.ID)
 		}
 		if pr.ID == provider.VertexPreset {
-			state = muted.Render("magpie provider add " + pr.ID + " project=<project id>")
+			state = muted.Render("eipgam provider add " + pr.ID + " project=<project id>")
 		}
 		if have[pr.ID] {
 			state = green.Render("✓ added")
@@ -381,7 +381,7 @@ func presets() error {
 	return nil
 }
 
-// models: `magpie models [<agent>]` — the catalog every agent sees, or the
+// models: `eipgam models [<agent>]` — the catalog every agent sees, or the
 // one agent is shown and what is kept from it
 func models(args []string) error {
 	entries := provider.Catalog()
@@ -401,14 +401,14 @@ func models(args []string) error {
 		entries, hidden = provider.CatalogFor(agentID)
 	}
 	if _, only := provider.PickedModels(agentID); len(entries) == 0 && agentID != "" && only {
-		fmt.Println(amber.Render("!"), agentID, "is shown none of them: it is shown only the models picked for it, and none is", muted.Render("· tick some in its list on the Agents page, or magpie visible "+agentID+" --show-new"))
+		fmt.Println(amber.Render("!"), agentID, "is shown none of them: it is shown only the models picked for it, and none is", muted.Render("· tick some in its list on the Agents page, or eipgam visible "+agentID+" --show-new"))
 	} else if len(entries) == 0 && agentID != "" {
 		names, _ := provider.VisibleTo(agentID)
-		fmt.Println(amber.Render("!"), agentID, "is shown none of them: nothing is in", strings.Join(names, ", "), muted.Render("· magpie visible "+agentID+" all shows it every model"))
+		fmt.Println(amber.Render("!"), agentID, "is shown none of them: nothing is in", strings.Join(names, ", "), muted.Render("· eipgam visible "+agentID+" all shows it every model"))
 	} else if len(entries) == 0 && bad != nil {
 		return bad
 	} else if len(entries) == 0 {
-		fmt.Println(muted.Render("no models yet · add a provider first:"), "magpie provider add moonshot sk-…")
+		fmt.Println(muted.Render("no models yet · add a provider first:"), "eipgam provider add moonshot sk-…")
 		return nil
 	}
 	w := 0
@@ -445,7 +445,7 @@ func models(args []string) error {
 		}
 		if ids, why := notExposed(p); len(ids) > 0 {
 			fmt.Println(faint.Render("  "+p.Name+": "+plural(len(ids), "more model")+" in its list, not exposed ("+why+"): ") + muted.Render(listSome(ids, 6)))
-			fmt.Println(faint.Render("    magpie provider models " + p.ID + " +<model> exposes one"))
+			fmt.Println(faint.Render("    eipgam provider models " + p.ID + " +<model> exposes one"))
 		}
 	}
 	fmt.Println(faint.Render("  " + advertisedURL() + "/v1"))
@@ -453,7 +453,7 @@ func models(args []string) error {
 }
 
 // notExposed are the models p's list has that it doesn't expose, and why:
-// the user picked others, or no picks and the list is longer than magpie
+// the user picked others, or no picks and the list is longer than eipgam
 // exposes by default.
 func notExposed(p provider.Provider) ([]string, string) {
 	shown := map[string]bool{}
@@ -483,7 +483,7 @@ func listSome(ids []string, n int) string {
 	return strings.Join(ids, ", ")
 }
 
-// providerCmd: `magpie provider <verb> …`
+// providerCmd: `eipgam provider <verb> …`
 func providerCmd(args []string) error {
 	if len(args) < 2 {
 		return fmt.Errorf("%s", providerUsage)
@@ -495,7 +495,7 @@ func providerCmd(args []string) error {
 	case "set":
 		// the same k=v pairs as add, on a provider already here
 		if len(rest) < 2 {
-			return fmt.Errorf("magpie provider set <id> k=v…\n\n%s", providerUsage)
+			return fmt.Errorf("eipgam provider set <id> k=v…\n\n%s", providerUsage)
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -531,7 +531,7 @@ func providerCmd(args []string) error {
 		return nil
 	case "key":
 		if len(rest) != 2 {
-			return fmt.Errorf("magpie provider key <id> <key>")
+			return fmt.Errorf("eipgam provider key <id> <key>")
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -545,7 +545,7 @@ func providerCmd(args []string) error {
 		return nil
 	case "icon":
 		if len(rest) != 2 {
-			return fmt.Errorf("magpie provider icon <id> <picture file | built-in name | \"\">")
+			return fmt.Errorf("eipgam provider icon <id> <picture file | built-in name | \"\">")
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -570,7 +570,7 @@ func providerCmd(args []string) error {
 		// where requests go when this provider is out of quota, rate
 		// limited or down; "none" clears the list
 		if len(rest) < 1 {
-			return fmt.Errorf("magpie provider fallback <id> [provider/model… | group/<id>… | none]")
+			return fmt.Errorf("eipgam provider fallback <id> [provider/model… | group/<id>… | none]")
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -583,7 +583,7 @@ func providerCmd(args []string) error {
 					// a routing group's id ("group/<id>") resolves too: the
 					// gateway sends the request through the group
 					if _, _, ok := provider.Resolve(id); !ok {
-						return fmt.Errorf("magpie knows no model or group %q (magpie models lists them)", id)
+						return fmt.Errorf("eipgam knows no model or group %q (eipgam models lists them)", id)
 					}
 					p.Fallback = append(p.Fallback, id)
 				}
@@ -596,7 +596,7 @@ func providerCmd(args []string) error {
 			}
 		}
 		if len(p.Fallback) == 0 {
-			fmt.Println(p.Name, muted.Render("has no fallback · magpie provider fallback "+p.ID+" <provider/model>…"))
+			fmt.Println(p.Name, muted.Render("has no fallback · eipgam provider fallback "+p.ID+" <provider/model>…"))
 			return nil
 		}
 		fmt.Println(green.Render("✓"), p.Name, "falls back to", strings.Join(p.Fallback, muted.Render(" → ")),
@@ -604,7 +604,7 @@ func providerCmd(args []string) error {
 		return nil
 	case "rm", "remove", "delete":
 		if len(rest) != 1 {
-			return fmt.Errorf("magpie provider rm <id>")
+			return fmt.Errorf("eipgam provider rm <id>")
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -631,7 +631,7 @@ func providerCmd(args []string) error {
 			}
 		}
 		if len(rest) < 1 {
-			return fmt.Errorf("magpie provider test <id> [--as codex|claude-code] [model…]")
+			return fmt.Errorf("eipgam provider test <id> [--as codex|claude-code] [model…]")
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -699,7 +699,7 @@ func providerCmd(args []string) error {
 		// no: the provider's models leave the list agents see and serve
 		// only through the routing groups they are in
 		if len(rest) != 2 || (rest[1] != "yes" && rest[1] != "no") {
-			return fmt.Errorf("magpie provider listed <id> yes|no")
+			return fmt.Errorf("eipgam provider listed <id> yes|no")
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -719,7 +719,7 @@ func providerCmd(args []string) error {
 		// yes: sync neither sends the provider out nor lets another
 		// computer's copy replace or remove it (treydtw on X)
 		if len(rest) != 2 || (rest[1] != "yes" && rest[1] != "no") {
-			return fmt.Errorf("magpie provider this-device <id> yes|no")
+			return fmt.Errorf("eipgam provider this-device <id> yes|no")
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -738,7 +738,7 @@ func providerCmd(args []string) error {
 		// off: kept with its keys, but agents are given none of its
 		// models and no request goes to it
 		if len(rest) != 1 {
-			return fmt.Errorf("magpie provider %s <id>", verb)
+			return fmt.Errorf("eipgam provider %s <id>", verb)
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
@@ -757,14 +757,14 @@ func providerCmd(args []string) error {
 		return nil
 	case "models", "refresh", "fetch":
 		if len(rest) < 1 {
-			return fmt.Errorf("magpie provider %s <id> [model ids to expose…]", verb)
+			return fmt.Errorf("eipgam provider %s <id> [model ids to expose…]", verb)
 		}
 		p, err := provider.Find(rest[0])
 		if err != nil {
 			return err
 		}
 		if len(rest) > 1 && verb != "models" {
-			return fmt.Errorf("magpie provider %s <id> fetches its list · magpie provider models <id> <ids…> picks from it", verb)
+			return fmt.Errorf("eipgam provider %s <id> fetches its list · eipgam provider models <id> <ids…> picks from it", verb)
 		}
 		if len(rest) > 1 {
 			before := *p
@@ -806,7 +806,7 @@ func providerCmd(args []string) error {
 		}
 		return showProvider(*p)
 	}
-	// `magpie provider <id>`
+	// `eipgam provider <id>`
 	p, err := provider.Find(verb)
 	if err != nil {
 		return err
@@ -814,10 +814,10 @@ func providerCmd(args []string) error {
 	return showProvider(*p)
 }
 
-// addProvider: `magpie provider add <preset> [key]` or `magpie provider add <name> k=v…`
+// addProvider: `eipgam provider add <preset> [key]` or `eipgam provider add <name> k=v…`
 func addProvider(rest []string) error {
 	if len(rest) == 0 {
-		return fmt.Errorf("magpie provider add <preset> <key>   or   magpie provider add <name> k=v…\n\n%s", providerUsage)
+		return fmt.Errorf("eipgam provider add <preset> <key>   or   eipgam provider add <name> k=v…\n\n%s", providerUsage)
 	}
 	if len(rest) == 1 && slices.ContainsFunc(provider.Excluded(), func(x provider.Exclusion) bool { return x.Provider == strings.ToLower(rest[0]) }) {
 		// a signed-in account the user removed comes back with its picks
@@ -847,7 +847,7 @@ func addProvider(rest []string) error {
 	id, err := provider.Add(p)
 	if err != nil && p.IsVertex() && (p.Vertex == nil || strings.TrimSpace(p.Vertex.Project) == "") {
 		// the pair that gives the project, which Save's words don't name
-		return fmt.Errorf("%w · magpie provider add %s project=<your Google Cloud project's id>, or give an API key", err, p.Preset)
+		return fmt.Errorf("%w · eipgam provider add %s project=<your Google Cloud project's id>, or give an API key", err, p.Preset)
 	}
 	if err != nil {
 		return err
@@ -887,14 +887,14 @@ func announce(id string) error {
 	}
 	n := len(saved.Exposed())
 	if saved.DecideOnly() {
-		fmt.Println("  it routes groups: magpie group set <id> effort=auto classifier="+saved.ID+"/"+saved.Jev(),
+		fmt.Println("  it routes groups: eipgam group set <id> effort=auto classifier="+saved.ID+"/"+saved.Jev(),
 			muted.Render("· or a rule's intent=…"))
 		return nil
 	}
 	if n == 0 {
-		fmt.Println(amber.Render("!"), "no models exposed yet ·", "magpie provider models", saved.ID, "<ids…>")
+		fmt.Println(amber.Render("!"), "no models exposed yet ·", "eipgam provider models", saved.ID, "<ids…>")
 	} else {
-		fmt.Printf("  %d models in the catalog · %s\n", n, muted.Render("magpie models"))
+		fmt.Printf("  %d models in the catalog · %s\n", n, muted.Render("eipgam models"))
 	}
 	return nil
 }
@@ -927,7 +927,7 @@ func showProviderAsking(p provider.Provider, ask bool) error {
 		kv("errors", "pass"+muted.Render("  sent to the agent as the vendor sent them, asked once"))
 	}
 	if p.MagpieUserAgent {
-		kv("user-agent", "magpie's"+muted.Render("  not the one the agent gave"))
+		kv("user-agent", "eipgam's"+muted.Render("  not the one the agent gave"))
 	}
 	if p.Unredacted {
 		why := "  Settings' redaction leaves its requests as written"
@@ -983,7 +983,7 @@ func showProviderAsking(p provider.Provider, ask bool) error {
 		}
 		project := v.Project
 		if !p.Ready() {
-			project = amber.Render(cmp.Or(project, "not set")) + muted.Render("  magpie provider set "+p.ID+" project=…")
+			project = amber.Render(cmp.Or(project, "not set")) + muted.Render("  eipgam provider set "+p.ID+" project=…")
 		}
 		if p.Key != "" {
 			// an API key: express mode, or the project's address
@@ -1009,7 +1009,7 @@ func showProviderAsking(p provider.Provider, ask bool) error {
 	case p.Ready():
 		kv("key", muted.Render("none needed"))
 	default:
-		kv("key", amber.Render("not set")+muted.Render("  magpie provider key "+p.ID+" …"))
+		kv("key", amber.Render("not set")+muted.Render("  eipgam provider key "+p.ID+" …"))
 	}
 	kv("catalog", p.Catalog)
 	kv("website", p.Website)
@@ -1061,7 +1061,7 @@ func showProviderAsking(p provider.Provider, ask bool) error {
 	}
 	kv("models", fmt.Sprintf("%d exposed of %d %s", len(ms), len(p.Available()), muted.Render("from "+src)))
 	if ids, why := notExposed(p); len(ids) > 0 {
-		kv("not shown", fmt.Sprintf("%s %s", listSome(ids, 8), muted.Render("· "+why+" · magpie provider models "+p.ID+" +<model> exposes one")))
+		kv("not shown", fmt.Sprintf("%s %s", listSome(ids, 8), muted.Render("· "+why+" · eipgam provider models "+p.ID+" +<model> exposes one")))
 	}
 	names := p.ModelNames()
 	for i, m := range ms {
@@ -1269,10 +1269,10 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 				return fmt.Errorf("codex=as-sent|default, not %q", v)
 			}
 		case "upstream-providers":
-			// on: a Remote magpie's models named by the provider serving
+			// on: a Remote eipgam's models named by the provider serving
 			// each there (Provider.UpstreamProviders, lcc580 on X)
 			if !p.IsRemoteMagpie() {
-				return fmt.Errorf("upstream-providers is a Remote magpie's; %s is not one", p.ID)
+				return fmt.Errorf("upstream-providers is a Remote eipgam's; %s is not one", p.ID)
 			}
 			switch strings.ToLower(v) {
 			case "on", "yes":
@@ -1299,8 +1299,8 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 			// on: a tool an Anthropic client's tool search loads goes to
 			// the provider's Responses API in an additional_tools item
 			// where it was loaded, which keeps the cached prefix (#2660);
-			// off: in the tools, where magpie's default sends the item
-			// (OpenAI's API, a ChatGPT account, #4738); default: magpie's
+			// off: in the tools, where eipgam's default sends the item
+			// (OpenAI's API, a ChatGPT account, #4738); default: eipgam's
 			switch strings.ToLower(v) {
 			case "on", "yes":
 				p.AdditionalTools, p.AdditionalToolsOff = true, false
@@ -1312,7 +1312,7 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 				return fmt.Errorf("additional-tools=on|off|default, not %q", v)
 			}
 		case "socket":
-			// its Responses turns over the Responses WebSocket magpie
+			// its Responses turns over the Responses WebSocket eipgam
 			// speaks to chatgpt.com (#5781): auto leaves a host that
 			// refuses it to HTTP for a while, on tries it every turn
 			s, ok := provider.ParseSocket(v)
@@ -1331,15 +1331,15 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 		case "errors":
 			// pass: its errors go to the agent as the vendor sent them,
 			// asked once, nothing inferred, no other provider tried and
-			// none rested for (ne9ko9 on Discord); magpie: handled by
-			// magpie, the default
+			// none rested for (ne9ko9 on Discord); eipgam: handled by
+			// eipgam, the default
 			var on bool
 			switch strings.ToLower(v) {
 			case "pass", "pass-through", "passthrough", "on", "yes":
 				on = true
-			case "magpie", "default", "off", "no":
+			case "eipgam", "default", "off", "no":
 			default:
-				return fmt.Errorf("errors=pass|magpie, not %q", v)
+				return fmt.Errorf("errors=pass|eipgam, not %q", v)
 			}
 			if on && !p.TakesPassErrors() {
 				return fmt.Errorf("%s isn't a provider with an API key; errors= is for one", p.Name)
@@ -1347,15 +1347,15 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 			p.PassErrors = on
 		case "user-agent", "ua":
 			// agent, the default: a request goes with the User-Agent the
-			// agent that sent it gave (#1851); magpie: magpie's own. A
+			// agent that sent it gave (#1851); eipgam: eipgam's own. A
 			// header.User-Agent the user set stands over both
 			var on bool
 			switch strings.ToLower(v) {
 			case "agent", "pass", "yes", "on":
 				on = true
-			case "magpie", "default", "no", "off":
+			case "eipgam", "default", "no", "off":
 			default:
-				return fmt.Errorf("user-agent=agent|magpie, not %q", v)
+				return fmt.Errorf("user-agent=agent|eipgam, not %q", v)
 			}
 			if on && p.Account != nil {
 				return fmt.Errorf("%s signs in as its own client, which sends the User-Agent it does; user-agent= is for a provider with an API key", p.Name)
@@ -1374,20 +1374,20 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 		case "compaction":
 			// native: Codex's compaction_trigger goes to the provider as
 			// Codex sent it, its sealed compaction back to Codex as it
-			// came (#1099); magpie: magpie's summary, the default
+			// came (#1099); eipgam: eipgam's summary, the default
 			switch strings.ToLower(v) {
 			case "native", "yes", "on":
 				p.NativeCompaction = true
-			case "magpie", "default", "no", "off":
+			case "eipgam", "default", "no", "off":
 				p.NativeCompaction = false
 			default:
-				return fmt.Errorf("compaction=native|magpie, not %q", v)
+				return fmt.Errorf("compaction=native|eipgam, not %q", v)
 			}
 		case "unmasked":
 			// yes: the provider gets the requests as written, unmasked by
 			// Settings' redaction (lc, AcMilan on Discord): the user's word
 			// at any address, a subscription's or a plugin's provider's too
-			// (isee1_1), another magpie's too, which then masks by its own
+			// (isee1_1), another eipgam's too, which then masks by its own
 			// settings (provider.SkipsRedaction)
 			if v != "yes" && v != "no" {
 				return fmt.Errorf("unmasked=yes|no, not %q", v)
@@ -1430,7 +1430,7 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 		case "billing":
 			// plan or payg: how the provider bills, by the user's word,
 			// marked on Providers and Routing (EV_John_Liu on X); auto:
-			// magpie's reading of it (provider.BillingKind)
+			// eipgam's reading of it (provider.BillingKind)
 			switch strings.ToLower(v) {
 			case "plan":
 				p.Billing = provider.BillingPlan
@@ -1469,7 +1469,7 @@ func applyPairs(p *provider.Provider, pairs []string) error {
 			}
 			p.Routing = r
 		case "icon":
-			// a picture on disk is kept by magpie; anything else is one of
+			// a picture on disk is kept by eipgam; anything else is one of
 			// the built-in icons' names
 			if st, err := os.Stat(v); err == nil && !st.IsDir() {
 				icon, err := provider.StoreIconFile(v)
@@ -1622,7 +1622,7 @@ func ago(t time.Time) string {
 }
 
 // refreshLive re-fetches the model list of every ready provider not
-// switched off; `magpie sync` calls it after the catalog download.
+// switched off; `eipgam sync` calls it after the catalog download.
 func refreshLive(ctx context.Context) {
 	var names []string
 	for _, l := range provider.RefreshLists(ctx) {
@@ -1635,33 +1635,33 @@ func refreshLive(ctx context.Context) {
 
 // keyNote says who the gateway takes any key from: this machine (in a
 // container, the container) alone. Shared from Settings, or put on the
-// network by MAGPIE_ADDR (a server, a Docker image), it takes others with
+// network by EIPGAM_ADDR (a server, a Docker image), it takes others with
 // an enabled gateway key.
 func keyNote() string {
 	if settings.Shared().LAN || gateway.OnNetwork() {
 		if gateway.InContainer() {
-			return "(anything works inside the container; from its host and other machines, an enabled gateway key — magpie gateway-key add <name>)"
+			return "(anything works inside the container; from its host and other machines, an enabled gateway key — eipgam gateway-key add <name>)"
 		}
-		return "(anything works from this machine; from others, an enabled gateway key — magpie gateway-key add <name>)"
+		return "(anything works from this machine; from others, an enabled gateway key — eipgam gateway-key add <name>)"
 	}
 	return "(anything works; the gateway only listens on localhost)"
 }
 
-// containerNote follows the addresses magpie finds for itself in a
+// containerNote follows the addresses eipgam finds for itself in a
 // container, which are the container's own: other machines reach it at
 // the host's, and other containers on the host at the bridge's gateway
 // (jiezhengj on Discord: 172.17.0.1 on a NAS), containerLine's.
-const containerNote = "these are the container's own addresses: other machines use the host's, and MAGPIE_PUBLIC_URL=http://<host>:<port> puts it here"
+const containerNote = "these are the container's own addresses: other machines use the host's, and EIPGAM_PUBLIC_URL=http://<host>:<port> puts it here"
 
 // containerLine is where other containers on this host reach the gateway
-// while magpie runs in one, "" when that isn't known. In a LazyCat app on
+// while eipgam runs in one, "" when that isn't known. In a LazyCat app on
 // the box's bridge network it says how the box's LAN address gets the
 // port, which LazyCat publishes only to its client's devices (mtoolstec
 // on X).
 func containerLine() string {
 	if gateway.LazyCatURL() != "" && !gateway.LazyCatBox() {
 		port := gateway.Port()
-		return muted.Render("  only devices with the LazyCat client reach " + gateway.LazyCatURL() + "; for the box's LAN IP on port " + port + ", forward port " + port + " to Magpie in LazyCat's LAN port forwarding app")
+		return muted.Render("  only devices with the LazyCat client reach " + gateway.LazyCatURL() + "; for the box's LAN IP on port " + port + ", forward port " + port + " to eipgam in LazyCat's LAN port forwarding app")
 	}
 	if u := gateway.ContainerHostURL(); u != "" {
 		return muted.Render("  other containers on this host ") + u
@@ -1689,7 +1689,7 @@ func shareLines() []string {
 }
 
 // advertisedURL is what the CLIs print for other machines: the public
-// address when MAGPIE_PUBLIC_URL is valid, otherwise the one reached from
+// address when EIPGAM_PUBLIC_URL is valid, otherwise the one reached from
 // this machine.
 func advertisedURL() string {
 	if u := gateway.PublicURL(); u != "" {
@@ -1698,7 +1698,7 @@ func advertisedURL() string {
 	return gateway.URL()
 }
 
-// serve: `magpie serve` — the gateway alone, in the foreground.
+// serve: `eipgam serve` — the gateway alone, in the foreground.
 func serve() error {
 	s := gateway.New()
 	catalog.Seed()         // the shipped copy, when models.dev can't be reached
@@ -1715,10 +1715,10 @@ func serve() error {
 	// before a change and no codex session is on it
 	go agent.KeepCodexDaemonCurrent(context.Background())
 	go agent.KeepCodexRolloutsPortable(context.Background())
-	// a launch agent an older magpie wrote, brought up to date (#2961)
+	// a launch agent an older eipgam wrote, brought up to date (#2961)
 	daemon.Mend()
 	public := advertisedURL()
-	fmt.Println(green.Render("●"), "magpie gateway on", bold.Render(gateway.URL()))
+	fmt.Println(green.Render("●"), "eipgam gateway on", bold.Render(gateway.URL()))
 	fmt.Println(muted.Render("  OpenAI  "), public+"/v1/chat/completions", muted.Render("·"), public+"/v1/responses")
 	fmt.Println(muted.Render("  Anthropic"), public+"/v1/messages")
 	fmt.Println(muted.Render("  key     "), gateway.Token, muted.Render(keyNote()))
@@ -1733,9 +1733,9 @@ func serve() error {
 		fmt.Println(amber.Render("!"), err) // served without it, as no providers
 	}
 	if n == 0 {
-		fmt.Println(amber.Render("!"), "no models yet ·", "magpie provider add moonshot sk-…")
+		fmt.Println(amber.Render("!"), "no models yet ·", "eipgam provider add moonshot sk-…")
 	} else {
-		fmt.Printf("  %d models · %s\n", n, muted.Render("magpie models"))
+		fmt.Printf("  %d models · %s\n", n, muted.Render("eipgam models"))
 	}
 	for _, x := range provider.Excluded() {
 		if x.SignedOut {
@@ -1752,11 +1752,11 @@ func serve() error {
 		gateway.SetForceRestarter(follow.answerNow)
 		go follow.run(ctx)
 	}
-	// another magpie using this one updated (serve_update.go), and this
+	// another eipgam using this one updated (serve_update.go), and this
 	// one's own Remote magpies follow it
 	gateway.SetUpdater(serveUpdateAsked(follow))
 	go provider.KeepRemotesUpdated(ctx, version)
-	// the models a Remote magpie's agents are on, as the app follows them
+	// the models a Remote eipgam's agents are on, as the app follows them
 	go agent.KeepFollowingRemote(ctx, 30*time.Second)
 	drained := make(chan struct{})
 	finish := stopGatewayOnSignal(func() { stop(); <-drained })
@@ -1764,17 +1764,17 @@ func serve() error {
 	close(drained)
 	finish()
 	if exe := follow.restartTo(); exe != "" {
-		// the plugin hosts end, waited for, first, as magpie web's
+		// the plugin hosts end, waited for, first, as eipgam web's
 		// reexec does (#3285)
 		plugin.EndHosts()
-		log.Printf("magpie serve: restarting into %s", exe)
+		log.Printf("eipgam serve: restarting into %s", exe)
 		return serveReexec(exe, os.Args[1:], os.Environ())
 	}
 	return err
 }
 
-// importCmd adds the provider a magpie://import link describes, after
-// showing it: magpie import [-y] <link>.
+// importCmd adds the provider a eipgam://import link describes, after
+// showing it: eipgam import [-y] <link>.
 func importCmd(args []string) error {
 	yes := false
 	var link string
@@ -1787,7 +1787,7 @@ func importCmd(args []string) error {
 		}
 	}
 	if link == "" {
-		return errors.New("magpie import [-y] 'magpie://import?…'")
+		return errors.New("eipgam import [-y] 'eipgam://import?…'")
 	}
 	p, err := provider.ParseImport(link)
 	if err != nil {
@@ -1811,7 +1811,7 @@ func importCmd(args []string) error {
 		}
 	}
 	if p.Key == "" && !p.Ready() {
-		fmt.Println(amber.Render("!"), "the link has no key · magpie provider key", p.ID, "<key>")
+		fmt.Println(amber.Render("!"), "the link has no key · eipgam provider key", p.ID, "<key>")
 	}
 	return saveNew(p)
 }
@@ -1826,12 +1826,12 @@ func fetchedFrom(p provider.Provider) string {
 	return p.Name
 }
 
-// accountModelsCmd: `magpie provider account-models <id> [account|key
+// accountModelsCmd: `eipgam provider account-models <id> [account|key
 // [ids…|all]]` — the models one account or key of a provider alone serves
 // (#474), each account's with none named, all for every one the provider has.
 func accountModelsCmd(rest []string) error {
 	if len(rest) < 1 {
-		return fmt.Errorf("magpie provider account-models <id> [account|key [model ids…|all]]")
+		return fmt.Errorf("eipgam provider account-models <id> [account|key [model ids…|all]]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {
@@ -1887,7 +1887,7 @@ func accountModelsCmd(rest []string) error {
 // alone (provider.AccountWindowCaps); with --amount too, a fixed amount of
 // that window's own unit, credits or requests (provider.AccountWindowAmounts).
 func accountCapCmd(rest []string) error {
-	usage := fmt.Errorf("magpie provider account-cap <id> [account [percent|off]]\n       magpie provider account-cap <id> <account> --window <name> [percent|none|default]\n       magpie provider account-cap <id> <account> --window <name> --amount <n|off>")
+	usage := fmt.Errorf("eipgam provider account-cap <id> [account [percent|off]]\n       eipgam provider account-cap <id> <account> --window <name> [percent|none|default]\n       eipgam provider account-cap <id> <account> --window <name> --amount <n|off>")
 	window, windowSet := "", false
 	amount, amountSet := "", false
 	for i := 0; i < len(rest); i++ {
@@ -1922,7 +1922,7 @@ func accountCapCmd(rest []string) error {
 		return err
 	}
 	if !p.TakesUsageCap() {
-		return fmt.Errorf("%s has keys with no usage windows magpie reads, not subscription accounts with windows to cap", p.Name)
+		return fmt.Errorf("%s has keys with no usage windows eipgam reads, not subscription accounts with windows to cap", p.Name)
 	}
 	if amountSet {
 		n, err := parseWindowAmount(amount)
@@ -2029,10 +2029,10 @@ func parseWindowCap(s string) (int, error) {
 // accountConcurrencyCmd shows, or sets, the limit on requests at once of a
 // provider's accounts or keys (#892): each one's own, else the provider's
 // Concurrency. What runs and waits now is the gateway's, at GET
-// /v1/magpie/concurrency and on the app's account rows.
+// /v1/eipgam/concurrency and on the app's account rows.
 func accountConcurrencyCmd(rest []string) error {
 	if len(rest) < 1 {
-		return fmt.Errorf("magpie provider account-concurrency <id> [account|key [n|off|default]]")
+		return fmt.Errorf("eipgam provider account-concurrency <id> [account|key [n|off|default]]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {
@@ -2096,7 +2096,7 @@ func accountConcurrencyCmd(rest []string) error {
 // the requests, 1 when none is set.
 func accountWeightCmd(rest []string) error {
 	if len(rest) < 1 || len(rest) > 3 {
-		return fmt.Errorf("magpie provider account-weight <id> [account [n|default]]")
+		return fmt.Errorf("eipgam provider account-weight <id> [account [n|default]]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {
@@ -2137,7 +2137,7 @@ func accountWeightCmd(rest []string) error {
 		}
 	}
 	if p.Routing != provider.Weighted {
-		fmt.Println(muted.Render("Weights count with routing=weight: magpie provider set " + p.ID + " routing=weight"))
+		fmt.Println(muted.Render("Weights count with routing=weight: eipgam provider set " + p.ID + " routing=weight"))
 	}
 	return nil
 }
@@ -2147,7 +2147,7 @@ func accountWeightCmd(rest []string) error {
 // (#892).
 func queueCmd(rest []string) error {
 	if len(rest) < 1 || len(rest) > 3 {
-		return fmt.Errorf("magpie provider queue <id> [length [seconds]]")
+		return fmt.Errorf("eipgam provider queue <id> [length [seconds]]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {
@@ -2197,7 +2197,7 @@ func queueCmd(rest []string) error {
 // free models take 20).
 func rpmCmd(rest []string) error {
 	if len(rest) < 1 || len(rest) > 2 {
-		return fmt.Errorf("magpie provider rpm <id> [n|off]")
+		return fmt.Errorf("eipgam provider rpm <id> [n|off]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {
@@ -2232,7 +2232,7 @@ func rpmCmd(rest []string) error {
 // at once got the address refused with a 405, two didn't). The others wait
 // in reserve, in the list's order.
 func atOnceCmd(rest []string) error {
-	usage := fmt.Errorf("magpie provider at-once <id> [n|off|default]")
+	usage := fmt.Errorf("eipgam provider at-once <id> [n|off|default]")
 	if len(rest) < 1 || len(rest) > 2 {
 		return usage
 	}
@@ -2272,7 +2272,7 @@ func atOnceCmd(rest []string) error {
 // vendor says one is out of its allowance without saying when it is back
 // (#1772: Ollama Cloud's weekly limit, asked again every 15 minutes).
 func quotaRestCmd(rest []string) error {
-	usage := fmt.Errorf("magpie provider quota-rest <id> [30m|6h|7d|until 08:00|until 00:00+08:00|default]")
+	usage := fmt.Errorf("eipgam provider quota-rest <id> [30m|6h|7d|until 08:00|until 00:00+08:00|default]")
 	if len(rest) == 3 && (rest[1] == "until" || rest[1] == "at") {
 		rest = []string{rest[0], rest[2]}
 	}
@@ -2307,7 +2307,7 @@ func quotaRestCmd(rest []string) error {
 	} else if d := p.QuotaRestFor(); d > 0 {
 		fmt.Printf("%s · a key out of its allowance, with no word of when it is back, sits out %s\n", p.Name, restWords(d))
 	} else {
-		fmt.Printf("%s · a key out of its allowance, with no word of when it is back, sits out 15 minutes (magpie's own)\n", p.Name)
+		fmt.Printf("%s · a key out of its allowance, with no word of when it is back, sits out 15 minutes (eipgam's own)\n", p.Name)
 	}
 	return nil
 }
@@ -2316,7 +2316,7 @@ func quotaRestCmd(rest []string) error {
 // while they keep failing or being rate limited (#2008).
 func restCapCmd(rest []string) error {
 	if len(rest) < 1 || len(rest) > 2 {
-		return fmt.Errorf("magpie provider rest-cap <id> [1m|30m|6h|1d|off|default]")
+		return fmt.Errorf("eipgam provider rest-cap <id> [1m|30m|6h|1d|off|default]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {
@@ -2335,11 +2335,11 @@ func restCapCmd(rest []string) error {
 		}
 	}
 	if p.NoFailRest() {
-		fmt.Printf("%s · a key or account that fails without saying why doesn't rest: the next request asks it again. Out of quota or credit, its key refused or its model not served still rests it; rate limited, at most 30 minutes (magpie's own)\n", p.Name)
+		fmt.Printf("%s · a key or account that fails without saying why doesn't rest: the next request asks it again. Out of quota or credit, its key refused or its model not served still rests it; rate limited, at most 30 minutes (eipgam's own)\n", p.Name)
 	} else if p.RestCap > 0 {
 		fmt.Printf("%s · a key or account that keeps failing sits out at most %s\n", p.Name, restWords(time.Duration(p.RestCap)*time.Minute))
 	} else {
-		fmt.Printf("%s · a key or account that keeps failing sits out at most 10 minutes, 30 when rate limited (magpie's own)\n", p.Name)
+		fmt.Printf("%s · a key or account that keeps failing sits out at most 10 minutes, 30 when rate limited (eipgam's own)\n", p.Name)
 	}
 	return nil
 }
@@ -2405,7 +2405,7 @@ func printMoved(moved []agent.Move) {
 	}
 }
 
-// editPicks works out a provider's picks from `magpie provider models <id>
+// editPicks works out a provider's picks from `eipgam provider models <id>
 // args…`: plain ids replace them, all (or -) gives the default back, and
 // +id / -id add one to or take one out of the models exposed now, so a
 // user adding a model keeps the rest (MOMO on Discord: 35 exposed → 8).
@@ -2423,7 +2423,7 @@ func editPicks(p provider.Provider, args []string) ([]string, error) {
 		return slices.Clone(args), nil
 	}
 	if edits != len(args) {
-		return nil, fmt.Errorf("give either the whole list (magpie provider models %s a b c) or only changes (+a -b), not both", p.ID)
+		return nil, fmt.Errorf("give either the whole list (eipgam provider models %s a b c) or only changes (+a -b), not both", p.ID)
 	}
 	picks := slices.Clone(p.Models)
 	if len(picks) == 0 {
@@ -2448,7 +2448,7 @@ func editPicks(p provider.Provider, args []string) ([]string, error) {
 	}
 	if len(picks) == 0 {
 		// no picks means the default list, not none
-		return nil, fmt.Errorf("that leaves no model exposed · to serve none of %s's models: magpie provider models %s none; to keep them for routing groups alone: magpie provider listed %s no", p.Name, p.ID, p.ID)
+		return nil, fmt.Errorf("that leaves no model exposed · to serve none of %s's models: eipgam provider models %s none; to keep them for routing groups alone: eipgam provider listed %s no", p.Name, p.ID, p.ID)
 	}
 	return picks, nil
 }
@@ -2498,7 +2498,7 @@ func printPicksChange(before, after provider.Provider, args []string) {
 		fmt.Println(" ", amber.Render("-"), list(gone))
 	}
 	if replaced && len(gone) > 0 && len(after.Models) > 0 {
-		fmt.Println(muted.Render("  the ids given are now the whole list · to add one and keep the rest: magpie provider models " + after.ID + " +<model>"))
+		fmt.Println(muted.Render("  the ids given are now the whole list · to add one and keep the rest: eipgam provider models " + after.ID + " +<model>"))
 	}
 	avail := map[string]bool{}
 	for _, m := range after.Available() {
@@ -2515,7 +2515,7 @@ func printPicksChange(before, after provider.Provider, args []string) {
 // provider's list by itself (#2135).
 func refreshEveryCmd(rest []string) error {
 	if len(rest) < 1 || len(rest) > 2 {
-		return fmt.Errorf("magpie provider refresh-every <id> [30m|6h|1d|off]")
+		return fmt.Errorf("eipgam provider refresh-every <id> [30m|6h|1d|off]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {
@@ -2530,9 +2530,9 @@ func refreshEveryCmd(rest []string) error {
 		}
 	}
 	if d := p.RefreshInterval(); d > 0 {
-		fmt.Printf("%s · its model list is fetched by the gateway every %s (magpie serve, or the app, running)\n", p.Name, p.RefreshSchedule())
+		fmt.Printf("%s · its model list is fetched by the gateway every %s (eipgam serve, or the app, running)\n", p.Name, p.RefreshSchedule())
 	} else {
-		fmt.Printf("%s · its model list is fetched only when asked (magpie provider refresh %s, or Fetch models)\n", p.Name, p.ID)
+		fmt.Printf("%s · its model list is fetched only when asked (eipgam provider refresh %s, or Fetch models)\n", p.Name, p.ID)
 	}
 	return nil
 }
@@ -2541,7 +2541,7 @@ func refreshEveryCmd(rest []string) error {
 // are exposed by (#2135); none clears them.
 func autoIncludeCmd(rest []string) error {
 	if len(rest) < 1 {
-		return fmt.Errorf("magpie provider auto-include <id> [rule…|none]")
+		return fmt.Errorf("eipgam provider auto-include <id> [rule…|none]")
 	}
 	p, err := provider.Find(rest[0])
 	if err != nil {

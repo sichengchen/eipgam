@@ -3,7 +3,7 @@
 // on X: "other colours of my own, and a picture from my computer"). In both
 // engines, with the API faked, in every language, wide and at a phone's
 // width:
-// - the Accent color row offers magpie's own, six presets and a colour of
+// - the Accent color row offers eipgam's own, six presets and a colour of
 //   the reader's own; picking one saves it as accent and the page takes
 //   the server's stylesheet for it (/api/appearance/css) with no reload;
 // - a colour from the system's picker is saved, and shown as the chosen
@@ -88,7 +88,7 @@ async function open(browser, st, width, query = "view=settings", wait = "#accent
   const errors = [], log = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(st, log));
-  await page.goto("http://magpie.test/?" + query);
+  await page.goto("http://eipgam.test/?" + query);
   await page.locator(wait).first().waitFor();
   return { page, errors, log };
 }
@@ -103,10 +103,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const st = {};
     const { page, errors, log } = await open(browser, st, 1000);
     const sw = page.locator("#accentPick .swatch");
-    assert.equal(await sw.count(), 8, "magpie's own, six presets and the reader's own");
-    assert.deepEqual(await chosen(page), [""], "magpie's own is chosen at first");
+    assert.equal(await sw.count(), 8, "eipgam's own, six presets and the reader's own");
+    assert.deepEqual(await chosen(page), [""], "eipgam's own is chosen at first");
     assert.equal(await accentNow(page), "#4f46e5");
-    assert.deepEqual(log.filter(([k]) => k === "css"), [], "magpie's own look needs no stylesheet");
+    assert.deepEqual(log.filter(([k]) => k === "css"), [], "eipgam's own look needs no stylesheet");
 
     await page.locator('#accentPick .swatch[data-accent="#0d9488"]').click();
     await page.waitForFunction((w) => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() === w, varOf("#0d9488", "--accent"));
@@ -120,7 +120,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.waitForFunction(() => document.querySelector("#accentPick .swatch.own.on"));
     assert.deepEqual(await chosen(page), ["own:#7c3aed"]);
 
-    // back to magpie's own: nothing drawn over it
+    // back to eipgam's own: nothing drawn over it
     await page.locator('#accentPick .swatch[data-accent=""]').click();
     await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() === "#4f46e5");
     assert.equal(log.filter(([k]) => k === "settings").at(-1)[1].accent, "");
@@ -160,13 +160,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForFunction(() => document.body.classList.contains("side-nav"));
       const sel = ["#themeSegs .opt.on", "#birdSegs .opt.on", "body.side-nav #prefs.on svg"];
       const before = await settled(page, sel);
-      same(before, before.fg, "magpie's own look: what is chosen is in the text's ink");
+      same(before, before.fg, "eipgam's own look: what is chosen is in the text's ink");
       // 「主题深色依然还是灰色」: the chosen option's thumb is tinted too,
       // and is its own grey, exactly as before, with no accent
       const thumbs = ["#themeSegs .segs > .thumb", "#birdSegs .segs > .thumb", "#reduceMotionSegs .segs > .thumb"];
       const grounds = () => page.evaluate((sel) => sel.map((s) => { const e = document.querySelector(s); return e ? getComputedStyle(e).backgroundColor : "missing " + s; }), thumbs);
       const card = await page.evaluate(() => { const p = document.createElement("i"); p.style.background = "var(--card)"; document.body.append(p); const c = getComputedStyle(p).backgroundColor; p.remove(); return c; });
-      assert.deepEqual(await grounds(), thumbs.map(() => card), "magpie's own look: the thumb is the card's grey");
+      assert.deepEqual(await grounds(), thumbs.map(() => card), "eipgam's own look: the thumb is the card's grey");
       const rgbOf = (h) => `rgb(${parseInt(h.slice(1, 3), 16)}, ${parseInt(h.slice(3, 5), 16)}, ${parseInt(h.slice(5, 7), 16)})`;
       for (const v of ["#0d9488", "#db2777"]) {
         await page.locator(`#accentPick .swatch[data-accent="${v}"]`).click();
@@ -180,8 +180,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator('#accentPick .swatch[data-accent=""]').click();
       await page.waitForFunction(() => !document.getElementById("lookCSS")?.textContent);
       const back = await settled(page, sel);
-      same(back, back.fg, "back to magpie's own");
-      assert.deepEqual(await grounds(), thumbs.map(() => card), "back to magpie's own thumb");
+      same(back, back.fg, "back to eipgam's own");
+      assert.deepEqual(await grounds(), thumbs.map(() => card), "back to eipgam's own thumb");
       assert.deepEqual(errors, []);
     });
 
@@ -230,7 +230,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await page.locator('#accentPick .swatch[data-accent=""]').click();
         await page.waitForFunction(() => !document.getElementById("lookCSS")?.textContent);
-        assert.deepEqual(await grounds(), grey, "back to magpie's own grey");
+        assert.deepEqual(await grounds(), grey, "back to eipgam's own grey");
         assert.deepEqual(errors, []);
         await page.context().close();
       }
@@ -355,7 +355,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.route("**/*", serve({ wallpaper: 1700000000000 }, log));
     // appearance.js is held back, so the page shows the rows before their controls
     await page.route("**/appearance.js", async (r) => { await held; await r.fallback(); });
-    await page.goto("http://magpie.test/?view=settings");
+    await page.goto("http://eipgam.test/?view=settings");
     await page.locator("#colorblindRow").waitFor();
     const ids = ["accentRow", "wallpaperRow", "colorblindRow", "reduceMotionRow", "birdRow"];
     const heights = () => page.evaluate((ids) => ids.map((id) => [id, Math.round(document.getElementById(id)?.getBoundingClientRect().height)]), ids);

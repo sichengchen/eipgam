@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/masking"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // claudeWorkDirs runs two Claude subscription requests through a script
@@ -156,8 +156,8 @@ func TestClaudeWorkDirSymlinkIsAvoided(t *testing.T) {
 
 // A caller that says which folder it works in has Claude Code run there:
 // Claude Code tells its model the folder it runs in as the working
-// directory, and a model told magpie's own folder wrote the caller's files
-// into it (a pelican.html left in magpie-claude-work), through tools that
+// directory, and a model told eipgam's own folder wrote the caller's files
+// into it (a pelican.html left in eipgam-claude-work), through tools that
 // run in the caller's. Each client's way of saying it is read, the last
 // said in the first text that says one counting. The caller's folder keeps sessions of its own, which are
 // never swept, and its repository's status is not added to the prompt.
@@ -173,7 +173,7 @@ func TestClaudeRunsInTheCallersWorkDir(t *testing.T) {
 		{name: "pi", said: "Current date: 2026-10-26\nCurrent working directory: %s"},
 		// pi 1.4's buildSystemPromptSections, each section its own tag,
 		// joined with a blank line; the folder on a line of its own
-		// (fysly on X: the model was told magpie's temp folder too)
+		// (fysly on X: the model was told eipgam's temp folder too)
 		{name: "pi 1.x", said: "You are an expert coding assistant operating inside pi, a coding agent harness.\n\n<tools>\n- read: Read file contents\n</tools>\n\n<rules>\n- Be concise in your responses\n</rules>\n\n<cwd>\n%s\n</cwd>"},
 		{name: "said twice", said: " - Primary working directory: /nowhere/at/all\nlater:\n - Primary working directory: %s"},
 	} {
@@ -229,7 +229,7 @@ func TestClaudeRunsInTheCallersWorkDir(t *testing.T) {
 }
 
 // A folder the caller names that isn't one here (a caller on another
-// computer), or isn't absolute, leaves the runs in magpie's own folder.
+// computer), or isn't absolute, leaves the runs in eipgam's own folder.
 // Claude Code's prompt then gives this computer's platform and folder, and
 // the caller's another's, so the run is told after the caller's
 // instructions that theirs is where the tools run (vv_nil on X: a Mac
@@ -382,7 +382,7 @@ func TestClaudeRunsWhereTheCallerRunsNotWhereATurnQuotes(t *testing.T) {
 // named for the user, say) stands in the request as a placeholder, which
 // names no folder on disk. The run never works in the folder unmasked:
 // Claude Code tells its vendor the folder it runs in, so the masked word
-// would leave the machine as it is. It works in magpie's folder and is
+// would leave the machine as it is. It works in eipgam's folder and is
 // told the caller's environment is the one its tools run in (#4449).
 func TestClaudeNeverRunsInAMaskedFolderUnmasked(t *testing.T) {
 	const word = "someuser"
@@ -412,7 +412,7 @@ func TestClaudeNeverRunsInAMaskedFolderUnmasked(t *testing.T) {
 		return masked
 	})
 	if len(dirs) != 2 || dirs[0] != work || dirs[1] != work {
-		t.Fatalf("working directories %q, want magpie's %s: the caller's names a masked word", dirs, work)
+		t.Fatalf("working directories %q, want eipgam's %s: the caller's names a masked word", dirs, work)
 	}
 	for _, d := range dirs {
 		if strings.Contains(d, word) {
@@ -420,6 +420,6 @@ func TestClaudeNeverRunsInAMaskedFolderUnmasked(t *testing.T) {
 		}
 	}
 	if !strings.Contains(told, "every tool runs in") {
-		t.Fatalf("a run in magpie's folder was not told the caller's environment is where its tools run: %s", told)
+		t.Fatalf("a run in eipgam's folder was not told the caller's environment is where its tools run: %s", told)
 	}
 }

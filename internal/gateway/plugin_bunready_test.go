@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A plugin's provider whose Bun is still downloading, the download
@@ -23,7 +23,7 @@ import (
 func TestPluginWhoseBunIsNotReadyFailsOver(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Cleanup(plugin.Settle)
 
 	up := testenv.FakeVendor(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +58,7 @@ func TestPluginWhoseBunIsNotReadyFailsOver(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// now no Bun on hand: magpie's own is to be downloaded, from a release
+	// now no Bun on hand: eipgam's own is to be downloaded, from a release
 	// that never answers
 	stalled := make(chan struct{})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +70,7 @@ func TestPluginWhoseBunIsNotReadyFailsOver(t *testing.T) {
 	t.Cleanup(srv.Close)
 	t.Cleanup(func() { close(stalled) })
 	t.Cleanup(plugin.BunReleaseForTest(srv.URL, 300*time.Millisecond))
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	plugin.Restart()
 
 	s := New()

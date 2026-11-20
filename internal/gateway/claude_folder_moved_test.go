@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// EricWvi on X (Claude Code → a local magpie → a magpie on a server →
+// EricWvi on X (Claude Code → a local eipgam → a eipgam on a server →
 // a Claude subscription): the cache read flipped between under 10% and
 // over 90%, and every drop was a turn whose folder had changed
 // (…/frontend, then …/frontend/src). Claude Code says a move as an

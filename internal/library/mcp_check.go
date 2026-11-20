@@ -20,12 +20,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
 // The Library page says of each server whether it works, found the only
@@ -47,7 +47,7 @@ type ServerHealth struct {
 	// Why is the kind of error, for the page to put in its own words:
 	// notfound, start, exited, timeout, http, refused, unreachable,
 	// protocol, home (exits in home, works in a project: Project),
-	// novar (a ${NAME} magpie's environment hasn't: Detail names
+	// novar (a ${NAME} eipgam's environment hasn't: Detail names
 	// them), wsldown (a command only agents in WSL start, whose distros,
 	// Detail, aren't running: it wasn't checked), nobrowser (it listed its
 	// Tools, and starts a Chrome the container it runs in hasn't: Detail
@@ -56,14 +56,14 @@ type ServerHealth struct {
 	Code   int    `json:"code,omitempty"`   // the exit code, or the HTTP status
 	Detail string `json:"detail,omitempty"` // the last line it wrote to stderr, or the error's text
 	// OAuth is a refusal that named a sign-in (WWW-Authenticate), which
-	// magpie can do itself for a streamable HTTP server
+	// eipgam can do itself for a streamable HTTP server
 	OAuth bool `json:"oauth,omitempty"`
-	// SignIn is magpie's sign-in to a streamable HTTP server as the check
+	// SignIn is eipgam's sign-in to a streamable HTTP server as the check
 	// left it: one whose renewed token the server refused has run out
 	// since, and the page's tag says so (新v学员 on Discord)
 	SignIn *mcpauth.Status `json:"signIn,omitempty"`
 	// AgentSignIn are the agents signed in to a server that refused
-	// magpie's check on their own (Claude Code's /mcp, mcp_agent_signin.go),
+	// eipgam's check on their own (Claude Code's /mcp, mcp_agent_signin.go),
 	// by id: they use it, though the check, without their tokens, was asked
 	// to sign in (CyberCaius on Discord)
 	AgentSignIn []string `json:"agentSignIn,omitempty"`
@@ -80,7 +80,7 @@ type ServerHealth struct {
 	// Project is a command that exited in home and listed its tools in a
 	// project folder, where the agents given it directly start it
 	// (inProject); Detail is what it said in home. Why "home" is that
-	// command run by magpie for its agents, in home (inHome).
+	// command run by eipgam for its agents, in home (inHome).
 	Project bool  `json:"project,omitempty"`
 	At      int64 `json:"at"` // when it was checked, unix ms
 }
@@ -110,7 +110,7 @@ func checkTransport() http.RoundTripper {
 	return viaRemoteMagpie{netproxy.Dispatch(t)}
 }
 
-// viaRemoteMagpie sends a request to a Remote magpie's MCP router through
+// viaRemoteMagpie sends a request to a Remote eipgam's MCP router through
 // that provider's own transport (provider.Via): its proxy, its client
 // certificate and the server certificate it trusts, as its model calls go.
 // Only the router's path is looked up, so no other server's request reads
@@ -143,7 +143,7 @@ func healthKey(s *Server, own ownSignIns) string {
 	b, _ := json.Marshal(c)
 	st := mcpauth.StatusOf(s.Name, s.URL)
 	// and where a command is started, which its agents decide
-	// and whether magpie runs it in home (inProject)
+	// and whether eipgam runs it in home (inProject)
 	var sides []string
 	if s.Transport == "stdio" {
 		sides = checkSides(s)
@@ -258,7 +258,7 @@ func checkServer(ctx context.Context, s *Server, own ownSignIns) ServerHealth {
 	}
 	h.At = time.Now().UnixMilli()
 	if s.Transport == "http" {
-		// only a server magpie is signed in to has one to report
+		// only a server eipgam is signed in to has one to report
 		if st := mcpauth.StatusOf(s.Name, s.URL); st.SignedIn || st.Dead {
 			h.SignIn = &st
 		}
@@ -339,7 +339,7 @@ func initParams() map[string]any {
 	return map[string]any{
 		"protocolVersion": mcpProtocol,
 		"capabilities":    map[string]any{},
-		"clientInfo":      map[string]any{"name": "magpie", "version": gateway.Version},
+		"clientInfo":      map[string]any{"name": "eipgam", "version": gateway.Version},
 	}
 }
 
@@ -528,7 +528,7 @@ func checkStdio(ctx context.Context, s *Server) ServerHealth {
 }
 
 // stdioProgram is the program checkStdio starts for a server's command,
-// and the folder it was found in when magpie's PATH lacks it. A bare name
+// and the folder it was found in when eipgam's PATH lacks it. A bare name
 // PATH doesn't have is looked for as a terminal would find it
 // (proc.FindTool: the folders a user's tools are installed in, fnm's Nodes
 // among them, #2685), and that folder goes on the child's PATH, as it is
@@ -565,7 +565,7 @@ func withPath(env []string, dir string) []string {
 }
 
 // startServer starts the command s runs as the agents start it, on this
-// machine or in WSL distro: in the environment magpie has, with the
+// machine or in WSL distro: in the environment eipgam has, with the
 // server's own variables over it, in home. Its stdin and stdout are the
 // MCP connection; what it writes to stderr is kept in errs; stop ends a
 // run in a distro (call it beside tree.Kill). The check starts it so, and
@@ -605,7 +605,7 @@ func startServer(ctx context.Context, s *Server, distro, dir string) (tree *proc
 		rctx, stop = context.WithCancel(context.WithoutCancel(ctx))
 		cmd = wslCommand(rctx, t, args...)
 	}
-	// Agents start MCP servers from a project or home directory. A magpie
+	// Agents start MCP servers from a project or home directory. A eipgam
 	// launched from a shortcut (Windows Start menu) often has C:\Windows\system32
 	// as its own cwd, which is not writable; inherit that and a server that
 	// writes into "." dies as "exited (1)" with no log. Pin the check to HOME.
@@ -617,7 +617,7 @@ func startServer(ctx context.Context, s *Server, distro, dir string) (tree *proc
 	if d != "" {
 		cmd.Dir = d
 		// and PWD with it, as exec does itself only when Env is nil: a
-		// shell-script server that reads $PWD would otherwise see magpie's
+		// shell-script server that reads $PWD would otherwise see eipgam's
 		// own folder while it runs in home (Windows doesn't use PWD)
 		if runtime.GOOS != "windows" && distro == "" {
 			cmd.Env = append(cmd.Env, "PWD="+d)
@@ -676,11 +676,11 @@ func checkStdioAt(ctx context.Context, s *Server, distro string) ServerHealth {
 // starts it in its project. A server that indexes the folder it starts in
 // refuses home (fff-mcp: "Can not run certain FFF features in a file
 // system root or home directories", math_milian on Discord), and works
-// for every agent that starts it itself. Run by magpie, in home (the MCP
-// router, or Codex on magpie: mcp_run.go), it doesn't, and the page says
+// for every agent that starts it itself. Run by eipgam, in home (the MCP
+// router, or Codex on eipgam: mcp_run.go), it doesn't, and the page says
 // to keep it direct. A server that exits in the project folder too is h.
 func inProject(ctx context.Context, s *Server, h ServerHealth) ServerHealth {
-	dir, err := os.MkdirTemp("", "magpie-mcp-project-")
+	dir, err := os.MkdirTemp("", "eipgam-mcp-project-")
 	if err != nil {
 		return h
 	}
@@ -699,8 +699,8 @@ func inProject(ctx context.Context, s *Server, h ServerHealth) ServerHealth {
 	return p
 }
 
-// inHome is whether magpie runs s, in home, for agents given it: the MCP
-// router, or Codex on magpie (sync gives it a command as RunPath unless the
+// inHome is whether eipgam runs s, in home, for agents given it: the MCP
+// router, or Codex on eipgam (sync gives it a command as RunPath unless the
 // user keeps it direct), rather than each agent starting it itself.
 func inHome(s *Server) bool {
 	if s.Hub == HubDirect {
@@ -825,7 +825,7 @@ func exitHealth(err error, errs *tail) ServerHealth {
 
 // ---- a URL -------------------------------------------------------------------
 
-// remoteHeaders are the server's own headers, with magpie's token when it
+// remoteHeaders are the server's own headers, with eipgam's token when it
 // is signed in to it: the agents reach it with that too.
 func remoteHeaders(ctx context.Context, s *Server) (http.Header, *ServerHealth) {
 	s = s.live()
@@ -838,7 +838,7 @@ func remoteHeaders(ctx context.Context, s *Server) (http.Header, *ServerHealth) 
 	for k, v := range headers {
 		h.Set(k, v)
 	}
-	// another magpie's router is told the call is a router's, for it not
+	// another eipgam's router is told the call is a router's, for it not
 	// to ask this one's back (bridge_mcp.go)
 	if u, err := url.Parse(s.URL); err == nil && strings.HasPrefix(u.Path, gateway.HubMCPAll) {
 		h.Set(gateway.RouterHeader, "1")
@@ -885,7 +885,7 @@ func statusHealth(res *http.Response) ServerHealth {
 }
 
 // httpSession is a connection to a streamable HTTP server: its headers,
-// with magpie's token when it is signed in to it, and the session the
+// with eipgam's token when it is signed in to it, and the session the
 // server gave. A check holds one for its few requests, the hub for as long
 // as the server is used (mcp_hub.go).
 type httpSession struct {
@@ -893,7 +893,7 @@ type httpSession struct {
 
 	mu  sync.Mutex
 	hdr http.Header
-	// tok is magpie's own token, when it is signed in: one the server
+	// tok is eipgam's own token, when it is signed in: one the server
 	// refuses is renewed once and asked again with, as the gateway's
 	// relay does, and one refused just after it was renewed is a sign-in
 	// that has run out

@@ -8,7 +8,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // errorShape is the family of error bodies an API answers with: Chat's and
@@ -30,9 +30,9 @@ func errorShape(proto provider.Protocol) int {
 // writeVendorErrorFrom answers a vendor's error as writeVendorError does,
 // but for a vendor that speaks the client's own API (upstream's error
 // shape is the client's): the vendor's body goes to the client as it came,
-// its status, type, a numeric code and every field magpie doesn't know
-// (ne9ko9 on Discord). Only the message is magpie's: the provider's name
-// and the vendor's words, with a note of why where magpie has one (an
+// its status, type, a numeric code and every field eipgam doesn't know
+// (ne9ko9 on Discord). Only the message is eipgam's: the provider's name
+// and the vendor's words, with a note of why where eipgam has one (an
 // account's Explain, a region, the wrong endpoint), a busy relay said so
 // (saysBusy) and a 413's hint. A prompt too long for the model is said as
 // the client's API says it (tooLong: the status, type and code that make
@@ -57,7 +57,7 @@ func writeKeptError(w http.ResponseWriter, proto, upstream provider.Protocol, p 
 		return 0, false
 	}
 	status := res.StatusCode
-	// the message is magpie's: the provider's name, the vendor's words as
+	// the message is eipgam's: the provider's name, the vendor's words as
 	// APIError reads them, then any notes (explained, wrongAPINote…), so
 	// the agent, a describer asking for another model and a sign-in's
 	// rewording all know which provider said it.

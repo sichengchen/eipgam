@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A Muse (Meta) subscription draws with Muse Image on the Responses API
@@ -40,17 +40,17 @@ func TestMusePluginDraws(t *testing.T) {
 			if ds := Drawers(*p); len(ds) != 1 || ds[0].ID != "muse-image-1.0" || ds[0].Provider != pid {
 				t.Fatalf("drawers %v", ds)
 			}
-			code, a, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"`+pid+`/muse-image-1.0","prompt":"a magpie"}`)
+			code, a, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"`+pid+`/muse-image-1.0","prompt":"a eipgam"}`)
 			if code != 200 || len(a.Data) != 1 {
 				t.Fatalf("%d %s", code, raw)
 			}
-			// a newer Muse Image, named before magpie lists it
-			if code, a, raw = postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"muse-image-1.1","prompt":"a magpie"}`); code != 200 || len(a.Data) != 1 {
+			// a newer Muse Image, named before eipgam lists it
+			if code, a, raw = postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"muse-image-1.1","prompt":"a eipgam"}`); code != 200 || len(a.Data) != 1 {
 				t.Fatalf("bare name: %d %s", code, raw)
 			}
 			mu.Lock()
 			defer mu.Unlock()
-			if len(paths) != 2 || paths[0] != "/v1/responses" || !strings.Contains(bodies[0], `"model":"muse-image-1.0"`) || !strings.Contains(bodies[0], `"input":"a magpie"`) || !strings.Contains(bodies[1], `"model":"muse-image-1.1"`) {
+			if len(paths) != 2 || paths[0] != "/v1/responses" || !strings.Contains(bodies[0], `"model":"muse-image-1.0"`) || !strings.Contains(bodies[0], `"input":"a eipgam"`) || !strings.Contains(bodies[1], `"model":"muse-image-1.1"`) {
 				t.Fatalf("sent %v %v", paths, bodies)
 			}
 		})

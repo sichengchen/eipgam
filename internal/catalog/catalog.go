@@ -1,5 +1,5 @@
 // Package catalog knows which models exist. It reads the models.dev catalog
-// (from magpie's own cache or OpenCode's), Codex's model cache, and falls back
+// (from eipgam's own cache or OpenCode's), Codex's model cache, and falls back
 // to a small built-in list so the picker is never empty.
 package catalog
 
@@ -22,9 +22,9 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Model is one entry the picker can offer.
@@ -47,7 +47,7 @@ type Model struct {
 	// APIs, when the vendor says, are the APIs the model is served on
 	// ("chat", "responses", "anthropic"); empty is not known.
 	APIs []string `json:",omitempty"`
-	// Endpoints, in magpie's own models for an agent, are the gateway
+	// Endpoints, in eipgam's own models for an agent, are the gateway
 	// paths a request for it is relayed on as it is
 	// (provider.NativeEndpoints, /v1/models' native_endpoints); a group's
 	// are those every member relays (provider.GroupEndpoints), which
@@ -81,21 +81,21 @@ type Model struct {
 	// provider.CompactFor): the window it is told when Context is longer.
 	// 0 is none set, for the one for every model (settings.Compact).
 	Compact int `json:",omitempty"`
-	// Plain, on a model of another magpie's list, is its name there alone
-	// (display_name), when Name is its label there, with that magpie's
-	// provider after it (magpie_label): the name Provider in model names
+	// Plain, on a model of another eipgam's list, is its name there alone
+	// (display_name), when Name is its label there, with that eipgam's
+	// provider after it (eipgam_label): the name Provider in model names
 	// Off has here (ARNO on Discord).
 	Plain string `json:",omitempty"`
-	// By, on a model of another magpie's list, is the provider that
-	// magpie names as serving it (magpie_by): its own provider's name, or,
-	// for a model it has from a magpie further on, the one there, the
-	// first in the chain. Its Remote magpie's upstream names (Provider's
+	// By, on a model of another eipgam's list, is the provider that
+	// eipgam names as serving it (eipgam_by): its own provider's name, or,
+	// for a model it has from a eipgam further on, the one there, the
+	// first in the chain. Its Remote eipgam's upstream names (Provider's
 	// UpstreamProviders) say it after the model (lcc580 on X).
 	By string `json:",omitempty"`
-	// Via, on a model of another magpie's list, is the magpies it passes
-	// through to its vendor, that one last (magpie_via.go)
+	// Via, on a model of another eipgam's list, is the magpies it passes
+	// through to its vendor, that one last (eipgam_via.go)
 	Via []string `json:",omitempty"`
-	// Apart, in a list magpie hands Codex, is what tells the model from
+	// Apart, in a list eipgam hands Codex, is what tells the model from
 	// another entry Codex's picker would call the same (two providers
 	// named Codex each serving GPT-6.1-Sol, nb5p on Discord): its
 	// provider's id. Said in the entry's display_name alone
@@ -116,7 +116,7 @@ type Model struct {
 	Seals bool `json:",omitempty"`
 	// Tiers, in one ChatGPT account's own model list, are the service
 	// tiers its plan offers on the model ("priority", "ultrafast"); in
-	// another magpie's, the tiers it offers its Codex on the model
+	// another eipgam's, the tiers it offers its Codex on the model
 	// (#1234); in a provider plugin's, the tiers it says its vendor serves
 	// the model at (#2514).
 	Tiers []string `json:",omitempty"`
@@ -138,8 +138,8 @@ type Model struct {
 	// a relay's flux): kept with the list for Settings → Models → Images, never
 	// offered to agents as a model to talk to.
 	Draws bool `json:",omitempty"`
-	// Films is set on a model another magpie lists as one it makes videos
-	// with (a Remote magpie's Grok Imagine Video): kept with the list for
+	// Films is set on a model another eipgam lists as one it makes videos
+	// with (a Remote eipgam's Grok Imagine Video): kept with the list for
 	// its videos API, never offered as a model to talk to or draw with.
 	Films bool `json:",omitempty"`
 	// Serves is set on a vendor-listed model made for an API other than
@@ -148,7 +148,7 @@ type Model struct {
 	// their groups of one kind (provider.KindGroup), never offered to
 	// agents as a model to talk to (#5339, XYenon on Discord).
 	Serves string `json:",omitempty"`
-	// Decides marks a decision model another magpie explicitly lists,
+	// Decides marks a decision model another eipgam explicitly lists,
 	// including models whose ids don't name Jev.
 	Decides bool `json:",omitempty"`
 	// Free is set on a model a subscription serves at no cost to its
@@ -176,19 +176,19 @@ type Model struct {
 	// at when none is asked: Kimi Code's think_efforts.default_effort
 	// (reasoning.effort.default). "" is not said.
 	DefaultEffort string `json:",omitempty"`
-	// WebSearch is how another magpie (a Remote magpie) searches the web
+	// WebSearch is how another eipgam (a Remote eipgam) searches the web
 	// for the model when a web search tool is offered: "native", its own
-	// provider by itself, or "magpie", with that magpie's searcher; "" it
+	// provider by itself, or "eipgam", with that eipgam's searcher; "" it
 	// doesn't, or didn't say. A plugin's model it says searches by itself
 	// (m.searches) is "native" too.
 	WebSearch string `json:",omitempty"`
 	// Codex, on a model a vendor lists the way Codex's own catalog does
 	// (a sub2api asked with Codex's client_version), is that entry as the
 	// vendor gave it (CodexEntry): Codex is handed it as it is, its
-	// instructions and window and all, rather than an entry magpie made up
+	// instructions and window and all, rather than an entry eipgam made up
 	// from models.dev (ctopsc on Discord). Its context_window,
 	// max_context_window, input_modalities and reasoning levels are read
-	// into the fields above too, so the rest of magpie says what it says.
+	// into the fields above too, so the rest of eipgam says what it says.
 	Codex json.RawMessage `json:",omitempty"`
 }
 
@@ -296,7 +296,7 @@ type Tier struct {
 	CacheWrite1h float64 `json:"cache_write_1h,omitempty"`
 }
 
-// UnmarshalJSON reads a price as magpie writes it, and as models.dev does,
+// UnmarshalJSON reads a price as eipgam writes it, and as models.dev does,
 // whose tiers name their size as {"tier": {"type": "context", "size": N}}
 // and may leave a part out, which is then the base price's. A tier of
 // another type, or of no size, is left out.
@@ -520,7 +520,7 @@ func (p mdProvider) levels(m mdModel, providerID string) []string {
 	}
 	// the kin is kept by its id, date and levels, not as &x: a pointer to
 	// the loop's copy put every model of p on the heap, for every model
-	// asked (~6 GB in 48 minutes of a user's magpie, #1956)
+	// asked (~6 GB in 48 minutes of a user's eipgam, #1956)
 	var kinID, kinDate string
 	var kin []string
 	for id := range p.Models {
@@ -638,7 +638,7 @@ var (
 	syncCh = make(chan struct{}, 1)
 )
 
-// CachePath is where `magpie sync` stores the models.dev catalog.
+// CachePath is where `eipgam sync` stores the models.dev catalog.
 func CachePath() string { return appdir.Join(appdir.Cache(), "models.json") }
 
 func opencodeCache() string {
@@ -670,7 +670,7 @@ func loadGen() (map[string]mdProvider, int) {
 	if !loaded {
 		loaded = true
 		func() {
-			// magpie's own copy, OpenCode's, then the one magpie ships
+			// eipgam's own copy, OpenCode's, then the one eipgam ships
 			// with (bundled.go): a file that can't be read or parsed is
 			// passed over for the next, never read as no catalog
 			for _, read := range []func() ([]byte, error){
@@ -932,7 +932,7 @@ func syncLock(ctx context.Context, onlyIfMissing bool) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "magpie")
+	req.Header.Set("User-Agent", "eipgam")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -969,7 +969,7 @@ func syncLock(ctx context.Context, onlyIfMissing bool) error {
 }
 
 // Stale reports whether no catalog exists or the cache is older than a day
-// (fresh.go), or magpie's has no lab catalog beside it yet (labs.go).
+// (fresh.go), or eipgam's has no lab catalog beside it yet (labs.go).
 func Stale() bool {
 	src := Source()
 	if src == "" || labsMissing() {
@@ -1841,7 +1841,7 @@ func lookupIn[T any](b string, table map[string]T, spellings, user bool) (T, boo
 // vendor spells it with (settings' ModelSameAs; the settings package sets
 // it). A model models.dev lists by its very id is that model; one it
 // doesn't is looked up as the model the user named, before any guess of
-// magpie's (renamed, normalFor): a relay's rename no rule can read,
+// eipgam's (renamed, normalFor): a relay's rename no rule can read,
 // "ds.4.1(WB)" for deepseek-v4.1-flash (pinmmis on X), has that model's
 // window, reply limit, levels and images.
 var UserSame func(bare string) (string, bool)
@@ -2766,14 +2766,14 @@ func parseCodex(b []byte) ([]Model, error) {
 }
 
 // MagpieAdded reports whether an entry of Codex's models_cache.json is one
-// of magpie's, not Codex's own: the list Codex keeps is the one it was last
-// handed, and handed through the gateway it has magpie's models in it too
-// ("group/semantic", "deepseek/deepseek-v4", "codex/gpt-5.5" — magpie's ids,
+// of eipgam's, not Codex's own: the list Codex keeps is the one it was last
+// handed, and handed through the gateway it has eipgam's models in it too
+// ("group/semantic", "deepseek/deepseek-v4", "codex/gpt-5.5" — eipgam's ids,
 // which Codex's slugs never look like). Read back as Codex's own, they were
 // listed under OpenAI, and kept there after Codex was routed elsewhere.
 func MagpieAdded(etag, slug, description string) bool {
-	return strings.HasSuffix(description, " via magpie") ||
-		strings.Contains(etag, "+magpie-") && strings.Contains(slug, "/")
+	return strings.HasSuffix(description, " via eipgam") ||
+		strings.Contains(etag, "+eipgam-") && strings.Contains(slug, "/")
 }
 
 // EffortRank orders the reasoning levels agents and vendors name, weakest

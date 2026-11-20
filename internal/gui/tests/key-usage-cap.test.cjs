@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A key whose usage windows magpie reads (OpenCode Go's 5 hours, week and
+// A key whose usage windows eipgam reads (OpenCode Go's 5 hours, week and
 // month) takes the usage cap a subscription account does (@wanggenjidev on
 // X): the same pill and words (No cap, Cap 99%), the app's own menu, posted
 // to provider/accountcap by the key's id, and a key at its cap is marked
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Relay" }).first().click();
         await page.locator(".editor .accts .acc .acap").first().waitFor({ state: "attached" });
         await page.waitForTimeout(300);

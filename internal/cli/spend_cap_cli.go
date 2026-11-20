@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	stats "github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	stats "github.com/sichengchen/eipgam/internal/usage"
 )
 
-const spendCapUsage = "magpie provider spend-cap <id> [key [usd [day|month|total]|off]]"
+const spendCapUsage = "eipgam provider spend-cap <id> [key [usd [day|month|total]|off]]"
 
 // spendCapCmd shows, or sets, how much a provider's API keys may spend
 // (sparkling_lemur_62868 on Discord): in USD as the Usage page prices
@@ -23,7 +23,7 @@ func spendCapCmd(rest []string) error {
 		return err
 	}
 	if p.Account != nil {
-		return fmt.Errorf("%s is a subscription: a spend cap is for an API key (an account's cap is a share of its usage windows, magpie provider account-cap)", p.Name)
+		return fmt.Errorf("%s is a subscription: a spend cap is for an API key (an account's cap is a share of its usage windows, eipgam provider account-cap)", p.Name)
 	}
 	if len(rest) > 2 {
 		period := ""

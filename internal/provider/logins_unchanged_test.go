@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // An unchanged save leaves logins.json alone (#6289): its mtime stays and

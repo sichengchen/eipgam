@@ -47,7 +47,7 @@ func lostLibrary(t *testing.T, agents []string, applied map[string]*Applied) {
 
 // An apply — the write every start does over the whole library (Sync, the
 // page's change too) — that finds the library emptied under it (no agent
-// ticked, no text kept) leaves the agents' files alone: what magpie gave
+// ticked, no text kept) leaves the agents' files alone: what eipgam gave
 // them is the only copy of instructions the library no longer has (#5709).
 // The page's own take-back is another write and keeps working: it runs
 // with the library as the user left it, and the recovery at the end shows
@@ -111,7 +111,7 @@ func TestEmptyTextApplyLeavesTickedFilesAlone(t *testing.T) {
 
 // A library whose record says the last it wrote an agent was empty while
 // the file still holds a part is one an apply already wiped once: the
-// user's files came back from magpie's backups, and the next apply must
+// user's files came back from eipgam's backups, and the next apply must
 // not wipe them again. It says why it left them.
 func TestApplySaysWhyItLeftAPartAlone(t *testing.T) {
 	h := sandbox(t)

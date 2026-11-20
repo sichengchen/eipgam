@@ -10,10 +10,10 @@ import (
 
 // WaitFollowingStops waits for a started command in the foreground and
 // reaps it, as cmd.Wait would, but follows its stops: when the terminal
-// stops it (Ctrl+Z), magpie stops itself too, so the shell has the
+// stops it (Ctrl+Z), eipgam stops itself too, so the shell has the
 // terminal back, and fg continues both. cmd.Wait can't see a stop. It
 // answers the command's exit code, 128 plus the signal's number for one
-// a signal ended. (`magpie claude run`: claude in front, magpie waiting.)
+// a signal ended. (`eipgam claude run`: claude in front, eipgam waiting.)
 func WaitFollowingStops(cmd *exec.Cmd) (int, error) {
 	pid := cmd.Process.Pid
 	for {

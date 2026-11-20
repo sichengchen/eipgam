@@ -2,7 +2,7 @@
 // ryanpascal on Discord: Library › Skills' heading had a dozen buttons.
 // What is used now and then waits under ⋯, the app's own row menu: Check
 // for updates, Update all, Group again, Collapse all, Turn all on and off,
-// By agent, Manage n in magpie and Remove all. The bar keeps the order,
+// By agent, Manage n in eipgam and Remove all. The bar keeps the order,
 // Select and the ⋯, on one line at a wide window, inside a narrow one. The
 // MCP servers' heading does the same. Each item is the bar's button: its
 // name and title, greyed when it was, and its click. Five languages, narrow
@@ -35,14 +35,14 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
   };
 }
 
-const SKILL_MENU = ["Check for updates", "Update all", "Group again", "Collapse all", "Turn all on", "Turn all off", "By agent", "Manage {n} in magpie", "Remove all"];
+const SKILL_MENU = ["Check for updates", "Update all", "Group again", "Collapse all", "Turn all on", "Turn all off", "By agent", "Manage {n} in eipgam", "Remove all"];
 const SERVER_MENU = ["Turn all on", "Turn all off", "By agent", "Remove all"];
 const MOVED = ".lib-check, .lib-updallnow, .lib-regroup, .lib-foldall, .lib-everyon, .lib-everyoff, .lib-byagent, .lib-handover, .lib-everyrm";
 
@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang + " " + width, async () => {
         const state = {
           lib: {
-            dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+            dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
             agents: [agent("claude", "Claude Code", "claudecode-color"), agent("codex", "Codex", "openai")],
             instructions: { agents: [], sets: [] }, servers: [srv("alpha"), srv("beta")], foundServers: [], projects: [], problems: [],
             skills: [gh("acme/tools", "grill", { shared: true }), gh("acme/tools", "lint", { shared: true }), gh("zed/kit", "pdf"), gh("zed/kit", "tdd", { agents: ["claude", "codex"] })],
@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         const posts = [];
         const ctx = await browser.newContext({ viewport: { width, height: 760 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "skills"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         await page.locator("#view-library .lib-row.lib-skill").first().waitFor();
         const tr = (words, vars) => page.evaluate(([w, v]) => w.map((x) => t(x, v)), [words, vars]);

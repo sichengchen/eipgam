@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // "Codex prompt suggestions" (@0xcb198609 on X): the Codex app's home-page
 // prompt suggestions, a background turn that reads the project and its
-// connected apps, ran on whatever magpie's auto picked. Codex's row on the
+// connected apps, ran on whatever eipgam's auto picked. Codex's row on the
 // Agents page sets their model: Codex's own pick by default, else one of
-// magpie's models or groups from the app's menu (no native select). A pick
+// eipgam's models or groups from the app's menu (no native select). A pick
 // posts settings/codex-suggestions on its own, the other side calls'
 // settings untouched, the row's tooltip says where Codex turns them off,
 // and no click scrolls the page.
@@ -24,7 +24,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], lanURLs: [],
     titleModels: [
@@ -99,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await browser.close();
         });
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await openAgentSettings(page); // on Codex's opened row, not in Settings (the owner, 10-20)
         const row = page.locator("#codexSuggestionsRow");
         const pick = page.locator("#codexSuggestionsPick button");
@@ -131,7 +131,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.locator("#list li:not(.group)").filter({ hasText: s }).first().click();
         };
 
-        // the app's menu: the session's, Off and magpie's models
+        // the app's menu: the session's, Off and eipgam's models
         await pick.click();
         await page.locator("#pop:not([hidden]) #list li").first().waitFor();
         const items = (await page.locator("#list li:not(.group)").allTextContents()).join("|");
@@ -142,7 +142,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the tooltip says where Codex turns them off
         assert((await row.locator(".who").getAttribute("title")).includes(want[lang].off));
 
-        // a model of magpie's
+        // a model of eipgam's
         await pickItem("DeepSeek V4 Flash");
         await shows("DeepSeek V4 Flash");
         assert.deepEqual(posted, [["codex-suggestions", { model: "deepseek/deepseek-v4-flash" }]]);

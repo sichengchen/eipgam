@@ -1,7 +1,7 @@
-// An app magpie is added to by a link of its own (Cindy, Lody, AionUi, Cherry Studio) is a row like the
+// An app eipgam is added to by a link of its own (Cindy, Lody, AionUi, Cherry Studio) is a row like the
 // others on the Agents page (the owner: its wide button, with no line under
 // the name, sat apart from every other): a line under its name says whether
-// magpie is added, and its button stands where the others' model picker
+// eipgam is added, and its button stands where the others' model picker
 // does, as wide and lined up with it.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -11,17 +11,17 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 
-// connected when Cindy has magpie, so neither is folded under Show more
+// connected when Cindy has eipgam, so neither is folded under Show more
 const crush = (wired) => ({
   id: "crush", name: "Crush", path: "/test/crush.json", icon: "crush", wired,
-  fields: [{ key: "model", label: "model", value: wired ? "magpie/deepseek-flash" : "", options: [{ value: "magpie/deepseek-flash", label: "DeepSeek Flash", ref: "deepseek/deepseek-flash" }] }],
+  fields: [{ key: "model", label: "model", value: wired ? "eipgam/deepseek-flash" : "", options: [{ value: "eipgam/deepseek-flash", label: "DeepSeek Flash", ref: "deepseek/deepseek-flash" }] }],
 });
 const cindy = (added) => ({ id: "cindy", name: "Cindy", path: "", icon: "cindy", import: "cindy://import?x=1", added, fields: [] });
-// AionUi's link as magpie makes it (agent.AionUiLink), its status the
+// AionUi's link as eipgam makes it (agent.AionUiLink), its status the
 // other way round from Cindy's so each run has both
-const AIONUI_LINK = "aionui://add-provider?api_key=magpie-aionui&base_url=http%3A%2F%2F127.0.0.1%3A3425%2Fv1&name=magpie&platform=custom";
+const AIONUI_LINK = "aionui://add-provider?api_key=eipgam-aionui&base_url=http%3A%2F%2F127.0.0.1%3A3425%2Fv1&name=eipgam&platform=custom";
 const aionui = (added) => ({ id: "aionui", name: "AionUi", path: "", icon: "aionui", import: AIONUI_LINK, added, fields: [] });
-// Cherry Studio's link as magpie makes it (agent.CherryStudioLink)
+// Cherry Studio's link as eipgam makes it (agent.CherryStudioLink)
 const CHERRY_LINK = "cherrystudio://providers/api-keys?v=1&data=eyJpZCI6Im1hZ3BpZSIsImJhc2VVcmwiOiJodHRwOi8vMTI3LjAuMC4xOjM0MjUvdjEiLCJhcGlLZXkiOiJtYWdwaWUtY2hlcnJ5c3R1ZGlvIiwibmFtZSI6Im1hZ3BpZSIsInR5cGUiOiJvcGVuYWkifQ%3D%3D";
 const cherry = (added) => ({ id: "cherrystudio", name: "Cherry Studio", path: "", icon: "cherrystudio-color", import: CHERRY_LINK, added, fields: [] });
 
@@ -44,39 +44,39 @@ async function serve(route, lang, added, ctl = {}) {
 }
 
 const SAID = {
-  en: [/^Not added · Cindy asks to add magpie/, /^Added · magpie is a provider in Cindy/],
+  en: [/^Not added · Cindy asks to add eipgam/, /^Added · eipgam is a provider in Cindy/],
   zh: [/^未添加 · /, /^已添加 · /],
   "zh-TW": [/^未新增 · /, /^已新增 · /],
   ja: [/^未追加 · /, /^追加済み · /],
   de: [/^Nicht hinzugefügt · /, /^Hinzugefügt · /],
 };
-// Lody has no status magpie can read: its line asks to confirm in Lody, in
+// Lody has no status eipgam can read: its line asks to confirm in Lody, in
 // the reader's language, and never says added or not
 const UNKNOWN = {
-  en: "Opens Lody to add magpie as a provider — confirm it there",
-  zh: "打开 Lody 添加 magpie 供应商，在其中确认",
-  "zh-TW": "開啟 Lody 新增 magpie 供應商，在其中確認",
-  ja: "Lody を開いて magpie をプロバイダとして追加します。そちらで確認してください",
-  de: "Öffnet Lody, um magpie als Anbieter hinzuzufügen — dort bestätigen",
+  en: "Opens Lody to add eipgam as a provider — confirm it there",
+  zh: "打开 Lody 添加 eipgam 供应商，在其中确认",
+  "zh-TW": "開啟 Lody 新增 eipgam 供應商，在其中確認",
+  ja: "Lody を開いて eipgam をプロバイダとして追加します。そちらで確認してください",
+  de: "Öffnet Lody, um eipgam als Anbieter hinzuzufügen — dort bestätigen",
 };
 
-// what a click on Add magpie became, in the reader's language (sungt,
+// what a click on Add eipgam became, in the reader's language (sungt,
 // 10-29: a link nothing opened did nothing, and nothing said so)
 const OPENED = {
-  en: "Sent to Cindy: confirm adding magpie there",
-  zh: "已交给 Cindy：请在其中确认添加 magpie",
-  "zh-TW": "已交給 Cindy：請在其中確認新增 magpie",
-  ja: "Cindy に渡しました。そちらで magpie の追加を確認してください",
-  de: "An Cindy übergeben: dort das Hinzufügen von magpie bestätigen",
+  en: "Sent to Cindy: confirm adding eipgam there",
+  zh: "已交给 Cindy：请在其中确认添加 eipgam",
+  "zh-TW": "已交給 Cindy：請在其中確認新增 eipgam",
+  ja: "Cindy に渡しました。そちらで eipgam の追加を確認してください",
+  de: "An Cindy übergeben: dort das Hinzufügen von eipgam bestätigen",
 };
 // the i18n.js key api.go's linkSaid sends
-const LINK_SAID = "Nothing on this computer opens {app}'s links, so {app} didn't open: open {app} once or install it again, then click Add magpie again";
+const LINK_SAID = "Nothing on this computer opens {app}'s links, so {app} didn't open: open {app} once or install it again, then click Add eipgam again";
 const NO_HANDLER = {
-  en: "Nothing on this computer opens Cindy's links, so Cindy didn't open: open Cindy once or install it again, then click Add magpie again",
-  zh: "这台电脑上没有程序能打开 Cindy 的链接，所以 Cindy 没有打开：先打开一次 Cindy 或重新安装，再点「添加 magpie」",
-  "zh-TW": "這台電腦上沒有程式能開啟 Cindy 的連結，所以 Cindy 沒有開啟：先開啟一次 Cindy 或重新安裝，再點「新增 magpie」",
-  ja: "このコンピュータには Cindy のリンクを開くアプリがないため、Cindy は開きませんでした。Cindy を一度起動するか入れ直してから、もう一度「magpie を追加」を押してください",
-  de: "Auf diesem Computer öffnet nichts die Links von Cindy, daher wurde Cindy nicht geöffnet: Cindy einmal starten oder neu installieren, dann erneut auf „magpie hinzufügen“ klicken",
+  en: "Nothing on this computer opens Cindy's links, so Cindy didn't open: open Cindy once or install it again, then click Add eipgam again",
+  zh: "这台电脑上没有程序能打开 Cindy 的链接，所以 Cindy 没有打开：先打开一次 Cindy 或重新安装，再点「添加 eipgam」",
+  "zh-TW": "這台電腦上沒有程式能開啟 Cindy 的連結，所以 Cindy 沒有開啟：先開啟一次 Cindy 或重新安裝，再點「新增 eipgam」",
+  ja: "このコンピュータには Cindy のリンクを開くアプリがないため、Cindy は開きませんでした。Cindy を一度起動するか入れ直してから、もう一度「eipgam を追加」を押してください",
+  de: "Auf diesem Computer öffnet nichts die Links von Cindy, daher wurde Cindy nicht geöffnet: Cindy einmal starten oder neu installieren, dann erneut auf „eipgam hinzufügen“ klicken",
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const ctl = {};
         await page.route("**/*", (route) => serve(route, lang, added, ctl));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.waitForLoadState("networkidle");
 
         const more = page.locator('.agent-more[aria-expanded="false"]');

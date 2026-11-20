@@ -6,16 +6,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A conversation saved on a group magpie found keeps working once the group
+// A conversation saved on a group eipgam found keeps working once the group
 // is gone (canlee886 on X: a Codex thread on group/auto-gpt-6-1-sol failed
 // every turn with 404 once one of its two providers no longer listed
 // gpt-6.1-sol, and switching the thread's model did not help). While a
 // provider still serves the model, the group's id goes to that model there;
 // it is the same model, so nothing is switched. With none left the 404 says
-// the model is gone and to pick another, not every id magpie has.
+// the model is gone and to pick another, not every id eipgam has.
 func TestFoundGroupGoneGoesToItsModel(t *testing.T) {
 	fresh(t)
 	a, b := &keyed{}, &keyed{}
@@ -79,8 +79,8 @@ func TestFoundGroupGoneGoesToItsModel(t *testing.T) {
 	}
 }
 
-// Codex, switched off a model magpie no longer serves, compacts the thread
-// on the old model first (model_downshift): that compaction is magpie's own
+// Codex, switched off a model eipgam no longer serves, compacts the thread
+// on the old model first (model_downshift): that compaction is eipgam's own
 // local summary, never the turn's 404, so the thread goes on on the model
 // it was switched to.
 func TestCodexLeavingGoneGroupCompactsLocally(t *testing.T) {

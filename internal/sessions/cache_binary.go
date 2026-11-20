@@ -19,7 +19,7 @@ import (
 // history's 40MB, and json's reflection allocated ~20MB to encode it on
 // each save; this form is a few times smaller and read and written without
 // reflection. A file without it is the old JSON, read once and written
-// back in this form; an older magpie finds this one invalid and reads its
+// back in this form; an older eipgam finds this one invalid and reads its
 // files again, as it would any file of another version.
 const cacheMagic = "MGPSC\x01"
 

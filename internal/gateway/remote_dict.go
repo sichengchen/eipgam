@@ -16,31 +16,31 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zstd"
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A magpie using another magpie in the cloud (a Remote magpie provider:
-// a cloud or Docker deploy, a shared gateway) sent that magpie every
+// A eipgam using another eipgam in the cloud (a Remote eipgam provider:
+// a cloud or Docker deploy, a shared gateway) sent that eipgam every
 // request whole and uncompressed, and an agent's request is the whole
 // conversation every turn: a long Claude Code session with a screenshot
 // is megabytes, nearly all of it the request before (gaubeebangeel on X,
 // after jixoai/reply9842, whose idea this follows: the body before as a
 // zstd dictionary for the next).
 //
-// So the leg between two magpies, the one hop magpie holds both ends of,
+// So the leg between two magpies, the one hop eipgam holds both ends of,
 // goes as RFC 9842's Dictionary-Compressed Zstandard, turned round for a
-// request: a request to a remote magpie of dictMin bytes or more offers
-// its body as a dictionary (KeepBodyHeader), and a magpie that keeps it
+// request: a request to a remote eipgam of dictMin bytes or more offers
+// its body as a dictionary (KeepBodyHeader), and a eipgam that keeps it
 // says so on its reply with the body's SHA-256 (KeptBodyHeader). This
 // side then keeps the body it sent under the route, and the next request
 // goes as "dcz" against the kept body it shares the most with
 // (dictBase), naming it in Available-Dictionary, its own SHA-256 in
 // BodyDigestHeader; one that shares too little with any goes as plain
-// zstd. A magpie that never said it keeps bodies (one from before this)
+// zstd. A eipgam that never said it keeps bodies (one from before this)
 // is sent each body as it was, so nothing is asked of it.
 //
-// The other magpie keeps each body under the key it came with and the
+// The other eipgam keeps each body under the key it came with and the
 // address it came from (dictScope), bounded per caller and in all
 // (keptBodies), and decodes a "dcz" body only against a dictionary of the
 // same scope: another key, or the same key from another computer, can't
@@ -50,10 +50,10 @@ import (
 // DictMissHeader, before any provider is asked, and this side sends the
 // request again whole (dictSend.after): a body is never guessed.
 const (
-	// KeepBodyHeader on a request to another magpie offers its body as a
+	// KeepBodyHeader on a request to another eipgam offers its body as a
 	// dictionary for the next ("dcz")
 	KeepBodyHeader = "X-Magpie-Keep-Body"
-	// KeptBodyHeader on a magpie's reply is the SHA-256 of the request
+	// KeptBodyHeader on a eipgam's reply is the SHA-256 of the request
 	// body it kept, as an RFC 8941 byte sequence
 	KeptBodyHeader = "X-Magpie-Kept-Body"
 	// availableDictHeader is RFC 9842's: the SHA-256 of the dictionary a
@@ -73,7 +73,7 @@ const (
 	dictTTL = 30 * time.Minute
 	// dictPerScope is the most bodies kept per caller or route
 	dictPerScope = 8
-	// dictScopeBytes bounds one caller's kept bodies on the magpie kept for
+	// dictScopeBytes bounds one caller's kept bodies on the eipgam kept for
 	dictScopeBytes = 96 << 20
 	// dictServerBytes bounds every caller's together
 	dictServerBytes = 256 << 20
@@ -153,7 +153,7 @@ func dczReader(r io.Reader, dict []byte) (io.ReadCloser, error) {
 	return d.IOReadCloser(), nil
 }
 
-var errDictMiss = errors.New("magpie doesn't hold the dictionary this body was compressed against, or it doesn't decode against it; send it whole")
+var errDictMiss = errors.New("eipgam doesn't hold the dictionary this body was compressed against, or it doesn't decode against it; send it whole")
 
 // anchors are the places in a body chosen by its content alone, each
 // known by a hash of the bytes after it: two bodies that share content
@@ -216,7 +216,7 @@ func (a anchors) shared(b anchors) int {
 type sentBodies struct {
 	mu     sync.Mutex
 	routes map[string][]*sentDict // the newest first
-	speaks map[string]bool        // routes whose magpie said it keeps bodies
+	speaks map[string]bool        // routes whose eipgam said it keeps bodies
 	size   int
 	now    func() time.Time
 }
@@ -235,7 +235,7 @@ func newSentBodies() *sentBodies {
 }
 
 // base is the kept body of route that body shares the most with, nil for
-// none sharing dictShareMin anchors; speaks, whether its magpie keeps bodies.
+// none sharing dictShareMin anchors; speaks, whether its eipgam keeps bodies.
 func (s *sentBodies) base(route string, at anchors) (best *sentDict, speaks bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -292,7 +292,7 @@ func (s *sentBodies) put(route string, d *sentDict) {
 	}
 }
 
-// forget lets go of a route's kept bodies, after its magpie didn't hold
+// forget lets go of a route's kept bodies, after its eipgam didn't hold
 // one; it still speaks.
 func (s *sentBodies) forget(route string) {
 	s.mu.Lock()
@@ -303,8 +303,8 @@ func (s *sentBodies) forget(route string) {
 	delete(s.routes, route)
 }
 
-// unspoken: the route's magpie couldn't read the encoding at all (a
-// magpie gone back to a version from before this): its bodies go as
+// unspoken: the route's eipgam couldn't read the encoding at all (a
+// eipgam gone back to a version from before this): its bodies go as
 // they are until it says again that it keeps them.
 func (s *sentBodies) unspoken(route string) {
 	s.forget(route)
@@ -313,7 +313,7 @@ func (s *sentBodies) unspoken(route string) {
 	delete(s.speaks, route)
 }
 
-// dictSend is one request to a remote magpie and how its body went.
+// dictSend is one request to a remote eipgam and how its body went.
 type dictSend struct {
 	route string
 	body  []byte
@@ -322,8 +322,8 @@ type dictSend struct {
 	enc   string // "", "zstd" or "dcz"
 }
 
-// sendDict puts body on req as it goes to remote magpie p: offered kept,
-// and against a body the other magpie keeps, or zstd, when it said it
+// sendDict puts body on req as it goes to remote eipgam p: offered kept,
+// and against a body the other eipgam keeps, or zstd, when it said it
 // keeps bodies. It returns the bytes that go on the wire, and nil when
 // the request is not one for this.
 func sendDict(p provider.Provider, req *http.Request, body []byte) (*dictSend, int) {
@@ -369,7 +369,7 @@ var plainZstd = sync.OnceValue(func() *zstd.Encoder {
 
 func zstdEncode(b []byte) []byte { return plainZstd().EncodeAll(b, make([]byte, 0, len(b)/4+64)) }
 
-// after reads the other magpie's answer to the request: a body it
+// after reads the other eipgam's answer to the request: a body it
 // couldn't decode goes again whole, by again; a body it kept is kept
 // here too.
 func (d *dictSend) after(req *http.Request, res *http.Response, err error, again func(*http.Request) (*http.Response, error)) (*http.Response, error) {
@@ -403,7 +403,7 @@ func (d *dictSend) after(req *http.Request, res *http.Response, err error, again
 	return res, nil
 }
 
-// keptBodies is what a magpie keeps of the bodies other magpies offered,
+// keptBodies is what a eipgam keeps of the bodies other magpies offered,
 // per scope (dictScope), the least lately used going first over a bound.
 type keptBodies struct {
 	mu     sync.Mutex
@@ -499,7 +499,7 @@ func dictOf(ctx context.Context) []byte {
 	return b
 }
 
-// keptBodyRequests keeps the body of another magpie's request that offers
+// keptBodyRequests keeps the body of another eipgam's request that offers
 // it, and decodes one sent "dcz" against a body it kept, before the
 // request's key limit and route read it. Its headers come off every
 // request, so nothing passes them on.

@@ -6,7 +6,7 @@ import (
 )
 
 // Which of a provider's accounts or keys a model goes to. The gateway's
-// routing (gateway/fallback.go, perKeyEvery) and magpie's own test of a
+// routing (gateway/fallback.go, perKeyEvery) and eipgam's own test of a
 // model (test.go) both take them from here, so a test asks the account
 // or key a real request would: a pool whose accounts list different
 // models tested every one of them with its first account, and a model
@@ -59,7 +59,7 @@ func (p Provider) AccountsOn() []AccountOn {
 // lacks the model would only answer 400, so it is in out only when no
 // account lists it (by the vendor's own id: an account's list names its
 // models by theirs, not by one the user lists one by). A list older than
-// the model, as magpie knows it (Account.listLags), is unknown, not a
+// the model, as eipgam knows it (Account.listLags), is unknown, not a
 // plan without it: that account is in out.
 func (p Provider) AccountsFor(model string, held func(AccountOn) bool) (out, left, barred []AccountOn) {
 	all := slices.DeleteFunc(p.AccountsOn(), func(a AccountOn) bool {
@@ -160,7 +160,7 @@ func (p Provider) KeysFor(model string, held func(KeyOn) bool) (out, unlisted, b
 		out, unlisted = unlisted, nil // no key lists it: try them all the same
 	}
 	if len(out) == 0 {
-		// no key's plan has it as magpie knows the plans: a model the
+		// no key's plan has it as eipgam knows the plans: a model the
 		// vendor added since, tried on them all the same. Else a key
 		// whose plan lacks it is never asked, not even after the others
 		// refused it: its endpoint has no such model either

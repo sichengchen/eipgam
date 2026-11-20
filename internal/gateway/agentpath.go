@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // AgentPath is the prefix of a gateway address that names the agent
 // calling it, for an agent that can be given neither a key of its own
 // (TokenFor) nor a User-Agent: OpenBot seals the key of an endpoint it
-// lists in safeStorage, which magpie doesn't open, and hands the endpoint
+// lists in safeStorage, which eipgam doesn't open, and hands the endpoint
 // to the OpenCode it runs, whose requests say "opencode/…". So its
 // requests were counted and listed as OpenCode's (SSNQT on X). Given
 // <gateway>/agent/openbot/v1, the gateway reads /agent/openbot off the
@@ -26,7 +26,7 @@ type agentPathCtx struct{}
 
 // takeAgentPath is r without the AgentPath its path begins with, the agent
 // it names kept for agentOf: /agent/openbot/v1/chat/completions is
-// /v1/chat/completions from OpenBot. A path naming no agent magpie knows is
+// /v1/chat/completions from OpenBot. A path naming no agent eipgam knows is
 // left as it is.
 func takeAgentPath(r *http.Request) *http.Request {
 	rest, ok := strings.CutPrefix(r.URL.Path, AgentPath)

@@ -16,7 +16,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // servedTierAt is the served tier a reply from host says, as the log keeps
@@ -121,14 +121,14 @@ func upstreamTier(b []byte) string {
 	return ""
 }
 
-// A reply passed back to another magpie (a Remote magpie provider there)
+// A reply passed back to another eipgam (a Remote eipgam provider there)
 // says the tier the request went to its vendor at here, and whether the
-// vendor's own word in the body tells anything. That magpie records them
+// vendor's own word in the body tells anything. That eipgam records them
 // as its own: its request goes to this one at the tier it asked, this
 // one's Fast or a key's tier may send another, and the body's
 // "default" from the ChatGPT backend is no tier at all (JackyFill on X: a
-// Codex turn sent as Fast by the remote magpie was recorded "default" on
-// the magpie Codex asked).
+// Codex turn sent as Fast by the remote eipgam was recorded "default" on
+// the eipgam Codex asked).
 const (
 	// tierSentHeader is the tier the reply's request went to the vendor
 	// at, as the log keeps it (Record.TierSent); tierNone for none
@@ -139,9 +139,9 @@ const (
 	tierNone         = "none"
 )
 
-// stampTier says on h, a try's reply header to another magpie, the tier
+// stampTier says on h, a try's reply header to another eipgam, the tier
 // sent went to p at, and whether p's "auto"/"default" tell nothing. Those
-// p is a remote magpie that said them stand: they are its vendor's.
+// p is a remote eipgam that said them stand: they are its vendor's.
 func stampTier(h http.Header, p provider.Provider, sent string) {
 	if !p.IsRemoteMagpie() || h.Get(tierSentHeader) == "" {
 		h.Set(tierSentHeader, cmp.Or(sent, tierNone))
@@ -154,9 +154,9 @@ func stampTier(h http.Header, p provider.Provider, sent string) {
 	}
 }
 
-// tierThere adds to passed, the headers of a remote magpie's reply that go
-// to the try, what it said of its tier (stampTier). Only a remote magpie's
-// are read: a vendor's X-Magpie- headers are never taken.
+// tierThere adds to passed, the headers of a remote eipgam's reply that go
+// to the try, what it said of its tier (stampTier). Only a remote eipgam's
+// are read: a vendor's X-eipgam- headers are never taken.
 func tierThere(p provider.Provider, got, passed http.Header) http.Header {
 	if !p.IsRemoteMagpie() {
 		return passed
@@ -177,8 +177,8 @@ func tierThere(p provider.Provider, got, passed http.Header) http.Header {
 	return passed
 }
 
-// sentThere is the tier a remote magpie's reply says it sent its vendor
-// (tierThere); ok false when it said none, as a magpie before it didn't.
+// sentThere is the tier a remote eipgam's reply says it sent its vendor
+// (tierThere); ok false when it said none, as a eipgam before it didn't.
 func (h *holdWriter) sentThere() (string, bool) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -190,7 +190,7 @@ func (h *holdWriter) sentThere() (string, bool) {
 }
 
 // servedThere is t, the tier a reply from p said, unknown ("") where p is
-// a remote magpie whose vendor's "auto"/"default" tell nothing.
+// a remote eipgam whose vendor's "auto"/"default" tell nothing.
 func servedThere(w http.ResponseWriter, p provider.Provider, t string) string {
 	if t != "auto" && t != "default" || !p.IsRemoteMagpie() {
 		return t

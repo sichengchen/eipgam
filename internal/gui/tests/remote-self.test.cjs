@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// hanslin1666 on Discord: B uses A through a Remote magpie, and sync
-// carried that provider to A, where it points at A itself. magpie now
-// finds it (the list it fetches was listed by this magpie) and leaves it
-// out. Its row says "This magpie", its editor says why, and "Use it
+// hanslin1666 on Discord: B uses A through a Remote eipgam, and sync
+// carried that provider to A, where it points at A itself. eipgam now
+// finds it (the list it fetches was listed by this eipgam) and leaves it
+// out. Its row says "This eipgam", its editor says why, and "Use it
 // anyway" keeps it in: ticking posts provider/keepself, the redraw keeps
-// it ticked, unticking posts it off. Another Remote magpie says nothing.
+// it ticked, unticking posts it off. Another Remote eipgam says nothing.
 // The page doesn't move. In English, Chinese, Japanese and German,
 // Chromium and WebKit, at 1100 and 420 wide.
 const assert = require("node:assert/strict");
@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const remote = (id, name, more = {}) => ({
-  id, name, preset: "remote-magpie", icon: "magpie", host: "192.168.1.20:3425", chat: "http://192.168.1.20:3425/v1", responses: "", anthropic: "", catalog: "", routing: "",
+  id, name, preset: "remote-eipgam", icon: "eipgam", host: "192.168.1.20:3425", chat: "http://192.168.1.20:3425/v1", responses: "", anthropic: "", catalog: "", routing: "",
   models: [{ id: "own/m1", name: "m1", on: true }], agents: [], fallback: [], headers: {}, keyList: [], key: { set: true, masked: "mg-…a1b2" }, ready: true, ...more,
 });
 
@@ -46,18 +46,18 @@ function serve(lang, first, posts) {
 }
 
 const said = {
-  en: ["This magpie", "Use it anyway"],
-  zh: ["本机 magpie", "仍然使用"],
-  ja: ["この magpie", "それでも使う"],
-  de: ["Dieses magpie", "Trotzdem nutzen"],
+  en: ["This eipgam", "Use it anyway"],
+  zh: ["本机 eipgam", "仍然使用"],
+  ja: ["この eipgam", "それでも使う"],
+  de: ["Dieses eipgam", "Trotzdem nutzen"],
 };
 const strings = [
-  "This magpie",
-  "This is this magpie itself, used anyway: its models are listed twice, and a request through it passes here twice.",
-  "This is this magpie itself, brought by sync from a computer that uses it. It is left out, so its models aren't listed twice; a request for one is served here.",
+  "This eipgam",
+  "This is this eipgam itself, used anyway: its models are listed twice, and a request through it passes here twice.",
+  "This is this eipgam itself, brought by sync from a computer that uses it. It is left out, so its models aren't listed twice; a request for one is served here.",
   "Use it anyway",
   "{name} is used anyway",
-  "{name} is left out: it is this magpie",
+  "{name} is left out: it is this eipgam",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -72,19 +72,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, list, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider").first().waitFor();
         return { page, errors, posts };
       };
 
-      test(`${engine} ${width} ${lang}: a Remote magpie that is this magpie says so, and Use it anyway keeps it`, async (t) => {
+      test(`${engine} ${width} ${lang}: a Remote eipgam that is this eipgam says so, and Use it anyway keeps it`, async (t) => {
         const { page, errors, posts } = await open(t, [remote("home", "Home", { self: true }), remote("office", "Office")]);
         const row = page.locator(".row.provider", { hasText: "Home" }).first();
         const badge = row.locator(".name .badge", { hasText: said[lang][0] });
-        assert.equal(await badge.count(), 1, "the row says it is this magpie");
+        assert.equal(await badge.count(), 1, "the row says it is this eipgam");
         assert.ok((await badge.getAttribute("title")).length > 20, "the badge says why");
         assert.match(await badge.getAttribute("class"), /\boff\b/, "left out, it reads as off");
-        assert.equal(await page.locator(".row.provider", { hasText: "Office" }).locator(".name .badge").count(), 0, "another Remote magpie says nothing");
+        assert.equal(await page.locator(".row.provider", { hasText: "Office" }).locator(".name .badge").count(), 0, "another Remote eipgam says nothing");
         if (lang === "en") {
           const missing = await page.evaluate((ks) => ["zh", "zh-TW", "ja", "de"].flatMap((l) => ks.filter((k) => !I18N[l][k]).map((k) => `${l}: ${k}`)), strings);
           assert.deepEqual(missing, [], "every string has its translations");
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.locator(".editor").waitFor({ state: "detached" });
         await page.locator(".row.provider", { hasText: "Office" }).first().click();
         await page.locator(".editor .ehead", { hasText: "Office" }).waitFor();
-        assert.equal(await page.locator(".editor .self-note").count(), 0, "another Remote magpie's editor has no note");
+        assert.equal(await page.locator(".editor .self-note").count(), 0, "another Remote eipgam's editor has no note");
         assert.deepEqual(errors, []);
       });
     }

@@ -7,13 +7,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/yetone/magpie/internal/desktopdir"
-	"github.com/yetone/magpie/internal/desktopiso"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/desktopdir"
+	"github.com/sichengchen/eipgam/internal/desktopiso"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // isolatedSandbox is desktopSandbox on a Mac, with the user's choice held
-// in the test and the app magpie would make stubbed: home, the user's own
+// in the test and the app eipgam would make stubbed: home, the user's own
 // Desktop's folders and the isolated one's.
 func isolatedSandbox(t *testing.T) (string, desktopPaths, desktopPaths, *bool) {
 	t.Helper()
@@ -26,7 +26,7 @@ func isolatedSandbox(t *testing.T) (string, desktopPaths, desktopPaths, *bool) {
 }
 
 // isolatedFakes holds the isolated Desktop's choices in the test, its
-// Claude Code folder's too, and stubs the app: made as magpie would make
+// Claude Code folder's too, and stubs the app: made as eipgam would make
 // it (desktopiso.Here finds it), with the Claude Code folder it was last
 // made with in *made. desktopdir.OS is darwin.
 func isolatedFakes(t *testing.T, home string) (desktopPaths, desktopPaths, *bool, *[]string) {
@@ -65,9 +65,9 @@ func isolatedFakes(t *testing.T, home string) (desktopPaths, desktopPaths, *bool
 	return usual, iso, &on, &made
 }
 
-// The isolated Desktop (#5671): turned on with Desktop on magpie, the
-// user's own Desktop is put back as it was before magpie, byte for byte,
-// and Claude-Magpie-3p gets magpie's 3p mode, with the user's language
+// The isolated Desktop (#5671): turned on with Desktop on eipgam, the
+// user's own Desktop is put back as it was before eipgam, byte for byte,
+// and Claude-eipgam-3p gets eipgam's 3p mode, with the user's language
 // and MCP servers; the agent then reads and writes that folder. Off moves
 // it back, there having been its wiring before.
 func TestClaudeDesktopIsolatedMovesThere(t *testing.T) {
@@ -77,38 +77,38 @@ func TestClaudeDesktopIsolatedMovesThere(t *testing.T) {
 	before := desktopTree(t, usual)
 
 	f := claudeDesktop(home).Field("provider")
-	if err := f.Set("magpie"); err != nil {
+	if err := f.Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	if !desktopWired(usual) || desktopWired(iso) {
-		t.Fatal("not on magpie in the usual folders")
+		t.Fatal("not on eipgam in the usual folders")
 	}
 
 	p, err := SetDesktopIsolated(home, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !*on || p != filepath.Join(home, "Applications", "Claude Magpie.app") {
+	if !*on || p != filepath.Join(home, "Applications", "Claude eipgam.app") {
 		t.Fatalf("on %v, app %q", *on, p)
 	}
 	if after := desktopTree(t, usual); !reflect.DeepEqual(after, before) {
 		t.Fatalf("the user's own Desktop:\n%v\nwas:\n%v", after, before)
 	}
 	if !desktopWired(iso) {
-		t.Fatal("Claude-Magpie-3p not on magpie")
+		t.Fatal("Claude-eipgam-3p not on eipgam")
 	}
 	if m := desktopJSON(t, iso.config3p); m["deploymentMode"] != "3p" || !reflect.DeepEqual(m["mcpServers"], map[string]any{"fs": map[string]any{"command": "npx"}}) {
-		t.Fatalf("Claude-Magpie-3p's config: %v", m)
+		t.Fatalf("Claude-eipgam-3p's config: %v", m)
 	}
 	if m := desktopJSON(t, iso.app3p); m["locale"] != "zh-CN" {
-		t.Fatalf("Claude-Magpie-3p's language: %v", m)
+		t.Fatalf("Claude-eipgam-3p's language: %v", m)
 	}
 
 	a := claudeDesktop(home)
 	if a.Path != usual.config {
 		t.Errorf("row's file %q, want the user's own %q", a.Path, usual.config)
 	}
-	if a.Field("provider").Get() != "magpie" || a.Check() != "" {
+	if a.Field("provider").Get() != "eipgam" || a.Check() != "" {
 		t.Fatalf("get %q, check %q", a.Field("provider").Get(), a.Check())
 	}
 	if a.Notice() != noticeClaudedesktopIsolated.String() {
@@ -124,14 +124,14 @@ func TestClaudeDesktopIsolatedMovesThere(t *testing.T) {
 	if tw := DesktopTwinApp(home); tw == nil || tw.Path != iso.config3p || tw.Dir != iso.dir3p || !tw.Detected() {
 		t.Errorf("the twin's app %+v, want %s, here", tw, iso.config3p)
 	}
-	// off magpie and on again, while isolated: only Claude-Magpie-3p
+	// off eipgam and on again, while isolated: only Claude-eipgam-3p
 	if err := a.Field("provider").Set(""); err != nil {
 		t.Fatal(err)
 	}
 	if desktopWired(iso) || desktopWired(usual) {
-		t.Fatal("still on magpie")
+		t.Fatal("still on eipgam")
 	}
-	if err := a.Field("provider").Set("magpie"); err != nil {
+	if err := a.Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	if !desktopWired(iso) || desktopWired(usual) {
@@ -149,8 +149,8 @@ func TestClaudeDesktopIsolatedMovesThere(t *testing.T) {
 	}
 }
 
-// Turned on with Desktop not on magpie, nothing of the user's is written:
-// the app is made, and connecting later wires Claude-Magpie-3p only.
+// Turned on with Desktop not on eipgam, nothing of the user's is written:
+// the app is made, and connecting later wires Claude-eipgam-3p only.
 func TestClaudeDesktopIsolatedBeforeConnecting(t *testing.T) {
 	home, usual, iso, _ := isolatedSandbox(t)
 	desktopWrite(t, usual.config, `{"globalShortcut":"Alt+Space"}`)
@@ -167,11 +167,11 @@ func TestClaudeDesktopIsolatedBeforeConnecting(t *testing.T) {
 	if claudeDesktop(home).Notice() != noticeClaudedesktopIsolatedOff.String() {
 		t.Error("notice")
 	}
-	if err := claudeDesktop(home).Field("provider").Set("magpie"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	if !desktopWired(iso) || desktopWired(usual) {
-		t.Fatal("connecting didn't wire Claude-Magpie-3p alone")
+		t.Fatal("connecting didn't wire Claude-eipgam-3p alone")
 	}
 	if after := desktopTree(t, usual); !reflect.DeepEqual(after, before) {
 		t.Fatalf("connecting wrote the user's Desktop:\n%v", after)
@@ -200,7 +200,7 @@ func TestClaudeDesktopIsolatedOnlyOnAMac(t *testing.T) {
 	}
 }
 
-// Two Claude.app processes run with the isolated Desktop on: magpie's
+// Two Claude.app processes run with the isolated Desktop on: eipgam's
 // Restart and its "running on the old settings" read the one it wires.
 func TestDesktopInstance(t *testing.T) {
 	old := desktopdir.OS
@@ -234,8 +234,8 @@ func TestDesktopInstance(t *testing.T) {
 }
 
 // The isolated Desktop's Code tab on a Claude Code folder of its own
-// (#6459, xMopf7RF on X): Claude Magpie.app is made again with
-// CLAUDE_CONFIG_DIR on ~/.claude-magpie-desktop, the windows and
+// (#6459, xMopf7RF on X): Claude eipgam.app is made again with
+// CLAUDE_CONFIG_DIR on ~/.claude-eipgam-desktop, the windows and
 // capabilities of Desktop's models leave ~/.claude/settings.json (the
 // user's own keys stay) and go to that folder's, which is a Claude Code
 // row of its own named for the app. Off takes them back, the app made
@@ -248,11 +248,11 @@ func TestClaudeDesktopIsolatedClaudeDir(t *testing.T) {
 	desktopdir.OS = "darwin"
 	t.Cleanup(func() { desktopdir.OS = old })
 	_, iso, _, made := isolatedFakes(t, home)
-	// the user chose ~/.claude for it, so a new Claude Magpie keeps that
+	// the user chose ~/.claude for it, so a new Claude eipgam keeps that
 	if err := saveDesktopIsolatedClaude(false, true); err != nil {
 		t.Fatal(err)
 	}
-	own := filepath.Join(home, ".claude-magpie-desktop", "settings.json")
+	own := filepath.Join(home, ".claude-eipgam-desktop", "settings.json")
 	get := func(f, k string) string { v, _ := edit.GetJSON(f, "env."+k); return v }
 	where := func(want string) {
 		t.Helper()
@@ -267,7 +267,7 @@ func TestClaudeDesktopIsolatedClaudeDir(t *testing.T) {
 		}
 	}
 
-	if err := claudeDesktop(home).Field("provider").Set("magpie"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	where(path)
@@ -276,7 +276,7 @@ func TestClaudeDesktopIsolatedClaudeDir(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !desktopWired(iso) {
-		t.Fatal("isolated Desktop not on magpie")
+		t.Fatal("isolated Desktop not on eipgam")
 	}
 	// on ~/.claude still, as before
 	where(path)
@@ -287,7 +287,7 @@ func TestClaudeDesktopIsolatedClaudeDir(t *testing.T) {
 	if err := SetDesktopIsolatedClaude(home, true); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(*made, []string{"", filepath.Join(home, ".claude-magpie-desktop")}) {
+	if !reflect.DeepEqual(*made, []string{"", filepath.Join(home, ".claude-eipgam-desktop")}) {
 		t.Fatalf("app made with %q", *made)
 	}
 	where(own)
@@ -304,7 +304,7 @@ func TestClaudeDesktopIsolatedClaudeDir(t *testing.T) {
 			row = a
 		}
 	}
-	if row == nil || row.Name != "Claude Code · Claude Magpie" {
+	if row == nil || row.Name != "Claude Code · Claude eipgam" {
 		t.Fatalf("its row: %+v", row)
 	}
 	// the round that syncs every agent keeps it so
@@ -347,16 +347,16 @@ func TestClaudeDesktopIsolatedClaudeDirOnlyOnAMac(t *testing.T) {
 	if err := SetDesktopIsolatedClaude(home, true); !errors.Is(err, ErrDesktopIsolatedOS) {
 		t.Fatalf("err %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(home, ".claude-magpie-desktop")); err == nil {
+	if _, err := os.Stat(filepath.Join(home, ".claude-eipgam-desktop")); err == nil {
 		t.Fatal("folder made off a Mac")
 	}
 }
 
-// A Claude Magpie made beside a Desktop not on magpie is a twin, like a
+// A Claude eipgam made beside a Desktop not on eipgam is a twin, like a
 // phone's app clone (xMopf7RF on X): turning it on and connecting, as
-// "Use Claude Magpie" does, writes nothing of the user's own Desktop or
+// "Use Claude eipgam" does, writes nothing of the user's own Desktop or
 // ~/.claude, since its Code tab gets a Claude Code folder of its own, and
-// turning it off leaves the user's own Desktop off magpie.
+// turning it off leaves the user's own Desktop off eipgam.
 func TestClaudeMagpieTwinLeavesTheOriginal(t *testing.T) {
 	home, path := desktopWindowSandbox(t)
 	old := desktopdir.OS
@@ -383,18 +383,18 @@ func TestClaudeMagpieTwinLeavesTheOriginal(t *testing.T) {
 	if _, err := SetDesktopIsolated(home, true); err != nil {
 		t.Fatal(err)
 	}
-	own := filepath.Join(home, ".claude-magpie-desktop")
+	own := filepath.Join(home, ".claude-eipgam-desktop")
 	if !*on || !desktopIsolatedClaudeOn() || desktopIsolatedClaudeChosen() {
 		t.Fatalf("on %v, its own folder %v, chosen %v", *on, desktopIsolatedClaudeOn(), desktopIsolatedClaudeChosen())
 	}
 	if !reflect.DeepEqual(*made, []string{own}) {
 		t.Fatalf("app made with %q", *made)
 	}
-	if err := claudeDesktop(home).Field("provider").Set("magpie"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	if !desktopWired(iso) || desktopWiredAny(desktopUsualSets("darwin", home, os.Getenv)) {
-		t.Fatal("connecting didn't wire Claude-Magpie-3p alone")
+		t.Fatal("connecting didn't wire Claude-eipgam-3p alone")
 	}
 	if w, _ := edit.GetJSON(filepath.Join(own, "settings.json"), "env."+claudeContextEnv); w == "" {
 		t.Fatal("its Code tab's folder has no window")
@@ -410,14 +410,14 @@ func TestClaudeMagpieTwinLeavesTheOriginal(t *testing.T) {
 		t.Fatal(err)
 	}
 	if *on || desktopWired(iso) || desktopWiredAny(desktopUsualSets("darwin", home, os.Getenv)) {
-		t.Fatalf("off: on %v, isolated %v; the user's own on magpie %v", *on, desktopWired(iso), desktopWiredAny(desktopUsualSets("darwin", home, os.Getenv)))
+		t.Fatalf("off: on %v, isolated %v; the user's own on eipgam %v", *on, desktopWired(iso), desktopWiredAny(desktopUsualSets("darwin", home, os.Getenv)))
 	}
 	same("off")
 }
 
-// A new Claude Magpie's own Claude Code folder never overrides what was
-// there: the user's off, a Claude Magpie made before (its chats in
-// Claude-Magpie-3p, its Code tab on ~/.claude), or one on already.
+// A new Claude eipgam's own Claude Code folder never overrides what was
+// there: the user's off, a Claude eipgam made before (its chats in
+// Claude-eipgam-3p, its Code tab on ~/.claude), or one on already.
 func TestClaudeMagpieOwnFolderKeepsWhatWasSet(t *testing.T) {
 	for _, tc := range []struct {
 		name  string
@@ -444,17 +444,17 @@ func TestClaudeMagpieOwnFolderKeepsWhatWasSet(t *testing.T) {
 			if desktopIsolatedClaudeOn() {
 				t.Fatal("its own folder turned on")
 			}
-			if _, err := os.Stat(filepath.Join(home, ".claude-magpie-desktop")); err == nil {
+			if _, err := os.Stat(filepath.Join(home, ".claude-eipgam-desktop")); err == nil {
 				t.Fatal("folder made")
 			}
 		})
 	}
 }
 
-// After Use Claude Magpie (xMopf7RF on X, 0.1.4111), the Claude Code row
-// of Claude Magpie's Code tab folder is that tab's, on magpie through
-// Claude Magpie (DesktopTwinCode): not before Claude Magpie is wired, not
-// for ~/.claude's row or another folder's, not once Claude Magpie is off.
+// After Use Claude eipgam (xMopf7RF on X, 0.1.4111), the Claude Code row
+// of Claude eipgam's Code tab folder is that tab's, on eipgam through
+// Claude eipgam (DesktopTwinCode): not before Claude eipgam is wired, not
+// for ~/.claude's row or another folder's, not once Claude eipgam is off.
 func TestClaudeMagpieCodeTabRowIsOnThroughIt(t *testing.T) {
 	home, _ := desktopWindowSandbox(t)
 	old := desktopdir.OS
@@ -476,22 +476,22 @@ func TestClaudeMagpieCodeTabRowIsOnThroughIt(t *testing.T) {
 	if _, err := SetDesktopIsolated(home, true); err != nil {
 		t.Fatal(err)
 	}
-	if got := rows(); got["claude#magpie-desktop"] || got["claude"] || got["claude#work"] {
-		t.Fatalf("on magpie before Claude Magpie is wired: %v", got)
+	if got := rows(); got["claude#eipgam-desktop"] || got["claude"] || got["claude#work"] {
+		t.Fatalf("on eipgam before Claude eipgam is wired: %v", got)
 	}
-	if err := claudeDesktop(home).Field("provider").Set("magpie"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	if !desktopWired(iso) {
-		t.Fatal("Claude Magpie not wired")
+		t.Fatal("Claude eipgam not wired")
 	}
-	if got := rows(); !got["claude#magpie-desktop"] || got["claude"] || got["claude#work"] {
+	if got := rows(); !got["claude#eipgam-desktop"] || got["claude"] || got["claude#work"] {
 		t.Fatalf("wired: %v", got)
 	}
 	if _, err := SetDesktopIsolated(home, false); err != nil {
 		t.Fatal(err)
 	}
-	if got := rows(); got["claude#magpie-desktop"] {
-		t.Fatalf("Claude Magpie off: %v", got)
+	if got := rows(); got["claude#eipgam-desktop"] {
+		t.Fatalf("Claude eipgam off: %v", got)
 	}
 }

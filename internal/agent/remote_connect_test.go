@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// KoiLx0 on X: every agent on a client magpie had to be switched on by
-// hand before it took the remote's models. With the Remote magpie's
+// KoiLx0 on X: every agent on a client eipgam had to be switched on by
+// hand before it took the remote's models. With the Remote eipgam's
 // switch on (off by default), an agent installed here that the remote has
 // connected is connected on the follow loop, on the remote's pick; one
 // the remote hasn't connected is left alone; and one the user
@@ -103,7 +103,7 @@ func TestRemoteConnectsNewAgents(t *testing.T) {
 	}
 	forget(c.ID + disconnectedKey)
 
-	// put back by magpie on quit (RewireOnStart connects it again): not
+	// put back by eipgam on quit (RewireOnStart connects it again): not
 	// connected here, and not taken for a disconnect by hand
 	fake.set("claude", "model", "group/fast")
 	stash(map[string]string{autoKey(c.ID): "on", quitRestoredKey: `["claude"]`})

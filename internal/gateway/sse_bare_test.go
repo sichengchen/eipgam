@@ -9,7 +9,7 @@ import (
 	"testing"
 	"testing/iotest"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // agBareError is the line Antigravity ended zRain's gemini-4-argon-high
@@ -148,7 +148,7 @@ func TestAntigravityBareErrorIsTheVendors(t *testing.T) {
 
 // A Gemini stream relayed as it came (a custom provider's Gemini URL)
 // reaches its client with the bare error as Gemini's own error event,
-// which Google's SDK reads, and magpie appends no "ended before" of its
+// which Google's SDK reads, and eipgam appends no "ended before" of its
 // own after it.
 func TestGeminiRelayBareError(t *testing.T) {
 	fresh(t)

@@ -3,7 +3,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const assets = process.env.MAGPIE_GROUP_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_GROUP_ASSETS || path.resolve(__dirname, "../assets");
 const source = fs.readFileSync(path.join(assets, "plugins/routing/client.js"), "utf8");
 const app = fs.readFileSync(path.join(assets, "app.js"), "utf8");
 const section = (s, a, b) => { const start = s.indexOf(a); return start < 0 ? "" : s.slice(start, s.indexOf(b, start)); };

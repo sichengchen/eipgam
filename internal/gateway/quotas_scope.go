@@ -5,16 +5,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A key held to a budget, models or accounts is told none of this
-// magpie's quotas (#1981), unless the key's owner lets it be told those
+// eipgam's quotas (#1981), unless the key's owner lets it be told those
 // of what it may use (access.Key.Quotas, Kenoia, #2216). It is then told
 // a card only when:
 //
-//   - the card's provider is one of this magpie's, in the catalog, and
+//   - the card's provider is one of this eipgam's, in the catalog, and
 //     the key may use every model the catalog lists of it: a key held to
 //     some of a provider's models is told nothing of the provider, since
 //     its quota is spent by the models the key may not use as well; and
@@ -24,9 +24,9 @@ import (
 //     name; a card no account of the provider is known by is told to no
 //     such key.
 //
-// The quotas, their kept report, their history, the cards another magpie
+// The quotas, their kept report, their history, the cards another eipgam
 // reads and a card's refresh all go through it. The accounts' lanes
-// (/v1/magpie/concurrency) and the usage summary are still refused.
+// (/v1/eipgam/concurrency) and the usage summary are still refused.
 
 // quotaScope is what a held key with Quotas set may be told; nil is
 // everything, for a key held to nothing and this machine's owner.
@@ -132,8 +132,8 @@ func (s *quotaScope) cards(cs []provider.SubscriptionQuota) []provider.Subscript
 	return out
 }
 
-// writeCards answers another magpie the cards the key may be told. A key
-// told none of the cards here is answered as held: the other magpie then
+// writeCards answers another eipgam the cards the key may be told. A key
+// told none of the cards here is answered as held: the other eipgam then
 // shows the key's own limit, not that nothing was read here, which a
 // refresh wouldn't change.
 func writeCards(w http.ResponseWriter, r *http.Request, s *quotaScope) {
@@ -144,13 +144,13 @@ func writeCards(w http.ResponseWriter, r *http.Request, s *quotaScope) {
 		return
 	}
 	// each window's whole (Holds), reckoned here from the calls routed
-	// here, which the other magpie can't (linkaww on Discord: a Docker
-	// magpie's Codex card had none on the computer reading it). A held key
+	// here, which the other eipgam can't (linkaww on Discord: a Docker
+	// eipgam's Codex card had none on the computer reading it). A held key
 	// is told none, as in quotas.
 	if s == nil && provider.ReckonHolds != nil {
 		cs = provider.ReckonHolds(cs, time.Now())
 	}
-	// with what routing reads of each window, so the other magpie can
+	// with what routing reads of each window, so the other eipgam can
 	// weigh this one by them (#6708)
 	writeJSON(w, 200, map[string]any{"object": "list", "data": provider.ToldRouting(cs)})
 }

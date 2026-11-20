@@ -7,18 +7,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
-// `magpie claude launcher add` puts the magpie command on PATH when it
-// isn't (as Settings › Command line does), then claude-magpie beside it;
+// `eipgam claude launcher add` puts the eipgam command on PATH when it
+// isn't (as Settings › Command line does), then claude-eipgam beside it;
 // remove takes out only the launcher. Everything is in a temporary home.
 func TestAddLauncherBesideTheCommand(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("ZDOTDIR", "")
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
-	exe := filepath.Join(h, "Applications", "magpie.app", "Contents", "MacOS", "magpie")
+	exe := filepath.Join(h, "Applications", "eipgam.app", "Contents", "MacOS", "eipgam")
 	bin := filepath.Join(h, ".local", "bin")
 	for _, d := range []string{filepath.Dir(exe), bin} {
 		if err := os.MkdirAll(d, 0o755); err != nil {
@@ -33,18 +33,18 @@ func TestAddLauncherBesideTheCommand(t *testing.T) {
 	cliShellPath = func(string) []string { return []string{bin, "/usr/bin"} }
 	cliStuck = func() string { return "" }
 
-	if p := Launcher("claude-magpie"); p != "" {
+	if p := Launcher("claude-eipgam"); p != "" {
 		t.Fatalf("a launcher before any was added: %s", p)
 	}
-	p, err := AddLauncher("claude-magpie", "claude", "run")
+	p, err := AddLauncher("claude-eipgam", "claude", "run")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p != filepath.Join(bin, "claude-magpie") {
+	if p != filepath.Join(bin, "claude-eipgam") {
 		t.Fatalf("launcher at %s, want in %s", p, bin)
 	}
-	if l, err := os.Readlink(filepath.Join(bin, "magpie")); err != nil || l != exe {
-		t.Fatalf("the magpie command wasn't put on PATH first: %q, %v", l, err)
+	if l, err := os.Readlink(filepath.Join(bin, "eipgam")); err != nil || l != exe {
+		t.Fatalf("the eipgam command wasn't put on PATH first: %q, %v", l, err)
 	}
 	b, _ := os.ReadFile(p)
 	if string(b) != launcherText("darwin", exe, "claude", "run") {
@@ -53,34 +53,34 @@ func TestAddLauncherBesideTheCommand(t *testing.T) {
 	if fi, _ := os.Stat(p); fi.Mode()&0o111 == 0 {
 		t.Fatalf("launcher isn't executable: %v", fi.Mode())
 	}
-	if Launcher("claude-magpie") != p {
+	if Launcher("claude-eipgam") != p {
 		t.Fatal("the launcher added isn't found")
 	}
-	if got, err := RemoveLauncher("claude-magpie"); err != nil || got != p {
+	if got, err := RemoveLauncher("claude-eipgam"); err != nil || got != p {
 		t.Fatalf("remove: %q, %v", got, err)
 	}
 	if _, err := os.Stat(p); !os.IsNotExist(err) {
 		t.Fatal("the launcher is still there")
 	}
-	if _, err := os.Lstat(filepath.Join(bin, "magpie")); err != nil {
-		t.Fatal("removing the launcher took the magpie command out")
+	if _, err := os.Lstat(filepath.Join(bin, "eipgam")); err != nil {
+		t.Fatal("removing the launcher took the eipgam command out")
 	}
 
-	// Settings › Command line puts claude-magpie beside magpie, with
+	// Settings › Command line puts claude-eipgam beside eipgam, with
 	// nothing more asked
-	os.Remove(filepath.Join(bin, "magpie"))
+	os.Remove(filepath.Join(bin, "eipgam"))
 	if _, err := AddCLI(""); err != nil {
 		t.Fatal(err)
 	}
-	if Launcher("claude-magpie") != p {
-		t.Fatal("adding the magpie command didn't put claude-magpie beside it")
+	if Launcher("claude-eipgam") != p {
+		t.Fatal("adding the eipgam command didn't put claude-eipgam beside it")
 	}
 	// one of the user's own by that name stays theirs
 	os.WriteFile(p, []byte("#!/bin/sh\necho mine\n"), 0o755)
 	if _, err := AddCLI(""); err != nil {
-		t.Fatalf("the user's own claude-magpie failed the command's add: %v", err)
+		t.Fatalf("the user's own claude-eipgam failed the command's add: %v", err)
 	}
 	if b, _ := os.ReadFile(p); string(b) != "#!/bin/sh\necho mine\n" {
-		t.Fatalf("the user's own claude-magpie was written over:\n%s", b)
+		t.Fatalf("the user's own claude-eipgam was written over:\n%s", b)
 	}
 }

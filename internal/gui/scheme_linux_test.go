@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // fakeDesktopTools puts update-desktop-database and an xdg-mime that
@@ -16,16 +16,16 @@ import (
 // each call logged to calls (names only, or with arguments).
 func fakeDesktopTools(t *testing.T, bin, calls string, args bool) {
 	t.Helper()
-	t.Setenv("MAGPIE_SCHEME_TEST_CALLS", calls)
+	t.Setenv("EIPGAM_SCHEME_TEST_CALLS", calls)
 	t.Setenv("PATH", bin)
 	for _, name := range []string{"update-desktop-database", "xdg-mime"} {
 		log := `printf '%s\n' '` + name + `'`
 		if args {
 			log = `printf '%s\n' '` + name + `' "$@"`
 		}
-		script := "#!/bin/sh\n" + log + ` >> "$MAGPIE_SCHEME_TEST_CALLS"` + "\n"
+		script := "#!/bin/sh\n" + log + ` >> "$EIPGAM_SCHEME_TEST_CALLS"` + "\n"
 		if name == "xdg-mime" {
-			script += `f="$MAGPIE_SCHEME_TEST_CALLS.${3##*/}"` + "\n" + // PATH holds only these two, so shell builtins
+			script += `f="$EIPGAM_SCHEME_TEST_CALLS.${3##*/}"` + "\n" + // PATH holds only these two, so shell builtins
 				`[ "$1" = query ] && { [ -f "$f" ] && read -r v < "$f" && echo "$v"; exit 0; }` + "\n" +
 				`[ "$1" = default ] && echo "$2" > "$f"` + "\n"
 		}
@@ -47,7 +47,7 @@ func TestRegisterScheme(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Setenv("FLATPAK_ID", "")
 			if tc.flatpak {
-				t.Setenv("FLATPAK_ID", "ai.usemagpie.Magpie")
+				t.Setenv("FLATPAK_ID", "ai.usemagpie.eipgam")
 			}
 			root := t.TempDir()
 			data := filepath.Join(root, "data")
@@ -59,8 +59,8 @@ func TestRegisterScheme(t *testing.T) {
 			calls := filepath.Join(root, "calls")
 			fakeDesktopTools(t, bin, calls, true)
 			dir := filepath.Join(data, "applications")
-			path := filepath.Join(dir, "magpie.desktop")
-			const old = "[Desktop Entry]\nExec=/usr/bin/magpie %u\nMimeType=x-scheme-handler/magpie;\n"
+			path := filepath.Join(dir, "eipgam.desktop")
+			const old = "[Desktop Entry]\nExec=/usr/bin/eipgam %u\nMimeType=x-scheme-handler/eipgam;\n"
 			if tc.existing {
 				if err := os.MkdirAll(dir, 0o755); err != nil {
 					t.Fatal(err)
@@ -93,7 +93,7 @@ func TestRegisterScheme(t *testing.T) {
 				t.Fatal(err)
 			}
 			got, err := os.ReadFile(path)
-			if err != nil || !strings.Contains(string(got), "Exec="+exe+" %u\n") || !strings.Contains(string(got), "MimeType=x-scheme-handler/magpie;\n") {
+			if err != nil || !strings.Contains(string(got), "Exec="+exe+" %u\n") || !strings.Contains(string(got), "MimeType=x-scheme-handler/eipgam;\n") {
 				t.Fatalf("desktop entry: %q, %v", got, err)
 			}
 			checkDesktopBinding(t, data, string(got))
@@ -102,7 +102,7 @@ func TestRegisterScheme(t *testing.T) {
 				t.Fatal(err)
 			}
 			// ccswitch:// is CC Switch's: never asked about or claimed
-			want := "update-desktop-database\n" + dir + "\n" + "xdg-mime\ndefault\nmagpie.desktop\nx-scheme-handler/magpie\n"
+			want := "update-desktop-database\n" + dir + "\n" + "xdg-mime\ndefault\neipgam.desktop\nx-scheme-handler/eipgam\n"
 			if got, err := os.ReadFile(calls); err != nil || string(got) != want {
 				t.Fatalf("registration calls: %q, want %q (%v)", got, want, err)
 			}
@@ -114,10 +114,10 @@ func TestRegisterScheme(t *testing.T) {
 // is installed, so neither the dock nor the app grid draws a gear (#2626).
 func checkDesktopBinding(t *testing.T, data, entry string) {
 	t.Helper()
-	if !strings.Contains(entry, "\nStartupWMClass="+programName+"\n") || !strings.Contains(entry, "\nIcon=magpie\n") {
+	if !strings.Contains(entry, "\nStartupWMClass="+programName+"\n") || !strings.Contains(entry, "\nIcon=eipgam\n") {
 		t.Fatalf("desktop entry doesn't bind the window %q and its icon: %q", programName, entry)
 	}
-	icon, err := os.ReadFile(filepath.Join(data, "icons", "hicolor", "256x256", "apps", "magpie.png"))
+	icon, err := os.ReadFile(filepath.Join(data, "icons", "hicolor", "256x256", "apps", "eipgam.png"))
 	if err != nil || !bytes.Equal(icon, desktopIcon) {
 		t.Fatalf("icon not installed: %d bytes, %v", len(icon), err)
 	}
@@ -126,7 +126,7 @@ func checkDesktopBinding(t *testing.T, data, entry string) {
 	}
 }
 
-// An entry an older magpie (or install.sh) wrote for this executable has no
+// An entry an older eipgam (or install.sh) wrote for this executable has no
 // StartupWMClass; it is written again, once, and the icon put beside it.
 func TestRegisterSchemeBindsAnOlderEntry(t *testing.T) {
 	t.Setenv("FLATPAK_ID", "")
@@ -144,9 +144,9 @@ func TestRegisterSchemeBindsAnOlderEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 	dir := filepath.Join(data, "applications")
-	path := filepath.Join(dir, "magpie.desktop")
-	older := "[Desktop Entry]\nType=Application\nName=magpie\nComment=Every agent's model. One place.\nExec=" + exe +
-		" %u\nIcon=magpie\nCategories=Development;Utility;\nMimeType=x-scheme-handler/magpie;\nTerminal=false\n"
+	path := filepath.Join(dir, "eipgam.desktop")
+	older := "[Desktop Entry]\nType=Application\nName=eipgam\nComment=Every agent's model. One place.\nExec=" + exe +
+		" %u\nIcon=eipgam\nCategories=Development;Utility;\nMimeType=x-scheme-handler/eipgam;\nTerminal=false\n"
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func TestKeepWebData(t *testing.T) {
 		moved         bool
 	}{
 		{"webkit data under the executable's name", true, false, true},
-		{"magpie's folder there already", true, true, false},
+		{"eipgam's folder there already", true, true, false},
 		{"a folder that isn't WebKit's", false, false, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -200,7 +200,7 @@ func TestKeepWebData(t *testing.T) {
 			if err := os.WriteFile(filepath.Join(from, sub, "file__0.localstorage"), []byte("favourites"), 0o644); err != nil {
 				t.Fatal(err)
 			}
-			if tc.there { // even empty, it is magpie's, which a rename would replace
+			if tc.there { // even empty, it is eipgam's, which a rename would replace
 				if err := os.MkdirAll(to, 0o755); err != nil {
 					t.Fatal(err)
 				}

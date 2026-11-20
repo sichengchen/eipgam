@@ -19,8 +19,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Quiet is how long a dismissal of the pill holds: the Stable channel's

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Settings › Models' check of each pipeline (EV_John_Liu on X) makes one
@@ -133,7 +133,7 @@ func TestCheckSearchAsksOnce(t *testing.T) {
 	f.mu.Lock()
 	asked := f.asked
 	f.mu.Unlock()
-	if len(asked) != 1 || asked[0] != "tavily: magpie" {
+	if len(asked) != 1 || asked[0] != "tavily: eipgam" {
 		t.Fatalf("asked %v", asked)
 	}
 	f.mu.Lock()
@@ -188,7 +188,7 @@ func TestCheckSearchAsksEveryAPI(t *testing.T) {
 	asked := slices.Clone(f.asked)
 	f.mu.Unlock()
 	slices.Sort(asked)
-	if !slices.Equal(asked, []string{"exa: magpie", "tavily: magpie"}) {
+	if !slices.Equal(asked, []string{"exa: eipgam", "tavily: eipgam"}) {
 		t.Fatalf("one call each: asked %v", asked)
 	}
 }

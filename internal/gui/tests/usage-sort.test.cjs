@@ -16,7 +16,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const reader = require("./reader.cjs");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 
 const G = (id, name, input, output, calls, cost, extra) => ({ id, name, icon: "generic", calls, input, output, cache_read: 0, cache_write: 0, cost, ...extra });
 // sent in the server's order, most tokens first; the cost, calls and names
@@ -41,7 +41,7 @@ const sum = (k) => AGENTS.reduce((n, g) => n + g[k], 0);
 const USAGE = {
   calls: 115, errors: 0, input: sum("input"), output: sum("output"), reasoning: 0, cache_read: sum("cache_read"), cache_write: 0, unpriced: 5, cost: 8.75, bucket: "day",
   series: [{ label: "Nov 14", time: new Date().toISOString(), calls: 115, input: sum("input"), output: sum("output"), cache_read: sum("cache_read"), cache_write: 0, cost: 8.75 }],
-  path: "~/.config/magpie/usage.jsonl",
+  path: "~/.config/eipgam/usage.jsonl",
   agents: AGENTS, models: MODELS, accounts: ACCOUNTS, callerKeys: KEYS,
 };
 
@@ -99,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             p.setDefaultNavigationTimeout(60000);
             p.on("pageerror", (e) => errors.push(e.message));
             await p.route("**/*", server(lang));
-            await p.goto("http://magpie.test/");
+            await p.goto("http://eipgam.test/");
             await goUsage(p);
             await p.locator("#usageKeys .row.stat").first().waitFor({ state: "attached" });
             return p;
@@ -178,7 +178,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await fold.click();
           assert.equal(await pick("models").isVisible(), true);
 
-          await p.evaluate(() => { localStorage.removeItem("magpie.usageSort"); localStorage.removeItem("magpie.usageWithCache"); localStorage.removeItem("magpie.usageFolded"); });
+          await p.evaluate(() => { localStorage.removeItem("eipgam.usageSort"); localStorage.removeItem("eipgam.usageWithCache"); localStorage.removeItem("eipgam.usageFolded"); });
           await p.close();
           assert.deepEqual(errors, []);
         });

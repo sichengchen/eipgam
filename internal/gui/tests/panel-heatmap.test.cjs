@@ -6,14 +6,14 @@
 // Requests switch. It is of the provider picked; the pointer on a day says
 // its date and what it had; weeks without a call show no card. Every
 // language, a 440px and a 320px panel, light and dark; no backend, the API
-// is faked. MAGPIE_ASSETS runs it on other assets.
+// is faked. EIPGAM_ASSETS runs it on other assets.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets");
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -81,9 +81,9 @@ async function open(browser, lang, theme, width, empty) {
   p.setDefaultTimeout(5000);
   p.setDefaultNavigationTimeout(60000);
   p.on("pageerror", (e) => errors.push(e.message));
-  await p.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "stats"); localStorage.setItem("magpie.panelUseMetric", "tokens"); localStorage.setItem("magpie.panelUseSplit", "provider"); } catch {} });
+  await p.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "stats"); localStorage.setItem("eipgam.panelUseMetric", "tokens"); localStorage.setItem("eipgam.panelUseSplit", "provider"); } catch {} });
   await p.route("**/*", serve(lang, theme, heats, empty));
-  await p.goto("http://magpie.test/?mode=panel");
+  await p.goto("http://eipgam.test/?mode=panel");
   await p.locator("#panelUsage .pu-card .led-rank .rk").first().waitFor();
   return { ctx, p, errors, heats };
 }

@@ -60,7 +60,7 @@ const inSight = (e) => { const b = e.getBoundingClientRect(); return b.height > 
 const fields = () => [...document.querySelectorAll(".editor.roomy > *, .editor.roomy .more .inner > *")].map((e) => { const b = e.getBoundingClientRect(); return [Math.round(b.top), Math.round(b.height)].join(","); });
 const strings = [
   "Headers", "Certificate", "Turn it on only on a network you trust.",
-  "For your own server with a self-signed certificate or one from your company's CA. magpie then can't tell it from another machine answering at its address: turn it on only on a network you trust.",
+  "For your own server with a self-signed certificate or one from your company's CA. eipgam then can't tell it from another machine answering at its address: turn it on only on a network you trust.",
   "Find groups on their own", "Every member busy",
 ];
 
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=" + at);
+      await page.goto("http://eipgam.test/?view=" + at);
       const w = await page.evaluate(([lang, ks]) => Object.fromEntries(ks.map((k) => [k, (I18N[lang] || {})[k] || k])), [lang, strings]);
       if (lang !== "en") {
         const missing = await page.evaluate(([lang, ks]) => ks.filter((k) => !(I18N[lang] || {})[k]), [lang, strings.slice(0, 4)]);

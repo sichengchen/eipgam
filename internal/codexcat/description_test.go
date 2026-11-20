@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // #5024: Codex 0.166 fails the whole model catalog on a
 // supported_reasoning_levels entry without a description ("missing field
-// `description`"), so every level of an entry magpie writes from a vendor's
+// `description`"), so every level of an entry eipgam writes from a vendor's
 // carries one: the vendor's own where it gave it, else the effort's display
 // name. That is whether the user's efforts are the vendor's own, whose
-// levels magpie keeps as it wrote them, or differ from them, whose missing
-// ones magpie makes. A level of an entry magpie makes alone has said a
+// levels eipgam keeps as it wrote them, or differ from them, whose missing
+// ones eipgam makes. A level of an entry eipgam makes alone has said a
 // description (an empty one) all along.
 func TestCodexListedLevelsSayDescription(t *testing.T) {
 	v1Home(t, `{"etag":"W/\"a\"","models":[]}`)
@@ -45,7 +45,7 @@ func TestCodexListedLevelsSayDescription(t *testing.T) {
 		"relay/glm-5.3": {"low": "Fastest", "medium": "Medium", "high": "High"},
 		// one the vendor doesn't list, made for an effort of the user's
 		"relay/kimi": {"low": "Low", "xhigh": "Extra High"},
-		// magpie's own entry: a description said all along, Codex's
+		// eipgam's own entry: a description said all along, Codex's
 		// Ultra after its levels (TestUltraOnOtherVendorsModels)
 		"or/deepseek-v4": {"low": "", "max": "", "ultra": ""},
 		// none listed and none asked for: nothing to describe, no panic

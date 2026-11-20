@@ -10,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // @czhhcz on X: a relay's /v1/models listed a Claude model with
-// reasoning_levels: [], `magpie model efforts` showed five levels for it
+// reasoning_levels: [], `eipgam model efforts` showed five levels for it
 // with nothing saying where they came from, and setting all five printed a
 // tick while nothing was saved. The listing says the levels are the
 // model's own from models.dev, the relay's list naming none, and a set
@@ -60,7 +60,7 @@ func TestModelEffortsOfARelayThatListsNone(t *testing.T) {
 	if es := settings.Load().ModelEfforts; len(es) != 0 {
 		t.Fatal(es)
 	}
-	// and through magpie model spec, which said "✓ saved" over it
+	// and through eipgam model spec, which said "✓ saved" over it
 	out = saidArgs(t, "spec", ref, "--reasoning", "low-max")
 	if strings.Contains(out, "✓") || !strings.Contains(out, "nothing changed") {
 		t.Fatalf("spec, all of them again:\n%s", out)

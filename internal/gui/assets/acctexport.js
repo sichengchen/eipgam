@@ -1,5 +1,5 @@
 // ChatGPT and Claude accounts taken out as a file Sub2API, CLIProxyAPI or
-// magpie imports (heyiwei5 and Rk1ngggg on X). app.js imports this when
+// eipgam imports (heyiwei5 and Rk1ngggg on X). app.js imports this when
 // "Export accounts to a file…" is pressed (startExport), so it weighs
 // nothing on the core. The file is written by the server, 0600, into
 // Downloads; its tokens never reach the page.

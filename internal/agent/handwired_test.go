@@ -5,21 +5,21 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Users who connected before this release read as connected still: an
-// older magpie recorded the model it set (applied.json), or, where Keep
+// older eipgam recorded the model it set (applied.json), or, where Keep
 // took that record away, stashed what the agent was on at Connect.
 func TestPiConnectedBeforeStaysConnected(t *testing.T) {
 	for _, c := range []struct {
 		name string
 		mark func(a *Agent)
 	}{
-		{"applied", func(a *Agent) { record(a.ID, "model", "magpie/relay/glm-4.6") }},
-		{"applied, model since gone", func(a *Agent) { record(a.ID, "model", "magpie/gone/model-x") }},
+		{"applied", func(a *Agent) { record(a.ID, "model", "eipgam/relay/glm-4.6") }},
+		{"applied, model since gone", func(a *Agent) { record(a.ID, "model", "eipgam/gone/model-x") }},
 		{"kept before", func(a *Agent) { stash(map[string]string{a.ID + ".connect.was": `{"model":""}`}) }},
-		{"applied, then kept", func(a *Agent) { record(a.ID, "model", "magpie/relay/glm-4.6"); a.Keep() }},
+		{"applied, then kept", func(a *Agent) { record(a.ID, "model", "eipgam/relay/glm-4.6"); a.Keep() }},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			syncHome(t)
@@ -27,8 +27,8 @@ func TestPiConnectedBeforeStaysConnected(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			// as magpie wrote it: the model field's Set, with nothing recorded
-			if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+			// as eipgam wrote it: the model field's Set, with nothing recorded
+			if err := a.Field("model").Set("eipgam/relay/glm-4.6"); err != nil {
 				t.Fatal(err)
 			}
 			if a.Wired() {
@@ -42,7 +42,7 @@ func TestPiConnectedBeforeStaysConnected(t *testing.T) {
 	}
 }
 
-// setUpInMagpie marks agents as connected in magpie, as Connect leaves them
+// setUpInMagpie marks agents as connected in eipgam, as Connect leaves them
 // (its connect.was stash), for a test that writes a connected agent's files
 // itself.
 func setUpInMagpie(ids ...string) {
@@ -51,13 +51,13 @@ func setUpInMagpie(ids ...string) {
 	}
 }
 
-// JFunfunfun on X: Pi set by hand onto a provider of its own named magpie
-// (magpie/<model>, at magpie's gateway) read as connected in magpie, which
+// JFunfunfun on X: Pi set by hand onto a provider of its own named eipgam
+// (eipgam/<model>, at eipgam's gateway) read as connected in eipgam, which
 // then wrote its own list over that provider's models on every catalog
-// change, and Disconnect took the provider out. A provider named magpie
-// that magpie didn't put there is the user's: the agent isn't connected,
+// change, and Disconnect took the provider out. A provider named eipgam
+// that eipgam didn't put there is the user's: the agent isn't connected,
 // nothing drifts, and neither a sync, a rename nor Disconnect touches its
-// files. Connecting it in magpie takes it on.
+// files. Connecting it in eipgam takes it on.
 func TestPiHandWiredMagpieProviderIsTheirs(t *testing.T) {
 	syncHome(t)
 	a, err := Find("pi")
@@ -69,14 +69,14 @@ func TestPiHandWiredMagpieProviderIsTheirs(t *testing.T) {
 	// Pi's own layout, as a person writes it (pi.dev docs: models.json
 	// providers, settings.json defaultProvider/defaultModel)
 	settingsJSON := `{
-  "defaultProvider": "magpie",
+  "defaultProvider": "eipgam",
   "defaultModel": "relay/glm-4.6",
   "defaultThinkingLevel": "medium"
 }
 `
 	modelsJSON := `{
   "providers": {
-    "magpie": {
+    "eipgam": {
       "baseUrl": "` + gatewayV1() + `",
       "api": "openai-completions",
       "apiKey": "sk-a-gateway-key-of-mine",
@@ -95,14 +95,14 @@ func TestPiHandWiredMagpieProviderIsTheirs(t *testing.T) {
 			}
 		}
 	}
-	if v := a.Values()["model"]; v != "magpie/relay/glm-4.6" {
+	if v := a.Values()["model"]; v != "eipgam/relay/glm-4.6" {
 		t.Fatalf("model reads %q", v)
 	}
 	if a.Wired() {
-		t.Fatal("a provider named magpie written by hand reads as connected")
+		t.Fatal("a provider named eipgam written by hand reads as connected")
 	}
 	if d := a.Drift(); d != nil {
-		t.Errorf("drift on a config magpie never set: %+v", d)
+		t.Errorf("drift on a config eipgam never set: %+v", d)
 	}
 	// a provider saved: the catalog changed, every agent's list is synced
 	if err := provider.Save(provider.Provider{ID: "relay2", Name: "Relay 2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"glm-4.6"}}); err != nil {
@@ -122,7 +122,7 @@ func TestPiHandWiredMagpieProviderIsTheirs(t *testing.T) {
 		t.Fatal("connected after Disconnect")
 	}
 
-	// connected in magpie, it is magpie's: Keep (taking the config as it
+	// connected in eipgam, it is eipgam's: Keep (taking the config as it
 	// is) leaves it so, Disconnect gives it up
 	writeMode(t, a.Path, `{}`, 0o644)
 	os.Remove(models)
@@ -134,7 +134,7 @@ func TestPiHandWiredMagpieProviderIsTheirs(t *testing.T) {
 	}
 	a.Keep()
 	if !a.Wired() {
-		t.Fatal("Keep took magpie's connection away")
+		t.Fatal("Keep took eipgam's connection away")
 	}
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
@@ -144,8 +144,8 @@ func TestPiHandWiredMagpieProviderIsTheirs(t *testing.T) {
 	}
 }
 
-// Every agent whose magpie is a provider of its own config (Spelled) holds
-// a provider magpie didn't put there as the user's, as Pi does.
+// Every agent whose eipgam is a provider of its own config (Spelled) holds
+// a provider eipgam didn't put there as the user's, as Pi does.
 func TestHandWiredMagpieProviderSiblings(t *testing.T) {
 	ids := []string{"agy", "opencode", "pi", "zed", "vscode", "kimi", "grok"}
 	for _, id := range ids {
@@ -158,12 +158,12 @@ func TestHandWiredMagpieProviderSiblings(t *testing.T) {
 			if a.Spelled == nil {
 				t.Fatal("no Spelled")
 			}
-			// written outside magpie: the field's own Set, nothing recorded
-			if err := a.Fields[0].Set("magpie/relay/glm-4.6"); err != nil {
+			// written outside eipgam: the field's own Set, nothing recorded
+			if err := a.Fields[0].Set("eipgam/relay/glm-4.6"); err != nil {
 				t.Fatal(err)
 			}
 			if a.Wired() {
-				t.Fatalf("a provider named magpie magpie didn't set reads as connected: %v", a.Values())
+				t.Fatalf("a provider named eipgam eipgam didn't set reads as connected: %v", a.Values())
 			}
 			if d := a.Drift(); d != nil {
 				t.Errorf("drift: %+v", d)

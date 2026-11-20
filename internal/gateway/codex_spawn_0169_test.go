@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // modelCatalogText is the text of the <model_catalog> listings Codex puts
@@ -43,7 +43,7 @@ func modelCatalogText(t *testing.T, body []byte) string {
 
 // Codex 0.169 hands its lead spawn_agent's models in places other than a
 // request's tools, and the lead saw only Codex's first five there
-// (@m0eaki on X, Codex 0.169: another magpie's models could be spawned by
+// (@m0eaki on X, Codex 0.169: another eipgam's models could be spawned by
 // their full slug but weren't listed). In multi-agent V2 on one of
 // OpenAI's own models (a Lite request, use_responses_lite) spawn_agent is
 // in the additional_tools input item; with
@@ -52,7 +52,7 @@ func modelCatalogText(t *testing.T, body []byte) string {
 // tools member, its V1 spawn_agent in a tool_search_output. Each fixture
 // is real Codex 0.169.0's second request of a turn whose first searched
 // for spawn_agent, captured in a sandbox CODEX_HOME on gpt-5.6-luna with
-// a catalog of six of OpenAI's models and four of magpie's.
+// a catalog of six of OpenAI's models and four of eipgam's.
 func TestSpawnAgentNamesEveryModelInCodex0169(t *testing.T) {
 	var models []string
 	for i := 1; i <= 12; i++ {
@@ -71,7 +71,7 @@ func TestSpawnAgentNamesEveryModelInCodex0169(t *testing.T) {
 		io.WriteString(w, sse(`data: {"type":"response.created","response":{"id":"r1"}}`,
 			`data: {"type":"response.completed","response":{"id":"r1","usage":{"input_tokens":9,"output_tokens":2}}}`))
 	})
-	// subagents on any model: a lead on OpenAI's model is told of magpie's
+	// subagents on any model: a lead on OpenAI's model is told of eipgam's
 	if err := provider.SetCodexAgentsV1(true); err != nil {
 		t.Fatal(err)
 	}
@@ -113,15 +113,15 @@ func TestSpawnAgentNamesEveryModelInCodex0169(t *testing.T) {
 			}
 			namesAll(t, upstream)
 		})
-		// a lead on magpie's model, at CodexPath and at /v1 (where a
-		// ChatGPT account's model in magpie is Lite too): as the request
+		// a lead on eipgam's model, at CodexPath and at /v1 (where a
+		// ChatGPT account's model in eipgam is Lite too): as the request
 		// goes on, before a provider that takes neither Lite's items nor
 		// a tool search has them made over. The body as Codex wrote it,
 		// and as withModel writes it again when the request is moved to
 		// another model, its angle brackets escaped
 		for _, codexPath := range []bool{true, false} {
 			for _, moved := range []bool{false, true} {
-				t.Run(fmt.Sprintf("%s, a lead on magpie's model, CodexPath %v, moved %v", sh.name, codexPath, moved), func(t *testing.T) {
+				t.Run(fmt.Sprintf("%s, a lead on eipgam's model, CodexPath %v, moved %v", sh.name, codexPath, moved), func(t *testing.T) {
 					path := "/v1/responses"
 					if codexPath {
 						path = CodexPath + "/responses"
@@ -147,7 +147,7 @@ func TestSpawnAgentNamesEveryModelInCodex0169(t *testing.T) {
 // Codex makes the host's clientInfo.name its originator and the head of
 // its User-Agent (codex-rs app-server initialize_processor.rs,
 // set_default_originator). LobeHub's desktop app runs Codex 0.169.0 so,
-// with magpie as its provider at /v1, and its lead saw only Codex's first
+// with eipgam as its provider at /v1, and its lead saw only Codex's first
 // five models of a catalog of 13 (@m0eaki on X): the gate named only
 // Codex's own names. Any host's Codex turn carries the headers Codex puts
 // on every turn (x-codex-window-id, x-codex-turn-metadata), and is

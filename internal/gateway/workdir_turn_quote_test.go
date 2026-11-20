@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A user turn that quotes a working-directory line — "Primary working

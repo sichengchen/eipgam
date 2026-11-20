@@ -10,29 +10,29 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // The route-events feed (#3387, joe21_eee on Discord, sywyyhykkk on
 // GitHub): a display on the LAN, an ESP32 screen, shows every agent's
 // requests as they are routed (started, each try, its first content,
 // fallback, done) without knowing their sessions, which
-// /v1/magpie/route asks for, and without the full trace, which names
+// /v1/eipgam/route asks for, and without the full trace, which names
 // accounts, folders and errors and is told to this computer alone.
 //
 // GET routeSnapshotPath is the requests going now and a cursor; GET
 // routeEventsPath?after=<cursor> streams each change after it as SSE. A
 // route here is routeActivity, an allow list of fields, never a Route
 // with some taken out. They are told as the usage log is: to this
-// computer, and to another with an enabled gateway key while magpie is
+// computer, and to another with an enabled gateway key while eipgam is
 // shared (a read-only key reads them too, readOnlyRoutes), never to a
 // key held to a budget, models or accounts, which is told no one else's
 // requests.
 const (
-	routeSnapshotPath = "/v1/magpie/route-events/snapshot"
-	routeEventsPath   = "/v1/magpie/route-events"
+	routeSnapshotPath = "/v1/eipgam/route-events/snapshot"
+	routeEventsPath   = "/v1/eipgam/route-events"
 	// routeEventsKeep is how many changes the feed keeps for a reader
 	// that fell behind, or reconnects with the cursor it last had
 	routeEventsKeep = 512
@@ -45,9 +45,9 @@ const (
 // again whether its key is still on (a var for the tests)
 var routeEventsRecheck = time.Second
 
-// routeEventsRefused is what another machine is told while magpie isn't
+// routeEventsRefused is what another machine is told while eipgam isn't
 // shared with it.
-const routeEventsRefused = "magpie's routing events are told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries an enabled gateway key (Authorization: Bearer <key> or x-api-key: <key>); a read-only key reads them too"
+const routeEventsRefused = "eipgam's routing events are told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries an enabled gateway key (Authorization: Bearer <key> or x-api-key: <key>); a read-only key reads them too"
 
 // routeActivity is what the feed tells of a request. ID is the route's,
 // never a session's, an account's or a key's; Attempt counts from 1.
@@ -224,7 +224,7 @@ func routeEventsAllowed(w http.ResponseWriter, r *http.Request) bool {
 		writeError(w, provider.Chat, http.StatusForbidden, routeEventsRefused)
 		return false
 	}
-	return !refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it is told no one else's routing: GET /v1/magpie/usage/requests tells it its own calls")
+	return !refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it is told no one else's routing: GET /v1/eipgam/usage/requests tells it its own calls")
 }
 
 // activitySnapshot is the requests going now, by id, and the cursor of
@@ -255,7 +255,7 @@ func (s *Server) routeSnapshot(w http.ResponseWriter, r *http.Request) {
 // else ?after=). It ends when the client goes, when the gateway stops
 // serving (streamsEnding: Shutdown would wait its whole drain for it),
 // when the key it came with is turned off, removed or runs out, and when
-// magpie stops being shared with a reader on another machine.
+// eipgam stops being shared with a reader on another machine.
 func (s *Server) routeEvents(w http.ResponseWriter, r *http.Request) {
 	if !routeEventsAllowed(w, r) {
 		return

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/sichengchen/eipgam/internal/redact"
 )
 
 // fakeReader is a backend whose model finds "Alice" wherever it is, and

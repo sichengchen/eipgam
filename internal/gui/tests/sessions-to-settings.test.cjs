@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Which agents' session history magpie reads is set in Settings › Privacy,
+// Which agents' session history eipgam reads is set in Settings › Privacy,
 // and the Sessions page it is about didn't lead there once its first ask was
 // answered (the scattered settings audit after netube99 on X). Its head now
 // has a Settings › that opens Privacy at those rows, lit, with Back to
@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.errors = [];
           page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; page.errors.push(e.message); });
           await page.route("**/*", serve(lang, gateway));
-          await page.goto("http://magpie.test/?view=sessions");
+          await page.goto("http://eipgam.test/?view=sessions");
           await page.locator(".sm-head .sm-trash-btn").waitFor();
           return page;
         };

@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Devin's Adaptive and Fusion route between models inside Devin's own
@@ -22,7 +22,7 @@ import (
 // the file is read, and a save keeps them out.
 func TestDevinRouterPicksNotServed(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	spec := "@magpie-community/opencode-devin-auth"
 	write := func(name string, v any) {
 		t.Helper()

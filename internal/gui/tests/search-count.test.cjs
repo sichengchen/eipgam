@@ -65,7 +65,7 @@ async function open(engine, t, lang, saved, counts, searchCount, width) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, saved, counts, searchCount));
   await watchSettingsReads(page);
-  await page.goto(`http://magpie.test/?view=settings&tab=models&lang=${lang}`);
+  await page.goto(`http://eipgam.test/?view=settings&tab=models&lang=${lang}`);
   await settingsDrawn(page);
   return { page, errors };
 }

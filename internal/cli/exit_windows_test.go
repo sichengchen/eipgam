@@ -12,15 +12,15 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// A magpie whose exit runs into a DLL detach that never returns (WebView2's
+// A eipgam whose exit runs into a DLL detach that never returns (WebView2's
 // or COM's, waiting on a thread ExitProcess already ended) still ends:
-// BESTLJP0412 on X, 0.1.4179 to 0.1.4193, the magpie an update restarted
+// BESTLJP0412 on X, 0.1.4179 to 0.1.4193, the eipgam an update restarted
 // sat with one thread on the gateway's port and the WebView2 profile, and
 // the new one's window was "Not Responding". The stuck detach here is a
 // fiber-local storage callback, which ExitProcess runs on its last thread
 // and TerminateProcess doesn't: kernel32's Sleep, with INFINITE as its
 // value.
-const testExitEnv = "MAGPIE_TEST_EXIT_STUCK"
+const testExitEnv = "EIPGAM_TEST_EXIT_STUCK"
 
 func init() {
 	how := os.Getenv(testExitEnv)

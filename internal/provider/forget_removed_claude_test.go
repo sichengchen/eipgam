@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// ikunbots on X: Claude Code removed from magpie sat under "Removed from
-// magpie, still signed in", and its Sign out… changed nothing. Claude Code
-// is never signed out by magpie (its sign-in may be in the keychain), so
+// ikunbots on X: Claude Code removed from eipgam sat under "Removed from
+// eipgam, still signed in", and its Sign out… changed nothing. Claude Code
+// is never signed out by eipgam (its sign-in may be in the keychain), so
 // ForgetAccount was refused by ForgetLogin and the row stayed for good.
 // Signing out a removed Claude Code now leaves Claude Code as it is and
 // takes the row off the list: it no longer shows among the removed.

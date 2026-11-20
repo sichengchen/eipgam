@@ -5,22 +5,22 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // An enabledModels list (Pi's and its forks', StepCode's, omp's) names
 // models as provider/model. An entry that names one outright, when no model
 // has that name, gets "No models match pattern" from Pi every time it starts
 // (model-resolver.js resolveModelScope); it never takes such an entry out.
-// magpie's catalog sync takes a model out of the provider block it writes
+// eipgam's catalog sync takes a model out of the provider block it writes
 // when it is deselected in a provider's editor, or its provider goes, and
 // then the list's entries on it named nothing (#2055, misaka9981).
 //
-// After the sync, an entry that names one of magpie's models outright (no
-// glob; a thinking level on its end is read off) whose model magpie no
+// After the sync, an entry that names one of eipgam's models outright (no
+// glob; a thinking level on its end is read off) whose model eipgam no
 // longer gives the agent leaves the list. It may be the user's own, so it is
-// remembered, and goes back on the list's end once magpie gives that model
-// again. Globs, entries on other providers and entries on a model magpie
+// remembered, and goes back on the list's end once eipgam gives that model
+// again. Globs, entries on other providers and entries on a model eipgam
 // still gives stay as they are, in their order. A list left with nothing is
 // removed, never written empty, and comes back with its entries. A list the
 // user removed themselves isn't made again.
@@ -59,7 +59,7 @@ func scopeGoneRename(key, from, to string) {
 	}
 }
 
-// scopeMagpieOne is the model an entry names outright on magpie, lowercased
+// scopeMagpieOne is the model an entry names outright on eipgam, lowercased
 // and with its level off (bare cuts the level); "" for a glob or an entry on
 // another provider.
 func scopeMagpieOne(p string, bare func(string) string) string {
@@ -79,8 +79,8 @@ func piBare(p string) string {
 }
 
 // scopeSynced is an enabledModels list, has false when there is none, once
-// it has caught up with offered, the models magpie gives the agent as
-// magpie/<id> lowercased: what goes, what comes back, and what is
+// it has caught up with offered, the models eipgam gives the agent as
+// eipgam/<id> lowercased: what goes, what comes back, and what is
 // remembered after.
 func scopeSynced(cur []string, has bool, offered map[string]bool, mem scopeGone, bare func(string) string) (next []string, nextHas bool, out scopeGone, changed bool) {
 	if !has && !mem.Emptied {
@@ -119,8 +119,8 @@ func scopeSynced(cur []string, has bool, offered map[string]bool, mem scopeGone,
 	return next, nextHas, out, changed
 }
 
-// magpieOffered is the models of magpie's provider block in a Pi-style
-// models.json, as magpie/<id> lowercased; nil when the block or its list
+// magpieOffered is the models of eipgam's provider block in a Pi-style
+// models.json, as eipgam/<id> lowercased; nil when the block or its list
 // isn't there or can't be read, which says nothing about what is offered.
 func magpieOffered(modelsPath string) map[string]bool {
 	raw, ok := edit.GetJSON(modelsPath, "providers."+magpieID+".models")
@@ -150,7 +150,7 @@ func offeredSet(n int, id func(int) string) map[string]bool {
 }
 
 // piScopeSynced catches Pi's enabledModels (settings.json) up with the
-// models magpie's block in models.json gives it; mem is the stash key of
+// models eipgam's block in models.json gives it; mem is the stash key of
 // what was taken out.
 func piScopeSynced(settings, modelsPath, mem string) error {
 	offered := magpieOffered(modelsPath)

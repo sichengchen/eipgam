@@ -63,7 +63,7 @@ func openDesignCompaction(t *testing.T, refuse func(b []byte) bool) (*httptest.R
 
 // Mugenrikka on X: Codex compacting on any Open Design model got 400
 // upstream_error, while the turns around it went through. Codex's
-// compaction is its one request with no tools ("tools": []), and magpie's
+// compaction is its one request with no tools ("tools": []), and eipgam's
 // summary ask added tool_choice and parallel_tool_calls beside them. With
 // nothing to call, amr-link is sent none of the three, and the summary
 // comes back.
@@ -103,7 +103,7 @@ func TestOpenDesignCompactionRefusedAsksAsText(t *testing.T) {
 	if n := len(got); n < 2 || calls(got[n-1]) || !bytes.Contains(got[n-1], []byte("This is the conversation so far")) {
 		t.Errorf("asked %d times; last %.600s", n, got[len(got)-1])
 	}
-	if strings.Contains(rec.Body.String(), "magpie could not") {
+	if strings.Contains(rec.Body.String(), "eipgam could not") {
 		t.Errorf("compacted locally: %s", rec.Body)
 	}
 }

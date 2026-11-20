@@ -9,9 +9,9 @@ import (
 )
 
 // TestPathPluginEditRestartsTheHost (yansheng1003 on X: "每次改了需要重新
-// magpie"): a plugin added by its path is the user's own code, edited in
+// eipgam"): a plugin added by its path is the user's own code, edited in
 // place. The host running had loaded it as it was, and an edit reached it
-// only once magpie was quit and opened again. A change to any of its files
+// only once eipgam was quit and opened again. A change to any of its files
 // (not its node_modules or .git) now starts the host again; nothing
 // changed, or a plugin turned off, does not.
 func TestPathPluginEditRestartsTheHost(t *testing.T) {
@@ -79,11 +79,11 @@ func TestPathPluginEditRestartsTheHost(t *testing.T) {
 		t.Fatal("a plugin that is one file was edited, and the running host goes on with the old code")
 	}
 
-	// this magpie's own restart takes up the edit: no second restart
+	// this eipgam's own restart takes up the edit: no second restart
 	write("src/index.js", `export default async () => ({ v: 3 })`, then.Add(3*time.Minute))
 	Restart()
 	if stale() {
-		t.Fatal("this magpie's own restart was taken for an edit")
+		t.Fatal("this eipgam's own restart was taken for an edit")
 	}
 
 	// an edit to a plugin turned off restarts nothing

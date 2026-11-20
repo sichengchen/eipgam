@@ -6,8 +6,8 @@ import (
 	"sync"
 )
 
-// A plugin's provider in front of a vendor magpie has a preset for is that
-// vendor to the gateway (#5464): what magpie does for the vendor's API —
+// A plugin's provider in front of a vendor eipgam has a preset for is that
+// vendor to the gateway (#5464): what eipgam does for the vendor's API —
 // Mistral's thinking parts, DeepSeek's reasoning replay and token field,
 // xAI's schema rules, OpenRouter's shared free pool — is done for the
 // plugin's requests too, before they reach its fetch. The plugin says
@@ -18,7 +18,7 @@ import (
 
 // vendorPresets is each preset's API host to its id, the first preset in
 // the list taking a host two share (Qwen's DashScope ones): every base a
-// preset names, its regions' too. A local server's or another magpie's
+// preset names, its regions' too. A local server's or another eipgam's
 // preset is no vendor's (Ollama's localhost would make every plugin
 // whose fetch talks to a helper on this computer Ollama).
 var vendorPresets = sync.OnceValue(func() map[string]string {
@@ -84,7 +84,7 @@ func onThisNetwork(h string) bool {
 }
 
 // VendorHost is the host of the vendor's API p's requests are shaped for:
-// Host(), and for a plugin's provider in front of a vendor magpie has a
+// Host(), and for a plugin's provider in front of a vendor eipgam has a
 // preset for, that vendor's API host (api.mistral.ai), where Host() is
 // the plugin's id. The gateway's checks of whose API a request goes to
 // read this; Host() stays where calls are kept and shown.
@@ -96,7 +96,7 @@ func (p Provider) VendorHost() string {
 }
 
 // VendorPreset is the preset of the vendor p's requests are shaped for:
-// p.Preset, and for a plugin's provider in front of a vendor magpie has a
+// p.Preset, and for a plugin's provider in front of a vendor eipgam has a
 // preset for, that preset (mistral).
 func (p Provider) VendorPreset() string {
 	if p.Preset != "" {

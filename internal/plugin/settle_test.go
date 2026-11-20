@@ -95,7 +95,7 @@ func TestSettleWaitsForTheSignInHook(t *testing.T) {
 // test's folder had being the one seen last: the change was told there,
 // in the background, and dropped what that test held.
 func TestSettleForgetsTheFoldersPlugins(t *testing.T) {
-	t.Setenv("MAGPIE_BUN", "") // no Bun, nor a host: nothing asks the plugins here
+	t.Setenv("EIPGAM_BUN", "") // no Bun, nor a host: nothing asks the plugins here
 	storeSandbox(t)
 	t.Cleanup(Settle)
 	spec := "opencode-fake-auth"

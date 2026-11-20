@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // WorkBuddy's two refusals, as Natsumeretsu quoted them (#1669), and
@@ -34,7 +34,7 @@ const (
 )
 
 // wbTao is WorkBuddy's China build's refusal of deepseek-v4.1-flash as
-// taoxiaoxin's agent got it (magpie v0.1.2992, plugin 0.2.24, Discord
+// taoxiaoxin's agent got it (eipgam v0.1.2992, plugin 0.2.24, Discord
 // 11-06), its offset in brackets: the account had credits left, and the
 // Routing page read it as quota used up.
 const (
@@ -317,7 +317,7 @@ func TestRateLimitBelievesItsReset(t *testing.T) {
 func TestPluginWrittenResetRests(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	old := allowances
 	allowances = func(string) map[string]provider.Allowance { return nil }

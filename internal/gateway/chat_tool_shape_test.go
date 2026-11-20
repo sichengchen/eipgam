@@ -4,12 +4,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // zcodeAsking is jinyue806's reproduction of #2622 as they sent it to
-// magpie, with tool standing in for its tools[0]. The tools are the
+// eipgam, with tool standing in for its tools[0]. The tools are the
 // shapes the report tried, each of which SenseNova turned away.
 const zcodeAsking = `{
     "model": "sensenova/kimi-k3",

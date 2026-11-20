@@ -2,7 +2,7 @@ package gateway
 
 import "time"
 
-// onWall gives t on the wall clock alone, for a deadline magpie keeps for
+// onWall gives t on the wall clock alone, for a deadline eipgam keeps for
 // minutes to days: a rest, a hold, a window's reset. A time from
 // time.Now() also carries the monotonic clock, and Go compares two such
 // times by it; on macOS it stops while the computer sleeps, so a rest set

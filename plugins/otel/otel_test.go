@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/otlp"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/testenv"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/otlp"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }
@@ -40,10 +40,10 @@ func TestOnExportsOffSendsNothing(t *testing.T) {
 		io.WriteString(w, `{}`)
 	}))
 	defer collector.Close()
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-	t.Setenv("MAGPIE_OTEL_HEADERS", "")
-	t.Setenv("MAGPIE_OTEL_METRICS", "false")
+	t.Setenv("EIPGAM_OTEL_ENABLED", "true")
+	t.Setenv("EIPGAM_OTEL_ENDPOINT", collector.URL)
+	t.Setenv("EIPGAM_OTEL_HEADERS", "")
+	t.Setenv("EIPGAM_OTEL_METRICS", "false")
 	every := otlp.OTelEvery
 	otlp.OTelEvery = 50 * time.Millisecond
 	t.Cleanup(func() { otlp.OTelEvery = every })
@@ -113,17 +113,17 @@ func TestOnExportsOffSendsNothing(t *testing.T) {
 	}
 }
 
-// MAGPIE_OTEL_ENABLED alone keeps it on, as settings.json's switch does:
+// EIPGAM_OTEL_ENABLED alone keeps it on, as settings.json's switch does:
 // off, an export set up only in the environment would send nothing.
 func TestInUseByEnvironment(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(t.TempDir(), "config"))
 	m := manifest(t)
-	t.Setenv("MAGPIE_OTEL_ENABLED", "false")
+	t.Setenv("EIPGAM_OTEL_ENABLED", "false")
 	if n, err := m.InUse(); err != nil || n != 0 {
 		t.Fatalf("off: %d %v", n, err)
 	}
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", "http://127.0.0.1:1")
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
+	t.Setenv("EIPGAM_OTEL_ENDPOINT", "http://127.0.0.1:1")
+	t.Setenv("EIPGAM_OTEL_ENABLED", "true")
 	if n, err := m.InUse(); err != nil || n != 1 {
 		t.Fatalf("on by the environment: %d %v", n, err)
 	}

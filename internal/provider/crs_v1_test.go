@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 // crsRelay answers as claude-relay-service routes (src/app.js): OpenAI's
@@ -63,7 +63,7 @@ func crsHome(t *testing.T) {
 
 // Cyrus_4433 on X: a claude-relay-service added as OpenAI compatible at
 // http://host:port/openai, models typed in by hand, and Test models said
-// "gpt-6.1-sol: 404 · Not Found" — magpie asked …/openai/chat/completions,
+// "gpt-6.1-sol: 404 · Not Found" — eipgam asked …/openai/chat/completions,
 // which CRS doesn't serve. The model is now asked at …/openai/v1 too, its
 // answer there is the model's, and the base is saved with the /v1.
 func TestCRSOpenAIBaseTestsUnderV1(t *testing.T) {

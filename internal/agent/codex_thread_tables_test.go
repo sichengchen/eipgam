@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // codexThreads makes Codex's state database with a thread on each of the
@@ -33,9 +33,9 @@ func codexThreads(t *testing.T, dir string, providers ...string) {
 // and the Codex app resumes it on that provider. CC Switch rewrites
 // config.toml whole when it switches, so its table can be gone, and the
 // app then loads no config for the thread: "Model provider `custom` not
-// found". While magpie is wired, each provider a thread names that has no
-// table gets one pointed at magpie, and keeps it when Codex steps off
-// magpie; Codex's built-in ones, magpie's own and a table the user has
+// found". While eipgam is wired, each provider a thread names that has no
+// table gets one pointed at eipgam, and keeps it when Codex steps off
+// eipgam; Codex's built-in ones, eipgam's own and a table the user has
 // stay as they are, one spelled inline too.
 func TestCodexWritesTablesThreadsName(t *testing.T) {
 	for _, auth := range []string{`{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, ""} {
@@ -43,7 +43,7 @@ func TestCodexWritesTablesThreadsName(t *testing.T) {
 		inline := "model_providers.inl = { name = \"inl\", base_url = \"https://inl.example/v1\" }\n"
 		home, read := codexHome(t, auth, "model = \"gpt-5.4\"\n"+inline+"\n"+mine)
 		dir := filepath.Join(home, ".codex")
-		codexThreads(t, dir, "custom", "openai", "magpie", "mine", "ollama", "cc-switch-2", "custom", "inl")
+		codexThreads(t, dir, "custom", "openai", "eipgam", "mine", "ollama", "cc-switch-2", "custom", "inl")
 		path := filepath.Join(dir, "config.toml")
 		table := func(id string) map[string]string {
 			tb, err := edit.GetTOMLTable(path, "model_providers."+id)
@@ -59,7 +59,7 @@ func TestCodexWritesTablesThreadsName(t *testing.T) {
 		v1, key := here(home).v1(), here(home).gwKey()
 		for _, id := range []string{"custom", "cc-switch-2"} {
 			if c := table(id); c["base_url"] != v1 || c["wire_api"] != "responses" || c["experimental_bearer_token"] != key {
-				t.Fatalf("auth %q: %s not written through magpie:\n%s", auth, id, read())
+				t.Fatalf("auth %q: %s not written through eipgam:\n%s", auth, id, read())
 			}
 		}
 		for _, id := range []string{"openai", "ollama"} {
@@ -71,10 +71,10 @@ func TestCodexWritesTablesThreadsName(t *testing.T) {
 		if !strings.Contains(read(), inline) || strings.Contains(read(), "[model_providers.inl]") {
 			t.Fatalf("auth %q: inline provider:\n%s", auth, read())
 		}
-		// the user's own table a thread was started on goes through magpie
+		// the user's own table a thread was started on goes through eipgam
 		// too, its other keys as they were (TestCodexTakesThreadTables)
 		if m := table("mine"); m["base_url"] != v1 || m["name"] != "mine" || strings.Count(read(), "[model_providers.custom]") != 1 {
-			t.Fatalf("auth %q: user's table not through magpie or custom twice:\n%s", auth, read())
+			t.Fatalf("auth %q: user's table not through eipgam or custom twice:\n%s", auth, read())
 		}
 		if d := cx.Check(); d != "" {
 			t.Fatalf("auth %q: check: %s", auth, d)
@@ -91,7 +91,7 @@ func TestCodexWritesTablesThreadsName(t *testing.T) {
 	}
 }
 
-// Not wired, magpie writes nothing for the threads: Codex isn't magpie's
+// Not wired, eipgam writes nothing for the threads: Codex isn't eipgam's
 // to change then.
 func TestCodexThreadTablesOnlyWired(t *testing.T) {
 	home, read := codexHome(t, "", "model = \"gpt-5.4\"\n")
@@ -107,10 +107,10 @@ func TestCodexThreadTablesOnlyWired(t *testing.T) {
 
 // A Codex thread started on a provider table of the user's own (or one a
 // newer CC Switch names after its card) is reopened on that table. With a
-// magpie model on, Codex sent "apikeyfan/gpt-6.1-sol" straight to the
+// eipgam model on, Codex sent "apikeyfan/gpt-6.1-sol" straight to the
 // relay, which answered 404 "not supported by any configured account",
 // while a new thread worked (a report relayed by the owner, 10-26). The
-// table goes through magpie while a magpie model is on and gets its own
+// table goes through eipgam while a eipgam model is on and gets its own
 // base URL back with Codex's own model; a table no thread was started on,
 // and one a profile names, stay as they are.
 func TestCodexTakesThreadTables(t *testing.T) {
@@ -137,7 +137,7 @@ func TestCodexTakesThreadTables(t *testing.T) {
 		}
 		v1 := here(home).v1()
 		if a := table("apikeyfan"); a["base_url"] != v1 || a["experimental_bearer_token"] != "sk-relay" || a["wire_api"] != "responses" {
-			t.Fatalf("auth %q: thread's table not through magpie:\n%s", auth, read())
+			t.Fatalf("auth %q: thread's table not through eipgam:\n%s", auth, read())
 		}
 		if table("unused")["base_url"] != "https://unused.example/v1" || table("work")["base_url"] != "https://work.example/v1" {
 			t.Fatalf("auth %q: other tables changed:\n%s", auth, read())
@@ -168,12 +168,12 @@ func TestCodexTakesThreadTables(t *testing.T) {
 // JsonParser on X: T3 Code starts Codex with a provider of its own on the
 // command line (`-c model_providers.openai_token_sharing={…, auth =
 // {command = …}}`), so its threads name openai_token_sharing while
-// config.toml never had that table. magpie wrote one for them, pointed at
+// config.toml never had that table. eipgam wrote one for them, pointed at
 // itself with experimental_bearer_token, Codex merged it with T3's -c, and
 // refused the whole config: "model_providers.openai_token_sharing: provider
 // auth cannot be combined with experimental_bearer_token". An id
-// config.toml never had is the other app's: magpie writes no table for it,
-// and takes out the one an older magpie wrote, wired or not. CC Switch's
+// config.toml never had is the other app's: eipgam writes no table for it,
+// and takes out the one an older eipgam wrote, wired or not. CC Switch's
 // ids, and a table of the user's that config.toml lost, are still written
 // (#1372).
 func TestCodexLeavesOtherAppsProviders(t *testing.T) {
@@ -210,7 +210,7 @@ func TestCodexLeavesOtherAppsProviders(t *testing.T) {
 	}
 }
 
-// The table an older magpie wrote for T3 Code's provider is taken out at
+// The table an older eipgam wrote for T3 Code's provider is taken out at
 // the next sync or Disconnect, connected or not; one the user made, one with keys of
 // theirs added, and one Codex is on stay.
 func TestCodexDropsStrayThreadTables(t *testing.T) {

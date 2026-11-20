@@ -20,7 +20,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = () => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("pi", "Pi")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 });
@@ -65,7 +65,7 @@ function server(lang, st) {
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const english = "An agent switched on here can't also run billion-context-pi or opencode-acp.";
 const NONE = "What billion-context saves shows here once it has run for an agent.";
-// /__bili/overview of bili 0.1.213 after ten turns on mote, as magpie
+// /__bili/overview of bili 0.1.213 after ten turns on mote, as eipgam
 // passes it on (internal/library/testdata/bili/overview-0.1.213.json)
 const SAVED = { net: 166285, gross: 166390, hasFolds: true, folds: 7, sessions: 1, requests: 10, input: 175279, at: "2026-11-10T07:21:30Z", live: true, version: "0.1.213" };
 
@@ -88,7 +88,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         // its tab, right after RTK's
@@ -163,7 +163,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         const tabs = page.locator(":is(#view-library .lib-tabs .opt, .nav-s):visible");

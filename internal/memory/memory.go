@@ -7,7 +7,7 @@
 // user picks are also given a digest of it in their instructions
 // (library/instructions.go). The Library's Memory tab lists and edits it.
 //
-// It is a folder of Markdown files in magpie's config folder, one a memory
+// It is a folder of Markdown files in eipgam's config folder, one a memory
 // (store.go): one writer at a time across magpies (filelock), a change to
 // several written all or none (a journal), and a file that can't be read
 // is unknown, never empty, so nothing is written over it.
@@ -133,7 +133,7 @@ type file struct {
 
 	// what read found on disk, for write to change only what changed
 	// (store.go): each memory file's hash as read, the ids whose file
-	// can't be read (never written over nor removed), the hashes magpie
+	// can't be read (never written over nor removed), the hashes eipgam
 	// last wrote (written: another is the user's edit), and meta.json's
 	// bytes
 	seen    map[string]string

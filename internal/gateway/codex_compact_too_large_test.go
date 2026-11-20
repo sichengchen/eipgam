@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // deepseekBodyCap is what DeepSeek's API answered a Codex user's long
@@ -73,7 +73,7 @@ func cappedOn(t *testing.T, c *capped) {
 	noRests()
 	t.Cleanup(noRests)
 	// The hold before routing is not what these tests are about, and their
-	// bodies are up to 42 MB: magpie's work on one before its first route
+	// bodies are up to 42 MB: eipgam's work on one before its first route
 	// is ~0.6s, ~9s under -race on a loaded Mac, and past unroutedUnknown's
 	// 30s on a loaded ubuntu runner under -race, which answered the
 	// compaction 504 "held 30s without routing" (#5571). The hold's own
@@ -118,7 +118,7 @@ const cappedMost = 256 << 10
 // failure. Codex's remote compaction has no way to shrink it (it trims
 // only by its token estimate against the catalog's 1M window, and asks
 // nothing smaller on context_length_exceeded), so every compaction failed
-// the same way and the session could neither compact nor go on. magpie
+// the same way and the session could neither compact nor go on. eipgam
 // asks again with the conversation as text, its images left out and its
 // long outputs cut, and Codex installs the model's summary.
 func TestCodexCompactTooLargeAsksSmaller(t *testing.T) {
@@ -160,7 +160,7 @@ func TestCodexCompactTooLargeAsksSmaller(t *testing.T) {
 	}
 }
 
-// When the conversation as text is refused too, magpie compacts without a
+// When the conversation as text is refused too, eipgam compacts without a
 // model, so Codex still goes on.
 func TestCodexCompactTooLargeCompactsLocally(t *testing.T) {
 	up := &capped{proto: provider.Chat, most: 0, status: 413, ctype: "text/plain; charset=utf-8", body: deepseekBodyCap}

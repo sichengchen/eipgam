@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // brethhbbm on X: with "Codex subagents on any model" on, a lead on
@@ -12,7 +12,7 @@ import (
 // entry for the model, multi_agent_version "v2" and all) still had its
 // subagents' tasks sealed, so the subagent model set was never used. A
 // model a provider that seals serves (Seals) now says V1 with the setting,
-// listed by its relay or made by magpie; with the setting off it keeps what
+// listed by its relay or made by eipgam; with the setting off it keeps what
 // its vendor said, and a model of a provider that seals nothing (Copilot's
 // Ultra, #656) keeps V2.
 func TestCodexAgentsV1SealingRelay(t *testing.T) {

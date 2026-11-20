@@ -11,7 +11,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// framelessTestProc answers as Wails' frameless window does: magpie's
+// framelessTestProc answers as Wails' frameless window does: eipgam's
 // interceptor first (mainFrameCalc, which appWndProc asks first), then
 // WM_NCCALCSIZE with the whole window as the client area.
 var framelessTestProc = windows.NewCallback(func(hwnd, msg, wParam, lParam uintptr) uintptr {
@@ -30,7 +30,7 @@ func framelessTestWindow(t *testing.T) uintptr {
 	wc := w32.WNDCLASSEX{WndProc: framelessTestProc, Instance: w32.GetModuleHandle(""), ClassName: cls}
 	wc.Size = uint32(unsafe.Sizeof(wc))
 	w32.RegisterClassEx(&wc) // once a process; a second call fails harmlessly
-	title, _ := windows.UTF16PtrFromString("magpie frameless test")
+	title, _ := windows.UTF16PtrFromString("eipgam frameless test")
 	hwnd := w32.CreateWindowEx(0, cls, title, w32.WS_OVERLAPPEDWINDOW, 100, 100, 800, 600, 0, 0, wc.Instance, nil)
 	if hwnd == 0 {
 		t.Fatalf("CreateWindowEx: %v", windows.GetLastError())

@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// magpie provider pool (plugins#349) sets a subscription's caps, Stop at
+// eipgam provider pool (plugins#349) sets a subscription's caps, Stop at
 // the caps and Check usage near the cap from one command, and shows them;
 // a bad value or an account the subscription hasn't changes nothing.
 func TestPoolCmd(t *testing.T) {

@@ -18,7 +18,7 @@ const body = "window.ran = 1;";
 function serve(hash) {
   return async (route) => {
     const url = new URL(route.request().url());
-    if (url.pathname !== `/_magpie/plugin/${tok}/index.html`) return route.fulfill({ status: 404, body: "" });
+    if (url.pathname !== `/_eipgam/plugin/${tok}/index.html`) return route.fulfill({ status: 404, body: "" });
     const doc = `<!doctype html><meta charset="utf-8"><script>${body}\n</script><p id=p>page</p>`;
     return route.fulfill({ headers: { "Content-Type": "text/html", "Content-Security-Policy": `sandbox allow-scripts; default-src 'none'; script-src ${hash}` }, body: doc });
   };
@@ -29,7 +29,7 @@ async function open(browser, hash) {
   p.setDefaultNavigationTimeout(60000);
   await p.addInitScript(() => { window.violations = []; document.addEventListener("securitypolicyviolation", (e) => window.violations.push(e.violatedDirective)); });
   await p.route("**/*", serve(hash));
-  await p.goto(`http://magpie.test/_magpie/plugin/${tok}/index.html`);
+  await p.goto(`http://eipgam.test/_eipgam/plugin/${tok}/index.html`);
   return p;
 }
 

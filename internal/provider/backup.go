@@ -7,7 +7,7 @@ import (
 	"context"
 	"slices"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // handOver is HandOver: a var so a test can see it asked.
@@ -33,7 +33,7 @@ func Restore(ps []Provider) (added, replaced int, err error) {
 	}
 	for _, p := range ps {
 		p.IconURL = ""
-		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "magpie" {
+		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "eipgam" {
 			continue
 		}
 		i := -1
@@ -98,8 +98,8 @@ func RestoreGroups(gs []Group) error {
 // keys keeps the keys it has here, and an access key or balance token it
 // came without is kept too (KeepSecrets). Which account an agent is kept
 // signed in to (KeepLogin, KeepLoginAs, SwitchOnly), whether its app is
-// restarted to follow (RestartApp), and whether a Remote magpie that is
-// this magpie is used anyway (KeepSelf), is this computer's own:
+// restarted to follow (RestartApp), and whether a Remote eipgam that is
+// this eipgam is used anyway (KeepSelf), is this computer's own:
 // one person signs in to a personal account at home and a work account at
 // the office, and sync set each computer to the other's every day. A
 // provider kept on this computer (ThisDevice) is neither replaced nor
@@ -116,7 +116,7 @@ func Mirror(ps []Provider, gs []Group) error {
 	out := []Provider{}
 	for _, p := range ps {
 		p.IconURL = ""
-		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "magpie" {
+		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "eipgam" {
 			continue
 		}
 		// a provider kept on this computer isn't replaced by another
@@ -131,7 +131,7 @@ func Mirror(ps []Provider, gs []Group) error {
 			p.KeepSelf = h.KeepSelf
 		} else {
 			p.KeepLoginAs = "" // an account signed in on the other computer
-			p.KeepSelf = false // kept on the other computer, of a magpie that isn't this one
+			p.KeepSelf = false // kept on the other computer, of a eipgam that isn't this one
 		}
 		out = append(out, p)
 	}
@@ -238,7 +238,7 @@ func AddPlugins(ctx context.Context, es []plugin.Entry) (added []string, failed 
 // NotSignedIn is the subscriptions among ps (as a backup or a sync brings
 // them: their model picks and settings alone) that no account here is
 // signed in to: they are listed once one is, and are to be signed in to on
-// this computer. A subscription the user removed from magpie is not one.
+// this computer. A subscription the user removed from eipgam is not one.
 func NotSignedIn(ps []Provider) []string {
 	have := map[string]bool{}
 	for _, p := range All() {

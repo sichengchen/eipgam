@@ -11,7 +11,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // A session file's chunk is named in the heatmap's key by a digest of its
@@ -42,7 +42,7 @@ func sourceDigestsPath() string {
 	return filepath.Join(filepath.Dir(sessions.CachePath()), "heat-digests.bin")
 }
 
-const sourceDigestsMagic = "magpie-heat-digests-2\n"
+const sourceDigestsMagic = "eipgam-heat-digests-2\n"
 
 // digestList is serials and their digests, each 8+32 bytes, in the
 // serials' order.

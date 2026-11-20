@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, fixture(), ks));
           if (setup) await page.addInitScript(setup);
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://eipgam.test/?view=routing");
           await page.locator(".rt-req").nth(5).waitFor();
           return page;
         };
@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await byKey.click();
         await page.locator(".rt-session").nth(3).waitFor();
         assert.equal(await byKey.getAttribute("aria-pressed"), "true");
-        assert.equal(await page.evaluate(() => localStorage.getItem("magpie.routingGroupBy")), "key");
+        assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.routingGroupBy")), "key");
 
         const heads = await page.locator(".rt-session").evaluateAll((es) => es.map((e) => ({
           name: e.querySelector(".nm").textContent, title: e.querySelector(".nm").title,
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
 
         // no gateway key: no By key, and a list left on it reads by request
-        const bare = await open([], () => localStorage.setItem("magpie.routingGroupBy", "key"));
+        const bare = await open([], () => localStorage.setItem("eipgam.routingGroupBy", "key"));
         await bare.waitForFunction(() => [...document.querySelectorAll(".rt-group-by .rt-day")].filter((b) => !b.hidden).length === 2);
         assert.equal(await bare.locator(".rt-group-by .rt-day", { hasText: w.byKey }).isVisible(), false);
         assert.equal(await bare.locator(".rt-session").count(), 0, "by request");

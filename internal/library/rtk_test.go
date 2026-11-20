@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // fakeRTK is an rtk on PATH that acts as rtk 0.50's installer does for
 // Claude Code, OpenCode and Cursor: installing OpenCode or Cursor gives it to
-// Claude Code as well. Its uninstaller isn't there: magpie doesn't use it.
+// Claude Code as well. Its uninstaller isn't there: eipgam doesn't use it.
 const fakeRTK = `#!/bin/sh
 c="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 claude() { [ -d "$c" ] && echo '{"hooks":{"PreToolUse":[{"hooks":[{"command":"rtk hook claude"}]}]}}' > "$c/settings.json"; }
@@ -213,7 +213,7 @@ func TestRTKRemove(t *testing.T) {
 // hook under hooks.PostToolUse too, when the rtk pipeline has after_tool
 // rules (its src/hooks/init/claude.rs: "enabling rtk:posthook adds
 // PostToolUse"), and its uninstaller takes its entries out of PreToolUse,
-// PostToolUse and SessionStart alike. magpie says Claude Code has rtk by
+// PostToolUse and SessionStart alike. eipgam says Claude Code has rtk by
 // the file whole, so an entry under another event kept the row on: turning
 // it off took only PreToolUse out, then said "rtk's hook is still in
 // Claude". The user's own hooks under those events stay.
@@ -373,7 +373,7 @@ func TestRTKOpenCode2(t *testing.T) {
 	if exists(plugin) {
 		t.Fatal("rtk 0.51's plugin was written for OpenCode 2")
 	}
-	// one written before (by an older magpie, or rtk init by hand) is on,
+	// one written before (by an older eipgam, or rtk init by hand) is on,
 	// and goes
 	write(t, plugin, "export const RtkOpenCodePlugin: Plugin = async ({ $ }) => {\n")
 	if !row().On {
@@ -531,7 +531,7 @@ func TestRTKGainRead(t *testing.T) {
 		t.Fatalf("failed: gain %+v, err %q", v.Gain, v.GainErr)
 	}
 	gain(`echo 'No tracking data yet.'; exit 0`)
-	if v := ReadRTK(); v.Gain != nil || v.GainErr != "rtk gain printed no summary magpie can read: No tracking data yet." {
+	if v := ReadRTK(); v.Gain != nil || v.GainErr != "rtk gain printed no summary eipgam can read: No tracking data yet." {
 		t.Fatalf("not JSON: gain %+v, err %q", v.Gain, v.GainErr)
 	}
 }
@@ -561,7 +561,7 @@ func TestCodexSandbox(t *testing.T) {
 
 // TestRTKNoHookListed (Discord, lc: rtk 没有识别 deepseek harness): an
 // agent RTK has no hook for, Kimi Code, is listed all the same with why,
-// not left out as if magpie hadn't seen it, and it can't be switched on.
+// not left out as if eipgam hadn't seen it, and it can't be switched on.
 func TestRTKNoHookListed(t *testing.T) {
 	h := sandbox(t)
 	holdCLI(t, h, "kimi")
@@ -582,7 +582,7 @@ func TestRTKNoHookListed(t *testing.T) {
 		t.Fatalf("switched on: %v", err)
 	}
 	if _, err := RTKTakes("kimi"); err == nil || !strings.Contains(err.Error(), "only allow or deny a command") {
-		t.Fatalf("magpie library rtk on kimi: %v", err)
+		t.Fatalf("eipgam library rtk on kimi: %v", err)
 	}
 }
 
@@ -609,7 +609,7 @@ func TestRTKNoHookGrokApp(t *testing.T) {
 		t.Fatalf("switched on: %v", err)
 	}
 	if _, err := RTKTakes("grok-app"); err == nil || !strings.Contains(err.Error(), "no Grok or Grok App agent") {
-		t.Fatalf("magpie library rtk on grok-app: %v", err)
+		t.Fatalf("eipgam library rtk on grok-app: %v", err)
 	}
 }
 
@@ -634,7 +634,7 @@ func TestRTKNoHookGrokBuild(t *testing.T) {
 		t.Fatalf("switched on: %v", err)
 	}
 	if _, err := RTKTakes("grok"); err == nil || !strings.Contains(err.Error(), "no Grok agent") {
-		t.Fatalf("magpie library rtk on grok: %v", err)
+		t.Fatalf("eipgam library rtk on grok: %v", err)
 	}
 }
 

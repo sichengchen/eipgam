@@ -53,7 +53,7 @@ async function open(t, engine, lang, width) {
   const errors = [], saved = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, saved));
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://eipgam.test/?view=providers");
   const say = (key, vars = {}) => page.evaluate(([lang, key, vars]) => {
     const s = (lang !== "en" && I18N[lang]?.[key]) || key;
     return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);

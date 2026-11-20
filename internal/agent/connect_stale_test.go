@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // staleOnWindows is why the tests of copies told from the process list
@@ -21,9 +21,9 @@ import (
 const staleOnWindows = "Windows lists no processes for StaleCopies; see TestCodexStaleOnWindowsIsTheDaemonsLastCheck"
 
 // Codex writes config.toml itself (a project's trust, a notice seen), so a
-// copy reopened after magpie's change and then writing there was still
+// copy reopened after eipgam's change and then writing there was still
 // told to reopen; an app-server daemon left running for another
-// CODEX_HOME was counted too (#729). Only magpie's own change counts, for
+// CODEX_HOME was counted too (#729). Only eipgam's own change counts, for
 // copies of this home's Codex.
 func TestCodexStaleOnlyForMagpiesChange(t *testing.T) {
 	if runtime.GOOS == "windows" {
@@ -38,11 +38,11 @@ func TestCodexStaleOnlyForMagpiesChange(t *testing.T) {
 	dir := filepath.Join(home, ".codex")
 	os.MkdirAll(dir, 0o755)
 	cfg := filepath.Join(dir, "config.toml")
-	list := filepath.Join(dir, "magpie-models.json")
-	conf := "model = \"magpie/gpt-6-luna\"\nmodel_provider = \"magpie\"\nmodel_catalog_json = \"" + tomlString(list) + "\"\n\n" +
-		"[model_providers.magpie]\nname = \"magpie\"\nbase_url = \"http://127.0.0.1:3425/v1\"\n"
+	list := filepath.Join(dir, "eipgam-models.json")
+	conf := "model = \"eipgam/gpt-6-luna\"\nmodel_provider = \"eipgam\"\nmodel_catalog_json = \"" + tomlString(list) + "\"\n\n" +
+		"[model_providers.eipgam]\nname = \"eipgam\"\nbase_url = \"http://127.0.0.1:3425/v1\"\n"
 	os.WriteFile(cfg, []byte(conf), 0o600)
-	os.WriteFile(list, []byte(`{"models":[{"slug":"magpie/gpt-6-luna"}]}`), 0o644)
+	os.WriteFile(list, []byte(`{"models":[{"slug":"eipgam/gpt-6-luna"}]}`), 0o644)
 	then := time.Now().Add(-2 * time.Hour)
 	os.Chtimes(cfg, then, then)
 	os.Chtimes(list, then, then)
@@ -59,10 +59,10 @@ func TestCodexStaleOnlyForMagpiesChange(t *testing.T) {
 	}
 	a := codex(home)
 	if n := a.Stale(); n != 0 {
-		t.Fatalf("reopened after magpie's change, other home's daemon: %d stale, want 0", n)
+		t.Fatalf("reopened after eipgam's change, other home's daemon: %d stale, want 0", n)
 	}
 
-	// Codex trusts a project: config.toml written now, magpie's part as it was
+	// Codex trusts a project: config.toml written now, eipgam's part as it was
 	f, _ := os.OpenFile(cfg, os.O_APPEND|os.O_WRONLY, 0)
 	f.WriteString("\n[projects.\"/Users/x/work\"]\ntrust_level = \"trusted\"\n")
 	f.Close()
@@ -70,12 +70,12 @@ func TestCodexStaleOnlyForMagpiesChange(t *testing.T) {
 		t.Fatalf("Codex's own write: %d stale, want 0", n)
 	}
 
-	// magpie's list changes: the copy running from before has the old one
-	os.WriteFile(list, []byte(`{"models":[{"slug":"magpie/gpt-6-luna"},{"slug":"magpie/new"}]}`), 0o644)
+	// eipgam's list changes: the copy running from before has the old one
+	os.WriteFile(list, []byte(`{"models":[{"slug":"eipgam/gpt-6-luna"},{"slug":"eipgam/new"}]}`), 0o644)
 	if n := a.Stale(); n != 1 {
-		t.Fatalf("magpie's list changed: %d stale, want 1", n)
+		t.Fatalf("eipgam's list changed: %d stale, want 1", n)
 	}
-	// and stays so while nothing else changes, magpie restarted or not
+	// and stays so while nothing else changes, eipgam restarted or not
 	if n := codex(home).Stale(); n != 1 {
 		t.Fatalf("asked again: %d stale, want 1", n)
 	}
@@ -151,7 +151,7 @@ func TestCodexStaleCopiesSayWhichIsLeft(t *testing.T) {
 // (codex app-server daemon pid-update-loop) that a daemon restart doesn't
 // end and that reads no list. It matches the codex startsWith pattern and
 // no --managed-daemon, so it was counted as a "cli" copy from before
-// magpie's change: "A Codex in a terminal" that doesn't exist, forever,
+// eipgam's change: "A Codex in a terminal" that doesn't exist, forever,
 // and only killing the process cleared the row. A daemon helper is no
 // copy to reopen.
 func TestCodexDaemonHelperIsNoStaleCopy(t *testing.T) {
@@ -175,7 +175,7 @@ func TestCodexDaemonHelperIsNoStaleCopy(t *testing.T) {
 	t.Cleanup(func() { running = was })
 	running = func(string) []runningProc {
 		return []runningProc{
-			// the helper, from before magpie's change
+			// the helper, from before eipgam's change
 			{3 * time.Hour, "/opt/homebrew/bin/codex app-server daemon pid-update-loop"},
 		}
 	}
@@ -195,15 +195,15 @@ func TestCodexDaemonHelperIsNoStaleCopy(t *testing.T) {
 
 // On Windows, where listing processes is a PowerShell run, the Codex row's
 // stale copy is the daemon as KeepCodexDaemonCurrent last found it (#1388):
-// behind magpie's change, until it is restarted, while the check is
+// behind eipgam's change, until it is restarted, while the check is
 // recent. Elsewhere the same last check is kept for the row, beside the
 // process list.
 func TestCodexStaleOnWindowsIsTheDaemonsLastCheck(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	dir := filepath.Join(home, ".codex")
-	cfg, list := filepath.Join(dir, "config.toml"), filepath.Join(dir, "magpie-models.json")
-	os.WriteFile(cfg, []byte("model_provider = \"magpie\"\nmodel_catalog_json = \""+tomlString(list)+"\"\n"), 0o600)
-	os.WriteFile(list, []byte(`{"models":[{"slug":"magpie/a"}]}`), 0o644)
+	cfg, list := filepath.Join(dir, "config.toml"), filepath.Join(dir, "eipgam-models.json")
+	os.WriteFile(cfg, []byte("model_provider = \"eipgam\"\nmodel_catalog_json = \""+tomlString(list)+"\"\n"), 0o600)
+	os.WriteFile(list, []byte(`{"models":[{"slug":"eipgam/a"}]}`), 0o644)
 	wasKeep, wasRunning := keepCodexDaemon, running
 	t.Cleanup(func() {
 		keepCodexDaemon, running = wasKeep, wasRunning
@@ -228,7 +228,7 @@ func TestCodexStaleOnWindowsIsTheDaemonsLastCheck(t *testing.T) {
 	}
 	codexDaemonCheck(cfg)
 	if got := copies(); len(got) != 0 {
-		t.Fatalf("a daemon on magpie's list: %+v, want none", got)
+		t.Fatalf("a daemon on eipgam's list: %+v, want none", got)
 	}
 	answer = provider.CodexDaemonCheck{Behind: true, Attached: 1, Since: since}
 	codexDaemonCheck(cfg)
@@ -240,11 +240,11 @@ func TestCodexStaleOnWindowsIsTheDaemonsLastCheck(t *testing.T) {
 	if got := copies(); len(got) != 0 {
 		t.Fatalf("restarted: %+v, want none", got)
 	}
-	// restarted by magpie, no session on it
+	// restarted by eipgam, no session on it
 	answer = provider.CodexDaemonCheck{Behind: true, Restarted: true, Since: since}
 	codexDaemonCheck(cfg)
 	if got := copies(); len(got) != 0 {
-		t.Fatalf("restarted by magpie: %+v, want none", got)
+		t.Fatalf("restarted by eipgam: %+v, want none", got)
 	}
 	// a check from longer ago than the loop looks says nothing now
 	answer = provider.CodexDaemonCheck{Behind: true, Attached: 1, Since: since}
@@ -259,12 +259,12 @@ func TestCodexStaleOnWindowsIsTheDaemonsLastCheck(t *testing.T) {
 
 // Qyburn3 on X: "为什么我每天好多次要重启" — the Codex row said 已接入 ·
 // 退出并重开 Codex 应用后生效 several times a day for a Codex app already
-// connected. Beside the ChatGPT sign-in magpie writes the app's list
-// (magpie-desktop-models.json) with the backend's entries as it sends
+// connected. Beside the ChatGPT sign-in eipgam writes the app's list
+// (eipgam-desktop-models.json) with the backend's entries as it sends
 // them, asked for again each hour, and every entry's details follow
-// magpie's version and models.dev; each rewrite counted as a change to
+// eipgam's version and models.dev; each rewrite counted as a change to
 // reopen for. Only a change in which models the lists hold (or where the
-// config sends Codex) does; a stash an older magpie wrote over the same
+// config sends Codex) does; a stash an older eipgam wrote over the same
 // files is taken as it is.
 func TestCodexStaleNotForAListsDetails(t *testing.T) {
 	if runtime.GOOS == "windows" {
@@ -279,16 +279,16 @@ func TestCodexStaleNotForAListsDetails(t *testing.T) {
 	dir := filepath.Join(home, ".codex")
 	os.MkdirAll(dir, 0o755)
 	cfg := filepath.Join(dir, "config.toml")
-	desk := filepath.Join(dir, "magpie-desktop-models.json")
+	desk := filepath.Join(dir, "eipgam-desktop-models.json")
 	os.WriteFile(cfg, []byte("model = \"gpt-6-sol\"\nopenai_base_url = \"http://127.0.0.1:3425/backend-api/codex\"\nmodel_catalog_json = \""+tomlString(desk)+"\"\n\n"+
-		"[model_providers.magpie]\nname = \"magpie\"\nbase_url = \"http://127.0.0.1:3425/v1\"\n"), 0o600)
+		"[model_providers.eipgam]\nname = \"eipgam\"\nbase_url = \"http://127.0.0.1:3425/v1\"\n"), 0o600)
 	entry := func(slug, vis, instr string, prio int) string {
 		return `{"slug":"` + slug + `","visibility":"` + vis + `","base_instructions":"` + instr + `","comp_hash":"` + instr + `","priority":` + strconv.Itoa(prio) + `}`
 	}
 	write := func(entries ...string) {
 		os.WriteFile(desk, []byte(`{"models":[`+strings.Join(entries, ",")+`]}`), 0o644)
 	}
-	write(entry("gpt-6-sol", "list", "v1", 1), entry("codex-auto-review", "hide", "v1", 2), entry("ds/deepseek-v4-pro", "list", "magpie", 3))
+	write(entry("gpt-6-sol", "list", "v1", 1), entry("codex-auto-review", "hide", "v1", 2), entry("ds/deepseek-v4-pro", "list", "eipgam", 3))
 	then := time.Now().Add(-2 * time.Hour)
 	os.Chtimes(cfg, then, then)
 	os.Chtimes(desk, then, then)
@@ -305,24 +305,24 @@ func TestCodexStaleNotForAListsDetails(t *testing.T) {
 	}
 
 	// the backend's entries come back with other details, in another
-	// order, and magpie's entry is written with another priority
-	write(entry("codex-auto-review", "hide", "v2", 1), entry("gpt-6-sol", "list", "v2", 2), entry("ds/deepseek-v4-pro", "list", "magpie 2", 4))
+	// order, and eipgam's entry is written with another priority
+	write(entry("codex-auto-review", "hide", "v2", 1), entry("gpt-6-sol", "list", "v2", 2), entry("ds/deepseek-v4-pro", "list", "eipgam 2", 4))
 	if n := a.Stale(); n != 0 {
 		t.Fatalf("the same models, other details: %d stale, want 0", n)
 	}
 
-	// a model magpie serves now: the app opened before lacks it
-	write(entry("codex-auto-review", "hide", "v2", 1), entry("gpt-6-sol", "list", "v2", 2), entry("ds/deepseek-v4-pro", "list", "magpie 2", 4), entry("ds/deepseek-v5", "list", "magpie", 5))
+	// a model eipgam serves now: the app opened before lacks it
+	write(entry("codex-auto-review", "hide", "v2", 1), entry("gpt-6-sol", "list", "v2", 2), entry("ds/deepseek-v4-pro", "list", "eipgam 2", 4), entry("ds/deepseek-v5", "list", "eipgam", 5))
 	if n := a.Stale(); n != 1 {
 		t.Fatalf("a model added: %d stale, want 1", n)
 	}
 
-	// an older magpie's stash, a digest of every byte, over the files as
+	// an older eipgam's stash, a digest of every byte, over the files as
 	// they are: kept at its time, not a change first seen now
 	old := sha256.Sum256([]byte(a.readsBefore()()))
 	stash(map[string]string{"codex.started": hex.EncodeToString(old[:8]) + " " + strconv.FormatInt(then.UnixNano(), 10)})
 	if n := a.Stale(); n != 0 {
-		t.Fatalf("an older magpie's stash, nothing changed since: %d stale, want 0", n)
+		t.Fatalf("an older eipgam's stash, nothing changed since: %d stale, want 0", n)
 	}
 	if n := codex(home).Stale(); n != 0 {
 		t.Fatalf("asked again: %d stale, want 0", n)

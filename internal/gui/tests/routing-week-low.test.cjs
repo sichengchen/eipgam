@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               const errors = [];
               page.on("pageerror", (e) => errors.push(e.message));
               await page.route("**/*", serve(lang));
-              await page.goto("http://magpie.test/?view=routing");
+              await page.goto("http://eipgam.test/?view=routing");
               await page.locator(".rt-accts > li", { hasText: "cx-3@example.com" }).first().waitFor();
               const want = kept[lang];
               await page.waitForFunction(([w]) => [...document.querySelectorAll(".rt-accts > li")].some((l) => l.textContent.includes("cx-3@example.com") && l.textContent.includes(w)), [want], { timeout: 4000 }).catch(() => {});

@@ -15,7 +15,7 @@ import (
 // x-goog-api-key, api-key and a provider's own headers went to wherever
 // the vendor's Location named. A redirect elsewhere is not followed, and
 // its 3xx is the answer, as it came, so the caller sees where the vendor
-// sent it and no credential goes there. No vendor magpie speaks to was
+// sent it and no credential goes there. No vendor eipgam speaks to was
 // found to redirect its API to another origin (a download that does is
 // fetched by its own URL, unsigned), and the search APIs had this rule
 // already (search_api.go, #1580).

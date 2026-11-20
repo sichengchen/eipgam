@@ -7,7 +7,7 @@
 // (left alone, not pickable) and one whose name the user's own subagent
 // has (it goes in beside it). The files left out say why. Import posts
 // subagents/import with the paths picked and the agents ticked, never
-// one magpie can't write for (WSL), and says what it did.
+// one eipgam can't write for (WSL), and says what it did.
 // At 420 and 1100 wide in en, zh, zh-TW, ja and de: no sideways scroll,
 // and what each click pressed stays where it was on the screen.
 // No backend: the API is faked here.
@@ -26,10 +26,10 @@ const WSL = "claude@wsl:Ubuntu";
 const SUB_AGENTS = [
   { id: "claude", dir: `${HOME}/.claude/agents`, skills: true, mcp: true },
   { id: "codex", dir: `${HOME}/.codex/agents`, model: true },
-  { id: WSL, wsl: true, no: "magpie gives no subagents to an agent in WSL yet" },
+  { id: WSL, wsl: true, no: "eipgam gives no subagents to an agent in WSL yet" },
 ];
 const lib = (subagents) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent(WSL, "Claude Code (Ubuntu)")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills: [], problems: [],
   hooks: [], hookAgents: [], subagents, subagentAgents: SUB_AGENTS, subagentModels: [],
@@ -87,7 +87,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -131,14 +131,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const state = { subagents: [{ name: "backend-architect", description: "My own", prompt: "Mine.", agents: ["claude"] }] };
           const posts = [], errors = [];
           const ctx = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "subagents"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "subagents"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
           await page.route("**/*", server(lang, state, posts));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const v = page.locator("#view-library");
           const card = v.locator(".lib-safind");

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // hermesOldSystem is Hermes Agent's earlier default persona, the SOUL.md it
@@ -54,10 +54,10 @@ var openCodeSystem = []string{
 // own for begins.
 const codexCLISystem = "You are a coding agent running in the Codex CLI, a terminal-based coding assistant. Codex CLI is an open source project led by OpenAI. You are expected to be precise, safe, and helpful."
 
-// zeroWidth is U+200B, what magpie put inside these lines until 11-14.
+// zeroWidth is U+200B, what eipgam put inside these lines until 11-14.
 const zeroWidth = "\u200b"
 
-// brokenTwice is line as magpie sent it from 11-11 to 11-14: a zero-width
+// brokenTwice is line as eipgam sent it from 11-11 to 11-14: a zero-width
 // space after the first and the second character of each run of three or
 // more ASCII letters or digits.
 func brokenTwice(line string) string {
@@ -84,7 +84,7 @@ func brokenTwice(line string) string {
 }
 
 // breakLines is system with f applied to each turned-away line in it and
-// nothing else, as an older magpie or middleware broke them up.
+// nothing else, as an older eipgam or middleware broke them up.
 func breakLines(system string, f func(string) string) string {
 	var at [][]int
 	for _, re := range agTurnedAwayRes {
@@ -123,7 +123,7 @@ func unsaid(got string) string {
 // Claude Code 2.1.316's own system blocks (claude -p, captured 11-11; the
 // Claude desktop app's Code tab sends the same with cc_entrypoint=
 // claude-desktop, captured 11-14): the billing line is left out, the Agent
-// SDK's line reworded, and the copy magpie sent until 11-14, which Google
+// SDK's line reworded, and the copy eipgam sent until 11-14, which Google
 // turned away 5 of 5 that day, goes the same way.
 func TestAntigravityCloakClaudeCode2316(t *testing.T) {
 	t.Cleanup(provider.AntigravityBuiltinForTest()) // the retired built-in route
@@ -268,7 +268,7 @@ func fakeGoogle(sent *string) func(w http.ResponseWriter, r *http.Request) {
 }
 
 // hermesTurn is a Hermes Agent turn on Antigravity's model, on the Chat
-// Completions API it reaches magpie by, with system as its system prompt.
+// Completions API it reaches eipgam by, with system as its system prompt.
 func hermesTurn(s *Server, system string) (int, string) {
 	body := `{"model":"antigravity/gemini-3-flash","stream":false,"messages":[{"role":"system","content":` + quote(system) + `},{"role":"user","content":"hi"}]}`
 	rec := httptest.NewRecorder()

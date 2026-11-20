@@ -1,6 +1,6 @@
 package cli
 
-// magpie tools and magpie tool: the tools magpie's own MCP servers give
+// eipgam tools and eipgam tool: the tools eipgam's own MCP servers give
 // agents (image generation, image recognition, web search, plugins'
 // tools), listed and called from the terminal (iwinux on Discord). They
 // are asked of the running gateway's MCP servers themselves
@@ -25,39 +25,39 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/imagemcp"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/imagemcp"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 const toolUsage = `usage:
-  magpie tools                  every tool magpie's MCP servers give agents, with its parameters
-  magpie tools <name>           one tool: what it does and each parameter
-  magpie tool <name> [--<param> <value>…] [<words>…] [-o <file|folder>] [--json]
-                                call one through the running magpie, as an agent's MCP call is
+  eipgam tools                  every tool eipgam's MCP servers give agents, with its parameters
+  eipgam tools <name>           one tool: what it does and each parameter
+  eipgam tool <name> [--<param> <value>…] [<words>…] [-o <file|folder>] [--json]
+                                call one through the running eipgam, as an agent's MCP call is
 
   A parameter is --<param> <value> or --<param>=<value> (- and _ alike); a list
   parameter is given once per item. The words left over are the tool's one required
   text (generate_image's prompt, web_search's query, analyze_image's image), else its
-  prompt. A file named in a parameter is read by magpie on this computer.
+  prompt. A file named in a parameter is read by eipgam on this computer.
   An image or video the tool makes is saved: -o names a file or a folder (with --n 2 or
   more a number is added to the name), else it goes in this folder, named from the
   prompt; a file that is there is never written over. Text is printed. --json prints
   the tool's answer as it came and saves nothing.
   An unknown parameter, or a missing required one, is refused before anything is
-  called. The models are the ones magpie's Settings pick (Images › Image generation,
+  called. The models are the ones eipgam's Settings pick (Images › Image generation,
   Image recognition, Web search); generate_image and generate_video take --model
-  provider/model for another one set up (magpie tools generate_image lists them). It asks the gateway at the port in Settings' Gateway
-  address (or MAGPIE_ADDR; MAGPIE_GATEWAY=<url> for another).
+  provider/model for another one set up (eipgam tools generate_image lists them). It asks the gateway at the port in Settings' Gateway
+  address (or EIPGAM_ADDR; EIPGAM_GATEWAY=<url> for another).
 
-  e.g. magpie tool generate_image "a magpie on a branch, watercolour" --size 1536x1024 -o hero.png
-       magpie tool generate_image --n 2 --quality high --background transparent "an app icon"
-       magpie tool analyze_image ./shot.png --prompt "what does the error say?"
-       magpie tool web_search "go 1.27 release notes"`
+  e.g. eipgam tool generate_image "a eipgam on a branch, watercolour" --size 1536x1024 -o hero.png
+       eipgam tool generate_image --n 2 --quality high --background transparent "an app icon"
+       eipgam tool analyze_image ./shot.png --prompt "what does the error say?"
+       eipgam tool web_search "go 1.27 release notes"`
 
-// toolAgent is the User-Agent the calls go with: magpie's own, as the
-// image tool's (gateway.DrawAgent), so a vendor is sent magpie's.
-const toolAgent = "magpie-tool/1"
+// toolAgent is the User-Agent the calls go with: eipgam's own, as the
+// image tool's (gateway.DrawAgent), so a vendor is sent eipgam's.
+const toolAgent = "eipgam-tool/1"
 
 // toolCallMost bounds one ask of the gateway: the image server answers
 // within about 20s, a plugin's tool within 55s, and a look at a large
@@ -79,7 +79,7 @@ type toolGateway struct {
 }
 
 func newToolGateway() *toolGateway {
-	base := strings.TrimRight(os.Getenv("MAGPIE_GATEWAY"), "/")
+	base := strings.TrimRight(os.Getenv("EIPGAM_GATEWAY"), "/")
 	if base == "" {
 		base = gateway.ClientURL()
 	}
@@ -93,7 +93,7 @@ type errNoMagpie struct {
 }
 
 func (e errNoMagpie) Error() string {
-	return fmt.Sprintf("magpie isn't running at %s: open the app or run magpie serve, then try again (%v)", e.base, e.err)
+	return fmt.Sprintf("eipgam isn't running at %s: open the app or run eipgam serve, then try again (%v)", e.base, e.err)
 }
 
 func (g *toolGateway) do(method, path string, body []byte) (*http.Response, error) {
@@ -108,7 +108,7 @@ func (g *toolGateway) do(method, path string, body []byte) (*http.Response, erro
 	r.Header.Set("Authorization", "Bearer "+gateway.Token)
 	r.Header.Set("User-Agent", toolAgent)
 	if body != nil {
-		// the folder it runs in, as `magpie mcp memory` names it: the
+		// the folder it runs in, as `eipgam mcp memory` names it: the
 		// memory server's project (--scope project), and no roots/list
 		// asked of it to find one (#6049)
 		if d, err := os.Getwd(); err == nil {
@@ -141,9 +141,9 @@ func (g *toolGateway) rpc(path, method string, params any) (json.RawMessage, err
 	}
 	switch {
 	case res.StatusCode == http.StatusNotFound:
-		return nil, fmt.Errorf("the magpie at %s has no %s: it is older than this one, update it", g.base, path)
+		return nil, fmt.Errorf("the eipgam at %s has no %s: it is older than this one, update it", g.base, path)
 	case res.StatusCode != http.StatusOK:
-		return nil, fmt.Errorf("the magpie at %s answered %s: %s", g.base, res.Status, strings.TrimSpace(string(data)))
+		return nil, fmt.Errorf("the eipgam at %s answered %s: %s", g.base, res.Status, strings.TrimSpace(string(data)))
 	}
 	return g.answerOf(data)
 }
@@ -162,7 +162,7 @@ type rpcMessage struct {
 func (g *toolGateway) answerOf(data []byte) (json.RawMessage, error) {
 	var m rpcMessage
 	if err := json.Unmarshal(data, &m); err != nil {
-		return nil, fmt.Errorf("what %s answered isn't JSON-RPC: is it magpie? (%v)", g.base, err)
+		return nil, fmt.Errorf("what %s answered isn't JSON-RPC: is it eipgam? (%v)", g.base, err)
 	}
 	if m.Error != nil {
 		return nil, errors.New(m.Error.Message)
@@ -186,7 +186,7 @@ func (g *toolGateway) readStream(path string, body io.Reader, id int) (json.RawM
 		}
 		var m rpcMessage
 		if err := json.Unmarshal(d, &m); err != nil {
-			return nil, true, fmt.Errorf("what %s answered isn't JSON-RPC: is it magpie? (%v)", g.base, err)
+			return nil, true, fmt.Errorf("what %s answered isn't JSON-RPC: is it eipgam? (%v)", g.base, err)
 		}
 		switch {
 		case m.Method != "" && len(m.ID) > 0:
@@ -222,7 +222,7 @@ func (g *toolGateway) readStream(path string, body io.Reader, id int) (json.RawM
 }
 
 // answerServer answers what a server asked on a call's stream: roots/list
-// is the folder magpie tool runs in; anything else, which a terminal
+// is the folder eipgam tool runs in; anything else, which a terminal
 // can't do, is refused.
 func (g *toolGateway) answerServer(path string, ask rpcMessage) {
 	reply := map[string]any{"jsonrpc": "2.0", "id": ask.ID}
@@ -230,7 +230,7 @@ func (g *toolGateway) answerServer(path string, ask rpcMessage) {
 	if ask.Method == "roots/list" && err == nil {
 		reply["result"] = map[string]any{"roots": []any{map[string]any{"uri": fileURI(d), "name": filepath.Base(d)}}}
 	} else {
-		reply["error"] = map[string]any{"code": -32601, "message": "magpie tool doesn't answer " + ask.Method}
+		reply["error"] = map[string]any{"code": -32601, "message": "eipgam tool doesn't answer " + ask.Method}
 	}
 	b, _ := json.Marshal(reply)
 	if res, err := g.do(http.MethodPost, path, b); err == nil {
@@ -249,12 +249,12 @@ func fileURI(dir string) string {
 }
 
 // fetch is a file the gateway made, at u's path on the gateway asked: a
-// URL may name the address agents are given (MAGPIE_PUBLIC_URL), and the
+// URL may name the address agents are given (EIPGAM_PUBLIC_URL), and the
 // key goes nowhere else.
 func (g *toolGateway) fetch(u string) ([]byte, error) {
 	pu, err := url.Parse(u)
 	if err != nil || !strings.HasPrefix(pu.Path, "/") {
-		return nil, fmt.Errorf("%q isn't a file of magpie's", u)
+		return nil, fmt.Errorf("%q isn't a file of eipgam's", u)
 	}
 	res, err := g.do(http.MethodGet, pu.RequestURI(), nil)
 	if err != nil {
@@ -437,15 +437,15 @@ func paramShape(p toolParam) string {
 	return "<" + shape + ">"
 }
 
-// toolsCmd: magpie tools [<name>]
+// toolsCmd: eipgam tools [<name>]
 func toolsCmd(args []string) error {
 	for _, a := range args {
 		if strings.HasPrefix(a, "-") {
-			return fmt.Errorf("unknown flag %s (magpie tools [<name>])", a)
+			return fmt.Errorf("unknown flag %s (eipgam tools [<name>])", a)
 		}
 	}
 	if len(args) > 1 {
-		return errors.New("magpie tools takes one tool's name at most (magpie tools [<name>])")
+		return errors.New("eipgam tools takes one tool's name at most (eipgam tools [<name>])")
 	}
 	g := newToolGateway()
 	tools, notes, err := listTools(g)
@@ -483,12 +483,12 @@ func toolsCmd(args []string) error {
 		}
 	}
 	if len(tools) == 0 {
-		fmt.Println(muted.Render("  no tools: the magpie running has none on"))
+		fmt.Println(muted.Render("  no tools: the eipgam running has none on"))
 	}
 	for _, n := range notes {
 		fmt.Println(muted.Render("  " + n))
 	}
-	fmt.Println(muted.Render("\nmagpie tools <name> for one in full · magpie tool <name> --<param> <value> … to call it"))
+	fmt.Println(muted.Render("\neipgam tools <name> for one in full · eipgam tool <name> --<param> <value> … to call it"))
 	return nil
 }
 
@@ -509,7 +509,7 @@ func toolHelp(t listedTool) string {
 		}
 	}
 	if w := t.wordsParam(); w != "" {
-		fmt.Fprintf(&b, "\n  the words after the name are its --%s: magpie tool %s <%s>\n", w, t.Name, w)
+		fmt.Fprintf(&b, "\n  the words after the name are its --%s: eipgam tool %s <%s>\n", w, t.Name, w)
 	}
 	return b.String()
 }
@@ -519,9 +519,9 @@ func unknownTool(name string, tools []listedTool, notes []string) error {
 	for _, t := range tools {
 		names = append(names, t.Name)
 	}
-	msg := fmt.Sprintf("no tool called %q: nothing was called; there is %s (magpie tools)", name, strings.Join(names, ", "))
+	msg := fmt.Sprintf("no tool called %q: nothing was called; there is %s (eipgam tools)", name, strings.Join(names, ", "))
 	if len(names) == 0 {
-		msg = fmt.Sprintf("no tool called %q: the magpie running has no tools on", name)
+		msg = fmt.Sprintf("no tool called %q: the eipgam running has no tools on", name)
 	}
 	if len(notes) > 0 {
 		msg += " (" + strings.Join(notes, "; ") + ")"
@@ -536,7 +536,7 @@ type toolCall struct {
 	json   bool
 }
 
-// parseToolArgs reads in, what follows magpie tool <name>, against t's
+// parseToolArgs reads in, what follows eipgam tool <name>, against t's
 // parameters: nothing is called on an error.
 func parseToolArgs(t listedTool, in []string) (toolCall, error) {
 	c := toolCall{args: map[string]any{}}
@@ -577,7 +577,7 @@ func parseToolArgs(t listedTool, in []string) (toolCall, error) {
 		name, val, hasVal := strings.Cut(a[2:], "=")
 		key := paramKey(props, name)
 		if key == "" {
-			return c, fmt.Errorf("%s takes no --%s: nothing was called; it takes %s (magpie tools %s)", t.Name, name, paramList(t), t.Name)
+			return c, fmt.Errorf("%s takes no --%s: nothing was called; it takes %s (eipgam tools %s)", t.Name, name, paramList(t), t.Name)
 		}
 		p := props[key]
 		if !hasVal {
@@ -641,7 +641,7 @@ func parseToolArgs(t listedTool, in []string) (toolCall, error) {
 		}
 	}
 	if len(missing) > 0 {
-		return c, fmt.Errorf("%s needs %s: nothing was called (magpie tools %s)", t.Name, strings.Join(missing, " and "), t.Name)
+		return c, fmt.Errorf("%s needs %s: nothing was called (eipgam tools %s)", t.Name, strings.Join(missing, " and "), t.Name)
 	}
 	return c, nil
 }
@@ -780,10 +780,10 @@ func callTool(g *toolGateway, t listedTool, args map[string]any) (json.RawMessag
 	return res, err
 }
 
-// toolCmd: magpie tool <name> [--<param> <value>…] [<words>…] [-o <path>] [--json]
+// toolCmd: eipgam tool <name> [--<param> <value>…] [<words>…] [-o <path>] [--json]
 func toolCmd(args []string) error {
 	if len(args) == 0 || strings.HasPrefix(args[0], "-") {
-		return errors.New("magpie tool needs a tool's name first: magpie tool <name> --<param> <value> … (magpie tools lists them)")
+		return errors.New("eipgam tool needs a tool's name first: eipgam tool <name> --<param> <value> … (eipgam tools lists them)")
 	}
 	g := newToolGateway()
 	tools, notes, err := listTools(g)

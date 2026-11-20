@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // openCodeSeed names the conversation a request to OpenCode's gateway is a
@@ -38,7 +38,7 @@ func openCodeSeed(in http.Header, body []byte) string {
 	return conversationID(in, body)
 }
 
-// logOpenCodeRefusal writes to magpie's log what went to OpenCode's
+// logOpenCodeRefusal writes to eipgam's log what went to OpenCode's
 // gateway with a request it refused: where, the names of the headers sent
 // (never a value), and whether x-opencode-session was among them, by its
 // first 8 characters. OpenCode answers a request without one 400

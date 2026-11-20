@@ -3,7 +3,7 @@ package provider
 import (
 	"bytes"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // OpenRouter serves some free endpoints only to the agent apps it lists
@@ -14,15 +14,15 @@ import (
 // https://openrouter.ai/apps" (Wade111999 on X), its routing step "Gate
 // Free Endpoints by Agentic Harness". The key is fine, and so is the
 // model: the app the request came from is what is turned away, so a
-// magpie test, which is magpie's own request and names no app, is
-// refused, and an agent's may be served. magpie never names an app it
+// eipgam test, which is eipgam's own request and names no app, is
+// refused, and an agent's may be served. eipgam never names an app it
 // isn't.
 
 // harnessOnly matches that refusal's words.
 var harnessOnly = lazyre.New(`(?i)only available (?:on|with|via|in|to|for use with) agentic harness`)
 
 // HarnessOnlyHint says what the refusal means and what to do.
-const HarnessOnlyHint = "OpenRouter serves this free model only to requests from an agent app it lists at openrouter.ai/apps, which magpie's own requests (a model test) are not; the model without :free is served to any request"
+const HarnessOnlyHint = "OpenRouter serves this free model only to requests from an agent app it lists at openrouter.ai/apps, which eipgam's own requests (a model test) are not; the model without :free is served to any request"
 
 // HarnessOnly says whether an error body is OpenRouter's refusal of a
 // request not from an agent app it lists.

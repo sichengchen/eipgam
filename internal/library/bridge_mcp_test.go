@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // fakeRemotes has the Remote magpies in providers.json be hs, or
@@ -39,11 +39,11 @@ func loaded(t *testing.T) *Library {
 	return l
 }
 
-// A Remote magpie that says it serves its MCP router (treeman_26897 on
+// A Remote eipgam that says it serves its MCP router (treeman_26897 on
 // Discord) is a Library server of its own: named for the provider, at its
 // router with its key, kept to this computer, on for the agents given the
 // hub's entry, its tools in their hub. It is asked as a router asks
-// another's, and isn't given to another magpie's router. The provider's
+// another's, and isn't given to another eipgam's router. The provider's
 // key changed, the server's is; edited in the Library's editor as it was,
 // it stays the provider's; edited to another address, the user's own.
 func TestRemoteMagpieRouterIsAServer(t *testing.T) {
@@ -51,75 +51,75 @@ func TestRemoteMagpieRouterIsAServer(t *testing.T) {
 	var seen http.Header
 	srv := httptest.NewServer(mcpHandler(t, false, &seen))
 	t.Cleanup(srv.Close)
-	f := fakeRemoteHubs(t, provider.RemoteHub{ID: "home", Name: "Home magpie", Root: srv.URL + "/", Key: "k1"})
+	f := fakeRemoteHubs(t, provider.RemoteHub{ID: "home", Name: "Home eipgam", Root: srv.URL + "/", Key: "k1"})
 	fake := fakeStdio(t, "ok", nil)
 	fake.Agents = []string{"claude"}
 	ok(t)(SaveServer("", *fake))
 	ok(t)(SetMCPHub(true))
 
 	if provider.RemoteHubAsk("home") {
-		t.Fatal("a Remote magpie whose switch is off is asked")
+		t.Fatal("a Remote eipgam whose switch is off is asked")
 	}
 	ok(t)(SetRemoteMCP("home", true))
 	if !provider.RemoteHubAsk("home") {
-		t.Fatal("a Remote magpie switched on, not offered yet, isn't asked")
+		t.Fatal("a Remote eipgam switched on, not offered yet, isn't asked")
 	}
 	provider.RemoteHubFound("home")
 	l := loaded(t)
-	s := l.server("home-magpie")
+	s := l.server("home-eipgam")
 	if s == nil {
-		t.Fatalf("no server for the Remote magpie: %+v", l.MCP)
+		t.Fatalf("no server for the Remote eipgam: %+v", l.MCP)
 	}
 	if s.Bridge != "home" || !s.Local || s.Transport != "http" || s.URL != srv.URL+gateway.HubMCPAll ||
 		s.Headers["Authorization"] != "Bearer k1" || !slices.Equal(s.Agents, []string{"claude"}) {
-		t.Fatalf("the Remote magpie's server: %+v", s)
+		t.Fatalf("the Remote eipgam's server: %+v", s)
 	}
 	if provider.RemoteHubAsk("home") {
-		t.Error("a Remote magpie offered once is asked again")
+		t.Error("a Remote eipgam offered once is asked again")
 	}
 
 	ctx := context.Background()
 	hub := theHub{}
-	if got := hubNames(hub.Tools(ctx, "claude")); !slices.Contains(got, "home-magpie/a") {
-		t.Fatalf("claude's hub tools %v, want home-magpie's", got)
+	if got := hubNames(hub.Tools(ctx, "claude")); !slices.Contains(got, "home-eipgam/a") {
+		t.Fatalf("claude's hub tools %v, want home-eipgam's", got)
 	}
 	if seen.Get(gateway.RouterHeader) == "" || seen.Get("Authorization") != "Bearer k1" {
 		t.Errorf("the router asked with %v, want its key and %s", seen, gateway.RouterHeader)
 	}
-	if ss := hub.Servers("claude"); !slices.ContainsFunc(ss, func(s gateway.HubServer) bool { return s.Name == "home-magpie" && s.Bridge }) {
-		t.Errorf("the gateway isn't told home-magpie is a Remote magpie's router: %+v", ss)
+	if ss := hub.Servers("claude"); !slices.ContainsFunc(ss, func(s gateway.HubServer) bool { return s.Name == "home-eipgam" && s.Bridge }) {
+		t.Errorf("the gateway isn't told home-eipgam is a Remote eipgam's router: %+v", ss)
 	}
-	// another magpie's router isn't given it
+	// another eipgam's router isn't given it
 	rctx := gateway.WithRouter(ctx)
-	if got := hubNames(hub.Tools(rctx, "claude")); slices.Contains(got, "home-magpie/a") || !slices.Contains(got, "fake/a") {
+	if got := hubNames(hub.Tools(rctx, "claude")); slices.Contains(got, "home-eipgam/a") || !slices.Contains(got, "fake/a") {
 		t.Fatalf("a router's tools %v, want fake's alone", got)
 	}
-	if _, err := hub.Call(rctx, "claude", "home-magpie", "a", json.RawMessage(`{}`)); err == nil {
-		t.Error("home-magpie's tool ran for a router")
+	if _, err := hub.Call(rctx, "claude", "home-eipgam", "a", json.RawMessage(`{}`)); err == nil {
+		t.Error("home-eipgam's tool ran for a router")
 	}
-	if res, err := hub.Call(ctx, "claude", "home-magpie", "a", json.RawMessage(`{}`)); err != nil || !strings.HasPrefix(hubText(t, res), "remote ") {
-		t.Fatalf("home-magpie's a: %s %v", res, err)
+	if res, err := hub.Call(ctx, "claude", "home-eipgam", "a", json.RawMessage(`{}`)); err != nil || !strings.HasPrefix(hubText(t, res), "remote ") {
+		t.Fatalf("home-eipgam's a: %s %v", res, err)
 	}
 
 	// the provider's key changed
 	f.hs[0].Key = "k2"
 	ok(t)(Sync())
-	if s := loaded(t).server("home-magpie"); s.Headers["Authorization"] != "Bearer k2" {
+	if s := loaded(t).server("home-eipgam"); s.Headers["Authorization"] != "Bearer k2" {
 		t.Fatalf("the key changed, the server's headers: %v", s.Headers)
 	}
 	// edited as it was, by an editor that sends neither Bridge nor Local
-	ed := *loaded(t).server("home-magpie")
+	ed := *loaded(t).server("home-eipgam")
 	ed.Bridge, ed.Local, ed.Agents = "", false, []string{"claude", "codex"}
-	ok(t)(SaveServer("home-magpie", ed))
-	if s := loaded(t).server("home-magpie"); s.Bridge != "home" || !s.Local {
-		t.Fatalf("edited as it was, no longer the Remote magpie's: %+v", s)
+	ok(t)(SaveServer("home-eipgam", ed))
+	if s := loaded(t).server("home-eipgam"); s.Bridge != "home" || !s.Local {
+		t.Fatalf("edited as it was, no longer the Remote eipgam's: %+v", s)
 	}
 	// edited to another address: the user's own, not changed again
 	ed.URL = srv.URL + "/mine"
-	ok(t)(SaveServer("home-magpie", ed))
+	ok(t)(SaveServer("home-eipgam", ed))
 	f.hs[0].Key = "k3"
 	ok(t)(Sync())
-	if s := loaded(t).server("home-magpie"); s.Bridge != "" || !s.Local || s.URL != srv.URL+"/mine" || s.Headers["Authorization"] != "Bearer k2" {
+	if s := loaded(t).server("home-eipgam"); s.Bridge != "" || !s.Local || s.URL != srv.URL+"/mine" || s.Headers["Authorization"] != "Bearer k2" {
 		t.Fatalf("edited to another address: %+v", s)
 	}
 }
@@ -127,7 +127,7 @@ func TestRemoteMagpieRouterIsAServer(t *testing.T) {
 // The server is offered once each time its switch is turned on: removed
 // by the user, it isn't added again until the switch is turned on again
 // (removing it turned the switch off); the provider removed and added
-// again, its switch is off. Switched off for an agent, it stays off. One the user has at that magpie's router already
+// again, its switch is off. Switched off for an agent, it stays off. One the user has at that eipgam's router already
 // is the one. The provider removed takes its server with it; one turned
 // off keeps it (RemoteHubs still lists it); providers.json unreadable
 // takes nothing out. A name a server has already, or the hub's own entry's,
@@ -138,7 +138,7 @@ func TestRemoteMagpieRouterOfferedOnce(t *testing.T) {
 	f := fakeRemoteHubs(t, home)
 	has := func(name string) bool { t.Helper(); return loaded(t).server(name) != nil }
 
-	// the user's own at that magpie's router: none beside it
+	// the user's own at that eipgam's router: none beside it
 	ok(t)(SaveServer("", Server{Name: "office", Transport: "http", URL: "http://192.168.1.9:3425" + gateway.HubMCPPath + "claude"}))
 	ok(t)(SetRemoteMCP("home", true))
 	provider.RemoteHubFound("home")
@@ -217,22 +217,22 @@ func TestRemoteMagpieRouterOfferedOnce(t *testing.T) {
 	}
 
 	// names: the hub's own entry's isn't given, nor one a server has
-	ok(t)(SaveServer("", Server{Name: "magpie-remote", Transport: "http", URL: "https://example.com/mcp"}))
-	f.hs = []provider.RemoteHub{{ID: "m", Name: "magpie", Root: "http://10.0.0.2:3425", Key: "k"}, {ID: "x", Name: "!!", Root: "http://10.0.0.3:3425", Key: "k"}}
+	ok(t)(SaveServer("", Server{Name: "eipgam-remote", Transport: "http", URL: "https://example.com/mcp"}))
+	f.hs = []provider.RemoteHub{{ID: "m", Name: "eipgam", Root: "http://10.0.0.2:3425", Key: "k"}, {ID: "x", Name: "!!", Root: "http://10.0.0.3:3425", Key: "k"}}
 	ok(t)(SetRemoteMCP("m", true))
 	ok(t)(SetRemoteMCP("x", true))
 	provider.RemoteHubFound("m")
 	provider.RemoteHubFound("x")
 	l := loaded(t)
-	if s := l.server("magpie-remote-2"); s == nil || s.Bridge != "m" {
-		t.Errorf("a Remote magpie called magpie: %+v", l.MCP)
+	if s := l.server("eipgam-remote-2"); s == nil || s.Bridge != "m" {
+		t.Errorf("a Remote eipgam called eipgam: %+v", l.MCP)
 	}
 	if s := l.server("x"); s == nil || s.Bridge != "x" {
-		t.Errorf("a Remote magpie whose name gives no name: %+v", l.MCP)
+		t.Errorf("a Remote eipgam whose name gives no name: %+v", l.MCP)
 	}
 }
 
-// Adding a Remote magpie's router to the Library is the user's call
+// Adding a Remote eipgam's router to the Library is the user's call
 // (treeman_26897): with the switch off it isn't asked nor given a server;
 // turned on, it is; turned off, its server is taken out, and on again it
 // is offered again. A server added before the switch was there (no
@@ -284,20 +284,20 @@ func TestRemoteMagpieMCPIsOptIn(t *testing.T) {
 	}
 }
 
-// A Remote magpie renamed, its name and id (treeman_26897: its server
+// A Remote eipgam renamed, its name and id (treeman_26897: its server
 // went), keeps its server, under the id it has now, with its switch and
 // its offer; and renamed again, still.
 func TestRemoteMagpieMCPFollowsRename(t *testing.T) {
 	hubSandbox(t)
-	f := fakeRemoteHubs(t, provider.RemoteHub{ID: "remote-magpie", Name: "Remote magpie", Root: "http://192.168.1.9:3425", Key: "k"})
-	ok(t)(SetRemoteMCP("remote-magpie", true))
-	provider.RemoteHubFound("remote-magpie")
-	if s := loaded(t).server("remote-magpie"); s == nil || s.Bridge != "remote-magpie" {
+	f := fakeRemoteHubs(t, provider.RemoteHub{ID: "remote-eipgam", Name: "Remote eipgam", Root: "http://192.168.1.9:3425", Key: "k"})
+	ok(t)(SetRemoteMCP("remote-eipgam", true))
+	provider.RemoteHubFound("remote-eipgam")
+	if s := loaded(t).server("remote-eipgam"); s == nil || s.Bridge != "remote-eipgam" {
 		t.Fatalf("no server: %+v", loaded(t).MCP)
 	}
 	for _, to := range []provider.RemoteHub{
-		{ID: "home", Name: "Home", Root: "http://192.168.1.9:3425", Key: "k", Was: []string{"remote-magpie"}},
-		{ID: "lab", Name: "Lab", Root: "http://192.168.1.9:3425", Key: "k", Was: []string{"remote-magpie", "home"}},
+		{ID: "home", Name: "Home", Root: "http://192.168.1.9:3425", Key: "k", Was: []string{"remote-eipgam"}},
+		{ID: "lab", Name: "Lab", Root: "http://192.168.1.9:3425", Key: "k", Was: []string{"remote-eipgam", "home"}},
 	} {
 		f.hs = []provider.RemoteHub{to}
 		if on := RemoteMCPOn(); !on[to.ID] {
@@ -305,7 +305,7 @@ func TestRemoteMagpieMCPFollowsRename(t *testing.T) {
 		}
 		ok(t)(Sync())
 		l := loaded(t)
-		s := l.server("remote-magpie")
+		s := l.server("remote-eipgam")
 		if s == nil || s.Bridge != to.ID {
 			t.Fatalf("renamed %s, the server: %+v", to.ID, l.MCP)
 		}
@@ -330,11 +330,11 @@ func TestRemoteMagpieMCPFollowsRename(t *testing.T) {
 }
 
 // A server carried in from another computer is never that computer's
-// Remote magpie's here.
+// Remote eipgam's here.
 func TestCarriedServerIsNoBridge(t *testing.T) {
 	l := &Library{}
 	l.putServers([]*Server{{Name: "home", Transport: "http", URL: "http://10.0.0.2:3425" + gateway.HubMCPAll, Bridge: "home"}})
 	if l.MCP[0].Bridge != "" {
-		t.Fatalf("carried in as a Remote magpie's: %+v", l.MCP[0])
+		t.Fatalf("carried in as a Remote eipgam's: %+v", l.MCP[0])
 	}
 }

@@ -35,10 +35,10 @@ func TestOpenCodexApp(t *testing.T) {
 		t.Fatalf("opened %q (%v)", opened, err)
 	}
 
-	// Linux has no launcher magpie starts
+	// Linux has no launcher eipgam starts
 	restartOnMac = false
 	if CodexAppInstalled() || OpenCodexApp(context.Background()) == nil {
-		t.Fatal("offered to open the app where magpie cannot")
+		t.Fatal("offered to open the app where eipgam cannot")
 	}
 	if len(launched) != 0 {
 		t.Fatalf("launched %v off Windows", launched)

@@ -14,14 +14,14 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const options = [{ value: "magpie/deepseek/pro", label: "DeepSeek Pro", ref: "deepseek/pro" }];
+const options = [{ value: "eipgam/deepseek/pro", label: "DeepSeek Pro", ref: "deepseek/pro" }];
 const st = (...v) => v.map((value) => ({ value }));
 const fresh = (review) => ({
   agents: [{
     id: "omp", name: "omp", path: "/test/config.yml", icon: "omp", wired: true,
     fields: [
-      { key: "model", label: "model", value: "magpie/deepseek/pro", options },
-      { key: "advisor", label: "advisor", value: "magpie/deepseek/pro", options },
+      { key: "model", label: "model", value: "eipgam/deepseek/pro", options },
+      { key: "advisor", label: "advisor", value: "eipgam/deepseek/pro", options },
       { key: "advisor_thinking", label: "advisor thinking", value: "", options: st("auto", "low", "high") },
       { key: "advisor_review", label: "advisor review", value: review, options: st("off", "turn", "agent-end") },
       { key: "advisor_wait", label: "advisor wait", value: "", options: st("off", "1", "3", "5", "strict") },
@@ -33,7 +33,7 @@ const fresh = (review) => ({
 
 function server(lang, sets, review) {
   let cur = fresh(review);
-  const settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", redactWords: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false } };
+  const settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425", redactWords: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false } };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
@@ -81,7 +81,7 @@ const rowsIn = (page, box) => page.locator(`${box} .row.pref.ag-advisor`).evalua
 const waitRows = (page, box, n) => page.waitForFunction(([box, n]) => document.querySelectorAll(box + " .row.pref.ag-advisor").length === n, [box, n]);
 const opt = (page, box, key, seg) => page.locator(`${box} .row.pref.ag-advisor[data-key="${key}"] .segs .opt[data-seg="${seg}"]`);
 
-async function open(engine, width, lang, t, review, url = "http://magpie.test/") {
+async function open(engine, width, lang, t, review, url = "http://eipgam.test/") {
   const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
   const page = await browser.newPage({ viewport: { width, height: 760 } });
   page.setDefaultTimeout(5000);
@@ -145,7 +145,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   for (const lang of ["en", "zh", "de"]) {
     test(`${engine} ${lang}: in the panel the agent's sheet has the advisor's rows, and they answer in place`, async (t) => {
       const w = W[lang];
-      const { page, errors, sets } = await open(engine, 360, lang, t, "", "http://magpie.test/?mode=panel&view=agents");
+      const { page, errors, sets } = await open(engine, 360, lang, t, "", "http://eipgam.test/?mode=panel&view=agents");
       await page.locator(`${omp} .ag-sum`).click();
       const line = page.locator(`${omp} .agent-prefs-open`);
       await line.waitFor();

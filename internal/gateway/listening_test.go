@@ -19,12 +19,12 @@ func freeAddr(t *testing.T) string {
 }
 
 // The serving process writes down where it listens and who it is, so a
-// command run in another shell without MAGPIE_ADDR (ljlwlcz on X) finds it;
+// command run in another shell without EIPGAM_ADDR (ljlwlcz on X) finds it;
 // the note goes when it ends.
 func TestServingWritesDownWhereItListens(t *testing.T) {
 	fresh(t)
 	addr := freeAddr(t)
-	t.Setenv("MAGPIE_ADDR", addr)
+	t.Setenv("EIPGAM_ADDR", addr)
 	was := Serves
 	Serves = "web"
 	t.Cleanup(func() { Serves = was })
@@ -41,8 +41,8 @@ func TestServingWritesDownWhereItListens(t *testing.T) {
 	if !ok || l.Addr != addr || l.Pid != os.Getpid() || l.Serves != "web" {
 		t.Fatalf("while serving: %+v %v (want %s)", l, ok, addr)
 	}
-	// what a client without MAGPIE_ADDR is told
-	t.Setenv("MAGPIE_ADDR", "")
+	// what a client without EIPGAM_ADDR is told
+	t.Setenv("EIPGAM_ADDR", "")
 	if got := ClientURL(); got != "http://"+addr {
 		t.Errorf("ClientURL = %s, want http://%s", got, addr)
 	}
@@ -53,7 +53,7 @@ func TestServingWritesDownWhereItListens(t *testing.T) {
 	}
 }
 
-// A magpie that took the gateway over has written its own note by the time
+// A eipgam that took the gateway over has written its own note by the time
 // the old one ends: the old one leaves it.
 func TestEndingLeavesAnotherPidsNote(t *testing.T) {
 	fresh(t)
@@ -76,7 +76,7 @@ func TestEndingLeavesAnotherPidsNote(t *testing.T) {
 // address to ask.
 func TestUnreadableNoteIsUnknown(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	os.MkdirAll(ListeningPath()[:strings.LastIndex(ListeningPath(), string(os.PathSeparator))], 0o700)
 	for _, body := range []string{`{"addr":"127.0.0.1:99`, `{"addr":"nope","pid":5}`, `{"addr":"127.0.0.1:9","pid":0}`, ``} {
 		os.WriteFile(ListeningPath(), []byte(body), 0o600)
@@ -99,7 +99,7 @@ func TestRelistenMovesTheNote(t *testing.T) {
 	}
 	s.ln = first
 	to := freeAddr(t)
-	t.Setenv("MAGPIE_ADDR", to)
+	t.Setenv("EIPGAM_ADDR", to)
 	if err := s.Relisten(); err != nil {
 		t.Fatal(err)
 	}

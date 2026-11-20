@@ -19,9 +19,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/redact"
 )
 
 // hello is the line pf-serve writes once the model is loaded.
@@ -38,7 +38,7 @@ type helper struct {
 	cmd *exec.Cmd
 	in  io.WriteCloser
 	out *bufio.Reader
-	// outf is out's end of the stdout pipe. It is magpie's, not
+	// outf is out's end of the stdout pipe. It is eipgam's, not
 	// cmd's: cmd.Wait closes a StdoutPipe as the process exits, so a
 	// read after a death got "read |0: file already closed" in place of
 	// the EOF that says pf-serve died, and the status showed that as why
@@ -47,11 +47,11 @@ type helper struct {
 	stderr *tail
 	hello  hello
 	exited chan struct{}
-	// slow says magpie ended it, given too long to answer
+	// slow says eipgam ended it, given too long to answer
 	slow atomic.Pointer[string]
 }
 
-// srv is the pf-serve magpie runs, one at a time. Its requests take
+// srv is the pf-serve eipgam runs, one at a time. Its requests take
 // turns on its one pipe: turn is held for each, from start to answer, and
 // a request's caller can stop waiting for it (FindContext). mu guards
 // only the fields below, and is never held while pf-serve loads or
@@ -66,7 +66,7 @@ var srv struct {
 	// hung there twice in a row: it runs on the CPU until gpuAgain, when
 	// the GPU is tried again (gpuRetryAfter); gpuLost says why, gpuFails
 	// how many times in a row the GPU was lost. A GPU that answers clears
-	// them. Before, nothing did short of a restart of magpie, and one
+	// them. Before, nothing did short of a restart of eipgam, and one
 	// request too slow for its time on a weak GPU left every request after
 	// it on a CPU 3x slower (#3682).
 	cpu      bool
@@ -267,14 +267,14 @@ func startOne(path string, cpu bool, stop <-chan struct{}) (*helper, error) {
 	// code page, where ggml's fopen reads UTF-8 and the GPU's weights
 	// are read again through a narrow ifstream, so a folder with a
 	// character outside ASCII (a Chinese user name in C:\Users) failed
-	// to load on every device, its error a path in mojibake. magpie's
+	// to load on every device, its error a path in mojibake. eipgam's
 	// own names are ASCII.
 	cmd := proc.Command(path, modelName())
 	cmd.Dir = filepath.Dir(modelPath())
 	// Without GGML_METAL_NO_RESIDENCY, ggml's Metal residency set keeps a
 	// heartbeat that woke an idle pf-serve ~146 times a second for the 10
 	// minutes it stays up after a request, and macOS's Energy Impact
-	// counted magpie among the top for it (#3185). With it set: 0.3 a
+	// counted eipgam among the top for it (#3185). With it set: 0.3 a
 	// second, and the first request after an idle spell takes 0.1-0.45s
 	// more (51-78ms hot either way).
 	cmd.Env = append(os.Environ(), "GGML_METAL_NO_RESIDENCY=1")
@@ -355,9 +355,9 @@ func onWhat(cpu bool) string {
 	return " on the GPU"
 }
 
-// died says why pf-serve ended: that magpie ended it, given too long to
+// died says why pf-serve ended: that eipgam ended it, given too long to
 // answer, or how it exited; and what it said last that isn't ggml's
-// startup lines. Those were all a user saw of a pf-serve magpie had
+// startup lines. Those were all a user saw of a pf-serve eipgam had
 // ended for being slow (lazyeo: "pf-serve ended: ggml_metal_device_init:
 // tensor API disabled for pre-M5 …", which every Mac before the M5
 // prints and means nothing).
@@ -500,7 +500,7 @@ func end(h *helper) {
 // fails is ended and started again. One that failed on the GPU is started
 // again on the GPU: one that died there is most often a GPU the driver
 // reset under it (vk::DeviceLostError, kongbai01203's after an idle
-// spell), which a new pf-serve gets a new device of, and one magpie ended
+// spell), which a new pf-serve gets a new device of, and one eipgam ended
 // for taking too long had a request too slow for its time. Twice in a row
 // the GPU is lost, and the CPU is tried, until the GPU is tried again: at
 // once for one that died, and from the next request for one that hung,
@@ -665,7 +665,7 @@ func (h *helper) classify(texts []string) ([][]redact.Found, error) {
 		case <-done:
 		case <-time.After(timeout):
 			// a hung pf-serve: killed, its pipe ends the read below
-			s := fmt.Sprintf("didn't answer in %s (%d KB%s), so magpie ended it", timeout, (size+1023)/1024, onWhat(!h.hello.GPU))
+			s := fmt.Sprintf("didn't answer in %s (%d KB%s), so eipgam ended it", timeout, (size+1023)/1024, onWhat(!h.hello.GPU))
 			h.slow.Store(&s)
 			h.cmd.Process.Kill()
 		}

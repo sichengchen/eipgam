@@ -13,7 +13,7 @@ import (
 // DO_NOT_TRACK set it reads none, and every turn sends the whole history,
 // every image in it. Nothing forces threads (CLAUDE_CODE_TETHER_LIVE is
 // never set). Updates and error reports stay off, and a quiet variable the
-// user set, in magpie's environment or in their Claude Code's settings.json,
+// user set, in eipgam's environment or in their Claude Code's settings.json,
 // stays as they set it.
 func TestClaudeRunReadsItsFlags(t *testing.T) {
 	for _, c := range []struct {
@@ -24,7 +24,7 @@ func TestClaudeRunReadsItsFlags(t *testing.T) {
 		{name: "nothing set", want: "traffic unset telemetry unset track unset tether unset updater 1 errors 1"},
 		{name: "settings telemetry off", settings: `{"env":{"DISABLE_TELEMETRY":"1"}}`, want: "traffic unset telemetry 1 track unset tether unset updater 1 errors 1"},
 		{name: "settings nonessential off", settings: `{"env":{"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC":"true"}}`, want: "traffic true telemetry unset track unset tether unset updater 1 errors 1"},
-		{name: "magpie's env", env: map[string]string{"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1", "DO_NOT_TRACK": "1"}, want: "traffic 1 telemetry unset track 1 tether unset updater 1 errors 1"},
+		{name: "eipgam's env", env: map[string]string{"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1", "DO_NOT_TRACK": "1"}, want: "traffic 1 telemetry unset track 1 tether unset updater 1 errors 1"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			for _, k := range append(claudeQuietVars, "CLAUDE_CODE_TETHER_LIVE", "DISABLE_AUTOUPDATER", "DISABLE_ERROR_REPORTING") {

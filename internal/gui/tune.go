@@ -17,12 +17,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/tune"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/tune"
 )
 
 type tuneAdvice struct {
@@ -100,7 +100,7 @@ type tuneState struct {
 	Agents []tuneAgent `json:"agents"`
 	// Gateway: in gateway mode the agents are on other computers, and
 	// their session files and settings aren't here to replay or change
-	// (linkaww on Discord: a Docker magpie's Claude Code card said 0
+	// (linkaww on Discord: a Docker eipgam's Claude Code card said 0
 	// calls beside the requests it routed); the page leaves the card out
 	Gateway bool `json:"gateway,omitempty"`
 }
@@ -193,7 +193,7 @@ func adviseOf(by map[string][]tune.Call, days int, home string) tuneState {
 			st := settings.Load().ForAgent("codex")
 			window, told, own, apart := codexWindow(calls, st, provider.Catalog(), provider.GroupFinder())
 			// Long conversations' value is the setting; where Codex runs
-			// now is that as magpie tells it for these models (their
+			// now is that as eipgam tells it for these models (their
 			// windows, a provider's own Compact at)
 			cur, _ := strconv.Atoi(s.Value)
 			if cur == 0 || s.Source == agent.TuneLong {
@@ -229,15 +229,15 @@ func adviseOf(by map[string][]tune.Call, days int, home string) tuneState {
 	return out
 }
 
-// pricedWeights weighs a model's calls at what magpie bills them where the
-// agent asked for a model magpie wrote into its config (provider/model, as
+// pricedWeights weighs a model's calls at what eipgam bills them where the
+// agent asked for a model eipgam wrote into its config (provider/model, as
 // Claude Code is given it, dashed): the price of the provider it resolves
 // to, as the usage pages count it, so a Claude model on Copilot has its
 // hour at the 5-minute write Copilot bills and one on Anthropic at 2× input
 // (#3435). By its name alone a provider/model id was weighed as no Claude
 // model, its hour costing what a 5-minute write does. A model the agent
-// named itself never went through magpie and is weighed at its maker's list
-// (tune.WeightsFor), as is one magpie has no cache price for.
+// named itself never went through eipgam and is weighed at its maker's list
+// (tune.WeightsFor), as is one eipgam has no cache price for.
 func pricedWeights(st settings.Settings) tune.Weigh {
 	memo := map[string]tune.Weights{}
 	return func(model string) tune.Weights {
@@ -259,9 +259,9 @@ func pricedWeights(st settings.Settings) tune.Weigh {
 }
 
 // codexWindow is the window Codex runs the calls' models to, and where
-// magpie has it compact them when its config.toml says nothing (told: the
-// largest of the models Long conversations moves, 0 when magpie tells it
-// none). A model outside the catalog, or one whose window magpie doesn't
+// eipgam has it compact them when its config.toml says nothing (told: the
+// largest of the models Long conversations moves, 0 when eipgam tells it
+// none). A model outside the catalog, or one whose window eipgam doesn't
 // know, leaves told to the others: it once made told 0 for the whole
 // range, so "Now" was guessed from the prompts instead, and the same
 // setting read 380K over 7 days and 430K today (hoobnn on Discord).
@@ -276,13 +276,13 @@ func pricedWeights(st settings.Settings) tune.Weigh {
 // it. A window the user typed is not one of these: it gives way to a size
 // tune puts in Long conversations (CompactFor's rule).
 //
-// A model of magpie's catalog has the window it is listed with, one the
+// A model of eipgam's catalog has the window it is listed with, one the
 // user typed or the vendor's, and is told the threshold the user set on
 // it, else Settings › Long conversations (provider.CompactFor, as
-// codexcat writes it). One whose window magpie doesn't know caps nothing
+// codexcat writes it). One whose window eipgam doesn't know caps nothing
 // (window 0): the largest prompt it had been sent was taken for its
 // window, and a 1M model set to compact at 750K was offered no more than
-// 412K (zhemu on Discord). Codex's own models, outside magpie's catalog,
+// 412K (zhemu on Discord). Codex's own models, outside eipgam's catalog,
 // run to the window Codex's catalog gives them (codexcat.OwnWindow, 272K
 // when it has none) or the largest prompt seen.
 func codexWindow(calls []tune.Call, st settings.Settings, entries []provider.Entry, find func(string) (provider.Group, []provider.Member, bool)) (window, told int, own string, apart []tuneOwn) {
@@ -296,7 +296,7 @@ func codexWindow(calls []tune.Call, st settings.Settings, entries []provider.Ent
 	}
 	unknown, moved, held := false, false, 0
 	for m, p := range peak {
-		e, ok := byID[strings.TrimPrefix(m, "magpie/")]
+		e, ok := byID[strings.TrimPrefix(m, "eipgam/")]
 		switch {
 		case !ok:
 			// Codex's own model: the window its catalog gives it (GPT-6.1
@@ -405,7 +405,7 @@ func tuneRoutes(mux *http.ServeMux) {
 		}
 		writeJSON(rw, settingsState())
 	})
-	// what Codex's config.toml sets before magpie, taken over on the
+	// what Codex's config.toml sets before eipgam, taken over on the
 	// user's click (agent.TuneTakeOver): Undo puts it back
 	mux.HandleFunc("POST /api/tune/takeover", func(rw http.ResponseWriter, r *http.Request) {
 		if gatewayRefused(rw) {

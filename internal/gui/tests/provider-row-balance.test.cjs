@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A provider's balance, as the Usage page reads it, is a quiet figure on its
-// row in Providers too (lyj1115 on X: magpie found the relay's balance, and
+// row in Providers too (lyj1115 on X: eipgam found the relay's balance, and
 // the row showed only the API key). Several keys' balances are added up as
 // the Usage card adds them; a failed read, a signed-in account and the Usage
 // page turned off show none. The read is Usage's own, never an asked one.
@@ -10,7 +10,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const base = {
   icon: "generic", chat: "", responses: "", anthropic: "", catalog: "",
   models: [{ id: "model-a", name: "Model A", on: true }], agents: [], fallback: [], headers: {},
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           const asked = [];
           await page.route("**/*", server(lang, [], asked));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           const row = (id) => page.locator(`#providers .row.provider[data-id="${id}"]`);
           const bal = (id) => row(id).locator(".who > .sub > .pv-bal");
           await bal("relay").waitFor();
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const page = await context.newPage();
       const asked = [];
       await page.route("**/*", server("en", ["usage"], asked));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator('#providers .row.provider[data-id="relay"]').waitFor();
       // show() asks for Usage's read before the list is drawn, so none was asked
       assert.equal(await page.evaluate(() => quotas === null && !quotasLoading), true);

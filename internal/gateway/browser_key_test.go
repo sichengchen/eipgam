@@ -10,21 +10,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The key magpie writes into the Magpie Browser extension's zip lands in
+// The key eipgam writes into the eipgam Browser extension's zip lands in
 // Downloads, so a copy of it can turn up anywhere. It is a browser key: it
 // opens the extension's socket and every other route the router has (every
 // model, count_tokens, a WebSocket's upgrade, every MCP server, the stats,
 // a plugin's backend and every write) is refused it, from this computer and
 // from another, however the key is sent, and no upstream is reached. The
-// key a magpie from before made with full access is held so too
+// key a eipgam from before made with full access is held so too
 // (ScopeOwnBrowserKey), and stays so.
 func TestBrowserKeyEveryRoute(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	var reached atomic.Int32
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reached.Add(1)
@@ -35,7 +35,7 @@ func TestBrowserKeyEveryRoute(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "plan", Name: "Plan", Key: "upstream-secret", Chat: up.URL + "/v1", Models: []string{"m1"}}); err != nil {
 		t.Fatal(err)
 	}
-	keys, secrets := newCaller(t, "Magpie Browser", "Laptop")
+	keys, secrets := newCaller(t, "eipgam Browser", "Laptop")
 	ext, full := secrets[0], secrets[1]
 	if err := SetOwnBrowserKey(keys[0].ID); err != nil {
 		t.Fatal(err)
@@ -60,7 +60,7 @@ func TestBrowserKeyEveryRoute(t *testing.T) {
 		h.ServeHTTP(w, r)
 		return w.Code, w.Body.String()
 	}
-	// a magpie from before gave it full access: it reached a model
+	// a eipgam from before gave it full access: it reached a model
 	if c, b := do("POST", "/v1/chat/completions", "192.168.1.9:5000", ext); c != 200 {
 		t.Fatal("the extension's key before it is held:", c, b)
 	}
@@ -134,9 +134,9 @@ func TestBrowserKeyEveryRoute(t *testing.T) {
 // all to this computer's agents' when the key was the own browser's.
 func TestBrowserKeyOffClosesItsBrowser(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	was := browserKeyCheck
 	t.Cleanup(func() { browserKeyCheck = was })
 	s := New()

@@ -12,8 +12,8 @@ import (
 
 // A plugin added by its path (a file or folder of the user's own, as a
 // plugin's author has it while writing it) is loaded by the host as it
-// was when the host started. An edit to it went unseen until magpie was
-// quit and opened again (yansheng1003 on X: "每次改了需要重新magpie"), so
+// was when the host started. An edit to it went unseen until eipgam was
+// quit and opened again (yansheng1003 on X: "每次改了需要重新eipgam"), so
 // what the host loaded is looked at as plugins.json is (checkList): once
 // its files change, the host is started again with them, as the
 // middleware already is (middleware.stamp).

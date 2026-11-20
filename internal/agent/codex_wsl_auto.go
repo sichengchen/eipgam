@@ -4,10 +4,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-// codexTwinAutoKey, after a twin's id, marks in the stash that magpie
+// codexTwinAutoKey, after a twin's id, marks in the stash that eipgam
 // connected it once from Windows' Codex being connected (or found it
 // connected or disconnected already): it is never done again, so a Disconnect
 // or a change the user makes in the distro stands.
@@ -22,7 +22,7 @@ const codexTwinAutoKey = ".autoconnected"
 //
 // It runs once per distro, and not at all for one the user disconnected, one
 // not running (asking a stopped distro starts it), one whose config names a
-// provider or base URL that isn't magpie's, or while Windows' Codex isn't
+// provider or base URL that isn't eipgam's, or while Windows' Codex isn't
 // connected. Off Windows there are no distros and nothing happens.
 func ConnectCodexTwins() {
 	if !wslLooks() {
@@ -65,7 +65,7 @@ func ConnectCodexTwins() {
 }
 
 // codexTwinHasOwn is whether the distro's Codex config names a provider or a
-// base URL that isn't magpie's: the user's own, which magpie doesn't take
+// base URL that isn't eipgam's: the user's own, which eipgam doesn't take
 // over without being asked.
 func codexTwinHasOwn(at place) bool {
 	path := filepath.Join(at.codexHome(), "config.toml")

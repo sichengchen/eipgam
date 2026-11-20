@@ -3,9 +3,9 @@ package gateway
 // Native compaction (#1099): a provider the user set to compact natively
 // (provider.Provider.NativeCompaction) is asked Codex's compaction_trigger
 // as Codex sent it, and the compaction item it writes back goes to Codex
-// as it came, sealed (encrypted_content), not as magpie's "magpie1:"
+// as it came, sealed (encrypted_content), not as eipgam's "magpie1:"
 // summary. Only the key or account that sealed it can read it again, so
-// magpie remembers who wrote each one (compactions.json, beside
+// eipgam remembers who wrote each one (compactions.json, beside
 // affinity.json), and a later request carrying it goes only there — a
 // writer whose own list has since dropped the model included, tried as
 // the last resort an account whose list lacks the model is. When that one
@@ -30,11 +30,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/steady"
+	"github.com/sichengchen/eipgam/internal/usage"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/steady"
-	"github.com/yetone/magpie/internal/usage"
 )
 
 const (
@@ -60,7 +60,7 @@ func compactionTriggerIn(body []byte) bool {
 }
 
 // sealedCompactions are the encrypted_content of the compaction items in
-// a Responses request's input that a vendor sealed: magpie's own
+// a Responses request's input that a vendor sealed: eipgam's own
 // ("magpie1:") are text by the time a request is sent, and aren't.
 func sealedCompactions(body []byte) []string {
 	if !bodyHas(body, `"compaction`) {
@@ -96,7 +96,7 @@ func (s *Server) compactsNatively(p provider.Provider, model string) bool {
 // it: every member of a group compacting natively, as any of them may
 // answer it, and a key or account the request would go over able to be
 // asked it (plannedCarrier, #2725). A group with one that doesn't keeps
-// magpie's summary, which any member can read; so does a provider whose
+// eipgam's summary, which any member can read; so does a provider whose
 // vendor lists the model only to keys that speak no Responses there, as
 // with native compaction off, where the trigger was refused before.
 func (s *Server) nativeCompactionFor(asked string) bool {
@@ -197,9 +197,9 @@ func compactionAside(kind, model string) bool {
 }
 
 // foreignToSignin is the writer of a compaction body carries that
-// Codex's own ChatGPT sign-in can't read: one magpie recorded as sealed
-// by a provider in magpie other than the Codex subscription (Copilot, an
-// API key's). A seal of the Codex subscription's, one magpie has no
+// Codex's own ChatGPT sign-in can't read: one eipgam recorded as sealed
+// by a provider in eipgam other than the Codex subscription (Copilot, an
+// API key's). A seal of the Codex subscription's, one eipgam has no
 // record of (OpenAI's own, compacted on the sign-in), and one whose
 // provider can't be read now are the sign-in's to judge, as before.
 func foreignToSignin(body []byte) (checkpointWriter, bool) {
@@ -284,7 +284,7 @@ func checkpointFor(enc string) (checkpointWriter, bool) {
 }
 
 // checkpointOf is who sealed the latest compaction in a Responses
-// request's input that magpie knows the writer of.
+// request's input that eipgam knows the writer of.
 func checkpointOf(body []byte) (checkpointWriter, bool) {
 	encs := sealedCompactions(body)
 	if len(encs) == 0 {
@@ -345,7 +345,7 @@ func saveCheckpoints() {
 	if err != nil {
 		return
 	}
-	tmp := target + ".magpie-tmp"
+	tmp := target + ".eipgam-tmp"
 	if os.WriteFile(tmp, b, 0o600) != nil {
 		return
 	}
@@ -355,14 +355,14 @@ func saveCheckpoints() {
 	}
 	if fi, err := os.Stat(path); err == nil {
 		checkpoints.Lock()
-		// what this magpie wrote isn't read back as another's
+		// what this eipgam wrote isn't read back as another's
 		checkpoints.from, checkpoints.mod = path, fi.ModTime()
 		checkpoints.Unlock()
 	}
 }
 
 // checkpointReaders keeps of cands those of the key or account that
-// sealed cp (behind a remote magpie, of the provider there too), pl's
+// sealed cp (behind a remote eipgam, of the provider there too), pl's
 // order with them; left says one is left, if only held or capped. One
 // whose own list lacks the model now (planned.unlisted) is kept too: it
 // is tried as the last resort an account whose list lacks the model is,
@@ -370,7 +370,7 @@ func saveCheckpoints() {
 // order with it, so the Routing page doesn't tell it both tried and
 // unlisted, skipped.
 func checkpointReaders(cands []candidate, pl planned, cp checkpointWriter) (_ []candidate, _ planned, left bool) {
-	// behind a remote magpie, the provider there that sealed it too
+	// behind a remote eipgam, the provider there that sealed it too
 	reads := func(c candidate) bool { return c.sameVendor(cp.Who, cp.Model) }
 	kept, pl, ok := keepCandidates(cands, pl, reads)
 	if ok {
@@ -455,7 +455,7 @@ func compactionWho(cp *checkpointWriter) string {
 
 // checkpointError is what Codex is told when the compaction a request
 // carries was sealed by a key or account the request can't go to now:
-// why, as magpie's own settings say, and what lets the conversation go on
+// why, as eipgam's own settings say, and what lets the conversation go on
 // (#2642: it said "switched off, removed, or no longer serves" of an
 // account that was on, and "switch it on again" changed nothing).
 func checkpointError(model string, cp checkpointWriter) string {
@@ -464,13 +464,13 @@ func checkpointError(model string, cp checkpointWriter) string {
 		what = "key"
 	}
 	why, fix := checkpointGone(model, what, cp)
-	msg := fmt.Sprintf("This conversation was compacted natively by %s: the compaction is sealed (encrypted) to that %s, and no other key or account can read it. The request for %s can't go to it now: %s. magpie doesn't send the compaction to another, which would refuse it, nor drop it or summarise it in its place, which would lose the conversation's earlier context. To go on with this conversation, %s; or start a new conversation.",
+	msg := fmt.Sprintf("This conversation was compacted natively by %s: the compaction is sealed (encrypted) to that %s, and no other key or account can read it. The request for %s can't go to it now: %s. eipgam doesn't send the compaction to another, which would refuse it, nor drop it or summarise it in its place, which would lose the conversation's earlier context. To go on with this conversation, %s; or start a new conversation.",
 		cp.Who, what, model, why, fix)
 	if p, err := provider.Find(cp.Provider); err == nil {
 		if p.NativeCompaction {
-			msg += fmt.Sprintf(" Native compaction is on for %s, so each conversation it compacts is held to the %s that compacted it; turned off (the provider's Compaction row), magpie summarises instead, which any of them can read.", p.ID, what)
+			msg += fmt.Sprintf(" Native compaction is on for %s, so each conversation it compacts is held to the %s that compacted it; turned off (the provider's Compaction row), eipgam summarises instead, which any of them can read.", p.ID, what)
 		} else {
-			msg += fmt.Sprintf(" Native compaction is off for %s now, so a compaction magpie routes among its %ss is magpie's summary, which any of them can read.", p.ID, what)
+			msg += fmt.Sprintf(" Native compaction is off for %s now, so a compaction eipgam routes among its %ss is eipgam's summary, which any of them can read.", p.ID, what)
 		}
 	}
 	return msg
@@ -484,7 +484,7 @@ func checkpointError(model string, cp checkpointWriter) string {
 func checkpointGone(model, what string, cp checkpointWriter) (why, fix string) {
 	p, err := provider.Find(cp.Provider)
 	if err != nil {
-		return fmt.Sprintf("the provider %s is no longer in magpie", cp.Provider),
+		return fmt.Sprintf("the provider %s is no longer in eipgam", cp.Provider),
 			fmt.Sprintf("add %s again with that %s", cp.Provider, what)
 	}
 	served := cp.Model
@@ -520,17 +520,17 @@ func checkpointGone(model, what string, cp checkpointWriter) (why, fix string) {
 		}
 		switch {
 		case l.Lapsed != "":
-			return "its sign-in has lapsed", fmt.Sprintf("sign in to %s again in magpie", l.User)
+			return "its sign-in has lapsed", fmt.Sprintf("sign in to %s again in eipgam", l.User)
 		case l.Paused:
-			return "it is paused, passed over while magpie's other accounts are on", fmt.Sprintf("turn %s on again: the others can stay on beside it, and only this conversation is held to it", l.User)
+			return "it is paused, passed over while eipgam's other accounts are on", fmt.Sprintf("turn %s on again: the others can stay on beside it, and only this conversation is held to it", l.User)
 		case !l.On:
-			return "it is switched off in magpie", fmt.Sprintf("switch %s on again: the others can stay on beside it, and only this conversation is held to it", l.User)
+			return "it is switched off in eipgam", fmt.Sprintf("switch %s on again: the others can stay on beside it, and only this conversation is held to it", l.User)
 		case !p.AccountServes(l.User, served):
 			return fmt.Sprintf("it is set not to serve %s (Model settings)", served), fmt.Sprintf("let %s serve %s again", l.User, served)
 		}
 		return checkpointNotRouted(model, served)
 	}
-	return fmt.Sprintf("%s is no longer signed in to magpie", user), fmt.Sprintf("sign in to %s again in magpie", user)
+	return fmt.Sprintf("%s is no longer signed in to eipgam", user), fmt.Sprintf("sign in to %s again in eipgam", user)
 }
 
 // checkpointNotRouted is checkpointGone for a writer that is on and may
@@ -542,7 +542,7 @@ func checkpointNotRouted(model, served string) (why, fix string) {
 // carrierError is what Codex is told when its compaction_trigger, asked
 // of a provider set to compact natively, has nowhere left that carries it.
 func carrierError(model string) string {
-	return fmt.Sprintf("Codex asked %s for its own compaction (native compaction), and none of the keys or accounts that serve %s now can be asked it on the Responses API. magpie doesn't turn it into a summary of its own unasked. Turn native compaction off for the provider to have magpie summarise the conversation instead.", model, model)
+	return fmt.Sprintf("Codex asked %s for its own compaction (native compaction), and none of the keys or accounts that serve %s now can be asked it on the Responses API. eipgam doesn't turn it into a summary of its own unasked. Turn native compaction off for the provider to have eipgam summarise the conversation instead.", model, model)
 }
 
 // compactionWatch reads, on the way past, the compaction a native

@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // While no session has a speed, the Sessions page asks /api/speeds every
 // few seconds, not every second: an open page resting on nothing still
-// woke magpie once a second. A session the gateway starts hearing shows
+// woke eipgam once a second. A session the gateway starts hearing shows
 // its speed within that rest, and the page then asks every second again.
 // Every language, Chromium and WebKit.
 const assert = require("node:assert/strict");
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const gw = { reads: 0, heard: false };
       await page.route("**/*", serve(lang, gw));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator("#nav").getByRole("button", { name: nav[lang], exact: true }).click();
       await page.locator('#view-sessions .row.sm-sess[data-id="s-1"]').waitFor();
       await until(() => gw.reads >= 1, 8000, () => `no read of /api/speeds`);

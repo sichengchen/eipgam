@@ -11,9 +11,9 @@ import (
 )
 
 // A plugin that runs its vendor's CLI says how to install it (auth.cli):
-// it is listed with the CLI's name and manual, magpie asks whether it is
+// it is listed with the CLI's name and manual, eipgam asks whether it is
 // there and has the plugin install it, and gives up an install it no
-// longer waits for (niuniu_8964 on X: agy in magpie's container).
+// longer waits for (niuniu_8964 on X: agy in eipgam's container).
 func TestPluginInstallsItsCLI(t *testing.T) {
 	sandbox(t)
 	home := os.Getenv("HOME")

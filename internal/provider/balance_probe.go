@@ -131,7 +131,7 @@ func balanceProbeKey(origins []string, key string) string {
 }
 
 // probesBalance is a provider whose balance is looked for: added by hand
-// (no preset, no account, a key), with no Balance URL and no host magpie
+// (no preset, no account, a key), with no Balance URL and no host eipgam
 // knows the query of, and at a relay's address, never a model vendor's own
 // or this computer's.
 func probesBalance(p Provider) bool {
@@ -269,7 +269,7 @@ func probedBalanceURL(p Provider) string {
 	return probedLocked()[balanceProbeKey(probeOrigins(p), p.Key)].url
 }
 
-// BalanceFound is the balance query magpie found for p by itself, with
+// BalanceFound is the balance query eipgam found for p by itself, with
 // its field ("" when none was found yet), and whether p is one it looks
 // for at all: a relay added by hand with no Balance URL. The editor shows
 // it, so a wrong amount can be put right with a Balance URL of the user's.
@@ -285,7 +285,7 @@ func BalanceFound(p Provider) (u, field string, looked bool) {
 	return u, field, true
 }
 
-// BalanceProbeState says whether magpie looks for p's balance query (the
+// BalanceProbeState says whether eipgam looks for p's balance query (the
 // off switch aside, so the editor can offer to turn it on again), and
 // whether it looked and found none.
 func BalanceProbeState(p Provider) (eligible, undetected bool) {

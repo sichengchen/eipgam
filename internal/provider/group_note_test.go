@@ -8,7 +8,7 @@ import (
 // A routing group keeps a note of the user's (ConatusMoon2222 on X): saved
 // as one line, its spaces run together, cut at NoteLongest characters, and
 // cleared by saving it empty. It goes with the group where the group goes:
-// a copy, a group shared to another magpie, a backup's StoredGroups and
+// a copy, a group shared to another eipgam, a backup's StoredGroups and
 // sync's Mirror. A save that changes something else keeps it.
 func TestGroupNote(t *testing.T) {
 	fastHome(t)
@@ -60,7 +60,7 @@ func TestGroupNote(t *testing.T) {
 		t.Fatalf("copy's note %q", got)
 	}
 
-	// shared to another magpie
+	// shared to another eipgam
 	text, err := ShareGroup("work")
 	if err != nil {
 		t.Fatal(err)

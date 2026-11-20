@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/claudetui"
 )
 
 const subscriptionNotice = "You are currently using your subscription to power your Claude Code usage"

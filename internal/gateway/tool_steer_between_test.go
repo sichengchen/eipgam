@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The reporter's turn (wizcheu on X, deepseek-flash at max effort through
@@ -120,7 +120,7 @@ func strictDeepSeek(t *testing.T) (*httptest.Server, func() []string) {
 
 // A Claude Code request whose {role: "system"} message stands between a
 // call and its result reaches DeepSeek with the message after the result,
-// the call answered by its real result, never a made-up one: magpie read
+// the call answered by its real result, never a made-up one: eipgam read
 // the system message as the turn after the call, gave the call a
 // synthetic result there and the real one as text, and DeepSeek refused
 // every later request of the conversation, "400 due to tool use

@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Which of Codex's own models magpie serves on the user's ChatGPT account
+// Which of Codex's own models eipgam serves on the user's ChatGPT account
 // is kept while nothing the catalog is built from changed: Codex's
 // options, asked per field of its Drift on every drift poll, built
 // Codex's whole catalog each time for these few names. A provider saved

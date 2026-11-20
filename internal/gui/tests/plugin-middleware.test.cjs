@@ -2,7 +2,7 @@
 // Gateway middleware plugins on the Installed tab: a plugin that is only
 // middleware says what it runs (its hooks, calls, µs each, failures with
 // the last error in the tip) where a subscription plugin says what it
-// signs in to, and never "Signs in to nothing magpie can use"; one that
+// signs in to, and never "Signs in to nothing eipgam can use"; one that
 // didn't load says why in red; one switched off says Off alone; a plugin
 // that is both keeps its sign-in line and gains the middleware line.
 // English and Chinese; the API is faked here.
@@ -58,7 +58,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const view = page.locator("#view-plugins");
         await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: w.installed }).click();
         const row = (name) => view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: name }) });
@@ -105,8 +105,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const I = {
-      en: { kinds: ["All", "Subscriptions", "Middleware"], a: "Write a plugin", url: "https://usemagpie.ai/docs/plugins", trust: /sign-in or your requests/ },
-      zh: { kinds: ["全部", "订阅", "中间件"], a: "编写插件", url: "https://usemagpie.ai/docs/zh/plugins", trust: /登录或看到你的请求/ },
+      en: { kinds: ["All", "Subscriptions", "Middleware"], a: "Write a plugin", url: "https://github.com/sichengchen/eipgam/blob/main/docs/subsystems/plugin-runtime.md", trust: /sign-in or your requests/ },
+      zh: { kinds: ["全部", "订阅", "中间件"], a: "编写插件", url: "https://github.com/sichengchen/eipgam/blob/main/docs/subsystems/plugin-runtime.md", trust: /登录或看到你的请求/ },
     };
     for (const lang of ["en", "zh"]) {
       await t.test(lang, async () => {
@@ -122,7 +122,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           { package: "@magpie-community/provider-x", name: "X plan", community: true, providers: ["x"], summary: { en: "Signs in to X" } },
           { package: "@magpie-community/mw-alias", name: "Alias", kind: "middleware", community: true, summary: { en: "Renames models" } },
         ] } }));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const strip = page.locator("#view-plugins .pm-bar .pm-kinds .opt");
         await strip.first().waitFor();
         // each kind with how many there are: the name before its count
@@ -167,7 +167,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           pluginState.plugins[0].options = body.options;
           return r.fulfill({ json: pluginState });
         });
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const view = page.locator("#view-plugins");
         await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: w.installed }).click();
         const row = (name) => view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: name }) });
@@ -242,7 +242,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.route("**/*", server(lang));
         await page.route("**/api/plugins/listings", (r) => r.fulfill({ json: { listings } }));
         await page.route("**/api/plugins/market", (r) => r.fulfill({ json: { listings, state } }));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const secs = page.locator("#view-plugins .pm-sec");
         await secs.first().waitFor();
         const heads = (await secs.locator(".pm-sechead h3").allInnerTexts()).map((x) => x.trim());

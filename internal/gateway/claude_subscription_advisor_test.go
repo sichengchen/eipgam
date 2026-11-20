@@ -9,16 +9,16 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Claude Code's /advisor through a Claude subscription (recih on X,
-// #6804, #6813): the run's Claude Code is offered magpie's tools only, so
+// #6804, #6813): the run's Claude Code is offered eipgam's tools only, so
 // the advisor, Anthropic's server tool, was left out of the request and
-// its instructions said to be void. magpie now runs it as it does for a
+// its instructions said to be void. eipgam now runs it as it does for a
 // vendor's model: it is read as the model's own advisor, its instructions
-// kept as Claude Code wrote them, and an advisor magpie doesn't serve is
+// kept as Claude Code wrote them, and an advisor eipgam doesn't serve is
 // still left out.
 func TestBridgeRequestKeepsTheAdvisor(t *testing.T) {
 	advisedSetup(t)
@@ -61,7 +61,7 @@ func allText(req *Request) string {
 	return b.String()
 }
 
-// The run's Claude Code calls magpie's advisor tool: magpie asks the
+// The run's Claude Code calls eipgam's advisor tool: eipgam asks the
 // advisor model, hands the advice back to the run, and tells the client
 // as Anthropic's server does, a server_tool_use and an
 // advisor_tool_result with the advice, never a call of a tool of its own.
@@ -81,7 +81,7 @@ func TestClaudeTUIAdvisorAnsweredHere(t *testing.T) {
 	var res []mcpToolResult
 	for i := range advisorUses + 1 {
 		id := "toolu_adv" + itoa(i)
-		c.write(tuiRow("msg_a"+itoa(i), `{"type":"tool_use","id":"`+id+`","name":"mcp__magpie__advisor","input":{}}`, "tool_use", 2))
+		c.write(tuiRow("msg_a"+itoa(i), `{"type":"tool_use","id":"`+id+`","name":"mcp__eipgam__advisor","input":{}}`, "tool_use", 2))
 		res = append(res, c.adviceCall(id))
 	}
 	c.write(tuiRow("msg_end", `{"type":"text","text":"Done."}`, "end_turn", 2), tuiDone)
@@ -164,7 +164,7 @@ func TestClaudeTUIAdvisorHeldToTheCallersKey(t *testing.T) {
 	held := access.WithIdentity(context.Background(), access.Identity{KeyID: "friend", KeyName: "Friend", Models: []string{"claude/claude-sonnet-5-5"}})
 	c.run.adviseOn(held, q, New().adviceRound)
 	c.write(tuiRow("msg_a0", `{"type":"text","text":"Let me ask."}`, "tool_use", 4))
-	c.write(tuiRow("msg_a1", `{"type":"tool_use","id":"toolu_adv0","name":"mcp__magpie__advisor","input":{}}`, "tool_use", 2))
+	c.write(tuiRow("msg_a1", `{"type":"tool_use","id":"toolu_adv0","name":"mcp__eipgam__advisor","input":{}}`, "tool_use", 2))
 	res := c.adviceCall("toolu_adv0")
 	c.write(tuiRow("msg_end", `{"type":"text","text":"Done."}`, "end_turn", 2), tuiDone)
 	if !res.IsError || res.Content[0]["text"] == "Check the tests first." {
@@ -192,7 +192,7 @@ func TestClaudeRunSearchAskedAsTheCaller(t *testing.T) {
 	friend := access.Identity{KeyID: "friend", KeyName: "Friend", Limit: &access.Limit{Period: "day", Tokens: 700}}
 	q := &Request{Model: "claude/claude-sonnet-5-5"}
 	run.adviseOn(access.WithIdentity(context.Background(), friend), q, New().adviceRound)
-	r := httptest.NewRequest("POST", "/", strings.NewReader(`{"tool_call_id":"toolu_s","name":"web_search","arguments":{"query":"magpie"}}`))
+	r := httptest.NewRequest("POST", "/", strings.NewReader(`{"tool_call_id":"toolu_s","name":"web_search","arguments":{"query":"eipgam"}}`))
 	r.SetPathValue("token", "run")
 	rec := httptest.NewRecorder()
 	b.mcpCall(rec, r)

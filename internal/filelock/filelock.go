@@ -1,5 +1,5 @@
 // Package filelock keeps a change to a file one at a time across the
-// magpies on a computer: the gateway that runs all day, and each magpie
+// magpies on a computer: the gateway that runs all day, and each eipgam
 // run from a terminal or a script meanwhile.
 package filelock
 
@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// Wait is how long Mutex waits for another magpie to let go, before it
-// goes on without the lock, as it did before there was one: a magpie
+// Wait is how long Mutex waits for another eipgam to let go, before it
+// goes on without the lock, as it did before there was one: a eipgam
 // stuck holding it (or two magpies each waiting on a lock the other
 // holds) never hangs every other.
 const Wait = 10 * time.Second
@@ -54,7 +54,7 @@ func Lock(path string, wait time.Duration) (unlock func(), held bool) {
 		}
 		if time.Since(start) > wait {
 			f.Close()
-			log.Printf("%s: another magpie held it for %v; going on without it", path, wait)
+			log.Printf("%s: another eipgam held it for %v; going on without it", path, wait)
 			return func() {}, false
 		}
 		time.Sleep(5 * time.Millisecond)
@@ -71,7 +71,7 @@ type Mutex struct {
 	Path func() string
 	// Locked, when set, is called once both locks are held: to have the
 	// file guarded read afresh, not from what was parsed of it before
-	// another magpie wrote it.
+	// another eipgam wrote it.
 	Locked func()
 	unlock func()
 }

@@ -9,14 +9,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // twoEyed is eyed with a second provider whose model sees, other/bigeye,
 // on an upstream of its own; vision names the Image recognition model
-// picked in Settings ("" for magpie's own pick).
+// picked in Settings ("" for eipgam's own pick).
 func twoEyed(t *testing.T, vision string) (*Server, *eyeUp, *eyeUp) {
 	t.Helper()
 	s, u := eyed(t)
@@ -89,7 +89,7 @@ func TestPickedDescriberThatFailsGivesWayToTheNextThatSees(t *testing.T) {
 	}
 }
 
-// magpie's own pick failing gives way to its next one too.
+// eipgam's own pick failing gives way to its next one too.
 func TestAutoDescriberThatFailsGivesWayToTheNext(t *testing.T) {
 	s, u, u2 := twoEyed(t, "")
 	first, next, down := AutoVision(), "other/bigeye", u

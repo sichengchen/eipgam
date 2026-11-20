@@ -11,7 +11,7 @@
 
   function from(r) {
     switch (r.from) {
-      case "magpie": return t("set here");
+      case "eipgam": return t("set here");
       case "env": return t("from {name}", { name: r.var });
       case "shell": return t("from your shell's {name}", { name: r.var });
       case "bunfig": case "npmrc": return t("from {name}", { name: r.path });
@@ -50,8 +50,8 @@
     box.replaceChildren(el("span", "pm-mlabel", t("npm registry")));
     if (!editing) {
       box.append(el("code", "pm-reg-url", r.url), el("span", "pm-reg-from", from(r)), el("span", "grow"),
-        button(t("Change"), "text", () => { editing = true; draft = r.from === "magpie" ? r.url : ""; draw(); }));
-      if (r.from === "magpie") {
+        button(t("Change"), "text", () => { editing = true; draft = r.from === "eipgam" ? r.url : ""; draw(); }));
+      if (r.from === "eipgam") {
         const def = button(t("Use default"), "text", () => set(""));
         def.title = t("Use the registry your .npmrc, .bunfig.toml or shell names, or npm's own");
         box.append(def);

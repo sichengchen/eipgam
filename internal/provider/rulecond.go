@@ -204,7 +204,7 @@ func (c Cond) Holds(q RuleRequest) bool {
 	case "last":
 		return c.holdsIn(q.Last)
 	}
-	return false // a condition this magpie doesn't know never holds
+	return false // a condition this eipgam doesn't know never holds
 }
 
 // holdsIn is a text condition over texts: it holds when one of them has

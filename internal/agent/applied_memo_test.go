@@ -6,21 +6,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // appliedOf is asked for every agent on every drift poll: an unchanged
-// applied.json is parsed once, and magpie's own record is read at once.
+// applied.json is parsed once, and eipgam's own record is read at once.
 func TestAppliedOfParsesAnUnchangedFileOnce(t *testing.T) {
 	stashHome(t)
 	p := appliedPath()
 	os.MkdirAll(filepath.Dir(p), 0o755)
-	if err := os.WriteFile(p, []byte(`{"codex":{"fields":{"model":"magpie/a"}}}`), 0o600); err != nil {
+	if err := os.WriteFile(p, []byte(`{"codex":{"fields":{"model":"eipgam/a"}}}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	old := time.Now().Add(-time.Minute)
 	os.Chtimes(p, old, old)
-	if got := appliedOf("codex").Fields["model"]; got != "magpie/a" {
+	if got := appliedOf("codex").Fields["model"]; got != "eipgam/a" {
 		t.Fatalf("model = %q", got)
 	}
 	release := filememo.Hold()
@@ -29,8 +29,8 @@ func TestAppliedOfParsesAnUnchangedFileOnce(t *testing.T) {
 	if n := testing.AllocsPerRun(20, func() { appliedOf("codex") }); n > 2 {
 		t.Fatalf("%v allocations for an unchanged file", n)
 	}
-	record("codex", "model", "magpie/b")
-	if got := appliedOf("codex").Fields["model"]; got != "magpie/b" {
+	record("codex", "model", "eipgam/b")
+	if got := appliedOf("codex").Fields["model"]; got != "eipgam/b" {
 		t.Fatalf("after record, model = %q", got)
 	}
 	os.Remove(p)

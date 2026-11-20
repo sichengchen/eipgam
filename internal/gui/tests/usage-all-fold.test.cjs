@@ -85,7 +85,7 @@ async function open(browser, lang, tray, url, width, height) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, tray));
-  await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("magpie.quotaRange", "off"); sessionStorage.setItem("set", "1"); } } catch {} });
+  await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("eipgam.quotaRange", "off"); sessionStorage.setItem("set", "1"); } } catch {} });
   await page.goto(url);
   return { page, errors };
 }
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       t.after(() => browser.close());
 
       // the Usage page: Codex's card after three, before Claude's
-      const { page, errors } = await open(browser, lang, "window", "http://magpie.test/?view=usage", 440, 520);
+      const { page, errors } = await open(browser, lang, "window", "http://eipgam.test/?view=usage", 440, 520);
       const card = '#subscriptionUsage > [data-key="codex"]';
       const strip = `${card} .quota-all`;
       const chev = page.locator(`${strip} .quota-all-fold`);
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForSelector(strip);
       assert.equal(await chev.getAttribute("aria-expanded"), "false");
       assert.equal(await page.locator(`${card} .subscription-account`).count(), 0);
-      assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("magpie.usageAllFolded"))), ["codex"]);
+      assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("eipgam.usageAllFolded"))), ["codex"]);
 
       // the chevron unfolds; from the keyboard it folds again and keeps focus
       await chev.click();
@@ -155,11 +155,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.ok(await page.evaluate((s) => document.activeElement === document.querySelector(s + " .quota-all-fold"), strip), "focus stays on the chevron");
       await page.keyboard.press(" ");
       await page.waitForFunction((c) => document.querySelectorAll(c + " .subscription-account").length === 2, card);
-      assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("magpie.usageAllFolded"))), []);
+      assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("eipgam.usageAllFolded"))), []);
       assert.deepEqual(errors, []);
 
       // the tray panel: folded the same way, and a menu bar cell opens them
-      const panel = await open(browser, lang, "panel", "http://magpie.test/?mode=panel", 360, 760);
+      const panel = await open(browser, lang, "panel", "http://eipgam.test/?mode=panel", 360, 760);
       const p = panel.page;
       await p.locator('#ptabs [data-ptab="usage"]').click();
       const pstrip = '#panelQuota .quota-all[data-fold="codex"]';

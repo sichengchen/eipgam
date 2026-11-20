@@ -13,20 +13,20 @@ import (
 )
 
 // The test binary stands in for a program a plugin starts (a headless
-// browser, a daemon) when MAGPIE_HOST_TREE_CHILD names a file: it starts
+// browser, a daemon) when EIPGAM_HOST_TREE_CHILD names a file: it starts
 // one of its own, as a browser starts its GPU and renderer processes, and
 // sits; that one writes its pid to the file and sits too.
 func init() {
-	if f := os.Getenv("MAGPIE_HOST_TREE_CHILD"); f != "" {
+	if f := os.Getenv("EIPGAM_HOST_TREE_CHILD"); f != "" {
 		kid := exec.Command(os.Args[0])
-		kid.Env = append(os.Environ(), "MAGPIE_HOST_TREE_CHILD=", "MAGPIE_HOST_TREE_GRANDCHILD="+f)
+		kid.Env = append(os.Environ(), "EIPGAM_HOST_TREE_CHILD=", "EIPGAM_HOST_TREE_GRANDCHILD="+f)
 		if kid.Start() != nil {
 			os.Exit(1)
 		}
 		time.Sleep(90 * time.Second)
 		os.Exit(0)
 	}
-	if f := os.Getenv("MAGPIE_HOST_TREE_GRANDCHILD"); f != "" {
+	if f := os.Getenv("EIPGAM_HOST_TREE_GRANDCHILD"); f != "" {
 		_ = os.WriteFile(f+".tmp", []byte(strconv.Itoa(os.Getpid())), 0o600)
 		_ = os.Rename(f+".tmp", f)
 		time.Sleep(90 * time.Second)
@@ -56,7 +56,7 @@ func TestHostEndedEndsWhatItsPluginStarted(t *testing.T) {
 				t.Fatal(err)
 			}
 			q := func(s string) string { b, _ := json.Marshal(s); return string(b) }
-			spawn := "Bun.spawn({ cmd: [" + q(self) + "], env: { ...process.env, MAGPIE_HOST_TREE_CHILD: " + q(pidFile) + " }, stdout: \"ignore\", stderr: \"ignore\" })\n"
+			spawn := "Bun.spawn({ cmd: [" + q(self) + "], env: { ...process.env, EIPGAM_HOST_TREE_CHILD: " + q(pidFile) + " }, stdout: \"ignore\", stderr: \"ignore\" })\n"
 			if how == "killed" {
 				// a host that doesn't leave when its input closes, so
 				// stop kills it once stopWait has passed

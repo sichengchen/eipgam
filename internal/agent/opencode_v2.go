@@ -5,7 +5,7 @@ import (
 	"errors"
 	"maps"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // OpenCode 2 reads OpenCode 1's config and turns it into its own words as
@@ -13,8 +13,8 @@ import (
 // into providers, small_model into agents.title.model. A model's reasoning,
 // which OpenCode 2 doesn't read, it drops with a WARN on every load, one per
 // model ("omitted unsupported legacy setting", kaising00 on X). Where the
-// OpenCode the config is for is 2.x, magpie writes the file in OpenCode 2's
-// words: magpie's provider under providers only (openCodeNative), its small
+// OpenCode the config is for is 2.x, eipgam writes the file in OpenCode 2's
+// words: eipgam's provider under providers only (openCodeNative), its small
 // model under agents.title.model. For OpenCode 1, or a version not known,
 // it writes OpenCode 1's, which every OpenCode reads.
 
@@ -33,23 +33,23 @@ func openCodeTwo(at place) bool {
 // with, which OpenCode 1's small_model became.
 const openCodeTitleKey = "agents.title.model"
 
-// ocFile is an OpenCode config magpie writes its provider into: two when
-// the OpenCode reading it is 2.x, block magpie's provider in OpenCode 1's
+// ocFile is an OpenCode config eipgam writes its provider into: two when
+// the OpenCode reading it is 2.x, block eipgam's provider in OpenCode 1's
 // words (magpieProviderJSONAt).
 type ocFile struct {
 	path     string
 	two      bool
-	discover bool // the OpenCode loads magpie's plugin (opencode_discover.go)
+	discover bool // the OpenCode loads eipgam's plugin (opencode_discover.go)
 	block    func() any
 }
 
-// sync brings magpie's provider in the file up to date, and writes it
-// where it is missing when put (a model of magpie's is chosen there). For
-// OpenCode 2 a provider of magpie's under provider, and a small_model of
-// magpie's, move to OpenCode 2's words first.
+// sync brings eipgam's provider in the file up to date, and writes it
+// where it is missing when put (a model of eipgam's is chosen there). For
+// OpenCode 2 a provider of eipgam's under provider, and a small_model of
+// eipgam's, move to OpenCode 2's words first.
 //
-// Where the OpenCode finds magpie's models itself (discover), the file has
-// magpie's provider without them, and magpie's plugin beside it.
+// Where the OpenCode finds eipgam's models itself (discover), the file has
+// eipgam's provider without them, and eipgam's plugin beside it.
 func (f ocFile) sync(put bool) error {
 	var err error
 	if f.discover {
@@ -63,8 +63,8 @@ func (f ocFile) sync(put bool) error {
 	return errors.Join(err, f.pluginSynced())
 }
 
-// syncFound is sync for an OpenCode that finds magpie's models itself:
-// magpie's models in the file go first, leaving what the user said of
+// syncFound is sync for an OpenCode that finds eipgam's models itself:
+// eipgam's models in the file go first, leaving what the user said of
 // them (modelsLeft), and the provider is written without them.
 func (f ocFile) syncFound(put bool) error {
 	moved := unstashPeek(openCodeDiscoverKey(f.path)) != ""
@@ -94,7 +94,7 @@ func (f ocFile) syncFound(put bool) error {
 	return listed.syncListed(put)
 }
 
-// syncListed is sync with magpie's models as block has them.
+// syncListed is sync with eipgam's models as block has them.
 func (f ocFile) syncListed(put bool) error {
 	if !f.two {
 		v1 := openCodeKept(f.path, f.block)
@@ -122,7 +122,7 @@ func (f ocFile) syncListed(put bool) error {
 }
 
 // outputsKept is block with a limit.output the user typed into one of
-// magpie's models kept (openCodeOutputsKept).
+// eipgam's models kept (openCodeOutputsKept).
 func (f ocFile) outputsKept() any {
 	v := f.block()
 	if b, ok := v.(map[string]any); ok {
@@ -133,9 +133,9 @@ func (f ocFile) outputsKept() any {
 	return v
 }
 
-// moveProvider moves magpie's provider under provider to providers, in
+// moveProvider moves eipgam's provider under provider to providers, in
 // OpenCode 2's words, as OpenCode 2 itself reads it (openCodeFromV1): what
-// the user added to it goes along. Where providers has magpie's already,
+// the user added to it goes along. Where providers has eipgam's already,
 // OpenCode 2 reads that one whole and not the other (mergeMaps), so the
 // other goes.
 func (f ocFile) moveProvider() error {
@@ -160,7 +160,7 @@ func (f ocFile) moveProvider() error {
 	return f.dropEmpty("provider")
 }
 
-// moveSmall moves a small_model of magpie's to agents.title.model, where
+// moveSmall moves a small_model of eipgam's to agents.title.model, where
 // OpenCode 2 reads it, unless the title agent has a model of its own
 // already, which OpenCode 2 reads instead.
 func (f ocFile) moveSmall() error {
@@ -247,9 +247,9 @@ func openCodeSelection(raw string) string {
 // migrateStandardProvider): npm is package "aisdk:<npm>", api a baseURL in
 // settings, options settings but for headers and body, which are the
 // provider's own, and setCacheKey, which is compatibility's
-// supportsPromptCacheKey. Of a model it keeps the parts magpie's models
+// supportsPromptCacheKey. Of a model it keeps the parts eipgam's models
 // leave to the user, as openCodeNativeKept reads them: its name, limit and
-// variants (openCodeNativeVariant); magpie writes the rest of its models
+// variants (openCodeNativeVariant); eipgam writes the rest of its models
 // whole. What OpenCode 2 doesn't read of OpenCode 1's (id, whitelist,
 // blacklist) goes, as it goes there.
 func openCodeFromV1(raw []byte) (orderedJSON, bool) {

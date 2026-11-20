@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// ysm119 on Discord (#4550): after magpie restarted the Codex app's
+// ysm119 on Discord (#4550): after eipgam restarted the Codex app's
 // app-server, a signed-in ChatGPT app showed "ChatGPT hit a snag" till it
-// was quit and opened again. magpie reopens it itself when nothing runs;
+// was quit and opened again. eipgam reopens it itself when nothing runs;
 // where it couldn't (Linux, an app that didn't quit), the Agents row says
 // to (appSnag), over what it would say of its provider. Every language,
 // both engines, wide and narrow. No backend, the API is faked.
@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, true));
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         const st = page.locator(`${row} .ag-st-t`);
         await st.waitFor();
         assert.equal((await st.textContent()).trim(), words[lang]);
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const page = await browser.newPage({ viewport: { width: 980, height: 800 } });
     await page.route("**/*", serve("en", undefined));
-    await page.goto("http://magpie.test/?view=agents");
+    await page.goto("http://eipgam.test/?view=agents");
     await page.locator(`${row} .ag-st-t`).waitFor();
     assert.doesNotMatch(await page.locator(`${row} .ag-st-t`).textContent(), /hit an error/);
   });

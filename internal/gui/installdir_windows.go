@@ -15,8 +15,8 @@ import (
 	ole "github.com/go-ole/go-ole"
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // askInstallFolder has update.Settle ask where to install, in the
@@ -25,7 +25,7 @@ import (
 // installed copy in this one's place. So a start no one can answer (a
 // CI runner, a service, a start over SSH) is never asked, or it would
 // wait on a dialog no one sees with no gateway behind it: v0.1.4160 to
-// v0.1.4166's release check started dist\magpie-windows-amd64.exe, which
+// v0.1.4166's release check started dist\eipgam-windows-amd64.exe, which
 // 14807bcf2 made a download to ask about, and the gateway never came
 // up. Unasked, a copy kept outside Downloads runs where it is and
 // nothing is recorded for it; one in Downloads installs as it did

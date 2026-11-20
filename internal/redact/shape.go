@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A key can go to the vendor as a made-up key of its own form instead of
@@ -411,7 +411,7 @@ func standInOf(v string) string {
 // took it for the public address it is when asked what was wrong. A name
 // with no dot in it is no one's on the internet, so a stand-in the vendor
 // tries itself reaches nobody. The same address gets the same stand-in
-// every turn while magpie runs, and two addresses never share one; it is
+// every turn while eipgam runs, and two addresses never share one; it is
 // put back only as a whole name (wholeAddr).
 
 // ipStandInHead starts every address's stand-in, and ipStandInLen

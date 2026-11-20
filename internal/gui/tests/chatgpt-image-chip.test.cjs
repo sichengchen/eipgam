@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, saves));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           const editor = page.locator("#modal:not([hidden]) .editor");
           const chips = editor.locator(".mchips.drawers .mchip");
           const texts = () => chips.evaluateAll((cs) => cs.map((c) => [c.textContent, c.title]));

@@ -15,7 +15,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // gheName is an enterprise's subdomain of ghe.com: one DNS label.
@@ -54,7 +54,7 @@ var copilotGHEOrigin = func(host, sub string) string {
 }
 
 // copilotHostOf is an account's host from the Copilot CLI's
-// ("https://acme.ghe.com"); ok is false for one magpie can't serve.
+// ("https://acme.ghe.com"); ok is false for one eipgam can't serve.
 func copilotHostOf(cli string) (string, bool) {
 	if cli == "" {
 		return "", true

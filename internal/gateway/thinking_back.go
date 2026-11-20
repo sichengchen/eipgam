@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // thinkingBackRefusal is DeepSeek's model asking for an earlier turn's
@@ -23,7 +23,7 @@ var thinkingBackRefusal = lazyre.New("(?i)`?(?:content\\[\\]\\.thinking|reasonin
 // message's reasoning in other words than thinkingBackRefusal's:
 // Reflection's Beam on Command Code, 400 "Missing required parameter:
 // 'messages[1].reasoning_content'" for a second turn whose first reply
-// has none (EDwinpzy on Discord, magpie 0.1.2717), and the like that name
+// has none (EDwinpzy on Discord, eipgam 0.1.2717), and the like that name
 // reasoning_content as missing or required. A request missing what every
 // API requires ("Missing required parameter: 'messages'") isn't one.
 var reasoningBackWords = lazyre.New(`(?i)\breasoning_content\b[^"]{0,40}\b(?:is (?:missing|required)|must be (?:passed|provided|included))|\b(?:missing|required)\b[^"]{0,80}\breasoning_content\b`)

@@ -63,13 +63,13 @@ func TestIsGit(t *testing.T) {
 	}
 }
 
-// The test binary stands in for bun when MAGPIE_FAKE_BUN is set: add,
+// The test binary stands in for bun when EIPGAM_FAKE_BUN is set: add,
 // update and remove as bun does them — a git spec fetched from local
-// repositories ($MAGPIE_FAKE_GITHUB/owner/repo.git for GitHub's), and, like
+// repositories ($EIPGAM_FAKE_GITHUB/owner/repo.git for GitHub's), and, like
 // bun, keeping the commit its lock has when a spec is added again; an npm
 // one put at node_modules/<its name>, at the version its spec names.
 func init() {
-	if os.Getenv("MAGPIE_FAKE_BUN") == "1" {
+	if os.Getenv("EIPGAM_FAKE_BUN") == "1" {
 		if err := fakeBun(os.Args[1:]); err != nil {
 			fmt.Fprintln(os.Stderr, "fake bun:", err)
 			os.Exit(1)
@@ -79,7 +79,7 @@ func init() {
 }
 
 func fakeBun(args []string) error {
-	if f, err := os.OpenFile(os.Getenv("MAGPIE_FAKE_BUN_LOG"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err == nil {
+	if f, err := os.OpenFile(os.Getenv("EIPGAM_FAKE_BUN_LOG"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err == nil {
 		fmt.Fprintln(f, strings.Join(args, " "))
 		f.Close()
 	}
@@ -114,7 +114,7 @@ func fakeBun(args []string) error {
 			}
 		}
 		// a package npm doesn't have, as Bun 1.4.4 says it: nothing written
-		if n := os.Getenv("MAGPIE_FAKE_BUN_NPM404"); n != "" && !IsPath(spec) && Name(spec) == n {
+		if n := os.Getenv("EIPGAM_FAKE_BUN_NPM404"); n != "" && !IsPath(spec) && Name(spec) == n {
 			fmt.Println("bun add v1.4.4 (38afee6c8)")
 			fmt.Println("Resolving dependencies")
 			fmt.Println("Resolved, downloaded and extracted [1]")
@@ -164,7 +164,7 @@ func fakeBun(args []string) error {
 		}
 		deps[name], lock[name] = spec, commit
 	case "update":
-		if os.Getenv("MAGPIE_FAKE_BUN_STUCK") == "1" {
+		if os.Getenv("EIPGAM_FAKE_BUN_STUCK") == "1" {
 			return nil // as bun whose cache's clone of the repository is stale: the lock's commit stays (#2954)
 		}
 		for _, n := range args[2:] {
@@ -178,7 +178,7 @@ func fakeBun(args []string) error {
 			lock[name] = commit
 		}
 	case "remove":
-		if os.Getenv("MAGPIE_FAKE_BUN_NOREMOVE") == "1" {
+		if os.Getenv("EIPGAM_FAKE_BUN_NOREMOVE") == "1" {
 			return errors.New("error: lockfile had changes, but lockfile is frozen")
 		}
 		for _, n := range args[2:] {
@@ -205,9 +205,9 @@ func fakeBun(args []string) error {
 	// as bun does on Windows with a file of a package's copy held open:
 	// package.json written, then every command fails over that package
 	// while it is a dependency (CHENGJIAHEGOXIS's agency-agents)
-	// ($MAGPIE_FAKE_BUN_BUSY_SAYS: Bun's whole output instead)
-	if n := os.Getenv("MAGPIE_FAKE_BUN_BUSY"); n != "" && deps[n] != "" {
-		if says := os.Getenv("MAGPIE_FAKE_BUN_BUSY_SAYS"); says != "" {
+	// ($EIPGAM_FAKE_BUN_BUSY_SAYS: Bun's whole output instead)
+	if n := os.Getenv("EIPGAM_FAKE_BUN_BUSY"); n != "" && deps[n] != "" {
+		if says := os.Getenv("EIPGAM_FAKE_BUN_BUSY_SAYS"); says != "" {
 			fmt.Print(says)
 			return errors.New("exit 1")
 		}
@@ -223,8 +223,8 @@ func fakeBun(args []string) error {
 // tarball (@T@sha512-<32 hex>@@@1) when there is none, and copied from
 // that entry, whatever it holds. A copy over a folder holding .held (a
 // file of the old copy held open, as on Windows) isn't made, and held
-// says so; $MAGPIE_FAKE_BUN_HELD=1 is a copy it can never make (the
-// reporter's, v0.1.4241), and $MAGPIE_FAKE_BUN_LOSE a file that never
+// says so; $EIPGAM_FAKE_BUN_HELD=1 is a copy it can never make (the
+// reporter's, v0.1.4241), and $EIPGAM_FAKE_BUN_LOSE a file that never
 // reaches the copy. A copy whose .bun-tag is the tarball's integrity is
 // taken as installed and never copied over.
 func fakeDistAdd(path string) (name string, held bool, err error) {
@@ -275,7 +275,7 @@ func fakeDistAdd(path string) (name string, held bool, err error) {
 	if tag, err := os.ReadFile(filepath.Join(at, ".bun-tag")); err == nil && string(tag) == "sha512-"+base64.StdEncoding.EncodeToString(sum[:]) {
 		return name, false, nil
 	}
-	if _, err := os.Stat(filepath.Join(at, ".held")); err == nil || os.Getenv("MAGPIE_FAKE_BUN_HELD") == "1" {
+	if _, err := os.Stat(filepath.Join(at, ".held")); err == nil || os.Getenv("EIPGAM_FAKE_BUN_HELD") == "1" {
 		return name, true, nil
 	}
 	err = filepath.WalkDir(entry, func(p string, d fs.DirEntry, err error) error {
@@ -283,7 +283,7 @@ func fakeDistAdd(path string) (name string, held bool, err error) {
 			return err
 		}
 		rel, _ := filepath.Rel(entry, p)
-		if rel == os.Getenv("MAGPIE_FAKE_BUN_LOSE") {
+		if rel == os.Getenv("EIPGAM_FAKE_BUN_LOSE") {
 			return nil // a file taken out of every copy as it is made
 		}
 		b, err := os.ReadFile(p)
@@ -340,7 +340,7 @@ func fakeFetch(spec string) (name, commit string, err error) {
 		url = strings.TrimPrefix(s, "git+")
 	case strings.HasPrefix(s, "github:"), strings.HasPrefix(s, "https://github.com/"), IsGit(s) && !strings.Contains(s, ":"):
 		ghRepo = strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(s, "github:"), "https://github.com/"), ".git")
-		url = filepath.Join(os.Getenv("MAGPIE_FAKE_GITHUB"), filepath.FromSlash(ghRepo)+".git")
+		url = filepath.Join(os.Getenv("EIPGAM_FAKE_GITHUB"), filepath.FromSlash(ghRepo)+".git")
 	default:
 		return "", "", fmt.Errorf("fetches only git, not %s", spec)
 	}
@@ -496,7 +496,7 @@ func gitSandbox(t *testing.T) (github, log string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_BUN", self) // never downloaded
+	t.Setenv("EIPGAM_BUN", self) // never downloaded
 	github = filepath.Join(dir, "github")
 	log = filepath.Join(dir, "bun.log")
 	orig := bunCommand
@@ -506,7 +506,7 @@ func gitSandbox(t *testing.T) (github, log string) {
 		}
 		cmd := exec.CommandContext(ctx, self, args...)
 		cmd.Dir = dir
-		cmd.Env = append(os.Environ(), "MAGPIE_FAKE_BUN=1", "MAGPIE_FAKE_GITHUB="+github, "MAGPIE_FAKE_BUN_LOG="+log, "BUN_INSTALL_CACHE_DIR="+installCacheDir())
+		cmd.Env = append(os.Environ(), "EIPGAM_FAKE_BUN=1", "EIPGAM_FAKE_GITHUB="+github, "EIPGAM_FAKE_BUN_LOG="+log, "BUN_INSTALL_CACHE_DIR="+installCacheDir())
 		return cmd
 	}
 	t.Cleanup(func() { bunCommand = orig })

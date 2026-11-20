@@ -17,7 +17,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/netproxy"
 )
 
 // biubiu8802 on X: a proxy that cuts every HTTP/2 stream part way, while
@@ -65,7 +65,7 @@ func TestDownloadBrokenOverHTTP2TriesHTTP1(t *testing.T) {
 	client = &http.Client{Transport: netproxy.Dispatch(tr)}
 	t.Cleanup(func() { client = old; tr.CloseIdleConnections() })
 
-	path := filepath.Join(t.TempDir(), "magpie.new")
+	path := filepath.Join(t.TempDir(), "eipgam.new")
 	if err := download(context.Background(), Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatalf("download: %v (asked %q)", err, asked)
 	}

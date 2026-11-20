@@ -20,7 +20,7 @@ import (
 func TestWSLHangHoldsNoRequest(t *testing.T) {
 	for _, hang := range []string{"-l --running -q", "-d Ubuntu", "stat"} {
 		t.Run(hang, func(t *testing.T) {
-			root, home := codexDistroHome(t, "model_provider = \"magpie\"\nmodel = \"relay/main\"\n")
+			root, home := codexDistroHome(t, "model_provider = \"eipgam\"\nmodel = \"relay/main\"\n")
 			os.MkdirAll(filepath.Join(home, ".copilot"), 0o755)
 			fakeWSL(t, "Ubuntu\r\n", "Ubuntu\r\n", map[string]string{
 				"Ubuntu": "home:/home/me\ndir:.codex\ndir:.copilot\nroute:default via 172.20.0.1 dev eth0\n",

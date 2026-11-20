@@ -6,15 +6,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 const mime = "x-scheme-handler/" + Scheme
 
-// magpieEntry is the desktop entry magpie v0.1.3981 to v0.1.4454 wrote for
+// magpieEntry is the desktop entry eipgam v0.1.3981 to v0.1.4454 wrote for
 // ccswitch:// and made the default when it had none.
-const magpieEntry = "magpie-ccswitch.desktop"
+const magpieEntry = "eipgam-ccswitch.desktop"
 
 // executable is this program's path; tests stand in for it.
 var executable = os.Executable
@@ -23,7 +23,7 @@ var executable = os.Executable
 var start = func(argv []string) error { return proc.StartReaped(proc.Command(argv[0], argv[1:]...)) }
 
 // forward runs the Exec of CC Switch's desktop entry with the link. Then,
-// when the desktop's default for ccswitch:// is magpie's entry, that entry
+// when the desktop's default for ccswitch:// is eipgam's entry, that entry
 // goes and CC Switch's is made the default.
 func forward(link string) error {
 	id, exec := entry()
@@ -75,7 +75,7 @@ func dataDirs() []string {
 }
 
 // entry is the id and Exec of the desktop entry that handles ccswitch://
-// other than magpie's: one whose Exec takes a URL (cc-switch-handler.desktop)
+// other than eipgam's: one whose Exec takes a URL (cc-switch-handler.desktop)
 // before one that doesn't ("CC Switch.desktop" of the package, whose Exec
 // is then given the link as its last argument). An entry earlier in the
 // data folders hides one of the same id later.
@@ -90,7 +90,7 @@ func entry() (id, exec string) {
 				continue
 			}
 			seen[name] = true
-			if strings.HasPrefix(name, "magpie") {
+			if strings.HasPrefix(name, "eipgam") {
 				continue
 			}
 			x, ok := handles(f)
@@ -211,7 +211,7 @@ func words(s string) []string {
 }
 
 // ours reports whether a desktop entry runs this executable, or one that
-// is gone: magpie's own, not another magpie's.
+// is gone: eipgam's own, not another eipgam's.
 func ours(path string) bool {
 	b, err := os.ReadFile(path)
 	if err != nil {

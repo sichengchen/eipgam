@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Codex's effort field reads the models magpie keeps for it, not a copy
+// Codex's effort field reads the models eipgam keeps for it, not a copy
 // of the whole list on each look: the window asks it on every poll.
 func TestCodexEffortOptionsReadTheKeptList(t *testing.T) {
-	home, _ := codexHome(t, `{"OPENAI_API_KEY":"sk-x"}`, "model = \"fake/m1\"\nmodel_provider = \"magpie\"\n")
+	home, _ := codexHome(t, `{"OPENAI_API_KEY":"sk-x"}`, "model = \"fake/m1\"\nmodel_provider = \"eipgam\"\n")
 	var ids []string
 	for i := range 400 {
 		ids = append(ids, fmt.Sprintf("m%d", i))

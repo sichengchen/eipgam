@@ -2,8 +2,8 @@ import { GATEWAY, KEY } from "./config.js";
 
 const zh = /^zh/i.test(navigator.language);
 const say = zh
-  ? { on: "已连接 Magpie", off: "未连接 Magpie", onHint: "通过 Magpie 运行的智能体可以使用这个浏览器里的标签页。它们打开的标签页放在各自的 “Magpie” 分组里。", offHint: "请确认 Magpie 正在运行。扩展会自动重连。", key: "网关密钥", gw: "Magpie 的地址", save: "保存并重连" }
-  : { on: "Connected to Magpie", off: "Not connected to Magpie", onHint: "Agents you run through Magpie can use this browser's tabs. Each puts the tabs it opens in a \"Magpie\" group of its own.", offHint: "Check that Magpie is running. The extension reconnects by itself.", key: "Gateway key", gw: "Magpie's address", save: "Save and reconnect" };
+  ? { on: "已连接 eipgam", off: "未连接 eipgam", onHint: "通过 eipgam 运行的智能体可以使用这个浏览器里的标签页。它们打开的标签页放在各自的 “eipgam” 分组里。", offHint: "请确认 eipgam 正在运行。扩展会自动重连。", key: "网关密钥", gw: "eipgam 的地址", save: "保存并重连" }
+  : { on: "Connected to eipgam", off: "Not connected to eipgam", onHint: "Agents you run through eipgam can use this browser's tabs. Each puts the tabs it opens in a \"eipgam\" group of its own.", offHint: "Check that eipgam is running. The extension reconnects by itself.", key: "Gateway key", gw: "eipgam's address", save: "Save and reconnect" };
 
 async function show() {
   const { status } = await chrome.storage.session.get("status");

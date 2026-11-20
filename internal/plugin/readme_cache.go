@@ -9,8 +9,7 @@ import (
 )
 
 // A Discover page's README, from the copy the community repo's `tagged`
-// workflow keeps (readmes/<key>.md on its dist branch, passed on by
-// usemagpie.ai/api/plugins/readme) before npm or GitHub: npm puts a human
+// workflow keeps (readmes/<key>.md on its dist branch) before npm or GitHub: npm puts a human
 // check in front of some networks and answers a page that isn't the
 // package's, so the README never came (River_WLan on X). Where the copy
 // isn't there, or doesn't answer in readmeCacheWait, npm and GitHub are
@@ -19,7 +18,6 @@ import (
 // readmeBases is where a README's copy is asked, in order; moved by tests.
 // A %s is the package's key (readmeKey), url-escaped as the site wants it.
 var readmeBases = []string{
-	"https://usemagpie.ai/api/plugins/readme?name=%s",
 	"https://raw.githubusercontent.com/magpie-community/plugins/dist/readmes/%s.md",
 }
 
@@ -41,10 +39,10 @@ func readmeKey(spec string) string {
 }
 
 // cachedReadme is the README the workflow kept for spec, false when it has
-// none (or isn't asked: MAGPIE_PLUGIN_CATALOG=off keeps to the vendors).
+// none (or isn't asked: EIPGAM_PLUGIN_CATALOG=off keeps to the vendors).
 func cachedReadme(ctx context.Context, spec string) (string, bool) {
 	key := readmeKey(spec)
-	if key == "" || os.Getenv("MAGPIE_PLUGIN_CATALOG") == "off" {
+	if key == "" || os.Getenv("EIPGAM_PLUGIN_CATALOG") == "off" {
 		return "", false
 	}
 	for _, base := range readmeBases {

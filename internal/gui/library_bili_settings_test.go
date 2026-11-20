@@ -13,7 +13,7 @@ import (
 // The Library's billion-context tab reads and changes billion-context.json
 // through /api/library/bili/settings (@Luxzinw on X): a change is written
 // to bili's own file, its other keys kept, and both answers carry the
-// models magpie can give its summaries, a list even when there are none.
+// models eipgam can give its summaries, a list even when there are none.
 func TestBiliSettingsRoute(t *testing.T) {
 	home := sandboxHome(t)
 	p := filepath.Join(home, "bili", "billion-context.json")

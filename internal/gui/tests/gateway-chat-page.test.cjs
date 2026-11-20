@@ -6,7 +6,7 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
 // The gateway card opens DeepSeek's chat page, which the gateway serves
-// with magpie's models (@yanghonghang on X): at the gateway's own address,
+// with eipgam's models (@yanghonghang on X): at the gateway's own address,
 // and in the browser GUI at the address it is shared on.
 const WORDS = { en: "Chat page", zh: "聊天页面", "zh-TW": "聊天頁面", ja: "チャットページ", de: "Chat-Seite" };
 
@@ -30,7 +30,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const opened = [];
         await page.route("**/*", fixture(locale, "dark", []));
         await page.route("**/api/open", (route) => { opened.push(route.request().postDataJSON().url); return route.fulfill({ status: 204 }); });
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://eipgam.test/?view=gateway");
         const chat = page.locator("#gateway .gw-chat");
         await chat.waitFor();
         assert.equal((await chat.textContent()).trim(), WORDS[locale]);
@@ -58,11 +58,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const page = await (await browser.newContext({ viewport: { width: 1100, height: 800 }, reducedMotion: "reduce" })).newPage();
     t.after(() => browser.close());
     page.setDefaultTimeout(6000);
-    await page.route("**/*", fixture("en", "light", [], { web: true, lan: true, publicURL: "https://magpie.example.com" }));
+    await page.route("**/*", fixture("en", "light", [], { web: true, lan: true, publicURL: "https://eipgam.example.com" }));
     await page.addInitScript(() => { window.__opened = []; window.open = (u) => { window.__opened.push(u); return null; }; });
-    await page.goto("http://magpie.test/?view=gateway");
+    await page.goto("http://eipgam.test/?view=gateway");
     await page.locator("#gateway .gw-chat").click();
     await page.waitForFunction(() => window.__opened.length > 0);
-    assert.deepEqual(await page.evaluate(() => window.__opened), ["https://magpie.example.com/deepseek-chat/"]);
+    assert.deepEqual(await page.evaluate(() => window.__opened), ["https://eipgam.example.com/deepseek-chat/"]);
   });
 }

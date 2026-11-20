@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // hubSandbox is a sandbox with the hub's servers ended when the test is.
@@ -90,7 +90,7 @@ func TestHubToolsAndCalls(t *testing.T) {
 	if res, err := h.Call(ctx, "", "lone", "b", json.RawMessage(`{}`)); err != nil || !strings.HasPrefix(hubText(t, res), "remote ") {
 		t.Fatalf("lone's b for another app: %s %v", res, err)
 	}
-	if _, err := h.Call(ctx, "", "nope", "a", json.RawMessage(`{}`)); err == nil || err.Error() != "it isn't in magpie's Library" {
+	if _, err := h.Call(ctx, "", "nope", "a", json.RawMessage(`{}`)); err == nil || err.Error() != "it isn't in eipgam's Library" {
 		t.Errorf("a server not in the library, for another app: %v", err)
 	}
 	if _, err := h.Call(ctx, "", "fake", "b", json.RawMessage(`{}`)); err == nil || !strings.Contains(err.Error(), "turned off") {
@@ -217,15 +217,15 @@ func TestHubServerDiesAndIdles(t *testing.T) {
 	}
 }
 
-// With the hub on, an agent is given magpie's one entry in place of the
+// With the hub on, an agent is given eipgam's one entry in place of the
 // servers behind it; off, each server's own again. An agent with a
-// "magpie" of its own, or one that can't reach a URL, keeps each server's.
+// "eipgam" of its own, or one that can't reach a URL, keeps each server's.
 func TestHubEntrySwap(t *testing.T) {
 	h := hubSandbox(t)
 	claude := filepath.Join(h, ".claude.json")
 	write(t, claude, `{"numStartups": 3, "mcpServers": {"mine": {"command": "x"}}}`)
 	codex := filepath.Join(h, ".codex/config.toml")
-	write(t, codex, "[mcp_servers.magpie]\ncommand = \"their-own\"\n")
+	write(t, codex, "[mcp_servers.eipgam]\ncommand = \"their-own\"\n")
 	ok(t)(SaveServer("", Server{Name: "fs", Transport: "stdio", Command: "npx", Args: []string{"-y", "fs"}, Agents: []string{"claude", "codex"}}))
 	ok(t)(SaveServer("", Server{Name: "web", Transport: "http", URL: "https://example.com/mcp", Agents: []string{"claude"}}))
 	entries := func(id string) map[string]map[string]any {
@@ -257,14 +257,14 @@ func TestHubEntrySwap(t *testing.T) {
 			t.Errorf("problem: %+v", p)
 		}
 	}
-	if got := names("claude"); !slices.Equal(got, []string{"magpie", "mine"}) {
+	if got := names("claude"); !slices.Equal(got, []string{"eipgam", "mine"}) {
 		t.Fatalf("claude with the hub on: %v\n%s", got, read(t, claude))
 	}
-	if u, _ := entries("claude")["magpie"]["url"].(string); !strings.HasSuffix(u, gateway.HubMCPPath+"claude") {
-		t.Errorf("claude's magpie entry: %v", entries("claude")["magpie"])
+	if u, _ := entries("claude")["eipgam"]["url"].(string); !strings.HasSuffix(u, gateway.HubMCPPath+"claude") {
+		t.Errorf("claude's eipgam entry: %v", entries("claude")["eipgam"])
 	}
-	// codex has a magpie of its own: left as it is, its servers kept
-	if got := names("codex"); !slices.Equal(got, []string{"fs", "magpie"}) || entries("codex")["magpie"]["command"] != "their-own" {
+	// codex has a eipgam of its own: left as it is, its servers kept
+	if got := names("codex"); !slices.Equal(got, []string{"fs", "eipgam"}) || entries("codex")["eipgam"]["command"] != "their-own" {
 		t.Fatalf("codex with the hub on: %v\n%s", got, read(t, codex))
 	}
 	v, err := Read(nil)
@@ -294,12 +294,12 @@ func TestHubEntrySwap(t *testing.T) {
 	if !strings.Contains(read(t, claude), `"numStartups": 3`) {
 		t.Errorf("claude's own keys lost:\n%s", read(t, claude))
 	}
-	if got := names("codex"); !slices.Equal(got, []string{"fs", "magpie"}) || entries("codex")["magpie"]["command"] != "their-own" {
+	if got := names("codex"); !slices.Equal(got, []string{"fs", "eipgam"}) || entries("codex")["eipgam"]["command"] != "their-own" {
 		t.Fatalf("codex with the hub off: %v\n%s", got, read(t, codex))
 	}
 }
 
-// An agent given none of the hub's servers has no magpie entry and no
+// An agent given none of the hub's servers has no eipgam entry and no
 // state; the Connect sheet's Connect gives it every server
 // (EveryServerAgents, servers/agents-all), and it then has the hub's one
 // entry and says on.
@@ -326,8 +326,8 @@ func TestHubConnectAnAgent(t *testing.T) {
 	if got := hub(); got != "" {
 		t.Fatalf("claude given nothing: hub %q", got)
 	}
-	if strings.Contains(read(t, claude), `"magpie"`) {
-		t.Fatalf("claude given nothing has magpie:\n%s", read(t, claude))
+	if strings.Contains(read(t, claude), `"eipgam"`) {
+		t.Fatalf("claude given nothing has eipgam:\n%s", read(t, claude))
 	}
 	ok(t)(EveryServerAgents([]string{"claude"}, true))
 	if got := hub(); got != "on" {
@@ -337,23 +337,23 @@ func TestHubConnectAnAgent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if u, _ := e["magpie"]["url"].(string); !strings.HasSuffix(u, gateway.HubMCPPath+"claude") || e["fs"] != nil {
+	if u, _ := e["eipgam"]["url"].(string); !strings.HasSuffix(u, gateway.HubMCPPath+"claude") || e["fs"] != nil {
 		t.Fatalf("claude connected:\n%s", read(t, claude))
 	}
 }
 
-// A library server called magpie keeps every agent on each server's own
+// A library server called eipgam keeps every agent on each server's own
 // entry, said why.
 func TestHubNameTaken(t *testing.T) {
 	hubSandbox(t)
-	ok(t)(SaveServer("", Server{Name: "magpie", Transport: "stdio", Command: "npx", Args: []string{"x"}, Agents: []string{"claude"}}))
+	ok(t)(SaveServer("", Server{Name: "eipgam", Transport: "stdio", Command: "npx", Args: []string{"x"}, Agents: []string{"claude"}}))
 	ok(t)(SetMCPHub(true))
 	e, err := targetByID("claude").MCP.entries()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if e["magpie"]["command"] != "npx" {
-		t.Errorf("the library's own magpie was replaced: %v", e["magpie"])
+	if e["eipgam"]["command"] != "npx" {
+		t.Errorf("the library's own eipgam was replaced: %v", e["eipgam"])
 	}
 	v, err := Read(nil)
 	if err != nil {
@@ -368,7 +368,7 @@ func TestHubNameTaken(t *testing.T) {
 
 // A server the library no longer gives is ended by the next prune, though
 // no agent asks the hub again: ticked for no agent, edited, or the switch
-// turned off by another magpie (here a change that doesn't end them
+// turned off by another eipgam (here a change that doesn't end them
 // itself, as the CLI's doesn't end the gateway's).
 func TestHubPrune(t *testing.T) {
 	hubSandbox(t)
@@ -491,7 +491,7 @@ func TestHubLink(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const cursor = "cursor://anysphere.cursor-deeplink/mcp/install?name=magpie&config="
+	const cursor = "cursor://anysphere.cursor-deeplink/mcp/install?name=eipgam&config="
 	if !strings.HasPrefix(link, cursor) {
 		t.Fatalf("cursor's link %q", link)
 	}
@@ -517,8 +517,8 @@ func TestHubLink(t *testing.T) {
 		t.Fatal(err)
 	}
 	var v map[string]string
-	if err := json.Unmarshal([]byte(q), &v); err != nil || v["name"] != "magpie" || v["type"] != "http" || v["url"] != want || len(v) != 3 {
-		t.Fatalf("vscode's config %s (%v), want magpie at %s", q, err, want)
+	if err := json.Unmarshal([]byte(q), &v); err != nil || v["name"] != "eipgam" || v["type"] != "http" || v["url"] != want || len(v) != 3 {
+		t.Fatalf("vscode's config %s (%v), want eipgam at %s", q, err, want)
 	}
 
 	if _, err := HubLink("javascript:alert(1)"); err == nil {
@@ -527,7 +527,7 @@ func TestHubLink(t *testing.T) {
 }
 
 // A server kept direct (#4382, cuipengcx90) stays each agent's own entry
-// with the hub on, written as with the hub off, beside magpie's for the
+// with the hub on, written as with the hub off, beside eipgam's for the
 // rest; switching it either way writes the agents again, the entry it had
 // the other way gone, and the hub neither lists nor runs it.
 func TestHubDirectServer(t *testing.T) {
@@ -564,7 +564,7 @@ func TestHubDirectServer(t *testing.T) {
 	}
 
 	ok(t)(SetMCPHub(true))
-	for id, want := range map[string][]string{"claude": {"index", "magpie", "mine"}, "codex": {"index", "magpie"}} {
+	for id, want := range map[string][]string{"claude": {"index", "eipgam", "mine"}, "codex": {"index", "eipgam"}} {
 		if got := names(id); !slices.Equal(got, want) {
 			t.Fatalf("%s with the hub on: %v, want %v\n%s\n%s", id, got, want, read(t, claude), read(t, codex))
 		}
@@ -585,7 +585,7 @@ func TestHubDirectServer(t *testing.T) {
 	// shared again: behind the hub, its own entry gone
 	ok(t)(ServerHub("index", false))
 	for _, id := range []string{"claude", "codex"} {
-		if got := names(id); slices.Contains(got, "index") || !slices.Contains(got, "magpie") {
+		if got := names(id); slices.Contains(got, "index") || !slices.Contains(got, "eipgam") {
 			t.Fatalf("%s with index shared: %v\n%s\n%s", id, got, read(t, claude), read(t, codex))
 		}
 	}
@@ -606,7 +606,7 @@ func TestHubDirectServer(t *testing.T) {
 	}
 }
 
-// magpie's own image server is in the hub too: listed as a tool that
+// eipgam's own image server is in the hub too: listed as a tool that
 // writes into the agent's project (Roots), and each call made with the
 // agent's roots and name in _meta, an empty list when it has none here,
 // so it saves into that agent's project. The agent's file has the hub's
@@ -660,7 +660,7 @@ func TestHubPiDescription(t *testing.T) {
 	if d := about(); !strings.Contains(d, "context7 (") || !strings.Contains(d, "wiki (") {
 		t.Fatalf("context7 ticked: %q", d)
 	}
-	// one edited by hand is magpie's again on the next sync
+	// one edited by hand is eipgam's again on the next sync
 	write(t, file, strings.Replace(read(t, file), "Tools of", "Tools from", 1))
 	ok(t)(Sync())
 	if d := about(); !strings.HasPrefix(d, "Tools of context7") {
@@ -683,8 +683,8 @@ func TestHubGivesMagpieImage(t *testing.T) {
 	ctx := context.Background()
 
 	tools := hub.Tools(ctx, "claude")
-	if got := hubNames(tools); !slices.Equal(got, []string{"magpie-image/a", "magpie-image/b", "magpie-image/c"}) {
-		t.Fatalf("claude's tools %v, want magpie-image's", got)
+	if got := hubNames(tools); !slices.Equal(got, []string{"eipgam-image/a", "eipgam-image/b", "eipgam-image/c"}) {
+		t.Fatalf("claude's tools %v, want eipgam-image's", got)
 	}
 	for _, x := range tools {
 		if !x.Roots {
@@ -695,7 +695,7 @@ func TestHubGivesMagpieImage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if e["magpie"] == nil || e[selfServerName] != nil {
+	if e["eipgam"] == nil || e[selfServerName] != nil {
 		t.Fatalf("claude's file:\n%s", read(t, claude))
 	}
 
@@ -703,19 +703,19 @@ func TestHubGivesMagpieImage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := hubText(t, res); !strings.Contains(got, `meta={"magpie/client":"claude-code/2.1.314","magpie/roots":["file:///work/proj"]}`) {
+	if got := hubText(t, res); !strings.Contains(got, `meta={"eipgam/client":"claude-code/2.1.314","eipgam/roots":["file:///work/proj"]}`) {
 		t.Errorf("called as %q", got)
 	}
 	res, err = hub.Call(ctx, "claude", selfServerName, "a", json.RawMessage(`{}`))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := hubText(t, res); !strings.Contains(got, `meta={"magpie/roots":[]}`) {
+	if got := hubText(t, res); !strings.Contains(got, `meta={"eipgam/roots":[]}`) {
 		t.Errorf("no roots: called as %q", got)
 	}
 }
 
-// magpie's memory server is told the calling agent's roots and name, as
+// eipgam's memory server is told the calling agent's roots and name, as
 // the image server is, so a memory is kept for the agent's project and
 // the agent; another server is told neither.
 func TestHubTellsMagpieMemoryItsCaller(t *testing.T) {
@@ -741,7 +741,7 @@ func TestHubTellsMagpieMemoryItsCaller(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := hubText(t, res); !strings.Contains(got, `meta={"magpie/client":"codex-mcp-client","magpie/roots":["file:///work/proj"]}`) {
+	if got := hubText(t, res); !strings.Contains(got, `meta={"eipgam/client":"codex-mcp-client","eipgam/roots":["file:///work/proj"]}`) {
 		t.Errorf("memory called as %q", got)
 	}
 	res, err = hub.Call(caller, "claude", "fake", "a", json.RawMessage(`{}`))
@@ -753,7 +753,7 @@ func TestHubTellsMagpieMemoryItsCaller(t *testing.T) {
 	}
 }
 
-// The router runs one Magpie Browser for every agent behind it, so each
+// The router runs one eipgam Browser for every agent behind it, so each
 // call names its caller's session in _meta, for the browser to keep each
 // caller in a tab of its own; another server is sent no session, and a
 // call with none (a caller not told apart) is sent none.
@@ -775,7 +775,7 @@ func TestHubTellsMagpieBrowserItsCaller(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got := hubText(t, res); !strings.Contains(got, `meta={"magpie/session":"`+s+`"}`) {
+		if got := hubText(t, res); !strings.Contains(got, `meta={"eipgam/session":"`+s+`"}`) {
 			t.Errorf("browser called as %q, want session %s", got, s)
 		}
 	}
@@ -795,19 +795,19 @@ func TestHubTellsMagpieBrowserItsCaller(t *testing.T) {
 	}
 }
 
-// Another magpie's router is sent the session too, to pass on to its
-// Magpie Browser; any other URL isn't.
+// Another eipgam's router is sent the session too, to pass on to its
+// eipgam Browser; any other URL isn't.
 func TestKeepsSession(t *testing.T) {
 	for _, c := range []struct {
 		s    Server
 		want bool
 	}{
-		{Server{Transport: "stdio", Command: "/Applications/Magpie.app/Contents/MacOS/magpie", Args: []string{"mcp", "browser"}}, true},
-		{Server{Transport: "stdio", Command: "magpie", Args: []string{"mcp", "image"}}, false},
-		{Server{Transport: "http", URL: "http://10.0.0.2:3425/mcp/magpie/hub"}, true},
-		{Server{Transport: "http", URL: "http://10.0.0.2:3425/mcp/magpie/hub/claude"}, true},
+		{Server{Transport: "stdio", Command: "/Applications/eipgam.app/Contents/MacOS/eipgam", Args: []string{"mcp", "browser"}}, true},
+		{Server{Transport: "stdio", Command: "eipgam", Args: []string{"mcp", "image"}}, false},
+		{Server{Transport: "http", URL: "http://10.0.0.2:3425/mcp/eipgam/hub"}, true},
+		{Server{Transport: "http", URL: "http://10.0.0.2:3425/mcp/eipgam/hub/claude"}, true},
 		{Server{Transport: "http", URL: "https://mcp.example.com/mcp"}, false},
-		{Server{Transport: "http", URL: "https://example.com/x/mcp/magpie/hub"}, false},
+		{Server{Transport: "http", URL: "https://example.com/x/mcp/eipgam/hub"}, false},
 	} {
 		if got := keepsSession(&c.s); got != c.want {
 			t.Errorf("%+v: %v, want %v", c.s, got, c.want)
@@ -815,7 +815,7 @@ func TestKeepsSession(t *testing.T) {
 	}
 }
 
-// The hub runs Magpie Browser and magpie's image server for this
+// The hub runs eipgam Browser and eipgam's image server for this
 // computer's callers only, and a program of this computer for no caller
 // from elsewhere by a held key; a call from elsewhere starts neither, and
 // neither is listed for it. The gateway leaves them out too
@@ -866,16 +866,16 @@ func TestHubKeepsThisComputersOwnServersHere(t *testing.T) {
 		t.Errorf("a command server for a full key from elsewhere: %v", err)
 	}
 	if _, err := hub.Call(here, "claude", browserServerName, "a", json.RawMessage(`{}`)); err != nil {
-		t.Errorf("Magpie Browser here: %v", err)
+		t.Errorf("eipgam Browser here: %v", err)
 	}
 	for _, c := range []struct {
 		s             Server
 		here, program bool
 	}{
-		{Server{Transport: "stdio", Command: "magpie", Args: []string{"mcp", "browser"}}, true, true},
-		{Server{Transport: "stdio", Command: "magpie", Args: []string{"mcp", "image"}}, true, true},
-		{Server{Transport: "stdio", Command: "magpie", Args: []string{"mcp", "memory"}}, true, true},
-		{Server{Transport: "http", URL: "http://10.0.0.2:3425/mcp/magpie/hub"}, true, false},
+		{Server{Transport: "stdio", Command: "eipgam", Args: []string{"mcp", "browser"}}, true, true},
+		{Server{Transport: "stdio", Command: "eipgam", Args: []string{"mcp", "image"}}, true, true},
+		{Server{Transport: "stdio", Command: "eipgam", Args: []string{"mcp", "memory"}}, true, true},
+		{Server{Transport: "http", URL: "http://10.0.0.2:3425/mcp/eipgam/hub"}, true, false},
 		{Server{Transport: "stdio", Command: "npx", Args: []string{"server-filesystem"}}, false, true},
 		{Server{Transport: "http", URL: "https://mcp.example.com/mcp"}, false, false},
 		{Server{Plugin: "notes", Transport: "http", URL: "http://127.0.0.1:1/x"}, false, true},
@@ -883,7 +883,7 @@ func TestHubKeepsThisComputersOwnServersHere(t *testing.T) {
 		if got := hubServerOf(&c.s); got.HereOnly != c.here || got.Program != c.program {
 			t.Errorf("%+v: here-only %v program %v, want %v %v", c.s, got.HereOnly, got.Program, c.here, c.program)
 		}
-		// only Magpie Browser's browsers are a gateway key's (gateway.HubServer's Keyed)
+		// only eipgam Browser's browsers are a gateway key's (gateway.HubServer's Keyed)
 		if got, want := hubServerOf(&c.s).Keyed, len(c.s.Args) > 1 && c.s.Args[1] == "browser"; got != want {
 			t.Errorf("%+v: keyed %v, want %v", c.s, got, want)
 		}

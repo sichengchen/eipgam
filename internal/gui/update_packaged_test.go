@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// The AUR's magpie-bin installs /usr/bin/magpie, and with pkexec there
-// magpie put its own download over the package's file on a restart, so
+// The AUR's eipgam-bin installs /usr/bin/eipgam, and with pkexec there
+// eipgam put its own download over the package's file on a restart, so
 // pacman's database named one version and the disk had another, and the
 // next yay upgrade wrote over it again (shuhai on Discord). A binary a
 // package manager installed now says a version is out and the command
@@ -28,7 +28,7 @@ func TestUpdatePackagedLeavesItToTheManager(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()
@@ -37,11 +37,11 @@ func TestUpdatePackagedLeavesItToTheManager(t *testing.T) {
 	canElevate = func() bool { return true }
 
 	dir := t.TempDir() // writable: ownership alone decides
-	exe := filepath.Join(dir, "magpie")
-	if err := os.WriteFile(exe, []byte("magpie"), 0o755); err != nil {
+	exe := filepath.Join(dir, "eipgam")
+	if err := os.WriteFile(exe, []byte("eipgam"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	packagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "magpie-bin"} }
+	packagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "eipgam-bin"} }
 	u := &updater{}
 	u.placeExe(exe)
 	if u.exe != "" {
@@ -49,13 +49,13 @@ func TestUpdatePackagedLeavesItToTheManager(t *testing.T) {
 	}
 	u.check()
 	j := u.json()
-	if j.State != "available" || j.Stuck != "package" || j.Packaged == nil || j.Packaged.Manager != "pacman" || j.Packaged.Package != "magpie-bin" || j.Packaged.Command != "yay -S magpie-bin" || j.Latest != "0.1.11" {
+	if j.State != "available" || j.Stuck != "package" || j.Packaged == nil || j.Packaged.Manager != "pacman" || j.Packaged.Package != "eipgam-bin" || j.Packaged.Command != "yay -S eipgam-bin" || j.Latest != "0.1.11" {
 		t.Fatalf("%+v %+v", j, j.Packaged)
 	}
 	if u.install(true) {
 		t.Fatal("install put something in")
 	}
-	if b, _ := os.ReadFile(exe); string(b) != "magpie" {
+	if b, _ := os.ReadFile(exe); string(b) != "eipgam" {
 		t.Fatalf("the package's file was changed: %q", b)
 	}
 

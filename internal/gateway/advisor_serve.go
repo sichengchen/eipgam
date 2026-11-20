@@ -12,7 +12,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Claude Code's advisor (/advisor, --advisor, settings.json's
@@ -21,15 +21,15 @@ import (
 // conversation, and the reply carries both, a server_tool_use block and an
 // advisor_tool_result with the advice, before the model goes on. Claude
 // Code sends it for any model with CLAUDE_CODE_ENABLE_EXPERIMENTAL_ADVISOR_TOOL
-// set (2.1.316), which magpie's advisor field writes (internal/agent).
+// set (2.1.316), which eipgam's advisor field writes (internal/agent).
 //
 // An upstream that runs it itself (a Claude model on Anthropic's API, its
 // advisor a Claude model of the same provider) is given it as it is
-// (advisorTools). For any other, where the advisor model is one magpie
-// serves, magpie runs it: the model is offered an advisor tool of its own,
+// (advisorTools). For any other, where the advisor model is one eipgam
+// serves, eipgam runs it: the model is offered an advisor tool of its own,
 // a call of it is answered by asking the advisor model (advise), and the
 // client is told of it in the blocks Anthropic's server writes. Where
-// magpie can't (no such model), it is left out as before (advisorTools,
+// eipgam can't (no such model), it is left out as before (advisorTools,
 // readAnthropic). Claude Code's own instructions for the advisor stay as
 // it wrote them either way: nothing about it is added to the prompt the
 // model is sent beside the tool's description.
@@ -38,16 +38,16 @@ import (
 // the model calls it by.
 const advisorTool = "advisor"
 
-// AdvisorAgent is the User-Agent of the advisor's requests magpie makes.
-const AdvisorAgent = "magpie-advisor/1"
+// AdvisorAgent is the User-Agent of the advisor's requests eipgam makes.
+const AdvisorAgent = "eipgam-advisor/1"
 
 // advisorUses is how many times one reply may call the advisor; one more
 // is answered max_uses_exceeded, as Anthropic's server answers it.
 const advisorUses = 3
 
-// advisedHere tells whether magpie runs the advisor of a Messages request
+// advisedHere tells whether eipgam runs the advisor of a Messages request
 // it serves on p's model on API to: Claude Code asked for one, the
-// upstream doesn't run it itself, and magpie serves its model.
+// upstream doesn't run it itself, and eipgam serves its model.
 func advisedHere(p provider.Provider, from, to provider.Protocol, model string, body []byte, wires map[string]string) bool {
 	adv := advisorAsked(from, body)
 	if adv == "" {
@@ -84,10 +84,10 @@ func advisorAsked(from provider.Protocol, body []byte) string {
 	return adv
 }
 
-// advisedInBridge tells whether magpie runs the advisor of a Messages
+// advisedInBridge tells whether eipgam runs the advisor of a Messages
 // request a Claude subscription serves through Claude Code: the run's
-// agent is offered magpie's tools only, never Anthropic's server tool, so
-// magpie answers it whenever it serves the advisor's model.
+// agent is offered eipgam's tools only, never Anthropic's server tool, so
+// eipgam answers it whenever it serves the advisor's model.
 func advisedInBridge(from provider.Protocol, body []byte) bool {
 	adv := advisorAsked(from, body)
 	if adv == "" {
@@ -255,10 +255,10 @@ func (e errAdvice) Error() string { return e.err.Error() }
 // what it said before calling the advisor.
 func (s *Server) advise(ctx context.Context, q *Request, said []Part, model string) (string, error) {
 	body := buildAnthropic(adviceFor(q, said), model)
-	// the caller named the advisor's model, not magpie's settings, so it is
+	// the caller named the advisor's model, not eipgam's settings, so it is
 	// asked as the caller: the key's models and limits hold it (no
 	// magpieChose, which a search's or a title's model takes)
-	r, err := http.NewRequestWithContext(ownAsk(ctx), http.MethodPost, "http://magpie/v1/messages", nil)
+	r, err := http.NewRequestWithContext(ownAsk(ctx), http.MethodPost, "http://eipgam/v1/messages", nil)
 	if err != nil {
 		return "", errAdvice{"unavailable", err}
 	}

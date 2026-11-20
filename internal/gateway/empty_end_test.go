@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// emptyStop is #6712's stream, as aistudio2api (magpie-gemini-web) sent
+// emptyStop is #6712's stream, as aistudio2api (eipgam-gemini-web) sent
 // it when Google's every regeneration came back malformed: keepalive
 // comments while it waited, its role chunk with an empty content, then
 // finish_reason "stop" and usage that counted the prompt and no output.

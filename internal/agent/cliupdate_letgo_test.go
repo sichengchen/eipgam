@@ -11,7 +11,7 @@ import (
 
 // CLJY (Discord): on Windows npm can't replace Claude Code while a copy of
 // its claude.exe runs, and an update stopped partway and left only the sh
-// shim, which Windows can't run. Before an npm update there, magpie lets go
+// shim, which Windows can't run. Before an npm update there, eipgam lets go
 // of what it keeps running of that CLI; and an update that leaves the CLI
 // gone is a failure that says to quit it and reinstall, not "updated".
 func TestUpdateCLIOnWindowsLetsGoFirst(t *testing.T) {
@@ -53,7 +53,7 @@ func TestUpdateCLIOnWindowsLetsGoFirst(t *testing.T) {
 	}
 	_, err := a.UpdateCLI()
 	if got := strings.Join(order, ", "); got != "let go of claude, npm" {
-		t.Errorf("ran %q; want magpie's own runs let go of before npm", got)
+		t.Errorf("ran %q; want eipgam's own runs let go of before npm", got)
 	}
 	if err == nil || !strings.Contains(err.Error(), "is gone") {
 		t.Fatalf("an update that left no claude to run: %v", err)

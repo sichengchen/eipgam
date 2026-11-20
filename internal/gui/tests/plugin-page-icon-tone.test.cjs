@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// shannnnnks on X (magpie in Docker, v0.1.4059): Day card's icon in the
+// shannnnnks on X (eipgam in Docker, v0.1.4059): Day card's icon in the
 // sidebar was black on the dark sidebar. Its icon.svg (saved here as it is)
 // draws with currentColor, and a plugin page's tab drew it as an <img>,
 // where currentColor is black whatever the theme. A plugin page's mark in
@@ -21,7 +21,7 @@ const icons = {
   [WHITE]: async () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#fff"/></svg>`,
   [GLANCE]: () => fs.readFile(path.resolve(__dirname, "../testdata/page-plugin/page/icon.svg")),
 };
-const entry = (tok, name, title) => ({ spec: "/x/" + name, name, key: "plugin-" + name, title, reads: [], url: `/_magpie/plugin/${tok}/index.html`, icon: `/_magpie/plugin/${tok}/icon.svg` });
+const entry = (tok, name, title) => ({ spec: "/x/" + name, name, key: "plugin-" + name, title, reads: [], url: `/_eipgam/plugin/${tok}/index.html`, icon: `/_eipgam/plugin/${tok}/icon.svg` });
 const pages = [entry(DAY, "day-card", "Day card"), entry(WHITE, "white", "White mark"), entry(GLANCE, "glance", "Usage glance")];
 
 function server(lang, theme, web) {
@@ -38,7 +38,7 @@ function server(lang, theme, web) {
     if (url.pathname.startsWith("/api/")) return json({});
     const m = url.pathname.match(/^\/_magpie\/plugin\/([0-9a-f]{32})\/icon\.svg$/);
     if (m && icons[m[1]]) return route.fulfill({ contentType: "image/svg+xml", body: await icons[m[1]]() });
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, theme, web));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "the sidebar");
         const tab = (k) => page.locator(`#nav button[data-view="plugin-${k}"]`);
         await tab("day-card").locator(".nav-pic .mask").waitFor();
@@ -128,7 +128,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(8000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", server("en", theme, true));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.locator('#nav button[data-view="plugin-day-card"] .nav-pic .mask').waitFor({ state: "attached" });
       await page.locator("#nav .nav-more").tap();
       const menu = page.locator(".nav-more-menu");

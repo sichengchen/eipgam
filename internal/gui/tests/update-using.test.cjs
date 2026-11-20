@@ -15,11 +15,11 @@ const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 
 const words = {
-  en: { version: "Version", using: "waiting while you use magpie", idle: "restarts once the gateway is idle", pill: "Waiting to update" },
-  zh: { version: "版本", using: "正在使用 magpie，稍后再重启", idle: "网关空闲后自动重启", pill: "等待更新" },
-  "zh-TW": { version: "版本", using: "正在使用 magpie，稍後再重啟", idle: "閘道空閒後自動重啟", pill: "等待更新" },
-  ja: { version: "バージョン", using: "magpie の使用中は待機します", idle: "ゲートウェイがアイドルになったら再起動します", pill: null },
-  de: { version: "Version", using: "wartet, solange du magpie benutzt", idle: "startet neu, sobald der Zugangspunkt frei ist", pill: null },
+  en: { version: "Version", using: "waiting while you use eipgam", idle: "restarts once the gateway is idle", pill: "Waiting to update" },
+  zh: { version: "版本", using: "正在使用 eipgam，稍后再重启", idle: "网关空闲后自动重启", pill: "等待更新" },
+  "zh-TW": { version: "版本", using: "正在使用 eipgam，稍後再重啟", idle: "閘道空閒後自動重啟", pill: "等待更新" },
+  ja: { version: "バージョン", using: "eipgam の使用中は待機します", idle: "ゲートウェイがアイドルになったら再起動します", pill: null },
+  de: { version: "Version", using: "wartet, solange du eipgam benutzt", idle: "startet neu, sobald der Zugangspunkt frei ist", pill: null },
 };
 
 function settingsPayload(lang) {
@@ -28,7 +28,7 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", autoRestart: true,
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -65,7 +65,7 @@ const fresh = () => ({
 });
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": a restart by itself waits while magpie is used", async (t) => {
+  test(engine + ": a restart by itself waits while eipgam is used", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const open = async (lang, ctl, query, width) => {
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", server(lang, ctl));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/" + query);
+      await page.goto("http://eipgam.test/" + query);
       return { page, errors };
     };
 
@@ -117,14 +117,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction((t) => [...document.querySelectorAll("#about .row.pref .sub")].some((s) => s.textContent.includes(t)), w.using);
         const sub = (await row.locator(".sub").textContent()).trim();
         assert.ok(sub.endsWith(" · " + w.idle + " · " + w.using), sub);
-        if (lang === "en") assert.equal(sub, "0.1.401 is downloaded · restarts once the gateway is idle · waiting while you use magpie");
+        if (lang === "en") assert.equal(sub, "0.1.401 is downloaded · restarts once the gateway is idle · waiting while you use eipgam");
         const panel = await open(lang, fresh(), "?mode=panel", 420);
         const pill = panel.page.locator("#update");
         await pill.waitFor({ state: "visible" });
         await panel.page.waitForFunction(() => (document.querySelector("#update")?.title || "").length > 0);
         if (w.pill) assert.equal((await pill.locator("span").first().textContent()).trim(), w.pill);
         assert.ok((await pill.getAttribute("title")).includes(w.using), await pill.getAttribute("title"));
-        if (lang === "en") assert.equal(await pill.getAttribute("title"), "magpie restarts to update to 0.1.401 once the agents' requests through the gateway have finished: waiting while you use magpie. Click to restart now.");
+        if (lang === "en") assert.equal(await pill.getAttribute("title"), "eipgam restarts to update to 0.1.401 once the agents' requests through the gateway have finished: waiting while you use eipgam. Click to restart now.");
         assert.deepEqual(errors, []);
         assert.deepEqual(panel.errors, []);
       });

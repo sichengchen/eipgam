@@ -1,6 +1,6 @@
 package gateway
 
-// Completed image descriptions are kept next to the rest of magpie's
+// Completed image descriptions are kept next to the rest of eipgam's
 // settings, so restarting or updating the gateway doesn't describe every
 // image in an ongoing conversation again. Only inline images are saved:
 // their cache key comes from their bytes. A URL is left to the in-memory
@@ -19,10 +19,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
 const (

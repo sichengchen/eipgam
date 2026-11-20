@@ -19,13 +19,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/browserext"
+	"github.com/sichengchen/eipgam/internal/browserext"
 )
 
 // The fixture page the real browser works in, served from this test.
 const browserFixture = `<!doctype html>
 <title>Fixture</title>
-<h1>Magpie fixture</h1>
+<h1>eipgam fixture</h1>
 <input aria-label="Name" id="name">
 <button onclick="out.textContent = 'clicked ' + document.getElementById('name').value">Go</button>
 <select aria-label="Colour" onchange="out.textContent = 'colour ' + this.value"><option value="r">Red</option><option value="g">Green</option></select>
@@ -107,7 +107,7 @@ func TestBrowserFramesAndFailuresInARealBrowser(t *testing.T) {
 	for end := time.Now().Add(10 * time.Second); !strings.Contains(page, `button "Pay"`) && time.Now().Before(end); time.Sleep(200 * time.Millisecond) {
 		page = ok("browser_snapshot", nil)
 	}
-	if strings.Contains(page, "doesn't let Magpie Browser read") {
+	if strings.Contains(page, "doesn't let eipgam Browser read") {
 		t.Fatalf("the frame from the other site isn't read:\n%s", page)
 	}
 	ok("browser_type", map[string]any{"ref": ref(page, "textbox", "Card"), "text": "4242"}, "Typed into")
@@ -138,9 +138,9 @@ func TestBrowserFramesAndFailuresInARealBrowser(t *testing.T) {
 	failed("browser_navigate", map[string]any{"url": "http://127.0.0.1:1/"}, "LOAD_FAILED")
 }
 
-// Magpie Browser in a real Chromium: the extension magpie writes, loaded
+// eipgam Browser in a real Chromium: the extension eipgam writes, loaded
 // as a user loads it, connects to the gateway, and every tool an agent
-// calls is carried out in a real tab. Set MAGPIE_BROWSER_CHROME to a
+// calls is carried out in a real tab. Set EIPGAM_BROWSER_CHROME to a
 // Chromium that takes --load-extension (Chrome for Testing, as Playwright
 // has it) to run it.
 func TestBrowserToolsInARealBrowser(t *testing.T) {
@@ -159,9 +159,9 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 		ok("browser_evaluate", map[string]any{"script": "() => document.getElementById('out').textContent"}, want)
 	}
 
-	page := ok("browser_tabs", map[string]any{"action": "new", "url": site.URL}, "Opened t", "Tab t", "Fixture", "Magpie fixture")
+	page := ok("browser_tabs", map[string]any{"action": "new", "url": site.URL}, "Opened t", "Tab t", "Fixture", "eipgam fixture")
 	ok("browser_tabs", nil, "* t", site.URL)
-	page = ok("browser_snapshot", nil, `heading "Magpie fixture"`)
+	page = ok("browser_snapshot", nil, `heading "eipgam fixture"`)
 	ok("browser_snapshot", map[string]any{"interactive": true}, `button "Go"`)
 
 	ok("browser_type", map[string]any{"ref": ref(page, "textbox", "Name"), "text": "Ada"}, "Typed into")
@@ -209,7 +209,7 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 	} {
 		ok("browser_evaluate", map[string]any{"script": script}, `"awaited"`)
 	}
-	ok("browser_text", nil, "Magpie fixture", "Bottom of the page")
+	ok("browser_text", nil, "eipgam fixture", "Bottom of the page")
 
 	shot := call("browser_screenshot", nil)
 	if shot.Result.IsError || shot.Result.Content[0].Type != "image" || shot.Result.Content[0].MimeType != "image/jpeg" {
@@ -224,8 +224,8 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 	}
 
 	ok("browser_navigate", map[string]any{"url": site.URL + "/two"}, "Opened", "Page two")
-	ok("browser_navigate", map[string]any{"go": "back"}, "Went back", "Magpie fixture")
-	page = ok("browser_navigate", map[string]any{"go": "reload"}, "Reloaded", "Magpie fixture")
+	ok("browser_navigate", map[string]any{"go": "back"}, "Went back", "eipgam fixture")
+	page = ok("browser_navigate", map[string]any{"go": "reload"}, "Reloaded", "eipgam fixture")
 
 	// a link that opens a tab: the session goes on in it
 	two := ok("browser_click", map[string]any{"ref": ref(page, "link", "Open two")}, "opened a new tab", "Page two")
@@ -236,7 +236,7 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 	}
 }
 
-// realBrowser starts a Chromium with the extension magpie writes loaded
+// realBrowser starts a Chromium with the extension eipgam writes loaded
 // in a profile of its own, pointed at a gateway of the test's, and waits
 // for it to connect; site serves browserFixture (and /two).
 func realBrowser(t *testing.T) (srv, site *httptest.Server) {
@@ -255,9 +255,9 @@ func realBrowser(t *testing.T) (srv, site *httptest.Server) {
 // ext writes, and the gateway's Server too.
 func realBrowserFrom(t *testing.T, ext func(*httptest.Server) string) (srv, site *httptest.Server, s *Server) {
 	t.Helper()
-	chrome := os.Getenv("MAGPIE_BROWSER_CHROME")
+	chrome := os.Getenv("EIPGAM_BROWSER_CHROME")
 	if chrome == "" {
-		t.Skip("MAGPIE_BROWSER_CHROME names no Chromium")
+		t.Skip("EIPGAM_BROWSER_CHROME names no Chromium")
 	}
 	fresh(t)
 
@@ -297,7 +297,7 @@ func realBrowserFrom(t *testing.T, ext func(*httptest.Server) string) (srv, site
 	dir := ext(srv)
 	profile := t.TempDir()
 	head := "--headless=new"
-	if os.Getenv("MAGPIE_BROWSER_HEADFUL") != "" {
+	if os.Getenv("EIPGAM_BROWSER_HEADFUL") != "" {
 		// a window on the screen: only then does Chrome put a tab behind
 		// another one out of sight (headless, every tab is visible)
 		head = "--window-size=1000,700"
@@ -389,7 +389,7 @@ func browserCaller(t *testing.T, srv *httptest.Server, session string) (call fun
 // Two agent sessions at once in a real Chromium (packinggoodsllc_07668 on
 // Discord: two agents behind one router took one tab): each works in a
 // new tab of its own; each opens its tabs in a group of its own
-// ("Magpie", "Magpie 2"), and each sees the other's tab marked ~.
+// ("eipgam", "eipgam 2"), and each sees the other's tab marked ~.
 func TestBrowserSessionsApartInARealBrowser(t *testing.T) {
 	srv, site := realBrowser(t)
 	_, a := browserCaller(t, srv, "agent-a")
@@ -402,7 +402,7 @@ func TestBrowserSessionsApartInARealBrowser(t *testing.T) {
 		}
 		return m[1]
 	}
-	ta := tabOf(a("browser_navigate", map[string]any{"url": site.URL}, "Magpie fixture"))
+	ta := tabOf(a("browser_navigate", map[string]any{"url": site.URL}, "eipgam fixture"))
 	tb := tabOf(b("browser_navigate", map[string]any{"url": site.URL + "/two"}, "Page two"))
 	if ta == tb {
 		t.Fatalf("both sessions work in %s", ta)
@@ -422,9 +422,9 @@ func TestBrowserSessionsApartInARealBrowser(t *testing.T) {
 	// the group of the tab a list marks mark with the page title
 	groupOf := func(list, mark, title string) string {
 		t.Helper()
-		m := regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(mark) + ` t\d+ \[(Magpie(?: \d+)?)\] "` + title + `"`).FindStringSubmatch(list)
+		m := regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(mark) + ` t\d+ \[(eipgam(?: \d+)?)\] "` + title + `"`).FindStringSubmatch(list)
 		if m == nil {
-			t.Fatalf("no %s tab %q in a Magpie group:\n%s", mark, title, list)
+			t.Fatalf("no %s tab %q in a eipgam group:\n%s", mark, title, list)
 		}
 		return m[1]
 	}
@@ -468,10 +468,10 @@ func TestBrowserToolActionsInARealBrowser(t *testing.T) {
 	ok("browser", map[string]any{"action": "tab_close"}, "Closed t")
 }
 
-// Agents leave the user's tab alone (the owner, 11-03: Magpie Browser
+// Agents leave the user's tab alone (the owner, 11-03: eipgam Browser
 // "老是会代替掉用户正在浏览的网页"; 11-04: "你到底彻底修复了没啊"): a call
 // that names no tab works in a new one, behind the tab the user is looking
-// at, in the session's Magpie group; a link that opens a tab, tab_new,
+// at, in the session's eipgam group; a link that opens a tab, tab_new,
 // screenshots and a recording all happen behind it too. The user's page
 // counts each time it is put behind another tab, so a tab brought forward
 // for a moment and given back fails as well as one left in front.
@@ -490,18 +490,18 @@ func TestBrowserLeavesTheUsersTabAlone(t *testing.T) {
 		}
 	}
 	shown("to start with")
-	if os.Getenv("MAGPIE_BROWSER_HEADFUL") == "" {
+	if os.Getenv("EIPGAM_BROWSER_HEADFUL") == "" {
 		// headless, every tab is visible, so a tab brought forward for a
 		// moment and given back can't be told
-		t.Log("headless: only where the user's tab ends up is checked; MAGPIE_BROWSER_HEADFUL=1 catches a tab brought forward for a moment too")
+		t.Log("headless: only where the user's tab ends up is checked; EIPGAM_BROWSER_HEADFUL=1 catches a tab brought forward for a moment too")
 	}
-	page := ok("browser_navigate", map[string]any{"url": site.URL}, "Magpie fixture")
+	page := ok("browser_navigate", map[string]any{"url": site.URL}, "eipgam fixture")
 	if strings.Contains(page, users[1]+":") {
 		t.Fatalf("navigated the user's tab:\n%s", page)
 	}
 	shown("after a navigate")
-	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[Magpie\] "Fixture"`).MatchString(list) {
-		t.Fatalf("the agent's tab isn't in its Magpie group:\n%s", list)
+	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[eipgam\] "Fixture"`).MatchString(list) {
+		t.Fatalf("the agent's tab isn't in its eipgam group:\n%s", list)
 	}
 	link := regexp.MustCompile(`- link "Open two"(?: \[[a-z=, ]+\])? \[ref=(e\d+)\]`).FindStringSubmatch(page)
 	if link == nil {
@@ -509,7 +509,7 @@ func TestBrowserLeavesTheUsersTabAlone(t *testing.T) {
 	}
 	ok("browser_click", map[string]any{"ref": link[1]}, "opened a new tab", "Page two")
 	shown("after a link opened a tab")
-	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[Magpie\] "Two"`).MatchString(list) {
+	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[eipgam\] "Two"`).MatchString(list) {
 		t.Fatalf("the tab the link opened isn't the agent's, in its group:\n%s", list)
 	}
 	ok("browser_tabs", map[string]any{"action": "new", "url": site.URL + "/two"}, "Page two")
@@ -529,14 +529,14 @@ func TestBrowserLeavesTheUsersTabAlone(t *testing.T) {
 // Chrome does: a page behind the user's never goes on for minutes with
 // its focus emulated (Discord took that for a bot).
 func TestBrowserLetsATabGoAfterItsCalls(t *testing.T) {
-	if os.Getenv("MAGPIE_BROWSER_HEADFUL") == "" {
-		t.Skip("headless, every tab has focus: MAGPIE_BROWSER_HEADFUL=1 runs it")
+	if os.Getenv("EIPGAM_BROWSER_HEADFUL") == "" {
+		t.Skip("headless, every tab has focus: EIPGAM_BROWSER_HEADFUL=1 runs it")
 	}
 	srv, site := realBrowser(t)
 	_, ok := browserCaller(t, srv, "letgo")
 	ok("browser_navigate", map[string]any{"url": site.URL + "/focus"}, "Focus")
 	title := func() string {
-		m := regexp.MustCompile(`(?m)^. t\d+ \[Magpie\] "(Focus [^"]*)"`).FindStringSubmatch(ok("browser_tabs", nil))
+		m := regexp.MustCompile(`(?m)^. t\d+ \[eipgam\] "(Focus [^"]*)"`).FindStringSubmatch(ok("browser_tabs", nil))
 		if m == nil {
 			t.Fatal("no Focus tab in the list")
 		}
@@ -574,13 +574,13 @@ func TestBrowserLetsATabGoAfterItsCalls(t *testing.T) {
 	}
 }
 
-// An older extension, loaded from the folder magpie writes, has the folder
-// written with this magpie's when it connects, for the browser to read
+// An older extension, loaded from the folder eipgam writes, has the folder
+// written with this eipgam's when it connects, for the browser to read
 // when it starts again.
 func TestBrowserOlderExtensionsFolderWritten(t *testing.T) {
 	var man string
 	realBrowserFrom(t, func(srv *httptest.Server) string {
-		t.Setenv("MAGPIE_ADDR", srv.Listener.Addr().String())
+		t.Setenv("EIPGAM_ADDR", srv.Listener.Addr().String())
 		dir := browserext.Dir()
 		if err := browserext.Write(dir, srv.URL); err != nil {
 			t.Fatal(err)
@@ -645,7 +645,7 @@ const humanFixture = `<!doctype html>
 
 // The extension drives a site the way a person does, so the bot checks
 // sites like Discord run don't find it (the owner, 11-05: Discord flagged
-// the account under Magpie Browser, never under Claude's extension): CDP's
+// the account under eipgam Browser, never under Claude's extension): CDP's
 // Runtime domain, which a page can find by what the console does with its
 // values, stays off until console is asked for on a site's own host; its reads and helpers run in a world of its own, so the page's
 // own functions never see a call; a click comes after the mouse has moved
@@ -771,7 +771,7 @@ func TestBrowserActsLikeAPerson(t *testing.T) {
 		t.Fatalf("naming the user's tab again didn't go on in %s:\n%s", copied[1], again)
 	}
 	list := ok("browser_tabs", nil)
-	if !regexp.MustCompile(`(?m)^\* ` + copied[1] + ` \[Magpie\] "Watch 0"`).MatchString(list) {
+	if !regexp.MustCompile(`(?m)^\* ` + copied[1] + ` \[eipgam\] "Watch 0"`).MatchString(list) {
 		t.Fatalf("the copy %s isn't the agent's, in its group:\n%s", copied[1], list)
 	}
 	if !regexp.MustCompile(`(?m)^[+ ] ` + users[1] + ` "Watch 0" .*/watch$`).MatchString(list) {

@@ -7,23 +7,23 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// A restart of magpie as it is, asked for from the tray menu or Settings'
+// A restart of eipgam as it is, asked for from the tray menu or Settings'
 // version row (yansheng1003 on X: "请在刷新旁边增加一个重启按钮"). What a
 // user changes is meant to apply live, and most of it does; this is the
-// way out for what doesn't yet, without quitting and opening magpie by
+// way out for what doesn't yet, without quitting and opening eipgam by
 // hand. It goes the way the updater's restart goes: on a Mac or Linux the
-// new magpie takes the gateway over while this one finishes its requests
+// new eipgam takes the gateway over while this one finishes its requests
 // (handover.go); elsewhere it opens once this one has exited.
 
-// runStarted is when this run of magpie started: /api/update's run.
+// runStarted is when this run of eipgam started: /api/update's run.
 var runStarted = time.Now().UnixNano()
 
-// restartSelfNow arranges for this magpie to start again once it is gone;
+// restartSelfNow arranges for this eipgam to start again once it is gone;
 // the caller then quits (leave). An update staged is installed on the way,
-// as the updater's restart would. magpie web runs again in its own place
+// as the updater's restart would. eipgam web runs again in its own place
 // (Web.Wait). False when it can't: the caller runs on.
 func restartSelfNow(web, window bool, view string) bool {
 	if pending.Load() != nil {
@@ -69,7 +69,7 @@ func restartSelfNow(web, window bool, view string) bool {
 
 // restartAppFrom is restartSelfNow for a page: the app's, a browser's on
 // the app's page (the app restarts, its window back if it was up), or
-// magpie web's (it runs again in its place). view is the tab the window's
+// eipgam web's (it runs again in its place). view is the tab the window's
 // page is on, to come back to it.
 func restartAppFrom(w Windows, view string) (Windows, bool) {
 	if a, ok := w.(appWebHost); ok {
@@ -86,7 +86,7 @@ func restartRoutes(mux *http.ServeMux, w Windows) {
 		_ = json.NewDecoder(r.Body).Decode(&in) // nothing sent: no tab to come back to
 		app, ok := restartAppFrom(w, in.View)
 		if !ok {
-			fail(rw, errors.New("magpie couldn't start again: quit it and open it again"))
+			fail(rw, errors.New("eipgam couldn't start again: quit it and open it again"))
 			return
 		}
 		rw.WriteHeader(http.StatusNoContent)

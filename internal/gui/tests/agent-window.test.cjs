@@ -19,7 +19,7 @@ const { watchSettingsReads, agentRow, openAgentSettings, pickItem } = require(".
 const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, posts) {
-  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 400000 };
+  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 400000 };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await openAgentSettings(page, "dsh");
         const row = page.locator('.agent-window[data-agent="dsh"]');
         await row.waitFor();

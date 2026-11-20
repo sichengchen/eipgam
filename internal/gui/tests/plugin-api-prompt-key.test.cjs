@@ -53,7 +53,7 @@ function server(lang, asked, state) {
 }
 
 async function open(page, way) {
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://eipgam.test/?view=providers");
   await page.locator("#addProvider").click();
   const sheet = page.locator("#addSheet");
   const tile = sheet.locator('.tile[data-pick="FakeCo"]');

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // movedCards are the names and icons the built-ins' usage cards have,
@@ -131,7 +131,7 @@ func pluginLoginQuota(ctx context.Context, l Login) SubscriptionQuota {
 // namedModelWindows scopes each window that says no models but is named
 // by a model the provider serves to that model alone. Google AI Studio
 // limits each model's day on its own, and its plugin
-// (magpie-gemini-web's ai-studio) tells a model's cooldown as a window
+// (eipgam-gemini-web's ai-studio) tells a model's cooldown as a window
 // named after it, full till the cooldown ends, with no model said. Read
 // as the whole account's, gemini-4-hydrogen's 429 held the account
 // from every model till the reset (WangYeruo on X), while argon still

@@ -12,19 +12,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The chat page (ChatPagePath) speaks DeepSeek's Anthropic-compatible
 // Messages API with two server tools of DeepSeek's: deepseek_web_search
 // and deepseek_read_url, whose calls and results it shows in its own
-// shapes (its parseEvent.ts). chatMessages answers it with any of magpie's
-// models: the search is Anthropic's web_search tool, which magpie runs for
+// shapes (its parseEvent.ts). chatMessages answers it with any of eipgam's
+// models: the search is Anthropic's web_search tool, which eipgam runs for
 // a model that can't search (searchRounds), and the link reading a tool of
-// the request's own, read_url, which is run here with magpie's web_fetch
+// the request's own, read_url, which is run here with eipgam's web_fetch
 // (fetchPage) and its result handed back to the model, round after round,
 // as one reply to the page.
 
@@ -80,7 +80,7 @@ func (s *Server) chatMessages(w http.ResponseWriter, r *http.Request) {
 	}
 	model := chatModel(r)
 	if model == "" {
-		chatError(w, http.StatusServiceUnavailable, "magpie has no model to chat with: add a provider in magpie first")
+		chatError(w, http.StatusServiceUnavailable, "eipgam has no model to chat with: add a provider in eipgam first")
 		return
 	}
 	req, title := chatUpstream(r, &in, model)

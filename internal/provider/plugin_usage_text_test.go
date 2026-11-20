@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // A plugin's row set aside with text and nothing counted (AutoClaw's
@@ -39,7 +39,7 @@ func TestPluginTextRowIsText(t *testing.T) {
 	}
 }
 
-// Google AI Studio's plugin (magpie-gemini-web's ai-studio) reports no
+// Google AI Studio's plugin (eipgam-gemini-web's ai-studio) reports no
 // allowance, only the models its accounts cool down on, beside two lines
 // about its local service: its proxy and its admin page. With nothing
 // cooling those lines are all its card has, and each is text, which the

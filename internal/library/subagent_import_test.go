@@ -77,7 +77,7 @@ func candidateNames(p *SubagentProbe) map[string]SubagentCandidate {
 // Every agent file of agency-agents is a subagent by the slug of its
 // name, its description and its body; the README and the strategy notes,
 // no front matter, are none, and the second Backend Architect is left
-// out by its name. The keys magpie doesn't model (color, emoji, vibe,
+// out by its name. The keys eipgam doesn't model (color, emoji, vibe,
 // tools, author) go nowhere.
 func TestSubagentsFromAgencyAgents(t *testing.T) {
 	h := sandbox(t)

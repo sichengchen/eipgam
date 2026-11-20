@@ -11,7 +11,7 @@ import (
 )
 
 // HandOverSkills gives skills kept in ~/.agents/skills to the library to
-// manage (tnt1223 on Discord, "统一移入 magpie 的资源库文件夹，交给 magpie
+// manage (tnt1223 on Discord, "统一移入 eipgam 的资源库文件夹，交给 eipgam
 // 管理"). Several agents read that folder themselves, so a skill there is
 // on for each of them whatever the library ticks, and turning it off for
 // one, or on this computer alone (OffHere), can't work. Handed over:
@@ -51,9 +51,9 @@ func HandOverSkills(names []string) (*Result, error) {
 		}
 		// Choosing which agents get a skill and the setting that puts every
 		// skill in ~/.agents/skills (SetSkillsWhere) can't both hold: with
-		// it on, every agent reading that folder has every skill and magpie
+		// it on, every agent reading that folder has every skill and eipgam
 		// links each one back there. It goes off, and the sync takes out
-		// magpie's own links there, never the user's entries
+		// eipgam's own links there, never the user's entries
 		// (ConatusMoon2222 on X).
 		l.SharedSkills = false
 		return nil
@@ -191,7 +191,7 @@ func handOver(l *Library, found *[]FoundSkill, ts []*Target, name string) (left 
 // left is what of from couldn't be taken away after its whole copy was
 // in (a file in it held open, on Windows).
 func moveIn(from, lib string) (left string, err error) {
-	tmp := filepath.Join(filepath.Dir(lib), "."+filepath.Base(lib)+".magpie-in-"+time.Now().Format("20060102150405.000"))
+	tmp := filepath.Join(filepath.Dir(lib), "."+filepath.Base(lib)+".eipgam-in-"+time.Now().Format("20060102150405.000"))
 	renamed := os.Rename(from, tmp) == nil
 	if !renamed {
 		if err := copyDir(from, tmp); err != nil {
@@ -266,7 +266,7 @@ func HandBackSkill(name string) (*Result, error) {
 			if !ours(p, name) {
 				return fmt.Errorf("%s has a %s of its own", sharedSkillsDir(), name)
 			}
-			// magpie's own link there (for Goose, Kimi Code or Cindy)
+			// eipgam's own link there (for Goose, Kimi Code or Cindy)
 			if err := unlink(p); err != nil {
 				return err
 			}

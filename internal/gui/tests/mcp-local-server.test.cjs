@@ -5,7 +5,7 @@
 // off saves the server as local and shows again off; the row says "Not
 // synced" with a tag. It said "This computer only", and bin.90 on Discord
 // read that as a sharing switch: the stored local keeps its meaning. A
-// Remote magpie's server (bridge) holds this computer's key and is never
+// Remote eipgam's server (bridge) holds this computer's key and is never
 // synced: its switch is off and held, and the hint and the tag say why,
 // where it showed on and went back off once saved (treeman_26897 on
 // Discord: "无法打开 同步到其它电脑按钮"). Every language,
@@ -25,11 +25,11 @@ const agents = [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/
 
 function server(lang, calls) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents,
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [{ name: "mine", transport: "stdio", command: "/opt/mine/mcp", agents: ["claude"] },
-      { name: "home", transport: "http", url: "http://10.0.0.5:3425/mcp", headers: { Authorization: "Bearer sk-x" }, agents: ["claude"], local: true, bridge: "remote-magpie" }],
+      { name: "home", transport: "http", url: "http://10.0.0.5:3425/mcp", headers: { Authorization: "Bearer sk-x" }, agents: ["claude"], local: true, bridge: "remote-eipgam" }],
   };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -70,16 +70,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (const width of [1100, 390]) {
         await t.test(`${lang} ${width}`, async () => {
           const w = (s, v) => tr(lang, s, v);
-          if (lang !== "en") for (const s of ["Sync to your other computers", "Not synced", "Added from a Remote magpie with this computer's key for it, so it stays on this computer", "Sync never carries it to your other computers", "Off keeps it on this computer: sync never carries it to your other computers, and a sync from them neither removes it nor puts theirs in its place"]) assert.ok(I18N[lang][s], `${lang}: ${s}`);
+          if (lang !== "en") for (const s of ["Sync to your other computers", "Not synced", "Added from a Remote eipgam with this computer's key for it, so it stays on this computer", "Sync never carries it to your other computers", "Off keeps it on this computer: sync never carries it to your other computers, and a sync from them neither removes it nor puts theirs in its place"]) assert.ok(I18N[lang][s], `${lang}: ${s}`);
           const calls = [];
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const row = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="mine"]') });
           const ed = page.locator("#modal .lib-editor");
@@ -108,15 +108,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await save();
           assert.deepEqual(calls, ["mine true", "mine false"]);
           await tag.waitFor({ state: "detached" });
-          // a Remote magpie's server: off and held, the hint and tag say why
+          // a Remote eipgam's server: off and held, the hint and tag say why
           const brow = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="home"]') });
           const btag = brow.locator(".lib-tag.lib-local");
-          assert.equal(await btag.getAttribute("title"), w("Added from a Remote magpie with this computer's key for it, so it stays on this computer"));
+          assert.equal(await btag.getAttribute("title"), w("Added from a Remote eipgam with this computer's key for it, so it stays on this computer"));
           await brow.locator(".name").click();
           await ed.waitFor();
           assert.equal(await sw.getAttribute("aria-checked"), "false");
           assert.equal(await sw.getAttribute("aria-disabled"), "true");
-          await ed.locator(".hint", { hasText: w("Added from a Remote magpie with this computer's key for it, so it stays on this computer") }).waitFor();
+          await ed.locator(".hint", { hasText: w("Added from a Remote eipgam with this computer's key for it, so it stays on this computer") }).waitFor();
           await sw.dispatchEvent("click"); // Playwright won't click an aria-disabled one
           assert.equal(await sw.getAttribute("aria-checked"), "false", "a click doesn't turn it on");
           await save();

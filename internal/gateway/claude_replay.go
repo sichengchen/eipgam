@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/bridgesid"
+	"github.com/sichengchen/eipgam/internal/bridgesid"
 )
 
 // replaySession is a saved session written for a conversation no run has

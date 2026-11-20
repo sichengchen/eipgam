@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // A list fetched again as it was (an account's, each 45 minutes) moves only
@@ -14,7 +14,7 @@ import (
 // were every agent's lists were built and compared again for nothing. A
 // list that differs in anything else — a model, a part, what it was asked
 // as — tells them. The held catalog isn't dropped either (Forget moves the
-// stamp dsh's rounds build magpie's models again by); the file's next
+// stamp dsh's rounds build eipgam's models again by); the file's next
 // read, under a request's hold too, is the new one.
 func TestLiveSavedAgainSameTellsNoAgent(t *testing.T) {
 	home := t.TempDir()

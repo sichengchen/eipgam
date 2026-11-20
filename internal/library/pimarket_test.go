@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // piNPM is npm's search as the market asks it, answering with these
@@ -182,7 +182,7 @@ func TestPiMarketFromNPM(t *testing.T) {
 	}
 }
 
-// With npm down and nothing on disk, the market is the snapshot magpie
+// With npm down and nothing on disk, the market is the snapshot eipgam
 // shipped with, not empty.
 func TestPiMarketSnapshot(t *testing.T) {
 	sandbox(t)

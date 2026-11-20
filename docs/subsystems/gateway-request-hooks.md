@@ -7,22 +7,22 @@ execution and subsequent inference rounds belong to the client.
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Magpie
+    participant eipgam
     participant Hook as Bun gateway hook
     participant Model
-    Client->>Magpie: Request
-    Magpie->>Hook: await onRequest(body, ctx with host-derived origin)
-    Hook-->>Magpie: Context-enriched body, or original on failure
-    Magpie->>Model: One inference request
-    Model-->>Client: Live response through Magpie
-    Magpie--)Hook: onResponse(completedReply, ctx)
+    Client->>eipgam: Request
+    eipgam->>Hook: await onRequest(body, ctx with host-derived origin)
+    Hook-->>eipgam: Context-enriched body, or original on failure
+    eipgam->>Model: One inference request
+    Model-->>Client: Live response through eipgam
+    eipgam--)Hook: onResponse(completedReply, ctx)
     Note over Hook: Bounded best-effort notification
 ```
 
 ## Entry and request contract
 
-Declare `"magpie": {"hooks": "./context.hooks.ts"}` in package.json,
-or install a `*.hooks.js`, `.mjs`, `.ts` or `.mts` file using `magpie plugin add`.
+Declare `"eipgam": {"hooks": "./context.hooks.ts"}` in package.json,
+or install a `*.hooks.js`, `.mjs`, `.ts` or `.mts` file using `eipgam plugin add`.
 The names are apart from the JS gateway middleware's (`magpie.middleware`,
 its alias `magpie.gateway`, `*.gateway.js`), so a hook that imports `node:fs`
 is never also loaded as middleware.
@@ -57,24 +57,24 @@ after a subagent in the same session is `""`. The prompt and tool history
 are never used to guess it.
 
 `origin` is host-derived: `local` for a direct loopback request without
-forwarding headers or a named gateway key; `magpie-key` for the sharing key
-magpie made itself (`access.Identity.Default`: the key marked `lan`, the one
-`LANKeyID` names, or an older magpie's settings-only key) when it comes from
+forwarding headers or a named gateway key; `eipgam-key` for the sharing key
+eipgam made itself (`access.Identity.Default`: the key marked `lan`, the one
+`LANKeyID` names, or an older eipgam's settings-only key) when it comes from
 this computer (`ownComputer`: loopback, one of this computer's own
 addresses, or a WSL distro's network; never with forwarding headers, a
-trusted proxy's included, nor through magpie web's page port), which is
-where magpie writes it into the owner's own agents; `gateway-key` for any
+trusted proxy's included, nor through eipgam web's page port), which is
+where eipgam writes it into the owner's own agents; `gateway-key` for any
 other named key, on loopback too (one the owner made for someone else, a
-value a user brought, a `sk-magpie-` key that didn't authenticate), and for
+value a user brought, a `sk-eipgam-` key that didn't authenticate), and for
 the sharing key from anywhere else: Gateway keys lists it with a Copy
 button and offers it to connect other computers, so a friend may hold it;
-otherwise `remote`. magpie has no "this named key is mine" mark, so every
+otherwise `remote`. eipgam has no "this named key is mine" mark, so every
 key the owner made reads `gateway-key`. A plugin that serves the owner's own
-agents beyond `local` checks `magpie-key`, never `gateway-key`
-(plugins#526). Hosts before `magpie-key` (v0.1.2208) sent `gateway-key` for
+agents beyond `local` checks `eipgam-key`, never `gateway-key`
+(plugins#526). Hosts before `eipgam-key` (v0.1.2208) sent `gateway-key` for
 the sharing key too, so a plugin that trusts only `local` sees both as
 not local, as before. Forwarded traffic stays
-remote even with `MAGPIE_TRUST_PROXY=1`. No key, key name, peer address or
+remote even with `EIPGAM_TRUST_PROXY=1`. No key, key name, peer address or
 client-supplied origin claim is exposed. Missing origin on an older host means
 unknown. This classification is not a user identity; plugins that export
 conversations must obtain their own explicit opt-in and default to skipping
@@ -138,10 +138,10 @@ The accounts and the test are the app's sign-in alert's
 account in use of a subscription switched on whose row says Sign in again
 (any mark on a Claude, Copilot or plugin account; a built-in's revoked or
 refused sign-in, ChatGPT's `token_revoked` and refused refresh among them),
-told once until it is usable again. The magpie serving the gateway looks a
+told once until it is usable again. The eipgam serving the gateway looks a
 minute after it starts and every two minutes after
 (`keepHooksToldOfSignIns`, `tellHooksOfSignIns` in
-`internal/gateway/signin_hooks.go`), reading magpie's own files only. What
+`internal/gateway/signin_hooks.go`), reading eipgam's own files only. What
 the hooks were told is kept in `signin-hooks.json` beside `providers.json`,
 apart from the app's `signin-alerts.json`, so the desktop notification and
 the hooks are each told, and a restart tells neither again. With no hook
@@ -164,13 +164,13 @@ eleven seconds); each callback uses the configured bounded hook timeout. Request
   middleware, so `onResponse` sees what the agent got. `serveAgent` runs it for
   every agent request; Codex's own ChatGPT sign-in passthrough
   (`codex_backend.go`) runs it without the synchronous middleware. The
-  requests magpie makes on its own call `serve` directly and run no hooks:
+  requests eipgam makes on its own call `serve` directly and run no hooks:
   Codex's compaction and its fallback turn, titles, System One's
   classifier, search and vision (#4847). A request over a provider's byte
   cap is fitted in the gateway itself, not by a hook (`body_cap.go`), as is
   one over a model's image cap (`image_cap.go`, #6849). The cap is the
   smaller of the user's `MaxImages` (by model id, `"*"` for all; the
-  editor's Advanced › Images per request, `magpie provider set <id>
+  editor's Advanced › Images per request, `eipgam provider set <id>
   max-images=8 max-images.<model>=10`) and the one a 400 taught that
   provider's model: Copilot's words on a Copilot account, and
   100milionseek's and Coarena's own words, which name their vendor, on any

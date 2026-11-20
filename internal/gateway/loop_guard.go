@@ -108,8 +108,8 @@ func (t loopTrip) message() string {
 }
 
 // loopGuardSaid begins what the loop guard tells the agent of a reply it
-// ended: magpie's words, not a vendor's (magpieSaid).
-const loopGuardSaid = "magpie ended this reply"
+// ended: eipgam's words, not a vendor's (magpieSaid).
+const loopGuardSaid = "eipgam ended this reply"
 
 // feed reads b, the next of the reply as the agent is sent it.
 func (g *loopGuard) feed(b []byte) (loopTrip, bool) {

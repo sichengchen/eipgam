@@ -8,9 +8,9 @@ import (
 // Codex gives the model its built-in image tool (image_gen.imagegen) only to
 // a provider it reads as the OpenAI actor: one that does not require OpenAI
 // auth but carries x-openai-actor-authorization
-// (ModelProviderInfo::uses_openai_actor_authorization). So magpie's own
+// (ModelProviderInfo::uses_openai_actor_authorization). So eipgam's own
 // provider table must carry that header and must not require OpenAI auth, or
-// a Codex on magpie never has the tool at all and cannot draw through a Codex
+// a Codex on eipgam never has the tool at all and cannot draw through a Codex
 // backend (sub2api's).
 func TestCodexMagpieProviderCarriesActorAuthorization(t *testing.T) {
 	home, read := codexHome(t, `{"OPENAI_API_KEY":"sk-relay"}`,
@@ -20,18 +20,18 @@ func TestCodexMagpieProviderCarriesActorAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, "[model_providers.magpie]") {
-		t.Fatalf("no magpie provider table:\n%s", cfg)
+	if !strings.Contains(cfg, "[model_providers.eipgam]") {
+		t.Fatalf("no eipgam provider table:\n%s", cfg)
 	}
-	if !strings.Contains(cfg, `"x-openai-actor-authorization" = "magpie"`) {
-		t.Fatalf("magpie provider table carries no actor-authorization header:\n%s", cfg)
+	if !strings.Contains(cfg, `"x-openai-actor-authorization" = "eipgam"`) {
+		t.Fatalf("eipgam provider table carries no actor-authorization header:\n%s", cfg)
 	}
 	// uses_openai_actor_authorization() also requires !requires_openai_auth:
 	// the header beside that key would turn the flag off again. A ChatGPT
 	// sign-in gets the key (openaiAuth) and keeps the image tool on its
 	// account; an API key, as here, has no account to keep.
 	if strings.Contains(cfg, "requires_openai_auth") {
-		t.Fatalf("magpie provider table requires OpenAI auth, hiding the actor header:\n%s", cfg)
+		t.Fatalf("eipgam provider table requires OpenAI auth, hiding the actor header:\n%s", cfg)
 	}
 	if c := cx.Check(); c != "" {
 		t.Fatal(c)

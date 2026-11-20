@@ -1,8 +1,8 @@
-# magpie (fork)
+# eipgam
 
-magpie wires AI coding agents to the models and subscriptions you have: one local gateway serves them all, and when a quota runs out it moves on to your next account. Pick a provider and model per agent in the menu-bar app, the TUI (`magpie tui`) or the CLI.
+eipgam wires AI coding agents to the models and subscriptions you have: one local gateway serves them all, and when a quota runs out it moves on to your next account. Pick a provider and model per agent in the menu-bar app, the TUI (`eipgam tui`) or the CLI.
 
-This is a fork of [yetone/magpie](https://github.com/yetone/magpie), versioned from 0.2.0. It differs from upstream in what it leaves out:
+eipgam is based on Magpie. It is versioned from 0.2.0 and has these differences:
 
 - **No telemetry.** No usage counts, install id, plugin likes or partner counts are sent.
 - **No sponsors, partners or referral links.**
@@ -17,29 +17,31 @@ Needs Go and Node.
 
 ```sh
 make app VERSION=0.2.0
-codesign --force --deep --sign - --identifier com.yetone.magpie magpie.app
-ditto magpie.app /Applications/magpie.app
-open /Applications/magpie.app
+codesign --force --deep --sign - --identifier com.sichengchen.eipgam eipgam.app
+ditto eipgam.app /Applications/eipgam.app
+open /Applications/eipgam.app
 ```
 
-magpie runs in the menu bar. For the `magpie` command, use Settings → Command line, or link `/Applications/magpie.app/Contents/MacOS/magpie` into your PATH.
+eipgam runs in the menu bar. For the `eipgam` command, use Settings → Command line, or link `/Applications/eipgam.app/Contents/MacOS/eipgam` into your PATH.
 
-The app updates itself from upstream's release feed only to a newer version, and 0.2.0 is newer than every upstream 0.1.x release, so it never replaces this build. Turn automatic updates off in Settings → About to stop it checking at all.
+The app checks [eipgam releases on GitHub](https://github.com/sichengchen/eipgam/releases) for updates. It verifies the SHA-256 and GitHub build attestation before installation. Automatic checks are controlled in Settings → About.
+
+eipgam stores its configuration in `~/.config/eipgam` (or `$XDG_CONFIG_HOME/eipgam`).
 
 ## Using it
 
 ```sh
-magpie provider add openrouter sk-or-…           # a preset needs only the key
-magpie claude openrouter/anthropic/claude-sonnet-5-5
-magpie codex moonshot/kimi-k3                    # Codex on Kimi
-magpie group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=smart
-magpie claude group/opus-anywhere                # fails over between subscriptions
-magpie quota                                     # what's left on every plan
-magpie tui
+eipgam provider add openrouter sk-or-…           # a preset needs only the key
+eipgam claude openrouter/anthropic/claude-sonnet-5-5
+eipgam codex moonshot/kimi-k3                    # Codex on Kimi
+eipgam group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=smart
+eipgam claude group/opus-anywhere                # fails over between subscriptions
+eipgam quota                                     # what's left on every plan
+eipgam tui
 ```
 
-The full reference is [docs/reference.md](docs/reference.md); it is upstream's, and may still name things this fork removed.
+See [the full reference](docs/reference.md) for commands and configuration.
 
 ## License
 
-[MIT](LICENSE). magpie is not affiliated with [Apache Magpie](https://magpie.apache.org) or the [Apache Software Foundation](https://apache.org).
+eipgam is licensed under the [MIT License](LICENSE). The original Magpie license and other dependency notices are in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).

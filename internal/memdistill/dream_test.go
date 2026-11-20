@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 func note(t *testing.T, text, scope, origin string) *memory.Memory {

@@ -29,7 +29,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // streamRetries is how many times a cut reply is asked to go on before it
@@ -101,7 +101,7 @@ var errDoneSaid = errors.New("the stream said its reply over")
 // what such an ending most likely is: Open Design's glm-5.3-flash always
 // thinks, spent a model test's 16 tokens on it and ended after
 // content_block_stop, with no message_delta or message_stop, so every
-// plain test of it through a remote magpie was a 502 waited out through
+// plain test of it through a remote eipgam was a 502 waited out through
 // the patience (plugins#827). A larger reply that ends so is still a cut,
 // and so is a Gemini or Code Assist one of any size: Gemini ends every
 // reply with its finishReason, MAX_TOKENS included, so one without it was
@@ -522,7 +522,7 @@ func (s *Server) streamTranslated(w http.ResponseWriter, r *http.Request, p prov
 			}
 			failed, failedCode, failedStatus = ev.Text, ev.Code, ev.Status
 			if ev.Code == "" {
-				// a refusal's status is magpie's, told by its code
+				// a refusal's status is eipgam's, told by its code
 				errNamed = ev.Status
 			}
 			errSent = true
@@ -558,7 +558,7 @@ func (s *Server) streamTranslated(w http.ResponseWriter, r *http.Request, p prov
 	see := zenSee(zen, emit)
 	alive := func() {
 		// the provider's keepalives aren't events to translate: while it
-		// is heard from, the client hears from magpie (#436)
+		// is heard from, the client hears from eipgam (#436)
 		if failed == "" && sw.quiet() >= keepaliveGap {
 			enc.keepalive()
 		}

@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/memdistill"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/memdistill"
 )
 
-// genericIcon are the clients magpie has no logo for yet, drawn with the
+// genericIcon are the clients eipgam has no logo for yet, drawn with the
 // generic cube on purpose (#4487). Each leaves this list when its real
 // logo, from the app or its vendor, is added.
 var genericIcon = map[string]bool{"raft": true}
@@ -50,7 +50,7 @@ func TestEveryClientHasNameAndIcon(t *testing.T) {
 				t.Errorf("%s is drawn with the generic cube: give it its real logo", a.ID)
 			}
 		case a.Icon == "" || strings.HasPrefix(a.Icon, "file:") || strings.ContainsAny(a.Icon, ":/"):
-			t.Errorf("%s's icon %q isn't one of magpie's", a.ID, a.Icon)
+			t.Errorf("%s's icon %q isn't one of eipgam's", a.ID, a.Icon)
 		case png[a.Icon]:
 			if !exists(a.Icon + ".png") {
 				t.Errorf("%s's icon: pngIcons names %s, with no icons/%[2]s.png", a.ID, a.Icon)
@@ -78,7 +78,7 @@ func TestEveryClientHasNameAndIcon(t *testing.T) {
 	}
 	// the ids the gateway gives a request by more than its User-Agent
 	// (gateway.agentOf), and those it names by one: each is a client
-	for _, id := range []string{"claude-desktop", gateway.ScienceID, "cursor-local", "codex", "magpie", "kimi", "kimi-code-desktop", memdistill.Agent} {
+	for _, id := range []string{"claude-desktop", gateway.ScienceID, "cursor-local", "codex", "eipgam", "kimi", "kimi-code-desktop", memdistill.Agent} {
 		if !clients[id] {
 			t.Errorf("the gateway records requests as %s, which isn't among the clients", id)
 		}

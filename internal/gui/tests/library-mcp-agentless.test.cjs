@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// treeman_26897 on Discord: magpie run as an MCP entry point for remote
+// treeman_26897 on Discord: eipgam run as an MCP entry point for remote
 // clients has no agents, and the MCP router could only be turned on with
 // one to write to: the Library said "No agents to write to", and in
-// gateway mode (magpie web on such a server) it wasn't there at all.
+// gateway mode (eipgam web on such a server) it wasn't there at all.
 // With no agent, or in gateway mode, the Library is its MCP tab (beside
-// Instructions and Skills, for a Remote magpie's clients): the servers with
+// Instructions and Skills, for a Remote eipgam's clients): the servers with
 // no agent chips, nothing from agents' own configs, and the
 // router's switch, there before the first server too. Its lines say any
 // app connects at the address; a click posts servers/hub on, says the
@@ -23,8 +23,8 @@ const { strings } = require("./strings.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/srv/mg";
 const fixture = (st) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
-  mcpHub: st.on, hubPath: "/mcp/magpie/hub/",
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
+  mcpHub: st.on, hubPath: "/mcp/eipgam/hub/",
   // in gateway mode this computer's agents are there, and not shown
   agents: st.gateway ? [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json`, ...(st.on ? { hub: "on" } : {}) }] : [],
   instructions: { agents: [], sets: [] }, foundSkills: [], skills: [], problems: [],
@@ -67,7 +67,7 @@ function server(lang, st) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -99,18 +99,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const web = width < 800;
         const st = { on: false, sent: [], checked: [], web, gateway: web, none: false };
         const where = web ? "gateway mode" : "no agents";
-        const url = (web ? "https://mcp.example.net" : "http://127.0.0.1:3425") + "/mcp/magpie/hub";
+        const url = (web ? "https://mcp.example.net" : "http://127.0.0.1:3425") + "/mcp/eipgam/hub";
         const errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
         // the Hooks tab last left: there are only Instructions, MCP and
         // Skills now, and the page opens on MCP
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "hooks"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "hooks"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         // the Library is a page in gateway mode too
         const nav = page.locator('button[data-view="library"]');
         assert.ok(await nav.isVisible(), `${where}: no Library tab`);
@@ -119,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const hub = v.locator(".lib-hub");
         await hub.waitFor();
 
-        // the MCP tab, beside the prompts and skills a Remote magpie's
+        // the MCP tab, beside the prompts and skills a Remote eipgam's
         // client takes (library-agentless-skills), and nothing of agents
         assert.deepEqual((await v.locator(".lib-tabs .opt").allTextContents()).map((x) => x.trim().replace(/ · \d+$/, "")), [w("Instructions"), w("MCP servers"), w("Skills")], `${where}: the tabs`);
         assert.equal((await v.locator(".lib-tabs .opt.on").textContent()).trim().replace(/ · \d+$/, ""), w("MCP servers"), `${where}: the tab open`);
@@ -157,7 +157,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await sheet.locator(".lib-hubagent").count(), 0);
         assert.equal((await sheet.locator(".lib-hubaddr code").textContent()).trim(), url);
         assert.ok(await sheet.locator(".lib-hubapp").count() >= 3);
-        assert.equal((await sheet.locator(".lib-hubcap").textContent()).trim(), w("From another computer, use the address magpie is reached at there, with a gateway key: Authorization: Bearer <key>."));
+        assert.equal((await sheet.locator(".lib-hubcap").textContent()).trim(), w("From another computer, use the address eipgam is reached at there, with a gateway key: Authorization: Bearer <key>."));
         assert.deepEqual(await sideways(page), [], `${where}: sideways scroll, sheet`);
         await sheet.locator(".bar button.primary").click();
         await sheet.waitFor({ state: "hidden" });

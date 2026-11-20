@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // qingchen060106 on X (11-14): gpt-6-astra through a Codex account seemed
@@ -134,8 +134,8 @@ func TestClaudeCodeOnCodexSpendsAsCodex(t *testing.T) {
 		if n, want := len(gjson.GetBytes(b, "tools").Array()), len(gjson.GetBytes(raw, "tools").Array()); n != want {
 			t.Errorf("turn %d: %d tools, Claude Code declared %d", i+1, n, want)
 		}
-		if strings.Contains(strings.ToLower(gjson.GetBytes(b, "input").Raw), "magpie") {
-			t.Errorf("turn %d: the input names magpie", i+1)
+		if strings.Contains(strings.ToLower(gjson.GetBytes(b, "input").Raw), "eipgam") {
+			t.Errorf("turn %d: the input names eipgam", i+1)
 		}
 		// Claude Code's system blocks, billing line left out, go as one
 		// developer message, and its messages as they were: nothing else

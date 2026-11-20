@@ -12,7 +12,7 @@ import (
 
 // The config.toml Daimon writes for its Kimi Code runtime, as Kimi 3.2.27's
 // modelToToml builds it: the default alias on Kimi's own endpoint, and one
-// whose provider magpie's kimi-desktop plugin pointed at its bridge.
+// whose provider eipgam's kimi-desktop plugin pointed at its bridge.
 const kimiWorkConfig = `default_model = "daimon-kimi-code"
 
 [providers.daimon-kimi-code]
@@ -50,7 +50,7 @@ func writeKimiWork(t *testing.T, share string, lines ...string) {
 
 // CNSA0422: the Kimi desktop app's Work sessions are read from the share
 // folder the app gives Daimon, their alias read as the model it stands for,
-// and a call through magpie's bridge left to the gateway.
+// and a call through eipgam's bridge left to the gateway.
 func TestKimiWorkCalls(t *testing.T) {
 	for _, moved := range []bool{false, true} {
 		name := "daimon-share"

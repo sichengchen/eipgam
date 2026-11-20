@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// magpie's windows are WebView2 on Windows, a runtime Windows 10 doesn't
+// eipgam's windows are WebView2 on Windows, a runtime Windows 10 doesn't
 // always have. Without it Wails hands the failure to ErrorHandler and exits,
 // and the desktop build has no console for that to land in: a double-click
 // came up to nothing (#1806, ufec). Run asks before any window is made and,
@@ -21,7 +21,7 @@ const webView2Page = "https://developer.microsoft.com/microsoft-edge/webview2/"
 // webView2Missing reads Wails' own answer, Env.Info().PlatformInfo's
 // "WebView2": the runtime's version, "" when its lookup failed, the lookup
 // a window's WebView2 environment makes. A key Wails doesn't set at all
-// says nothing, and is read as there: refusing to start a magpie that would
+// says nothing, and is read as there: refusing to start a eipgam that would
 // have worked is worse than the silent exit.
 func webView2Missing(info map[string]any) bool {
 	v, ok := info["WebView2"]
@@ -41,35 +41,35 @@ func webView2Notice(lang string) (title, body string) {
 }
 
 var webView2Words = map[string][2]string{
-	"en": {"magpie needs WebView2",
-		"magpie's windows need Microsoft Edge WebView2 Runtime, which isn't installed on this computer.\r\n\r\n" +
+	"en": {"eipgam needs WebView2",
+		"eipgam's windows need Microsoft Edge WebView2 Runtime, which isn't installed on this computer.\r\n\r\n" +
 			"Install it from:\r\n%s\r\n\r\nor in a terminal:\r\nwinget install Microsoft.EdgeWebView2Runtime\r\n\r\n" +
-			"Until then, \"magpie web\" opens magpie in your browser and \"magpie tui\" in a terminal.\r\n\r\n" +
+			"Until then, \"eipgam web\" opens eipgam in your browser and \"eipgam tui\" in a terminal.\r\n\r\n" +
 			"Open the download page now?"},
-	"zh": {"magpie 需要 WebView2",
-		"magpie 的窗口需要 Microsoft Edge WebView2 运行时，这台电脑上没有安装。\r\n\r\n" +
+	"zh": {"eipgam 需要 WebView2",
+		"eipgam 的窗口需要 Microsoft Edge WebView2 运行时，这台电脑上没有安装。\r\n\r\n" +
 			"请从这里安装：\r\n%s\r\n\r\n或在终端里运行：\r\nwinget install Microsoft.EdgeWebView2Runtime\r\n\r\n" +
-			"装好之前，可以用 \"magpie web\" 在浏览器里打开 magpie，或用 \"magpie tui\" 在终端里打开。\r\n\r\n" +
+			"装好之前，可以用 \"eipgam web\" 在浏览器里打开 eipgam，或用 \"eipgam tui\" 在终端里打开。\r\n\r\n" +
 			"现在打开下载页面吗？"},
-	"zh-TW": {"magpie 需要 WebView2",
-		"magpie 的視窗需要 Microsoft Edge WebView2 執行階段，這台電腦上沒有安裝。\r\n\r\n" +
+	"zh-TW": {"eipgam 需要 WebView2",
+		"eipgam 的視窗需要 Microsoft Edge WebView2 執行階段，這台電腦上沒有安裝。\r\n\r\n" +
 			"請從這裡安裝：\r\n%s\r\n\r\n或在終端機裡執行：\r\nwinget install Microsoft.EdgeWebView2Runtime\r\n\r\n" +
-			"裝好之前，可以用 \"magpie web\" 在瀏覽器裡開啟 magpie，或用 \"magpie tui\" 在終端機裡開啟。\r\n\r\n" +
+			"裝好之前，可以用 \"eipgam web\" 在瀏覽器裡開啟 eipgam，或用 \"eipgam tui\" 在終端機裡開啟。\r\n\r\n" +
 			"現在開啟下載頁面嗎？"},
-	"ja": {"magpie には WebView2 が必要です",
-		"magpie のウィンドウには Microsoft Edge WebView2 ランタイムが必要ですが、このコンピューターにはインストールされていません。\r\n\r\n" +
+	"ja": {"eipgam には WebView2 が必要です",
+		"eipgam のウィンドウには Microsoft Edge WebView2 ランタイムが必要ですが、このコンピューターにはインストールされていません。\r\n\r\n" +
 			"こちらからインストールしてください：\r\n%s\r\n\r\nまたはターミナルで：\r\nwinget install Microsoft.EdgeWebView2Runtime\r\n\r\n" +
-			"それまでは \"magpie web\" でブラウザーから、\"magpie tui\" でターミナルから magpie を使えます。\r\n\r\n" +
+			"それまでは \"eipgam web\" でブラウザーから、\"eipgam tui\" でターミナルから eipgam を使えます。\r\n\r\n" +
 			"今すぐダウンロードページを開きますか？"},
-	"de": {"magpie braucht WebView2",
-		"Die Fenster von magpie brauchen die Microsoft Edge WebView2 Runtime, die auf diesem Computer nicht installiert ist.\r\n\r\n" +
+	"de": {"eipgam braucht WebView2",
+		"Die Fenster von eipgam brauchen die Microsoft Edge WebView2 Runtime, die auf diesem Computer nicht installiert ist.\r\n\r\n" +
 			"Installieren Sie sie von:\r\n%s\r\n\r\noder im Terminal:\r\nwinget install Microsoft.EdgeWebView2Runtime\r\n\r\n" +
-			"Bis dahin öffnet \"magpie web\" magpie im Browser und \"magpie tui\" im Terminal.\r\n\r\n" +
+			"Bis dahin öffnet \"eipgam web\" eipgam im Browser und \"eipgam tui\" im Terminal.\r\n\r\n" +
 			"Die Download-Seite jetzt öffnen?"},
 }
 
 // webViewOcclusion is Chromium's tracking of whether a window is covered,
-// turned off for magpie's windows (windowsOptions): when it is wrong, as
+// turned off for eipgam's windows (windowsOptions): when it is wrong, as
 // for a window shown while the screen is locked or the display off, the
 // page stays white (screenback_windows.go). A hidden or minimised window is
 // told so by Wails (put_IsVisible) without it.
@@ -80,7 +80,7 @@ const webViewOcclusion = "CalculateNativeWinOcclusion"
 // app's own arguments: the features to disable, the ones to enable, and
 // every other argument as written. Wails' loader blanks the variable
 // itself, so without this a user's --disable-features=RendererCodeIntegrity
-// never reached magpie's renderer (#2753, LuYquan: an injected DLL got it
+// never reached eipgam's renderer (#2753, LuYquan: an injected DLL got it
 // killed and the window went black). Wails puts its own
 // msSmartScreenProtection first in DisabledFeatures and writes the list as
 // one --disable-features (and EnabledFeatures as one --enable-features):
@@ -173,7 +173,7 @@ func splitArgs(s string) []string {
 	return out
 }
 
-// WebView2 that does not come up. A magpie started while the one before it
+// WebView2 that does not come up. A eipgam started while the one before it
 // is still going down finds the profile folder held by the old
 // msedgewebview2, and Wails waits a minute for a controller that never
 // arrives, then exits (@ljlwlcz on X, 0.1.3688: a restart by a script left
@@ -182,12 +182,12 @@ func splitArgs(s string) []string {
 
 // webView2TryEnv counts the starts that ended in a WebView2 failure; each
 // relaunch passes it on.
-const webView2TryEnv = "MAGPIE_WV2_TRY"
+const webView2TryEnv = "EIPGAM_WV2_TRY"
 
 // webView2Tries is how many starts are made before the failure is shown.
 const webView2Tries = 3
 
-// webView2Folder is the folder WebView2 keeps its profile in: the one magpie
+// webView2Folder is the folder WebView2 keeps its profile in: the one eipgam
 // passes Wails (webViewUserDataPath), else Wails' own default,
 // %AppData%\<exe name>.
 func webView2Folder(userDataPath, appData, exe string) string {
@@ -243,9 +243,9 @@ func awaitWebView2Folder(free func() bool, max, step time.Duration, sleep func(t
 // has none of its own).
 func webView2FailedNotice(lang, reason, version string) (title, body string) {
 	if strings.HasPrefix(lang, "zh") {
-		return "magpie 的窗口没能打开",
-			fmt.Sprintf("WebView2 在 %d 次启动里都没有就绪（运行时 %s）。\r\n\r\n%s\r\n\r\n请结束残留的 msedgewebview2.exe 后重新打开 magpie；也可以用 \"magpie web\" 在浏览器里打开。详情见 magpie 的日志。", webView2Tries, version, reason)
+		return "eipgam 的窗口没能打开",
+			fmt.Sprintf("WebView2 在 %d 次启动里都没有就绪（运行时 %s）。\r\n\r\n%s\r\n\r\n请结束残留的 msedgewebview2.exe 后重新打开 eipgam；也可以用 \"eipgam web\" 在浏览器里打开。详情见 eipgam 的日志。", webView2Tries, version, reason)
 	}
-	return "magpie's window didn't open",
-		fmt.Sprintf("WebView2 was not ready in %d starts (runtime %s).\r\n\r\n%s\r\n\r\nEnd any leftover msedgewebview2.exe and open magpie again, or use \"magpie web\" in your browser. The details are in magpie's log.", webView2Tries, version, reason)
+	return "eipgam's window didn't open",
+		fmt.Sprintf("WebView2 was not ready in %d starts (runtime %s).\r\n\r\n%s\r\n\r\nEnd any leftover msedgewebview2.exe and open eipgam again, or use \"eipgam web\" in your browser. The details are in eipgam's log.", webView2Tries, version, reason)
 }

@@ -16,7 +16,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const LEFT = "agency-agents";
 const lib = {
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [], instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 };
 
@@ -75,13 +75,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               },
             };
             const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-            await ctx.addInitScript(() => { try { localStorage.setItem("magpie.pluginTab", "installed"); } catch {} });
+            await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.pluginTab", "installed"); } catch {} });
             const page = await ctx.newPage();
             page.setDefaultTimeout(5000);
             page.setDefaultNavigationTimeout(60000);
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang, state));
-            await page.goto("http://magpie.test/?view=plugins");
+            await page.goto("http://eipgam.test/?view=plugins");
             const v = page.locator("#view-plugins");
             const sec = v.locator(".pm-leftovers");
             await sec.waitFor();

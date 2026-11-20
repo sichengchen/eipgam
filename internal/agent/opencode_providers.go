@@ -5,30 +5,30 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // OpenCode 2 keeps a provider under providers, in words of its own, and
 // still reads OpenCode 1's provider: a provider named under both is the one
 // under providers, whole, and the other only a line in its log
 // (packages/core/src/config/normalize.ts, mergeMaps, at v2.1.4). For
-// OpenCode 1 magpie writes its provider under provider, which both read; for
+// OpenCode 1 eipgam writes its provider under provider, which both read; for
 // OpenCode 2 under providers alone (ocFile). OpenChamber writes a
 // provider its form saves under providers and takes it out of provider
 // (packages/web/server/lib/opencode/config-v2.js, writeSectionEntry), so
-// once it had saved magpie's, magpie's next sync put magpie's back under
+// once it had saved eipgam's, eipgam's next sync put eipgam's back under
 // provider while OpenCode 2 went on reading OpenChamber's copy: a model
 // added since was missing from OpenCode 2 and OpenChamber (#3883). Where
-// the file keeps magpie's provider under providers, magpie writes it there
+// the file keeps eipgam's provider under providers, eipgam writes it there
 // too, in OpenCode 2's words; a file without one doesn't get one.
 const openCodeNativeKey = "providers." + magpieID
 
-// openCodeNative is magpie's provider block for an OpenCode config, in
+// openCodeNative is eipgam's provider block for an OpenCode config, in
 // OpenCode 1's words (magpieProviderJSONAt's "opencode" shape), as OpenCode
 // 2 reads it from provider (packages/core/src/v1/config/migrate.ts,
 // migrateStandardProvider and migrateModel; checked against what 2.1.4's
 // opencode debug config makes of it): npm is package "aisdk:<npm>",
-// options (magpie's baseURL and apiKey) are settings, a model's modalities
+// options (eipgam's baseURL and apiKey) are settings, a model's modalities
 // are capabilities beside tools (true, OpenCode's default), and its
 // variants a list of {id, settings, body} (openCodeNativeVariant).
 // reasoning, which OpenCode 2 doesn't read, goes.
@@ -52,9 +52,9 @@ func openCodeNative(block any) any {
 		}
 		out["settings"] = o
 	}
-	// in the order magpie lists them (#4575): OpenCode lists a provider's
+	// in the order eipgam lists them (#4575): OpenCode lists a provider's
 	// models in the file's key order
-	// and none where the block has none (OpenCode's magpie plugin lists
+	// and none where the block has none (OpenCode's eipgam plugin lists
 	// them: opencode_discover.go)
 	in, listed := b["models"].(orderedJSON)
 	if !listed {
@@ -117,11 +117,11 @@ func openCodeNativeVariant(id string, opts any) orderedJSON {
 	return out
 }
 
-// openCodeNativeKept is openCodeKept for magpie's provider under providers:
-// magpie's models are its own, written whole, and what else the block holds
+// openCodeNativeKept is openCodeKept for eipgam's provider under providers:
+// eipgam's models are its own, written whole, and what else the block holds
 // stays (theirsKept), as does a variant the user put on one of them, where
-// it is or after magpie's. A variant that says what magpie's of its name
-// says is magpie's (openCodeOwnVariant): one the model has no longer goes.
+// it is or after eipgam's. A variant that says what eipgam's of its name
+// says is eipgam's (openCodeOwnVariant): one the model has no longer goes.
 func openCodeNativeKept(path string, block func() any) func() any {
 	return theirsKept(path, openCodeNativeKey, func() any {
 		v := openCodeNative(block())
@@ -178,7 +178,7 @@ func openCodeNativeKept(path string, block func() any) func() any {
 }
 
 // openCodeOwnVariant is the id of a variant under providers, and whether
-// it is magpie's: it says what magpie's of that name says (openCodeVariant)
+// it is eipgam's: it says what eipgam's of that name says (openCodeVariant)
 // and nothing else, its options split as OpenCode 2 splits them or all in
 // settings, as OpenChamber writes a variant it carries over from provider
 // (config-v2.js, toModelVariants).
@@ -212,14 +212,14 @@ func openCodeOwnVariant(raw json.RawMessage) (string, bool) {
 	return id, err == nil && id != "" && sameJSON(string(b), openCodeVariant(id))
 }
 
-// syncOpenCodeNative brings magpie's provider under providers in the
-// OpenCode config at path up to block, magpie's provider in OpenCode 1's
+// syncOpenCodeNative brings eipgam's provider under providers in the
+// OpenCode config at path up to block, eipgam's provider in OpenCode 1's
 // words, where the file keeps it there.
 func syncOpenCodeNative(path string, block func() any) error {
 	return syncJSONInOrder(path, openCodeNativeKey, openCodeNativeKept(path, block))
 }
 
-// openCodeWiringOff is wiringOff for magpie's provider in the OpenCode
+// openCodeWiringOff is wiringOff for eipgam's provider in the OpenCode
 // config at path: under provider, and under providers where the file keeps
 // it there, which OpenCode 2 reads instead; under providers alone in a file
 // written for OpenCode 2 (ocFile). With neither, it is gone.

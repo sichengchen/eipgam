@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 const ark = {
   id: "volcengine", name: "Volcengine Ark", icon: "generic", chat: "https://ark.cn-beijing.volces.com/api/v3", responses: "", anthropic: "", catalog: "",
   models: [{ id: "ep-a", name: "ep-a", on: true }, { id: "ep-b", name: "ep-b", on: true, headers: { "X-Endpoint": "ep-b-1" } }],
@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], saves = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, saves));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const L = {};
         for (const k of ["Model settings", "+ Add header", "Remove header", "Restore default", "Fold Model settings",
           "Headers sent with {id}'s requests alone, after the provider's; one the provider has too is sent as this model's",

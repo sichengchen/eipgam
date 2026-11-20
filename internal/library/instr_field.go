@@ -9,14 +9,14 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // An agent whose instructions are a string inside a JSON settings file
 // (Target.Field: WorkBuddy's personalization.customPrompt in
 // app/app-config.json) is given them there. Everything else in the file is
 // the app's and stays as it is, key order and indentation included; what
-// is in the field is the user's own text and magpie's part around it, as
+// is in the field is the user's own text and eipgam's part around it, as
 // in an instructions file.
 
 // instrRead is what the agent reads at t.Instructions: the file, or for a
@@ -33,7 +33,7 @@ func instrRead(t *Target) ([]byte, error) {
 	}
 	stripped := jsonc.ToJSONInPlace(bytes.Clone(raw))
 	if !json.Valid(stripped) {
-		return nil, fmt.Errorf("%s is not JSON magpie can read", t.Instructions)
+		return nil, fmt.Errorf("%s is not JSON eipgam can read", t.Instructions)
 	}
 	r := gjson.GetBytes(stripped, t.Field)
 	switch {

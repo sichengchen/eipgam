@@ -9,16 +9,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// A restart magpie makes by itself (Settings' AutoRestart, or `magpie
+// A restart eipgam makes by itself (Settings' AutoRestart, or `eipgam
 // update` run in a terminal) brings the app back in the tray alone
 // (restartBySelf), and leaves the user where they were. Before, its
 // window came back if it was up (#2096), taking no focus (xyxyxy_15591 on Discord: "自动更新
 // 安装更新之后，不跳出界面"). The window came up in front of the app the
 // user was typing in and took the keyboard, for a restart nobody asked
-// for: the Mac's open brought magpie to the front, its Dock icon joining
+// for: the Mac's open brought eipgam to the front, its Dock icon joining
 // activated it, and the window's Focus did on every system.
 //
 // The old version writes quietRestartFile before it starts the new one;
@@ -32,7 +32,7 @@ import (
 // minimised"), and this one puts the window on the taskbar as it was,
 // neither shown nor activated (showMinimised).
 
-// quietRestartFile, in magpie's folder, holds when (Unix seconds) a
+// quietRestartFile, in eipgam's folder, holds when (Unix seconds) a
 // restart by itself began.
 const quietRestartFile = "restart-quiet"
 

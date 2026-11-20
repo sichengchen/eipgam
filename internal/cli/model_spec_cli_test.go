@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// magpie model spec (Dani Ariyanto on Discord): a model nothing knows is
+// eipgam model spec (Dani Ariyanto on Discord): a model nothing knows is
 // shown unknown on each part, takes a whole spec in one command, shows it
-// as the user's, is listed by magpie model specs, and --reset puts it back.
+// as the user's, is listed by eipgam model specs, and --reset puts it back.
 // A bad number, level, vision answer or flag is refused with the usage
 // and writes nothing; --help anywhere prints the usage and writes nothing.
 func TestModelSpecCmd(t *testing.T) {

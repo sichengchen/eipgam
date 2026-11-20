@@ -1,11 +1,11 @@
 package gateway
 
 import (
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// The reasoning level picked in Settings for a model magpie asks on its
+// The reasoning level picked in Settings for a model eipgam asks on its
 // own, beside the model in use: Image recognition's and the searcher's
 // (MOMO on Discord, "外置模型能不能提供思考深度选项"). Only those calls
 // are asked so; every other request goes as it did.
@@ -33,7 +33,7 @@ func sideEffort(model, want string) string {
 }
 
 // visionEffort is the level the Image recognition model is asked to read
-// an image at: the one picked in Settings, else magpie's own, the least
+// an image at: the one picked in Settings, else eipgam's own, the least
 // it has (leastEffort), as a description is wanted quickly.
 func visionEffort(model string) string {
 	if e := sideEffort(model, provider.HeldSettings().VisionEffort); e != "" {
@@ -118,12 +118,12 @@ func replyRoom(usual int, effort string) int {
 	return usual + budgetOf(effortOf(effort))
 }
 
-// SideEffort is the level a call magpie makes on its own with model is
+// SideEffort is the level a call eipgam makes on its own with model is
 // asked at when want is picked for it: want fitted to the model's own
 // levels, "" when none is picked or its levels aren't known.
 func SideEffort(model, want string) string { return sideEffort(model, want) }
 
-// WithSideEffort is an Anthropic Messages request magpie makes on its own
+// WithSideEffort is an Anthropic Messages request eipgam makes on its own
 // with model (memory's reading of conversations and its nightly tidy)
 // asked to reason at want, fitted to the model's levels as SideEffort
 // fits it, as a group's member fixed at a level is asked (withFixedEffort):

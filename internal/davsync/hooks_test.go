@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
 // A hook made on one computer is written into the other's agents by its
@@ -65,7 +65,7 @@ func TestSyncHooks(t *testing.T) {
 }
 
 // A library with no hooks hashes as it did before they were carried, so a
-// magpie that starts carrying them doesn't see a change to sync.
+// eipgam that starts carrying them doesn't see a change to sync.
 func TestNoHooksHashAsBefore(t *testing.T) {
 	none := []*library.Hook{}
 	with := backup.Bundle{Library: &library.Bundle{MCP: []*library.Server{}, Skills: []*library.CarriedSkill{}, Hooks: &none}}

@@ -12,15 +12,15 @@ import (
 )
 
 // A refresh of Codex's sign-in is a network round trip, and Codex can be
-// signed in to another account before it answers: by a switch (magpie's
+// signed in to another account before it answers: by a switch (eipgam's
 // own, as when the account in use is spent), or by the Codex app's own
 // sign-in. The refresh then never writes the account it started from back
-// over that one (darwish4021 on Discord: magpie "switched my account"),
+// over that one (darwish4021 on Discord: eipgam "switched my account"),
 // and a switch waits for a refresh in progress, so the account it saves
 // as the one replaced holds the refresh token the refresh got, not the
 // one it spent.
 func TestCodexRefreshNeverUndoesASwitch(t *testing.T) {
-	for _, by := range []string{"codex", "magpie"} {
+	for _, by := range []string{"codex", "eipgam"} {
 		t.Run(by, func(t *testing.T) {
 			home := signIn(t) // me@example.com, refresh token "r"
 			rememberLogins(true)
@@ -49,8 +49,8 @@ func TestCodexRefreshNeverUndoesASwitch(t *testing.T) {
 					// the Codex app signed in to me@example.com meanwhile
 					codexSignIn(t, home, "me@example.com", "r")
 					switched <- nil
-				case "magpie":
-					// magpie switched to me@example.com meanwhile; with
+				case "eipgam":
+					// eipgam switched to me@example.com meanwhile; with
 					// the refresh waited for, the switch is still waiting
 					// when the answer goes
 					go func() { _, err := switchSavedLogin("codex", "me@example.com"); switched <- err }()
@@ -78,7 +78,7 @@ func TestCodexRefreshNeverUndoesASwitch(t *testing.T) {
 			if a.Tokens.RefreshToken != "r" {
 				t.Fatalf("Codex is signed in to %q after the refresh, not the account switched to", a.Tokens.RefreshToken)
 			}
-			if by == "magpie" {
+			if by == "eipgam" {
 				for _, l := range readLogins() {
 					if l.User == "work@example.com" && !strings.Contains(string(l.Auth), "r-work-2") {
 						t.Fatalf("the account switched off was saved with the refresh token its refresh spent: %s", l.Auth)

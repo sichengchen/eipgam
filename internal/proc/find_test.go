@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A tool off PATH is found in the folders it is installed in, by its
@@ -79,7 +79,7 @@ func TestSystemDirsLieInTheTestsHome(t *testing.T) {
 // Windows is its sh shim alone, which Windows can't run: a folder holding
 // only that is given as the program it names, when that is a Windows one
 // still there, and passed over otherwise (CLJY on Discord: %APPDATA%\npm
-// had the 308-byte claude and no claude.cmd, and magpie ran the sh file).
+// had the 308-byte claude and no claude.cmd, and eipgam ran the sh file).
 // The shims are cmd-shim 7's own bytes, made on the Windows box.
 func TestToolInNPMShShimAlone(t *testing.T) {
 	read := func(name string) []byte {

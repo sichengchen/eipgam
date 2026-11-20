@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-// linkaww on Discord, a magpie in Docker in gateway mode: Usage › Context's
-// Tuned for you said Claude Code made 0 calls, while Through magpie below
+// linkaww on Discord, a eipgam in Docker in gateway mode: Usage › Context's
+// Tuned for you said Claude Code made 0 calls, while Through eipgam below
 // counted its requests. Tuned for you replays this computer's agents'
 // session files and changes their settings; in gateway mode the agents are
 // on other computers, so it has nothing to replay and nothing of theirs to

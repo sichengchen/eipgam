@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       await page.locator(".rt-act", { hasText: "dan@example.com" }).waitFor();
       // a long list shows its first rows, the rest behind "Show N more"
       // at its foot (ferock4669 on Discord): opened, every provider here

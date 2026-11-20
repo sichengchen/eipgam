@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The Codex magpie presents to ChatGPT (ouhthuo on X): a row in Codex's
+// The Codex eipgam presents to ChatGPT (ouhthuo on X): a row in Codex's
 // settings on the Agents page. Its button says the choice, "Codex CLI" by
 // default; the app's menu (no native select) offers Codex CLI and Codex
 // Desktop, and a pick posts settings/codex-client on its own: "" or
@@ -79,7 +79,7 @@ for (const engine of engines) {
           await browser.close();
         });
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await openAgentSettings(page);
         const row = page.locator('.row.agent[data-id="codex"] #codexClientRow');
         const pick = page.locator("#codexClientPick button");

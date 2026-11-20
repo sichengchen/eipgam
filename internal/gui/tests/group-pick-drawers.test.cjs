@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const card = page.locator('.rt-group[data-id="g"]');
       await card.waitFor();
       await card.locator("button", { hasText: w.edit }).click();

@@ -6,17 +6,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // helpAsked is whether args ask for help rather than for the command to
 // run: -h or --help anywhere, or help as the word after the command. It
 // is looked at before run does anything, since a command that took
-// --help for a value acted on it: `magpie snow --help` set Snow's model
-// to "--help", which took magpie out of it (#1457), and `magpie serve
+// --help for a value acted on it: `eipgam snow --help` set Snow's model
+// to "--help", which took eipgam out of it (#1457), and `eipgam serve
 // --help` started a gateway.
 func helpAsked(args []string) bool {
-	// what magpie is started with by others (Claude Code's MCP helper, the
+	// what eipgam is started with by others (Claude Code's MCP helper, the
 	// Agents page's dry run, a link, Windows' -Embedding) never carries
 	// an exact -h, --help or help
 	for _, a := range args {
@@ -27,8 +27,8 @@ func helpAsked(args []string) bool {
 	return len(args) > 1 && args[1] == "help"
 }
 
-// helpFor is what `magpie <command> --help` prints: the command's own
-// usage where it has one, its lines of magpie's usage otherwise, an
+// helpFor is what `eipgam <command> --help` prints: the command's own
+// usage where it has one, its lines of eipgam's usage otherwise, an
 // agent's forms and fields for an agent, and the whole usage for
 // anything else.
 func helpFor(args []string) string {
@@ -113,13 +113,13 @@ func helpFor(args []string) string {
 	return usage
 }
 
-// usageLines are the lines of magpie's usage for `magpie <cmd>`, with the
+// usageLines are the lines of eipgam's usage for `eipgam <cmd>`, with the
 // lines that carry on from them.
 func usageLines(cmd string) string {
 	var b strings.Builder
 	in := false
 	for _, l := range strings.Split(usage, "\n") {
-		if rest, ok := strings.CutPrefix(l, "  magpie "); ok {
+		if rest, ok := strings.CutPrefix(l, "  eipgam "); ok {
 			in = rest == cmd || strings.HasPrefix(rest, cmd+" ")
 		} else if !strings.HasPrefix(l, "          ") {
 			in = false
@@ -131,37 +131,37 @@ func usageLines(cmd string) string {
 	return b.String()
 }
 
-// agentHelp is `magpie <agent> --help`: the forms that set it, and its
+// agentHelp is `eipgam <agent> --help`: the forms that set it, and its
 // fields.
 func agentHelp(a *agent.Agent) string {
 	var b strings.Builder
 	id := a.ID
 	fmt.Fprintf(&b, "%s\n\n", a.Name)
-	fmt.Fprintf(&b, "  magpie %s                  show it\n", id)
+	fmt.Fprintf(&b, "  eipgam %s                  show it\n", id)
 	if len(a.Fields) == 0 {
 		return b.String()
 	}
-	fmt.Fprintf(&b, "  magpie %s <model>          set its model   (magpie models %s lists them)\n", id, id)
-	fmt.Fprintf(&b, "  magpie %s <field>          show one field\n", id)
-	fmt.Fprintf(&b, "  magpie %s <field> <value>  set another field\n", id)
-	fmt.Fprintf(&b, "  magpie %s default          take magpie out: back on what it had before\n", id)
-	fmt.Fprintf(&b, "  magpie %s <field> default  that field back to its own default\n", id)
+	fmt.Fprintf(&b, "  eipgam %s <model>          set its model   (eipgam models %s lists them)\n", id, id)
+	fmt.Fprintf(&b, "  eipgam %s <field>          show one field\n", id)
+	fmt.Fprintf(&b, "  eipgam %s <field> <value>  set another field\n", id)
+	fmt.Fprintf(&b, "  eipgam %s default          take eipgam out: back on what it had before\n", id)
+	fmt.Fprintf(&b, "  eipgam %s <field> default  that field back to its own default\n", id)
 	if a.Start != nil {
 		bin := a.Start().Bin
-		fmt.Fprintf(&b, "  magpie %s run [args…]      start %s, on magpie while its model is magpie's (what your shell's %s runs)\n", id, bin, bin)
-		fmt.Fprintf(&b, "  magpie %s env              the variables and model it is started with\n", id)
+		fmt.Fprintf(&b, "  eipgam %s run [args…]      start %s, on eipgam while its model is eipgam's (what your shell's %s runs)\n", id, bin, bin)
+		fmt.Fprintf(&b, "  eipgam %s env              the variables and model it is started with\n", id)
 	}
 	if a.ID == "claude" {
-		fmt.Fprintf(&b, "  magpie %s run [args…]      start Claude Code through magpie, a plain claude left as it is (what claude-magpie runs)\n", id)
-		fmt.Fprintf(&b, "  magpie %s launcher [add|remove]   the claude-magpie command\n", id)
+		fmt.Fprintf(&b, "  eipgam %s run [args…]      start Claude Code through eipgam, a plain claude left as it is (what claude-eipgam runs)\n", id)
+		fmt.Fprintf(&b, "  eipgam %s launcher [add|remove]   the claude-eipgam command\n", id)
 	}
 	if a.ID == "claude-desktop" {
-		fmt.Fprintf(&b, "  magpie %s launcher [add|remove]   Claude Magpie.app (macOS): Desktop on magpie in a folder of its own, your own Claude Desktop left signed in\n", id)
+		fmt.Fprintf(&b, "  eipgam %s launcher [add|remove]   Claude eipgam.app (macOS): Desktop on eipgam in a folder of its own, your own Claude Desktop left signed in\n", id)
 	}
 	// the tiers (Claude Code, Claude Desktop) and roles (omp) that take a
 	// model of their own, beside the main one (KoiLx0 on X)
 	if slots := slotKeys(a); len(slots) > 0 {
-		fmt.Fprintf(&b, "  magpie %s %s <model>   give one its own model (%s); default puts it back on the main model\n", id, slots[0], strings.Join(slots, ", "))
+		fmt.Fprintf(&b, "  eipgam %s %s <model>   give one its own model (%s); default puts it back on the main model\n", id, slots[0], strings.Join(slots, ", "))
 	}
 	var keys []string
 	for _, f := range a.Fields {
@@ -180,15 +180,15 @@ func agentHelp(a *agent.Agent) string {
 		if n > 1 {
 			names = strings.Join(both[:n-1], ", ") + " and " + both[n-1]
 		}
-		fmt.Fprintf(&b, "  %s alone name the %s: magpie %s %s sets its %s to %s\n", names, a.Fields[0].Label, id, both[0], a.Fields[0].Label, both[0])
-		// they are the agent's own models, not magpie's: setting one takes
-		// magpie out (#2000, read as a query of the tier)
-		fmt.Fprintf(&b, "  they are %s's own models, not magpie's: setting one takes magpie out; magpie %s alone shows each\n", a.Name, id)
+		fmt.Fprintf(&b, "  %s alone name the %s: eipgam %s %s sets its %s to %s\n", names, a.Fields[0].Label, id, both[0], a.Fields[0].Label, both[0])
+		// they are the agent's own models, not eipgam's: setting one takes
+		// eipgam out (#2000, read as a query of the tier)
+		fmt.Fprintf(&b, "  they are %s's own models, not eipgam's: setting one takes eipgam out; eipgam %s alone shows each\n", a.Name, id)
 	}
 	return b.String()
 }
 
-// flagArg is an argument to `magpie <agent> …` that is a flag, which no
+// flagArg is an argument to `eipgam <agent> …` that is a flag, which no
 // agent form takes: it is said to be one, rather than set as a model or a
 // field's value. A negative number is a value.
 func flagArg(args []string) string {

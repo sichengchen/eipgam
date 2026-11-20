@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A plugin's provider signed in to is a provider like the others: each of
@@ -25,7 +25,7 @@ import (
 func TestPluginProvider(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Cleanup(plugin.Settle)
 
 	type seen struct {
@@ -130,7 +130,7 @@ func TestPluginProvider(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/v1beta/models/fakeco/fake-gemini:streamGenerateContent?alt=sse",
 		strings.NewReader(`{"contents":[{"role":"user","parts":[{"text":"hello from Pi"}]}]}`))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-goog-api-key", "magpie")
+	req.Header.Set("x-goog-api-key", "eipgam")
 	rec := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "hi from gemini") {

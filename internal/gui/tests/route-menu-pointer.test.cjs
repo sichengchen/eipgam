@@ -15,7 +15,7 @@ const models = [
 const info = (ids) => ids.map((id) => ({ id, ready: true }));
 const group = (id, name, members, more = {}) => ({ id, name, members, ready: true, memberInfo: info(members), ...more });
 
-const SHARED = '{"magpie":"routing-group","version":1,"group":{"name":"One","members":["a/x","a/m"]}}';
+const SHARED = '{"eipgam":"routing-group","version":1,"group":{"name":"One","members":["a/x","a/m"]}}';
 
 function serve(lang, posts) {
   let list = [
@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     try {
       const page = await (await browser.newContext({ viewport: { width: 700, height: 700 }, reducedMotion: "reduce" })).newPage();
       await page.route("**/*", serve("en", []));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const row = page.locator(".rt-group[data-id=one] .main");
       await row.waitFor();
       const rb = await row.boundingBox();

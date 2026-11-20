@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // BieJian21872 on X: a second Claude Code (CLAUDE_CONFIG_DIR=~/.claude-work)
@@ -39,7 +39,7 @@ func TestClaudeCodeInMoreThanOneFolder(t *testing.T) {
 		listed = listed || b.ID == "claude#work"
 	}
 	if !listed {
-		t.Fatal("claude#work isn't among the agents magpie lists")
+		t.Fatal("claude#work isn't among the agents eipgam lists")
 	}
 	a := got["claude#work"]
 	if a.Dir != work || !a.Detected() || a.Name != "Claude Code · work" {
@@ -51,7 +51,7 @@ func TestClaudeCodeInMoreThanOneFolder(t *testing.T) {
 	path := filepath.Join(work, "settings.json")
 	if v, _ := edit.GetJSON(path, "env.ANTHROPIC_BASE_URL"); v != gateway.URL() {
 		b, _ := os.ReadFile(path)
-		t.Fatalf("%s doesn't point at magpie:\n%s", path, b)
+		t.Fatalf("%s doesn't point at eipgam:\n%s", path, b)
 	}
 	if v, _ := edit.GetJSON(path, "theme"); v != "dark" {
 		t.Fatalf("the user's theme is %q", v)

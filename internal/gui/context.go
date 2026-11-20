@@ -21,9 +21,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // defaultWindow is the window a prompt is measured against when the
@@ -284,7 +284,7 @@ func sessionOfRec(r *ctxRec) string {
 // its reply or its conversation id was read from (sessions' ResponseIDs and
 // Convs): dsh's chat-completions and messages routes send no session id, so
 // the gateway keys each request by its first prompt's hash, and the page
-// showed "magpie-a…" where the Sessions page shows the session's title
+// showed "eipgam-a…" where the Sessions page shows the session's title
 // (Kumo31 on Discord). A hash is the conversation's opening, which a fork
 // copies, so the reply's own id is asked first: a fork's reply has one its
 // source does not, and names the fork. An id two sessions share stays as it
@@ -961,7 +961,7 @@ func daysRecsLocked(r *http.Request, list []string) (out []ctxRec, stamp string)
 			}
 		}
 	}
-	// a group magpie found by the id agents pick it by (publicRoute)
+	// a group eipgam found by the id agents pick it by (publicRoute)
 	pub := publicRefs()
 	for i := range out {
 		out[i].Model = pub(out[i].Model)

@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-// Disconnect puts back only what magpie changed: a key the user edited by
-// hand while Codex was on magpie keeps the user's value, though magpie had
+// Disconnect puts back only what eipgam changed: a key the user edited by
+// hand while Codex was on eipgam keeps the user's value, though eipgam had
 // saved what was there before it connected (yhwangl on X).
 func TestCodexDisconnectKeepsHandEdits(t *testing.T) {
 	home, read := codexHome(t, "", "model = \"gpt-5.5\"\nmodel_reasoning_effort = \"low\"\nmodel_catalog_json = \"/x/old-list.json\"\n")
@@ -19,10 +19,10 @@ func TestCodexDisconnectKeepsHandEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, "model_provider = \"magpie\"") {
-		t.Fatalf("not magpie's provider:\n%s", cfg)
+	if !strings.Contains(cfg, "model_provider = \"eipgam\"") {
+		t.Fatalf("not eipgam's provider:\n%s", cfg)
 	}
-	// by hand, with magpie connected: an effort and a model list of their own
+	// by hand, with eipgam connected: an effort and a model list of their own
 	cfg = strings.Replace(cfg, "model_reasoning_effort = \"low\"", "model_reasoning_effort = \"high\"", 1)
 	lines := strings.Split(cfg, "\n")
 	for i, l := range lines {
@@ -40,12 +40,12 @@ func TestCodexDisconnectKeepsHandEdits(t *testing.T) {
 			t.Errorf("missing %q after Disconnect:\n%s", want, cfg)
 		}
 	}
-	if strings.Contains(cfg, "model_provider = \"magpie\"") {
-		t.Errorf("still on magpie:\n%s", cfg)
+	if strings.Contains(cfg, "model_provider = \"eipgam\"") {
+		t.Errorf("still on eipgam:\n%s", cfg)
 	}
 }
 
-// What magpie changed and the user didn't is put back as it was.
+// What eipgam changed and the user didn't is put back as it was.
 func TestCodexDisconnectPutsBackWhatMagpieChanged(t *testing.T) {
 	home, read := codexHome(t, "", "model = \"gpt-5.5\"\nmodel_reasoning_effort = \"low\"\n")
 	if err := codex(home).Fields[0].Set("fake/m1"); err != nil {
@@ -61,7 +61,7 @@ func TestCodexDisconnectPutsBackWhatMagpieChanged(t *testing.T) {
 		}
 	}
 	if strings.Contains(cfg, "model_catalog_json") || strings.Contains(cfg, "model_provider =") {
-		t.Errorf("magpie's keys left:\n%s", cfg)
+		t.Errorf("eipgam's keys left:\n%s", cfg)
 	}
 }
 

@@ -1,27 +1,27 @@
 package gateway
 
-// A reply says which of magpie's providers and models answered it (#822):
+// A reply says which of eipgam's providers and models answered it (#822):
 // the body's model is the vendor's own name for it (glm-5.3-flash), which
 // names neither the provider nor the group's member, so an agent that
 // counts usage by it puts every provider's glm-5.3-flash in one bucket.
 //
 // Every reply carries X-Magpie-Provider (the provider's id) and
-// X-Magpie-Model (magpie's provider/model id of the member that answered).
+// X-Magpie-Model (eipgam's provider/model id of the member that answered).
 // The body's model is the one the agent asked for whenever the request
 // went out under another name — a group's member, an alias, a fallback,
 // a provider/model id, a name the user gave the model upstream — since
 // agents compare it with what they asked and warn when it differs
 // (issennknight on Discord: deepseek-v4.1-flash served as
-// deepseek-v4.1-flash-1017). One of magpie's own aliases for Claude
+// deepseek-v4.1-flash-1017). One of eipgam's own aliases for Claude
 // Desktop or Science (magpieAliasAsked) is not among these: it names the
 // model only to Desktop and its Code tab, and a reply that carried it put
-// magpie's deployment name in the agent's usage records, where ccusage
+// eipgam's deployment name in the agent's usage records, where ccusage
 // counted it as a model of its own (#4667), so such a request keeps the
 // vendor's text, as every reply did before the asked-name rule. A request
 // that went out under the name it asked for keeps the vendor's text, a
 // dated name included. Settings' ReplyModel says what the body's model
 // is for every request and every agent: the model asked for (""),
-// magpie's id ("member"), or the vendor's text ("vendor", as before the
+// eipgam's id ("member"), or the vendor's text ("vendor", as before the
 // asked-for name). Both were asked for by ZoeCats on Discord, whose
 // Claude Code was given the name asked for under "member" until it named
 // the member to Claude Code, Claude Desktop and Codex too: the user's
@@ -38,9 +38,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
 )
 
 const (

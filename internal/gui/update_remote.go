@@ -3,13 +3,13 @@ package gui
 import (
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// updateAsked answers provider.RemoteUpdatePath: another magpie using
-// this one as its Remote magpie updated to want (nnlrl_75403 on Discord).
+// updateAsked answers provider.RemoteUpdatePath: another eipgam using
+// this one as its Remote eipgam updated to want (nnlrl_75403 on Discord).
 // This one updates as its own automatic update would, downloading the
 // latest and restarting into it once nothing would be cut short
 // (waitIdle), or says why it doesn't: nothing newer, automatic updates
@@ -44,7 +44,7 @@ func (u *updater) updateAsked(want string) provider.RemoteUpdate {
 	return provider.RemoteUpdate{State: "updating"}
 }
 
-// remoteUpdateJSON is a Remote magpie's row's word on its last ask to
+// remoteUpdateJSON is a Remote eipgam's row's word on its last ask to
 // update (provider.UpdateRemotes): Say on the row, Tip over it, each an
 // English key the page translates with the rest as its values.
 type remoteUpdateJSON struct {
@@ -55,7 +55,7 @@ type remoteUpdateJSON struct {
 	Cmd     string `json:"cmd,omitempty"`
 }
 
-// remoteUpdateNote is what the Remote magpie id's row says of its last
+// remoteUpdateNote is what the Remote eipgam id's row says of its last
 // ask to update, nil when nothing: one that is current, or not asked.
 func remoteUpdateNote(id string, now time.Time) *remoteUpdateJSON {
 	u, ok := provider.RemoteUpdateOf(id, now)
@@ -65,17 +65,17 @@ func remoteUpdateNote(id string, now time.Time) *remoteUpdateJSON {
 	j := &remoteUpdateJSON{Say: "can't update itself", V: u.Version, Manager: u.Manager, Cmd: u.Command}
 	switch u.State {
 	case "updating":
-		j.Say, j.Tip = "updating to {v}", "This magpie updated, so that one was asked to update to {v} too. It restarts into it once nothing is in flight."
+		j.Say, j.Tip = "updating to {v}", "This eipgam updated, so that one was asked to update to {v} too. It restarts into it once nothing is in flight."
 	case "off":
 		j.Say, j.Tip = "automatic updates off", "Automatic updates are turned off on that computer, so it stays on its version."
 	case "old":
-		j.Say, j.Tip = "update it there", "That magpie is too old to be updated from here: update it on that computer once."
+		j.Say, j.Tip = "update it there", "That eipgam is too old to be updated from here: update it on that computer once."
 	case "refused":
 		j.Say, j.Tip = "update it there", "Updating it from here takes a gateway key with full access there; this provider's key is read-only or held."
 	default:
 		switch u.Why {
 		case "container":
-			j.Tip = "It runs in a container: pull the new image (docker pull ghcr.io/yetone/magpie:latest) and recreate the container."
+			j.Tip = "It runs in a container: rebuild the image with the latest eipgam source and recreate the container."
 		case "package":
 			j.Tip = "{manager} installed it there: update it with {manager}."
 			if u.Command != "" {
@@ -84,7 +84,7 @@ func remoteUpdateNote(id string, now time.Time) *remoteUpdateJSON {
 		case "source":
 			j.Tip = "It was built from source: update it the way it was built."
 		default:
-			j.Tip = "magpie can't replace itself where it runs on that computer: update it there."
+			j.Tip = "eipgam can't replace itself where it runs on that computer: update it there."
 		}
 	}
 	return j

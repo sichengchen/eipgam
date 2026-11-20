@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/filelock"
 )
 
 // watchCodexThreads stands in for codexThreadsLater's Sync, looking every
@@ -41,10 +41,10 @@ func watchCodexThreads(t *testing.T) <-chan struct{} {
 }
 
 // nb5p on Discord: with the ChatGPT account Codex is signed in to used
-// up, magpie became Codex's provider (the takeover), and the turn the
-// user sent then started a thread on magpie. When the account came back
+// up, eipgam became Codex's provider (the takeover), and the turn the
+// user sent then started a thread on eipgam. When the account came back
 // Codex went back to OpenAI, but the thread, written to that minute, was
-// left on magpie for a later Sync, and none came: the Codex app couldn't
+// left on eipgam for a later Sync, and none came: the Codex app couldn't
 // go on with it on OpenAI, Retry failed the same way every time and its
 // model read "model unavailable". The takeover now stays while the thread
 // is written to (outStays), a Sync is asked for once it is quiet, and that
@@ -64,11 +64,11 @@ func TestCodexTakeoverThreadComesBackOnceQuiet(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) {
-		t.Fatalf("used up, magpie not Codex's provider:\n%s", cfg)
+	if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) {
+		t.Fatalf("used up, eipgam not Codex's provider:\n%s", cfg)
 	}
 	// the turn sent during the takeover, its rollout written just now
-	path := codexThreadOn(t, dir, id, "magpie")
+	path := codexThreadOn(t, dir, id, "eipgam")
 	now := time.Now()
 	os.Chtimes(path, now, now)
 
@@ -76,10 +76,10 @@ func TestCodexTakeoverThreadComesBackOnceQuiet(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) {
-		t.Fatalf("allowance back with a thread on magpie written to this minute, the takeover ended under it:\n%s", cfg)
+	if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) {
+		t.Fatalf("allowance back with a thread on eipgam written to this minute, the takeover ended under it:\n%s", cfg)
 	}
-	if p := codexRowOn(t, dir, id); p != "magpie" {
+	if p := codexRowOn(t, dir, id); p != "eipgam" {
 		t.Fatalf("a thread being written to was moved: %q", p)
 	}
 	select {
@@ -93,34 +93,34 @@ func TestCodexTakeoverThreadComesBackOnceQuiet(t *testing.T) {
 	select {
 	case <-asked:
 	case <-time.After(5 * time.Second):
-		t.Fatal("the thread left on magpie as it was written to: no later Sync asked for")
+		t.Fatal("the thread left on eipgam as it was written to: no later Sync asked for")
 	}
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	if cfg := read(); strings.Contains(cfg, "model_provider =") {
-		t.Fatalf("the thread quiet, magpie still Codex's provider:\n%s", cfg)
+		t.Fatalf("the thread quiet, eipgam still Codex's provider:\n%s", cfg)
 	}
 	if p := codexRowOn(t, dir, id); p != "openai" {
 		t.Fatalf("thread on %q after the later Sync, want openai, where Codex lists it", p)
 	}
 	select {
 	case <-asked:
-		t.Fatal("another Sync asked for with nothing left on magpie")
+		t.Fatal("another Sync asked for with nothing left on eipgam")
 	case <-time.After(50 * time.Millisecond):
 	}
 }
 
 // crypto0xfish on Discord, the Codex app: "Model provider mismatch. This
-// chat uses OpenAI, but your current provider is magpie. Switch to OpenAI
+// chat uses OpenAI, but your current provider is eipgam. Switch to OpenAI
 // to continue." The app holds the writer lock of every thread it has
 // loaded, the chat on screen among them, and a thread's row moves to
-// magpie (bringOver) only when no Codex holds it, so the chat open as
-// magpie became Codex's provider stayed on OpenAI. Nothing asked for
+// eipgam (bringOver) only when no Codex holds it, so the chat open as
+// eipgam became Codex's provider stayed on OpenAI. Nothing asked for
 // another Sync, so it stayed there after the app let it go, and the app
 // refused it on every reopen until something else synced, which can be
 // hours. bringOver now asks for that Sync once the thread is let go, and
-// it moves the thread to magpie, where the app resumes it.
+// it moves the thread to eipgam, where the app resumes it.
 func TestCodexOpenThreadFollowsMagpieOnceLetGo(t *testing.T) {
 	const id = "019a0000-0000-7000-8000-0000000000b2"
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
@@ -165,8 +165,8 @@ func TestCodexOpenThreadFollowsMagpieOnceLetGo(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) {
-		t.Fatalf("used up, magpie not Codex's provider:\n%s", cfg)
+	if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) {
+		t.Fatalf("used up, eipgam not Codex's provider:\n%s", cfg)
 	}
 	if p := codexRowOn(t, dir, id); p != "openai" {
 		t.Fatalf("a thread a Codex holds open was moved: %q", p)
@@ -187,8 +187,8 @@ func TestCodexOpenThreadFollowsMagpieOnceLetGo(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if p := codexRowOn(t, dir, id); p != "magpie" {
-		t.Fatalf("thread on %q after the later Sync, want magpie, where the app resumes it", p)
+	if p := codexRowOn(t, dir, id); p != "eipgam" {
+		t.Fatalf("thread on %q after the later Sync, want eipgam, where the app resumes it", p)
 	}
 	select {
 	case <-asked:

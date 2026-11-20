@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Chiao on Discord: an account card's window says what the whole window
-// holds, reckoned from what magpie routed through the account in it over
+// holds, reckoned from what eipgam routed through the account in it over
 // the share used — "≈ N tokens · ≈ $X" under its reset, in every language,
 // at a phone's width too, and in its tooltip how it was reckoned and that
 // it reads low if the account is used elsewhere. A window the server didn't
@@ -71,7 +71,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           await page.route("**/*", serve(lang));
-          await page.goto("http://magpie.test/?view=usage");
+          await page.goto("http://eipgam.test/?view=usage");
           await page.locator(".subscription-card .quota-holds").nth(2).waitFor();
           const got = await page.evaluate(() => {
             const lines = [...document.querySelectorAll(".quota-holds")];
@@ -170,7 +170,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           await page.route("**/*", serve(lang, baseCards));
-          await page.goto("http://magpie.test/?view=usage");
+          await page.goto("http://eipgam.test/?view=usage");
           await page.locator(".quota-holds-cost").nth(1).waitFor();
           const read = () => page.evaluate(() => [...document.querySelectorAll(".quota-holds")].map((l) => {
             const card = l.closest(".subscription-card").getBoundingClientRect(), b = l.getBoundingClientRect();
@@ -232,7 +232,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
             { name: "5 hours", used: 20, resetsAt: soon(2), holds: holds(2345678, 0, 20, false) },
           ] }];
           await page.route("**/*", serve(lang, cards));
-          await page.goto("http://magpie.test/?view=usage");
+          await page.goto("http://eipgam.test/?view=usage");
           await page.locator(".subscription-card .quota-holds").nth(1).waitFor();
           const got = await page.evaluate(() => [...document.querySelectorAll(".quota-holds")].map((l) => ({ text: l.textContent, title: l.title })));
           const at = `${lang} ${width}px`;
@@ -247,7 +247,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
 }
 
 // Anotiaww on X: the whole-window estimate follows the Overview's tokens
-// pick. With cache, it adds the cache read and written magpie routed in the
+// pick. With cache, it adds the cache read and written eipgam routed in the
 // window, scaled by the same share used, and says so on the line and in the
 // tooltip; picked on the tokens tile, the cards follow at once, the pick is
 // kept for the next load, and picked back the line is as it was.
@@ -258,7 +258,7 @@ const cacheCard = [{ provider: "claude", name: "Claude Code", icon: "claude-colo
 const withCacheTokens = 12345678 + (52345678 + 1000000) * 5;
 const summary = { calls: 30, errors: 0, input: 5000000, output: 2000000, reasoning: 0, cache_read: 90000000, cache_write: 0, unpriced: 0, cost: 0, bucket: "day",
   series: [{ label: "Oct 15", time: new Date().toISOString(), calls: 30, input: 5000000, output: 2000000, cache_read: 90000000, cache_write: 0, cost: 0 }],
-  path: "~/.config/magpie/usage.jsonl", agents: [], models: [], accounts: [], callerKeys: [] };
+  path: "~/.config/eipgam/usage.jsonl", agents: [], models: [], accounts: [], callerKeys: [] };
 const withCache = {
   en: { line: (n) => `Whole ≈ ${n} tokens with cache`, tip: "cache read and written included" },
   zh: { line: (n) => `整窗 ≈ ${n} tokens（含缓存）`, tip: "含缓存读取与写入" },
@@ -278,7 +278,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           await page.route("**/*", serve(lang, cacheCard, summary));
-          await page.goto("http://magpie.test/?view=usage");
+          await page.goto("http://eipgam.test/?view=usage");
           await page.locator(".subscription-card .quota-holds").first().waitFor();
           await page.locator("#stats .kpi .kpi-pick").first().waitFor();
           const at = `${lang} ${width}px`;

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// installFixture is a download folder holding exe (magpie-windows-amd64.exe,
+// installFixture is a download folder holding exe (eipgam-windows-amd64.exe,
 // as the site names it) and the place it installs to, each with its
 // version; what Settle asks of the system answers from them.
 type installFixture struct {
@@ -17,8 +17,8 @@ type installFixture struct {
 	versions                     map[string]uint64
 	placed                       []string // folders installCLI was asked to put on PATH
 	portable                     string
-	record                       string   // the folder chosen, as HKCU\Software\magpie keeps it
-	declined                     string   // the copy kept uninstalled, as HKCU\Software\magpie keeps it
+	record                       string   // the folder chosen, as HKCU\Software\eipgam keeps it
+	declined                     string   // the copy kept uninstalled, as HKCU\Software\eipgam keeps it
 	asked                        []string // what AskFolder was offered
 }
 
@@ -27,11 +27,11 @@ func newInstallFixture(t *testing.T) *installFixture {
 	root := t.TempDir()
 	f := &installFixture{
 		downloads: filepath.Join(root, "Downloads"),
-		to:        filepath.Join(root, "Local", "Programs", "magpie", "magpie.exe"),
+		to:        filepath.Join(root, "Local", "Programs", "eipgam", "eipgam.exe"),
 		profiles:  filepath.Join(root, "Roaming"),
 		versions:  map[string]uint64{},
 	}
-	f.exe = filepath.Join(f.downloads, "magpie-windows-amd64.exe")
+	f.exe = filepath.Join(f.downloads, "eipgam-windows-amd64.exe")
 	if err := os.MkdirAll(f.downloads, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func readString(t *testing.T, p string) string {
 }
 
 // Opened from Downloads with nothing installed, the app is copied to the
-// user's programs folder as magpie.exe, that folder goes on the PATH, and
+// user's programs folder as eipgam.exe, that folder goes on the PATH, and
 // the installed one is what opens. The download itself stays: it is the
 // user's file.
 func TestSettleInstallsADownload(t *testing.T) {
@@ -133,7 +133,7 @@ func TestSettleInstallsADownload(t *testing.T) {
 	if len(f.placed) != 1 || !samePath(f.placed[0], filepath.Dir(f.to)) {
 		t.Fatalf("PATH given %v, want the install folder once", f.placed)
 	}
-	left, _ := filepath.Glob(filepath.Join(filepath.Dir(f.to), ".magpie-install-*"))
+	left, _ := filepath.Glob(filepath.Join(filepath.Dir(f.to), ".eipgam-install-*"))
 	if len(left) != 0 {
 		t.Fatalf("staging files left: %v", left)
 	}
@@ -141,11 +141,11 @@ func TestSettleInstallsADownload(t *testing.T) {
 
 // A copy kept anywhere the user chose under a name of its own, or a
 // portable one, runs where it is and installs nothing; so does one run
-// with MAGPIE_NO_INSTALL=1.
+// with EIPGAM_NO_INSTALL=1.
 func TestSettleLeavesAChosenPlace(t *testing.T) {
 	f := newInstallFixture(t)
 	f.ask(t, filepath.Dir(f.to))
-	tools := filepath.Join(filepath.Dir(f.downloads), "Tools", "magpie.exe")
+	tools := filepath.Join(filepath.Dir(f.downloads), "Tools", "eipgam.exe")
 	if err := os.MkdirAll(filepath.Dir(tools), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -168,10 +168,10 @@ func TestSettleLeavesAChosenPlace(t *testing.T) {
 	}
 	t.Setenv(NoInstallEnv, "1")
 	if from, to := Settle(); from != "" || to != "" {
-		t.Fatalf("MAGPIE_NO_INSTALL=1 still opens %q", to)
+		t.Fatalf("EIPGAM_NO_INSTALL=1 still opens %q", to)
 	}
 	if forwards(f.exe) {
-		t.Fatal("MAGPIE_NO_INSTALL=1 still counts as forwarding")
+		t.Fatal("EIPGAM_NO_INSTALL=1 still counts as forwarding")
 	}
 }
 
@@ -203,7 +203,7 @@ func TestSettleKeepsTheInstalledVersion(t *testing.T) {
 				t.Fatalf("installed holds %q, want %q", got, c.want)
 			}
 			if len(f.placed) != 0 {
-				t.Fatalf("PATH written again for an installed magpie: %v", f.placed)
+				t.Fatalf("PATH written again for an installed eipgam: %v", f.placed)
 			}
 			if got := readString(t, f.exe); got != "MZ new download" {
 				t.Fatalf("the download was changed: %q", got)
@@ -231,12 +231,12 @@ func TestSettleFailingRunsOn(t *testing.T) {
 	}
 }
 
-// WebView2 keeps a profile per exe name, so magpie.exe would start with
+// WebView2 keeps a profile per exe name, so eipgam.exe would start with
 // none: the installed copy is pointed at the download's, unless it has
 // one of its own.
 func TestSettleKeepsTheWebViewProfile(t *testing.T) {
 	f := newInstallFixture(t)
-	old := filepath.Join(f.profiles, "magpie-windows-amd64.exe")
+	old := filepath.Join(f.profiles, "eipgam-windows-amd64.exe")
 	if err := os.MkdirAll(old, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -249,7 +249,7 @@ func TestSettleKeepsTheWebViewProfile(t *testing.T) {
 	}
 
 	g := newInstallFixture(t)
-	for _, d := range []string{"magpie-windows-amd64.exe", "magpie.exe"} {
+	for _, d := range []string{"eipgam-windows-amd64.exe", "eipgam.exe"} {
 		if err := os.MkdirAll(filepath.Join(g.profiles, d), 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -258,13 +258,13 @@ func TestSettleKeepsTheWebViewProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 	if exists(filepath.Join(filepath.Dir(g.to), "webview-profile")) {
-		t.Fatal("pointed away from magpie.exe's own profile")
+		t.Fatal("pointed away from eipgam.exe's own profile")
 	}
 }
 
-// The installed copy clears what magpie wrote beside the download: the
-// magpie.com and magpie.cmd that ran it, and what updates moved aside.
-// A magpie.cmd of the user's own, or one magpie wrote for another
+// The installed copy clears what eipgam wrote beside the download: the
+// eipgam.com and eipgam.cmd that ran it, and what updates moved aside.
+// A eipgam.cmd of the user's own, or one eipgam wrote for another
 // program there, stays.
 func TestSettledClearsOnlyMagpiesFiles(t *testing.T) {
 	f := newInstallFixture(t)
@@ -279,7 +279,7 @@ func TestSettledClearsOnlyMagpiesFiles(t *testing.T) {
 	if err := os.WriteFile(f.exe+".old", []byte("MZ"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// an update an older magpie downloaded beside it, never put in now
+	// an update an older eipgam downloaded beside it, never put in now
 	if err := os.WriteFile(f.exe+".new", []byte("MZ newer"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -294,25 +294,25 @@ func TestSettledClearsOnlyMagpiesFiles(t *testing.T) {
 		t.Fatal("the download itself was removed")
 	}
 	if os.Getenv(installedFromEnv) != "" {
-		t.Fatal("passed on to what the installed magpie starts")
+		t.Fatal("passed on to what the installed eipgam starts")
 	}
 
-	// the user's own, and magpie's for another program
-	own := []byte("@echo off\r\nrem mine\r\n\"%~dp0magpie-windows-amd64.exe\" %*\r\n")
+	// the user's own, and eipgam's for another program
+	own := []byte("@echo off\r\nrem mine\r\n\"%~dp0eipgam-windows-amd64.exe\" %*\r\n")
 	if err := os.WriteFile(filepath.Join(dir, shimName), own, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	other := comText([]byte("MZ launcher"), filepath.Join(dir, "magpie-windows-amd64 (1).exe"))
+	other := comText([]byte("MZ launcher"), filepath.Join(dir, "eipgam-windows-amd64 (1).exe"))
 	if err := os.WriteFile(com, other, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv(installedFromEnv, f.exe)
 	Settled()
 	if b, err := os.ReadFile(filepath.Join(dir, shimName)); err != nil || !bytes.Equal(b, own) {
-		t.Fatalf("the user's magpie.cmd: %q, %v", b, err)
+		t.Fatalf("the user's eipgam.cmd: %q, %v", b, err)
 	}
 	if b, err := os.ReadFile(com); err != nil || !bytes.Equal(b, other) {
-		t.Fatalf("another program's magpie.com: %v", err)
+		t.Fatalf("another program's eipgam.com: %v", err)
 	}
 }
 
@@ -335,10 +335,10 @@ func TestForwardWaitsForTheInstalledOne(t *testing.T) {
 		}
 		return make(chan struct{}), func() {}, nil
 	}
-	if err := Forward(`C:\Users\u\Downloads\magpie-windows-amd64.exe`, `C:\Users\u\AppData\Local\Programs\magpie\magpie.exe`); err != nil {
+	if err := Forward(`C:\Users\u\Downloads\eipgam-windows-amd64.exe`, `C:\Users\u\AppData\Local\Programs\eipgam\eipgam.exe`); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasSuffix(gotExe, `magpie.exe`) {
+	if !strings.HasSuffix(gotExe, `eipgam.exe`) {
 		t.Fatalf("opened %q", gotExe)
 	}
 	if strings.Join(gotArgs, " ") != strings.Join(os.Args[1:], " ") {
@@ -346,7 +346,7 @@ func TestForwardWaitsForTheInstalledOne(t *testing.T) {
 	}
 	var from, marks int
 	for _, e := range gotEnv {
-		if strings.HasPrefix(e, installedFromEnv+`=C:\Users\u\Downloads\magpie-windows-amd64.exe`) {
+		if strings.HasPrefix(e, installedFromEnv+`=C:\Users\u\Downloads\eipgam-windows-amd64.exe`) {
 			from++
 		}
 		if strings.HasPrefix(e, startedEnv+"=") {
@@ -370,12 +370,12 @@ func TestForwardWaitsForTheInstalledOne(t *testing.T) {
 		return c, func() {}, nil
 	}
 	if err := Forward("a", "b"); err == nil {
-		t.Fatal("a magpie that quit unstarted taken as opened")
+		t.Fatal("a eipgam that quit unstarted taken as opened")
 	}
 }
 
-// A download that opens the installed magpie writes no magpie.com beside
-// it: the terminal's magpie is the installed one's.
+// A download that opens the installed eipgam writes no eipgam.com beside
+// it: the terminal's eipgam is the installed one's.
 func TestNoCompanionBesideAForwardingDownload(t *testing.T) {
 	f := newInstallFixture(t)
 	f.installed(t, "MZ installed", 0)
@@ -393,7 +393,7 @@ func TestNoCompanionBesideAForwardingDownload(t *testing.T) {
 	// nor one that runs where it is: a download folder gets one only from
 	// Add (TestNoCompanionPutBackOnTheDesktop)
 	if exists(filepath.Join(f.downloads, comName)) {
-		t.Fatalf("magpie.com beside the download, forwarding: %v", forwards(f.exe))
+		t.Fatalf("eipgam.com beside the download, forwarding: %v", forwards(f.exe))
 	}
 }
 
@@ -419,18 +419,18 @@ func TestInFolder(t *testing.T) {
 }
 
 // The first time, the user is asked where to install, offered the
-// default; the folder they choose is where magpie goes, what goes on
+// default; the folder they choose is where eipgam goes, what goes on
 // PATH, and what is kept for the next download (feng_21795_78266 on
 // Discord).
 func TestSettleInstallsWhereTheUserChose(t *testing.T) {
 	f := newInstallFixture(t)
-	mine := filepath.Join(filepath.Dir(f.downloads), "D", "Apps", "magpie")
+	mine := filepath.Join(filepath.Dir(f.downloads), "D", "Apps", "eipgam")
 	f.ask(t, mine)
 	to, err := settle(f.exe)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := filepath.Join(mine, "magpie.exe")
+	want := filepath.Join(mine, "eipgam.exe")
 	if to != want {
 		t.Fatalf("settle opens %q, want %q", to, want)
 	}
@@ -486,12 +486,12 @@ func TestSettleDeclinedRunsHere(t *testing.T) {
 	}
 }
 
-// A magpie in the default folder from before there was a choice is
+// A eipgam in the default folder from before there was a choice is
 // installed: it is opened with no question and no record.
 func TestSettleDefaultInstallAsksNothing(t *testing.T) {
 	f := newInstallFixture(t)
 	f.installed(t, "MZ installed", 0)
-	f.ask(t, filepath.Join(t.TempDir(), "magpie"))
+	f.ask(t, filepath.Join(t.TempDir(), "eipgam"))
 	to, err := settle(f.exe)
 	if err != nil || to != f.to {
 		t.Fatalf("settle = %q, %v; want %q", to, err, f.to)
@@ -504,7 +504,7 @@ func TestSettleDefaultInstallAsksNothing(t *testing.T) {
 // A chosen folder since emptied is offered again, not the default.
 func TestSettleOffersTheChosenFolderAgain(t *testing.T) {
 	f := newInstallFixture(t)
-	gone := filepath.Join(t.TempDir(), "magpie")
+	gone := filepath.Join(t.TempDir(), "eipgam")
 	f.record = gone
 	f.ask(t, filepath.Dir(f.to))
 	to, err := settle(f.exe)
@@ -519,14 +519,14 @@ func TestSettleOffersTheChosenFolderAgain(t *testing.T) {
 	}
 }
 
-// A folder picked is used as it is when named magpie, else a magpie
+// A folder picked is used as it is when named eipgam, else a eipgam
 // folder goes inside it.
 func TestInstallDir(t *testing.T) {
 	root := t.TempDir()
 	for _, c := range []struct{ picked, want string }{
-		{filepath.Join(root, "Apps"), filepath.Join(root, "Apps", "magpie")},
-		{filepath.Join(root, "Apps", "magpie"), filepath.Join(root, "Apps", "magpie")},
-		{filepath.Join(root, "Apps", "Magpie") + string(filepath.Separator), filepath.Join(root, "Apps", "Magpie")},
+		{filepath.Join(root, "Apps"), filepath.Join(root, "Apps", "eipgam")},
+		{filepath.Join(root, "Apps", "eipgam"), filepath.Join(root, "Apps", "eipgam")},
+		{filepath.Join(root, "Apps", "eipgam") + string(filepath.Separator), filepath.Join(root, "Apps", "eipgam")},
 	} {
 		if got := InstallDir(c.picked); got != c.want {
 			t.Errorf("InstallDir(%q) = %q, want %q", c.picked, got, c.want)
@@ -542,11 +542,11 @@ func TestInstallableRefuses(t *testing.T) {
 	if err := Installable(f.downloads); err != ErrDownloadFolder {
 		t.Fatalf("Downloads: %v", err)
 	}
-	if err := Installable("magpie"); err == nil {
+	if err := Installable("eipgam"); err == nil {
 		t.Fatal("a relative folder accepted")
 	}
 	tmp := t.TempDir()
-	if err := Installable(filepath.Join(tmp, "new", "magpie")); err != nil {
+	if err := Installable(filepath.Join(tmp, "new", "eipgam")); err != nil {
 		t.Fatalf("a folder of the user's own: %v", err)
 	}
 	if exists(filepath.Join(tmp, "new")) {
@@ -575,19 +575,19 @@ func TestInstallableRefuses(t *testing.T) {
 	if err := Installable(ro); err != ErrNeedsAdmin {
 		t.Fatalf("a folder the user can't write: %v", err)
 	}
-	if err := Installable(filepath.Join(ro, "magpie")); err != ErrNeedsAdmin {
+	if err := Installable(filepath.Join(ro, "eipgam")); err != ErrNeedsAdmin {
 		t.Fatalf("a folder that can't be made: %v", err)
 	}
 }
 
 // A copy still named as the download, kept in a folder downloads don't
-// land in as far as magpie knows (a browser saving to D:\下载, a download
+// land in as far as eipgam knows (a browser saving to D:\下载, a download
 // moved into D:\Tools and updated in place there), is a download too
 // (@XBJNTMs2mDbsvPH on X): it asks, and installed, it opens the installed
 // copy, as a download in Downloads does. Without a dialog to ask in it
 // is never installed.
 func TestSettleAsksAboutADownloadKeptElsewhere(t *testing.T) {
-	for _, name := range []string{"magpie-windows-amd64.exe", "magpie-windows-arm64 (1).exe", "MAGPIE-WINDOWS-AMD64(2).EXE"} {
+	for _, name := range []string{"eipgam-windows-amd64.exe", "eipgam-windows-arm64 (1).exe", "EIPGAM-WINDOWS-AMD64(2).EXE"} {
 		t.Run(name, func(t *testing.T) {
 			f := newInstallFixture(t)
 			kept := filepath.Join(filepath.Dir(f.downloads), "下载", name)
@@ -623,11 +623,11 @@ func TestSettleAsksAboutADownloadKeptElsewhere(t *testing.T) {
 
 // Cancel on a copy kept outside a download folder is kept: it runs where
 // it is from then on, is never asked about again, and never opens an
-// installed magpie in its place. Another copy is asked about still, and
+// installed eipgam in its place. Another copy is asked about still, and
 // a download in Downloads as before.
 func TestSettleDeclinedElsewhereIsKept(t *testing.T) {
 	f := newInstallFixture(t)
-	kept := filepath.Join(filepath.Dir(f.downloads), "Tools", "magpie-windows-amd64.exe")
+	kept := filepath.Join(filepath.Dir(f.downloads), "Tools", "eipgam-windows-amd64.exe")
 	if err := os.MkdirAll(filepath.Dir(kept), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -652,7 +652,7 @@ func TestSettleDeclinedElsewhereIsKept(t *testing.T) {
 	if to, err := settle(kept); to != "" || err != nil || forwards(kept) {
 		t.Fatalf("the declined copy opens %q (%v)", to, err)
 	}
-	other := filepath.Join(filepath.Dir(kept), "magpie-windows-amd64 (1).exe")
+	other := filepath.Join(filepath.Dir(kept), "eipgam-windows-amd64 (1).exe")
 	if err := os.WriteFile(other, []byte("MZ other"), 0o755); err != nil {
 		t.Fatal(err)
 	}

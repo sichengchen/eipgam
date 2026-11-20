@@ -17,7 +17,7 @@ const HOME = "/Users/emo";
 const DIR = HOME + "/code/app";
 const agent = (id, name, more = {}) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json`, instructions: `${HOME}/.${id}/AGENTS.md`, ...more });
 const lib = (pr) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [
     agent("claude", "Claude Code", { projectInstructions: "CLAUDE.md" }),
     agent("codex", "Codex", { projectInstructions: "AGENTS.md" }),
@@ -94,13 +94,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang, async () => {
         const w = words[lang], posts = [];
         const ctx = await browser.newContext({ viewport: { width: 860, height: 1000 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "instructions"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "instructions"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posts));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const card = page.locator("#view-library .lib-project");
         await card.waitFor();

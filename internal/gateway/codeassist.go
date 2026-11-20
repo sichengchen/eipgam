@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // ---- Google Code Assist (provider side) --------------------------------------
@@ -53,7 +53,7 @@ func accountAgent(p provider.Provider) string {
 // "Resource has been exhausted (e.g. check quota)" whatever the quota left:
 // one that carries a line of agTurnedAway anywhere in the system
 // instruction, in any case, is turned away on every model (#666), and since
-// 11-14 Codex's GPT-5 line in a user's turn too. magpie rewords those lines
+// 11-14 Codex's GPT-5 line in a user's turn too. eipgam rewords those lines
 // before they go (antigravityCloak, antigravityCloakMessages); this still tells the refusal for what it is
 // when the user has the prompt sent as written, or Google turns away a copy
 // someone broke up with invisible characters, so no one chases a quota that
@@ -77,7 +77,7 @@ func antigravityTurnsAway(system string) bool {
 //     conversation's first developer message, and a thread begun on a GPT
 //     model keeps it when it is switched to another (/model, resume -m) or
 //     forked as an agent's thread, so such a thread on an Antigravity model
-//     never got an answer (Jodiezzzzzz on X, 10-27). The prompt magpie
+//     never got an answer (Jodiezzzzzz on X, 10-27). The prompt eipgam
 //     handed other models until 11-01 ("You are Codex, based on GPT-5."),
 //     "an AI agent based on GPT-5" and GPT-6's prompt go through. Codex's
 //     prompt for a model it doesn't know, which other models carry since
@@ -187,7 +187,7 @@ var agInvisibleRe = lazyre.New(agInvisible)
 
 // agLineRe matches line in any case, with any run of white space between
 // its words and any invisible characters inside them, so a copy someone
-// broke up (an older magpie, the antigravity-cloak middleware before 0.1.7)
+// broke up (an older eipgam, the antigravity-cloak middleware before 0.1.7)
 // is found as the line. Claude Code's billing line is matched to the end of
 // its line, since it goes whole.
 func agLineRe(line string) *lazyre.RE {
@@ -408,36 +408,36 @@ func (s *Server) antigravityForeseen(p provider.Provider, from provider.Protocol
 	return antigravityHint(req.System)
 }
 
-// antigravityTurnedAwayHint is what magpie adds to Antigravity's words, after
+// antigravityTurnedAwayHint is what eipgam adds to Antigravity's words, after
 // " — ", for the agent and the Routing page, which says it apart from them in
 // its own language (routing/client.js AG_TURNED_AWAY).
 const antigravityTurnedAwayHint = "Antigravity answers this 429 to the system prompt of Claude Code and the Claude Agent SDK (Claude Desktop's chats) whatever quota is left, so it is not a quota and waiting won't help; use another provider for these chats, or put one after Antigravity in a routing group"
 
 // antigravityCodexHint is the hint for Codex's GPT-5 system prompt
 // (routing/client.js AG_CODEX): the thread keeps the prompt it began with,
-// and a new one on the Antigravity model is sent magpie's own.
+// and a new one on the Antigravity model is sent eipgam's own.
 const antigravityCodexHint = "Antigravity answers this 429 to Codex's own system prompt for GPT-5 models whatever quota is left, so it is not a quota and waiting won't help; a Codex chat begun on a GPT model keeps that prompt after a model switch or a fork, so start a new chat on this model"
 
 // antigravityHermesHint is the hint for Hermes Agent's persona, today's or
 // the earlier one, word for word what the antigravity plugin says
 // (HERMES_HINT; routing/client.js AG_HERMES).
-const antigravityHermesHint = "Antigravity answers this 429 to Hermes Agent's default persona (\"You are Hermes Agent, …\" in its SOUL.md), the current one and the earlier one alike, whatever quota is left, so it is not a quota and waiting won't help; magpie sends it as \"You're Hermes Agent, …\", which goes through, so start SOUL.md another way, or use another provider for these chats"
+const antigravityHermesHint = "Antigravity answers this 429 to Hermes Agent's default persona (\"You are Hermes Agent, …\" in its SOUL.md), the current one and the earlier one alike, whatever quota is left, so it is not a quota and waiting won't help; eipgam sends it as \"You're Hermes Agent, …\", which goes through, so start SOUL.md another way, or use another provider for these chats"
 
 // antigravityOpenCodeHint is the hint for OpenCode's prompts (OPENCODE_HINT;
 // routing/client.js AG_OPENCODE).
-const antigravityOpenCodeHint = "Antigravity answers this 429 to OpenCode's system prompt (\"You are OpenCode, …\") whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"You're OpenCode, …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group"
+const antigravityOpenCodeHint = "Antigravity answers this 429 to OpenCode's system prompt (\"You are OpenCode, …\") whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"You're OpenCode, …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group"
 
 // antigravityCodexCLIHint is the hint for Codex's prompt for a model it has
 // none of its own for (CODEX_CLI_HINT; routing/client.js AG_CODEX_CLI).
-const antigravityCodexCLIHint = "Antigravity answers this 429 to Codex's prompt for a model it has none of its own for (\"You are a coding agent running in the Codex CLI\") whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"You're …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group"
+const antigravityCodexCLIHint = "Antigravity answers this 429 to Codex's prompt for a model it has none of its own for (\"You are a coding agent running in the Codex CLI\") whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"You're …\", which goes through, so use another provider for these chats, or put one after Antigravity in a routing group"
 
 // antigravityPiHint is the hint for pi's default prompt (PI_HINT;
 // routing/client.js AG_PI).
-const antigravityPiHint = "Antigravity answers this 429 to pi's default system prompt (\"You are a coding assistant running inside pi\") whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"running within pi\", which goes through, so give pi a system prompt of your own (--system-prompt) or use another provider for these chats"
+const antigravityPiHint = "Antigravity answers this 429 to pi's default system prompt (\"You are a coding assistant running inside pi\") whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"running within pi\", which goes through, so give pi a system prompt of your own (--system-prompt) or use another provider for these chats"
 
 // antigravityRFCHint is the hint for omp's RFC 2119 line, word for word
 // what the antigravity plugin says (RFC_HINT; routing/client.js AG_RFC).
-const antigravityRFCHint = "Antigravity answers this 429 to the line \"RFC 2119 keywords: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL.\" that starts oh-my-pi (omp)'s system prompt, and to any prompt that has it, whatever quota is left, so it is not a quota and waiting won't help; magpie sends that line as \"RFC 2119 key words: …\", which goes through, so this one came from a copy of it that was worded another way"
+const antigravityRFCHint = "Antigravity answers this 429 to the line \"RFC 2119 keywords: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL.\" that starts oh-my-pi (omp)'s system prompt, and to any prompt that has it, whatever quota is left, so it is not a quota and waiting won't help; eipgam sends that line as \"RFC 2119 key words: …\", which goes through, so this one came from a copy of it that was worded another way"
 
 // antigravityHint is the hint for what Antigravity turned away with system
 // as its system instruction.
@@ -476,7 +476,7 @@ const turnedAwayErrType = "prompt_turned_away"
 
 // codeAssistID is the id a request on the account's app goes out under: on
 // Antigravity the variant the effort picks for a model that is a family of
-// levels, and elsewhere the model magpie knows. It is keyed by the account
+// levels, and elsewhere the model eipgam knows. It is keyed by the account
 // (accountAgent) rather than by the provider's id, since that is the account
 // the variants belong to, and it is the id a ledger judges what the vendor
 // answered against (provider.AntigravitySentID), so the gateway and the
@@ -2081,11 +2081,11 @@ func hasResponse(parts []map[string]any) bool {
 	return false
 }
 
-// antigravityRound is ask, a round of magpie's own search for p, told as
+// antigravityRound is ask, a round of eipgam's own search for p, told as
 // the refusal it is when Antigravity turns the system prompt away: its 429
 // or the reply's own error event gets the hint, and the attempt is marked
 // so the account doesn't rest. Codex asks every turn with its web_search
-// tool, which an Antigravity model is given magpie's search for, so its
+// tool, which an Antigravity model is given eipgam's search for, so its
 // turns went this way and came back as the plain 429 that Codex retried to
 // its limit (Jodiezzzzzz on X, 10-27).
 func antigravityRound(w http.ResponseWriter, p provider.Provider, ask round) round {

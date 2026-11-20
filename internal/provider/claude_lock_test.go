@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudelock"
-	"github.com/yetone/magpie/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/claudelock"
+	"github.com/sichengchen/eipgam/internal/filelock"
 )
 
 // claudeLockAccounts signs Claude Code in to b, with a saved beside it,
@@ -51,7 +51,7 @@ func savedAuth(t *testing.T, user string) string {
 // #4532: a switch while Claude Code refreshes b's sign-in under its
 // .oauth_refresh.lock waits for the refresh, and saves b as refreshed: read
 // before, b's refresh token was the one the refresh spent, and b was
-// signed out of magpie on its next use.
+// signed out of eipgam on its next use.
 func TestClaudeSwitchWaitsForClaudeCodesRefresh(t *testing.T) {
 	for _, name := range []string{"refresh", "legacy", "config"} {
 		t.Run(name, func(t *testing.T) {
@@ -156,9 +156,9 @@ func TestClaudeSwitchStaleAndHeldLocks(t *testing.T) {
 	})
 }
 
-// #4532: a switch from one magpie process waits for Claude Code another
+// #4532: a switch from one eipgam process waits for Claude Code another
 // runs in the account's own directory (the app reading its /usage while
-// `magpie accounts switch` runs), and hands Claude Code the sign-in that
+// `eipgam accounts switch` runs), and hands Claude Code the sign-in that
 // run refreshed. Before, the wait was in-process only: the switch handed
 // over the refresh token the run then spent.
 func TestClaudeSwitchWaitsForAnotherMagpiesRun(t *testing.T) {
@@ -171,7 +171,7 @@ func TestClaudeSwitchWaitsForAnotherMagpiesRun(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// the other magpie's run, as markClaudeRun holds it there
+	// the other eipgam's run, as markClaudeRun holds it there
 	mark := claudeAccountDir("max@x.com") + ".run-99999-1.lock"
 	unlock, held := filelock.Lock(mark, time.Second)
 	if !held {
@@ -182,7 +182,7 @@ func TestClaudeSwitchWaitsForAnotherMagpiesRun(t *testing.T) {
 	select {
 	case err := <-done:
 		unlock()
-		t.Fatalf("switched while another magpie ran Claude Code in the account's directory (%v)", err)
+		t.Fatalf("switched while another eipgam ran Claude Code in the account's directory (%v)", err)
 	case <-time.After(300 * time.Millisecond):
 	}
 	// its Claude Code refreshes the sign-in there, and ends
@@ -270,7 +270,7 @@ func TestSavedClaudeRunHoldsItsLock(t *testing.T) {
 	}
 }
 
-// Forgetting an account whose directory a run of another magpie process
+// Forgetting an account whose directory a run of another eipgam process
 // holds is refused (#3254): the folder and the saved sign-in stay. A lock
 // file whose run ended holds nothing, and the forget goes on.
 func TestClaudeForgetRefusedWhileAnotherMagpieRunsTheFolder(t *testing.T) {

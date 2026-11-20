@@ -64,7 +64,7 @@ async function open(engine, lang, width, tab, posted, st, t, touch = false) {
   page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; errors.push(e.message); }); // a goto in WebKit can cut off a fetch (#1350)
   await page.route("**/*", serve(lang, posted, st));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings&tab=" + tab);
+  await page.goto("http://eipgam.test/?view=settings&tab=" + tab);
   await settingsDrawn(page); // rows found are the ones that stay (#1659)
   await page.locator(`#setPage-${tab} .segs .opt`).first().waitFor();
   return { page, errors };

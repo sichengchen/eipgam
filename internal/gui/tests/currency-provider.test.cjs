@@ -34,7 +34,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], lanURLs: [],
     ...over,
@@ -117,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.route("**/*", server(lang, saved));
 
           // dollars everywhere by default
-          await page.goto("http://magpie.test/?view=usage");
+          await page.goto("http://eipgam.test/?view=usage");
           await page.locator("#usageModels .row").first().waitFor();
           assert.equal(await totalCost(page), "$3.00");
           assert.equal(await modelCost(page, "deepseek-chat"), "$1.00");

@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, quotas));
-      await page.goto(`http://magpie.test/?view=${view}`);
+      await page.goto(`http://eipgam.test/?view=${view}`);
       const said = lang === "en" ? [GRANTS, HINT] : await page.evaluate(([l, keys]) => keys.map((k) => I18N[l][k]), [lang, [GRANTS, HINT]]);
       return { page, errors, said };
     };

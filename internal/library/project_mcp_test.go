@@ -81,7 +81,7 @@ func TestProjectServers(t *testing.T) {
 	if read(t, filepath.Join(h, ".claude.json")) != globalClaude || read(t, filepath.Join(h, ".codex", "config.toml")) != globalCodex {
 		t.Error("a user-wide file was written")
 	}
-	// the files magpie made are kept out of git; the user's .mcp.json isn't
+	// the files eipgam made are kept out of git; the user's .mcp.json isn't
 	g := excluded(t, proj)
 	for _, f := range []string{"/.codex/config.toml", "/.gemini/settings.json", "/.cursor/mcp.json", "/opencode.json"} {
 		if !strings.Contains(g, f+"\n") {
@@ -102,7 +102,7 @@ func TestProjectServers(t *testing.T) {
 		t.Errorf("after rename: %v", s)
 	}
 
-	// taken from some agents: out of their files, those magpie made gone
+	// taken from some agents: out of their files, those eipgam made gone
 	ok(t)(ProjectServer(proj, "fs", []string{"claude"}))
 	for _, f := range []string{".codex", ".gemini", ".cursor", "opencode.json"} {
 		gone(t, filepath.Join(proj, f))
@@ -111,7 +111,7 @@ func TestProjectServers(t *testing.T) {
 		t.Errorf("info/exclude: %q", g)
 	}
 
-	// removing the project takes out only magpie's entries
+	// removing the project takes out only eipgam's entries
 	ok(t)(RemoveProject(proj, false))
 	s = servers(t, mcp, "mcpServers")
 	if len(s) != 1 || s["team"] == nil {
@@ -122,7 +122,7 @@ func TestProjectServers(t *testing.T) {
 	}
 }
 
-// A server by the name that magpie didn't write is the user's: it's left
+// A server by the name that eipgam didn't write is the user's: it's left
 // as it is, and said so.
 func TestProjectServerNotOurs(t *testing.T) {
 	_, proj := mcpProject(t)
@@ -144,7 +144,7 @@ func TestProjectServerNotOurs(t *testing.T) {
 	}
 }
 
-// What the user adds to a file magpie made keeps it, out of info/exclude.
+// What the user adds to a file eipgam made keeps it, out of info/exclude.
 func TestProjectServerFileKept(t *testing.T) {
 	_, proj := mcpProject(t)
 	ok(t)(ProjectServer(proj, "fs", []string{"cursor"}))
@@ -216,7 +216,7 @@ func TestProjectServersPi(t *testing.T) {
 		t.Errorf("problems: %+v", r.Problems)
 	}
 
-	// a file magpie made, in Pi's own shape, kept out of git
+	// a file eipgam made, in Pi's own shape, kept out of git
 	pi := filepath.Join(proj, ".pi", "mcp.json")
 	ps := servers(t, pi, "mcpServers")
 	if fs, _ := ps["fs"].(map[string]any); fs["command"] != "npx" || fs["type"] != nil {
@@ -239,7 +239,7 @@ func TestProjectServersPi(t *testing.T) {
 		t.Error("ProjectMCPFile/ProjectNoSSE")
 	}
 
-	// taken out: the file it made goes with magpie's servers
+	// taken out: the file it made goes with eipgam's servers
 	ok(t)(RemoveProject(proj, false))
 	gone(t, filepath.Join(proj, ".pi"))
 	if g := excluded(t, proj); g != "" {
@@ -247,8 +247,8 @@ func TestProjectServersPi(t *testing.T) {
 	}
 }
 
-// #514: a project removed with keep goes off magpie's list alone; the
-// skills and servers magpie put in it, and its .gitignore lines, stay.
+// #514: a project removed with keep goes off eipgam's list alone; the
+// skills and servers eipgam put in it, and its .gitignore lines, stay.
 func TestRemoveProjectKeep(t *testing.T) {
 	h, proj := mcpProject(t)
 	src := filepath.Join(h, "src")
@@ -279,7 +279,7 @@ func TestRemoveProjectKeep(t *testing.T) {
 		}
 	}
 	check("removed")
-	// nothing magpie does later takes them out
+	// nothing eipgam does later takes them out
 	ok(t)(Sync())
 	ok(t)(RemoveServer("fs"))
 	check("later")

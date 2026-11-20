@@ -10,18 +10,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// magpie's provider under providers says what OpenCode 2 reads magpie's
+// eipgam's provider under providers says what OpenCode 2 reads eipgam's
 // provider under provider as: want is what OpenCode 2.1.4's opencode debug
-// config printed under providers.magpie for this block in an opencode.json
+// config printed under providers.eipgam for this block in an opencode.json
 // (its apiKey, shown there as ***, put back), levels, fast variants, an
 // image model and one without levels.
 func TestOpenCodeNativeIsOpenCode2s(t *testing.T) {
-	block := map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "magpie",
+	block := map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "eipgam",
 		"options": map[string]any{"baseURL": "http://127.0.0.1:3425/v1", "apiKey": "mk-test"},
 		"models": orderedJSON{
 			{"think/deep", map[string]any{"name": "Deep", "modalities": map[string]any{"input": []string{"text", "image"}, "output": []string{"text"}},
@@ -29,7 +29,7 @@ func TestOpenCodeNativeIsOpenCode2s(t *testing.T) {
 			{"think/plain", map[string]any{"name": "Plain", "variants": openCodeVariants(nil, false)}},
 			{"gpt/fast", map[string]any{"name": "Fast", "variants": openCodeVariants(nil, true)}},
 		}}
-	const want = `{"name":"magpie","package":"aisdk:@ai-sdk/openai-compatible","settings":{"apiKey":"mk-test","baseURL":"http://127.0.0.1:3425/v1"},"models":{` +
+	const want = `{"name":"eipgam","package":"aisdk:@ai-sdk/openai-compatible","settings":{"apiKey":"mk-test","baseURL":"http://127.0.0.1:3425/v1"},"models":{` +
 		`"gpt/fast":{"name":"Fast","variants":[{"id":"fast","settings":{"extraBody":{"service_tier":"priority"}},"body":{"service_tier":"priority"}}]},` +
 		`"think/deep":{"name":"Deep","capabilities":{"tools":true,"input":["text","image"],"output":["text"]},"variants":[` +
 		`{"id":"none","settings":{"reasoningEffort":"none"}},{"id":"high","settings":{"reasoningEffort":"high"}},{"id":"max","settings":{"reasoningEffort":"max"}},` +
@@ -64,13 +64,13 @@ func thinkCatalog(t *testing.T) {
 // form does to a provider it saves (config-v2.js, writeSectionEntry): the
 // one under provider goes, and the block under providers is the form's,
 // from before think/new: a stale baseURL and key, a header and a setting
-// of the user's own, magpie's variants (some of levels deep no longer has,
+// of the user's own, eipgam's variants (some of levels deep no longer has,
 // one in OpenChamber's split), one the user wrote over and one of their
 // own, a modelID, as #3883's block has, and a model the catalog no longer
 // has.
 func openChamberSaved(t *testing.T, path string) {
 	t.Helper()
-	const stale = `{"name":"magpie","package":"aisdk:@ai-sdk/openai-compatible",
+	const stale = `{"name":"eipgam","package":"aisdk:@ai-sdk/openai-compatible",
 		"settings":{"baseURL":"http://127.0.0.1:1/v1","apiKey":"old","timeout":600000},
 		"headers":{"X-Mine":"1"},
 		"models":{
@@ -89,7 +89,7 @@ func openChamberSaved(t *testing.T, path string) {
 	}
 }
 
-// providersCurrent checks that magpie's provider under providers in the
+// providersCurrent checks that eipgam's provider under providers in the
 // OpenCode config at path says what the one under provider says, with what
 // openChamberSaved left of the user's kept.
 func providersCurrent(t *testing.T, path string) {
@@ -122,7 +122,7 @@ func providersCurrent(t *testing.T, path string) {
 	if !slices.Contains(ids, "think/new") || !reflect.DeepEqual(ids, want) {
 		t.Fatalf("models %v, provider's %v: %s", ids, want, raw)
 	}
-	// in the order magpie lists them under provider (#4575)
+	// in the order eipgam lists them under provider (#4575)
 	if order, v1order := jsonKeyOrder(t, raw, "models"), jsonKeyOrder(t, raw1Of(path), "models"); !slices.Equal(order, v1order) {
 		t.Fatalf("models in the order %v, provider's %v", order, v1order)
 	}
@@ -157,16 +157,16 @@ func providersCurrent(t *testing.T, path string) {
 	}
 }
 
-// #3883: once OpenChamber's form had saved magpie's provider under
-// providers, which OpenCode 2 reads instead of provider, magpie's sync put
+// #3883: once OpenChamber's form had saved eipgam's provider under
+// providers, which OpenCode 2 reads instead of provider, eipgam's sync put
 // its provider back under provider and OpenCode 2 never saw think/new.
-// The sync brings the block under providers up to magpie's models too;
+// The sync brings the block under providers up to eipgam's models too;
 // a config without one doesn't get one.
 func TestOpenCodeProvidersKeptCurrent(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	thinkCatalog(t)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+	if err := oc.Apply("model", "eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	if err := oc.Sync(); err != nil {
@@ -190,11 +190,11 @@ func TestOpenCodeProvidersKeptCurrent(t *testing.T) {
 	}
 	// a model picked again writes it there as well
 	openChamberSaved(t, oc.Path)
-	if err := oc.Apply("model", "magpie/think/new"); err != nil {
+	if err := oc.Apply("model", "eipgam/think/new"); err != nil {
 		t.Fatal(err)
 	}
 	providersCurrent(t, oc.Path)
-	// stepped off magpie, its provider goes under both
+	// stepped off eipgam, its provider goes under both
 	if err := oc.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
@@ -205,18 +205,18 @@ func TestOpenCodeProvidersKeptCurrent(t *testing.T) {
 	}
 }
 
-// What says whether OpenCode reaches magpie reads the block under
+// What says whether OpenCode reaches eipgam reads the block under
 // providers too, which OpenCode 2 sends by: one at another address is off
 // until a sync brings it back.
 func TestOpenCodeCheckReadsProviders(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	thinkCatalog(t)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+	if err := oc.Apply("model", "eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	if off := oc.Check(); off != "" {
-		t.Fatalf("off on magpie's own: %s", off)
+		t.Fatalf("off on eipgam's own: %s", off)
 	}
 	if err := edit.SetJSON(oc.Path, edit.KV{Path: openCodeNativeKey, Value: map[string]any{
 		"settings": map[string]any{"baseURL": "http://127.0.0.1:1/v1", "apiKey": "old"}}}); err != nil {
@@ -265,11 +265,11 @@ func jsonKeyOrder(t *testing.T, raw, key string) []string {
 	return keys
 }
 
-// magpie's models go under providers in the order magpie lists them, as
+// eipgam's models go under providers in the order eipgam lists them, as
 // under provider (#4575), and a model's cost in OpenCode 2's words: a list
 // of tiers, its cache prices under cache (migrateModel's costs at v2.2.5).
 func TestOpenCodeNativeKeepsOrderAndCost(t *testing.T) {
-	block := map[string]any{"name": "magpie", "npm": "@ai-sdk/openai-compatible", "models": orderedJSON{
+	block := map[string]any{"name": "eipgam", "npm": "@ai-sdk/openai-compatible", "models": orderedJSON{
 		{"zeta/z", map[string]any{"name": "Z", "cost": map[string]any{"input": 1.0, "output": 2.0, "cache_read": 0.1, "cache_write": 1.25}}},
 		{"alpha/a", map[string]any{"name": "A"}},
 	}}

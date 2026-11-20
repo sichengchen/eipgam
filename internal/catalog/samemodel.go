@@ -4,7 +4,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // SameModel is a model's name as vendors agree on it: lowercase, without

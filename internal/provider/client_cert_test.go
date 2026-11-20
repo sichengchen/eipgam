@@ -13,11 +13,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/mtls"
 )
 
-// mtlsMagpie is a magpie behind mTLS (#5596, clxsh: an Nginx asking for
-// a client certificate in front of the magpie at home): its certificate
+// mtlsMagpie is a eipgam behind mTLS (#5596, clxsh: an Nginx asking for
+// a client certificate in front of the eipgam at home): its certificate
 // is st's CA's, and it answers only a client showing one st issued, with
 // the gateway key.
 func mtlsMagpie(t *testing.T, st mtls.Store) *httptest.Server {
@@ -46,8 +46,8 @@ func mtlsMagpie(t *testing.T, st mtls.Store) *httptest.Server {
 	return s
 }
 
-// Remote magpie with a client certificate, its key and the server's CA
-// lists the other magpie's models and passes its connection test; without
+// Remote eipgam with a client certificate, its key and the server's CA
+// lists the other eipgam's models and passes its connection test; without
 // them both fail on the certificate. The paths are kept whole, a ~ taken
 // as home.
 func TestRemoteMagpieClientCert(t *testing.T) {

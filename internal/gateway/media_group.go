@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // mediaMembers is the routing group ref with its members ready now for
@@ -20,7 +20,7 @@ import (
 // are (FindDrawingGroup, jzw690 on X). A chat model the user unticked
 // (#3911) is on its provider's list and still stays out.
 //
-// A group magpie finds (#5339): the providers that serve a model of kind
+// A group eipgam finds (#5339): the providers that serve a model of kind
 // under exactly the same id, asked for by the group's id
 // ("group/auto-embedding:embed-1") or by the model's own on its API's
 // route ("embed-1" on /v1/embeddings) when more than one provider serves
@@ -56,7 +56,7 @@ func bareRef(ref string) bool {
 
 // servesKind says whether a provider serves a model of kind's under that
 // id: its fetched list says so (catalog.LiveServing; Videomakers for
-// videos), its chat list has an id that says so (another magpie's list,
+// videos), its chat list has an id that says so (another eipgam's list,
 // which keeps them as it lists them), or, for embeddings and rerank, its
 // preset names it (PlanRetrieval).
 func servesKind(kind string) func(p provider.Provider, model string) bool {

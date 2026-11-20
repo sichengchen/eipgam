@@ -9,7 +9,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const entry = (name) => ({ spec: "/x/" + name, name, key: "plugin-" + name, title: name, reads: [], url: `/_magpie/plugin/${"a".repeat(32)}/${name}.html` });
+const entry = (name) => ({ spec: "/x/" + name, name, key: "plugin-" + name, title: name, reads: [], url: `/_eipgam/plugin/${"a".repeat(32)}/${name}.html` });
 const names = ["alpha", "beta", "gamma"];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -33,13 +33,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (url.pathname === "/api/plugin-pages/arrange") { const b = route.request().postDataJSON(); posts.push(b.order); order = b.order; return json({}); }
       if (url.pathname === "/api/plugin-pages") return json(names.map(entry).sort((a, b) => (order.indexOf(a.key) + 1 || 9) - (order.indexOf(b.key) + 1 || 9)));
       if (url.pathname === "/api/plugin-panels") return json([]);
-      if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_magpie/")) return json({});
-      if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+      if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_eipgam/")) return json({});
+      if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
       const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
       const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
       try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
     });
-    await page.goto("http://magpie.test/");
+    await page.goto("http://eipgam.test/");
     const tabs = page.locator("#nav button[data-plugin-page]");
     await tabs.nth(2).waitFor({ state: "attached" });
     const keys = () => tabs.evaluateAll((l) => l.map((b) => b.dataset.view.replace("plugin-", "")));

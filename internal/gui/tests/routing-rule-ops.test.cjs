@@ -17,7 +17,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, process.env.MAGPIE_RULE_OPS_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.EIPGAM_RULE_OPS_ASSETS || "../assets");
 const models = [
   { id: "a/glm", name: "glm", providerName: "A", icon: "generic", context: 200000, ready: true },
   { id: "b/other", name: "other", providerName: "B", icon: "generic", context: 200000, ready: true },
@@ -97,7 +97,7 @@ async function open(engine, lang, width, t, rules = RULES) {
   const errors = [], posts = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, posts, rules));
-  await page.goto("http://magpie.test/?view=groups");
+  await page.goto("http://eipgam.test/?view=groups");
   const group = page.locator(".rt-group").first();
   await group.waitFor();
   return { page, group, errors, posts };

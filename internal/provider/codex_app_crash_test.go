@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // crashStub has the Codex app's logs say it showed its error page at at,
@@ -41,9 +41,9 @@ func stubCodexCrash(t *testing.T) *crashStub {
 	return c
 }
 
-// ysm119 on Discord: each restart magpie made of the Codex app's
+// ysm119 on Discord: each restart eipgam made of the Codex app's
 // app-server left a signed-in ChatGPT app on its "ChatGPT hit a snag"
-// page, which only quitting and opening it again ends (#4550). magpie
+// page, which only quitting and opening it again ends (#4550). eipgam
 // reads the app's logs after its end and reopens the app once, when no
 // turn has started since; it does nothing when the app logged no page.
 func TestCodexAppReopenedWhenItShowsItsErrorPage(t *testing.T) {
@@ -98,7 +98,7 @@ func TestCodexAppReopenedWhenItShowsItsErrorPage(t *testing.T) {
 	}
 }
 
-// A page logged before magpie's end is none of magpie's: the app showed
+// A page logged before eipgam's end is none of eipgam's: the app showed
 // it for its own reasons, and the user has it in front of them.
 func TestCodexAppErrorPageBeforeTheEndIsLeft(t *testing.T) {
 	signIn(t)
@@ -117,7 +117,7 @@ func TestCodexAppErrorPageBeforeTheEndIsLeft(t *testing.T) {
 }
 
 // The app that came back by itself (its Try again) or is in use is never
-// quit: a Codex turn open since the page, or a request through magpie
+// quit: a Codex turn open since the page, or a request through eipgam
 // since or in flight, leaves it running.
 func TestCodexAppInUseAfterItsErrorPageIsLeft(t *testing.T) {
 	for _, tc := range []struct {
@@ -279,7 +279,7 @@ func TestCodexAppRowRestartWatchesForTheErrorPage(t *testing.T) {
 }
 
 // Michael25651150 on X: "额度用尽时会强制重启 codex 客户端". With the
-// user's "Restart the Codex app" off (as it ships), a change magpie makes
+// user's "Restart the Codex app" off (as it ships), a change eipgam makes
 // that isn't a used-up account's (where Codex sends its requests) still
 // restarts the app's app-server, but the app showing its error page after
 // it is never quit and opened again unasked: the Agents row says to, and
@@ -311,8 +311,8 @@ func TestCodexAppNotQuitUnasked(t *testing.T) {
 	}
 }
 
-// RealZeroP27 on X (switch only, requests not through magpie): quota ran
-// out, magpie signed Codex in to the next account, ended the app's
+// RealZeroP27 on X (switch only, requests not through eipgam): quota ran
+// out, eipgam signed Codex in to the next account, ended the app's
 // app-server for the app to read it, and the ChatGPT app showed "hit a
 // snag" till the user quit and opened it. The account was used up, so the
 // app was greyed already and the page is all its window shows: it is

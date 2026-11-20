@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// JackyFill on X: Codex → magpie1 → (Remote magpie) → magpie2 → a ChatGPT
+// JackyFill on X: Codex → magpie1 → (Remote eipgam) → magpie2 → a ChatGPT
 // account, Fast on in magpie2 alone (here its gateway key's tier).
 // magpie1's log said "default", the ChatGPT backend's word in the body
 // that tells nothing, and nothing of the priority magpie2 sent. It now

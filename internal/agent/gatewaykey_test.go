@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// T3 Code's magpie instance is Claude Code routed with the gateway's
+// T3 Code's eipgam instance is Claude Code routed with the gateway's
 // address and the token Claude Code is sent with: beyond loopback that is
 // the LAN sharing key, as at.gwKey() routes Claude Code itself.
 // gateway.Token is turned away there, so T3's every call was answered 401
@@ -63,7 +63,7 @@ func TestT3CodeKeyBeyondLoopback(t *testing.T) {
 
 // An agent in a WSL distro under NAT reaches the gateway at Windows'
 // address, where gateway.Token is turned away (whqtian on Discord: OpenCode
-// in WSL was written "apiKey": "magpie" and refused). Every agent's config
+// in WSL was written "apiKey": "eipgam" and refused). Every agent's config
 // carries the LAN sharing key there while sharing is on, and gateway.Token on
 // loopback, or while nothing is shared.
 func TestGatewayKeyBeyondLoopback(t *testing.T) {
@@ -105,7 +105,7 @@ func TestGatewayKeyBeyondLoopback(t *testing.T) {
 	want(local, gateway.Token)
 	want("http://localhost:3425", gateway.Token)
 	if !ourKey(lan) || !ourKey(gateway.Token) || ourKey("sk-someone-else") || ourKey("") {
-		t.Error("ourKey tells magpie's keys from others wrongly")
+		t.Error("ourKey tells eipgam's keys from others wrongly")
 	}
 
 	if err := access.ConfigureLAN(false, false); err != nil {
@@ -116,11 +116,11 @@ func TestGatewayKeyBeyondLoopback(t *testing.T) {
 
 // Every agent given the gateway's own address, gateway.URL(), with the key
 // that names it (gateway.TokenFor) or gateway.Token, is given the LAN
-// sharing key instead while MAGPIE_ADDR pins that address beyond loopback
+// sharing key instead while EIPGAM_ADDR pins that address beyond loopback
 // and sharing is on: the gateway takes neither from there (#1647's class).
 func TestPinnedGatewayKeyForEveryWriter(t *testing.T) {
 	codexHome(t, "", "")
-	t.Setenv("MAGPIE_ADDR", "172.23.80.1:3425")
+	t.Setenv("EIPGAM_ADDR", "172.23.80.1:3425")
 	gw := gateway.URL()
 	if gw != "http://172.23.80.1:3425" {
 		t.Fatalf("gateway URL %q", gw)
@@ -151,7 +151,7 @@ func TestPinnedGatewayKeyForEveryWriter(t *testing.T) {
 			t.Errorf("%s at %s: key %q, want the LAN sharing key", agent, gw, k)
 		}
 		if plain[agent] == lan || !strings.HasPrefix(plain[agent], gateway.Token) {
-			t.Errorf("%s with nothing shared: key %q, want magpie's own", agent, plain[agent])
+			t.Errorf("%s with nothing shared: key %q, want eipgam's own", agent, plain[agent])
 		}
 	}
 }

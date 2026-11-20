@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // End ends process pid as its own clean exit would look to its parent:

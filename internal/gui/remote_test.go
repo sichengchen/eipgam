@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// remoteWin is the app's windows, as far as another magpie's window goes:
+// remoteWin is the app's windows, as far as another eipgam's window goes:
 // the links it was asked to open.
 type remoteWin struct {
 	Windows
@@ -34,24 +34,24 @@ func remotePost(t *testing.T, w Windows, path, body string) (int, string) {
 
 func jsonStr(s string) string { b, _ := json.Marshal(s); return string(b) }
 
-// What is typed as the other magpie's address: the link it printed, with
+// What is typed as the other eipgam's address: the link it printed, with
 // its key taken out, or a bare address; plain http only where the key
 // doesn't cross the internet.
 func TestRemoteAddr(t *testing.T) {
 	for _, c := range []struct{ in, addr, key, err string }{
-		{"https://magpie.example.com/?k=0123456789abcdef-key", "https://magpie.example.com/", "0123456789abcdef-key", ""},
-		{"magpie.example.com:3430", "https://magpie.example.com:3430/", "", ""},
+		{"https://eipgam.example.com/?k=0123456789abcdef-key", "https://eipgam.example.com/", "0123456789abcdef-key", ""},
+		{"eipgam.example.com:3430", "https://eipgam.example.com:3430/", "", ""},
 		{"http://192.168.1.20:3430/?k=abc&view=usage#x", "http://192.168.1.20:3430/?view=usage", "abc", ""},
 		{"http://100.101.1.2:3430", "http://100.101.1.2:3430/", "", ""},
 		{"http://nas.local:3430", "http://nas.local:3430/", "", ""},
 		{"http://server:3430", "http://server:3430/", "", ""},
-		{"https://example.com/magpie/", "https://example.com/magpie/", "", ""},
+		{"https://example.com/eipgam/", "https://example.com/eipgam/", "", ""},
 		{"HTTP://192.168.1.20:3430/", "http://192.168.1.20:3430/", "", ""},
-		{"HTTPS://Magpie.example.com/?k=abc", "https://Magpie.example.com/", "abc", ""},
+		{"HTTPS://eipgam.example.com/?k=abc", "https://eipgam.example.com/", "abc", ""},
 		{"http://http://192.168.1.20:3430", "http://192.168.1.20:3430/", "", ""},
-		{"https://https://magpie.example.com", "https://magpie.example.com/", "", ""},
-		{"http://magpie.example.com:3430", "", "", "name on the internet"},
-		{"https://u:p@magpie.example.com", "", "", "user name"},
+		{"https://https://eipgam.example.com", "https://eipgam.example.com/", "", ""},
+		{"http://eipgam.example.com:3430", "", "", "name on the internet"},
+		{"https://u:p@eipgam.example.com", "", "", "user name"},
 		{"ftp://example.com", "", "", "http:// or https://"},
 		{"file:///etc/passwd", "", "", "isn't an address"},
 		{"  ", "", "", "type the other"},
@@ -84,10 +84,10 @@ func TestRemoteReadsADoubledScheme(t *testing.T) {
 	}
 }
 
-// xuanwo on X: the app opens a server's magpie, its routing and usage, in
-// a window. The key is checked against that magpie's own page before the
+// xuanwo on X: the app opens a server's eipgam, its routing and usage, in
+// a window. The key is checked against that eipgam's own page before the
 // window opens, kept 0600 on this computer, never read back into the page,
-// and the link the window opens signs in to the other magpie's page as a
+// and the link the window opens signs in to the other eipgam's page as a
 // browser does.
 func TestRemoteOpensTheOtherMagpie(t *testing.T) {
 	onePortHome(t)
@@ -109,7 +109,7 @@ func TestRemoteOpensTheOtherMagpie(t *testing.T) {
 		t.Fatalf("a refused key was kept: %v", err)
 	}
 	// no key at all
-	if code, body := remotePost(t, w, "/api/remote", `{"url":`+jsonStr(other.URL)+`}`); code != http.StatusBadRequest || !strings.Contains(body, "type that magpie's key") {
+	if code, body := remotePost(t, w, "/api/remote", `{"url":`+jsonStr(other.URL)+`}`); code != http.StatusBadRequest || !strings.Contains(body, "type that eipgam's key") {
 		t.Fatalf("no key: %d %s", code, body)
 	}
 
@@ -129,7 +129,7 @@ func TestRemoteOpensTheOtherMagpie(t *testing.T) {
 		t.Fatal(err)
 	}
 	if runtime.GOOS != "windows" && fi.Mode().Perm() != 0o600 {
-		t.Fatalf("remote-magpie.json is %v", fi.Mode().Perm())
+		t.Fatalf("remote-eipgam.json is %v", fi.Mode().Perm())
 	}
 	mux := http.NewServeMux()
 	remoteRoutes(mux, w)
@@ -139,7 +139,7 @@ func TestRemoteOpensTheOtherMagpie(t *testing.T) {
 		t.Fatalf("GET /api/remote: %s", s)
 	}
 
-	// the window's link signs in to the other magpie's page, as a browser
+	// the window's link signs in to the other eipgam's page, as a browser
 	jar, _ := cookiejar.New(nil)
 	res, err := (&http.Client{Jar: jar, Timeout: 5 * time.Second}).Get(w.opened[0])
 	if err != nil {
@@ -163,17 +163,17 @@ func TestRemoteOpensTheOtherMagpie(t *testing.T) {
 	}
 }
 
-// Something at the address that isn't a magpie page, or none: said, and
+// Something at the address that isn't a eipgam page, or none: said, and
 // no window opened.
 func TestRemoteNotMagpie(t *testing.T) {
 	onePortHome(t)
 	plain := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		http.Redirect(rw, r, "/login", http.StatusSeeOther) // a redirect with no magpie cookie
+		http.Redirect(rw, r, "/login", http.StatusSeeOther) // a redirect with no eipgam cookie
 	}))
 	defer plain.Close()
 	w := &remoteWin{}
-	if code, body := remotePost(t, w, "/api/remote", `{"url":`+jsonStr(plain.URL)+`,"key":"0123456789abcdef-key"}`); code != http.StatusBadRequest || !strings.Contains(body, "not as a magpie page") || len(w.opened) != 0 {
-		t.Fatalf("not magpie: %d %s", code, body)
+	if code, body := remotePost(t, w, "/api/remote", `{"url":`+jsonStr(plain.URL)+`,"key":"0123456789abcdef-key"}`); code != http.StatusBadRequest || !strings.Contains(body, "not as a eipgam page") || len(w.opened) != 0 {
+		t.Fatalf("not eipgam: %d %s", code, body)
 	}
 	plain.Close()
 	if code, body := remotePost(t, w, "/api/remote", `{"url":`+jsonStr(plain.URL)+`,"key":"0123456789abcdef-key"}`); code != http.StatusBadRequest || !strings.Contains(body, "doesn't answer") || len(w.opened) != 0 {
@@ -181,8 +181,8 @@ func TestRemoteNotMagpie(t *testing.T) {
 	}
 }
 
-// A page served to a browser (magpie web, the app's Browser access) has no
-// /api/remote: only the app's own windows open another magpie, and a
+// A page served to a browser (eipgam web, the app's Browser access) has no
+// /api/remote: only the app's own windows open another eipgam, and a
 // browser can't read or change the key kept for it.
 func TestRemoteNotOnBrowserPages(t *testing.T) {
 	onePortHome(t)

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A model disabled in Settings → Models (#1867) is still in its provider's

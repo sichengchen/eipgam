@@ -16,10 +16,10 @@ import (
 // takes every window as covered then, and a surface first drawn in that
 // state may not be drawn again. aquaarboraurum on X saw a white window
 // after every restart to update. AutoRestart makes that restart once no
-// request is going through magpie and its window has sat unused, as when
+// request is going through eipgam and its window has sat unused, as when
 // the user is away and the screen locked; a restart by hand, with the
 // user there, came up drawn. Not reproduced: the screen of the Windows box
-// the tests run on can't be locked for them. magpie's windows are drawn
+// the tests run on can't be locked for them. eipgam's windows are drawn
 // again when the session is unlocked or the display comes on (mendOnWake),
 // as closing the window to the tray and opening it again did by hand, and
 // windowsOptions turns Chromium's occlusion tracking off
@@ -74,7 +74,7 @@ func watchScreenBack() {
 }
 
 // ownMainThreadWindow is this process's Wails main-thread window: another
-// magpie's has the same title, during a restart's handover too.
+// eipgam's has the same title, during a restart's handover too.
 func ownMainThreadWindow() uintptr {
 	title, err := windows.UTF16PtrFromString(wailsMainThread)
 	if err != nil {

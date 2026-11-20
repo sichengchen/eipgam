@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// KoiLx0 on X: a client magpie had each agent switched on by hand before
-// it took the remote's models. A Remote magpie's editor has a switch for
+// KoiLx0 on X: a client eipgam had each agent switched on by hand before
+// it took the remote's models. A Remote eipgam's editor has a switch for
 // that, "Connect new agents to this remote", under Advanced: off, and the
 // fold closed, while the backend says it is off; sent as ticked; and with
 // it on, Advanced opens on it ticked. In every language, both engines, at
@@ -13,9 +13,9 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 
-const office = () => ({ id: "office", name: "Office", icon: "magpie", preset: "remote-magpie", chat: "http://office/v1", responses: "http://office/v1", anthropic: "http://office",
+const office = () => ({ id: "office", name: "Office", icon: "eipgam", preset: "remote-eipgam", chat: "http://office/v1", responses: "http://office/v1", anthropic: "http://office",
   models: [{ id: "lib/m1", name: "Chat", on: true }], agents: [], key: { set: true, masked: "sk-…ab12" } });
-const presets = [{ id: "remote-magpie", name: "Remote magpie", icon: "magpie", kind: "remote", added: true, endpoint: "http://192.168.1.20:3425" }];
+const presets = [{ id: "remote-eipgam", name: "Remote eipgam", icon: "eipgam", kind: "remote", added: true, endpoint: "http://192.168.1.20:3425" }];
 
 function server(lang, state, saves) {
   return async (route) => {
@@ -50,7 +50,7 @@ const L = {
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": a Remote magpie's switch to connect new agents, under Advanced", async (t) => {
+  test(engine + ": a Remote eipgam's switch to connect new agents, under Advanced", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, state, saves));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const ed = page.locator(".editor");
         const open = async () => {
           await page.locator('#providers .row[data-id="office"]').click();

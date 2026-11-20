@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/maskrec"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/maskrec"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // checkedOf is agent's count in the summary's checked turns.
@@ -22,7 +22,7 @@ func checkedOf(agent string) maskrec.Looked {
 	return maskrec.Looked{Name: agent}
 }
 
-// Pi's turns, on each API it asks magpie's models on (pi_protocol.go),
+// Pi's turns, on each API it asks eipgam's models on (pi_protocol.go),
 // are masked as any agent's are: one carrying a key is recorded under
 // Pi, and one with nothing to mask is counted as checked, which the
 // Masking page shows, so an agent with no records reads as "checked,
@@ -61,7 +61,7 @@ func TestPiTurnsCountedAsChecked(t *testing.T) {
 		t.Helper()
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", path, strings.NewReader(body))
-		// as Pi sends it: magpie's token, its own name, session affinity
+		// as Pi sends it: eipgam's token, its own name, session affinity
 		req.Header.Set("Authorization", "Bearer "+Token)
 		req.Header.Set("User-Agent", "pi/0.70.2")
 		req.Header.Set("X-Session-Affinity", "pi-session-1")

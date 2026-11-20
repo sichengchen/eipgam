@@ -13,8 +13,8 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // ErrWSLOff is what a wsl.exe start ends with, unrun, while Settings'
@@ -34,7 +34,7 @@ var ErrNoWSLDistro = errors.New("not run: WSL has no distribution installed")
 var ErrWSLNeedsUpdate = errors.New("not run: wsl.exe said lately that WSL must be updated (wsl.exe --update)")
 
 // wslOff refuses cmd when it is wsl.exe and Settings' Detect agents in WSL
-// is off (#1264). Every command magpie starts is made here, so this is the
+// is off (#1264). Every command eipgam starts is made here, so this is the
 // one place that holds for all of them: a request's Claude Code stand-in
 // and classifier asked wsl.exe which distros run past the gates in agent
 // and wslrun, and on a computer without WSL Windows' own wsl.exe answers
@@ -87,7 +87,7 @@ var wslPackage = wslPackageVersion
 const wslUpdateAge = 6 * time.Hour
 
 // wslUpdatePath, while recent, says wsl.exe answered that WSL must be
-// installed or updated: every magpie process (the app, a CLI, the Claude
+// installed or updated: every eipgam process (the app, a CLI, the Claude
 // Code helper) reads it.
 func wslUpdatePath() string { return filepath.Join(settings.Dir(), "wsl-update") }
 
@@ -127,8 +127,8 @@ func wslUpdateLately(names []string, ok bool) bool {
 
 // WSLSaid is told what a wsl.exe run printed and how it ended. When that
 // says WSL must be installed or updated, wsl.exe isn't run again for
-// wslUpdateAge (wslOff), by any magpie process, unless WSL changes. Every
-// runner of magpie's that reads wsl.exe's output tells it.
+// wslUpdateAge (wslOff), by any eipgam process, unless WSL changes. Every
+// runner of eipgam's that reads wsl.exe's output tells it.
 func WSLSaid(out []byte, err error) {
 	if !wslWantsUpdate(out, err) {
 		return

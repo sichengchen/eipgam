@@ -76,7 +76,7 @@ func TestEnvWrittenAndTakenOut(t *testing.T) {
 }
 
 // A variable the user set themselves is never written over, and never
-// taken out; one they changed after magpie wrote it is theirs from then on.
+// taken out; one they changed after eipgam wrote it is theirs from then on.
 func TestEnvNeverOverridesTheUsers(t *testing.T) {
 	h := sandbox(t)
 	settings := filepath.Join(h, ".claude/settings.json")
@@ -84,7 +84,7 @@ func TestEnvNeverOverridesTheUsers(t *testing.T) {
 	write(t, settings, `{"env": {"FOO": "mine", "SAME": "x"}}`)
 	write(t, cfg, "[shell_environment_policy.set]\nFOO = \"mine\"\n")
 
-	res, err := SaveEnv("", EnvVar{Name: "FOO", Value: "magpie", Agents: []string{"claude", "codex"}})
+	res, err := SaveEnv("", EnvVar{Name: "FOO", Value: "eipgam", Agents: []string{"claude", "codex"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +110,7 @@ func TestEnvNeverOverridesTheUsers(t *testing.T) {
 		t.Errorf("codex's own variable was taken out: %v", got)
 	}
 
-	// one magpie wrote and the user then changed is theirs
+	// one eipgam wrote and the user then changed is theirs
 	ok(t)(SaveEnv("", EnvVar{Name: "BAR", Value: "1", Agents: []string{"claude", "codex"}}))
 	if !strings.Contains(read(t, settings), `"BAR":"1"`) {
 		t.Fatalf("settings: %s", read(t, settings))
@@ -126,7 +126,7 @@ func TestEnvNeverOverridesTheUsers(t *testing.T) {
 	}
 }
 
-// Changing a value changes it where magpie wrote it, and only there.
+// Changing a value changes it where eipgam wrote it, and only there.
 func TestEnvValueChanged(t *testing.T) {
 	h := sandbox(t)
 	settings := filepath.Join(h, ".claude/settings.json")
@@ -239,7 +239,7 @@ func TestEnvIsCarried(t *testing.T) {
 	if got := claudeEnv(t, filepath.Join(h2, ".claude/settings.json")); got["ANYSEARCH_API_KEY"] != "sk-secret" {
 		t.Fatalf("the key didn't arrive: %v", got)
 	}
-	// one from a magpie that didn't carry them leaves this computer's alone
+	// one from a eipgam that didn't carry them leaves this computer's alone
 	old := *keyed
 	old.Env = nil
 	ok(t)(Put(&old))

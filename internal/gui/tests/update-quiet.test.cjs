@@ -22,7 +22,7 @@ function server(lang, ctl) {
     const json = (data) => route.fulfill({ json: data });
     const settings = {
       theme: "light", lang, tray: "panel", currency: "usd", redactWords: [], trayUsageEvery: 3,
-      version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+      version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
       proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
       fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     };
@@ -54,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", server(lang, ctl));
-      await page.goto("http://magpie.test/" + query);
+      await page.goto("http://eipgam.test/" + query);
       return { page, errors };
     };
     const hidden = { en: "Hidden for 3 days", zh: "已隐藏 3 天", "zh-TW": "已隱藏 3 天", ja: "3 日間非表示にしています", de: "Für 3 Tage ausgeblendet" };

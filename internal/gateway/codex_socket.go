@@ -19,18 +19,18 @@ import (
 	"github.com/coder/websocket"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A streamed turn to the ChatGPT backend (CodexBase/responses) goes over
 // the backend's WebSocket, as Codex's own client sends it, and comes back
-// to magpie's caller as the server-sent events the HTTP route answers with.
+// to eipgam's caller as the server-sent events the HTTP route answers with.
 // On some networks a streamed HTTP reply from chatgpt.com is cut at about
 // 120 s, before response.completed, while the same turn over the WebSocket
-// runs to its end (brickhao on Discord: 120.7 s through magpie, 121.5 s
+// runs to its end (brickhao on Discord: 120.7 s through eipgam, 121.5 s
 // over HTTP without it, both cut; 124.5 s and 131.4 s over the WebSocket,
-// both whole). Codex itself still speaks HTTP to magpie, over loopback:
-// it is the leg from magpie to the vendor that was cut.
+// both whole). Codex itself still speaks HTTP to eipgam, over loopback:
+// it is the leg from eipgam to the vendor that was cut.
 //
 // What goes on the socket is what Codex 0.16x sends there (codex-rs
 // ResponseCreateWsRequest, build_websocket_headers): the handshake carries
@@ -48,7 +48,7 @@ import (
 // handed on. That last one is Lamrfu's (Discord): chatgpt.com closed the
 // socket 1009 (message too big) on a long conversation's turn, and the
 // turn was a 502. Codex's own client sends a turn on a kept socket as a
-// delta after previous_response_id, so its messages stay small; magpie
+// delta after previous_response_id, so its messages stay small; eipgam
 // does too (codex_socket_keep.go). A message as big as one refused 1009
 // goes straight over HTTP to that host for codexSocketShun (codexTooBig).
 

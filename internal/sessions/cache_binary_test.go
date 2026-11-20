@@ -148,7 +148,7 @@ func TestCacheBinaryKnowsEveryField(t *testing.T) {
 	}
 }
 
-// A JSON index an older magpie kept is read, and the next save writes it
+// A JSON index an older eipgam kept is read, and the next save writes it
 // in the binary form.
 func TestCacheJSONReadThenBinary(t *testing.T) {
 	unraised(t)
@@ -182,7 +182,7 @@ func savedIndex(t *testing.T) cacheFile {
 	return c
 }
 
-// An older magpie's JSON index, with no session changed since, is written
+// An older eipgam's JSON index, with no session changed since, is written
 // again in the binary form on the first start: a save comes only when a
 // file changes, so it stayed JSON, read the slow way on every start.
 func TestCacheJSONRewrittenOnStart(t *testing.T) {

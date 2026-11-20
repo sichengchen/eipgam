@@ -6,14 +6,14 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// agy has no effort magpie can write (xyenon on Discord): settings.json has
-// no key for it and --effort, for one session, is turned away for magpie's
-// models. Its row picks one, kept in magpie (provider.AgentEffort "agy"),
-// among the levels its models have, offered only while agy is on magpie's;
+// agy has no effort eipgam can write (xyenon on Discord): settings.json has
+// no key for it and --effort, for one session, is turned away for eipgam's
+// models. Its row picks one, kept in eipgam (provider.AgentEffort "agy"),
+// among the levels its models have, offered only while agy is on eipgam's;
 // settings.json is never touched for it.
 func TestAgyEffort(t *testing.T) {
 	home := t.TempDir()
@@ -48,7 +48,7 @@ func TestAgyEffort(t *testing.T) {
 	if got := values(); got != nil {
 		t.Fatalf("offered %q while on the user's own model", got)
 	}
-	if err := a.Apply("model", "magpie/think/gemini-3.8-flash"); err != nil {
+	if err := a.Apply("model", "eipgam/think/gemini-3.8-flash"); err != nil {
 		t.Fatal(err)
 	}
 	if got := values(); !slices.Equal(got, []string{"", "low", "high"}) {

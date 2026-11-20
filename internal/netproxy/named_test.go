@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func savedVia(t *testing.T, tr http.RoundTripper, choice string) (string, error) {
@@ -66,7 +66,7 @@ func TestSavedProxyChoice(t *testing.T) {
 }
 
 // Settings' own proxy may name a saved one: every request without its own
-// choice takes it, and a CLI magpie starts gets its address in *_PROXY; a
+// choice takes it, and a CLI eipgam starts gets its address in *_PROXY; a
 // deleted one points a CLI nowhere rather than direct.
 func TestSavedProxyAsTheGlobalOne(t *testing.T) {
 	clearProxyEnv(t)

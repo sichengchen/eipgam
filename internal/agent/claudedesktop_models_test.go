@@ -7,16 +7,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // moer2831 on Discord: a model picked for a Claude Desktop tier ran in its
 // Code tab on Claude Code's generic prompt. While a tier is picked,
-// magpie's profile lists Desktop's models in inferenceModels, the pick's
+// eipgam's profile lists Desktop's models in inferenceModels, the pick's
 // with behavesAs, and Claude Code is told the pick's window, since it
 // would take the behavesAs model's. The list follows the picks and the
 // catalog, is written only when it changes, goes when nothing is picked,
@@ -71,7 +71,7 @@ func TestClaudeDesktopModelsList(t *testing.T) {
 		return nil
 	}
 
-	set("provider", "magpie")
+	set("provider", "eipgam")
 	if l := list(); l != nil {
 		t.Fatalf("nothing picked: %v", l)
 	}
@@ -188,7 +188,7 @@ func TestClaudeDesktopModelsSharedTier(t *testing.T) {
 		raw, _ := edit.GetJSONRaw(p.prof, "modelDiscoveryEnabled")
 		return raw
 	}
-	for _, kv := range [][2]string{{"provider", "magpie"}, {"sonnet", "v/a"}, {"haiku", "v/a"}} {
+	for _, kv := range [][2]string{{"provider", "eipgam"}, {"sonnet", "v/a"}, {"haiku", "v/a"}} {
 		set(kv[0], kv[1])
 	}
 	raw, ok := edit.GetJSONRaw(p.prof, "inferenceModels")

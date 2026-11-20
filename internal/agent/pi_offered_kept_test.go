@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Pi's Values asks piOffered on every Drift of the window's poll: it is
@@ -28,7 +28,7 @@ func TestPiOfferedKeptPerStamp(t *testing.T) {
 		Catalog: "moonshotai", Models: []string{"kimi-k3-max"}}); err != nil {
 		t.Fatal(err)
 	}
-	const model = "magpie/trae-cn/kimi-k3-max"
+	const model = "eipgam/trae-cn/kimi-k3-max"
 	built := func() int64 {
 		builtOffered.Lock()
 		defer builtOffered.Unlock()
@@ -45,8 +45,8 @@ func TestPiOfferedKeptPerStamp(t *testing.T) {
 	if built() != first {
 		t.Fatal("built again while nothing changed")
 	}
-	if got := piOffered("pi", "magpie/trae-cn/none"); got != nil {
-		t.Fatalf("a model magpie doesn't have: %v", got)
+	if got := piOffered("pi", "eipgam/trae-cn/none"); got != nil {
+		t.Fatalf("a model eipgam doesn't have: %v", got)
 	}
 	thinks("false")
 	if got := piOffered("pi", model); !reflect.DeepEqual(got, []string{"off"}) {

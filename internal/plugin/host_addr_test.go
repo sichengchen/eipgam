@@ -7,19 +7,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// A plugin with a service of its own is told where magpie's gateway is:
-// Magiczerowxy/magpie-chat's chat server asks MAGPIE_ADDR, then 3425, so
+// A plugin with a service of its own is told where eipgam's gateway is:
+// Magiczerowxy/magpie-chat's chat server asks EIPGAM_ADDR, then 3425, so
 // with the port set in Settings its model list was empty and every
 // message failed (yuesh1_ on X, Magiczerowxy/magpie-chat#1). The host is
-// told Settings' port, started again when it moves, and a MAGPIE_ADDR
-// magpie runs under, on loopback when it listens on every interface.
+// told Settings' port, started again when it moves, and a EIPGAM_ADDR
+// eipgam runs under, on loopback when it listens on every interface.
 func TestHostToldTheGatewayAddress(t *testing.T) {
 	sandbox(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	os.Unsetenv("MAGPIE_ADDR")
+	t.Setenv("EIPGAM_ADDR", "")
+	os.Unsetenv("EIPGAM_ADDR")
 	was := proxyLookNone
 	proxyLookNone = 0
 	t.Cleanup(func() { proxyLookNone = was })
@@ -36,7 +36,7 @@ func TestHostToldTheGatewayAddress(t *testing.T) {
 		"package.json": `{"name": "addr-probe", "version": "0.0.1", "type": "module", "main": "./index.mjs"}`,
 		// as magpie-chat's index.mjs, which starts its server on import
 		"index.mjs": `import { writeFileSync } from "node:fs"
-writeFileSync(process.env.ADDR_PROBE_OUT, process.env.MAGPIE_ADDR ?? "unset")
+writeFileSync(process.env.ADDR_PROBE_OUT, process.env.EIPGAM_ADDR ?? "unset")
 export default { id: "addr-probe", server: async () => ({}) }
 `,
 	}
@@ -70,17 +70,17 @@ export default { id: "addr-probe", server: async () => ({}) }
 		t.Fatal(err)
 	}
 	if got := told(); got != "127.0.0.1:3591" {
-		t.Fatalf("with Settings' port 3591 the plugin was told MAGPIE_ADDR=%s", got)
+		t.Fatalf("with Settings' port 3591 the plugin was told EIPGAM_ADDR=%s", got)
 	}
 	// the port moves in Settings: the page opened next has a host told so
 	setPort(3592)
 	if got := told(); got != "127.0.0.1:3592" {
-		t.Errorf("after the port moved to 3592 the plugin was told MAGPIE_ADDR=%s", got)
+		t.Errorf("after the port moved to 3592 the plugin was told EIPGAM_ADDR=%s", got)
 	}
-	// magpie's own MAGPIE_ADDR comes first, reached on loopback
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:4999")
+	// eipgam's own EIPGAM_ADDR comes first, reached on loopback
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:4999")
 	Restart()
 	if got := told(); got != "127.0.0.1:4999" {
-		t.Errorf("under MAGPIE_ADDR=0.0.0.0:4999 the plugin was told MAGPIE_ADDR=%s", got)
+		t.Errorf("under EIPGAM_ADDR=0.0.0.0:4999 the plugin was told EIPGAM_ADDR=%s", got)
 	}
 }

@@ -6,18 +6,18 @@ import (
 	"os"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// The key a magpie from before made for the Magpie Browser extension had
+// The key a eipgam from before made for the eipgam Browser extension had
 // full access. ScopeBrowser holds it to the extension: the secret is the
-// same, so the extension keeps connecting, read-only for a magpie from
+// same, so the extension keeps connecting, read-only for a eipgam from
 // before this one, and it can neither be given full access back nor issue
 // keys. A key made for the extension now is so from the start. The sharing
 // key is never held so, and a key that isn't there says so.
 func TestScopeBrowser(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	secret, err := Update("add-key", Change{Name: "Magpie Browser"})
+	secret, err := Update("add-key", Change{Name: "eipgam Browser"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func TestScopeBrowser(t *testing.T) {
 	if !ok || !after.Browser || !after.ReadOnly || after.Issues || after.KeyID != who.KeyID {
 		t.Fatal("held to the browser:", after, ok)
 	}
-	// what a magpie from before reads: read-only
+	// what a eipgam from before reads: read-only
 	b, err := os.ReadFile(Path())
 	if err != nil {
 		t.Fatal(err)
@@ -46,7 +46,7 @@ func TestScopeBrowser(t *testing.T) {
 		Issues   bool `json:"issues"`
 	}
 	if json.Unmarshal(b, &old) != nil || len(old) != 1 || !old[0].ReadOnly || old[0].Issues {
-		t.Fatalf("a magpie from before reads %s", b)
+		t.Fatalf("a eipgam from before reads %s", b)
 	}
 	if err := ScopeBrowser(who.KeyID); err != nil {
 		t.Fatal("twice:", err)
@@ -67,7 +67,7 @@ func TestScopeBrowser(t *testing.T) {
 		t.Fatal("the browser key let go:", k)
 	}
 
-	made, err := Update("add-key", Change{Name: "Magpie Browser 2", Browser: true})
+	made, err := Update("add-key", Change{Name: "eipgam Browser 2", Browser: true})
 	if err != nil {
 		t.Fatal(err)
 	}

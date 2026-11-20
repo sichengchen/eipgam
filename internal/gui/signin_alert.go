@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // signInNotice is the id a sign-in alert is notified under, followed by
 // its provider's id and "|", so a click opens that provider's accounts.
-const signInNotice = "magpie-signin-"
+const signInNotice = "eipgam-signin-"
 
 // signInKind is the start of the id a sign-in alert for provider id is
 // notified under (sendAs puts the time after it).

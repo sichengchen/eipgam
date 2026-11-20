@@ -9,7 +9,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // copilotWSModels is Copilot's model list as the owner's account has it:
@@ -54,7 +54,7 @@ func copilotPost(t *testing.T, s *Server, body string) {
 	}
 }
 
-// yuushabu_buyinn on X: magpie sent each Copilot Responses turn whole over
+// yuushabu_buyinn on X: eipgam sent each Copilot Responses turn whole over
 // HTTP (129 GB up for 31 GB down), where Copilot answers
 // previous_response_id 400 "previous_response_id is not supported". Over
 // its Responses WebSocket, as Copilot Chat sends a model that lists

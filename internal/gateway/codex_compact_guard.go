@@ -16,7 +16,7 @@ import (
 // compaction at every step of a turn whose history has changed since the
 // last one it started, and drops one that fails without a word. So a
 // conversation over the line whose summaries never come — Antigravity
-// cutting each reply short, then its 429s — asked magpie for a summary
+// cutting each reply short, then its 429s — asked eipgam for a summary
 // at every step: 1169 compactions in 6 hours, each paying for the whole
 // conversation as input, none of them installed, the conversation never
 // shorter. A foreground one is asked again twice more by Codex itself on
@@ -74,7 +74,7 @@ func (f *compactFails) held(key, model string) (string, bool) {
 		return "", false
 	}
 	left := (compactHeldFor - time.Since(c.last)).Round(time.Second)
-	return fmt.Sprintf("Couldn't compact the conversation: %s failed %d times in a row (last: %s). magpie waits %s before asking it again. To compact now, switch this conversation to another model.",
+	return fmt.Sprintf("Couldn't compact the conversation: %s failed %d times in a row (last: %s). eipgam waits %s before asking it again. To compact now, switch this conversation to another model.",
 		model, c.n, c.why, left), true
 }
 
@@ -125,7 +125,7 @@ func wantsWhole(ctx context.Context) bool {
 	return v
 }
 
-// compactionAskKey marks a request that is magpie's own summary ask for a
+// compactionAskKey marks a request that is eipgam's own summary ask for a
 // compaction (codexCompact). It is not Codex's turn: a provider that
 // isn't OpenAI's is given its developer messages as the system ones they
 // are (forVendor), while Codex's own turns keep the role the client sent.

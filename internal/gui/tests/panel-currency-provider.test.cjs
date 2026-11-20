@@ -9,14 +9,14 @@
 // provider picked the whole page is its calls: the total and the axis in its
 // currency. Every language, a 440px and a 320px panel, a 1100px and a 420px
 // window; no backend, the API is faked as the Go side answers it
-// (usageapi.Ledger's provider, fx.yuan). MAGPIE_ASSETS runs it on other assets.
+// (usageapi.Ledger's provider, fx.yuan). EIPGAM_ASSETS runs it on other assets.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets");
 const midnight = new Date();
 midnight.setHours(0, 0, 0, 0);
 
@@ -113,9 +113,9 @@ for (const engine of BROWSERS) {
         p.setDefaultTimeout(5000);
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
-        await p.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "stats"); localStorage.setItem("magpie.panelUseSplit", "provider"); localStorage.setItem("magpie.panelUseMetric", "tokens"); } catch {} });
+        await p.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "stats"); localStorage.setItem("eipgam.panelUseSplit", "provider"); localStorage.setItem("eipgam.panelUseMetric", "tokens"); } catch {} });
         await p.route("**/*", serve(lang, asked, "usd"));
-        await p.goto("http://magpie.test/?mode=panel");
+        await p.goto("http://eipgam.test/?mode=panel");
         const box = "#panelUsage";
         await p.locator(box + " .pu-card .led-rank .rk").first().waitFor();
 
@@ -166,10 +166,10 @@ for (const engine of BROWSERS) {
         p.setDefaultTimeout(5000);
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
-        await p.addInitScript(() => { try { localStorage.setItem("magpie.ledMetric", "cost"); } catch {} });
+        await p.addInitScript(() => { try { localStorage.setItem("eipgam.ledMetric", "cost"); } catch {} });
         // totals in yuan this time: OpenAI's stays in dollars
         await p.route("**/*", serve(lang, asked, "cny"));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://eipgam.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledRank button.rk").first().waitFor();

@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
-// The Gateway page lists the MCP servers a key can be held to, magpie's
+// The Gateway page lists the MCP servers a key can be held to, eipgam's
 // own and then the Library's, each with its tools, and keeps what was
 // picked for it (wakaka on Discord).
 func TestCallerKeyMCPRoutes(t *testing.T) {
@@ -37,14 +37,14 @@ func TestCallerKeyMCPRoutes(t *testing.T) {
 		if s.Tools == nil {
 			t.Fatalf("%s: tools null", s.Name)
 		}
-		if s.Name == "magpie-browser" && (!s.Own || !slices.Equal(s.Tools, []string{"browser"})) {
+		if s.Name == "eipgam-browser" && (!s.Own || !slices.Equal(s.Tools, []string{"browser"})) {
 			t.Fatalf("browser %+v", s)
 		}
 		if s.Name == "github" && s.Own {
 			t.Fatalf("github %+v", s)
 		}
 	}
-	if len(names) < 2 || names[len(names)-1] != "github" || !slices.Contains(names, "magpie-browser") {
+	if len(names) < 2 || names[len(names)-1] != "github" || !slices.Contains(names, "eipgam-browser") {
 		t.Fatal("servers", names)
 	}
 	var s struct{ Keys []access.Key }
@@ -52,10 +52,10 @@ func TestCallerKeyMCPRoutes(t *testing.T) {
 		t.Fatal(w.Code, w.Body)
 	}
 	id := s.Keys[0].ID
-	if w := request("POST", "/api/caller-keys/mcp-key", `{"key":"`+id+`","mcp":["github/search_code","magpie-browser"]}`); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &s) != nil {
+	if w := request("POST", "/api/caller-keys/mcp-key", `{"key":"`+id+`","mcp":["github/search_code","eipgam-browser"]}`); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &s) != nil {
 		t.Fatal(w.Code, w.Body)
 	}
-	if !slices.Equal(s.Keys[0].MCP, []string{"github/search_code", "magpie-browser"}) {
+	if !slices.Equal(s.Keys[0].MCP, []string{"github/search_code", "eipgam-browser"}) {
 		t.Fatal("kept", s.Keys[0].MCP)
 	}
 	if w := request("POST", "/api/caller-keys/mcp-key", `{"key":"`+id+`","mcp":["github/"]}`); w.Code == 200 {

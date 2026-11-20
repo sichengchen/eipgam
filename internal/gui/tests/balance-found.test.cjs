@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A relay added by hand with no Balance URL has its balance found by magpie
+// A relay added by hand with no Balance URL has its balance found by eipgam
 // (provider/balance_probe.go). The editor says where, under the Balance URL,
 // so an amount read at the wrong query can be put right: Use copies the
 // query into the fields. A check that found nothing says where it looked.
@@ -41,7 +41,7 @@ function server(lang, list, checks) {
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": the editor says where magpie found a relay's balance, and Use puts it in the fields", async (t) => {
+  test(engine + ": the editor says where eipgam found a relay's balance, and Use puts it in the fields", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     for (const width of [900, 420]) {
@@ -57,10 +57,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             ? (b.balanceURL ? { ok: true, amount: "$1.00" } : { ok: false, amount: "", looked: true, found: "", foundField: "" })
             : { ok: true, amount: "$5.00", looked: !b.balanceURL, found: b.balanceURL ? "" : "https://relay.example.com/api/usage/token", foundField: "$data.total_available / 500000" };
           await page.route("**/*", server(lang, [relay, plain, miss, own], checks));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
           const open = async (name) => {
-            await page.goto("http://magpie.test/?view=providers");
+            await page.goto("http://eipgam.test/?view=providers");
             await page.locator(".row.provider").first().waitFor();
             errors.length = 0; // the last page's requests, cut off by the load
             await page.locator(".row.provider", { hasText: name }).first().click();
@@ -69,10 +69,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           };
           const line = page.locator(".editor .bal-found");
 
-          // found by magpie: said under the Balance URL, with its field
+          // found by eipgam: said under the Balance URL, with its field
           await open("Relay");
           await line.waitFor();
-          assert.equal(await line.locator("span").textContent(), await tr("Found by magpie: {url}", { url: "https://relay.example.com/v1/usage $remaining" }));
+          assert.equal(await line.locator("span").textContent(), await tr("Found by eipgam: {url}", { url: "https://relay.example.com/v1/usage $remaining" }));
           if (lang !== "en") assert(!(await line.locator("span").textContent()).startsWith("Found by"), "translated");
           const fit = await line.evaluate((e) => { const a = e.closest("details.advanced").getBoundingClientRect(), r = e.getBoundingClientRect(); return r.right <= a.right + 1; });
           assert(fit, "the line fits at " + width + "px");
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert(await line.isHidden(), "off: nothing said");
           assert.equal(await page.evaluate(() => draft.noBalanceProbe), true);
 
-          // the user's own Balance URL: nothing of magpie's
+          // the user's own Balance URL: nothing of eipgam's
           await open("Own");
           assert.equal(await line.count(), 0, "not drawn under a saved Balance URL");
           assert.deepEqual(errors, []);

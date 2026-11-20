@@ -1,9 +1,9 @@
 package library
 
-// Claude Magpie, the isolated Desktop, is an app of its own to the library
+// Claude eipgam, the isolated Desktop, is an app of its own to the library
 // (agent.DesktopTwinApp, xMopf7RF on X). Before, Claude Desktop's servers
 // and Cowork skills were written into its folder too, as Claude Desktop's:
-// carryTwin records each of those still there as given to Claude Magpie,
+// carryTwin records each of those still there as given to Claude eipgam,
 // ticked for it, so it keeps what it has and each can then be taken from
 // one app and not the other.
 
@@ -14,12 +14,12 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
-// carryTwin ticks for Claude Magpie each server and skill magpie gave
-// Claude Desktop that is in Claude Magpie's folder, while nothing is
-// recorded for Claude Magpie yet: once, as what magpie wrote is recorded
+// carryTwin ticks for Claude eipgam each server and skill eipgam gave
+// Claude Desktop that is in Claude eipgam's folder, while nothing is
+// recorded for Claude eipgam yet: once, as what eipgam wrote is recorded
 // from then on.
 func (l *Library) carryTwin() {
 	desk := l.Applied["claude-desktop"]

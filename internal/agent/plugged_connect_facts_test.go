@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // An agent plugin's connect is told, of each model in models and of
@@ -31,7 +31,7 @@ export function connect({ gateway, model, models }) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("model").Set("magpie/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("eipgam/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(filepath.Join(home, ".facts.json"))
@@ -98,9 +98,9 @@ export function connect({ gateway, model, models }) {
 	}
 }
 
-// An agent plugin's connect is given magpie's decision models as
+// An agent plugin's connect is given eipgam's decision models as
 // decisionModels, apart from models (baranwang on X: a plugin wiring
-// magpie's judging models into its agent had no way to learn them):
+// eipgam's judging models into its agent had no way to learn them):
 // each with its id, its provider and the gateway paths it is asked on,
 // a routing group of them too, and none of them in models, which agents
 // offer for a conversation.
@@ -122,7 +122,7 @@ export function connect({ models, decisionModels }) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("model").Set("magpie/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("eipgam/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(filepath.Join(home, ".judged.json"))

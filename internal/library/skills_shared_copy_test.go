@@ -7,11 +7,11 @@ import (
 )
 
 // math_milian: a skill given to every agent was in ~/.agents/skills (the
-// user's own copy) and in ~/.pi/agent/skills (magpie's link to the
+// user's own copy) and in ~/.pi/agent/skills (eipgam's link to the
 // library's own copy of the same files). Pi reads both folders and drops
 // a skill read twice only when both paths are one file (realpath,
 // dist/core/skills.js), so it warned "hunk-review" collision. An agent
-// that reads ~/.agents/skills itself gets no second tree there: magpie's
+// that reads ~/.agents/skills itself gets no second tree there: eipgam's
 // link or copy in its own folder goes, the user's copy stays as it is.
 func TestSharedCopyNotGivenTwice(t *testing.T) {
 	for _, how := range []string{HowLink, HowCopy} {
@@ -108,8 +108,8 @@ func ownProblem(r *Result, agent, name string) bool {
 // The user's own copy kept in ~/.agents/skills under another folder name
 // (hunk-review-main, as a repository's checkout names it): Pi, Codex and
 // Gemini CLI know a skill by its SKILL.md's name, so the library's in
-// their own folder too is the skill twice. A magpie link left there by an
-// older magpie goes on the next sync.
+// their own folder too is the skill twice. A eipgam link left there by an
+// older eipgam goes on the next sync.
 func TestSharedCopyOtherFolderName(t *testing.T) {
 	h := sandbox(t)
 	os.RemoveAll(filepath.Join(h, ".config/goose"))

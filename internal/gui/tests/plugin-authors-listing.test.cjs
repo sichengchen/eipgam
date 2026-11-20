@@ -5,7 +5,7 @@
 // (yetone: 社区插件、非官方插件散落的太厉害了，你要把它统筹起来): in Agents,
 // and alone under the Other authors origin. Browsed or found by a search,
 // by its name or its publisher, it is under its publisher's name and never
-// with the magpie community badge, on its card and on its page. PinK's listing is
+// with the eipgam community badge, on its card and on its page. PinK's listing is
 // registry.json's before plugins#617. Every language, both engines, at a
 // narrow width too; the API is faked here.
 const assert = require("node:assert/strict");
@@ -24,9 +24,9 @@ const KILO = "@magpie-community/agent-kilo";
 const listings = () => [
   { package: RIVER, name: "River", providers: ["river"], community: true,
     summary: { en: "River (river.ai) pay-as-you-go inference with your API key: per-account models from /v1/models, documented reasoning efforts and live prices from River's public pricing endpoint.", zh: "用你的 API key 接入 River (river.ai) 按量计费推理：按账号从 /v1/models 列出模型，带官方推理档位与实时价格。" } },
-  { package: KILO, name: "Kilo Code", kind: "agent", community: true, summary: { en: "Kilo Code on magpie's Agents page.", zh: "把 Kilo Code 加到 Agent 页。" } },
+  { package: KILO, name: "Kilo Code", kind: "agent", community: true, summary: { en: "Kilo Code on eipgam's Agents page.", zh: "把 Kilo Code 加到 Agent 页。" } },
   { package: PINK, name: "PinK", kind: "agent", icon: "https://raw.githubusercontent.com/YuchenWell/magpie-plugin-pink/main/assets/pink.png",
-    summary: { en: "Connect PinK to Magpie's models from the Agents page and track gateway usage and cost. Disconnecting restores the managed configuration.", zh: "在 Agent 页面连接 PinK，使用 Magpie 中配置的模型并查看调用用量与费用；断开时恢复插件管理的配置。" } },
+    summary: { en: "Connect PinK to eipgam's models from the Agents page and track gateway usage and cost. Disconnecting restores the managed configuration.", zh: "在 Agent 页面连接 PinK，使用 eipgam 中配置的模型并查看调用用量与费用；断开时恢复插件管理的配置。" } },
 ];
 const npm = {
   [PINK]: { version: "0.1.1", publisher: "zhouzhenzhou", license: "MIT", weekly: 12 },
@@ -58,7 +58,7 @@ function server(lang) {
     if (url.pathname === "/api/plugins/github") return json({ repos: [] });
     if (url.pathname === "/api/plugins/page") return json({ readme: "# PinK", updated: "2026-10-30T00:00:00Z" });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.hostname !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.hostname !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -66,11 +66,11 @@ function server(lang) {
 }
 
 const L = {
-  en: { agents: "Agents", community: "magpie community" },
-  zh: { agents: "Agent", community: "magpie 社区" },
-  "zh-TW": { agents: "Agent", community: "magpie 社群" },
-  ja: { agents: "エージェント", community: "magpie コミュニティ" },
-  de: { agents: "Agenten", community: "magpie-Community" },
+  en: { agents: "Agents", community: "eipgam community" },
+  zh: { agents: "Agent", community: "eipgam 社区" },
+  "zh-TW": { agents: "Agent", community: "eipgam 社群" },
+  ja: { agents: "エージェント", community: "eipgam コミュニティ" },
+  de: { agents: "Agenten", community: "eipgam-Community" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const card = (pkg) => view.locator(`.pm-card[data-pkg="${pkg}"]`);
         const shot = (name) => process.env.ARTIFACT_DIR && view.screenshot({ path: path.join(process.env.ARTIFACT_DIR, `plugin-authors-${name}-${engine}-${lang}-${width}.png`) });

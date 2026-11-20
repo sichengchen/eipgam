@@ -41,7 +41,7 @@ func TestDownloadRetriesAndReports(t *testing.T) {
 
 	var done, total int64
 	ctx := WithProgress(context.Background(), func(d, t int64) { done, total = d, t })
-	path := filepath.Join(t.TempDir(), "magpie.new")
+	path := filepath.Join(t.TempDir(), "eipgam.new")
 	if err := download(ctx, Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestDownloadResumesWhereItBrokeOff(t *testing.T) {
 
 	var done, total int64
 	ctx := WithProgress(context.Background(), func(d, t int64) { done, total = d, t })
-	path := filepath.Join(t.TempDir(), "magpie.new")
+	path := filepath.Join(t.TempDir(), "eipgam.new")
 	if err := download(ctx, Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +123,7 @@ func TestDownloadResumesWhereItBrokeOff(t *testing.T) {
 // nothing is kept.
 func TestDownloadResumedFileIsStillChecked(t *testing.T) {
 	quickRetries(t)
-	body := bytes.Repeat([]byte("magpie"), 50<<10)
+	body := bytes.Repeat([]byte("eipgam"), 50<<10)
 	sum := sha256.Sum256(body)
 	tries := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -141,7 +141,7 @@ func TestDownloadResumedFileIsStillChecked(t *testing.T) {
 		w.Write(bytes.Repeat([]byte("x"), len(body)-1000))
 	}))
 	defer srv.Close()
-	path := filepath.Join(t.TempDir(), "magpie.new")
+	path := filepath.Join(t.TempDir(), "eipgam.new")
 	err := download(context.Background(), Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path)
 	if err == nil || !strings.Contains(err.Error(), "does not match its checksum") {
 		t.Fatalf("err = %v, want a checksum mismatch", err)
@@ -156,7 +156,7 @@ func TestDownloadResumedFileIsStillChecked(t *testing.T) {
 // kept and is not a failure: the file is asked for whole.
 func TestDownloadBadContentRangeIsFetchedWhole(t *testing.T) {
 	quickRetries(t)
-	body := bytes.Repeat([]byte("magpie"), 50<<10)
+	body := bytes.Repeat([]byte("eipgam"), 50<<10)
 	sum := sha256.Sum256(body)
 	var ranges []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +178,7 @@ func TestDownloadBadContentRangeIsFetchedWhole(t *testing.T) {
 		w.Write(body)
 	}))
 	defer srv.Close()
-	path := filepath.Join(t.TempDir(), "magpie.new")
+	path := filepath.Join(t.TempDir(), "eipgam.new")
 	if err := download(context.Background(), Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatal(err)
 	}
@@ -208,15 +208,15 @@ func TestDownloadDroppedConnectionErrorKeepsAddressOut(t *testing.T) {
 		http.Redirect(w, r, signed, http.StatusFound)
 	}))
 	defer gh.Close()
-	path := filepath.Join(t.TempDir(), "magpie.new")
-	err := download(context.Background(), Asset{URL: gh.URL + "/magpie-windows-amd64.exe", SHA256: "00"}, path)
+	path := filepath.Join(t.TempDir(), "eipgam.new")
+	err := download(context.Background(), Asset{URL: gh.URL + "/eipgam-windows-amd64.exe", SHA256: "00"}, path)
 	if err == nil || !Network(err) {
 		t.Fatalf("err = %v, want a network error", err)
 	}
 	if tries != len(retryWaits)+1 {
 		t.Fatalf("tries = %d, want %d", tries, len(retryWaits)+1)
 	}
-	if msg := err.Error(); strings.Contains(msg, "SECRET") || strings.Contains(msg, "http") || !strings.Contains(msg, "magpie.new") || !strings.Contains(msg, "EOF") {
+	if msg := err.Error(); strings.Contains(msg, "SECRET") || strings.Contains(msg, "http") || !strings.Contains(msg, "eipgam.new") || !strings.Contains(msg, "EOF") {
 		t.Fatalf("error = %q", msg)
 	}
 	if _, serr := os.Stat(path); !os.IsNotExist(serr) {
@@ -234,7 +234,7 @@ func TestDownloadNotFoundIsNotRetried(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 	defer srv.Close()
-	err := download(context.Background(), Asset{URL: srv.URL, SHA256: "00"}, filepath.Join(t.TempDir(), "magpie.new"))
+	err := download(context.Background(), Asset{URL: srv.URL, SHA256: "00"}, filepath.Join(t.TempDir(), "eipgam.new"))
 	if err == nil || Network(err) || tries != 1 {
 		t.Fatalf("err = %v after %d tries, want one 404", err, tries)
 	}
@@ -290,7 +290,7 @@ func TestDownloadStallIsTriedAgain(t *testing.T) {
 	// waited out
 	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
-	path := filepath.Join(t.TempDir(), "magpie.new")
+	path := filepath.Join(t.TempDir(), "eipgam.new")
 	start := time.Now()
 	if err := download(ctx, Asset{URL: srv.URL, Size: int64(len(body)), SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatalf("after %s at %d of %d bytes: %v", time.Since(start).Round(time.Millisecond), done, total, err)
@@ -323,7 +323,7 @@ func TestDownloadStallEveryTimeSaysSo(t *testing.T) {
 	defer srv.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	err := download(ctx, Asset{URL: srv.URL, SHA256: "00"}, filepath.Join(t.TempDir(), "magpie.new"))
+	err := download(ctx, Asset{URL: srv.URL, SHA256: "00"}, filepath.Join(t.TempDir(), "eipgam.new"))
 	if err == nil || !Network(err) || !errors.Is(err, errStalled) || ctx.Err() != nil {
 		t.Fatalf("err = %v, want a stall", err)
 	}
@@ -364,7 +364,7 @@ func TestDownloadSlowButMovingOutlastsTheClientTimeout(t *testing.T) {
 	defer srv.Close()
 	var steps []string
 	ctx := WithStep(context.Background(), func(s string) { steps = append(steps, s) })
-	path := filepath.Join(t.TempDir(), "magpie.new")
+	path := filepath.Join(t.TempDir(), "eipgam.new")
 	if err := download(ctx, Asset{URL: srv.URL, Size: int64(len(body)), SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatalf("a moving download failed: %v", err)
 	}

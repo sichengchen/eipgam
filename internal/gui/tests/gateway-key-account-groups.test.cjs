@@ -33,7 +33,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.route("**/*", fixture(lang, "light", events, { lan: true,
           accountGroups: [{ id: "gday", name: "Day", accounts: ["relay/me@example.com"] }],
           keyHolds: { server: { accounts: ["@gday"] } } }));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://eipgam.test/?view=gateway");
         await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
         const row = (id) => page.locator(`#gatewayKeys .acc[data-key="${id}"]`);
         const sent = (action) => events.filter((e) => e.action === action).map((e) => e.body);

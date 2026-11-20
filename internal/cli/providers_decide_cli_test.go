@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A System One API of another vendor is added with decide= (#647).
@@ -36,7 +36,7 @@ func TestRemoteMagpieAddReportsModels(t *testing.T) {
 				up.Close()
 			}
 			out, err := stdoutOf(t, func() error {
-				return providerCmd([]string{"provider", "add", "remote-magpie", "remote-key", "url=" + up.URL, "id=office"})
+				return providerCmd([]string{"provider", "add", "remote-eipgam", "remote-key", "url=" + up.URL, "id=office"})
 			})
 			if err != nil {
 				t.Fatal(err)

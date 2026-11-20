@@ -19,8 +19,8 @@ const { strings } = require("./strings.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/mg";
 const fixture = (st) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
-  mcpHub: st.on, hubPath: "/mcp/magpie/hub/", hubNote: "", hubName: "la-box", hubAllTools: st.all,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
+  mcpHub: st.on, hubPath: "/mcp/eipgam/hub/", hubNote: "", hubName: "la-box", hubAllTools: st.all,
   hubOnDemandOver: OVER, hubFindsItself: FINDS,
   agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json`, ...(st.on ? { hub: "on" } : {}) }],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
@@ -63,7 +63,7 @@ function server(lang, st) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -103,13 +103,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const st = { on: false, all: false, sent: [], web: width < 800 };
         const errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         await v.locator(".lib-hub").waitFor();
@@ -119,13 +119,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         st.on = true;
         const ctx2 = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx2.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+        await ctx2.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {} });
         const p = await ctx2.newPage();
         p.setDefaultTimeout(5000);
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang, st));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://eipgam.test/");
         await p.locator('button[data-view="library"]').click();
         const row = p.locator("#view-library .lib-hubtoolsrow");
         await row.waitFor();

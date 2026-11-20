@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // busyRetryClaude stands in for Claude Code, keeping its session as it
@@ -20,7 +20,7 @@ import (
 // a user line and an assistant line of its own written to the session's
 // file, and answered with its pid and turn. A run resumed from a session
 // answers at once; the second turn of a run started anew holds mid-reply,
-// as one whose client went away without magpie hearing of it does (#5405).
+// as one whose client went away without eipgam hearing of it does (#5405).
 // It says where the per-run logs are, and the log of what it was told.
 func busyRetryClaude(t *testing.T) (string, string) {
 	t.Helper()
@@ -100,7 +100,7 @@ func newBusyRetryHarness(t *testing.T, mode string) *busyRetryHarness {
 	if mode != "print" {
 		claudeTUIRuns = true
 		t.Cleanup(func() { claudeTUIRuns = false })
-		helper := filepath.Join(t.TempDir(), "magpie")
+		helper := filepath.Join(t.TempDir(), "eipgam")
 		testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift
@@ -158,7 +158,7 @@ func (h *busyRetryHarness) send(msgs string) chan struct{} {
 // A turn sent again while its run is still busy answering it goes on in a
 // branch of the run's session, cut before the turn (#5405): the client's
 // connection dropped mid-reply, the request was retried, and no cancel
-// reached magpie — the run the first attempt started is still busy with
+// reached eipgam — the run the first attempt started is still busy with
 // the very turn. A new Claude Code told the whole conversation writes it
 // all to the cache again; the branch's run reads the history from the
 // cache, as Claude Code asked it of Anthropic, and is told only the turn.
@@ -180,7 +180,7 @@ func busyRetryBranches(t *testing.T, mode string) {
 
 	// the turn is sent, its run holds mid-reply, and no cancel comes: the
 	// request stays unanswered, as one whose client's connection dropped
-	// mid-reply does at the server magpie, whose context knows of no cancel
+	// mid-reply does at the server eipgam, whose context knows of no cancel
 	firstTold := h.heard()
 	done := h.send(conv)
 	t.Cleanup(func() {
@@ -192,7 +192,7 @@ func busyRetryBranches(t *testing.T, mode string) {
 	deadline := time.Now().Add(10 * time.Second)
 	for !strings.Contains(h.read(), "and run the tests") || h.heard() == firstTold {
 		if time.Now().After(deadline) {
-			t.Fatalf("the run was never told the turn:\n%s\nmagpie log:\n%s", h.read(), logs.String())
+			t.Fatalf("the run was never told the turn:\n%s\neipgam log:\n%s", h.read(), logs.String())
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
@@ -203,7 +203,7 @@ func busyRetryBranches(t *testing.T, mode string) {
 	}
 	h.s.subscription.mu.Lock()
 	n := len(h.s.subscription.runs)
-	state := fmt.Sprintf("%d runs, %d idle; told log:\n%s\nmagpie log:\n%s", n, len(h.s.subscription.idle), h.read(), logs.String())
+	state := fmt.Sprintf("%d runs, %d idle; told log:\n%s\neipgam log:\n%s", n, len(h.s.subscription.idle), h.read(), logs.String())
 	h.s.subscription.mu.Unlock()
 	if n < 2 {
 		t.Fatalf("%s", state)
@@ -272,7 +272,7 @@ func busyRunPassedBy(t *testing.T, mode string) {
 	deadline := time.Now().Add(10 * time.Second)
 	for !strings.Contains(h.read(), "and run the tests") || h.heard() == firstTold {
 		if time.Now().After(deadline) {
-			t.Fatalf("the run was never told the turn:\n%s\nmagpie log:\n%s", h.read(), logs.String())
+			t.Fatalf("the run was never told the turn:\n%s\neipgam log:\n%s", h.read(), logs.String())
 		}
 		time.Sleep(10 * time.Millisecond)
 	}

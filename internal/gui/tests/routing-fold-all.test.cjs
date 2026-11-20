@@ -11,7 +11,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { reach } = require("./reader.cjs");
 
-const assets = path.resolve(__dirname, process.env.MAGPIE_ROUTING_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.EIPGAM_ROUTING_ASSETS || "../assets");
 const now = new Date();
 const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((n) => String(n).padStart(2, "0")).join("-");
 const stamp = (d) => {
@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         const view = page.locator("#view-routing");
         await view.locator(".rt-req").nth(4).waitFor();
         await view.locator(".rt-group-by button").nth(1).click();

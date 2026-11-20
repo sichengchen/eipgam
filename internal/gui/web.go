@@ -20,13 +20,13 @@ import (
 
 	"github.com/klauspost/compress/gzhttp"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// `magpie web` serves the window's page to a browser, for a computer that
+// `eipgam web` serves the window's page to a browser, for a computer that
 // can't show the app — no desktop, WSL, a server reached over SSH — with
 // the gateway beside it as the app has. What is the desktop's (the panel,
 // the tray, the Dock) does nothing there; a folder is named, not opened.
@@ -44,14 +44,14 @@ func (webHost) TintPanel([4]uint8, int) bool     { return false }
 func (webHost) TintTitleBar([4]uint8, bool) bool { return false }
 func (webHost) SetTextSize(int)                  {} // the browser zooms its own tab
 func (webHost) OpenFolder(path string) error {
-	return errors.New("in the browser magpie can't open folders: it is " + tilde(path))
+	return errors.New("in the browser eipgam can't open folders: it is " + tilde(path))
 }
 func (webHost) ChooseFolder(string) (string, error) {
-	return "", errors.New("in the browser magpie can't show a folder picker: type the folder's path")
+	return "", errors.New("in the browser eipgam can't show a folder picker: type the folder's path")
 }
 
 // openOnHost opens a link that isn't a web page's (System Settings' Login
-// Items) on this computer, the one magpie runs on.
+// Items) on this computer, the one eipgam runs on.
 // A web page's own https links stay the page's to open. Tests stand in for
 // the system.
 var openOnHost = func(u string) error {
@@ -61,8 +61,8 @@ var openOnHost = func(u string) error {
 	return proc.OpenBrowser(u)
 }
 
-// Web is a started `magpie web`: its address and the link that signs a
-// browser in, and with MAGPIE_WEB_SIGN_IN=lazycat the box's address its
+// Web is a started `eipgam web`: its address and the link that signs a
+// browser in, and with EIPGAM_WEB_SIGN_IN=lazycat the box's address its
 // administrators open the page at, signed in to the box (BoxLink).
 type Web struct {
 	Addr, Link, BoxLink string
@@ -77,14 +77,14 @@ var webReexec atomic.Bool
 
 // webRunKey hands a run's own key to the version it restarts into, so the
 // browser's cookie still opens the page (#111).
-const webRunKey = "MAGPIE_WEB_RUNKEY"
+const webRunKey = "EIPGAM_WEB_RUNKEY"
 
 // StartWeb serves the page on addr (host:port), as the given version of
-// magpie, which keeps itself up to date as the app does. Every request needs the
+// eipgam, which keeps itself up to date as the app does. Every request needs the
 // key the link carries, taken once into a cookie other sites' pages can't
 // send with a POST (every change is one), so neither a page elsewhere nor
 // anyone else on the network reaches the settings and keys behind it. On a
-// LazyCat box, MAGPIE_WEB_SIGN_IN=lazycat lets the box's administrators in
+// LazyCat box, EIPGAM_WEB_SIGN_IN=lazycat lets the box's administrators in
 // without it, signed in to the box (webBoxSignIn).
 func StartWeb(addr, version string) (*Web, error) {
 	Version = version
@@ -131,7 +131,7 @@ func StartWeb(addr, version string) (*Web, error) {
 		ReadHeaderTimeout: 30 * time.Second,
 	}
 	go w.srv.Serve(ln)
-	// Settings' AutoRestart: magpie web runs on as the new version (#2096)
+	// Settings' AutoRestart: eipgam web runs on as the new version (#2096)
 	updates.autoRestart = func() bool {
 		if restartInto(true, false, "", true) {
 			quit()
@@ -145,7 +145,7 @@ func StartWeb(addr, version string) (*Web, error) {
 }
 
 // ServesGateway says whether this process serves the gateway, which it
-// doesn't while another magpie (the service, the app, magpie serve) has
+// doesn't while another eipgam (the service, the app, eipgam serve) has
 // it: the page then shows that one's settings and accounts, read from the
 // same files, and this one takes the gateway up once that one is gone.
 func (w *Web) ServesGateway() bool { return served.Load() != nil }
@@ -178,7 +178,7 @@ func (w *Web) Close() {
 	stopServing()
 }
 
-// webKeyMin is the shortest MAGPIE_WEB_KEY taken: it is all that stands
+// webKeyMin is the shortest EIPGAM_WEB_KEY taken: it is all that stands
 // between the network and the keys behind the page.
 const webKeyMin = 16
 
@@ -188,16 +188,16 @@ const webKeyMin = 16
 const webCookieAge = 400 * 24 * time.Hour
 
 // webKey is the key the link carries: a new one each run, unless
-// MAGPIE_WEB_KEY names one — for a page kept running as a service, which
+// EIPGAM_WEB_KEY names one — for a page kept running as a service, which
 // browsers then stay signed in to across restarts. fixed says which.
 func webKey() (key string, fixed bool, err error) {
 	if k := os.Getenv(webRunKey); k != "" {
 		os.Unsetenv(webRunKey) // the run's alone, not its children's
-		if len(k) == 32 && strings.Trim(k, "0123456789abcdef") == "" && os.Getenv("MAGPIE_WEB_KEY") == "" {
+		if len(k) == 32 && strings.Trim(k, "0123456789abcdef") == "" && os.Getenv("EIPGAM_WEB_KEY") == "" {
 			return k, false, nil
 		}
 	}
-	if k := os.Getenv("MAGPIE_WEB_KEY"); k != "" {
+	if k := os.Getenv("EIPGAM_WEB_KEY"); k != "" {
 		if err := CheckWebKey(k); err != nil {
 			return "", false, err
 		}
@@ -213,16 +213,16 @@ func NewWebKey() string {
 	return hex.EncodeToString(b)
 }
 
-// CheckWebKey says what is wrong with k as a MAGPIE_WEB_KEY, nil when
+// CheckWebKey says what is wrong with k as a EIPGAM_WEB_KEY, nil when
 // nothing is.
 func CheckWebKey(k string) error {
 	if len(k) < webKeyMin {
-		return fmt.Errorf("MAGPIE_WEB_KEY is %d characters; it needs at least %d", len(k), webKeyMin)
+		return fmt.Errorf("EIPGAM_WEB_KEY is %d characters; it needs at least %d", len(k), webKeyMin)
 	}
 	// a cookie can't hold a space, ; " \ or a comma: the browser would
 	// be sent one that isn't the key, and turned away
 	if strings.Trim(k, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~") != "" {
-		return errors.New("MAGPIE_WEB_KEY takes letters, digits and - . _ ~ only (openssl rand -hex 16 makes one)")
+		return errors.New("EIPGAM_WEB_KEY takes letters, digits and - . _ ~ only (openssl rand -hex 16 makes one)")
 	}
 	return nil
 }
@@ -254,7 +254,7 @@ func webGuard(cookie, key string, keep time.Duration, box boxSignIn, next http.H
 		}
 		if q := r.URL.Query(); q.Has("k") {
 			if !same(q.Get("k")) {
-				http.Error(rw, "this link's key is not this magpie web's: use the link it printed when it started", http.StatusUnauthorized)
+				http.Error(rw, "this link's key is not this eipgam web's: use the link it printed when it started", http.StatusUnauthorized)
 				return
 			}
 			q.Del("k")
@@ -275,7 +275,7 @@ func webGuard(cookie, key string, keep time.Duration, box boxSignIn, next http.H
 			r.Body = http.MaxBytesReader(rw, r.Body, 4096)
 			back := localPath(r.PostFormValue("back"))
 			if !same(r.PostFormValue("key")) {
-				webTurnedAway(rw, r, back, "That key is not this magpie web's.")
+				webTurnedAway(rw, r, back, "That key is not this eipgam web's.")
 				return
 			}
 			signIn(rw, r, back)
@@ -293,9 +293,9 @@ func webGuard(cookie, key string, keep time.Duration, box boxSignIn, next http.H
 		}
 		why, short := "This browser sent no sign-in cookie for this address. A browser keeps cookies per host, not per port, so another service on this host's other ports can take it away: by clearing its site data (a sign-out often does), or by filling the host's cookie limit. A page opened at another address than the one signed in at (an IP instead of a name) has none either.", "no cookie sent"
 		if len(sent) > 0 {
-			why, short = "This browser's sign-in cookie holds a key that isn't this magpie web's: the key changed after it signed in (MAGPIE_WEB_KEY changed, or a start without it made a new one).", "its cookie holds another key"
+			why, short = "This browser's sign-in cookie holds a key that isn't this eipgam web's: the key changed after it signed in (EIPGAM_WEB_KEY changed, or a start without it made a new one).", "its cookie holds another key"
 		}
-		lead := "open the link magpie web printed when it started: it carries the key. "
+		lead := "open the link eipgam web printed when it started: it carries the key. "
 		// on a LazyCat box the box's sign-in is the way in, with no
 		// cookie of the page's own: it alone says why not
 		if box != nil {
@@ -309,7 +309,7 @@ func webGuard(cookie, key string, keep time.Duration, box boxSignIn, next http.H
 			http.Error(rw, lead+why, http.StatusUnauthorized)
 			return
 		}
-		log.Printf("magpie web: turned away %s from %s: %s", r.URL.Path, r.RemoteAddr, short)
+		log.Printf("eipgam web: turned away %s from %s: %s", r.URL.Path, r.RemoteAddr, short)
 		webTurnedAway(rw, r, r.URL.RequestURI(), why)
 	})
 }
@@ -317,7 +317,7 @@ func webGuard(cookie, key string, keep time.Duration, box boxSignIn, next http.H
 // webAppFiles are the files webGuard serves without the key: the web app
 // manifest and the icons it and index.html name, so "Add to Home Screen"
 // gets them whether or not the browser sends its cookie with them. Each is
-// a file of the build, the same for every magpie; nothing in it is the
+// a file of the build, the same for every eipgam; nothing in it is the
 // user's.
 var webAppFiles = map[string]bool{
 	"/manifest.json":              true,
@@ -326,7 +326,7 @@ var webAppFiles = map[string]bool{
 }
 
 // webSignInPath takes the key pasted into the form a page turned away shows.
-const webSignInPath = "/_magpie/sign-in"
+const webSignInPath = "/_eipgam/sign-in"
 
 // localPath is back when it is a path on this server, else "/": the form's
 // return address never leads to another site, nor to the form's own.
@@ -345,18 +345,18 @@ func webTurnedAway(rw http.ResponseWriter, r *http.Request, back, why string) {
 	rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 	rw.Header().Set("Cache-Control", "no-store")
 	rw.WriteHeader(http.StatusUnauthorized)
-	fmt.Fprintf(rw, `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>magpie web</title>
+	fmt.Fprintf(rw, `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>eipgam web</title>
 <style>body{font:15px/1.5 system-ui,sans-serif;max-width:32em;margin:12vh auto;padding:0 16px;color:#222;background:#fafafa}@media(prefers-color-scheme:dark){body{color:#ddd;background:#1c1c1e}}input,button{font:inherit;padding:.4em .6em}input{width:100%%;box-sizing:border-box;margin:.5em 0}</style></head>
-<body><h1>magpie web</h1><p>%s</p><p>Paste the key (MAGPIE_WEB_KEY, or the k= in the link magpie web printed when it started):</p>
+<body><h1>eipgam web</h1><p>%s</p><p>Paste the key (EIPGAM_WEB_KEY, or the k= in the link eipgam web printed when it started):</p>
 <form method="post" action="%s"><input type="hidden" name="back" value="%s"><input type="password" name="key" autocomplete="current-password" autofocus required><button type="submit">Sign in</button></form></body></html>`,
 		html.EscapeString(why), webSignInPath, html.EscapeString(back))
 }
 
 // NetworkLinks are the links to the page, served on port, that other
-// machines open; key is the link's "/?k=…". MAGPIE_PUBLIC_URL with a port
+// machines open; key is the link's "/?k=…". EIPGAM_PUBLIC_URL with a port
 // of its own names the host the container's ports are published on, so
 // the page is at that host on its own port; one without (a reverse proxy's
-// https://magpie.example.com, #372) is where the page is, path and all.
+// https://eipgam.example.com, #372) is where the page is, path and all.
 func NetworkLinks(port, key string) []string {
 	if u, err := url.Parse(gateway.PublicURL()); err == nil && u.Host != "" && u.Port() == "" {
 		return []string{strings.TrimRight(u.String(), "/") + key}
@@ -369,7 +369,7 @@ func NetworkLinks(port, key string) []string {
 }
 
 // LANAddrs are this computer's addresses on the local network, for the
-// links to print when the page is served there: MAGPIE_PUBLIC_URL's host
+// links to print when the page is served there: EIPGAM_PUBLIC_URL's host
 // when set (in a container, whose own addresses the network can't reach),
 // else the gateway's own (gateway.LANHosts), so Settings lists one
 // computer's addresses the same way twice.
@@ -380,17 +380,17 @@ func LANAddrs() []string {
 	return gateway.LANHosts()
 }
 
-// webServed is all `magpie web` on port serves: the gateway's client
+// webServed is all `eipgam web` on port serves: the gateway's client
 // routes, judged by the gateway (onePort) and never by box, and the page
 // and its API behind the allow list and the key, or box's sign-in.
 func webServed(port, key string, keep time.Duration, box boxSignIn, page http.Handler) http.Handler {
 	return onePort(gateway.AllowGuard(gateway.ClientCertGuard(webHandler(port, key, keep, box, page))))
 }
 
-// webHandler is what `magpie web` on port serves: the page and its API
+// webHandler is what `eipgam web` on port serves: the page and its API
 // behind the key, or box's sign-in, compressed for the browser.
 func webHandler(port, key string, keep time.Duration, box boxSignIn, page http.Handler) http.Handler {
-	return webCompressed(webGuard("magpie_web_"+port, key, keep, box, webOwnPage(page)))
+	return webCompressed(webGuard("eipgam_web_"+port, key, keep, box, webOwnPage(page)))
 }
 
 // webOwnPage turns away a request for /api that another page sent with
@@ -404,7 +404,7 @@ func webHandler(port, key string, keep time.Duration, box boxSignIn, page http.H
 // GET, HEAD and OPTIONS) is judged by net/http's CrossOriginProtection,
 // which takes the browser's Sec-Fetch-Site (same-origin, or none for what
 // the user did) and, from a browser too old to send it, an Origin that is
-// absent or names the request's own Host or MAGPIE_PUBLIC_URL. A read is
+// absent or names the request's own Host or EIPGAM_PUBLIC_URL. A read is
 // turned away too when the browser says another origin sent it, so that
 // no GET route that does something (an import read once, a sign-in
 // started) is any page's to call, whether or not it answers.
@@ -418,7 +418,7 @@ func webOwnPage(next http.Handler) http.Handler {
 		// behind a proxy that passes on a Host of its own, the page's
 		// address is the one the user named
 		if err := cop.AddTrustedOrigin(u.Scheme + "://" + u.Host); err != nil {
-			log.Printf("magpie web: MAGPIE_PUBLIC_URL %s is no origin: %v", u, err)
+			log.Printf("eipgam web: EIPGAM_PUBLIC_URL %s is no origin: %v", u, err)
 		}
 	}
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -433,15 +433,15 @@ func webOwnPage(next http.Handler) http.Handler {
 			}
 		}
 		if err != nil {
-			log.Printf("magpie web: turned away %s %s from another page (Origin %q): %v", r.Method, r.URL.Path, r.Header.Get("Origin"), err)
-			http.Error(rw, "magpie's API answers magpie's own page only", http.StatusForbidden)
+			log.Printf("eipgam web: turned away %s %s from another page (Origin %q): %v", r.Method, r.URL.Path, r.Header.Get("Origin"), err)
+			http.Error(rw, "eipgam's API answers eipgam's own page only", http.StatusForbidden)
 			return
 		}
 		next.ServeHTTP(rw, r)
 	})
 }
 
-// webCompressed gzips what `magpie web` sends a browser that takes it: the
+// webCompressed gzips what `eipgam web` sends a browser that takes it: the
 // page's scripts, styles and SVG icons, and the API's JSON. They went out
 // as they are, about 4 MB for a first load before any data, and the
 // routing trace's JSON grows with every account a request could go to; a
@@ -450,7 +450,7 @@ func webOwnPage(next http.Handler) http.Handler {
 // Pictures already compressed go as they are.
 //
 // The app's own window gets the page from inside the process, with no
-// network between, so only `magpie web` compresses.
+// network between, so only `eipgam web` compresses.
 //
 // A gzipped file's ETag says so ("…-gzip"), as a validator of other bytes;
 // asked for again with it, the file is still a 304. A few bytes of padding
@@ -492,16 +492,16 @@ func compressible(ct string) bool {
 		strings.HasSuffix(ct, "json") || ct == "image/svg+xml"
 }
 
-// browserTab is a Windows that stands for a browser tab: magpie web's
+// browserTab is a Windows that stands for a browser tab: eipgam web's
 // (webHost) or one on the page the app serves (appWebHost).
 type browserTab interface{ browserTab() }
 
 func (webHost) browserTab() {}
 
-// isWeb: the page is served to a browser, by `magpie web` or by the app.
+// isWeb: the page is served to a browser, by `eipgam web` or by the app.
 func isWeb(w Windows) bool { _, ok := w.(browserTab); return ok }
 
-// ownWeb: the page is `magpie web`'s own (its gateway mode, its restart
+// ownWeb: the page is `eipgam web`'s own (its gateway mode, its restart
 // to update), not the app's served to a browser.
 func ownWeb(w Windows) bool { _, ok := w.(webHost); return ok }
 
@@ -511,7 +511,7 @@ func ownWeb(w Windows) bool { _, ok := w.(webHost); return ok }
 // (zgcwkj on Discord). Each such request is judged by the gateway's own
 // guards (Server.Front), not the page's key, and always as one from
 // another machine (gateway.FromPagePort): it needs a gateway key and
-// magpie shared, from loopback too. This port is the one put behind a
+// eipgam shared, from loopback too. This port is the one put behind a
 // proxy or a forward, and a raw TCP forward or a proxy that adds no
 // forwarding header arrives from loopback looking like an agent here
 // (reported privately by Coffemon). Agents here use the gateway's own
@@ -532,14 +532,14 @@ func onePort(page http.Handler) http.Handler {
 	})
 }
 
-// toGateway passes a client route on to the gateway another magpie serves
+// toGateway passes a client route on to the gateway another eipgam serves
 // here (the service, the app), as it came: its Host, so a rebound page's
 // name is still refused, and its forwarding headers, so a request a proxy
 // passed on is still one from another machine. It carries the page
 // port's mark (gateway.PagePortHeader, set by onePort), so the gateway
 // judges it as from another machine wherever it came from; and it always
 // carries an X-Forwarded-For (the peer's address added), so a gateway of
-// an older magpie, which doesn't know the mark, still does.
+// an older eipgam, which doesn't know the mark, still does.
 var toGateway = &httputil.ReverseProxy{
 	Rewrite: func(pr *httputil.ProxyRequest) {
 		u, _ := url.Parse(gateway.URL())
@@ -560,8 +560,8 @@ var toGateway = &httputil.ReverseProxy{
 	},
 	FlushInterval: -1, // streams as they come
 	ErrorHandler: func(rw http.ResponseWriter, r *http.Request, err error) {
-		log.Printf("magpie web: %s %s: the gateway at %s: %v", r.Method, r.URL.Path, gateway.URL(), err)
-		http.Error(rw, "magpie's gateway at "+gateway.URL()+" doesn't answer: "+err.Error(), http.StatusBadGateway)
+		log.Printf("eipgam web: %s %s: the gateway at %s: %v", r.Method, r.URL.Path, gateway.URL(), err)
+		http.Error(rw, "eipgam's gateway at "+gateway.URL()+" doesn't answer: "+err.Error(), http.StatusBadGateway)
 	},
 }
 

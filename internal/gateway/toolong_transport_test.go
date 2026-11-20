@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // overflowTold says an agent's reply tells it the prompt is too long.
@@ -15,7 +15,7 @@ func overflowTold(body string) bool {
 	return strings.Contains(body, "prompt is too long") || strings.Contains(body, "context_length_exceeded")
 }
 
-// magpieError is the body magpie writes for a try that got no answer, as
+// magpieError is the body eipgam writes for a try that got no answer, as
 // the gateway hands it to tooLongUnsaid.
 func magpieError(msg string) []byte {
 	rec := httptest.NewRecorder()

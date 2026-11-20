@@ -20,13 +20,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/iconproxy"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/iconproxy"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // The market is where the page finds MCP servers and skills to add in one
-// click: servers magpie picked and checked itself, then the MCP Registry's;
+// click: servers eipgam picked and checked itself, then the MCP Registry's;
 // skills from skills.sh, which counts how often each is installed.
 
 // ---- servers ----------------------------------------------------------------
@@ -62,7 +62,7 @@ type MarketServer struct {
 	Featured bool `json:"featured,omitempty"`
 	// OptIn is one no agent is given unless it is picked for it
 	OptIn bool `json:"optIn,omitempty"`
-	// Unready is why one of magpie's own can't answer yet (nothing it
+	// Unready is why one of eipgam's own can't answer yet (nothing it
 	// needs is set up, or Settings turned it off), from the GUI, which
 	// knows: its tools still answer, with the same words
 	Unready string  `json:"unready,omitempty"`
@@ -92,7 +92,7 @@ func secretEnv(key, label, where string) Input {
 	return Input{Key: key, Where: "env", Label: label, Description: where, Secret: true, Required: true}
 }
 
-// featured are the servers magpie offers first. Every one was checked: its
+// featured are the servers eipgam offers first. Every one was checked: its
 // package is published, its endpoint answers.
 var featured = []MarketServer{
 	selfServer(),
@@ -168,106 +168,106 @@ var featured = []MarketServer{
 		secretEnv("TAVILY_API_KEY", "API key", "app.tavily.com")),
 }
 
-// magpieCommand stands for this magpie's own binary in a featured server's
+// magpieCommand stands for this eipgam's own binary in a featured server's
 // command, which InstallServer puts in when it is added, and in a library
 // carried to another computer, which reads it as its own (self_here.go).
-const magpieCommand = "magpie"
+const magpieCommand = "eipgam"
 
-// selfServerName is the name magpie's own image generation server is written
+// selfServerName is the name eipgam's own image generation server is written
 // under, in every agent's config.
-const selfServerName = "magpie-image"
+const selfServerName = "eipgam-image"
 
-// selfServer is magpie's own image generation server: generate_image makes
+// selfServer is eipgam's own image generation server: generate_image makes
 // an image with the model Settings → Models → Images → Image generation names, saved
 // in the project. It costs what the model does, so it is given only to the
 // agents picked for it.
 func selfServer() MarketServer {
-	m := localServer(selfServerName, "Magpie Image", "Magpie", "https://usemagpie.ai/favicon.png", "https://usemagpie.ai",
-		"Generate and edit images with the image model set in Magpie (Settings › Models › Images), and make short videos with a video model set up in Magpie (Grok Imagine, Seedance), saved in the project.", magpieCommand, []string{"mcp", "image"})
+	m := localServer(selfServerName, "eipgam Image", "eipgam", "/icons/eipgam.svg", "https://github.com/sichengchen/eipgam",
+		"Generate and edit images with the image model set in eipgam (Settings › Models › Images), and make short videos with a video model set up in eipgam (Grok Imagine, Seedance), saved in the project.", magpieCommand, []string{"mcp", "image"})
 	m.OptIn = true
 	return m
 }
 
-// browserServerName is the name Magpie Browser's server is written under.
-const browserServerName = "magpie-browser"
+// browserServerName is the name eipgam Browser's server is written under.
+const browserServerName = "eipgam-browser"
 
-// browserServer is Magpie Browser: the agent uses the user's own browser,
-// its tabs signed in to the sites they use, through the extension magpie
+// browserServer is eipgam Browser: the agent uses the user's own browser,
+// its tabs signed in to the sites they use, through the extension eipgam
 // sets up (gateway/browser.go). It acts as the user wherever they are
 // signed in, so it is given only to the agents picked for it.
 func browserServer() MarketServer {
-	m := localServer(browserServerName, "Magpie Browser", "Magpie", "https://usemagpie.ai/favicon.png", "https://usemagpie.ai",
-		"Use your own browser: your tabs, signed in to the sites you use. Open pages, click, type, upload, read and take screenshots, through the Magpie Browser extension.", magpieCommand, []string{"mcp", "browser"})
+	m := localServer(browserServerName, "eipgam Browser", "eipgam", "/icons/eipgam.svg", "https://github.com/sichengchen/eipgam",
+		"Use your own browser: your tabs, signed in to the sites you use. Open pages, click, type, upload, read and take screenshots, through the eipgam Browser extension.", magpieCommand, []string{"mcp", "browser"})
 	m.OptIn = true
 	return m
 }
 
-// searchServerName is the name Magpie Web Search's server is written
+// searchServerName is the name eipgam Web Search's server is written
 // under, the name the gateway's own search server goes by (ownMCP).
-const searchServerName = "magpie-web-search"
+const searchServerName = "eipgam-web-search"
 
-// searchServer is Magpie Web Search: magpie's web search (Settings ›
+// searchServer is eipgam Web Search: eipgam's web search (Settings ›
 // Models › Web search) as a web_search and a web_fetch tool, through
-// `magpie mcp search`, which passes each call to the gateway's
+// `eipgam mcp search`, which passes each call to the gateway's
 // SearchMCPPath. Settings named it, by its address only, and the Library
 // didn't have it (lutra_fs on Discord). A search costs what the searcher
 // or the search API it asks charges, and an agent mostly has a search of
 // its own, so it is given only to the agents picked for it.
 func searchServer() MarketServer {
-	m := localServer(searchServerName, "Magpie Web Search", "Magpie", "https://usemagpie.ai/favicon.png", "https://usemagpie.ai",
-		"Search the web with the search set in Magpie (Settings › Models › Web search), and read a page by its URL.", magpieCommand, []string{"mcp", "search"})
+	m := localServer(searchServerName, "eipgam Web Search", "eipgam", "/icons/eipgam.svg", "https://github.com/sichengchen/eipgam",
+		"Search the web with the search set in eipgam (Settings › Models › Web search), and read a page by its URL.", magpieCommand, []string{"mcp", "search"})
 	m.OptIn = true
 	return m
 }
 
-// visionServerName is the name Magpie Image Recognition's server is
+// visionServerName is the name eipgam Image Recognition's server is
 // written under, the name the gateway's own image recognition server goes
 // by (ownMCP).
-const visionServerName = "magpie-vision"
+const visionServerName = "eipgam-vision"
 
-// visionServer is Magpie Image Recognition: magpie's image recognition
+// visionServer is eipgam Image Recognition: eipgam's image recognition
 // (Settings › Models › Images › Image recognition) as an analyze_image
-// tool, through `magpie mcp vision`, which passes each call to the
+// tool, through `eipgam mcp vision`, which passes each call to the
 // gateway's VisionMCPPath. Settings named it by its address only, and the
 // Library had image generation and search but not it (matrix0487 on
 // Discord, #4653). A look costs what the model that sees charges, and
 // most agents' models see for themselves, so it is given only to the
 // agents picked for it.
 func visionServer() MarketServer {
-	m := localServer(visionServerName, "Magpie Image Recognition", "Magpie", "https://usemagpie.ai/favicon.png", "https://usemagpie.ai",
-		"Read an image (a file, a URL, a screenshot) with the image recognition model set in Magpie (Settings › Models › Images), for a model that can't see.", magpieCommand, []string{"mcp", "vision"})
+	m := localServer(visionServerName, "eipgam Image Recognition", "eipgam", "/icons/eipgam.svg", "https://github.com/sichengchen/eipgam",
+		"Read an image (a file, a URL, a screenshot) with the image recognition model set in eipgam (Settings › Models › Images), for a model that can't see.", magpieCommand, []string{"mcp", "vision"})
 	m.OptIn = true
 	return m
 }
 
-// memoryServerName is the name Magpie Memory's server is written under,
+// memoryServerName is the name eipgam Memory's server is written under,
 // the name the gateway's own memory server goes by (ownMCP).
-const memoryServerName = "magpie-memory"
+const memoryServerName = "eipgam-memory"
 
-// memoryServer is Magpie Memory: what is known about the user, kept by
-// magpie for every agent, as memory_search, memory_save, memory_forget and
+// memoryServer is eipgam Memory: what is known about the user, kept by
+// eipgam for every agent, as memory_search, memory_save, memory_forget and
 // memory_context,
-// through `magpie mcp memory`, which passes each call to the gateway's
+// through `eipgam mcp memory`, which passes each call to the gateway's
 // MemoryMCPPath with the folder the agent started it in. It is there to be
-// shared and costs nothing, so, unlike magpie's other servers, it is given
+// shared and costs nothing, so, unlike eipgam's other servers, it is given
 // to every agent that can take it.
 func memoryServer() MarketServer {
-	return localServer(memoryServerName, "Magpie Memory", "Magpie", "https://usemagpie.ai/favicon.png", "https://usemagpie.ai",
-		"Memory shared by every agent: your preferences, rules and what each project needs, kept in Magpie. Agents search it before asking again, and save what you ask them to remember.", magpieCommand, []string{"mcp", "memory"})
+	return localServer(memoryServerName, "eipgam Memory", "eipgam", "/icons/eipgam.svg", "https://github.com/sichengchen/eipgam",
+		"Memory shared by every agent: your preferences, rules and what each project needs, kept in eipgam. Agents search it before asking again, and save what you ask them to remember.", magpieCommand, []string{"mcp", "memory"})
 }
 
-// sessionsServerName is the name Magpie Sessions' server is written
+// sessionsServerName is the name eipgam Sessions' server is written
 // under, the name the gateway's own sessions server goes by (ownMCP).
-const sessionsServerName = "magpie-sessions"
+const sessionsServerName = "eipgam-sessions"
 
-// sessionsServer is Magpie Sessions: what was said in every agent's
+// sessionsServer is eipgam Sessions: what was said in every agent's
 // sessions on this computer, as search_sessions and read_session, through
-// `magpie mcp sessions`, which passes each call to the gateway's
+// `eipgam mcp sessions`, which passes each call to the gateway's
 // SessionsMCPPath (cryingLiu on X). An agent given it reads the user's
 // other conversations, so it is given only to the agents picked for it.
 func sessionsServer() MarketServer {
-	m := localServer(sessionsServerName, "Magpie Sessions", "Magpie", "https://usemagpie.ai/favicon.png", "https://usemagpie.ai",
-		"Search and read what was said in every agent's sessions on this computer: an earlier conversation, decision or fix, from Claude Code, Codex or any agent Magpie reads.", magpieCommand, []string{"mcp", "sessions"})
+	m := localServer(sessionsServerName, "eipgam Sessions", "eipgam", "/icons/eipgam.svg", "https://github.com/sichengchen/eipgam",
+		"Search and read what was said in every agent's sessions on this computer: an earlier conversation, decision or fix, from Claude Code, Codex or any agent eipgam reads.", magpieCommand, []string{"mcp", "sessions"})
 	m.OptIn = true
 	return m
 }
@@ -281,7 +281,7 @@ func sessionsServer() MarketServer {
 // on X).
 func evermeServer() MarketServer {
 	m := localServer("everme-memory", "EverMe Memory", "EverMind", gh("EverMind-AI"), "https://github.com/EverMind-AI/EverMe",
-		"Cross-device, cross-agent memory from EverMe, as a second memory beside Magpie Memory: agents search it and save facts to it.", "npx", []string{"-y", "@everme/memory-mcp"},
+		"Cross-device, cross-agent memory from EverMe, as a second memory beside eipgam Memory: agents search it and save facts to it.", "npx", []string{"-y", "@everme/memory-mcp"},
 		Input{Key: "EVERME_AGENT_ID", Where: "env", Label: "Agent ID", Description: "agt_… , from EverMe (evercli auth login)", Placeholder: "agt_…", Required: true},
 		Input{Key: "EVERME_AGENT_TOKEN", Where: "env", Label: "Agent token", Description: "evt_… , never an emk_ account key", Placeholder: "evt_…", Secret: true, Required: true})
 	m.server.Env = map[string]string{"EVERME_API_BASE": "https://api.everme.evermind.ai"}
@@ -295,11 +295,11 @@ func evermeServer() MarketServer {
 // address, both edited after adding (OipsAnthony on X).
 func nowledgeServer() MarketServer {
 	return remoteServer("nowledge-mem", "Nowledge Mem", "Nowledge", gh("nowledge-co"), "http://127.0.0.1:14242/mcp",
-		"Nowledge Mem's graph memory, as a second memory beside Magpie Memory. Mem must be running on this computer; for a remote Mem, edit the address and add its API key.", false,
+		"Nowledge Mem's graph memory, as a second memory beside eipgam Memory. Mem must be running on this computer; for a remote Mem, edit the address and add its API key.", false,
 		Input{Key: "Authorization", Where: "header", Label: "API key", Description: "Optional — only for a Mem reached over Access Anywhere", Placeholder: "nmem_…", Secret: true, format: "Bearer {}"})
 }
 
-// selfCommand is the server's command and env for this magpie: its binary
+// selfCommand is the server's command and env for this eipgam: its binary
 // by full path, and the gateway's address when it isn't the default one.
 func selfCommand(s *Server) {
 	if s.Command != magpieCommand {
@@ -308,11 +308,11 @@ func selfCommand(s *Server) {
 	if exe, err := selfExe(); err == nil {
 		s.Command = exe
 	}
-	if a := os.Getenv("MAGPIE_ADDR"); a != "" {
+	if a := os.Getenv("EIPGAM_ADDR"); a != "" {
 		if s.Env == nil {
 			s.Env = map[string]string{}
 		}
-		s.Env["MAGPIE_ADDR"] = a
+		s.Env["EIPGAM_ADDR"] = a
 	}
 }
 
@@ -360,7 +360,7 @@ var serversSnapshot []byte
 // popularServers are the registry's servers whose repositories have the
 // most stars on GitHub, most first, offered after the featured ones before
 // anything is searched. The registry lists tens of thousands, by name, so
-// they come from a crawl of it shipped with magpie (market_servers.json).
+// they come from a crawl of it shipped with eipgam (market_servers.json).
 // One a featured server already is, or two that start the same thing, is
 // offered once.
 var popularServers = sync.OnceValue(func() []MarketServer { return readPopular(serversSnapshot) })
@@ -462,7 +462,7 @@ func serverKey(s *Server) string {
 		return strings.TrimSuffix(strings.ToLower(s.URL), "/")
 	}
 	if len(s.Args) == 2 && s.Args[0] == "mcp" && (s.Args[1] == "image" || s.Args[1] == "browser" || s.Args[1] == "search" || s.Args[1] == "vision" || s.Args[1] == "memory" || s.Args[1] == "sessions") {
-		return "magpie mcp " + s.Args[1] // magpie's own, wherever its binary is
+		return "eipgam mcp " + s.Args[1] // eipgam's own, wherever its binary is
 	}
 	uv := progName(s.Command) == "uvx"
 	for i := 0; i < len(s.Args); i++ {
@@ -747,7 +747,7 @@ func fromRegistry(r *registryServer) (MarketServer, bool) {
 				continue
 			}
 			cmd, args, inputs, ok := launchLine(&r.Packages[i])
-			if !ok { // not a line magpie can start; another package may be
+			if !ok { // not a line eipgam can start; another package may be
 				continue
 			}
 			s.Transport, m.Transport = "stdio", "stdio"
@@ -968,7 +968,7 @@ type MarketSkill struct {
 	Name     string `json:"name"`
 	Installs int    `json:"installs"`
 	Official bool   `json:"official,omitempty"`
-	// Featured is magpie's own, not one skills.sh lists
+	// Featured is eipgam's own, not one skills.sh lists
 	Featured bool   `json:"featured,omitempty"`
 	Icon     string `json:"icon"`
 	// Description is known once it has been fetched
@@ -976,22 +976,22 @@ type MarketSkill struct {
 	Have        string `json:"have,omitempty"`
 }
 
-// featuredSkills are magpie's own skills, first in the market: in
-// magpie-community/plugins, beside its plugins. magpie-setup has an agent
-// set magpie up as the user asks, through its commands (Leyuu_5 on X: so
-// many features that an AI could do the setting up); magpie-quota reads
-// what magpie quota tells (ttmouse on X); magpie-sessions searches and
-// reads every agent's sessions through magpie sessions search and show
+// featuredSkills are eipgam's own skills, first in the market: in
+// this repository. eipgam-setup has an agent
+// set eipgam up as the user asks, through its commands (Leyuu_5 on X: so
+// many features that an AI could do the setting up); eipgam-quota reads
+// what eipgam quota tells (ttmouse on X); eipgam-sessions searches and
+// reads every agent's sessions through eipgam sessions search and show
 // (yansheng1003 on X).
 var featuredSkills = []MarketSkill{{
-	Source: "magpie-community/plugins", SkillID: "magpie-setup", Name: "magpie-setup", Official: true, Featured: true,
-	Description: "Set magpie up as you ask, through its own commands: add keys and subscriptions, point agents at models, build routing groups with fallbacks and time-of-day rules, give devices gateway keys with budgets, and share MCP servers and instructions with every agent.",
+	Source: "sichengchen/eipgam", SkillID: "eipgam-setup", Name: "eipgam-setup", Official: true, Featured: true,
+	Description: "Set eipgam up as you ask, through its own commands: add keys and subscriptions, point agents at models, build routing groups with fallbacks and time-of-day rules, give devices gateway keys with budgets, and share MCP servers and instructions with every agent.",
 }, {
-	Source: "magpie-community/plugins", SkillID: "magpie-quota", Name: "magpie-quota", Official: true, Featured: true,
-	Description: "Check how much is left of the user's AI subscriptions, coding plans and API key balances through magpie: each usage window's percent used and when it resets, each key's balance, and wait until a subscription has allowance again.",
+	Source: "sichengchen/eipgam", SkillID: "eipgam-quota", Name: "eipgam-quota", Official: true, Featured: true,
+	Description: "Check how much is left of the user's AI subscriptions, coding plans and API key balances through eipgam: each usage window's percent used and when it resets, each key's balance, and wait until a subscription has allowance again.",
 }, {
-	Source: "magpie-community/plugins", SkillID: "magpie-sessions", Name: "magpie-sessions", Official: true, Featured: true,
-	Description: "Search what was said in every coding agent's sessions on this computer through magpie, Claude Code's, Codex's and the others', and read the session a hit is in: find an earlier conversation, decision or fix.",
+	Source: "sichengchen/eipgam", SkillID: "eipgam-sessions", Name: "eipgam-sessions", Official: true, Featured: true,
+	Description: "Search what was said in every coding agent's sessions on this computer through eipgam, Claude Code's, Codex's and the others', and read the session a hit is in: find an earlier conversation, decision or fix.",
 }}
 
 type skillsShEntry struct {
@@ -1026,7 +1026,7 @@ func marketCache(name string) string {
 
 // popularSkills are skills.sh's most installed, read off its front page,
 // then the ones trending there that aren't among them; kept for six hours,
-// and on disk for when it can't be reached, else what magpie shipped with.
+// and on disk for when it can't be reached, else what eipgam shipped with.
 func popularSkills() []skillsShEntry {
 	popular.Lock()
 	defer popular.Unlock()
@@ -1104,7 +1104,7 @@ func searchSkillsSh(q string) ([]skillsShEntry, error) {
 	return slices.DeleteFunc(body.Skills, func(e skillsShEntry) bool { return !repoRe.MatchString(e.Source) || e.SkillID == "" }), nil
 }
 
-// MarketSkills is what the market shows for a search: magpie's own skills
+// MarketSkills is what the market shows for a search: eipgam's own skills
 // that match it, the most installed skills that do, then what skills.sh
 // finds for it.
 func MarketSkills(q string) ([]MarketSkill, error) {
@@ -1308,7 +1308,7 @@ func InstallMarketSkill(source, id string, agents []string) (*Result, error) {
 // ---- icons ------------------------------------------------------------------
 
 // Icon is a market icon, fetched once and kept on disk: only an icon the
-// market gave out is fetched, so the page can't have magpie fetch anything else.
+// market gave out is fetched, so the page can't have eipgam fetch anything else.
 func Icon(u string) ([]byte, string, error) {
 	sum := sha256.Sum256([]byte(u))
 	file := marketCache(filepath.Join("icons", hex.EncodeToString(sum[:16])))
@@ -1356,10 +1356,14 @@ func offered(u string) bool {
 	return false
 }
 
-// fetchImage downloads an icon through usemagpie.ai's icon proxy, so the
+// fetchImage downloads an icon through the configured icon proxy, so the
 // host a server's author picked never sees the user's IP.
 func fetchImage(u string) ([]byte, string, error) {
-	b, err := get(iconproxy.URL(u), "image/*", 1<<20)
+	proxyURL := iconproxy.URL(u)
+	if proxyURL == "" {
+		return nil, "", errors.New("no icon proxy is configured")
+	}
+	b, err := get(proxyURL, "image/*", 1<<20)
 	if err != nil {
 		return nil, "", err
 	}
@@ -1424,7 +1428,7 @@ func getBy(c *http.Client, u, accept string, limit int64) ([]byte, error) {
 		return nil, err
 	}
 	// skills.sh answers a client it doesn't know with a page of its own
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 magpie")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 eipgam")
 	req.Header.Set("Accept", accept)
 	resp, err := c.Do(req)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // sinkWriter is a ResponseWriter that keeps what is written, or only

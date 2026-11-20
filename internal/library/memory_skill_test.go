@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 // A procedure made a skill: a SKILL.md of its own in the library, named

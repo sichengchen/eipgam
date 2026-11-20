@@ -8,15 +8,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
-// Packaged is the package manager that installed a magpie binary, which
-// then has to be the one to update it. magpie replacing a file a package
-// owns (pkexec over /usr/bin/magpie from the AUR's magpie-bin, shuhai on
+// Packaged is the package manager that installed a eipgam binary, which
+// then has to be the one to update it. eipgam replacing a file a package
+// owns (pkexec over /usr/bin/eipgam from the AUR's eipgam-bin, shuhai on
 // Discord) leaves the manager's database naming an older version and a
 // file that no longer matches it, and the manager's next upgrade, which
-// can be a version older than the one magpie put in, writes over it again.
+// can be a version older than the one eipgam put in, writes over it again.
 type Packaged struct {
 	Manager string `json:"manager"`           // pacman, dpkg, rpm, homebrew, nix, scoop or winget
 	Package string `json:"package,omitempty"` // the package's name, when known
@@ -38,13 +38,13 @@ func (p *Packaged) Name() string {
 }
 
 // Command is what updates the package, "" when there is no one command
-// (Nix: a profile or a system configuration). magpie is in no distribution's
+// (Nix: a profile or a system configuration). eipgam is in no distribution's
 // own repository, so a pacman package is the AUR's, which pacman alone
 // doesn't upgrade: its AUR helper does.
 func (p *Packaged) Command() string {
 	pkg := p.Package
 	if pkg == "" {
-		pkg = "magpie"
+		pkg = "eipgam"
 	}
 	switch p.Manager {
 	case "pacman":
@@ -59,20 +59,20 @@ func (p *Packaged) Command() string {
 		return "scoop update " + pkg
 	case "winget":
 		if p.Package == "" {
-			return "winget upgrade magpie"
+			return "winget upgrade eipgam"
 		}
 		return "winget upgrade --id " + p.Package
 	}
 	return ""
 }
 
-// Say is the sentence a terminal is told: who updates this magpie, and how.
+// Say is the sentence a terminal is told: who updates this eipgam, and how.
 func (p *Packaged) Say() string {
-	s := "this magpie was installed with " + p.Name()
+	s := "this eipgam was installed with " + p.Name()
 	if p.Package != "" {
 		s += " (package " + p.Package + ")"
 	}
-	s += ", which updates it, not magpie"
+	s += ", which updates it, not eipgam"
 	if c := p.Command(); c != "" {
 		s += ": " + c
 		if p.Manager == "pacman" {
@@ -144,7 +144,7 @@ func packagedIn(root, goos, exe string) *Packaged {
 // %LOCALAPPDATA%\Microsoft (or Program Files, machine-wide), and the
 // command on PATH is a link to it in WinGet\Links, which Executable
 // resolves. Either one's next update would otherwise put back the version
-// it holds, or fail on the file magpie changed.
+// it holds, or fail on the file eipgam changed.
 func packagedOnWindows(exe string) *Packaged {
 	dir := filepath.Dir(exe)
 	app := filepath.Dir(dir)
@@ -207,12 +207,12 @@ func aliases(p string) []string {
 	return out
 }
 
-// magpieFirst orders names with those starting "magpie" first: the package
-// owning magpie is all but always one of them (magpie-bin, magpie-cli-bin,
-// magpie-git), so the rest are read only when none is.
+// magpieFirst orders names with those starting "eipgam" first: the package
+// owning eipgam is all but always one of them (eipgam-bin, eipgam-cli-bin,
+// eipgam-git), so the rest are read only when none is.
 func magpieFirst(names []string) []string {
 	slices.SortStableFunc(names, func(a, b string) int {
-		ma, mb := strings.HasPrefix(a, "magpie"), strings.HasPrefix(b, "magpie")
+		ma, mb := strings.HasPrefix(a, "eipgam"), strings.HasPrefix(b, "eipgam")
 		switch {
 		case ma && !mb:
 			return -1

@@ -47,7 +47,7 @@ func mainFrameCalc(hwnd uintptr, msg uint32, wParam, lParam uintptr) (uintptr, b
 }
 
 // keepResizeFrame has the main window w keep its resize border: it is told
-// apart from magpie's other windows by its handle, and its frame worked
+// apart from eipgam's other windows by its handle, and its frame worked
 // out again once the handle is known. That waits for the page to be
 // ready: the first main window is made before Wails' main loop runs.
 func keepResizeFrame(w *application.WebviewWindow) {

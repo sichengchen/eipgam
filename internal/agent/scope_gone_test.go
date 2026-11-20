@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // wevnal is the #2055 reporter's provider, its models the ones Pi warned
@@ -33,15 +33,15 @@ func piList(t *testing.T, settings string) string {
 // A list with nothing left is removed, not written empty, and comes back
 // when its model does, with the model picked meanwhile. A list the user
 // removed themselves stays removed; one on other providers alone, or a
-// sync that can't read what magpie gives, leaves the file byte for byte.
+// sync that can't read what eipgam gives, leaves the file byte for byte.
 func TestPiEnabledModelsEmptiedAndBack(t *testing.T) {
 	home := syncHome(t)
 	wevnalSave(t, wevnalAll...)
 	settings := filepath.Join(home, ".pi", "agent", "settings.json")
 	os.MkdirAll(filepath.Dir(settings), 0o755)
-	os.WriteFile(settings, []byte(`{"enabledModels": ["magpie/wevnal/space-bunny-free"]}`+"\n"), 0o644)
+	os.WriteFile(settings, []byte(`{"enabledModels": ["eipgam/wevnal/space-bunny-free"]}`+"\n"), 0o644)
 	a := pi(home)
-	if err := a.Apply("model", "magpie/wevnal/space-bunny-free"); err != nil {
+	if err := a.Apply("model", "eipgam/wevnal/space-bunny-free"); err != nil {
 		t.Fatal(err)
 	}
 	wevnalSave(t, "glm-5.2", "kimi-k3")
@@ -51,14 +51,14 @@ func TestPiEnabledModelsEmptiedAndBack(t *testing.T) {
 	if got := piList(t, settings); got != "(none)" {
 		t.Fatalf("emptied: %s", got)
 	}
-	if err := a.Apply("model", "magpie/wevnal/kimi-k3"); err != nil {
+	if err := a.Apply("model", "eipgam/wevnal/kimi-k3"); err != nil {
 		t.Fatal(err)
 	}
 	wevnalSave(t, "glm-5.2", "kimi-k3", "space-bunny-free")
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if got, want := piList(t, settings), `["magpie/wevnal/space-bunny-free","magpie/wevnal/kimi-k3"]`; got != want {
+	if got, want := piList(t, settings), `["eipgam/wevnal/space-bunny-free","eipgam/wevnal/kimi-k3"]`; got != want {
 		t.Fatalf("back: %s, want %s", got, want)
 	}
 
@@ -74,7 +74,7 @@ func TestPiEnabledModelsEmptiedAndBack(t *testing.T) {
 		t.Fatalf("user's removal undone: %s", got)
 	}
 
-	const theirs = `{"enabledModels": ["xai/grok-4.6", "magpie/*/*"], "defaultProvider": "magpie", "defaultModel": "wevnal/kimi-k3"}` + "\n"
+	const theirs = `{"enabledModels": ["xai/grok-4.6", "eipgam/*/*"], "defaultProvider": "eipgam", "defaultModel": "wevnal/kimi-k3"}` + "\n"
 	os.WriteFile(settings, []byte(theirs), 0o644)
 	wevnalSave(t, "kimi-k3")
 	if err := a.Sync(); err != nil {
@@ -85,9 +85,9 @@ func TestPiEnabledModelsEmptiedAndBack(t *testing.T) {
 	}
 
 	// models.json unreadable: unknown, so nothing goes
-	const one = `{"enabledModels": ["magpie/wevnal/kimi-k3"]}` + "\n"
+	const one = `{"enabledModels": ["eipgam/wevnal/kimi-k3"]}` + "\n"
 	os.WriteFile(settings, []byte(one), 0o644)
-	os.WriteFile(filepath.Join(home, ".pi", "agent", "models.json"), []byte(`{"providers": {"magpie": {"models": "not a list"`), 0o644)
+	os.WriteFile(filepath.Join(home, ".pi", "agent", "models.json"), []byte(`{"providers": {"eipgam": {"models": "not a list"`), 0o644)
 	a.Sync()
 	if got := readFile(settings); got != one {
 		t.Fatalf("unreadable models.json pruned: %s", got)
@@ -95,10 +95,10 @@ func TestPiEnabledModelsEmptiedAndBack(t *testing.T) {
 }
 
 // #2055 (misaka9981): models deselected in a provider's editor leave
-// magpie's provider in Pi's models.json, and the entries naming them in
+// eipgam's provider in Pi's models.json, and the entries naming them in
 // enabledModels go too, in Pi and the forks that keep its settings.json:
 // Pi warned "No models match pattern" for each. The user's other
-// entries, a glob on magpie, entries on a model still there (one at a
+// entries, a glob on eipgam, entries on a model still there (one at a
 // thinking level), their order and comments stay. The ones taken out are
 // remembered: selected again, a model's entry is back, and a rename takes
 // a remembered one with it.
@@ -119,22 +119,22 @@ func TestPiEnabledModelsLoseDeselected(t *testing.T) {
   // the user's own
   "enabledModels": [
     "xai/grok-4.6:high",
-    "magpie/wevnal/mimo-v2.6-flash-free",
-    "magpie/wevnal/kimi-k3:low",
-    "magpie/wevnal/muse-spark-1.3-contributor-free",
-    "magpie/wevnal/*-lightning-*",
-    "magpie/wevnal/nemotron-3.5-lightning-free",
-    "magpie/wevnal/space-bunny-free:high"
+    "eipgam/wevnal/mimo-v2.6-flash-free",
+    "eipgam/wevnal/kimi-k3:low",
+    "eipgam/wevnal/muse-spark-1.3-contributor-free",
+    "eipgam/wevnal/*-lightning-*",
+    "eipgam/wevnal/nemotron-3.5-lightning-free",
+    "eipgam/wevnal/space-bunny-free:high"
   ],
   "defaultProvider": "xai",
   "defaultModel": "grok-4.6"
 }
 `), 0o644)
 			a := c.a(home)
-			if err := a.Apply("model", "magpie/wevnal/glm-5.2"); err != nil {
+			if err := a.Apply("model", "eipgam/wevnal/glm-5.2"); err != nil {
 				t.Fatal(err)
 			}
-			mine := `["xai/grok-4.6:high","magpie/wevnal/mimo-v2.6-flash-free","magpie/wevnal/kimi-k3:low","magpie/wevnal/muse-spark-1.3-contributor-free","magpie/wevnal/*-lightning-*","magpie/wevnal/nemotron-3.5-lightning-free","magpie/wevnal/space-bunny-free:high","magpie/wevnal/glm-5.2"]`
+			mine := `["xai/grok-4.6:high","eipgam/wevnal/mimo-v2.6-flash-free","eipgam/wevnal/kimi-k3:low","eipgam/wevnal/muse-spark-1.3-contributor-free","eipgam/wevnal/*-lightning-*","eipgam/wevnal/nemotron-3.5-lightning-free","eipgam/wevnal/space-bunny-free:high","eipgam/wevnal/glm-5.2"]`
 			if got := piList(t, settings); got != mine {
 				t.Fatalf("after the pick: %s", got)
 			}
@@ -151,14 +151,14 @@ func TestPiEnabledModelsLoseDeselected(t *testing.T) {
 			if err := a.Sync(); err != nil {
 				t.Fatal(err)
 			}
-			want := `["xai/grok-4.6:high","magpie/wevnal/kimi-k3:low","magpie/wevnal/*-lightning-*","magpie/wevnal/glm-5.2"]`
+			want := `["xai/grok-4.6:high","eipgam/wevnal/kimi-k3:low","eipgam/wevnal/*-lightning-*","eipgam/wevnal/glm-5.2"]`
 			if got := piList(t, settings); got != want {
 				t.Fatalf("enabledModels = %s, want %s", got, want)
 			}
 			if !strings.Contains(readFile(settings), "// the user's own") {
 				t.Fatalf("comment lost: %s", readFile(settings))
 			}
-			if got := a.Field("model").Get(); got != "magpie/wevnal/glm-5.2" {
+			if got := a.Field("model").Get(); got != "eipgam/wevnal/glm-5.2" {
 				t.Fatalf("model = %q", got)
 			}
 
@@ -167,7 +167,7 @@ func TestPiEnabledModelsLoseDeselected(t *testing.T) {
 			if err := a.Sync(); err != nil {
 				t.Fatal(err)
 			}
-			want = `["xai/grok-4.6:high","magpie/wevnal/kimi-k3:low","magpie/wevnal/*-lightning-*","magpie/wevnal/glm-5.2","magpie/wevnal/space-bunny-free:high"]`
+			want = `["xai/grok-4.6:high","eipgam/wevnal/kimi-k3:low","eipgam/wevnal/*-lightning-*","eipgam/wevnal/glm-5.2","eipgam/wevnal/space-bunny-free:high"]`
 			if got := piList(t, settings); got != want {
 				t.Fatalf("selected again: %s, want %s", got, want)
 			}
@@ -182,7 +182,7 @@ func TestPiEnabledModelsLoseDeselected(t *testing.T) {
 			if err := a.Sync(); err != nil {
 				t.Fatal(err)
 			}
-			want = `["xai/grok-4.6:high","magpie/wv/kimi-k3:low","magpie/wv/*-lightning-*","magpie/wv/glm-5.2","magpie/wv/space-bunny-free:high","magpie/wv/mimo-v2.6-flash-free","magpie/wv/muse-spark-1.3-contributor-free","magpie/wv/nemotron-3.5-lightning-free"]`
+			want = `["xai/grok-4.6:high","eipgam/wv/kimi-k3:low","eipgam/wv/*-lightning-*","eipgam/wv/glm-5.2","eipgam/wv/space-bunny-free:high","eipgam/wv/mimo-v2.6-flash-free","eipgam/wv/muse-spark-1.3-contributor-free","eipgam/wv/nemotron-3.5-lightning-free"]`
 			if got := piList(t, settings); got != want {
 				t.Fatalf("after the rename: %s, want %s", got, want)
 			}

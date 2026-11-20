@@ -34,7 +34,7 @@ import (
 
 	"golang.org/x/net/publicsuffix"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Options says what to mask.
@@ -894,7 +894,7 @@ type span struct {
 	bare bool
 }
 
-// Which finder found a value (Hit.By): magpie's rules, the user's own
+// Which finder found a value (Hit.By): eipgam's rules, the user's own
 // rules, the user's words, the local model (with the Chinese names it
 // brings, which run only with it), or a value masked before (known.go).
 const (
@@ -922,7 +922,7 @@ type Hit struct {
 	Len                           int
 }
 
-// Value is the value behind placeholder p, while this run of magpie
+// Value is the value behind placeholder p, while this run of eipgam
 // remembers it.
 func Value(p string) (string, bool) {
 	mu.RLock()
@@ -1142,7 +1142,7 @@ func mask(raw string, o Options, put func(kind, v string) string, escaped bool) 
 	return apply(raw, found, put, o)
 }
 
-// ruleSpans are what the rules, magpie's and the user's own, find in s,
+// ruleSpans are what the rules, eipgam's and the user's own, find in s,
 // the text the finders read.
 func ruleSpans(s string, o Options) []span {
 	return memoRules(s, o, func() []span {
@@ -1152,7 +1152,7 @@ func ruleSpans(s string, o Options) []span {
 		var found []span
 		all := rules
 		if o.Secrets && len(o.Rules) > 0 {
-			// the user's first: where one of theirs and one of magpie's find
+			// the user's first: where one of theirs and one of eipgam's find
 			// the same value, it goes by the name they gave it
 			all = append(customRules(o.Rules), rules...)
 		}
@@ -1727,7 +1727,7 @@ var placeholderBody = lazyre.New(`[A-Za-z][A-Za-z0-9_]*_[A-Za-z2-7]{8}`)
 // A model doesn't always write a placeholder back as it was given: it
 // writes {{ PHONE_b5puzbfv }} as a template has it, drops a brace, or the
 // braces, or changes the case. Any of those is put back too when what is
-// left names a placeholder this magpie made: its kind and the 8 of its
+// left names a placeholder this eipgam made: its kind and the 8 of its
 // hash, which no other text has by chance (shensmart on Discord).
 func Restore(s string, escaped bool) string { return restore(s, escaped, nil) }
 
@@ -1823,7 +1823,7 @@ const maxPlaceholder = len("{{") + maxKind + len("_") + 8 + len("}}")
 // partialTail is how much of the end of s may be the start of a
 // placeholder the next piece of a stream finishes, in any of the ways
 // Restore takes one back: {{API_, {{ phone_b5, PHONE_b5puzbfv} — or, with
-// no brace before it, a last word that starts as a placeholder this magpie
+// no brace before it, a last word that starts as a placeholder this eipgam
 // made does (PHO, PHONE_b5pu), or is one whose }} may still come.
 func partialTail(s string) int {
 	if n := braceTail(s); n > 0 {
@@ -1870,7 +1870,7 @@ func braceTail(s string) int {
 
 // wordTail is the last word of s, where it may be a placeholder's body as
 // a model writes one without braces: the start of one of the kinds this
-// magpie has made placeholders of, up to the 8 of its hash. A word of
+// eipgam has made placeholders of, up to the 8 of its hash. A word of
 // text that only starts like a kind is held for an event and then goes
 // on, unchanged.
 func wordTail(s string) int {

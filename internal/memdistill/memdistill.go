@@ -9,7 +9,7 @@
 // later, whole. The hourly run reads at most PerRun; one the user asked
 // for (ReadAll) reads every one due, and Stop ends it. The model is the one
 // picked, else the caller's automatic choice. The request goes through
-// magpie's own gateway (Complete), so masking and routing apply as to any
+// eipgam's own gateway (Complete), so masking and routing apply as to any
 // agent's request.
 package memdistill
 
@@ -29,11 +29,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // Complete sends one request to model, asked to reason at effort ("" the
@@ -195,7 +195,7 @@ func save(s State) error {
 func change(fn func(*State)) (State, error) {
 	unlock, held := filelock.Lock(Path()+".lock", 10*time.Second)
 	if !held {
-		return State{}, errors.New("distill.json is held by another magpie")
+		return State{}, errors.New("distill.json is held by another eipgam")
 	}
 	defer unlock()
 	s, err := Load()

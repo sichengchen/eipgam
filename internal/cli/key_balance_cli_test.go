@@ -3,10 +3,10 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// magpie provider key-balance sets, shows and takes off a key's balance
+// eipgam provider key-balance sets, shows and takes off a key's balance
 // typed by hand (tenacious_eagle on Discord), and a flag or an amount
 // that isn't one is refused without writing anything.
 func TestKeyBalanceCmd(t *testing.T) {

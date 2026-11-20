@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // ChatGPT and Claude accounts go out as a file Sub2API, CLIProxyAPI or
-// magpie takes (heyiwei5 and Rk1ngggg on X): the accounts list offers it,
+// eipgam takes (heyiwei5 and Rk1ngggg on X): the accounts list offers it,
 // the sheet warns that the file holds live sign-ins, lists each account to
 // tick, posts the chosen ones and format, and says where the file went; in
 // English and Chinese, in both engines, at 380px too. Its row comes last of
@@ -36,7 +36,7 @@ function serve(lang, posted, acct = account) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/signin/export") {
       posted.push(route.request().postDataJSON());
-      return json({ path: "~/Downloads/magpie-sub2api-codex.json", accounts: ["live@example.com"], skipped: [{ user: "two@example.com", error: "no refresh token" }] });
+      return json({ path: "~/Downloads/eipgam-sub2api-codex.json", accounts: ["live@example.com"], skipped: [{ user: "two@example.com", error: "no refresh token" }] });
     }
     if (url.pathname.startsWith("/api/")) return json({});
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "ChatGPT" }).click();
       const T = async (s, v) => page.evaluate(([s, v]) => t(s, v), [s, v || {}]);
       const row = page.locator(".editor .accts .acc.add", { hasText: await T("Export accounts to a file…") });
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await box.locator("button.primary").click();
       await box.locator(".res.added").waitFor();
       assert.deepEqual(posted, [{ agent: "codex", format: "cliproxyapi", users: ["live@example.com"] }]);
-      assert.match(await box.textContent(), /magpie-sub2api-codex\.json/);
+      assert.match(await box.textContent(), /eipgam-sub2api-codex\.json/);
       assert.match(await box.textContent(), /two@example\.com/);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "page scrolls sideways");
       await box.locator("button.primary").click();
@@ -112,7 +112,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, [], claude));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude" }).first().click();
       const T = async (s, v) => page.evaluate(([s, v]) => t(s, v), [s, v || {}]);
       const rows = page.locator(".editor .accts .acc.add");

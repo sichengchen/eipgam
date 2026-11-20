@@ -36,11 +36,11 @@ func fakeWSLNet(t *testing.T, cidrs ...string) {
 // with the WSL key is served as one from this computer, its key the
 // gateway's token (with the agent's id when the key has one); without the
 // key, from elsewhere, or at another of this computer's addresses, it is
-// judged as one from another machine and refused while magpie isn't
+// judged as one from another machine and refused while eipgam isn't
 // shared.
 func TestWSLCallerServedWithSharingOff(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	fakeWSLNet(t, "172.17.32.1/20")
 	key := WSLKey()
 	if !strings.HasPrefix(key, wslKeyPrefix) || strings.HasPrefix(key, Token) {
@@ -103,7 +103,7 @@ func TestWSLCallerServedWithSharingOff(t *testing.T) {
 }
 
 // shuitunlulu_ on Discord: Claude Science in a WSL distro wasn't found or
-// connected by magpie on Windows. Its daemon takes only an address
+// connected by eipgam on Windows. Its daemon takes only an address
 // (ANTHROPIC_BASE_URL, http only to loopback) and sends its Claude sign-in
 // as its bearer, so under NAT it is given the relay in the distro with the
 // WSL key as the address's first segment. From the WSL network that
@@ -112,7 +112,7 @@ func TestWSLCallerServedWithSharingOff(t *testing.T) {
 // one, is no WSL request.
 func TestWSLKeyInPath(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	fakeWSLNet(t, "172.17.32.1/20")
 	key := WSLKey()
 	var seen *http.Request
@@ -159,7 +159,7 @@ func TestServeWSLListensBesideLoopback(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { ln.Close() })
-	t.Setenv("MAGPIE_ADDR", ln.Addr().String())
+	t.Setenv("EIPGAM_ADDR", ln.Addr().String())
 	if l6, err := net.Listen("tcp6", "[::1]:0"); err != nil {
 		t.Skip("no IPv6 loopback")
 	} else {
@@ -231,7 +231,7 @@ func TestServeWSLListensBesideLoopback(t *testing.T) {
 // address that is no via is judged as before.
 func TestWSLViaCallerServed(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	fakeWSLNet(t, "172.17.32.1/20")
 	oldVia := WSLVia
 	WSLVia = func() []net.IP { return []net.IP{net.ParseIP("10.0.0.132")} }
@@ -314,7 +314,7 @@ func TestServeWSLListensAtVia(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { ln.Close() })
-	t.Setenv("MAGPIE_ADDR", ln.Addr().String())
+	t.Setenv("EIPGAM_ADDR", ln.Addr().String())
 	if l6, err := net.Listen("tcp6", "[::1]:0"); err != nil {
 		t.Skip("no IPv6 loopback")
 	} else {

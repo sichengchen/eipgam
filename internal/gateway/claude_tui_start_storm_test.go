@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // Six conversations asked at once each started a full Claude Code, and on
@@ -23,7 +23,7 @@ import (
 //
 // So the interactive mode's starts take turns: a run's Claude Code is
 // started only once the one before it has shown its prompt (its helper has
-// answered magpie's initialize request). The stand-in helper logs begin
+// answered eipgam's initialize request). The stand-in helper logs begin
 // when it starts and end when it hands over to Claude Code; the starts
 // must alternate — no begin while another is still starting — and every
 // call is answered.
@@ -32,7 +32,7 @@ func TestClaudeTUIStartsTakeTurns(t *testing.T) {
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
 	log := filepath.Join(t.TempDir(), "starts")
-	helper := filepath.Join(t.TempDir(), "magpie")
+	helper := filepath.Join(t.TempDir(), "eipgam")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 echo begin >> '`+log+`'

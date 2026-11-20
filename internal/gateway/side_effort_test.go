@@ -11,10 +11,10 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
 )
 
 // pickEfforts saves the levels picked in Settings for Image recognition's
@@ -30,7 +30,7 @@ func pickEfforts(t *testing.T, vision, searcher string) {
 
 // The reasoning level picked for Image recognition (MOMO on Discord) is
 // what its model is asked at, fitted to the levels it has, with room to
-// think in; Default is magpie's own, the least it has, as before. The
+// think in; Default is eipgam's own, the least it has, as before. The
 // model's own requests, from an agent, are sent as they came.
 func TestVisionEffortPicked(t *testing.T) {
 	fresh(t)

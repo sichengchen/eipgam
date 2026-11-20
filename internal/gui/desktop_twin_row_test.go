@@ -8,17 +8,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/desktopdir"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/desktopdir"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// xMopf7RF on X, 0.1.4111: after Use Claude Magpie the Agents page lit a
-// row named Claude Desktop, though only Claude Magpie was wired, and left
-// "Claude Code · Claude Magpie" reading not connected. While Claude Magpie
+// xMopf7RF on X, 0.1.4111: after Use Claude eipgam the Agents page lit a
+// row named Claude Desktop, though only Claude eipgam was wired, and left
+// "Claude Code · Claude eipgam" reading not connected. While Claude eipgam
 // is on, the claude-desktop row (whose switch wires it alone) is named
-// Claude Magpie, and once it is wired, its Code tab folder's row says it
-// is on magpie through it (twinCode). The user's own Desktop isn't wired.
+// Claude eipgam, and once it is wired, its Code tab folder's row says it
+// is on eipgam through it (twinCode). The user's own Desktop isn't wired.
 func TestClaudeMagpieRowsAfterUseClaudeMagpie(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -36,11 +36,11 @@ func TestClaudeMagpieRowsAfterUseClaudeMagpie(t *testing.T) {
 	os.MkdirAll(own, 0o755)
 	ownCfg := filepath.Join(own, "claude_desktop_config.json")
 	os.WriteFile(ownCfg, []byte(`{"mcpServers":{}}`+"\n"), 0o600)
-	// Claude Magpie as SetDesktopIsolated leaves it: on, its folder and its
+	// Claude eipgam as SetDesktopIsolated leaves it: on, its folder and its
 	// Code tab's Claude Code folder made
 	iso := desktopdir.Isolated("darwin", home)
 	os.MkdirAll(iso, 0o755)
-	code := filepath.Join(home, ".claude-magpie-desktop")
+	code := filepath.Join(home, ".claude-eipgam-desktop")
 	os.MkdirAll(code, 0o700)
 	os.WriteFile(filepath.Join(code, "settings.json"), []byte("{}\n"), 0o600)
 
@@ -72,7 +72,7 @@ func TestClaudeMagpieRowsAfterUseClaudeMagpie(t *testing.T) {
 	}
 
 	if a := row(call("/api/state", ""), "claude-desktop"); a.Name != "Claude Desktop" || a.Isolated == nil || a.Isolated.On {
-		t.Fatalf("Claude Magpie off: %q %+v", a.Name, a.Isolated)
+		t.Fatalf("Claude eipgam off: %q %+v", a.Name, a.Isolated)
 	}
 	s := settings.Load()
 	s.DesktopIsolated, s.DesktopIsolatedClaude = true, true
@@ -80,24 +80,24 @@ func TestClaudeMagpieRowsAfterUseClaudeMagpie(t *testing.T) {
 		t.Fatal(err)
 	}
 	st := call("/api/state", "")
-	if a := row(st, "claude-desktop"); a.Name != "Claude Magpie" || a.Wired {
-		t.Fatalf("Claude Magpie on: %q wired %v", a.Name, a.Wired)
+	if a := row(st, "claude-desktop"); a.Name != "Claude eipgam" || a.Wired {
+		t.Fatalf("Claude eipgam on: %q wired %v", a.Name, a.Wired)
 	}
-	if a := row(st, "claude#magpie-desktop"); a.TwinCode {
-		t.Fatal("its Code tab on magpie before Claude Magpie is wired")
+	if a := row(st, "claude#eipgam-desktop"); a.TwinCode {
+		t.Fatal("its Code tab on eipgam before Claude eipgam is wired")
 	}
 	ownWas, _ := os.ReadFile(ownCfg)
 
 	st = call("/api/agents/connect/claude-desktop", "{}")
-	if a := row(st, "claude-desktop"); a.Name != "Claude Magpie" || !a.Wired {
+	if a := row(st, "claude-desktop"); a.Name != "Claude eipgam" || !a.Wired {
 		t.Fatalf("connected: %q wired %v", a.Name, a.Wired)
 	}
-	if a := row(st, "claude#magpie-desktop"); a.Wired || !a.TwinCode {
+	if a := row(st, "claude#eipgam-desktop"); a.Wired || !a.TwinCode {
 		t.Fatalf("its Code tab's row: wired %v, twinCode %v", a.Wired, a.TwinCode)
 	}
 	for _, a := range st.Agents {
-		if a.TwinCode && a.ID != "claude#magpie-desktop" {
-			t.Fatalf("%s said to be Claude Magpie's Code tab", a.ID)
+		if a.TwinCode && a.ID != "claude#eipgam-desktop" {
+			t.Fatalf("%s said to be Claude eipgam's Code tab", a.ID)
 		}
 	}
 	if b, _ := os.ReadFile(ownCfg); string(b) != string(ownWas) {

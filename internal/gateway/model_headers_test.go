@@ -8,13 +8,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // axelburks on Discord: a model's own headers go on its provider's
 // requests for that model, on every API (relayed, translated, streamed,
 // count_tokens), after the provider's: a name both have goes once, as the
-// model's, over the provider's and over magpie's own key header. The
+// model's, over the provider's and over eipgam's own key header. The
 // provider's other model, and a fallback provider serving the same model
 // id, are sent the provider's headers alone.
 func TestModelHeadersReachTheirModelOnEveryRoute(t *testing.T) {

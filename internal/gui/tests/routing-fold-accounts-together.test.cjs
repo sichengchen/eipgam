@@ -11,14 +11,14 @@
 // (Sdsi134a on X: a kind asked for matched none of them, and the fold said
 // nothing). The figure says when its window starts again, the soonest of
 // the accounts', as an account's own row does; Hide plans on the groups
-// page (magpie.routingGroupPlans) folds the figure and the bar away.
+// page (eipgam.routingGroupPlans) folds the figure and the bar away.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const now = Date.now();
 const iso = (ms) => new Date(ms).toISOString();
 const acct = (provider, who, plan) => ({ id: `${provider}@${who}`, provider, name: provider === "same" ? "Same Plan" : "Mixed Plans", who, kind: "account", model: "m-1", known: true, used: 10, plan });
@@ -88,7 +88,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang));
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://eipgam.test/?view=routing");
             const fold = (name) => page.locator(".rt-accts > li.rt-fold", { has: page.locator(".who", { hasText: new RegExp(`^${name}$`) }) });
             const same = fold("Same Plan"), mixed = fold("Mixed Plans");
             await same.waitFor();
@@ -125,7 +125,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const over = await same.evaluate((e) => Math.max(e.scrollWidth - e.clientWidth, document.documentElement.scrollWidth - innerWidth));
             assert.ok(over <= 1, `${lang} at ${width}: ${over}px past`);
             // Hide plans: the figure and the bar go, the fold's count stays
-            await page.evaluate(() => localStorage.setItem("magpie.routingGroupPlans", "hidden"));
+            await page.evaluate(() => localStorage.setItem("eipgam.routingGroupPlans", "hidden"));
             await same.click();
             await page.waitForFunction(() => document.querySelectorAll(".rt-accts > li.rt-fold.open").length === 1);
             await same.click();
@@ -133,7 +133,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             let h = await look(same);
             assert.ok(!h.open && !h.bar && !h.text.includes(words[lang][0]), "hidden plans: " + JSON.stringify(h));
             // shown again: back
-            await page.evaluate(() => localStorage.setItem("magpie.routingGroupPlans", "shown"));
+            await page.evaluate(() => localStorage.setItem("eipgam.routingGroupPlans", "shown"));
             await same.click();
             await page.waitForFunction(() => document.querySelectorAll(".rt-accts > li.rt-fold.open").length === 1);
             await same.click();

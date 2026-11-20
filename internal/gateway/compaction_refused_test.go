@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/codexsummary"
+	"github.com/sichengchen/eipgam/internal/codexsummary"
 )
 
-// hey_boyce on X: OpenAI turned a turn away for magpie's own compaction
+// hey_boyce on X: OpenAI turned a turn away for eipgam's own compaction
 // ("The encrypted content for item cmp_magpie_1794916786407450000 could
 // not be verified"). Asked again, the item goes as the summary it holds,
 // not dropped with it, and every other item stays; an item of OpenAI's

@@ -1,12 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // HTTPS for other computers (zhangly1 on X: Claude on another computer on
-// the LAN needed magpie at https://): Settings › Network, under Require a
+// the LAN needed eipgam at https://): Settings › Network, under Require a
 // client certificate, turns HTTPS on; the Certificate row says which is
-// served and imports the user's own PEM files (or removes them); magpie's
+// served and imports the user's own PEM files (or removes them); eipgam's
 // CA row shows its SHA-256 and saves it to Downloads, the path said; the
 // rows under it give the download and each system's trust command with a
 // Copy button. A refused import or a far page's switch is told in the
-// page's language. Hidden while magpie answers only this computer.
+// page's language. Hidden while eipgam answers only this computer.
 // English and Chinese, Chromium and WebKit, 390px; the strings in all
 // four languages; no backend, the API is faked here.
 const assert = require("node:assert/strict");
@@ -25,12 +25,12 @@ const file = async (route, url) => {
 const boot = (route, lang) => route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
 
 const FP = Array.from({ length: 32 }, (_, i) => (i * 7 + 16).toString(16).toUpperCase().padStart(2, "0")).join(":");
-const FAR = "this page is open from another computer, and HTTPS changes how it is reached: turn it on or off from the computer magpie runs on";
+const FAR = "this page is open from another computer, and HTTPS changes how it is reached: turn it on or off from the computer eipgam runs on";
 const NOKEY = "a certificate but no private key: give the key's file too";
 
 function server(lang, posts, over = {}) {
   const s = {
-    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "/config/magpie",
+    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.400", dir: "/config/eipgam",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], allowIPs: [],
     lan: true, lanURLs: ["http://192.168.1.20:3425"], mtls: false, mtlsCerts: [],
@@ -39,8 +39,8 @@ function server(lang, posts, over = {}) {
   let h = { on: false, served: false };
   const served = (from) => ({
     on: true, served: true,
-    cert: { from, names: from === "magpie" ? ["mac.local", "192.168.1.20"] : ["nas.home"], issuer: from === "magpie" ? "magpie CA" : "Test Root", until: "2027-11-10T00:00:00Z" },
-    ...(from === "magpie" ? { ca: FP, caURLs: ["https://192.168.1.20:3425/magpie-ca.crt"] } : {}),
+    cert: { from, names: from === "eipgam" ? ["mac.local", "192.168.1.20"] : ["nas.home"], issuer: from === "eipgam" ? "eipgam CA" : "Test Root", until: "2027-11-10T00:00:00Z" },
+    ...(from === "eipgam" ? { ca: FP, caURLs: ["https://192.168.1.20:3425/eipgam-ca.crt"] } : {}),
   });
   return async (route) => {
     const url = new URL(route.request().url());
@@ -55,14 +55,14 @@ function server(lang, posts, over = {}) {
       posts.push({ path: url.pathname, body });
       if (url.pathname === "/api/settings/https") {
         if (over.farPage) return json({ error: FAR }, 400);
-        h = body.on ? served("magpie") : { on: false, served: false };
+        h = body.on ? served("eipgam") : { on: false, served: false };
       } else if (url.pathname.endsWith("/import")) {
         if (body.files.length < 2) return json({ error: NOKEY }, 400);
         h = served("imported");
       } else if (url.pathname.endsWith("/remove")) {
-        h = served("magpie");
+        h = served("eipgam");
       } else if (url.pathname.endsWith("/ca")) {
-        return json({ ...h, saved: "~/Downloads/magpie-ca.crt" });
+        return json({ ...h, saved: "~/Downloads/eipgam-ca.crt" });
       }
       return json(h);
     }
@@ -76,18 +76,18 @@ function server(lang, posts, over = {}) {
 }
 
 const en = {
-  sub: "Other computers call magpie at https://; this computer can still use http://",
+  sub: "Other computers call eipgam at https://; this computer can still use http://",
   mine: "Your certificate",
-  signed: "Signed by magpie’s CA",
-  ca: "magpie’s CA",
+  signed: "Signed by eipgam’s CA",
+  ca: "eipgam’s CA",
   node: "Claude Code and other Node apps",
-  far: "This page is open from another computer: turn HTTPS on or off from the computer magpie runs on",
+  far: "This page is open from another computer: turn HTTPS on or off from the computer eipgam runs on",
   nokey: "A certificate but no private key: choose the key’s file too",
 };
-const zh = { sub: "其他电脑通过 https:// 访问 magpie；本机仍可用 http://", ca: "magpie 的 CA" };
+const zh = { sub: "其他电脑通过 https:// 访问 eipgam；本机仍可用 http://", ca: "eipgam 的 CA" };
 const others = [
   "Already served over https:// by Require a client certificate or --tls-cert",
-  "Trust it once on each computer that calls magpie · SHA-256 {fp}",
+  "Trust it once on each computer that calls eipgam · SHA-256 {fp}",
   "A private key but no certificate: choose the certificate’s file too",
   "The private key belongs to none of the certificates",
   "The private key has a passphrase: choose one without",
@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.context().close();
     });
 
-    await t.test("hidden while magpie answers only this computer", async () => {
+    await t.test("hidden while eipgam answers only this computer", async () => {
       const { page, errors } = await open(browser, "en", [], { settings: { lan: false, lanURLs: [] } });
       await page.locator("#lanList .row").first().waitFor();
       await page.waitForTimeout(200);
@@ -175,9 +175,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok((await box.locator(".https-ca .sub").textContent()).includes("SHA-256 " + FP));
         const steps = await box.locator(".https-step").evaluateAll((rs) => rs.map((r) => [r.querySelector(".name").textContent, r.querySelector("code").textContent]));
         assert.deepEqual(steps.map((s) => s[0]).slice(1), ["macOS", "Windows", "Linux", w.node]);
-        assert.equal(steps[0][1], "curl -kO https://192.168.1.20:3425/magpie-ca.crt");
-        assert.match(steps[1][1], /add-trusted-cert .* magpie-ca\.crt$/);
-        assert.equal(steps[2][1], "certutil -addstore -f Root magpie-ca.crt");
+        assert.equal(steps[0][1], "curl -kO https://192.168.1.20:3425/eipgam-ca.crt");
+        assert.match(steps[1][1], /add-trusted-cert .* eipgam-ca\.crt$/);
+        assert.equal(steps[2][1], "certutil -addstore -f Root eipgam-ca.crt");
         await fits(box);
 
         // Copy sends the command itself
@@ -185,12 +185,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await reach(page, copy);
         await copy.click();
         await page.waitForFunction(() => document.querySelector("#status")?.textContent);
-        assert.deepEqual(posts.at(-1), { path: "/api/copy", body: { text: "certutil -addstore -f Root magpie-ca.crt" } });
+        assert.deepEqual(posts.at(-1), { path: "/api/copy", body: { text: "certutil -addstore -f Root eipgam-ca.crt" } });
 
         const save = box.locator(".https-ca button");
         await reach(page, save);
         await save.click();
-        const savedSays = await page.evaluate(() => t("Saved to {path}", { path: "~/Downloads/magpie-ca.crt" }));
+        const savedSays = await page.evaluate(() => t("Saved to {path}", { path: "~/Downloads/eipgam-ca.crt" }));
         await page.waitForFunction((s) => document.querySelector("#status")?.textContent.includes(s), savedSays);
         assert.deepEqual(posts.at(-1), { path: "/api/settings/https/ca", body: {} });
 

@@ -19,20 +19,20 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
 // An agent installed in a WSL distro reads its config there, not in
-// Windows' home — so does the Codex app's WSL connection. On Windows magpie
+// Windows' home — so does the Codex app's WSL connection. On Windows eipgam
 // lists the distros (wsl.exe -l -q), asks each running one once for its
 // $HOME and which of wslKinds' agents are there (never starting one that is
 // stopped), and edits the files through \\wsl.localhost\<distro>. Each is
@@ -44,14 +44,14 @@ import (
 // Windows as WSL sees it, which reaches the gateway only while that
 // listens beyond loopback.
 
-// place is where an agent lives: its home as magpie opens it, how a path
+// place is where an agent lives: its home as eipgam opens it, how a path
 // there is spelt in the agent's own config, and the gateway as it reaches
 // it. here(home) is this machine's.
 type place struct {
 	home  string
 	id    string              // the agent's id when not its own: its stash keys go under it
 	spell func(string) string // a path under home as the agent names it; nil: as is
-	sys   func(string) string // a path of the agent's system (/etc/…) as magpie opens it; nil: as is
+	sys   func(string) string // a path of the agent's system (/etc/…) as eipgam opens it; nil: as is
 	base  func() string       // the gateway's URL from the agent; nil: gateway.URL
 	// cold: a stopped distro's, whose files can't be looked at without
 	// starting it — an agent built there takes its files at their defaults
@@ -59,25 +59,25 @@ type place struct {
 	// version is the agent's CLI's there, as the probe found it; "" when
 	// not known (one on this machine is asked itself)
 	version string
-	// reach is a path under home as magpie can open it (distro.open): one
+	// reach is a path under home as eipgam can open it (distro.open): one
 	// below a link the distro has is opened where the link leads; nil: as
 	// is. unreached keeps the first path it couldn't tell the way to.
 	reach     func(string) (string, error)
 	unreached *error
 	// chmod takes the group's and others' bits off a file under home, where
-	// magpie's own mode doesn't hold (a distro's: see ownerOnly); nil: here
+	// eipgam's own mode doesn't hold (a distro's: see ownerOnly); nil: here
 	chmod func(string) error
-	// dir is the agent's config folder when magpie keeps one of its own
-	// for it (claude-magpie's launch file, claude_launch.go); "": its own
+	// dir is the agent's config folder when eipgam keeps one of its own
+	// for it (claude-eipgam's launch file, claude_launch.go); "": its own
 	dir string
-	// wsl is the distro of an agent there, for one magpie runs there
+	// wsl is the distro of an agent there, for one eipgam runs there
 	// itself (Claude Science's daemon); nil on this machine
 	wsl *distro
 }
 
 func here(home string) place { return place{home: home} }
 
-// open is path, a path under the place's home, where magpie can open it:
+// open is path, a path under the place's home, where eipgam can open it:
 // in a WSL distro, a folder that is a link there (~/.codex ->
 // /mnt/c/Users/me/.codex, #4502) is opened where it leads, as nothing
 // below it can be opened through \\wsl.localhost. A link the distro
@@ -96,13 +96,13 @@ func (p place) open(path string) string {
 	return o
 }
 
-// join is filepath.Join(home, elem...), opened where magpie can (open).
+// join is filepath.Join(home, elem...), opened where eipgam can (open).
 func (p place) join(elem ...string) string {
 	return p.open(filepath.Join(append([]string{p.home}, elem...)...))
 }
 
 // getenv is this machine's variable for this machine's agent; "" for one
-// in a distro, whose variables magpie can't read.
+// in a distro, whose variables eipgam can't read.
 func (p place) getenv(k string) string {
 	if p.spell != nil {
 		return ""
@@ -111,7 +111,7 @@ func (p place) getenv(k string) string {
 }
 
 // codexHome is Codex's folder at the place: $CODEX_HOME on this machine
-// (appdir.CodexHome), ~/.codex in a distro, whose variables magpie can't
+// (appdir.CodexHome), ~/.codex in a distro, whose variables eipgam can't
 // read.
 func (p place) codexHome() string {
 	if p.spell != nil {
@@ -122,7 +122,7 @@ func (p place) codexHome() string {
 
 // claudeDir is Claude Code's folder at the place: $CLAUDE_CONFIG_DIR on
 // this machine (appdir.ClaudeDir), ~/.claude in a distro, whose variables
-// magpie can't read.
+// eipgam can't read.
 func (p place) claudeDir() string {
 	if p.dir != "" {
 		return p.dir
@@ -190,7 +190,7 @@ func (p place) key(k string) string {
 type distro struct {
 	Name    string          `json:"name"`
 	Home    string          `json:"home"`              // $HOME inside it, e.g. /home/me
-	Root    string          `json:"root"`              // where magpie opens its / from, e.g. \\wsl.localhost\Ubuntu
+	Root    string          `json:"root"`              // where eipgam opens its / from, e.g. \\wsl.localhost\Ubuntu
 	Has     map[string]bool `json:"has"`               // "dir:.codex", "bin:pi": what the probe found
 	Probe   int             `json:"probe,omitempty"`   // the wslProbeVersion that found it
 	Gateway string          `json:"gateway,omitempty"` // the Windows host as the distro reaches it, when not at 127.0.0.1
@@ -238,12 +238,12 @@ func (d distro) live() bool {
 	return d.up()
 }
 
-// local is a path inside the distro as magpie opens it.
+// local is a path inside the distro as eipgam opens it.
 func (d distro) local(linux string) string {
 	return d.Root + strings.ReplaceAll(linux, "/", string(filepath.Separator))
 }
 
-// native is a path magpie opens as the distro spells it: one open moved
+// native is a path eipgam opens as the distro spells it: one open moved
 // to where a link leads is spelt through the link, as the agent knows it.
 func (d distro) native(local string) string {
 	best, spelt := "", ""
@@ -270,7 +270,7 @@ func (d distro) native(local string) string {
 	return rel
 }
 
-// open is local, a path in the distro as magpie opens it, where magpie can
+// open is local, a path in the distro as eipgam opens it, where eipgam can
 // open it. Through \\wsl.localhost Windows can't follow a link the
 // distro has: a path below ~/.codex, when that leads to
 // /mnt/c/Users/me/.codex, can be neither made, written, read nor listed,
@@ -294,12 +294,12 @@ func (d distro) open(local string) (string, error) {
 	}
 	to := d.Links[best]
 	if to == "" {
-		return "", fmt.Errorf("~/%s in WSL %s is a link magpie couldn't follow (readlink -f there failed), so nothing is written through it; check where it points from a shell there", best, d.Name)
+		return "", fmt.Errorf("~/%s in WSL %s is a link eipgam couldn't follow (readlink -f there failed), so nothing is written through it; check where it points from a shell there", best, d.Name)
 	}
 	return d.where(to) + rest, nil
 }
 
-// where is linux, a path in the distro, as magpie opens it: on one of
+// where is linux, a path in the distro, as eipgam opens it: on one of
 // Windows' drives, the drive's own path; anywhere else, through the
 // distro's root.
 func (d distro) where(linux string) string {
@@ -322,7 +322,7 @@ func (d distro) where(linux string) string {
 	return wslDrive(drives[best]) + strings.ReplaceAll(strings.TrimPrefix(linux[len(best):], "/"), "/", string(filepath.Separator))
 }
 
-// wslDrive is the root of a Windows drive ("C:") as magpie opens it; a var
+// wslDrive is the root of a Windows drive ("C:") as eipgam opens it; a var
 // for tests.
 var wslDrive = func(drive string) string { return drive + `\` }
 
@@ -396,8 +396,8 @@ func (d distro) place(id string) place {
 }
 
 // chmod takes the group's and others' bits off local, a file in the distro
-// magpie opens, from inside it: a file written through \\wsl.localhost is
-// 0644 there whatever mode magpie asks for, and a key store so is refused.
+// eipgam opens, from inside it: a file written through \\wsl.localhost is
+// 0644 there whatever mode eipgam asks for, and a key store so is refused.
 func (d distro) chmod(local string) error {
 	if _, err := os.Stat(local); err != nil {
 		return nil
@@ -410,7 +410,7 @@ func (d distro) chmod(local string) error {
 	return nil
 }
 
-// wslKind is an agent magpie looks for in a distro: what the probe finds
+// wslKind is an agent eipgam looks for in a distro: what the probe finds
 // of it, and how it lives at a place. Adding one here is all it takes.
 type wslKind struct {
 	id, name string
@@ -446,7 +446,7 @@ func (k wslKind) served() wslKind {
 }
 
 var wslKinds = []wslKind{
-	// its daemon, which magpie starts there itself (claudescience_wsl.go):
+	// its daemon, which eipgam starts there itself (claudescience_wsl.go):
 	// the probe looks in ~/.local/bin, where its installer puts it
 	{id: ScienceID, name: scienceName, dir: ".claude-science", bin: "claude-science", in: scienceIn, ownNotice: true},
 	{id: "codex", name: "Codex", dir: ".codex", bin: "codex", in: codexIn,
@@ -455,8 +455,8 @@ var wslKinds = []wslKind{
 			switch key {
 			case "model", "subagent", "memories":
 				return func(map[string]string) []Option {
-					// over several accounts magpie routes, so they are
-					// offered via magpie too, as on a live Codex (#1603)
+					// over several accounts eipgam routes, so they are
+					// offered via eipgam too, as on a live Codex (#1603)
 					if codexFailover() {
 						return withVia(group("OpenAI", codexNamed(ownCodex())), "codex", "")
 					}
@@ -504,11 +504,11 @@ var wslKinds = []wslKind{
 					return joinedVia(group("Claude Code", claudeOwn(cur["model"], nil, catalog.Provider("anthropic"))), claudeViaShared(false), [2]string{"\x00claude-via", "\x00asleep"})
 				}
 			case "effort", "ultracode", "statusline":
-				// their own options read only what was last seen; magpie's
+				// their own options read only what was last seen; eipgam's
 				// status line isn't offered in a distro
 				return nil
 			case "login":
-				// its sign-in, while the model last seen is magpie's
+				// its sign-in, while the model last seen is eipgam's
 				return func(cur map[string]string) []Option {
 					if !isMagpie(cur["model"]) {
 						return nil
@@ -526,7 +526,7 @@ var wslKinds = []wslKind{
 					return static(tierEfforts(cmp.Or(cur[tier], cur["model"]))...)
 				}
 			}
-			// a tier, the subagents or auto mode: magpie's models while the
+			// a tier, the subagents or auto mode: eipgam's models while the
 			// model last seen is one
 			return func(cur map[string]string) []Option {
 				if !isMagpie(cur["model"]) {
@@ -596,11 +596,11 @@ var wslKinds = []wslKind{
 			}
 		}},
 	// Antigravity CLI, by its own folder under ~/.gemini or its command
-	// (mimi001234 on Discord: magpie didn't find agy in WSL); it takes the
+	// (mimi001234 on Discord: eipgam didn't find agy in WSL); it takes the
 	// gateway only from how it is started, so the distro's shells get the
 	// function agy (agyDistroFunction)
 	{id: "agy", name: "Antigravity CLI", dir: ".gemini/antigravity-cli", bin: "agy", in: agyIn,
-		restart: newNotice("{agent} in WSL {distro} takes magpie's gateway and model only from how it is started — type agy in a new terminal there: magpie put it in the shell's profile."),
+		restart: newNotice("{agent} in WSL {distro} takes eipgam's gateway and model only from how it is started — type agy in a new terminal there: eipgam put it in the shell's profile."),
 		asleep: func(key string) func(map[string]string) []Option {
 			if key != "model" {
 				return nil
@@ -618,7 +618,7 @@ var wslKinds = []wslKind{
 
 // wslOwnAsleep is a stopped distro's options for an agent's model fields
 // (keys) whose live ones read its files: the providers of the value last
-// seen, and magpie's.
+// seen, and eipgam's.
 func wslOwnAsleep(id string, keys ...string) func(string) func(map[string]string) []Option {
 	return func(key string) func(map[string]string) []Option {
 		if !slices.Contains(keys, key) {
@@ -647,7 +647,7 @@ func (k wslKind) memo(key string) string {
 	return k.id + "." + key
 }
 
-// wslFound reports whether any agent magpie knows is in d.
+// wslFound reports whether any agent eipgam knows is in d.
 func wslFound(d distro) bool {
 	for _, k := range wslKinds {
 		if k.found(d) {
@@ -657,7 +657,7 @@ func wslFound(d distro) bool {
 	return false
 }
 
-// wslKept is whether magpie keeps a distro it probed: one of wslKinds is
+// wslKept is whether eipgam keeps a distro it probed: one of wslKinds is
 // there, or the Copilot CLI's folder, whose sign-in it reads (#723), or
 // the Antigravity app's data, whose sessions it reads.
 func wslKept(d distro) bool {
@@ -667,7 +667,7 @@ func wslKept(d distro) bool {
 
 // ListsFor is whose model lists an agent's are (provider.CatalogFor): its
 // own id's, or, for one in a WSL distro, its Windows twin's (claude for
-// claude@wsl:Ubuntu). A distro's agent is written magpie's models under
+// claude@wsl:Ubuntu). A distro's agent is written eipgam's models under
 // that id and sends the gateway that id's key, so the models picked for
 // its row are the ones it is shown only when kept under that id too (#927).
 func (a *Agent) ListsFor() string {
@@ -695,7 +695,7 @@ func wslPi(d distro) *Agent { return wslAgent(wslKindOf("pi"), d) }
 
 // wslAgent is an agent in a distro: its own reading and writing, at the
 // distro's home, with the distro's way to the gateway. A distro that isn't
-// running is shown as magpie last saw it, and nothing of it is read: any
+// running is shown as eipgam last saw it, and nothing of it is read: any
 // access to its files starts it. Picking a value starts it, as asked.
 func wslAgent(k wslKind, d distro) *Agent {
 	id := k.id + "@wsl:" + d.Name
@@ -848,12 +848,12 @@ func unreached(a *Agent, err error) *Agent {
 	return a
 }
 
-// Unreached is why magpie can't open the folder of a, an agent in a WSL
+// Unreached is why eipgam can't open the folder of a, an agent in a WSL
 // distro: a link there the distro couldn't resolve; nil for any other.
 func (a *Agent) Unreached() error { return a.unreached }
 
 // WSLOpen is path, under the home of a, an agent in a WSL distro, where
-// magpie can open it (distro.open): below a link of the distro's, where
+// eipgam can open it (distro.open): below a link of the distro's, where
 // the link leads. The error says a link there couldn't be resolved. Any
 // other agent's path is as it is.
 func WSLOpen(a *Agent, path string) (string, error) {
@@ -873,8 +873,8 @@ func WSLOpen(a *Agent, path string) (string, error) {
 	return c.open(path)
 }
 
-// asleep is a stopped distro's agent: its fields read what magpie last
-// saw, their options come from magpie alone, and it has no files to check,
+// asleep is a stopped distro's agent: its fields read what eipgam last
+// saw, their options come from eipgam alone, and it has no files to check,
 // sync or migrate (Path and Dir are empty); setting a field goes to the
 // files, which starts the distro.
 func asleep(live *Agent, k wslKind, d distro) *Agent {
@@ -941,7 +941,7 @@ func wslAgents() []*Agent {
 func wslAgentsOf(ds []distro) []*Agent {
 	var out []*Agent
 	for _, d := range ds {
-		// only the agents it has: magpie writes nothing for one that isn't
+		// only the agents it has: eipgam writes nothing for one that isn't
 		// there, and doesn't make it, which reads its files: a stopped
 		// distro's files opened start it again (#3896)
 		for _, k := range wslKinds {
@@ -955,7 +955,7 @@ func wslAgentsOf(ds []distro) []*Agent {
 
 // wslHomes are the distros agents (or the Copilot CLI's folder, or the
 // Antigravity app's data, wslKept)
-// were found in, each user's home as magpie
+// were found in, each user's home as eipgam
 // opens it, for internal/sessions to read their sessions in; none off
 // Windows. A stopped distro's is its home as last probed.
 func wslHomes() []sessions.WSLHome {
@@ -992,7 +992,7 @@ func wslAnswered() bool {
 }
 
 // wslCopilotDir is the Copilot CLI's folder under a distro's $HOME: not an
-// agent magpie sets up, but a sign-in it uses (provider.CopilotWSLDirs),
+// agent eipgam sets up, but a sign-in it uses (provider.CopilotWSLDirs),
 // so a distro that has only it is kept as one agents are found in (#723).
 const wslCopilotDir = ".copilot"
 
@@ -1003,12 +1003,12 @@ const wslCopilotDir = ".copilot"
 // antigravity, Antigravity 2.x's dist/wsl.js), which keeps the
 // conversations in the distro's ~/.gemini/antigravity, not Windows'
 // (@guyng35955 on X: no usage for Antigravity connected to WSL Ubuntu).
-// Not an agent magpie sets up, but sessions it reads
+// Not an agent eipgam sets up, but sessions it reads
 // (sessions.wslAgents), so a distro that has only them is kept as one
 // agents are found in.
 var wslAntigravityDirs = []string{".gemini/antigravity", ".gemini/antigravity-insiders"}
 
-// copilotWSLDirs are the Copilot CLI's folders, as magpie opens them (where
+// copilotWSLDirs are the Copilot CLI's folders, as eipgam opens them (where
 // a link leads, #4502), in the running distros it was found in, for
 // provider to read its sign-in in; none off Windows. A stopped distro is
 // left out: reading it would start it. It is asked on a request's path
@@ -1035,7 +1035,7 @@ func wslHasCopilot(name string) bool {
 
 // Only running distros are probed — asking one anything starts it — once
 // each in a process, and again only after a probe that failed. Those an
-// agent of wslKinds was found in are kept in wsl.json beside magpie's settings (not the
+// agent of wslKinds was found in are kept in wsl.json beside eipgam's settings (not the
 // stash, which profiles and backups carry), with their fields as last
 // read, so a stopped one is listed without being started.
 var wsl struct {
@@ -1068,7 +1068,7 @@ const (
 // wslOn is whether there is WSL to look in: on Windows, or in tests.
 var wslOn = runtime.GOOS == "windows"
 
-// wslLooks is whether magpie looks in WSL on its own: there is WSL, and
+// wslLooks is whether eipgam looks in WSL on its own: there is WSL, and
 // Settings' Detect agents in WSL is on (#1264).
 func wslLooks() bool { return wslOn && !settings.Shared().NoWSLAgents }
 
@@ -1138,7 +1138,7 @@ var wslRootWait = 5 * time.Second
 // wslStat is os.Stat, for wslRoot; a var for tests.
 var wslStat = os.Stat
 
-// wslRoot is where magpie opens a running distro's / from, "" when
+// wslRoot is where eipgam opens a running distro's / from, "" when
 // Windows didn't open it within wslRootWait (the probe failed, and is
 // tried again in wslRetryAge); a var for tests.
 var wslRoot = func(name string) string {
@@ -1162,7 +1162,7 @@ var wslRoot = func(name string) string {
 
 // wslHungPath, while recent, says a wsl.exe listing timed out: each
 // command a hung WSL held for its 10s timeout (20s with the running list),
-// `magpie providers` for Copilot's sign-in in a distro, `magpie version`
+// `eipgam providers` for Copilot's sign-in in a distro, `eipgam version`
 // for start-up's moves.
 func wslHungPath() string { return filepath.Join(filepath.Dir(provider.Path()), "wsl-hung") }
 
@@ -1186,7 +1186,7 @@ func wslHung(hung bool) {
 
 func wslStatePath() string { return filepath.Join(filepath.Dir(provider.Path()), "wsl.json") }
 
-// wslRefreshMu is held by the one refresh of what magpie knows of WSL
+// wslRefreshMu is held by the one refresh of what eipgam knows of WSL
 // (wslRefresh) at a time. wsl.exe and the distros' files are asked while
 // it is held, never under wsl's own lock: that is taken only to read and
 // write what they said. A probe, a listing or an open of a distro's /
@@ -1203,7 +1203,7 @@ func wslRefresh() {
 	wsl.Lock()
 	wslLoadLocked()
 	list := time.Since(wsl.at) > wslListAge
-	// another magpie waited out a hung wsl.exe moments ago: a command
+	// another eipgam waited out a hung wsl.exe moments ago: a command
 	// doesn't wait 10s more (this one lists again in a minute)
 	skip := list && wsl.at.IsZero() && wslHungLately()
 	wsl.Unlock()
@@ -1536,7 +1536,7 @@ func wslRemember(name, key, v string) {
 	wsl.dirty = true
 }
 
-// WSLKeep has magpie remember v under key for the WSL distro name, in
+// WSLKeep has eipgam remember v under key for the WSL distro name, in
 // wsl.json beside what its probe found, for while the distro is stopped:
 // what another package learnt of the distro's files while it ran (the
 // library's places for each agent there), which it can't read again then
@@ -1561,7 +1561,7 @@ func wslLastSeen(name, key string) string {
 
 // wslReady are the distros running now that the probe found kind in, each
 // with its mirrored networking settled, ready for a read of its files.
-// Only magpie's memory of them and which run (wslRunningWithin) are
+// Only eipgam's memory of them and which run (wslRunningWithin) are
 // asked — nothing is probed, and a stopped distro is never opened.
 // Detection off (wslLooks) reads none: a request's stand-in asks wsl.exe
 // nothing, which on a machine without WSL would answer with a console
@@ -1589,7 +1589,7 @@ func wslReady(kind string) []distro {
 }
 
 // wslClaudeStandIn is StandIn for a Claude Code in a WSL distro routed
-// through magpie: the first, of the distros running now, whose
+// through eipgam: the first, of the distros running now, whose
 // settings.json has a stand-in.
 func wslClaudeStandIn(model string) string {
 	for _, d := range wslReady("claude") {
@@ -1629,8 +1629,8 @@ func wslClaudeClassifier(model string) string {
 }
 
 // wslCodexStandIn is StandIn for a Codex in a WSL distro routed through
-// magpie: the first, of the distros running now, whose config.toml has
-// magpie as its provider, as this machine's codexStandIn reads it.
+// eipgam: the first, of the distros running now, whose config.toml has
+// eipgam as its provider, as this machine's codexStandIn reads it.
 func wslCodexStandIn() string {
 	for _, d := range wslReady("codex") {
 		path := filepath.Join(d.place("codex@wsl:"+d.Name).codexHome(), "config.toml")
@@ -1865,7 +1865,7 @@ func parseProbe(name, out string) *distro {
 	// #1230), not Windows: an agent left on it is moved to 127.0.0.1
 	// (wslMovedFrom). A bridged distro's is the LAN's router: Windows is
 	// at its address on the bridge's adapter (wslrun.HostAt), and an agent
-	// an older magpie pointed at the router is written over on the next
+	// an older eipgam pointed at the router is written over on the next
 	// sync, the router being among the addresses it was seen at (Was)
 	d.Gateway = wslrun.HostAt(d.Net, d.Gateway, gateway.WSLNets())
 	return d
@@ -1983,22 +1983,22 @@ func wslSetting(cfg, key string) (val string, ok bool) {
 // what an agent in WSL says after a change, besides its kind's restart
 // (notice.go)
 var (
-	noticeWSLNotMirrored = newNotice("WSL {distro} is in {net} networking, not mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; magpie listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
-	noticeWSLNoMode      = newNotice("magpie couldn't ask WSL {distro} its networking mode (it has no wslinfo) and %UserProfile%\\.wslconfig doesn't set it to mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; magpie listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
-	noticeWSLNoRelay     = newNotice("WSL {distro} is in {net} networking with localhostForwarding=false in %UserProfile%\\.wslconfig, so 127.0.0.1 there, where its {agent} was pointed, isn't relayed to Windows, where magpie listens. Remove localhostForwarding=false under [wsl2] (it is on by default) and run wsl --shutdown.")
-	noticeWSLAsleep      = newNotice("WSL {distro} isn't running: magpie shows what it last saw there, and starts it only to change something.")
+	noticeWSLNotMirrored = newNotice("WSL {distro} is in {net} networking, not mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; eipgam listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
+	noticeWSLNoMode      = newNotice("eipgam couldn't ask WSL {distro} its networking mode (it has no wslinfo) and %UserProfile%\\.wslconfig doesn't set it to mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; eipgam listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
+	noticeWSLNoRelay     = newNotice("WSL {distro} is in {net} networking with localhostForwarding=false in %UserProfile%\\.wslconfig, so 127.0.0.1 there, where its {agent} was pointed, isn't relayed to Windows, where eipgam listens. Remove localhostForwarding=false under [wsl2] (it is on by default) and run wsl --shutdown.")
+	noticeWSLAsleep      = newNotice("WSL {distro} isn't running: eipgam shows what it last saw there, and starts it only to change something.")
 )
 
 // H1_B1_K1 on X: a company's firewall (火绒企业版), which its user can't
 // open, kept a distro under NAT off Windows' address on vEthernet (WSL),
 // while Windows' own address on the LAN answered from WSL. Where the
 // gateway's address on the WSL network (or the WSL via in its place) is
-// found shut from inside a distro under NAT, magpie asks the gateway to
+// found shut from inside a distro under NAT, eipgam asks the gateway to
 // listen at each of Windows' other addresses as well (gateway.SetWSLVia,
 // let in only from Windows itself or WSL), asks from the distro which of
 // them answers, keeps that one as the via and lets the others go. Every
-// NAT distro's agents on magpie are then set again to reach it there
-// (distro.host, Rewire), the address they were on being magpie's to move
+// NAT distro's agents on eipgam are then set again to reach it there
+// (distro.host, Rewire), the address they were on being eipgam's to move
 // (wslHost, wslMovedFrom). Where the via is found shut later and the WSL
 // network's address answers again, the via is dropped. A setting isn't
 // needed: what answers is found.
@@ -2056,7 +2056,7 @@ var wslViaMu sync.Mutex
 // address it found shut: the WSL network's again, else another of
 // Windows' addresses (see above), tried one by one while the gateway
 // listens at all of them. The one that answers is kept; the agents of
-// every distro under NAT on magpie then are set again to reach it there.
+// every distro under NAT on eipgam then are set again to reach it there.
 func wslFindVia(d distro, shut string) {
 	wslViaMu.Lock()
 	defer wslViaMu.Unlock()
@@ -2069,7 +2069,7 @@ func wslFindVia(d distro, shut string) {
 	keep := func(via []string) {
 		if slices.Equal(via, old) {
 			if err := gateway.SetWSLVia(old, nil); err != nil {
-				log.Printf("wsl: can't keep the way to magpie from WSL: %v", err)
+				log.Printf("wsl: can't keep the way to eipgam from WSL: %v", err)
 			}
 			return
 		}
@@ -2079,7 +2079,7 @@ func wslFindVia(d distro, shut string) {
 			from[i] = a.pointedAt()
 		}
 		if err := gateway.SetWSLVia(via, nil); err != nil {
-			log.Printf("wsl: can't keep the way to magpie from WSL: %v", err)
+			log.Printf("wsl: can't keep the way to eipgam from WSL: %v", err)
 			return
 		}
 		if len(old) > 0 {
@@ -2111,7 +2111,7 @@ func wslFindVia(d distro, shut string) {
 			errs = append(errs, err)
 		}
 		if len(moved) > 0 || len(errs) > 0 {
-			log.Printf("wsl: set again to reach magpie from WSL: %v %v", moved, joinErrs(errs))
+			log.Printf("wsl: set again to reach eipgam from WSL: %v %v", moved, joinErrs(errs))
 		}
 	}
 	if len(old) > 0 && shut != url(old[0]) {
@@ -2123,7 +2123,7 @@ func wslFindVia(d distro, shut string) {
 	if len(old) > 0 && shut != url(d.Gateway) {
 		// the via shut: the WSL network's address may answer again
 		if ok, told := wslReach(d.Name, url(d.Gateway)); ok && told {
-			log.Printf("wsl: WSL %s reaches magpie at %s again", d.Name, url(d.Gateway))
+			log.Printf("wsl: WSL %s reaches eipgam at %s again", d.Name, url(d.Gateway))
 			keep(nil)
 			return
 		}
@@ -2146,7 +2146,7 @@ func wslFindVia(d distro, shut string) {
 			continue
 		}
 		if ok, told := wslReach(d.Name, url(c)); ok && told {
-			log.Printf("wsl: WSL %s can't reach magpie at %s; it reaches it at %s", d.Name, shut, c)
+			log.Printf("wsl: WSL %s can't reach eipgam at %s; it reaches it at %s", d.Name, shut, c)
 			keep([]string{c})
 			return
 		}
@@ -2154,7 +2154,7 @@ func wslFindVia(d distro, shut string) {
 	keep(old)
 }
 
-// wslOnGateway are the agents on magpie in distros under NAT, taken
+// wslOnGateway are the agents on eipgam in distros under NAT, taken
 // before their way to Windows moves (as OnGateway before a port change).
 // A var for the tests, set in init: its agents' probes find vias.
 var wslOnGateway func() []*Agent
@@ -2176,7 +2176,7 @@ func wslOnGatewayNow() []*Agent {
 }
 
 // wslViaLeft notes a via let go as an address every NAT distro reached
-// Windows at before (Was), so an agent still on it is magpie's to move.
+// Windows at before (Was), so an agent still on it is eipgam's to move.
 func wslViaLeft(via string) {
 	wsl.Lock()
 	defer wsl.Unlock()

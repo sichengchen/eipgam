@@ -34,7 +34,7 @@ func zombieChildren(t *testing.T) int {
 	return n
 }
 
-// TestAdoptedOrphansAreReaped: magpie as a container's PID 1 (here a
+// TestAdoptedOrphansAreReaped: eipgam as a container's PID 1 (here a
 // subreaper, which adopts the same way) is left the processes of its
 // children's children, and they stayed <defunct> until it restarted (254
 // after 7 days, Kling__Lab on X).

@@ -2,7 +2,7 @@
 // ysm119 on Discord, on the Sessions page's Cursor tab: some rows had a
 // delete and some had none, and the right-hand column (when, how many
 // sessions) stood at a different place from row to row. Every session of
-// an agent magpie deletes from has a delete; one it can't delete says why
+// an agent eipgam deletes from has a delete; one it can't delete says why
 // on it. A row without Resume, Continue in or delete, and a folder without
 // its ⋯, keep that room, so every row's right-hand column lines up: with a
 // title or none, a folder or none, hovered or not, while Resume says
@@ -45,7 +45,7 @@ function serve(lang, calls) {
     if (url.pathname === "/api/sessions/manage") {
       return json({
         agents: [{ agent: "cursor", count: sessions.length, deletable: true, name: "Cursor", icon: "cursor" }],
-        agent: "cursor", sessions, terminal: true, trash: [], trashDir: "~/Library/Application Support/magpie/trash/sessions",
+        agent: "cursor", sessions, terminal: true, trash: [], trashDir: "~/Library/Application Support/eipgam/trash/sessions",
       });
     }
     if (url.pathname.startsWith("/api/sessions/") && url.pathname !== "/api/sessions/manage") calls.push(url.pathname);
@@ -101,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], calls = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator('#nav button[data-view="sessions"]').click();
       const view = page.locator("#view-sessions");
       await view.locator(".row.sm-folder").first().waitFor();

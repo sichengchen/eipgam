@@ -10,7 +10,7 @@ import (
 )
 
 // A connection to an address on the user's own network that nobody holds
-// any more (le13ure on X: a Remote magpie whose computer was given
+// any more (le13ure on X: a Remote eipgam whose computer was given
 // another address) is given up on after lanDial, not after the system's
 // minute or two; a name, a public address and Tailscale's are left to
 // the request's own context.

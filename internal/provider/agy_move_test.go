@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // standInAgy has MoveToAgy's installs and import answer here: the plugin
@@ -123,7 +123,7 @@ func TestMoveToAgyNeedsAccountsAndAnImport(t *testing.T) {
 	}
 }
 
-// Where Google is reached only through Antigravity's own proxy (magpie in
+// Where Google is reached only through Antigravity's own proxy (eipgam in
 // a container, with that proxy set on Antigravity alone), agy is
 // installed and the accounts checked through it, and agy-cli keeps it for
 // its requests: going direct, the install failed every time (huiqiang6 on

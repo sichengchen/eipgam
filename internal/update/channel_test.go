@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // stableFor saves Settings' Update channel for one test and puts the one
@@ -47,7 +47,7 @@ func TestLatestAsksTheChannel(t *testing.T) {
 		json.NewEncoder(w).Encode(Release{Version: v})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL+"/api/latest")
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL+"/api/latest")
 	ctx := context.Background()
 
 	for _, c := range []struct{ channel, lang, query, version string }{
@@ -105,37 +105,6 @@ func TestStableNotesAreAll(t *testing.T) {
 	}
 }
 
-// Daily's release, like Stable's, is one only the site knows: a failed
-// feed doesn't go on to GitHub's newest, and GitHub only doesn't skip the
-// feed, either of which would hand the newest release to someone who chose
-// one a day.
-func TestDailyStaysOnTheFeed(t *testing.T) {
-	t.Setenv("MAGPIE_UPDATE_FEED", "")
-	for _, c := range []struct {
-		channel string
-		picked  bool
-	}{{"", false}, {settings.UpdateDaily, true}, {settings.UpdateStable, true}} {
-		stableFor(t, c.channel)
-		if Picked() != c.picked || Channel() != c.channel {
-			t.Fatalf("%q: Picked %v, Channel %q", c.channel, Picked(), Channel())
-		}
-		if fallsBack(context.Background()) == c.picked {
-			t.Errorf("%q: fallsBack %v", c.channel, !c.picked)
-		}
-	}
-	stableFor(t, settings.UpdateDaily)
-	s := settings.Load()
-	s.UpdateSource = settings.UpdateSourceGitHub
-	if err := settings.Save(s); err != nil {
-		t.Fatal(err)
-	}
-	if githubOnly() {
-		t.Error("GitHub only skipped Daily's feed")
-	}
-}
-
-// Settings take "stable", "daily" or nothing; anything else is refused, and the
-// value is kept as saved.
 func TestUpdateChannelSaved(t *testing.T) {
 	stableFor(t, settings.UpdateStable)
 	if got := settings.Load().UpdateChannel; got != "stable" || !Stable() {

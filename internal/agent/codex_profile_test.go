@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-// Codex wired by its profile alone (hpnjstar on X): codex -p magpie goes
-// through magpie, and config.toml, which plain codex reads, is not touched
+// Codex wired by its profile alone (hpnjstar on X): codex -p eipgam goes
+// through eipgam, and config.toml, which plain codex reads, is not touched
 // by connecting, switching models or disconnecting.
 func TestCodexProfileOnlyLeavesConfigTomlAlone(t *testing.T) {
 	const own = "model = \"gpt-5.5\"\nmodel_provider = \"acme\"\nopenai_base_url = \"https://relay.example/v1\"\n\n[model_providers.acme]\nname = \"acme\"\nbase_url = \"https://acme.example/v1\"\n"
@@ -19,14 +19,14 @@ func TestCodexProfileOnlyLeavesConfigTomlAlone(t *testing.T) {
 		t.Fatal(err)
 	}
 	cx = codex(home)
-	if cx.Path != filepath.Join(dir, "magpie.config.toml") {
+	if cx.Path != filepath.Join(dir, "eipgam.config.toml") {
 		t.Fatalf("path %s", cx.Path)
 	}
 	if err := cx.Apply("model", "fake/m1"); err != nil {
 		t.Fatal(err)
 	}
 	prof, _ := os.ReadFile(cx.Path)
-	for _, want := range []string{`model_provider = "magpie"`, `model = "fake/m1"`, `model_catalog_json = "magpie-models.json"`, "[model_providers.magpie]"} {
+	for _, want := range []string{`model_provider = "eipgam"`, `model = "fake/m1"`, `model_catalog_json = "eipgam-models.json"`, "[model_providers.eipgam]"} {
 		if !strings.Contains(string(prof), want) {
 			t.Errorf("profile lacks %q:\n%s", want, prof)
 		}
@@ -59,7 +59,7 @@ func TestCodexProfileOnlyLeavesConfigTomlAlone(t *testing.T) {
 	if _, err := os.Stat(cx.Path); !os.IsNotExist(err) {
 		t.Fatalf("profile left: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "magpie-models.json")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, "eipgam-models.json")); !os.IsNotExist(err) {
 		t.Fatalf("catalog left: %v", err)
 	}
 	if read() != own || codex(home).Wired() {
@@ -93,14 +93,14 @@ func TestCodexScopeWaitsForDisconnect(t *testing.T) {
 	if err := cx.Field("scope").Set("profile"); err == nil {
 		t.Fatal("scope changed while connected")
 	}
-	if _, err := os.Stat(filepath.Join(home, ".codex", "magpie.config.toml")); err == nil {
+	if _, err := os.Stat(filepath.Join(home, ".codex", "eipgam.config.toml")); err == nil {
 		t.Fatal("a profile was written by the default wiring")
 	}
 }
 
-// Codex routed through magpie by the base URL alone (beside its ChatGPT
-// sign-in, or for failover) reads as not wired, yet magpie keeps config.toml
-// and its list there. "applies to" moving to the profile then made magpie
+// Codex routed through eipgam by the base URL alone (beside its ChatGPT
+// sign-in, or for failover) reads as not wired, yet eipgam keeps config.toml
+// and its list there. "applies to" moving to the profile then made eipgam
 // stop looking at config.toml: its wiring stayed behind unmanaged and the
 // row read disconnected, Codex on its own list (kakzyanaba on X).
 func TestCodexScopeWaitsForBaseURLRouteToo(t *testing.T) {
@@ -111,7 +111,7 @@ func TestCodexScopeWaitsForBaseURLRouteToo(t *testing.T) {
 		t.Fatal("fixture is not routed by the base URL")
 	}
 	if err := cx.Field("scope").Set("profile"); err == nil {
-		t.Fatal("scope changed while Codex is routed through magpie")
+		t.Fatal("scope changed while Codex is routed through eipgam")
 	}
 	if codex(home).Path != filepath.Join(home, ".codex", "config.toml") || read() != routed {
 		t.Fatalf("Codex moved off config.toml:\n%s", read())

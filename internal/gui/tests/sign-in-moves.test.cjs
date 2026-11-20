@@ -2,7 +2,7 @@
 // The owner (11-11): Claude Code stopped switching to an account with room,
 // and nothing on the page said why: "Keep Claude Code signed in to" was
 // ticked. Moving the sign-in is now a switch of its own under the accounts
-// ("这个轮换做成一个开关"). On, a line under it says what magpie does, as
+// ("这个轮换做成一个开关"). On, a line under it says what eipgam does, as
 // the server tells it (signInMoves): moved on at 98% or once used up, back
 // to the first or not, or left alone while its requests go through the
 // gateway. Off, the account it stays on. Switch-only holds it on. Nothing
@@ -62,24 +62,24 @@ function serve(lang, first, posts) {
 
 const words = {
   en: {
-    at98: "When the account Claude Code is signed in to reaches 98%, magpie signs it in to the next ticked account with room. It stays on that one till it runs low too.",
-    usedUpBack: "When the account Claude Code is signed in to is used up, magpie signs it in to the next ticked account with room. It goes back to the first once that has room again.",
+    at98: "When the account Claude Code is signed in to reaches 98%, eipgam signs it in to the next ticked account with room. It stays on that one till it runs low too.",
+    usedUpBack: "When the account Claude Code is signed in to is used up, eipgam signs it in to the next ticked account with room. It goes back to the first once that has room again.",
     name: "Switch Claude Code's account automatically",
     keep: "Keep Claude Code signed in to",
-    gateway: "Claude Code's requests go through magpie, which sends each one to an account with room; its own sign-in stays where you put it.",
+    gateway: "Claude Code's requests go through eipgam, which sends each one to an account with room; its own sign-in stays where you put it.",
     tip: [
-      "When the account runs low, magpie signs Claude Code in to your next account, as /login does. Sessions already open keep their account until they are restarted.",
+      "When the account runs low, eipgam signs Claude Code in to your next account, as /login does. Sessions already open keep their account until they are restarted.",
       "Requests still go from Claude Code straight to Anthropic, unchanged. Use only accounts that are yours: sharing one is against Anthropic's terms.",
     ],
   },
   zh: {
-    at98: "Claude Code 登录的账号用到 98% 时，magpie 把它登录到下一个已勾选且有额度的账号。之后一直用这个账号，直到它的额度也快用完。",
-    usedUpBack: "Claude Code 登录的账号用完时，magpie 把它登录到下一个已勾选且有额度的账号。首选账号恢复额度后再切回去。",
+    at98: "Claude Code 登录的账号用到 98% 时，eipgam 把它登录到下一个已勾选且有额度的账号。之后一直用这个账号，直到它的额度也快用完。",
+    usedUpBack: "Claude Code 登录的账号用完时，eipgam 把它登录到下一个已勾选且有额度的账号。首选账号恢复额度后再切回去。",
     name: "自动切换 Claude Code 的账号",
     keep: "Claude Code 始终登录",
-    gateway: "Claude Code 的请求经过 magpie，每个请求都发给有额度的账号；Claude Code 自己的登录保持你选的账号不变。",
+    gateway: "Claude Code 的请求经过 eipgam，每个请求都发给有额度的账号；Claude Code 自己的登录保持你选的账号不变。",
     tip: [
-      "账号额度快用完时，magpie 把 Claude Code 登录到你的下一个账号，和 /login 一样。已经打开的会话继续用原来的账号，直到重新启动。",
+      "账号额度快用完时，eipgam 把 Claude Code 登录到你的下一个账号，和 /login 一样。已经打开的会话继续用原来的账号，直到重新启动。",
       "请求仍由 Claude Code 直接发往 Anthropic，原样不改。请只用你自己的账号：共享账号违反 Anthropic 的条款。",
     ],
   },
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, claude(opts), posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude Code" }).first().click();
       await page.locator(".editor .acc").first().waitFor();
       return { page, errors, posts };
@@ -199,7 +199,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
     });
 
-    test(`${engine} ${lang}: switch-only holds it on; nothing with one account, no line when off in magpie`, async (t) => {
+    test(`${engine} ${lang}: switch-only holds it on; nothing with one account, no line when off in eipgam`, async (t) => {
       const only = await open(t, { switchOnly: true, keepLogin: true });
       assert.equal(await sw(only.page).getAttribute("aria-checked"), "true");
       assert.equal(await sw(only.page).isDisabled(), true);

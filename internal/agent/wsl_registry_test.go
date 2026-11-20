@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
 // wslRealRuns has WSL on and agent's and wslrun's real wsl.exe runners
 // (testenv's failing stand-in on PATH) wrapped to note each run's arguments and
-// error; what magpie remembers of WSL starts empty.
+// error; what eipgam remembers of WSL starts empty.
 func wslRealRuns(t *testing.T) (runs func() map[string][]error) {
 	t.Helper()
 	syncHome(t)
@@ -59,7 +59,7 @@ func wslRealRuns(t *testing.T) (runs func() map[string][]error) {
 	}
 }
 
-// TraderX219 on X: magpie on a Windows with no WSL distro put up Windows'
+// TraderX219 on X: eipgam on a Windows with no WSL distro put up Windows'
 // "WSL must be updated… press any key to install" console every 20 to 30
 // seconds, from wsl.exe -l --running. With none registered no listing,
 // running list, link or run in a distro starts wsl.exe, and the distros
@@ -119,7 +119,7 @@ func TestNoWSLDistroRunsNoWSL(t *testing.T) {
 }
 
 // A wsl.exe that says WSL must be updated isn't asked again, and what
-// magpie remembers of a distro is kept while it isn't: its refusal is
+// eipgam remembers of a distro is kept while it isn't: its refusal is
 // unknown, not "no distro".
 func TestWSLUpdateKeepsDistros(t *testing.T) {
 	runs := wslRealRuns(t)

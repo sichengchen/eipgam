@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A card with four windows draws, through AppKit, two columns of two
@@ -33,7 +33,7 @@ func TestTrayImageColumns(t *testing.T) {
 	if len(four[0].Rows) != 4 || len(two[0].Rows) != 2 || len(three[0].Rows) != 3 {
 		t.Fatalf("rows %q %q %q", four[0].Rows, two[0].Rows, three[0].Rows)
 	}
-	out := os.Getenv("MAGPIE_TRAY_PREVIEW")
+	out := os.Getenv("EIPGAM_TRAY_PREVIEW")
 	for _, dark := range []bool{false, true} {
 		_, w0, _ := trayImagePNG(nil, bird, 22, 2, dark, false)
 		_, w2, _ := trayImagePNG(two, bird, 22, 2, dark, false)

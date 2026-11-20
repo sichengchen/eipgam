@@ -3,7 +3,7 @@ package provider
 // Keeping Codex or Claude Code signed in to an account of the user's
 // choosing (#524). Making an account first did two things at once: the
 // gateway tries it first, and the agent is signed in to it. Kept on the
-// first (KeepLogin), magpie only stopped moving the sign-in on. But the
+// first (KeepLogin), eipgam only stopped moving the sign-in on. But the
 // first is often just the account whose allowance is to be spent first,
 // not the one the user uses the agent as: KeepLoginAs keeps the agent
 // signed in to that one, wherever it stands in the order, and the order —
@@ -39,13 +39,13 @@ func keptAs(agent string) string {
 
 // CodexSignInKept reports whether the account Codex is signed in to is the
 // one the user keeps it on (keepsLogin): the account KeepLoginAs names, or,
-// kept on the first with none named, the one it is on, which magpie then
+// kept on the first with none named, the one it is on, which eipgam then
 // never moves it off. The Codex app shows that account as the user's own,
-// so on one of Codex's own models magpie doesn't become Codex's provider
+// so on one of Codex's own models eipgam doesn't become Codex's provider
 // while it is held (the agent package's outOn): its takeover answers
-// account/read with no account, and the app showed "magpie" for the
+// account/read with no account, and the app showed "eipgam" for the
 // account the user picked (davezfr on X, account 1 out of its allowance
-// and its credits). On a model of magpie's it does, kept or not, or the
+// and its credits). On a model of eipgam's it does, kept or not, or the
 // app greys Send for it till the reset. false while it can't be told.
 func CodexSignInKept() bool {
 	for _, p := range storedFile().Providers {
@@ -96,7 +96,7 @@ func SetKeepLoginAs(id, user string) error {
 		return err
 	}
 	if p.Account == nil || p.Account.Agent != p.ID || !slices.Contains(switchedAgents, p.ID) {
-		return fmt.Errorf("magpie doesn't sign %s in to another of its accounts", p.Name)
+		return fmt.Errorf("eipgam doesn't sign %s in to another of its accounts", p.Name)
 	}
 	if p.SwitchOnly {
 		return errSwitchOnly(*p)
@@ -144,7 +144,7 @@ func SetKeepLoginAs(id, user string) error {
 	return SwitchLogin(p.ID, to.User)
 }
 
-// keepsLogin reports whether magpie keeps the agent signed in to one
+// keepsLogin reports whether eipgam keeps the agent signed in to one
 // account (KeepLogin, KeepLoginAs). Not while it only switches the agent's
 // sign-in (SwitchOnly): that asks for the sign-in to move to the next
 // account with room, and kept on one, nothing would ever move it, nor any
@@ -153,10 +153,10 @@ func SetKeepLoginAs(id, user string) error {
 // switch-only is unticked.
 func (p Provider) keepsLogin() bool { return p.KeepLogin && !p.SwitchOnly }
 
-// errSwitchOnly refuses to keep p's agent on one account while magpie only
+// errSwitchOnly refuses to keep p's agent on one account while eipgam only
 // switches its sign-in (keepsLogin).
 func errSwitchOnly(p Provider) error {
-	return fmt.Errorf("magpie only switches %s's sign-in to the next account with room; untick that to keep it signed in to one account", p.Name)
+	return fmt.Errorf("eipgam only switches %s's sign-in to the next account with room; untick that to keep it signed in to one account", p.Name)
 }
 
 // rankLogins writes order as the order of agent's saved accounts.

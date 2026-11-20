@@ -36,7 +36,7 @@ function serve(lang, calls) {
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { running: true, window: true } });
     if (url.pathname === "/api/sessions/manage") {
       return json({ agents: [{ agent: "zcode", count: sessions.length, deletable: true, name: "ZCode", icon: "zcode" }],
-        agent: "zcode", home: "/home/me", sessions, terminal: false, trash: [], trashDir: "~/.local/share/magpie/trash/sessions" });
+        agent: "zcode", home: "/home/me", sessions, terminal: false, trash: [], trashDir: "~/.local/share/eipgam/trash/sessions" });
     }
     if (url.pathname === "/api/sessions/delete") {
       const body = req.postDataJSON();
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         const calls = [];
         await page.route("**/*", serve(lang, calls));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.evaluate(() => show("sessions"));
         const view = page.locator("#view-sessions");
         const tr = (k, vars) => page.evaluate(([k, vars]) => t(k, vars), [k, vars]);

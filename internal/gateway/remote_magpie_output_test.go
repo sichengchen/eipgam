@@ -11,12 +11,12 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Codex offers web_search on every turn and names no reply limit. A turn
-// for a Remote magpie's model is translated here when the search is
-// magpie's to do (searchedForIt), and the other magpie, given a body it
+// for a Remote eipgam's model is translated here when the search is
+// eipgam's to do (searchedForIt), and the other eipgam, given a body it
 // can pass whole, relays it — its own filling is translation work it never
 // does. So the model's published output has to go out on the first hop,
 // or the vendor's own short default is all the cascade gets (#5566):
@@ -24,7 +24,7 @@ import (
 // model asked direct of the far one completed.
 func TestRemoteMagpieCascadeAsksItsOutputLimit(t *testing.T) {
 	var mu sync.Mutex
-	var hop, vendor []string // the bodies the far magpie, and its vendor, were sent
+	var hop, vendor []string // the bodies the far eipgam, and its vendor, were sent
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, _ := io.ReadAll(r.Body)
 		mu.Lock()
@@ -43,7 +43,7 @@ func TestRemoteMagpieCascadeAsksItsOutputLimit(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k", Models: []string{"m1"}, Responses: up.URL + "/v1"}); err != nil {
 		t.Fatal(err)
 	}
-	// the far magpie publishes the model's reply limit beside its window,
+	// the far eipgam publishes the model's reply limit beside its window,
 	// as the user's Max output there does
 	if err := provider.SetModelOutput("relay/m1", 393216); err != nil {
 		t.Fatal(err)
@@ -87,7 +87,7 @@ func TestRemoteMagpieCascadeAsksItsOutputLimit(t *testing.T) {
 	// named the model's published output; the second relayed the body it
 	// got, its ceiling only lowering a larger one
 	if got := gjson.Get(body, "max_output_tokens").Int(); got != 393216 {
-		t.Errorf("the far magpie was sent max_output_tokens %v, want 393216: %s", got, body)
+		t.Errorf("the far eipgam was sent max_output_tokens %v, want 393216: %s", got, body)
 	}
 	if got := gjson.Get(sent, "max_output_tokens").Int(); got != 393216 {
 		t.Errorf("the vendor was sent max_output_tokens %v, want 393216: %s", got, sent)

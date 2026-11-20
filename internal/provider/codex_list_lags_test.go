@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // twoPlusAccounts signs Codex in to work@ and keeps me@ beside it, on: the
-// two ChatGPT Plus accounts of wudao_85256 on Discord. Magpie speaks as
+// two ChatGPT Plus accounts of wudao_85256 on Discord. eipgam speaks as
 // Codex 9.0.0 (a client seen through the gateway), so a list asked for an
 // older Codex is behind.
 func twoPlusAccounts(t *testing.T) Provider {
@@ -39,7 +39,7 @@ func twoPlusAccounts(t *testing.T) Provider {
 	return p
 }
 
-// keepList writes one account's own model list as magpie keeps it: fetched
+// keepList writes one account's own model list as eipgam keeps it: fetched
 // at, asked for Codex version asked (none when ""), and since, when each
 // model was first in it (none kept when nil).
 func keepList(t *testing.T, user string, at time.Time, asked string, since map[string]time.Time, ids ...string) {
@@ -75,7 +75,7 @@ func usersOf(as []AccountOn) []string {
 
 // An account whose own list leaves a model out is "its plan lacks it"
 // only when that list can know the model: fetched after another account's
-// list first had it, and asked as the Codex magpie speaks as now. A list
+// list first had it, and asked as the Codex eipgam speaks as now. A list
 // older than that, or asked for an older Codex (the backend lists
 // gpt-6.1-sol only to Codex 0.161.0 and later), or one saved before the
 // version was kept, says nothing of it: the account is routed over, not
@@ -148,7 +148,7 @@ func TestStaleAccountListIsNotAPlanWithoutTheModel(t *testing.T) {
 }
 
 // A saved account's list asked for an older Codex is asked again at the
-// next look, for the version magpie speaks as now, and kept with it; one
+// next look, for the version eipgam speaks as now, and kept with it; one
 // asked for this version waits its day, as before.
 func TestBehindListAskedAgain(t *testing.T) {
 	twoPlusAccounts(t)

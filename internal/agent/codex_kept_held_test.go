@@ -6,18 +6,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // davezfr on X, after v0.1.4216: Codex signed in to account 1, which had
-// used up both its allowance and its credits (held), showed "magpie" as
+// used up both its allowance and its credits (held), showed "eipgam" as
 // its account in the Codex app; picked in Codex's sign-in, account 2,
-// with room, showed itself. magpie became Codex's provider for the held
+// with room, showed itself. eipgam became Codex's provider for the held
 // account (codex.out), and the app-server answers account/read with no
 // account for a provider without requires_openai_auth. On one of Codex's
 // own models the account the user keeps Codex on is theirs to see, held
 // or not: Sync leaves Codex beside that sign-in, and a takeover made
-// before the user kept it ends. On a model of magpie's the takeover
+// before the user kept it ends. On a model of eipgam's the takeover
 // stands, kept or not (TestCodexKeptOnAHeldAccountSendsMagpiesModel).
 func TestCodexKeptOnAHeldAccountShowsIt(t *testing.T) {
 	kept := false
@@ -60,7 +60,7 @@ func TestCodexKeptOnAHeldAccountShowsIt(t *testing.T) {
 			if err := cx.Sync(); err != nil {
 				t.Fatal(err)
 			}
-			if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) || !cx.AppOut() {
+			if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) || !cx.AppOut() {
 				t.Fatalf("held, not kept: no takeover:\n%s", cfg)
 			}
 
@@ -84,7 +84,7 @@ func TestCodexKeptOnAHeldAccountShowsIt(t *testing.T) {
 			if err := cx.Sync(); err != nil {
 				t.Fatal(err)
 			}
-			if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) || !cx.AppOut() {
+			if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) || !cx.AppOut() {
 				t.Fatalf("held, let go: no takeover:\n%s", cfg)
 			}
 		})
@@ -97,7 +97,7 @@ func TestCodexKeptOnAHeldAccountShowsIt(t *testing.T) {
 // account's "usage used up" banner. a5e3972a7 left the account the user
 // keeps Codex on (Switch account automatically off) beside its sign-in
 // whatever the model, and beside it the app greys Send for every model
-// till the account's reset. On a model of magpie's, magpie is Codex's
+// till the account's reset. On a model of eipgam's, eipgam is Codex's
 // provider while the account is held, kept or not, as before a5e3972a7:
 // the takeover Sync makes, the one a pick makes, and one made before.
 func TestCodexKeptOnAHeldAccountSendsMagpiesModel(t *testing.T) {
@@ -111,8 +111,8 @@ func TestCodexKeptOnAHeldAccountSendsMagpiesModel(t *testing.T) {
 	cx := codex(home)
 	takenOver := func(when string) {
 		t.Helper()
-		if cfg := read(); !strings.Contains(cfg, `model_provider = "magpie"`) || !strings.Contains(cfg, `model = "fake/m1"`) || !cx.AppOut() {
-			t.Fatalf("%s: magpie's model left on the held account, where the app greys Send:\n%s", when, cfg)
+		if cfg := read(); !strings.Contains(cfg, `model_provider = "eipgam"`) || !strings.Contains(cfg, `model = "fake/m1"`) || !cx.AppOut() {
+			t.Fatalf("%s: eipgam's model left on the held account, where the app greys Send:\n%s", when, cfg)
 		}
 	}
 

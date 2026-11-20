@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // Call is one model call of an agent's conversation, as tune replays it.
@@ -85,7 +85,7 @@ func WeightsFor(model string) Weights {
 	return Weights{Read: 0.1, Write: 1, Write1h: 1, Out: 8}
 }
 
-// Weigh gives the weights a model's calls are replayed at: what magpie
+// Weigh gives the weights a model's calls are replayed at: what eipgam
 // bills the provider that served them, where the caller knows it (#3435:
 // Copilot bills an hour's cache write as a 5-minute one), else WeightsFor.
 type Weigh func(model string) Weights
@@ -165,7 +165,7 @@ type CompactOpts struct {
 	Current int
 	// Window is the model's whole window, the most a setting can give; 0
 	// when it isn't known, and then nothing short of Max caps a setting
-	// (zhemu on Discord: a 1M model magpie had no window for was offered
+	// (zhemu on Discord: a 1M model eipgam had no window for was offered
 	// no more than the largest prompt it had been sent, 412K)
 	Window int
 	// Weigh prices the calls; nil weighs them at WeightsFor

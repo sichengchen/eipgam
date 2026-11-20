@@ -7,26 +7,26 @@ import (
 	"strings"
 )
 
-// While Claude Desktop is on magpie, its Code tab runs Claude Code on
+// While Claude Desktop is on eipgam, its Code tab runs Claude Code on
 // ~/.claude/settings.json with every model Desktop lists, and Claude Code
 // takes one window (claudeContextEnv) for all of those it doesn't know.
 // The least of them held every one to it: one 131K image model beside a
-// 500K GPT ran the GPT at 131K too (#2025). So magpie tells Claude Code
+// 500K GPT ran the GPT at 131K too (#2025). So eipgam tells Claude Code
 // the largest window instead, and holds each model below it to its own
 // with modelSettings.<id>.autoCompactWindow, which Claude Code (2.1.296)
 // looks up by the id it was handed (lowercased, "[1m]" dropped) and takes
 // before the top-level autoCompactWindow. CLAUDE_CODE_AUTO_COMPACT_WINDOW
-// would take precedence over both, so magpie's working window
+// would take precedence over both, so eipgam's working window
 // (settings.WorkingWindow) goes in the top-level autoCompactWindow
 // instead while it does this.
 
-// claudeBudget is a model Claude Code may run on through magpie while
+// claudeBudget is a model Claude Code may run on through eipgam while
 // Claude Desktop is on it.
 type claudeBudget struct {
 	id     string // as Claude Code is handed it: its key under modelSettings
 	window int    // its window, 0 when unknown
 	long   bool   // Claude Code takes it for 1M by its id ("[1m]")
-	// the auto-compact window magpie gives it: 0 for the top-level one
+	// the auto-compact window eipgam gives it: 0 for the top-level one
 	// (base), below 0 for none, its whole window
 	compact int
 	// Claude Code runs it as a Claude model it knows (a Desktop tier's
@@ -49,15 +49,15 @@ const claudeLong = 1000000
 // 1000000 (above_maximum), and tune refuses one past it already.
 const claudeCompactMax = 1000000
 
-// claudeCompactCap is n as magpie writes it for Claude Code: no more than
-// claudeCompactMax. The user's own threshold in magpie stays as they
+// claudeCompactCap is n as eipgam writes it for Claude Code: no more than
+// claudeCompactMax. The user's own threshold in eipgam stays as they
 // typed it; only what goes into Claude Code's settings is held.
 func claudeCompactCap(n int) int { return min(n, claudeCompactMax) }
 
 // budgetKey is a modelSettings key as Claude Code matches it.
 func budgetKey(id string) string { return strings.ToLower(strings.TrimSuffix(id, "[1m]")) }
 
-// budgetKeyOK says id can go under modelSettings as a key path magpie's
+// budgetKeyOK says id can go under modelSettings as a key path eipgam's
 // JSON editor writes: a dot is escaped, gjson's other path characters
 // aren't, so a model whose id has one gets no entry.
 func budgetKeyOK(id string) bool {
@@ -72,11 +72,11 @@ func budgetPath(id string) string {
 // claudePlan is the window to tell Claude Code (top) and the
 // auto-compact window to give each model whose own differs from what it
 // would run at without one (entries, by id without "[1m]"). base is the
-// top-level autoCompactWindow in the file, magpie's or the user's, 0 for
+// top-level autoCompactWindow in the file, eipgam's or the user's, 0 for
 // none; theirs are the user's own modelSettings windows by budgetKey,
-// which magpie never writes over. A model the user gave a window past its
+// which eipgam never writes over. A model the user gave a window past its
 // own ("auto" too, which runs it to the one Claude Code is told) holds
-// top to its own window, as magpie can't put theirs right.
+// top to its own window, as eipgam can't put theirs right.
 func claudePlan(models []claudeBudget, base int, theirs map[string]string) (top int, entries map[string]int) {
 	for _, m := range models {
 		switch {

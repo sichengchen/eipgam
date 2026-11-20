@@ -51,7 +51,7 @@ func kindsOf(ms []Model) map[string]string {
 }
 
 // A relay's /models that marks no kind lists Grok's video models where the
-// user can mark them Video (#1399: magpie doesn't send a relay's model to
+// user can mark them Video (#1399: eipgam doesn't send a relay's model to
 // a videos API on its name alone), never under Image models.
 func TestFetchRelayGrokVideoIsNoDrawer(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

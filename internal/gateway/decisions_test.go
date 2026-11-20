@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // decisionAsked is the Decisions guide's request
@@ -117,7 +117,7 @@ func decisionRecords(t *testing.T, n int) []usage.Record {
 // POST /v1/decisions (a Discord user had a 404) goes as the agent sent it
 // to OpenAI with its key, to Azure OpenAI at its v1 API's
 // /openai/v1/decisions with the key in api-key, and on the bare
-// /decisions an SDK given magpie's root posts to. The answer comes back
+// /decisions an SDK given eipgam's root posts to. The answer comes back
 // as OpenAI said it, and the call is recorded as decisions: its input
 // apart from the cached and cache-written tokens, each priced at its
 // rate, and no output.
@@ -198,7 +198,7 @@ func TestDecisionsRefusedWhereNotServed(t *testing.T) {
 	}
 }
 
-// canDecide: OpenAI's API with a key, Azure OpenAI and another magpie;
+// canDecide: OpenAI's API with a key, Azure OpenAI and another eipgam;
 // never a ChatGPT sign-in on OpenAI's host, a plugin, or a relay.
 func TestCanDecide(t *testing.T) {
 	for _, tc := range []struct {
@@ -209,7 +209,7 @@ func TestCanDecide(t *testing.T) {
 		{"openai key", provider.Provider{ID: "openai", Key: "sk", Chat: "https://api.openai.com/v1"}, true},
 		{"azure", provider.Provider{ID: "az", Preset: provider.AzurePreset, Key: "k", Chat: "https://res.openai.azure.com/openai/v1"}, true},
 		{"azure by its host", provider.Provider{ID: "az2", Key: "k", Chat: "https://res.openai.azure.com/openai/v1"}, true},
-		{"another magpie", provider.Provider{ID: "office", Preset: provider.RemoteMagpiePreset, Key: "k", Chat: "http://192.168.1.20:3425/v1"}, true},
+		{"another eipgam", provider.Provider{ID: "office", Preset: provider.RemoteMagpiePreset, Key: "k", Chat: "http://192.168.1.20:3425/v1"}, true},
 		{"a chatgpt sign-in", provider.Provider{ID: "codex", Account: &provider.Account{Agent: "codex", User: "me@example.com"}, Chat: "https://api.openai.com/v1"}, false},
 		{"a plugin", provider.PluginForTest("grok", "grok"), false},
 		{"a relay", provider.Provider{ID: "relay", Key: "k", Chat: "https://relay.example/v1"}, false},
@@ -221,7 +221,7 @@ func TestCanDecide(t *testing.T) {
 	}
 }
 
-// Another magpie serves the Decisions API by routing it on: the request
+// Another eipgam serves the Decisions API by routing it on: the request
 // reaches its /v1/decisions and, through it, OpenAI.
 func TestDecisionsThroughAnotherMagpie(t *testing.T) {
 	openai, _ := decidingProviders(t)
@@ -267,7 +267,7 @@ func TestDecisionsHeldByKeysAndRules(t *testing.T) {
 	if w := keyCall(h, secrets[0], "/v1/decisions", decisionAsked("openai/gpt-6-luna")); w.Code != http.StatusForbidden {
 		t.Fatalf("a key held to other models: %d %s", w.Code, w.Body.String())
 	}
-	if w := keyCall(h, "sk-magpie-not-a-key", "/v1/decisions", decisionAsked("openai/gpt-6-luna")); w.Code != http.StatusUnauthorized && w.Code != http.StatusForbidden {
+	if w := keyCall(h, "sk-eipgam-not-a-key", "/v1/decisions", decisionAsked("openai/gpt-6-luna")); w.Code != http.StatusUnauthorized && w.Code != http.StatusForbidden {
 		t.Fatalf("a wrong key: %d %s", w.Code, w.Body.String())
 	}
 	if n := len(openai.all()); n != 0 {

@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Codex wired by its profile alone (codex -p magpie) keeps offering the
+// Codex wired by its profile alone (codex -p eipgam) keeps offering the
 // models of a provider that was deleted: the profile's model was one of
-// that provider's, so it no longer counted as magpie's and the sync left
-// magpie-models.json as it was (JNDliuliuM on X).
+// that provider's, so it no longer counted as eipgam's and the sync left
+// eipgam-models.json as it was (JNDliuliuM on X).
 func TestCodexProfileListDropsADeletedProvider(t *testing.T) {
 	home := syncHome(t)
 	stash(map[string]string{codexScopeKey: "profile"})
@@ -24,7 +24,7 @@ func TestCodexProfileListDropsADeletedProvider(t *testing.T) {
 	if err := codex(home).Fields[0].Set("added/m2"); err != nil {
 		t.Fatal(err)
 	}
-	list := filepath.Join(home, ".codex", "magpie-models.json")
+	list := filepath.Join(home, ".codex", "eipgam-models.json")
 	if !strings.Contains(readFile(list), "added/m3") {
 		t.Fatalf("not listed to begin with:\n%s", readFile(list))
 	}

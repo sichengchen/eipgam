@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
 // fakes puts a fake in for everything Run asks of the system, and records
@@ -58,7 +58,7 @@ func fakes(t *testing.T, list []*agent.Agent, isWired map[string]bool, failing m
 	removeScheme = func(string) error { did = append(did, "scheme"); return nil }
 	endPII = step("pii")
 	forgetInstall = step("install folder")
-	executable = func() (string, error) { return "/opt/magpie/magpie", nil }
+	executable = func() (string, error) { return "/opt/eipgam/eipgam", nil }
 	return &did
 }
 
@@ -79,9 +79,9 @@ func gone(t *testing.T, p string) bool {
 }
 
 // Uninstalling stops the service before anything else (one still serving
-// would wire agents again), disconnects only the agents magpie is in,
+// would wire agents again), disconnects only the agents eipgam is in,
 // restarts the Codex app's app-server when Codex was one of them, and
-// removes magpie's files last.
+// removes eipgam's files last.
 func TestRunOrder(t *testing.T) {
 	codex := &agent.Agent{ID: "codex", Name: "Codex"}
 	claude := &agent.Agent{ID: "claude", Name: "Claude Code"}
@@ -101,9 +101,9 @@ func TestRunOrder(t *testing.T) {
 		t.Fatalf("report: %+v", r)
 	}
 	if !gone(t, appdir.Config()) || !gone(t, appdir.Cache()) {
-		t.Fatal("magpie's folders left")
+		t.Fatal("eipgam's folders left")
 	}
-	if r.Exe != "/opt/magpie/magpie" {
+	if r.Exe != "/opt/eipgam/eipgam" {
 		t.Fatalf("exe %q", r.Exe)
 	}
 	if len(r.Agents) != 2 || r.Agents[0].What != "Codex" || r.Agents[1].What != "Claude Code" {
@@ -112,7 +112,7 @@ func TestRunOrder(t *testing.T) {
 }
 
 // KeepData, for install.sh --uninstall, does Run's agents and system and
-// leaves magpie's files for a magpie installed again.
+// leaves eipgam's files for a eipgam installed again.
 func TestKeepData(t *testing.T) {
 	codex := &agent.Agent{ID: "codex", Name: "Codex"}
 	did := fakes(t, []*agent.Agent{codex}, map[string]bool{"codex": true}, nil)
@@ -163,7 +163,7 @@ func TestRunCodexAppLeft(t *testing.T) {
 	}
 }
 
-// What no Disconnect could name (the marks gone with magpie's folder) goes
+// What no Disconnect could name (the marks gone with eipgam's folder) goes
 // even with no agent connected, says so, and restarts the Codex app's
 // app-server for it alone; one that can't be taken is said.
 func TestRunTakesCodexLeftovers(t *testing.T) {
@@ -195,7 +195,7 @@ func TestRunTakesCodexLeftovers(t *testing.T) {
 }
 
 // Skills and servers the user's agents use from the Library stay; the
-// rest of magpie's folder goes.
+// rest of eipgam's folder goes.
 func TestDataKeepsLibraryInUse(t *testing.T) {
 	fakes(t, nil, map[string]bool{}, nil)
 	skill := filepath.Join(library.Dir(), "skills", "docx", "SKILL.md")
@@ -207,7 +207,7 @@ func TestDataKeepsLibraryInUse(t *testing.T) {
 	r := &Report{}
 	Data(r)
 	if !gone(t, settings) || !gone(t, filepath.Join(appdir.Config(), "usage")) {
-		t.Fatal("magpie's own files left")
+		t.Fatal("eipgam's own files left")
 	}
 	if gone(t, skill) {
 		t.Fatal("a skill in use removed")
@@ -250,11 +250,11 @@ func TestFoldersNeverHome(t *testing.T) {
 	h := filepath.Join(root, "Users", "me")
 	for p, ok := range map[string]bool{
 		"":                                    false,
-		"magpie":                              false,
+		"eipgam":                              false,
 		root:                                  false,
 		h:                                     false,
 		filepath.Join(root, "Users"):          false,
-		filepath.Join(h, ".config", "magpie"): true,
+		filepath.Join(h, ".config", "eipgam"): true,
 		filepath.Join(root, "Users", "me2"):   true,
 	} {
 		if removable(p, h) != ok {
@@ -263,7 +263,7 @@ func TestFoldersNeverHome(t *testing.T) {
 	}
 }
 
-// What the app starts as it quits removes magpie's files once the app is
+// What the app starts as it quits removes eipgam's files once the app is
 // gone.
 func TestAfterExit(t *testing.T) {
 	fakes(t, nil, map[string]bool{}, nil)

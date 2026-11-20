@@ -1,17 +1,17 @@
-// Package mtls is magpie's own certificate authority for mutual TLS
+// Package mtls is eipgam's own certificate authority for mutual TLS
 // (hhdaxia on X: "希望能支持 mtls，避免暴露端口到公网被 compromise";
-// #5596). With it on (settings' MTLS, `magpie mtls on`), the gateway and
-// `magpie web`'s page serve other computers over HTTPS with a server
+// #5596). With it on (settings' MTLS, `eipgam mtls on`), the gateway and
+// `eipgam web`'s page serve other computers over HTTPS with a server
 // certificate this CA signs (or the user's own, --tls-cert), and a
 // connection from another computer is let in only with a client
 // certificate this CA issued and nobody revoked. Client certificates are
-// issued for a device by name (`magpie mtls issue <name>`, Settings →
+// issued for a device by name (`eipgam mtls issue <name>`, Settings →
 // Network and sharing) and exported as PEM files beside the CA's own
-// certificate, which the device trusts the server by: Remote magpie takes
+// certificate, which the device trusts the server by: Remote eipgam takes
 // all three (provider.ClientCert, ClientKey and ServerCA), as curl does
 // (--cert, --key, --cacert).
 //
-// The CA's key never leaves this computer: it is kept in magpie's folder
+// The CA's key never leaves this computer: it is kept in eipgam's folder
 // (0600) and is neither synced nor backed up, as the files here are no
 // part of those.
 package mtls
@@ -102,7 +102,7 @@ func (s Store) ca() (*x509.Certificate, crypto.Signer, error) {
 	if cerr == nil || kerr == nil {
 		// one of the two alone: never made over, which would orphan every
 		// certificate the CA issued
-		return nil, nil, fmt.Errorf("magpie's mTLS CA in %s is missing its certificate or its key", s.Dir)
+		return nil, nil, fmt.Errorf("eipgam's mTLS CA in %s is missing its certificate or its key", s.Dir)
 	}
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
@@ -112,7 +112,7 @@ func (s Store) ca() (*x509.Certificate, crypto.Signer, error) {
 	now := time.Now()
 	tmpl := &x509.Certificate{
 		SerialNumber:          serial(),
-		Subject:               pkix.Name{CommonName: strings.TrimSpace("magpie CA " + host), Organization: []string{"magpie"}},
+		Subject:               pkix.Name{CommonName: strings.TrimSpace("eipgam CA " + host), Organization: []string{"eipgam"}},
 		NotBefore:             now.Add(-time.Hour),
 		NotAfter:              now.Add(caLife),
 		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign | x509.KeyUsageDigitalSignature,
@@ -144,7 +144,7 @@ func (s Store) ca() (*x509.Certificate, crypto.Signer, error) {
 func parsePair(cb, kb []byte) (*x509.Certificate, crypto.Signer, error) {
 	p, _ := pem.Decode(cb)
 	if p == nil {
-		return nil, nil, errors.New("magpie's mTLS CA certificate isn't PEM")
+		return nil, nil, errors.New("eipgam's mTLS CA certificate isn't PEM")
 	}
 	cert, err := x509.ParseCertificate(p.Bytes)
 	if err != nil {
@@ -152,7 +152,7 @@ func parsePair(cb, kb []byte) (*x509.Certificate, crypto.Signer, error) {
 	}
 	k, _ := pem.Decode(kb)
 	if k == nil {
-		return nil, nil, errors.New("magpie's mTLS CA key isn't PEM")
+		return nil, nil, errors.New("eipgam's mTLS CA key isn't PEM")
 	}
 	key, err := x509.ParsePKCS8PrivateKey(k.Bytes)
 	if err != nil {
@@ -160,7 +160,7 @@ func parsePair(cb, kb []byte) (*x509.Certificate, crypto.Signer, error) {
 	}
 	signer, ok := key.(crypto.Signer)
 	if !ok {
-		return nil, nil, errors.New("magpie's mTLS CA key can't sign")
+		return nil, nil, errors.New("eipgam's mTLS CA key can't sign")
 	}
 	return cert, signer, nil
 }
@@ -190,7 +190,7 @@ type Issued struct {
 func (s Store) Issue(name string) (Issued, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
-		return Issued{}, errors.New("a client certificate needs a name, the device's: magpie mtls issue <name>")
+		return Issued{}, errors.New("a client certificate needs a name, the device's: eipgam mtls issue <name>")
 	}
 	if strings.ContainsAny(name, "/\\:*?\"<>|") || strings.ContainsFunc(name, func(r rune) bool { return r < ' ' }) {
 		return Issued{}, fmt.Errorf("%q: a name can't hold / \\ : * ? \" < > | or control characters", name)
@@ -213,7 +213,7 @@ func (s Store) Issue(name string) (Issued, error) {
 	sn := serial()
 	tmpl := &x509.Certificate{
 		SerialNumber: sn,
-		Subject:      pkix.Name{CommonName: name, Organization: []string{"magpie"}},
+		Subject:      pkix.Name{CommonName: name, Organization: []string{"eipgam"}},
 		NotBefore:    now.Add(-time.Hour),
 		NotAfter:     now.Add(clientLife),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
@@ -269,7 +269,7 @@ func (s Store) Revoke(name string) (int, error) {
 		}
 	}
 	if n == 0 {
-		return 0, fmt.Errorf("no certificate issued to %q is in use: magpie mtls list", name)
+		return 0, fmt.Errorf("no certificate issued to %q is in use: eipgam mtls list", name)
 	}
 	return n, s.saveClients(clients)
 }
@@ -292,7 +292,7 @@ func (s Store) Admits(cert *x509.Certificate) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("the client certificate %q isn't one this magpie issued", cert.Subject.CommonName)
+	return fmt.Errorf("the client certificate %q isn't one this eipgam issued", cert.Subject.CommonName)
 }
 
 var cache struct {
@@ -366,13 +366,13 @@ func (s Store) ServerCert(names []string, ips []net.IP) (tls.Certificate, error)
 		return tls.Certificate{}, err
 	}
 	now := time.Now()
-	cn := "magpie"
+	cn := "eipgam"
 	if len(names) > 0 {
 		cn = names[0]
 	}
 	tmpl := &x509.Certificate{
 		SerialNumber: serial(),
-		Subject:      pkix.Name{CommonName: cn, Organization: []string{"magpie"}},
+		Subject:      pkix.Name{CommonName: cn, Organization: []string{"eipgam"}},
 		NotBefore:    now.Add(-time.Hour),
 		NotAfter:     now.Add(serverLife),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
@@ -391,10 +391,10 @@ func (s Store) ServerCert(names []string, ips []net.IP) (tls.Certificate, error)
 	return tls.Certificate{Certificate: [][]byte{der, ca.Raw}, PrivateKey: key, Leaf: leaf}, nil
 }
 
-// Export writes what a device needs to dir/magpie-<name>: client.pem,
+// Export writes what a device needs to dir/eipgam-<name>: client.pem,
 // client-key.pem (0600) and ca.pem, and returns that folder.
 func Export(iss Issued, dir string) (string, error) {
-	out := filepath.Join(dir, "magpie-"+strings.ReplaceAll(iss.Name, " ", "-"))
+	out := filepath.Join(dir, "eipgam-"+strings.ReplaceAll(iss.Name, " ", "-"))
 	if _, err := os.Stat(out); err == nil {
 		for i := 2; ; i++ {
 			o := fmt.Sprintf("%s-%d", out, i)

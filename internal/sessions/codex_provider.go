@@ -21,23 +21,23 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/capre"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/capre"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
 // Codex lists, in its history and its resume picker, only the sessions made
 // with the provider it uses now: a rollout's session_meta names its
 // model_provider, and so does the thread's row in Codex's state database
 // (state_<n>.sqlite). Sessions made through CC Switch ("custom") are gone
-// from that list once Codex uses magpie, though their files are all there
+// from that list once Codex uses eipgam, though their files are all there
 // (#887). MoveCodexProvider changes a session's provider, in its files and
 // in that row, and nothing else: its messages, id, title and archive stay as
-// they were. A copy of each file as it was is kept in magpie's trash folder
+// they were. A copy of each file as it was is kept in eipgam's trash folder
 // first, and moving it back to the provider it had is the undo.
 
 // codexProviderRe is what a provider id may be: a key of config.toml's
@@ -238,7 +238,7 @@ func codexPagedProviders(home string) map[string]string {
 	return out
 }
 
-// forgetPaged drops what codexPagedProviders read: magpie wrote a row
+// forgetPaged drops what codexPagedProviders read: eipgam wrote a row
 func forgetPaged() {
 	pagedMemo.Lock()
 	clear(pagedMemo.m)
@@ -276,7 +276,7 @@ func readPagedProviders(path string) map[string]string {
 // Codex's state database. A session written to in the last minute is left
 // as it is (ErrActive), as Codex may be running it, and so is one a Codex
 // has open (holdCodexThread). Each file is copied to
-// <magpie dir>/trash/codex-provider/ before it is changed, and rewritten
+// <eipgam dir>/trash/codex-provider/ before it is changed, and rewritten
 // whole into a file beside it that then takes its place, keeping its time.
 func MoveCodexProvider(id, to string) (CodexMove, error) {
 	if !safeID.MatchString(id) {
@@ -442,7 +442,7 @@ type StuckError struct {
 }
 
 func (e *StuckError) Error() string {
-	return fmt.Sprintf("%s can't move to %s: Codex keeps its history by byte, so %q can't be written in place of %q, and Codex's database has no row for it to move it by instead. It stays on %s, as it was: Codex lists it when it uses %s again, and Delete moves it to magpie's trash, where it can be restored", e.File, e.To, e.To, e.From, e.From, e.From)
+	return fmt.Sprintf("%s can't move to %s: Codex keeps its history by byte, so %q can't be written in place of %q, and Codex's database has no row for it to move it by instead. It stays on %s, as it was: Codex lists it when it uses %s again, and Delete moves it to eipgam's trash, where it can be restored", e.File, e.To, e.To, e.From, e.From, e.From)
 }
 
 // errThreadOpen is a thread a Codex has open: it holds the thread's writer
@@ -628,7 +628,7 @@ func CodexThreadsBusyOn(home, p string) bool {
 
 // CodexThreadsBusyOnBut is CodexThreadsBusyOn leaving out the threads
 // skip names: another client's on p, which stay there whatever Codex's
-// config says (T3 Code's on magpie).
+// config says (T3 Code's on eipgam).
 func CodexThreadsBusyOnBut(home, p string, skip func(id string) bool) bool {
 	now := time.Now()
 	locked := codexLockedIDs(home)
@@ -722,10 +722,10 @@ func codexLockedIDs(home string) map[string]bool {
 // MoveCodexThreads moves every thread of a Codex folder its state database
 // keeps on the provider from to the provider to, each as MoveCodexProvider
 // moves one: its files' session_meta and its row, a copy of the files kept
-// in magpie's trash first. Codex lists only the threads of the provider it
+// in eipgam's trash first. Codex lists only the threads of the provider it
 // is on (app-server thread/list, the TUI's resume picker), so the threads
-// started while magpie was Codex's provider were gone from Codex's lists
-// once Codex was off magpie (kaizaoji on X: "the context doesn't exist").
+// started while eipgam was Codex's provider were gone from Codex's lists
+// once Codex was off eipgam (kaizaoji on X: "the context doesn't exist").
 // A thread written to in the last minute, or one a Codex has open, is left
 // for the next call, and so is one whose files can't be found; it says
 // what it moved and the first error it met, having gone on past it.
@@ -818,7 +818,7 @@ func moveCodexThreadIDs(home, from, to string, ids []string, budget int64) (move
 // MovePackedCodexThreads moves the threads of a Codex folder that
 // RelabelCodexThreads leaves, those Codex has packed (.zst, a week after
 // their last turn), from the provider from to the provider to, as
-// MoveCodexThreads moves one: a copy of its files kept in magpie's trash,
+// MoveCodexThreads moves one: a copy of its files kept in eipgam's trash,
 // its file written beside it and renamed over it, and one Codex has open
 // or wrote to in the last minute left. Only those whose last turn is
 // since since, newest first, and no more once the files moved come to
@@ -829,19 +829,19 @@ func moveCodexThreadIDs(home, from, to string, ids []string, budget int64) (move
 // X, a chat from 25 days before). A database whose threads have no updated_at (an
 // older Codex) moves none. Codex 0.166 resumes a thread only on the
 // provider it is on now ("This chat uses openai, but your current
-// provider is magpie"), so a packed thread left on OpenAI couldn't be
-// reopened while magpie was Codex's provider.
+// provider is eipgam"), so a packed thread left on OpenAI couldn't be
+// reopened while eipgam was Codex's provider.
 func MovePackedCodexThreads(home, from, to string, since time.Time, budget int64) (moved []CodexMove, more bool, err error) {
 	return moveRecentCodexThreads(home, from, to, since, budget, true)
 }
 
 // MoveRecentCodexThreads is MovePackedCodexThreads for every thread on
 // from whose last turn is since since, plain or packed: for a provider
-// whose id isn't magpie's length, which RelabelCodexThreads can't write
+// whose id isn't eipgam's length, which RelabelCodexThreads can't write
 // in place, so each one moved is rewritten with a copy kept. A thread of
 // the user's own provider (a relay's, "myrelay") was listed by the Codex
-// app once magpie was its provider, and refused: "This chat uses myrelay,
-// but your current provider is magpie" (hxy920830 on X).
+// app once eipgam was its provider, and refused: "This chat uses myrelay,
+// but your current provider is eipgam" (hxy920830 on X).
 func MoveRecentCodexThreads(home, from, to string, since time.Time, budget int64) (moved []CodexMove, more bool, err error) {
 	return moveRecentCodexThreads(home, from, to, since, budget, false)
 }
@@ -959,7 +959,7 @@ func rewriteCodexProvider(path, to string) (changed, kept bool, err error) {
 		return false, false, err
 	}
 	defer in.Close()
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".magpie-"+filepath.Base(path)+"-*")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".eipgam-"+filepath.Base(path)+"-*")
 	if err != nil {
 		return false, false, err
 	}
@@ -1062,8 +1062,8 @@ func moveCodexThread(path, id, to string) (bool, error) {
 
 // RelabelCodexThreads moves the threads of a Codex folder its state
 // databases keep on the provider from to the provider to, where that can
-// be done in place: ids of one length (Codex's "openai" and magpie's
-// "magpie"), and a rollout Codex keeps as plain lines. The id in the
+// be done in place: ids of one length (Codex's "openai" and eipgam's
+// "eipgam"), and a rollout Codex keeps as plain lines. The id in the
 // first line's session_meta, which Codex's thread/list and resume picker
 // filter on, is written over byte for byte, the file's time kept, and the
 // thread's row follows. Nothing else of the file is read or written, so a
@@ -1227,7 +1227,7 @@ func sameDir(a, b string) bool {
 // "Paginated history may contain only a suffix, so its display metadata
 // lives in SQLite"), and resume refuses a provider other than the one
 // Codex is on ("This chat uses openai, but your current provider is
-// magpie. Switch to openai to continue", Parry_Moody and Cyrus on
+// eipgam. Switch to openai to continue", Parry_Moody and Cyrus on
 // Discord). The file moves (RelabelCodexThreads, MovePackedCodexThreads)
 // left every packed one older than 30 days, and every one past a sync's
 // budget, on the provider it was started on; a row is a few bytes, so
@@ -1376,10 +1376,10 @@ func retagRows(db *sql.DB, ids []string, from, to string) ([]string, error) {
 // nothing back at a clean exit (tried with codex-cli 0.167.1, SIGTERM),
 // and the app-server that starts in its place resumes the chat on its
 // row's provider, where it would otherwise be refused ("This chat uses
-// openai, but your current provider is magpie", modelProviderMismatch).
+// openai, but your current provider is eipgam", modelProviderMismatch).
 // A paginated thread moves by its row alone; a legacy one that Codex
 // keeps as plain lines goes in place, its first line written over at one
-// length (openai and magpie) with the row following. A packed rollout or
+// length (openai and eipgam) with the row following. A packed rollout or
 // one of another length is left to the next sync. Recency is not looked
 // at: the end waits for no turn to be open. It says the ids it moved and
 // the first error it met, having gone on past it.
@@ -1389,7 +1389,7 @@ func RetagLoadedCodexThreads(home, from, to string) ([]string, error) {
 
 // RetagLoadedCodexThreadsBut is RetagLoadedCodexThreads leaving the
 // threads keep says where they are: another client's on from, which it
-// resumes there (T3 Code's on magpie).
+// resumes there (T3 Code's on eipgam).
 func RetagLoadedCodexThreadsBut(home, from, to string, keep func(id string) bool) ([]string, error) {
 	if !codexProviderRe.MatchString(from) || !codexProviderRe.MatchString(to) || from == to {
 		return nil, fmt.Errorf("can't move Codex's threads from %q to %q", from, to)

@@ -3,7 +3,7 @@ package uilang
 import (
 	"os"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // System is the first of the Mac's preferred languages, the one the

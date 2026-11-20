@@ -6,7 +6,7 @@
 // is drawn and again, fresh, on Check again, each on its key's line of the
 // list (辰林鸭~ on Discord). Each key is shown masked; a read that failed
 // says Unknown and why, never 0; a key used up says so, and one asked last
-// says until when and why. An API with one key that magpie can't read
+// says until when and why. An API with one key that eipgam can't read
 // lists it with no choice of order and no Check again. In five languages,
 // Chromium and WebKit, 1100px and 420px wide, with the API faked.
 const assert = require("node:assert/strict");
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const posted = [];
       await page.route("**/*", serve(lang, posted));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=models");
+      await page.goto("http://eipgam.test/?view=settings&tab=models");
       await settingsDrawn(page);
       const keys = page.locator('#searchList .row.search-keys[data-vendor="tavily"]');
       await keys.waitFor();

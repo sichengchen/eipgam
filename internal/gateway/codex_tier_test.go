@@ -5,16 +5,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// JackyFill on X: Codex's settings in magpie set the service tier every
+// JackyFill on X: Codex's settings in eipgam set the service tier every
 // request of Codex's goes at, whatever Codex asked: as Codex asks it
 // (unset), none (standard), priority (Fast) or ultrafast (Ultrafast).
 // Another agent's request goes as it asked, and Ultrafast on a model no
 // account lists it on goes as priority. Both of Codex's ways in: with
-// magpie as its provider (/v1/responses) and signed in, on the ChatGPT
+// eipgam as its provider (/v1/responses) and signed in, on the ChatGPT
 // backend's route.
 func TestCodexServiceTierSet(t *testing.T) {
 	tried := tierAccounts(t, nil, nil)
@@ -34,7 +34,7 @@ func TestCodexServiceTierSet(t *testing.T) {
 		}
 		return b + "}"
 	}
-	// through magpie's Codex provider, whose accounts' lists magpie knows
+	// through eipgam's Codex provider, whose accounts' lists eipgam knows
 	viaProvider := func(agent, tier string) string {
 		t.Helper()
 		postFrom(t, s, agent, "/v1/responses", body("codex/gpt-6-luna", tier))
@@ -87,7 +87,7 @@ func TestCodexServiceTierSet(t *testing.T) {
 	if got := viaProvider("opencode", "priority"); got != "acct-plus:priority" {
 		t.Errorf("OpenCode's priority tried %s", got)
 	}
-	// a value magpie doesn't know is refused
+	// a value eipgam doesn't know is refused
 	if err := provider.SetCodexServiceTier("flex"); err == nil {
 		t.Error("flex was taken")
 	}

@@ -62,7 +62,7 @@ async function open(engine, lang, platform, t) {
   if (platform) await page.addInitScript((p) => Object.defineProperty(Navigator.prototype, "platform", { get: () => p }), platform);
   const calls = [];
   await page.route("**/*", handler(lang, calls));
-  await page.goto("http://magpie.test/?mode=panel");
+  await page.goto("http://eipgam.test/?mode=panel");
   await page.locator("#agents .row.agent").first().waitFor();
   return { page, calls, errors };
 }

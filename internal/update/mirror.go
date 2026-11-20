@@ -7,18 +7,18 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A network that can't reach GitHub can have a release's file come
 // through a GitHub download mirror: its prefix goes before the file's
-// github.com URL (https://mirror.example/https://github.com/…). magpie
-// names no mirror of its own; one is used only when given (magpie update
-// --mirror, or Settings' UpdateMirror, which magpie update mirror sets).
+// github.com URL (https://mirror.example/https://github.com/…). eipgam
+// names no mirror of its own; one is used only when given (eipgam update
+// --mirror, or Settings' UpdateMirror, which eipgam update mirror sets).
 //
-// A mirror is a host magpie doesn't trust: the update feed, with each
-// file's SHA-256, is still asked at usemagpie.ai and never through the
+// A mirror is a host eipgam doesn't trust: the update feed, with each
+// file's SHA-256, comes from GitHub's release API and attestation, never through the
 // mirror, the file is checked against that hash, and the macOS app must
 // still be signed by the team that signed the one installed. A mirror
 // that changes a byte gets its download refused.

@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // wanggenjidev on X: an OpenCode Go key set to stop at 99% of its windows,
 // as a Codex account is, so the next key takes over and this one is back
-// when the window resets. A key whose windows magpie reads and that is at
+// when the window resets. A key whose windows eipgam reads and that is at
 // or past the usage cap set on it is left out of the plan (barred, with
 // the cap that holds it); an unknown reading (not read yet, or the read
 // failed) holds nothing, and a window that has renewed since it was read

@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// webTab is the page served to a browser (magpie web).
+// webTab is the page served to a browser (eipgam web).
 type webTab struct{ folderOnly }
 
 func (webTab) browserTab() {}
@@ -37,11 +37,11 @@ func httpsMux(t *testing.T, w Windows) func(method, path, body, from string) (in
 }
 
 // Settings → Network and sharing → HTTPS (zhangly1 on X): on makes
-// magpie's CA and serves a certificate it signs, its fingerprint shown;
-// Save puts magpie-ca.crt in Downloads; off goes back to plain http://.
+// eipgam's CA and serves a certificate it signs, its fingerprint shown;
+// Save puts eipgam-ca.crt in Downloads; off goes back to plain http://.
 func TestSettingsHTTPSOnSaveOff(t *testing.T) {
 	h := sandboxHome(t)
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3499")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3499")
 	t.Setenv(gateway.TLSCertEnv, "")
 	t.Setenv(gateway.TLSKeyEnv, "")
 	os.MkdirAll(filepath.Join(h, "Downloads"), 0o755)
@@ -51,7 +51,7 @@ func TestSettingsHTTPSOnSaveOff(t *testing.T) {
 		t.Fatalf("at first: %d %s", code, out)
 	}
 	code, s, out := call("POST", "/api/settings/https", `{"on":true}`, "")
-	if code != 200 || !s.On || !s.Served || !settings.Shared().HTTPS || s.Cert == nil || s.Cert.From != "magpie" || s.CA == "" {
+	if code != 200 || !s.On || !s.Served || !settings.Shared().HTTPS || s.Cert == nil || s.Cert.From != "eipgam" || s.CA == "" {
 		t.Fatalf("on: %d %s", code, out)
 	}
 	for _, u := range s.CAURLs {
@@ -63,7 +63,7 @@ func TestSettingsHTTPSOnSaveOff(t *testing.T) {
 	if code != 200 || s.Saved == "" {
 		t.Fatalf("save: %d %s", code, out)
 	}
-	b, err := os.ReadFile(filepath.Join(h, "Downloads", "magpie-ca.crt"))
+	b, err := os.ReadFile(filepath.Join(h, "Downloads", "eipgam-ca.crt"))
 	want, fp, _ := gateway.CA()
 	if err != nil || string(b) != string(want) || fp != s.CA {
 		t.Fatalf("saved CA: %v %q", err, b)
@@ -78,7 +78,7 @@ func TestSettingsHTTPSOnSaveOff(t *testing.T) {
 // off under itself; one on this computer can, and the app's window can.
 func TestSettingsHTTPSFarPage(t *testing.T) {
 	sandboxHome(t)
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3499")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3499")
 	call := httpsMux(t, webTab{})
 	if code, _, out := call("POST", "/api/settings/https", `{"on":true}`, "192.168.1.9:5000"); code < 400 || settings.Shared().HTTPS {
 		t.Fatalf("far page turned it on: %d %s", code, out)

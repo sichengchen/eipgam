@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // keyRow is a gateway key as the Gateway page lists it, with what it has
@@ -39,7 +39,7 @@ type keyModelJSON struct {
 	Plan         string `json:"plan,omitempty"`    // the account's subscription, for the menu's note
 	// Decides marks a decision model (Jev, Clef…), which no agent lists:
 	// a key held to some models reaches it at /v1/systemone, and another
-	// magpie lists it, only when it is picked (Kautism on Discord)
+	// eipgam lists it, only when it is picked (Kautism on Discord)
 	Decides bool `json:"decides,omitempty"`
 }
 
@@ -49,7 +49,7 @@ type keyMCPJSON struct {
 	Name  string   `json:"name"`
 	Title string   `json:"title,omitempty"`
 	Tools []string `json:"tools"`
-	Own   bool     `json:"own,omitempty"` // one of magpie's own
+	Own   bool     `json:"own,omitempty"` // one of eipgam's own
 }
 
 func withLimits(keys []access.Key) []keyRow {
@@ -100,7 +100,7 @@ func callerKeyRoutes(mux *http.ServeMux) {
 		accounts := []keyModelJSON{}
 		for _, e := range provider.Catalog() {
 			if e.Group != "" {
-				// by the id magpie keeps it by, group/<id>, as a key held to it
+				// by the id eipgam keeps it by, group/<id>, as a key held to it
 				// before names it: a found group's auto/<model> passes for it
 				// (gateway's allows), and its name is what the picker shows
 				out = append(out, keyModelJSON{ID: provider.GroupPrefix + e.Group, Name: cmp.Or(e.Name, e.Group), Group: true})
@@ -156,7 +156,7 @@ func callerKeyRoutes(mux *http.ServeMux) {
 		}
 		// the decision models the routing groups' pickers offer, each
 		// after its provider's chat models: the gateway holds a key to
-		// them as to any model (serveSystemOne, and another magpie's list
+		// them as to any model (serveSystemOne, and another eipgam's list
 		// of them), so a key held to some models had no way to be let use
 		// one but All models (Kautism on Discord: a key held to two
 		// groups, and Clef and Jev listed nowhere)
@@ -230,7 +230,7 @@ func callerKeyRoutes(mux *http.ServeMux) {
 		writeJSON(w, map[string]any{"models": out, "accounts": accounts, "providers": empty, "groups": accountGroupsJSON()})
 	})
 	// the MCP servers and tools a key may be held to (wakaka on Discord):
-	// magpie's own, then the Library's, each with its tools by name
+	// eipgam's own, then the Library's, each with its tools by name
 	mux.HandleFunc("GET /api/caller-keys/mcp", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
 		out := []keyMCPJSON{}

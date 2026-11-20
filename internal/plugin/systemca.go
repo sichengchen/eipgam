@@ -12,13 +12,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // caEnv has Bun trust what this machine trusts. Bun checks TLS against
 // the roots it ships, not the system's, so behind a box that re-signs
 // HTTPS (a company proxy, a VPN, Surge's or Proxyman's MITM, an
-// antivirus's HTTPS scan) whose root the user installed, magpie gets
+// antivirus's HTTPS scan) whose root the user installed, eipgam gets
 // through and Bun doesn't: `bun add` fails with
 // "UNABLE_TO_VERIFY_LEAF_SIGNATURE downloading package manifest" or
 // UNABLE_TO_GET_ISSUER_CERT_LOCALLY, and a plugin's requests with "self
@@ -34,8 +34,8 @@ import (
 // $SSL_CERT_DIR, else the distribution's bundle and folder. One the
 // environment sets already, 0 too, is the user's and is left as it is.
 //
-// NODE_EXTRA_CA_CERTS adds a file of the system's roots as magpie reads
-// them, as before: an older Bun the user points MAGPIE_BUN at has no
+// NODE_EXTRA_CA_CERTS adds a file of the system's roots as eipgam reads
+// them, as before: an older Bun the user points EIPGAM_BUN at has no
 // NODE_USE_SYSTEM_CA. One the environment sets already is the user's and
 // is left as it is; Bun takes it beside the system's store. dir is where
 // Bun runs.

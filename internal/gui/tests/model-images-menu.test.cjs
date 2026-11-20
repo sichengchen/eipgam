@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const open = async (name) => {
           await page.locator(".row.provider", { hasText: name }).first().click();
           await page.locator(".editor .mchips .mchip").first().waitFor();
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(posts[0]?.modelPrefs, { "text-1": { images: true }, "see-2": { images: false } });
 
         // a subscription's model has it too
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await open("GitHub Copilot");
         await rclick(chip("GPT-9"));
         await item(w.off).waitFor();

@@ -3,11 +3,11 @@ package provider
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // ClinePassAsked says what a ClinePass request asked the Cline API for
-// (zRain on Discord, 10-24): what magpie wrote into it, and nothing more.
+// (zRain on Discord, 10-24): what eipgam wrote into it, and nothing more.
 // Since 2026-11-06 Cline refuses providerOptions (#5442), so the Upstream
 // tick asks for nothing on a DeepSeek or GLM model and only glm-5.3-flash
 // keeps OpenRouter's provider.only; the Cline plugin's provider asks for

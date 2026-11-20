@@ -213,7 +213,7 @@ func must[T any](v T, err error) T {
 	return v
 }
 
-// A bundle from a magpie before plugins were carried has a plugin's parts
+// A bundle from a eipgam before plugins were carried has a plugin's parts
 // as its own items, naming the other computer's folder, and no plugins:
 // this computer's plugin stays, with its own parts.
 func TestPluginOldBundleKeepsPlugins(t *testing.T) {
@@ -227,14 +227,14 @@ func TestPluginOldBundleKeepsPlugins(t *testing.T) {
 		t.Fatal(err)
 	}
 	b.Plugins = nil
-	const there = "/Users/other/.config/magpie/library/plugins/acme-kit"
+	const there = "/Users/other/.config/eipgam/library/plugins/acme-kit"
 	b.Skills = append(b.Skills, &CarriedSkill{Name: "tdd", Agents: []string{"claude"},
 		Files: map[string][]byte{"SKILL.md": []byte("---\nname: tdd\ndescription: Test first\n---\nRun " + there + "/x\n")}})
 	hooks := []*Hook{{Name: "acme-kit-1", Event: "PostToolUse", Matcher: "Bash", Command: there + "/scripts/lint.sh", Agents: []string{"claude"}, Bundle: "acme-kit"}}
 	b.Hooks = &hooks
 	old := mustJSON(t, b)
 	if strings.Contains(old, `"plugins"`) {
-		t.Fatalf("not as an older magpie wrote it: %s", old)
+		t.Fatalf("not as an older eipgam wrote it: %s", old)
 	}
 	putJSON(t, old)
 	v := View0(t)

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // forgetImageHeard forgets every image window heard, now and when t ends.
@@ -71,7 +71,7 @@ func TestCodexImageRowFromA200sHeaders(t *testing.T) {
 	if w := imageRowOf(t, "me@example.com"); w.Display != "Unknown" || w.ResetsAt != nil {
 		t.Fatalf("before any drawing the row = %+v", w)
 	}
-	code, _, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"codex/gpt-image-2","prompt":"a magpie","size":"1024x1024"}`)
+	code, _, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"codex/gpt-image-2","prompt":"a eipgam","size":"1024x1024"}`)
 	if code != 200 {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -129,7 +129,7 @@ func TestCodexImageRefusalRestsUntilItsWindow(t *testing.T) {
 		}
 	})
 
-	code, _, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"codex/gpt-image-2","prompt":"a magpie"}`)
+	code, _, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"codex/gpt-image-2","prompt":"a eipgam"}`)
 	if code != http.StatusTooManyRequests {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -164,7 +164,7 @@ func TestCodexRelayedImageWindowHeard(t *testing.T) {
 	t.Cleanup(func() { provider.CodexBase = was })
 
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", CodexPath+"/images/generations", strings.NewReader(`{"model":"gpt-image-2","prompt":"a magpie"}`))
+	req := httptest.NewRequest("POST", CodexPath+"/images/generations", strings.NewReader(`{"model":"gpt-image-2","prompt":"a eipgam"}`))
 	req.Header.Set("Authorization", "Bearer chatgpt-token")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("chatgpt-account-id", "acct-1")

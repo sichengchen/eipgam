@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"io"
 	"net/http"
 	"net/http/httptest"

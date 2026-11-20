@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // ownFirstHome: Codex signed in to ChatGPT, whose backend serves
@@ -51,7 +51,7 @@ func postCodex(s *Server, model string) *httptest.ResponseRecorder {
 }
 
 // freefcw on X: Codex asked for gpt-6-astra by its bare name, which its
-// own ChatGPT subscription serves, and magpie sent it to Devin, through
+// own ChatGPT subscription serves, and eipgam sent it to Devin, through
 // the group it found (on) or as the first provider in the order (off). A
 // bare name Codex's own subscription serves now goes there, found groups
 // on or off.
@@ -87,7 +87,7 @@ func TestBareNameOnSeveralVendorsRefusedWhileGroupsOff(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := postCodex(s, "glm-6")
-	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "relay/glm-6") || !strings.Contains(rec.Body.String(), "magpie group auto on") {
+	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "relay/glm-6") || !strings.Contains(rec.Body.String(), "eipgam group auto on") {
 		t.Fatalf("%d %s", rec.Code, rec.Body)
 	}
 	if n := relayHits(); n != 0 {
@@ -105,7 +105,7 @@ func TestBareNameOnSeveralVendorsRefusedWhileGroupsOff(t *testing.T) {
 	}
 }
 
-// A found group magpie set the agent to (SetToGroup), which Codex asks
+// A found group eipgam set the agent to (SetToGroup), which Codex asks
 // for by its model's bare name (#750), stays the group's.
 func TestBareNameOfAGroupSetOnTheAgentStaysTheGroups(t *testing.T) {
 	ownFirstHome(t)

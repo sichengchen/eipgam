@@ -96,11 +96,11 @@ func TestCodexTurnOpenMarkAcrossReads(t *testing.T) {
 
 // Norethcy on X (v0.1.4045): the Codex app signed in to ChatGPT, sent
 // through a routing group. The account ran out mid-conversation, the
-// group's fallback answered, and magpie restarted the app's app-server
+// group's fallback answered, and eipgam restarted the app's app-server
 // while that turn went on, which cut it off. The turn's session file had
 // grown past what was read of it, and a tool ran between two of its
-// requests: magpie took the gap for the turn's end. And a turn that went
-// on through magpie after the account ran out is served, not stuck on
+// requests: eipgam took the gap for the turn's end. And a turn that went
+// on through eipgam after the account ran out is served, not stuck on
 // it: a tool running over codexTurnStuckAfter in it doesn't let the
 // app-server be ended under it. The app-server is restarted once the
 // turn ends.
@@ -126,7 +126,7 @@ func TestCodexAppServerWaitsForATurnTheFallbackServes(t *testing.T) {
 		t.Fatalf("on the account with room: ended %v", got)
 	}
 	// the account runs out: the group's fallback streams the reply, and
-	// magpie becomes Codex's provider for the account
+	// eipgam becomes Codex's provider for the account
 	s.on = true
 	if got := step(3*time.Second, 1, -time.Minute); got != nil {
 		t.Fatalf("the fallback's reply streaming: ended %v", got)
@@ -174,7 +174,7 @@ func TestCodexAppServerEndLooksAtRequestsAgain(t *testing.T) {
 }
 
 // When no app-server is listed in place of the one ended, a Codex request
-// through magpie since says the app has one all the same (a listing that
+// through eipgam since says the app has one all the same (a listing that
 // missed it): the app is never quit and opened under that request.
 func TestCodexAppNotReopenedWhileItSends(t *testing.T) {
 	signIn(t)
@@ -193,11 +193,11 @@ func TestCodexAppNotReopenedWhileItSends(t *testing.T) {
 	codexAppStep(context.Background(), start.Add(codexAppBackWait), sending)
 	codexAppStep(context.Background(), start.Add(2*codexAppBackWait), sending)
 	if reopened != 0 {
-		t.Fatalf("the app reopened %d times while it sent through magpie", reopened)
+		t.Fatalf("the app reopened %d times while it sent through eipgam", reopened)
 	}
 }
 
-// A magpie that took the gateway over from another (an update) saw none
+// A eipgam that took the gateway over from another (an update) saw none
 // of the requests the one before still serves: its start counts as a
 // Codex request ended then, so its first look doesn't end the app's
 // app-server under a reply still streaming from the old one.
@@ -226,7 +226,7 @@ func TestCodexAppStartCountsAsARequest(t *testing.T) {
 			case looked <- struct{}{}:
 			default:
 			}
-			return 0, time.Time{} // none served by this magpie
+			return 0, time.Time{} // none served by this eipgam
 		})
 	}()
 	defer func() { cancel(); <-done }()
@@ -236,7 +236,7 @@ func TestCodexAppStartCountsAsARequest(t *testing.T) {
 		case <-looked:
 			n++
 		case pid := <-ended:
-			t.Fatalf("ended %d within codexAppIdle of magpie's start", pid)
+			t.Fatalf("ended %d within codexAppIdle of eipgam's start", pid)
 		}
 	}
 }

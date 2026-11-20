@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/maskrec"
-	"github.com/yetone/magpie/internal/redact"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/masking"
+	"github.com/sichengchen/eipgam/internal/maskrec"
+	"github.com/sichengchen/eipgam/internal/redact"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Settings → Privacy reads what masking swapped: the summary, the records

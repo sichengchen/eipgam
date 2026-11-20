@@ -15,8 +15,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // fakeCodex signs a ChatGPT account in to Codex, its models listed by a
@@ -157,7 +157,7 @@ func openModelPicker(t *testing.T, m model, view string) (model, string) {
 		m.reload()
 		m.openFieldPicker()
 		// Codex has no list of its own here (no models_cache.json), so the
-		// models magpie serves on its ChatGPT account are offered via magpie
+		// models eipgam serves on its ChatGPT account are offered via eipgam
 		// (codexViaMagpieFor)
 		return m, "codex/gpt-6-luna"
 	default:

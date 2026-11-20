@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // TestAllLazyPatternsCompile compiles every regexp the binary's packages
@@ -21,7 +21,7 @@ func TestAllLazyPatternsCompile(t *testing.T) {
 
 // TestNoEagerPackageRegexps fails on a package-level regexp.MustCompile
 // (or regexp.Compile) outside a function: every package's init runs on
-// every launch, `magpie statusline` on each Claude Code message included,
+// every launch, `eipgam statusline` on each Claude Code message included,
 // so such a pattern is compiled for a path most launches never take. Use
 // lazyre.New, which compiles on first use. Each package that runs its
 // tests through testenv checks its own files too (testenv.eagerHere).

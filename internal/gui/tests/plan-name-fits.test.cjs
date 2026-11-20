@@ -105,7 +105,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       for (const width of [1100, 760, 420]) {
         const at = `${lang} ${width}`;
-        const page = await open("http://magpie.test/?view=usage", { width, height: 900 });
+        const page = await open("http://eipgam.test/?view=usage", { width, height: 900 });
         const codex = '#subscriptionUsage .subscription-card[data-provider="codex"]';
         await page.locator(codex + " .subscription-account").nth(3).waitFor();
         const { rows } = await measure(page, codex, { rows: "*rows" });
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the tray panel: the long plan alone in its group's head, cut, the name read
       for (const width of [440, 360]) {
         const at = `${lang} panel ${width}`;
-        const page = await open("http://magpie.test/?mode=panel", { width, height: 700 }, () => { try { localStorage.setItem("magpie.panelTab", "usage"); } catch {} });
+        const page = await open("http://eipgam.test/?mode=panel", { width, height: 700 }, () => { try { localStorage.setItem("eipgam.panelTab", "usage"); } catch {} });
         await page.locator("#panelQuota .pq-group[data-provider=\"volc\"] .pq-gnote").waitFor();
         const { name, note } = await measure(page, '#panelQuota .pq-group[data-provider="volc"] .pq-gh', { name: ".pq-gn", note: ".pq-gnote" });
         assert.ok(name.w >= 40 && !name.cut, `${at}: the group's name is read whole (${name.w}px)`);
@@ -148,7 +148,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the provider editor: the account rows' chip and the sheet
       for (const width of [1000, 560]) {
         const at = `${lang} editor ${width}`;
-        const page = await open("http://magpie.test/?view=providers", { width, height: 900 });
+        const page = await open("http://eipgam.test/?view=providers", { width, height: 900 });
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         const row = '.editor .accts .acc[data-account-id="siaorhm.long.name@example.com"]';
         await page.locator(row).waitFor();

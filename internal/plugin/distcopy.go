@@ -31,7 +31,7 @@ import (
 // cache to destination") still has it print "installed …", write the
 // dependency and exit 1 with "Failed to install 1 package"
 // (CHENGJIAHEGOXIS on X: "Unexpected: failed copying files …" adding
-// GoAnyAPI on v0.1.4229). The tarball magpie checked against the index's
+// GoAnyAPI on v0.1.4229). The tarball eipgam checked against the index's
 // sha512 is in hand, so the copy is checked against it, file by file.
 
 // errDistPartial is a dist add whose copy in node_modules isn't the
@@ -47,7 +47,7 @@ var distAgainAfter = 2 * time.Second
 // addDist adds the dist tarball file (plugins/dist/<file>, its bytes tgz)
 // as name's, and checks the copy Bun made. A copy that isn't the
 // tarball's is taken out with Bun's cached copy of the tarball, and the
-// add tried once more; one still not whole is made by magpie from tgz
+// add tried once more; one still not whole is made by eipgam from tgz
 // (unpackDist) and Bun run over it; one not whole even then is
 // errDistPartial, with what Bun said. A whole copy is name installed:
 // an error then is Bun's over another package, as before.
@@ -68,12 +68,12 @@ func addDist(ctx context.Context, bun, name, file string, tgz []byte) error {
 	if bad2 == "" {
 		return err
 	}
-	// Bun can't make the copy at all: magpie makes it from the tarball
+	// Bun can't make the copy at all: eipgam makes it from the tarball
 	// it verified, and Bun takes it as installed from then on
 	if uerr := distUnpack(name, tgz); uerr != nil {
-		log.Printf("plugins: %s: Bun's copy %s, and magpie's own can't be made: %v", name, bad2, uerr)
+		log.Printf("plugins: %s: Bun's copy %s, and eipgam's own can't be made: %v", name, bad2, uerr)
 	} else {
-		// Bun again, over magpie's copy: it writes the dependency and
+		// Bun again, over eipgam's copy: it writes the dependency and
 		// bun.lock, leaves the copy be, and says what else failed
 		err = bunAdd(ctx, bun, "./dist/"+file, name)
 		if bad2 = distCopyDiffers(tgz, name); bad2 == "" {

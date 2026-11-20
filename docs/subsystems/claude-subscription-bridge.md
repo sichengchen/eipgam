@@ -11,24 +11,24 @@ meet it.
 
 `claudeBinary` (and the sign-in's `claudeExecutable`) take
 `claudecode.Find`: the machine's own `claude` (`claudecode.Own`), else the
-one `magpie claude-code install` downloaded into
+one `eipgam claude-code install` downloaded into
 `<cache>/claude-code/<version>/` (`internal/claudecode`), else, on Windows,
 one in WSL. The download is Anthropic's native build from
 `downloads.claude.ai/claude-code-releases`, the "latest" channel, as
 `claude.ai/install.sh` takes it: the release's `manifest.json` gives the
 platform's SHA-256 and size, and a build that doesn't match both is not
-kept. It is only made when the user asks (`magpie claude-code install`, or
-yes to `magpie accounts add claude`'s offer on a machine without one), for
+kept. It is only made when the user asks (`eipgam claude-code install`, or
+yes to `eipgam accounts add claude`'s offer on a machine without one), for
 a server or a container (Jorben on Discord). It is not on PATH and stands
-in for no agent. It doesn't update itself (every run magpie starts sets
-`DISABLE_AUTOUPDATER`), so the serving magpie keeps it current
+in for no agent. It doesn't update itself (every run eipgam starts sets
+`DISABLE_AUTOUPDATER`), so the serving eipgam keeps it current
 (`claudecode.KeepCurrent`, a `WhileServing` loop): a minute after it
 starts and every six hours it asks for the latest release and downloads a
 newer one, checked the same way. The version it replaced is removed on the
 next look, not at once, as a run being started may hold its path;
-`magpie claude-code install` removes it at once. It does nothing when
-magpie downloaded none, when the machine has its own `claude`, or when
-`DISABLE_AUTOUPDATER` is set for magpie (alextjy on Discord: a container's
+`eipgam claude-code install` removes it at once. It does nothing when
+eipgam downloaded none, when the machine has its own `claude`, or when
+`DISABLE_AUTOUPDATER` is set for eipgam (alextjy on Discord: a container's
 download stayed at its first version across image updates). A failed look
 keeps the download as it is and is logged.
 
@@ -51,10 +51,10 @@ it is too old, with its version and path, and how to update it
 (`claudeTooOld`).
 
 A run is started with `--dangerously-skip-permissions` (`claudeCLIArgs`):
-its only tools are magpie's MCP ones, answered by the client, and
+its only tools are eipgam's MCP ones, answered by the client, and
 Anthropic's web search. Claude Code run as root refuses that flag ("cannot
 be used with root/sudo privileges") unless `IS_SANDBOX` is `1` or
-`CLAUDE_CODE_BUBBLEWRAP` is set, so a run as root, magpie's own euid 0 or
+`CLAUDE_CODE_BUBBLEWRAP` is set, so a run as root, eipgam's own euid 0 or
 a WSL distro whose default user is root (the probe's `uid`,
 `wslrun.Tool.Root`), is given `IS_SANDBOX=1` (`claudeCLI.asRoot`;
 FrierenF on Discord). A run as anyone else has its env as before. Only the
@@ -65,7 +65,7 @@ A run asks Claude Code for the model by `claudeRunName`. A Claude model
 of the 5 generation or later that Claude Code doesn't know (Fable 5.2 on
 2.1.316) is asked for by its `[1m]` name. By its own name Claude Code
 assumed a 200K window for it and turned a longer conversation away before
-Anthropic was asked ("Prompt is too long", `blocking_limit`), while magpie
+Anthropic was asked ("Prompt is too long", `blocking_limit`), while eipgam
 tells agents the model's 1M window: Codex, compacting at 272K, never
 compacted and failed every turn past 200K (magicalaciw18 on X).
 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` is not read for a Claude name. The models
@@ -76,28 +76,28 @@ without usage credits ("Usage credits required for 1M context"). The
 reply, the saved session and the logs keep the model as asked; only
 Claude Code's `--model` has the mark.
 
-Every Claude Code magpie starts for the subscription (a turn's run, the
+Every Claude Code eipgam starts for the subscription (a turn's run, the
 warm-up and model test `askClaude`, `/usage`, and the sign-in's
 `auth login` and `auth status`) is given its proxy through one helper,
 `claudeCLI.proxied` in each package, which is
 `netproxy.EnvForBunWith`: the account's own proxy, else the
 subscription's, else the global one (`netproxy.EnvWith`), with a SOCKS5
-proxy replaced by magpie's loopback HTTP bridge to it (`netproxy.Bridge`,
-as for every bun magpie starts, #1409). Claude Code is built with Bun,
+proxy replaced by eipgam's loopback HTTP bridge to it (`netproxy.Bridge`,
+as for every bun eipgam starts, #1409). Claude Code is built with Bun,
 which takes only http:// and https:// proxies: given `socks5://`, every
 request failed as `UnsupportedProxyProtocol`, after about three minutes of
 Claude Code's own retries, as a 502 (#2651). A Claude Code in a WSL
 distro that doesn't share Windows' loopback (`wslrun.Tool.Host` set)
 can't reach the bridge, so there, and where the bridge can't start, a
 SOCKS proxy is refused before Claude Code starts, with an error that says
-to use an http:// proxy. The `settings.json` env that magpie writes for the
+to use an http:// proxy. The `settings.json` env that eipgam writes for the
 user's own Claude Code sessions leaves a SOCKS proxy out (see
 [Providers and accounts](providers-accounts.md)).
 
-A saved account added by a setup-token (see [Providers and accounts](providers-accounts.md)) has no sign-in in its config directory. `inClaudeDir`, which builds the env of every run in a saved account's directory (a turn's run, the warm-up, `askClaude`, `/usage`), drops any `CLAUDE_CODE_OAUTH_TOKEN` it was given and sets it to `provider.ClaudeDirToken(configDir)` when that directory is a token account's: the token reaches the real Claude Code there and nowhere else, never on its command line, never in a log, and never to Claude Code's own account. magpie asks Anthropic nothing with it; the entrypoint and everything else about the run are as for any account.
+A saved account added by a setup-token (see [Providers and accounts](providers-accounts.md)) has no sign-in in its config directory. `inClaudeDir`, which builds the env of every run in a saved account's directory (a turn's run, the warm-up, `askClaude`, `/usage`), drops any `CLAUDE_CODE_OAUTH_TOKEN` it was given and sets it to `provider.ClaudeDirToken(configDir)` when that directory is a token account's: the token reaches the real Claude Code there and nowhere else, never on its command line, never in a log, and never to Claude Code's own account. eipgam asks Anthropic nothing with it; the entrypoint and everything else about the run are as for any account.
 
 The helper offers each of the client's tools under `bridgeToolName`
-(`bridgeTools`), which Claude Code calls `mcp__magpie__<name>`. Claude Code
+(`bridgeTools`), which Claude Code calls `mcp__eipgam__<name>`. Claude Code
 keeps only `[A-Za-z0-9_-]` of an MCP tool's name, so a name it would change
 (`spawn.agent`, `fs/read`), one longer than 51 (64 with the prefix) or one
 ending as a changed name ends (`_` and 12 hex digits) is cut, made of those
@@ -108,7 +108,7 @@ run was offered it. `subscriptionRun.names` (`bridgeNames`) maps it back
 to the declared name in `toolStart`, for streamed and whole messages, and
 in `mcpCall` (#2649).
 Each tool's input schema is folded to an object root (`objectSchema`,
-`provider.ObjectRoot`), as a Messages request magpie builds is: Claude
+`provider.ObjectRoot`), as a Messages request eipgam builds is: Claude
 Code leaves out an MCP tool whose `inputSchema` has a `oneOf`, `anyOf` or
 `allOf` at its root, which Anthropic's API refuses, so Codex desktop's
 `mcp__cua_repl__js` (a `oneOf` of objects) never reached the model. The
@@ -119,7 +119,7 @@ A client's MCP tool that it announced but hasn't loaded (Claude Code's
 tool search names deferred tools in a reminder and leaves them out of
 `tools` until `ToolSearch` loads them) is no tool of the run's, but the
 run's model reads its name in the conversation and calls it,
-`mcp__magpie__<server>__<tool>`. `toolStart` hands that call over under
+`mcp__eipgam__<server>__<tool>`. `toolStart` hands that call over under
 the full name, which is the client's own, when the cut name maps to
 nothing and isn't in `subscriptionRun.tools`: handed over cut, as
 `<server>__<tool>`, the client answered "No such tool available" and the
@@ -127,10 +127,10 @@ model had to load it and call again (packinggoods, 11-02,
 `TestClaudeBridgeHandsOverAnUnloadedMagpieTool`). Only a cut name of the
 router's form, `<server>__<tool>` (`magpieServerTool`), keeps the prefix.
 A deferred built-in (`WebFetch`, `WebSearch`, `CronCreate`: no `__` in
-the name, no prefix on the client) called as `mcp__magpie__WebFetch` is
+the name, no prefix on the client) called as `mcp__eipgam__WebFetch` is
 handed over as `WebFetch`; handed over whole, the client answered "No
-such tool available: mcp__magpie__WebFetch" (steven_4422, 11-08). One of
-another client MCP server called as `mcp__magpie__mcp__linear__…` is
+such tool available: mcp__eipgam__WebFetch" (steven_4422, 11-08). One of
+another client MCP server called as `mcp__eipgam__mcp__linear__…` is
 handed over as `mcp__linear__…`. A deferred tool the run's model calls
 by the bare client name (`WebFetch`, `mcp__linear__…`) is the run's
 Claude Code's to answer and is not handed over.
@@ -138,25 +138,25 @@ Claude Code's to answer and is not handed over.
 Claude Code's `/advisor` (`advisor_20260301`, sent with
 `CLAUDE_CODE_ENABLE_EXPERIMENTAL_ADVISOR_TOOL`, which the Claude Code
 advisor field writes) is a server tool: the run's Claude Code, offered
-magpie's tools only, can't pass it on, and Anthropic's server would not
-take magpie's id for its model anyway. Before #6804 the bridge read the
+eipgam's tools only, can't pass it on, and Anthropic's server would not
+take eipgam's id for its model anyway. Before #6804 the bridge read the
 request as a translation without one: the advisor was left out and its
 instructions turned into "The advisor tool is no longer available"
 (`advisorGoneIn`), so `/advisor` did nothing (recih on X, #6813).
 `bridgeRequest` now reads a Claude Code request whose advisor model
-magpie serves (`advisedInBridge`: `provider.Resolve` takes it, the client
+eipgam serves (`advisedInBridge`: `provider.Resolve` takes it, the client
 has no `advisor` tool of its own) as `readAdvised` does on a translation:
 `Request.Advisor` is set, the instructions and `tool_addition` stay as
 written, and the echoed `server_tool_use` and `advisor_tool_result` go
 back as the model's call and its result (`adviceApart`). The run is
-offered `advisorToolDef` beside magpie's tools, and `adviseOn` gives the
+offered `advisorToolDef` beside eipgam's tools, and `adviseOn` gives the
 run, for this request, `adviceRound`. A call of it is answered in
 `mcpCall`, as web search is: the advisor model is asked with what the
 reply said before the call (`adviceSaid`), within 55 seconds, and three
 calls a reply (`max_uses_exceeded` after). `toolStart` keeps the call
 from the client, which is told `KAdvice`'s `server_tool_use` and
 `advisor_tool_result` as on a translation. Claude Desktop, and an
-advisor model magpie doesn't serve, go as before.
+advisor model eipgam doesn't serve, go as before.
 `TestBridgeRequestKeepsTheAdvisor`, `TestClaudeTUIAdvisorAnsweredHere`.
 
 A turn with `tool_choice` none is offered every tool the client sent, as
@@ -171,15 +171,15 @@ A call the turn makes anyway is answered at once with an error result
 client never sees it. A named `tool_choice` still offers only that tool.
 `TestClaudeToolChoiceNoneKeepsTheTools` holds it.
 
-The run's MCP server is magpie itself (`magpie claude-mcp-helper`,
+The run's MCP server is eipgam itself (`eipgam claude-mcp-helper`,
 `internal/claudebridge`), which hands each tool call back to the gateway
-at `POST /_magpie/claude-mcp/<token>` (`mcpCall`), where the call is
+at `POST /_eipgam/claude-mcp/<token>` (`mcpCall`), where the call is
 registered in `b.calls` for the turn with its results to find. The token
 is `randomToken` (24 bytes from `crypto/rand`), one per run. The callback
 URL is written to `callback` in the run's own temp folder (0600) and the
 helper is given that file's path, so the token is never on Claude Code's
 command line. The helper calls the address the gateway listens on
-(`callbackBaseURL`: `MAGPIE_ADDR`, `0.0.0.0`/`::` as `127.0.0.1`), which,
+(`callbackBaseURL`: `EIPGAM_ADDR`, `0.0.0.0`/`::` as `127.0.0.1`), which,
 pinned to one interface's address, isn't loopback, and it sends no
 gateway key. `lanGuard` therefore lets in exactly that path, by POST, with
 the token of a run now live (`ownCallback`: `addCallback` when the run is
@@ -197,7 +197,7 @@ entrypoint, and a `-p` run's `sdk-cli` costs about twice the plan's allowance of
 mode's `cli` (anthropics/claude-code#97074). The run is the real
 interactive Claude Code: nothing sets `CLAUDE_CODE_ENTRYPOINT`.
 
-The bridge starts `magpie claude-tui-helper <claude> <the -p arguments>`
+The bridge starts `eipgam claude-tui-helper <claude> <the -p arguments>`
 (`internal/claudetui`) in place of `claude` when `claudeTUI` says so, and
 talks to it as it talks to `-p`: stream-json in and out. The helper:
 
@@ -205,8 +205,8 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   `-p`, the stream-json formats, `--verbose`,
   `--include-partial-messages`, `--thinking-display`,
   `--dangerously-skip-permissions` and `--no-session-persistence` go;
-  `--permission-mode default --allowedTools mcp__magpie[,WebSearch]
-  --no-chrome` come. Permissions are not skipped: only magpie's MCP tools
+  `--permission-mode default --allowedTools mcp__eipgam[,WebSearch]
+  --no-chrome` come. Permissions are not skipped: only eipgam's MCP tools
   (and the web search `-p` was given) are allowed, and nothing else is
   offered (`--tools ""`). A new session is given `--session-id`;
 - starts Claude Code in a pseudo-terminal of its own (200x50), no tmux,
@@ -222,16 +222,16 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   (Claude Code is told as a closed window tells it) and kills it after
   3s. Its `-p` fallback runs Claude Code as a child, since Windows has no
   exec. A Claude Code in WSL is run the same way, through `wsl.exe` in
-  the console: the gateway hands the helper `MAGPIE_CLAUDE_TUI_WSL`
+  the console: the gateway hands the helper `EIPGAM_CLAUDE_TUI_WSL`
   (`claudetui.WSL`, `claudeCLI.tuiWSL`), wsl.exe's arguments up to
-  Claude Code's (`wslrun.Tool.Args`, `MAGPIE_WSL_RUN` among them), the
+  Claude Code's (`wslrun.Tool.Args`, `EIPGAM_WSL_RUN` among them), the
   distro's mount of the drives, and the projects folder as Windows reads
   it: the account's config directory (handed in as
   `CLAUDE_CONFIG_DIR/p`), or the distro user's own `~/.claude/projects`
   through `\\wsl$\<distro>` (`wslrun.Tool.Home`, from the probe). `TERM` is
   added to `WSLENV`, and an image's path is pasted as the distro reads
   it (`/mnt/c/…`, `shim.path`). The helper itself is the Windows
-  magpie.exe, not the `/mnt/c/…` path the MCP helper is started at.
+  eipgam.exe, not the `/mnt/c/…` path the MCP helper is started at.
   In the distro user's own folder, when Windows can't stat
   `\\wsl$\<distro>\<home>` (`tuiWSLUnread`: a session with no 9P
   redirector, as one over ssh, reads nothing there) or the probe found
@@ -245,13 +245,13 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   shell's stdin, which ends it. Until 11-01 both cases were refused
   (`wslread`, `wsl-home`).
   Killing the gateway ended the distro's Claude Code with wsl.exe (tried
-  on Windows 11 26200, magpie-desktop, Claude Code 2.1.289);
+  on Windows 11 26200, eipgam-desktop, Claude Code 2.1.289);
 - pastes each user message into the prompt (bracketed paste) and presses
   Enter. A message opening with `/`, `!`, `#` or `&` is pasted after a
   line break, so it is words, not a command (`pasteable`);
 - pastes a message's images as files (`userPieces`, `writeImage`): each
   base64 image is written to `image-N.<ext>` (0600) in a
-  `magpie-claude-images-*` temp folder, and its path is pasted alone,
+  `eipgam-claude-images-*` temp folder, and its path is pasted alone,
   which Claude Code reads into the message as `[Image #N]` (a path inside
   other words stays words). Each piece is pasted once the prompt shows
   the one before (`send`). Claude Code reads an image's file after the
@@ -278,7 +278,7 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   Claude Code notes each one's path to the model (`[Image: source: …]`).
   The folder is removed once its message is sent (Claude Code has read
   the files by then), and when the helper ends, on SIGINT, SIGTERM and
-  SIGHUP too: magpie's own handler (`endProbesOnSignal`) let go of the
+  SIGHUP too: eipgam's own handler (`endProbesOnSignal`) let go of the
   signals for this command (`leaveSignals`), since it re-raised SIGTERM
   and killed the helper before it could end Claude Code and remove its
   files. Windows ends a run by killing its job, which no handler hears,
@@ -293,9 +293,9 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
 The transcript has a message only once it ends, so the tap streams it.
 Claude Code is a Bun program, and Bun loads first what `BUN_OPTIONS`
 names with `--preload`. The helper writes `tap.js` and an empty
-`tap.jsonl` to a `magpie-claude-tap-*` temp folder, and starts Claude
+`tap.jsonl` to a `eipgam-claude-tap-*` temp folder, and starts Claude
 Code with `BUN_OPTIONS` set to the user's own value followed by
-`--preload <tap.js>`, and `MAGPIE_CLAUDE_TAP` set to the file. Claude Code
+`--preload <tap.js>`, and `EIPGAM_CLAUDE_TAP` set to the file. Claude Code
 in WSL gets both through `WSLENV`, with the paths as WSL reads them, and
 not the user's Windows `BUN_OPTIONS`. `BUN_OPTIONS` has no quoting, so on
 Windows a path with a space takes its short name. A path that still has
@@ -384,14 +384,14 @@ one reads nothing in is not left at the earlier's (`TestClaudeOwnCallReplyTellsL
 `TestLaterTryZeroCacheReadNotTold`).
 
 The user's own `~/.claude.json` and `~/.claude` are never written by
-magpie (Claude Code writes them, as when it records its onboarding done,
+eipgam (Claude Code writes them, as when it records its onboarding done,
 below). Claude
 Code asks whether to trust a folder it has not run in; the helper answers
-yes only when the bridge sets `MAGPIE_CLAUDE_TUI_TRUST=1`, which it does
-for magpie's own working folder or a saved account's config directory,
-both magpie's. In the caller's folder under the account Claude Code is
+yes only when the bridge sets `EIPGAM_CLAUDE_TUI_TRUST=1`, which it does
+for eipgam's own working folder or a saved account's config directory,
+both eipgam's. In the caller's folder under the account Claude Code is
 signed in to, the question is the user's: the helper ends there, saying
-so (`claudetui.Untrusted`), and the turn goes in magpie's own folder,
+so (`claudetui.Untrusted`), and the turn goes in eipgam's own folder,
 told the caller's as any run whose folder isn't here is (`envElsewhere`;
 `startTrusted`). Until 11-01 such a run became `-p`; from then until
 the fallback it was a 502, which a Claude Code client (paseo) asked again
@@ -414,12 +414,12 @@ counts. The run's folder as written and with links followed both count.
 A profile that can't be read is unknown, and the run goes in the
 caller's folder as before. A folder Claude Code asked about all the same
 is passed over for 10 minutes (`passedOver`, `untrustedFor`). The run
-that goes in magpie's folder after the question goes on from the
+that goes in eipgam's folder after the question goes on from the
 conversation's saved session (`startRun` keeps it for `startTrusted`).
 Before, only the 10 minutes decided: past them, a conversation whose
-session was in magpie's folder ran in the caller's again, was told the
+session was in eipgam's folder ran in the caller's again, was told the
 whole conversation there, was asked, and was told it all once more in
-magpie's folder with its branch dropped, every 10 minutes (sleepy_shibe
+eipgam's folder with its branch dropped, every 10 minutes (sleepy_shibe
 on Discord). `TestClaudeTUIUntrustedFolderKeepsItsSession`,
 `TestClaudeTUIFolderTrustedLaterRunInAtOnce` and
 `TestClaudeTrustedFolders` hold it. The question opens on "No, exit", and a key
@@ -429,7 +429,7 @@ it has stayed so for 300ms (`ready`, `trustSettle`). Pressing Enter blind
 chose "No, exit" in the real gateway, and no run started.
 
 Every run is `-p` only when the Claude Code editor's "Claude Code runs
-as" row is on claude -p (`claudePrintMode`; the one row, in the editor and, in magpie web as a gateway, there too), or in the gateway's own
+as" row is on claude -p (`claudePrintMode`; the one row, in the editor and, in eipgam web as a gateway, there too), or in the gateway's own
 tests, whose fake Claude Codes are `-p` ones (`claudeTUIRuns`, code
 `no-shim`). With it On, nothing ever runs as `-p` (the owner, 11-01): the
 plan counts a `-p` request as another client's, at about twice the
@@ -471,7 +471,7 @@ turn whose reply had begun, and Off are never asked again
 `claude_tui_refusal_test.go` holds each case.
 
 A second exception is a turn whose message the interactive mode didn't
-take (ok123now on X: magpie v0.1.3901, Windows 10 LTSC 21H2, Claude Code
+take (ok123now on X: eipgam v0.1.3901, Windows 10 LTSC 21H2, Claude Code
 2.1.316; text worked, a 64×64 PNG was a 502 every try, and the client
 asked again and again). The helper pastes an image as its file's path,
 and Claude Code takes it as an image only when the paste reaches it as a
@@ -523,7 +523,7 @@ drops the marks.
 
 On Windows 10 the helper doesn't use Windows' own ConPTY when it can
 avoid it (#5205; `console` in `child_windows.go`). In order: a `conpty`
-folder beside magpie.exe holding `conpty.dll` and `OpenConsole.exe`, the
+folder beside eipgam.exe holding `conpty.dll` and `OpenConsole.exe`, the
 user's own; then, below build 22000 (`win11`), the pair a release carries
 (`internal/conptypair`): Microsoft.Windows.Console.ConPTY
 1.25.260930003 from nuget.org (MIT, both files signed by Microsoft), the
@@ -532,7 +532,7 @@ version 3leg0ocat ran whole on 19044. The release fetches it
 `release-windows`), checks the package against the SHA-512 nuget.org
 publishes and each file against its pinned SHA-256, and embeds the pair
 (`-tags conptypair`, about 1.2MB per Windows binary). At run time
-`conptypair.Ready` writes it to `%LocalAppData%\magpie\conpty\<version>\<arch>`
+`conptypair.Ready` writes it to `%LocalAppData%\eipgam\conpty\<version>\<arch>`
 (temp file and rename) and checks both files there against their pins
 before `conpty.dll` is loaded; a file that doesn't match is written again.
 Anything that fails leaves the system's ConPTY, as does Windows 11, whose
@@ -578,7 +578,7 @@ its marks with the interactive mode on only for this
 (`serveSubscriptionAs`). `TestClaudeTUIClassifierKeepsLongMarksAsPrint`
 holds it, with and without the header.
 
-A JSON schema is answered through an answer tool of magpie's
+A JSON schema is answered through an answer tool of eipgam's
 (`claude_tui_schema.go`): interactive Claude Code takes `--json-schema`
 and does nothing with it (2.1.316, a real run: its result's
 `structured_output` is null), since its `StructuredOutput` tool is
@@ -594,7 +594,7 @@ the kept input is the reply's `structured_output`; a turn that ended
 without one is told once to call the tool (`answerAsk`), and fails "no
 answer fitting the schema" when it still doesn't. Neither the call nor
 the words around it reach the client (`r.schema`). A real run (haiku,
-11-02) called `mcp__magpie__StructuredOutput` at once, with input that
+11-02) called `mcp__eipgam__StructuredOutput` at once, with input that
 fit a `pattern`. A schema the compiler can't take is a 400 before any
 run (`TestClaudeTUISchemaAnswer`, `TestClaudeTUISchemaAskedOnce`,
 `TestAnswerTool`).
@@ -648,7 +648,7 @@ changes nothing it sends). `startRun` puts them in its environment
 `safeguardsKept`, else `[]`, a stand-in Claude Code still sends), and
 writes the whole extra body to `guard.json` in the run's temp folder
 (`guardBody`; every interactive run has the file, `{}` with no
-safeguards), named to the helper by `MAGPIE_CLAUDE_GUARD`
+safeguards), named to the helper by `EIPGAM_CLAUDE_GUARD`
 (`claudetui.GuardEnv`). The helper hands it to Claude Code as WSL reads
 it, and takes it out of the environment otherwise. On each
 `/v1/messages` request whose body is a string with a `safeguards` key,
@@ -740,14 +740,14 @@ typed (`probeQuotaStatus`: haiku, `max_tokens` 1, content "quota"),
 unless `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` is set, which also
 keeps `/usage` from loading ("Failed to load usage data"). That request
 counts, so on an idle account it started the five-hour window: from
-v0.1.2635 to the fix, magpie's reads at its start and as a window ended
+v0.1.2635 to the fix, eipgam's reads at its start and as a window ended
 opened the user's window with warm-up off (recorded behind a proxy that
 answers everything itself). `-p` sends that request only when
 interactive, so its `/usage` asks the usage endpoint alone
 (`/api/oauth/usage`), and for a subscription's sign-in (the
 `user:profile` scope) prints the plan's windows as the lines
 `provider.parseClaudeUsage` reads. Only a sign-in without that scope (a
-setup-token, which magpie never reads, or an API key) gets the session's
+setup-token, which eipgam never reads, or an API key) gets the session's
 cost instead. `TestClaudeUsageStartsNoInteractiveRun` holds it.
 
 The text omits the extra-usage cap. The same run prints `--output-format
@@ -756,7 +756,7 @@ json --verbose` (`claudeUsageArgs`), whose messages carry
 `claudeExtraUsage` turns an enabled one with a cap into one more line
 (`provider.ClaudeExtraLine`), read as the "Usage credits" window: an
 `Aside` row with the month's spend over the cap, which never marks the
-account used up. It is not the prepaid balance (a separate endpoint magpie
+account used up. It is not the prepaid balance (a separate endpoint eipgam
 does not call), and only Anthropic decides whether a request spends it
 (X, Shinji_Zl). Tried against fakes only; the owner's account has extra
 usage off.
@@ -775,12 +775,12 @@ flag says, is never set, and an account Anthropic hasn't given threads
 sends whole, as its own `claude` does. Updates and error reports stay off
 (`DISABLE_AUTOUPDATER`, `DISABLE_ERROR_REPORTING`); Claude Code's own
 telemetry goes as a plain `claude`'s does, unless the user turned it off:
-a quiet variable set in magpie's environment or in their Claude Code's
+a quiet variable set in eipgam's environment or in their Claude Code's
 `settings.json` env is given to the run as they set it, and the run then
 reads no flags. An interactive run sends Claude Code's quota request as it
 starts, right before the turn's own. `TestClaudeRunReadsItsFlags` holds it.
 
-A turn's run also waits on magpie's MCP calls for as long as the caller's
+A turn's run also waits on eipgam's MCP calls for as long as the caller's
 tool takes (`claudeToolWaitVars`): `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0`
 and `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT=0`. The caller runs the tools and
 has its own timeouts. Interactive Claude Code 2.1.322 otherwise moves a call
@@ -797,7 +797,7 @@ after a shorter one). Claude Code also aborts a call that sent nothing for
 with `CLAUDE_AUTO_BACKGROUND_TASKS=1`, interactive mode always): a 4s
 background limit moves a 15s call to the background, `0` gets its result;
 a 5s idle limit aborts a 70s call at the 30s check, `0` gets its result. A
-value set in magpie's environment stays. `TestClaudeRunWaitsOnToolCalls`
+value set in eipgam's environment stays. `TestClaudeRunWaitsOnToolCalls`
 holds it, by -p and by the interactive mode, and
 `TestClaudeToolWaitVarsReachWSL` that a run in WSL is handed them.
 
@@ -814,7 +814,7 @@ second call was made. `0` also turns off the move Claude Code makes to hand over
 that arrived mid-call (`isMcpCallMovableWithoutTimer` reads the same
 value).
 
-The helper still takes a typed `/usage`, and nothing of magpie's sends it
+The helper still takes a typed `/usage`, and nothing of eipgam's sends it
 now: it is told `{"type":"command","command":"/usage"}`, types it, waits for the
 panel's windows ("NN% used", `commandSettle` still) and closes it with
 Esc. A panel with no window (its words saying why) is taken as drawn only
@@ -865,19 +865,19 @@ until …") are failures as "Failed to load usage data" is
 (`TestShimToldWhyUsageFailed`).
 
 These one-off interactive runs (`askClaudeTUI`) work in
-magpie's shared work folder (`oneOffDir`: `claudeWorkDir`, a fresh temp
+eipgam's shared work folder (`oneOffDir`: `claudeWorkDir`, a fresh temp
 folder only when it can't be made), where the helper may answer the trust
 question, so a config directory holds one trusted entry for it instead of
-a new `magpie-claude-<n>` entry each read (#4830, mydosu): 67 had piled up
-in one `~/.claude.json`. Entries left by older magpies stay; magpie
-doesn't write that file. In a saved account's config directory, magpie
+a new `eipgam-claude-<n>` entry each read (#4830, mydosu): 67 had piled up
+in one `~/.claude.json`. Entries left by older magpies stay; eipgam
+doesn't write that file. In a saved account's config directory, eipgam
 writes the folder's entry itself before each run there (`trustWork`,
 `provider.ClaudeTrustFolder`), and so before a bridge run of that
-account in magpie's folder: on mydosu's Windows (#4830) the helper's
+account in eipgam's folder: on mydosu's Windows (#4830) the helper's
 answer was never recorded there, and every read of the account waited
 out its time on the question. The entry is keyed as Claude Code 2.1.316
 looks a folder up (`claudeTrustKeys`): the path in NFC, with forward
-slashes on Windows (`C:/Users/<me>/AppData/Local/Temp/magpie-claude-work`),
+slashes on Windows (`C:/Users/<me>/AppData/Local/Temp/eipgam-claude-work`),
 also with its links resolved (`/private/var/…` on a Mac), and the WSL
 mount path for a Claude Code in WSL. Only a direct child of
 `claude-accounts` is written, never `~/.claude.json`; every other key
@@ -891,7 +891,7 @@ its own, saying what Claude Code hadn't done and its last screen ("Claude
 Code hadn't drawn /usage's panel in the 16.9s its caller waits for it:
 …"). Killed at the deadline instead, it said nothing, and on Windows the
 reading's error was "exit status 1" alone. A run that still says nothing
-is "Claude Code's interactive mode said nothing before magpie stopped
+is "Claude Code's interactive mode said nothing before eipgam stopped
 waiting for it" (`oneOffErr`), and the card says the reason
 (`quotaError`'s "Allowance unavailable: {why}"), its full text kept for the
 tooltip. A question about trust left unanswered at the deadline is named
@@ -910,7 +910,7 @@ The Claude Code provider editor's "Claude Code runs as" row
 its first read) is a switch between Interactive mode (TUI) and claude
 -p: pressing one saves `claudePrintMode` (`savePrefs`) and reads the mode again.
 It is the only control for it: Settings' second row, which wrote the same
-setting and was the one that worked in magpie web (the editor's was
+setting and was the one that worked in eipgam web (the editor's was
 disabled there, and read as a switch that doesn't switch), is gone
 (Anotiaww on X, `claude-tui-setting.test.cjs`). Hovering or focusing it opens what tells the two apart. It
 reads `GET /api/claude/mode` (`gateway.ClaudeModeNow`) as the page
@@ -921,7 +921,7 @@ opens, kept 30 seconds and dropped when the setting changes, not in
 the switch: turned off, that every request runs as claude -p; on where
 the interactive mode can't run, that Claude requests fail, and why;
 otherwise the last request, when it was the interactive mode's. A
-subscription with Only switch serves nothing through magpie and shows no
+subscription with Only switch serves nothing through eipgam and shows no
 row.
 
 A turn the interactive mode can't take ends the run, and the next starts
@@ -940,7 +940,7 @@ security notes (`firstRun`), and Esc on whether to set up the terminal
 Apple_Terminal or vscode), so that nothing of the user's terminal is set
 up. Each key goes once its screen has stayed drawn 300ms (`trustSettle`).
 Claude Code then records the onboarding done itself (2.1.316:
-`hasCompletedOnboarding`, `lastOnboardingVersion`; magpie writes neither
+`hasCompletedOnboarding`, `lastOnboardingVersion`; eipgam writes neither
 in the user's folder),
 and later runs show none of it. Until this change the notes ended the
 run, so with the interactive mode On every request and the `/usage` read
@@ -954,12 +954,12 @@ Claude Code signed in for `-p` only, as in a container given
 `CLAUDE_CODE_OAUTH_TOKEN`), stays on its first-run screens, or asks
 about a folder the user hasn't trusted, the helper ends, saying why on
 its stderr and in its exit (`fail` in `Run`). It never becomes `claude
--p`. Until 11-01 it did, and wrote `<cache>/magpie/claude-tui-broken`,
+-p`. Until 11-01 it did, and wrote `<cache>/eipgam/claude-tui-broken`,
 after which every run went `-p` for up to a day; that mark is no longer
 written or read, and one left on disk does nothing.
 
 The helper answers the bridge's `initialize` only once the prompt is
-shown and Claude Code has listed the tools of magpie's MCP server. Claude
+shown and Claude Code has listed the tools of eipgam's MCP server. Claude
 Code connects its MCP servers beside its prompt, and a first message sent
 at the prompt was answered without the agent's tools (MinhuWang on X, a pi
 agent whose tool server was slow to load; with the server held 8s, the
@@ -975,7 +975,7 @@ wait. `TestShimFirstMessageWaitsForTools` and
 control request's 10s), not the 10s of any other control request. With
 10s, a Claude Code slower than that to start (2 vCPU in Docker) was ended
 as the helper waited, and every try was answered 502 "Claude Code has
-not answered magpie's initialize request in 10s" (#4504). A helper that
+not answered eipgam's initialize request in 10s" (#4504). A helper that
 answers nothing even then is ended (`tuiNoStart`), and the turn fails
 saying the interactive mode didn't start; the next turn tries it again.
 So does a helper that ends saying why Claude Code didn't come up ("claude-tui:
@@ -999,7 +999,7 @@ A run started anew is told the whole conversation in one user message
 (`renderClaudePrompt`), a prefix the prompt cache has never seen, so the
 conversation is written to the cache again and its images are sent again.
 By default, that message holds the history in blocks of `historyChunk`
-messages, and magpie's one mark (Claude Code keeps three of Anthropic's four) is on the
+messages, and eipgam's one mark (Claude Code keeps three of Anthropic's four) is on the
 last whole block, else on the caller's instructions: a later run started
 anew for the same conversation while it is cached reads the history up to an
 earlier run's mark, found within Anthropic's 20-block lookback. A
@@ -1013,12 +1013,12 @@ cache.
 
 A run keeps its prompt cache as long as the user picked for Claude Code's
 main conversation (`claudeRunTTL`): `FORCE_PROMPT_CACHING_5M`, then
-`CLAUDE_CODE_PROMPT_CACHE_TTL`, in magpie's environment or settings.json's
+`CLAUDE_CODE_PROMPT_CACHE_TTL`, in eipgam's environment or settings.json's
 `env`, then settings.json's `promptCacheTtl` (the Agents page's "Prompt
 cache · main conversation"), and an hour with none of them, as Claude Code
 writes it on a subscription within its limits. The run is given it as
 `CLAUDE_CODE_PROMPT_CACHE_TTL` (`cleanClaudeEnvTTL`; a saved account's
-Claude Code reads its own folder's settings, not the user's), and magpie's
+Claude Code reads its own folder's settings, not the user's), and eipgam's
 mark in the first message is as long (`Request.runMark`), since Anthropic
 refuses a 1h mark after a 5m one. A session a run goes on from keeps the
 lifetime it started with (`cachePrefix.ttl`; one saved before it was kept
@@ -1054,14 +1054,14 @@ lifetime with `runTTLFor`:
   runs on (`Request.pickedTTL`, `claudeTTLOf`). For Claude Code on this
   computer (its token or `claude-cli/` User-Agent from loopback,
   `caller.claudeHere`), it is this computer's, read as `claudeRunTTL`
-  reads it. For a request another magpie passed on, it is what that
-  magpie named in `X-Magpie-Claude-Cache-TTL` (`ClaudeCacheTTLHeader`):
+  reads it. For a request another eipgam passed on, it is what that
+  eipgam named in `X-Magpie-Claude-Cache-TTL` (`ClaudeCacheTTLHeader`):
   `5m`, `1h`, or `default` for no pick. Claude Desktop (`claude-desktop`)
   with no such header is `default` too: its gateway key makes Claude Code
   mark 5 minutes with no ttl, which says no pick (`TestClaudeDesktopRunKeepsAnHour`).
   `passOnCaller` sends it on every
-  request to a Remote magpie whose caller is Claude Code here, or that
-  came with it. `callerFrom` takes it from a `magpie/` request alone, and
+  request to a Remote eipgam whose caller is Claude Code here, or that
+  came with it. `callerFrom` takes it from a `eipgam/` request alone, and
   `withCaller` takes it off what comes in, so no vendor is sent it.
   `default` gives `claudeRunTTL`: this computer's own pick, or an hour,
   as Claude Code keeps it on a subscription.
@@ -1078,10 +1078,10 @@ relayed write was five minutes, while a 5m pick still had its unmarked
 side calls written for an hour (linkaww). The header carries the pick
 itself. A settings.json that can't be read or parsed names no pick
 (`claudeSettingsKnown`), and the marks decide as before. Not seen by
-magpie: a pick made only in the shell Claude Code was started from, or
+eipgam: a pick made only in the shell Claude Code was started from, or
 in a project's `.claude/settings.json`. Such a client is sent `default`,
 an hour, unless its marks name an hour. A Claude Code that goes straight
-to a remote magpie, with no magpie of its own, sends no header, and its
+to a remote eipgam, with no eipgam of its own, sends no header, and its
 marks decide as before. Chat and Responses requests carry no marks and
 keep `claudeRunTTL`; warmup and usage runs have no request and keep it
 too (`cleanClaudeEnv`). `TestAskedCacheTTL`,
@@ -1257,7 +1257,7 @@ history to the 1h cache at 2×.
 3. `subscriptionBridge.retryBranch` when neither found the run: a turn
    sent again while its run is still busy answering it (#5405,
    margbug01) — the client's connection dropped mid-reply, the request
-   was retried, and no cancel reached magpie. A new Claude Code told the
+   was retried, and no cancel reached eipgam. A new Claude Code told the
    whole conversation wrote it all to the cache again, only its own
    system prompt and tools read from it: on a long conversation a short
    network blip cost a full cache rewrite, on top of the attempt already
@@ -1358,11 +1358,11 @@ minutes before its first word, and Claude Code hung up at 599s and
 started again from the replay, writing it to the cache once more (#3808).
 See [gateway routing](gateway-routing.md) for the keepalive rules.
 
-magpie ends a run (`abort`) by asking Claude Code to end with SIGTERM
+eipgam ends a run (`abort`) by asking Claude Code to end with SIGTERM
 (`proc.Tree.Stop`) and kills its tree only once it has exited or
 `stopGrace` (5s) has passed; Windows kills the job at once. Claude Code
 removes `~/.claude/.oauth_refresh.lock` as it exits on SIGTERM (2.1.299
-exits within half a second), and the SIGKILL magpie sent before left the
+exits within half a second), and the SIGKILL eipgam sent before left the
 lock for the next requests to fail on (#2195). The run counts as ended at
 once; the gateway stopping (`abortAll`) waits for every tree. Covered by
 `TestClaudeAbortAllowsLockCleanup` and `TestTreeStop*`.
@@ -1454,7 +1454,7 @@ the run waited on and the results it was last handed). Tool results a
 waiting run can't take (its safeguards can't be set, or it isn't
 waiting on those calls) end it with `abortFor`, and the log says why:
 "tool results process expired: <why>", where it said "process expired"
-alone and the run's end read "magpie ended it" (#4804,
+alone and the run's end read "eipgam ended it" (#4804,
 `TestClaudeTUIToolResultsLogWhyTheRunEnded`).
 
 ## A turn the client gives up on (`letGo`, #780, #1365)
@@ -1494,7 +1494,7 @@ other (`serveSubscription`'s ended callback runs only when `gone()`
 stopped the `AfterFunc` that calls `letGo`), so it isn't those two of one
 request. `keepIdle` holds the rule whichever caller it was (#1596). Past `idleMost`, the
 eviction loop takes out the key it found as oldest, not the run's own.
-Before (X, Sma1lboy: magpie at 158 GB after two days of omp agents), one
+Before (X, Sma1lboy: eipgam at 158 GB after two days of omp agents), one
 run under two keys was the oldest on every pass, the pass took out only
 its newer key, and the loop never ended: it held `b.mu`, stopping every
 Claude subscription request, and grew its list of runs to let go without
@@ -1666,7 +1666,7 @@ whose text is replaced by the line is not this shape, and starts anew.
 
 ## How many Claude Code processes run (`claudeRoom`, #2956)
 
-Every Claude Code magpie starts for a Claude subscription takes a place in
+Every Claude Code eipgam starts for a Claude subscription takes a place in
 `claudeRoom` (`claude_room.go`) before it starts, and frees it once its
 process has exited: each conversation's run (`startRun`), busy, idle or
 parked on tool results, and each one-off test, warm-up and /usage read
@@ -1679,11 +1679,11 @@ six idle runs were enough for two OOM kills.
 How many may run (`claudeRunsMost`):
 
 - the user's `claudeRunsMost` in settings.json, set with
-  `magpie claude-code runs N` (`auto` clears it). It is this machine's own
+  `eipgam claude-code runs N` (`auto` clears it). It is this machine's own
   setting (`KeepOwn`): a sync never brings a desktop's number to a server.
 - otherwise, on Linux, `(limit − 256 MiB) / 128 MiB`, at least 1, where
   the limit is the least of MemTotal, the cgroup v2 `memory.max` and
-  `memory.high` of magpie's cgroup and every one above it, and the cgroup v1
+  `memory.high` of eipgam's cgroup and every one above it, and the cgroup v1
   `memory.limit_in_bytes` (`memLimit`). 512 MiB gives 2, 1 GiB 6, a 964 MiB
   machine with no cgroup limit 5. It is read once per process.
 - otherwise no bound: macOS, Windows, and a Linux whose limits can't be
@@ -1724,33 +1724,33 @@ the 503.
 ### Which ones run (`ClaudeRunsPath`)
 
 Each run is two processes: Claude Code, and the MCP helper it starts for
-the caller's tools (`magpie claude-mcp-helper`, `internal/claudebridge`).
+the caller's tools (`eipgam claude-mcp-helper`, `internal/claudebridge`).
 Claude Code's parallel subagents are conversations of their own, so a
 session that starts eight has eight pairs running while they work and
 `idleMost` (6) pairs kept for an hour after. Those still waiting on tool
 calls stay for `runTimeout` (30 minutes) once their caller stops. A task
 manager names Claude Code by its version (its binary is
 `versions/2.1.311`), so on macOS Activity Monitor shows these as "2.1.311" and
-"magpie", with nothing to say what they are (@Candydidi3 on X).
+"eipgam", with nothing to say what they are (@Candydidi3 on X).
 
-`GET /v1/magpie/claude-runs` (`claude_runs.go`, loopback only, as the
+`GET /v1/eipgam/claude-runs` (`claude_runs.go`, loopback only, as the
 heap profile) lists each run with its pid, model, account, `state`
 (`answering`, `idle` for its next turn, `tools` waiting on the caller's
 tools) and `since`. It also gives `ends`, when its timer lets it go
 (`endIn` records it at each reset), and Claude Code's RSS. `live` is
-`claudeRoom`'s count, one-off asks included. `magpie claude-code runs`
+`claudeRoom`'s count, one-off asks included. `eipgam claude-code runs`
 prints the list under the bound and says what the processes are.
-On 10-27, a sandbox `magpie serve` with a made-up Claude sign-in and real
+On 10-27, a sandbox `eipgam serve` with a made-up Claude sign-in and real
 Claude Code 2.1.311 against a mock API got 8 concurrent subagent-like
 requests. It kept 6 Claude Code and 6 helpers, and the list named the same
-6 pids that `ps` showed. Quitting magpie ended all 12 within a second.
+6 pids that `ps` showed. Quitting eipgam ended all 12 within a second.
 
 ## How large one Claude Code process may grow (`claudeRunBudget`, #3256)
 
 `claudeRoom` bounds how many Claude Code processes run, not how large each
 is. A run is kept for its conversation's next turn, turn after turn, and a
 service that is never restarted kept one for days: on a 31 GiB host a
-`node-MainThread` in magpie.service reached 8 GiB RSS and the kernel's OOM
+`node-MainThread` in eipgam.service reached 8 GiB RSS and the kernel's OOM
 killer took the machine's other work with it.
 
 Each time a run's reply ends, `oversized` (`claude_rss.go`) reads the
@@ -1758,7 +1758,7 @@ resident memory of its process tree (`proc.Tree.RSS`: `/proc/<pid>/status`
 VmRSS on Linux, `ps -o rss=` on macOS, the working sets of every process in
 its job on Windows, where an npm install's `claude.cmd` is a cmd.exe with
 the node under it) and logs it with the pid. The budget is an eighth of the
-memory magpie may use (`memLimit` on Linux, `proc.MemTotal` elsewhere), at
+memory eipgam may use (`memLimit` on Linux, `proc.MemTotal` elsewhere), at
 least 1 GiB, 4 GiB where neither is known. It is read once per process.
 
 - A whole turn (`ended`, stop) over the budget: the run is not kept idle.
@@ -1772,17 +1772,17 @@ least 1 GiB, 4 GiB where neither is known. It is read once per process.
 Each Claude Code a run starts logs its pid and model when it starts, and its
 run time, how it ended and its peak RSS (`proc.PeakRSS`, rusage
 `ru_maxrss`; not on Windows) when it ends: an OOM report's pid can be found
-in magpie's log.
+in eipgam's log.
 
 ## The run's working folder (`clientWorkDir`)
 
 Claude Code tells its model the folder it runs in as the "Primary working
 directory". A run has no tools of its own: the client's run in the
-client's folder. Run in magpie's shared work folder (`claudeWorkDir`,
-`<tmp>/magpie-claude-work-<uid>`), the model was told that folder. It then
+client's folder. Run in eipgam's shared work folder (`claudeWorkDir`,
+`<tmp>/eipgam-claude-work-<uid>`), the model was told that folder. It then
 wrote the client's files there, through the client's own tools, while the
 client's own prompt named another folder. Under a real Claude Code client,
-`pelican.html` landed in magpie's folder.
+`pelican.html` landed in eipgam's folder.
 
 A run therefore starts in the folder the caller names. `clientWorkDir`
 reads the system prompt and every message that is not the model's, and
@@ -1797,7 +1797,7 @@ It knows four ways of naming it:
 
 The path's `&`, `<` and `>` may come as entities (Codex, Claude Code) and
 are read as the characters. A `<cwd>` read only on one line missed pi
-1.x's: its runs started in magpie's shared folder under the temp folder,
+1.x's: its runs started in eipgam's shared folder under the temp folder,
 and its model was told both folders (fysly on X), so `clientWorkDir` reads
 `<cwd>` as the folder rules' `workDirIn` does.
 
@@ -1842,7 +1842,7 @@ block for the note alone. A caller on this computer that names no folder
 is told nothing more: Claude Code's platform and shell are its own.
 
 Claude Code has no option to leave its environment out. In 2.1.312 it
-is a `<system-reminder>` in the run's first message, before magpie's
+is a `<system-reminder>` in the run's first message, before eipgam's
 text, with `--system-prompt-file` too; the SDK's `excludeDynamicSections`
 only moves it there. So a lean run (`claudeLeanPrompt`) is told the same
 in its system prompt (`leanSystem`), the named-folder note worded as
@@ -1870,14 +1870,14 @@ flag settings, which `--setting-sources` doesn't control
 (`disableDeepLinkSettings`). Auto memory is off, and
 `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS=1` keeps the repository's status out
 of the prompt, which would change it, and Anthropic's cache with it,
-whenever a file changes. The system prompt magpie sends is unchanged; only
+whenever a file changes. The system prompt eipgam sends is unchanged; only
 the folder Claude Code runs in is.
 
 A run's sessions are saved in that folder's project
 (`<config>/projects/<the caller's folder>`), beside the user's own Claude
 Code sessions there when the run is on the user's own sign-in. Claude
 Code's `--resume` picker lists them while they last. That project is never
-swept: only magpie's own folder is (`sweepSessions`). A run's session is
+swept: only eipgam's own folder is (`sweepSessions`). A run's session is
 removed there by its id, when it ends or is discarded (`removeSession`).
 A session that a stopped gateway left there, and its temp files, stay
 there as the user's own sessions do; a sweep can't tell them apart.
@@ -1908,7 +1908,7 @@ hold it.
   shelved or kept for a branch ([A run that ended during a
   turn](#a-run-that-ended-during-a-turn-6528)), and when a saved session
   is discarded (`removeSession`).
-  `sweepSessions` removes those a stopped gateway left in magpie's own
+  `sweepSessions` removes those a stopped gateway left in eipgam's own
   work folder's project, once older than `idleLongest` plus a minute; a caller's folder
   is never swept (`clientWorkDir`).
   A session still in the persisted shelf, the in-memory shelf, an active run,
@@ -1930,7 +1930,7 @@ hold it.
 
 A run started anew still sends every image in the conversation. Replacing
 earlier images with a placeholder would change what the model sees, and
-magpie doesn't do it.
+eipgam doesn't do it.
 
 ## Tool results another request answers first
 
@@ -2146,7 +2146,7 @@ past call as a `[tool call <name> id=… args=…]` line and each result as
 text: Claude Code has no call to make, the turn ends with end_turn, and the
 client shows the lines as the reply's words while nothing runs (Zhenzhen on
 Discord: Claude Desktop on Fable 5.1 got
-`[tool call mcp__magpie__Bash id=toolu_0Validate bash args={…}]`).
+`[tool call mcp__eipgam__Bash id=toolu_0Validate bash args={…}]`).
 
 - Such a prompt ends with a note (`pastCallsNote`) that the lines record
   earlier calls and that writing one calls nothing. A prompt with no call in
@@ -2225,14 +2225,14 @@ week's ring went on a cold start, `TestNoteClaudeLimitsKeepsTheWeekOnDisk`).
 
 A Claude Code signed in to claude.ai (its sign-in field set to
 `claudeai`, `claudeSignIns` in `internal/agent/claude.go`) reads these into its status line's `rate_limits`, which
-claude-hud shows. One that signs in to magpie with magpie's key
+claude-hud shows. One that signs in to eipgam with eipgam's key
 (`ANTHROPIC_AUTH_TOKEN`) ignores them: Claude Code 2.1.293 reads the
 headers only for a claude.ai subscriber. A reply another provider answered
 carries none.
 
 ## A restart to update
 
-A run is a Claude Code process of this magpie's, so a restart to update
+A run is a Claude Code process of this eipgam's, so a restart to update
 that hands the gateway to the new version ([GUI shell](gui-shell.md#a-restart-to-update-hands-the-gateway-over))
 waits for the bridge's turns, and for none of the gateway's other requests
 (`restartBusy` in [`handover.go`](../../internal/gui/handover.go): `Busy.Bridge`,
@@ -2262,7 +2262,7 @@ and a run in a turn or parked on tool results at the stop is not either.
 
 The successor can accept before the old gateway saves this file. Before
 starting a Claude subscription turn, `awaitPredecessorSessions` waits for
-`GET /_magpie/claude-ready` on the private callback socket. The old gateway
+`GET /_eipgam/claude-ready` on the private callback socket. The old gateway
 answers only after `abortAll` has saved and ended its runs, which follows
 every request it holds, of any provider. The wait is bounded by
 `predecessorWait` (90s, inside Claude Code's ten minutes for a reply): past
@@ -2354,9 +2354,9 @@ title (`entryNote` in the routing plugin's client.js), so the plan cost of
 a request can be told from how it ran (Anotiaww on X,
 `TestEntryNoted`, `routing-entry.test.cjs`).
 
-## Claude Code on a remote magpie
+## Claude Code on a remote eipgam
 
-A local Claude Code that uses a remote magpie holding the account sends its
+A local Claude Code that uses a remote eipgam holding the account sends its
 whole history each turn to the remote gateway, as any API client does. The
 remote bridge keeps the run's session and resumes it (`--resume`), typing
 only the turn that is new (`from.since`), so Anthropic is not sent the

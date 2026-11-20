@@ -1,5 +1,5 @@
-// Magpie Browser: magpie's gateway hands this extension the browser tool
-// calls of the agents it serves (magpie mcp browser), and it carries them
+// eipgam Browser: eipgam's gateway hands this extension the browser tool
+// calls of the agents it serves (eipgam mcp browser), and it carries them
 // out in this browser's own tabs, signed in to whatever the user is.
 
 import { GATEWAY, KEY } from "./config.js";
@@ -25,9 +25,9 @@ async function gatewayURL() {
   return GATEWAY;
 }
 
-// the gateway key a magpie on another computer, or in a container, takes
-// the extension with (magpie on this computer needs none): the popup's,
-// else the one magpie wrote in when it gave the extension out
+// the gateway key a eipgam on another computer, or in a container, takes
+// the extension with (eipgam on this computer needs none): the popup's,
+// else the one eipgam wrote in when it gave the extension out
 async function gatewayKey() {
   try {
     const { key } = await chrome.storage.local.get("key");
@@ -43,7 +43,7 @@ async function connect() {
   const key = await gatewayKey();
   let s;
   try {
-    s = new WebSocket(base.replace(/\/$/, "") + "/v1/magpie/browser/extension" + (key ? "?key=" + encodeURIComponent(key) : ""));
+    s = new WebSocket(base.replace(/\/$/, "") + "/v1/eipgam/browser/extension" + (key ? "?key=" + encodeURIComponent(key) : ""));
   } catch (e) {
     connecting = false;
     setStatus({ connected: false, gateway: base, error: String(e.message || e) });
@@ -90,7 +90,7 @@ function setStatus(s) {
 // a message every 20s keeps the service worker alive while connected;
 // the alarm brings it back to reconnect when Chrome stopped it
 setInterval(() => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type: "ping" })); }, 20000);
-chrome.alarms.create("magpie-reconnect", { periodInMinutes: 0.5 });
+chrome.alarms.create("eipgam-reconnect", { periodInMinutes: 0.5 });
 chrome.alarms.onAlarm.addListener(() => connect());
 chrome.runtime.onStartup.addListener(() => connect());
 chrome.runtime.onInstalled.addListener(() => connect());
@@ -113,8 +113,8 @@ connect();
 
 // ---- sessions: each agent's tab ------------------------------------------
 
-// Each agent session (gateway.BrowserSessionHeader: one `magpie mcp
-// browser`, or one caller of magpie's MCP router) works in a tab of its
+// Each agent session (gateway.BrowserSessionHeader: one `eipgam mcp
+// browser`, or one caller of eipgam's MCP router) works in a tab of its
 // own and opens its tabs in a tab group of its own, so two agents at once
 // never act in one tab unless one picks the other's by its id.
 const sessions = new Map(); // session → tabId
@@ -155,12 +155,12 @@ function tabArg(v) {
 }
 
 // ours is whether a tab is an agent's: one a session works in, or one in
-// a Magpie tab group
+// a eipgam tab group
 async function ours(tab) {
   for (const v of sessions.values()) if (v === tab.id) return true;
   if (tab.groupId === undefined || tab.groupId < 0) return false;
   const g = await chrome.tabGroups.get(tab.groupId).catch(() => null);
-  return !!g && /^Magpie( \d+)?$/.test(g.title || "");
+  return !!g && /^eipgam( \d+)?$/.test(g.title || "");
 }
 
 // what a call is told before its answer: session → text
@@ -228,7 +228,7 @@ async function open(session, url, front) {
 }
 
 // group puts a tab the session opened in the session's tab group in that
-// window: "Magpie" for the first session, "Magpie 2", "Magpie 3" for the
+// window: "eipgam" for the first session, "eipgam 2", "eipgam 3" for the
 // ones working beside it. A group no live session has (one an earlier run
 // left) is taken over by its title.
 async function group(session, tabId, windowId) {
@@ -241,7 +241,7 @@ async function group(session, tabId, windowId) {
     const others = new Set([...groups].filter(([k]) => k !== session).map(([, v]) => v));
     const inWindow = await chrome.tabGroups.query({ windowId });
     for (let n = 1; ; n++) {
-      const title = n === 1 ? "Magpie" : `Magpie ${n}`;
+      const title = n === 1 ? "eipgam" : `eipgam ${n}`;
       const g = inWindow.find((x) => x.title === title);
       if (g && others.has(g.id)) continue;
       let id;
@@ -294,7 +294,7 @@ async function run(m) {
   running++;
   try {
     const tool = TOOLS[m.tool];
-    if (!tool) return fail(`magpie's browser extension has no tool ${m.tool}: update it (magpie writes it again on start; reload it in chrome://extensions)`);
+    if (!tool) return fail(`eipgam's browser extension has no tool ${m.tool}: update it (eipgam writes it again on start; reload it in chrome://extensions)`);
     const session = m.session || "default";
     said.delete(session);
     const r = await tool(session, m.args || {});
@@ -318,14 +318,14 @@ const TYPE_WAIT_MS = 40000;
 // how long a call waits for typing still going on in its tab
 const TYPING_WAIT_MS = 60000;
 
-// stopped answers a call in a tab the user stopped Magpie Browser in
+// stopped answers a call in a tab the user stopped eipgam Browser in
 // (Cancel on Chrome's bar) with that, once, before anything attaches to it
 // again
 function stopped(t) {
   if (!t.stoppedByUser) return;
   t.stoppedByUser = false;
   t.typingFailed = null;
-  throw fault("USER_STOPPED", "the user stopped Magpie Browser in this tab (Cancel on Chrome's bar): ask them before going on. The next call attaches to it again.");
+  throw fault("USER_STOPPED", "the user stopped eipgam Browser in this tab (Cancel on Chrome's bar): ask them before going on. The next call attaches to it again.");
 }
 
 async function ready(session, args) {
@@ -595,7 +595,7 @@ const TOOLS = {
       const id = args.tab ? tabArg(args.tab) : sessions.get(session);
       if (id === undefined || id === null) throw fault("BAD_ARGS", "tab is needed");
       const tab = await chrome.tabs.get(id).catch(() => { throw fault("BAD_ARGS", `there is no tab t${id} now`); });
-      if (!(await ours(tab))) throw fault("UNACTIONABLE", `t${id} is the user's own tab: agents close only their own (in a Magpie group); ask the user to close it`);
+      if (!(await ours(tab))) throw fault("UNACTIONABLE", `t${id} is the user's own tab: agents close only their own (in a eipgam group); ask the user to close it`);
       await chrome.tabs.remove(id);
       return { content: [text(`Closed t${id}.`)] };
     }
@@ -832,7 +832,7 @@ const TOOLS = {
       const isInput = await call(t, el, 'function(){ return this.tagName === "INPUT" && this.type === "file" }');
       const set = (backendNodeId, sid) => send(t.tabId, "DOM.setFileInputFiles", { files, backendNodeId }, sid).catch((e) => {
         const m = String(e.message || e);
-        if (/not allowed|permission|denied/i.test(m)) throw fault("UNACTIONABLE", "Chrome didn't let Magpie Browser choose files: turn on \"Allow access to file URLs\" for Magpie Browser in chrome://extensions");
+        if (/not allowed|permission|denied/i.test(m)) throw fault("UNACTIONABLE", "Chrome didn't let eipgam Browser choose files: turn on \"Allow access to file URLs\" for eipgam Browser in chrome://extensions");
         throw e;
       });
       if (isInput) return void (await set(el.backend, el.sid));
@@ -923,7 +923,7 @@ const TOOLS = {
       const el = await find(t, args.ref);
       // the script is the agent's, for the page's own JavaScript: the
       // element as the page's world has it
-      const o = await send(t.tabId, "DOM.resolveNode", { backendNodeId: el.backend, objectGroup: "magpie-eval" }, el.sid);
+      const o = await send(t.tabId, "DOM.resolveNode", { backendNodeId: el.backend, objectGroup: "eipgam-eval" }, el.sid);
       r = await send(t.tabId, "Runtime.callFunctionOn", {
         objectId: o.object.objectId, returnByValue: true, awaitPromise: true,
         functionDeclaration: fn ? `function() { return (${src})(this); }` : `function() { return (${src}); }`,
@@ -956,14 +956,14 @@ const TOOLS = {
     if (await watchConsole(t)) {
       await sleep(300);
       if (!t.logs.some((l) => l.level !== "network")) {
-        return { content: [text("Magpie Browser reads this tab's console from now on (it is off until asked for, since a site can tell it is read). What the page logs next shows here: do what logs it, then call console again." + (t.logs.length ? "\n\n" + t.logs.map((l) => `[${new Date(l.at).toISOString().slice(11, 19)}] ${l.level}: ${l.text}`).join("\n") : ""))] };
+        return { content: [text("eipgam Browser reads this tab's console from now on (it is off until asked for, since a site can tell it is read). What the page logs next shows here: do what logs it, then call console again." + (t.logs.length ? "\n\n" + t.logs.map((l) => `[${new Date(l.at).toISOString().slice(11, 19)}] ${l.level}: ${l.text}`).join("\n") : ""))] };
       }
     }
     const levels = args.level === "errors" ? ["error", "assert"] : args.level === "network" ? ["network"] : null;
     let logs = t.logs.filter((l) => !levels || levels.includes(l.level));
     const n = Math.min(Number(args.limit) || 50, 300);
     logs = logs.slice(-n);
-    if (!logs.length) return { content: [text("Nothing logged since Magpie Browser started watching this tab.")] };
+    if (!logs.length) return { content: [text("Nothing logged since eipgam Browser started watching this tab.")] };
     return { content: [text(logs.map((l) => `[${new Date(l.at).toISOString().slice(11, 19)}] ${l.level}: ${l.text}`).join("\n"))] };
   },
 

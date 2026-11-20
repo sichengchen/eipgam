@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// magpie provider keys prints every key, one a line and nothing else, and
+// eipgam provider keys prints every key, one a line and nothing else, and
 // keys … add takes them from stdin or as words (@emilochen on X: one
-// provider's keys to a magpie in the cloud). A flag is never a key, and
+// provider's keys to a eipgam in the cloud). A flag is never a key, and
 // nothing is written for one.
 func TestKeysCmd(t *testing.T) {
 	home := t.TempDir()

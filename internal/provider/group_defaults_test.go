@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // What a group sets wins; what it leaves unset follows the default for
 // every group in settings (jiezhengj on Discord), and with that unset too,
-// magpie's own: wait for a first token, keep one's place, a minute's
+// eipgam's own: wait for a first token, keep one's place, a minute's
 // patience.
 func TestGroupDefaultsUnlessItsOwn(t *testing.T) {
 	home := t.TempDir()
@@ -18,7 +18,7 @@ func TestGroupDefaultsUnlessItsOwn(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	none := Group{}
 	if none.Waits() != PatienceDefault*time.Second || none.FirstTokenOr() != 0 || none.Sinks() {
-		t.Fatalf("magpie's own: %s %d %v", none.Waits(), none.FirstTokenOr(), none.Sinks())
+		t.Fatalf("eipgam's own: %s %d %v", none.Waits(), none.FirstTokenOr(), none.Sinks())
 	}
 	if err := settings.SetGroupDefaults(true, 45, 200); err != nil {
 		t.Fatal(err)

@@ -22,7 +22,7 @@ function server(lang, posts) {
   const cur = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", textSize: 100,
     proxy: "", redact: false, redactPersonal: false, redactWords: [], trayUsage: "", trayUsageEvery: 3,
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
     claudeCache: [{ knob: "cache_ttl", value: "1h" }, { knob: "subagent_cache_ttl" }],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; page.errors.push(e.message); });
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://magpie.test/?view=settings&tab=general");
+      await page.goto("http://eipgam.test/?view=settings&tab=general");
       await page.locator("#themeSegs .opt").first().waitFor();
       await page.locator("#netMoreList .instance-name-row").waitFor({ state: "attached" });
       return page;
@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.keyboard.press("Escape");
         await page.locator("#modal").waitFor({ state: "hidden" });
         // its own field, under the sheet's folded Advanced, unfolded
-        await page.goto("http://magpie.test/?view=settings&tab=general");
+        await page.goto("http://eipgam.test/?view=settings&tab=general");
         await page.locator("#themeSegs .opt").first().waitFor();
         await type(page, await tr("Permission mode"));
         await link(page, await tr("Permission mode")).locator("button").click();
@@ -124,7 +124,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.keyboard.press("Escape");
         await page.locator("#modal").waitFor({ state: "hidden" });
         // the run mode's Open reaches the Claude editor's row
-        await page.goto("http://magpie.test/?view=settings&tab=general");
+        await page.goto("http://eipgam.test/?view=settings&tab=general");
         await page.locator("#themeSegs .opt").first().waitFor();
         await type(page, "claude -p");
         await link(page, await tr("Claude Code runs as")).locator("button").click();

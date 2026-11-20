@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", serve(lang));
-          await p.goto("http://magpie.test/?view=usage&tab=requests");
+          await p.goto("http://eipgam.test/?view=usage&tab=requests");
           const say = (s, v) => p.evaluate(([s, v]) => t(s, v), [s, v]);
           const label = await say("Cache hit rate"), share = await say(SHARE), notCounted = await say(NOT_COUNTED);
           if (lang !== "en") assert.notEqual(share, SHARE, "translated");

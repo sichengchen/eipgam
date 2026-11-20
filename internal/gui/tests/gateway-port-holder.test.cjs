@@ -3,7 +3,7 @@
 // only "another program". With the gateway not running and the backend
 // naming what holds the port (state.gatewayHeld), the Gateway card says so:
 // Tailscale gets the way out (serve it from another port that forwards to
-// magpie), another program is named, and with nothing read the card keeps
+// eipgam), another program is named, and with nothing read the card keeps
 // its old line. The Start button's answer says the same. In every language.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -39,11 +39,11 @@ function fixture(lang, world) {
 
 const ts = { port: "8848", tailscale: true, alt: "8443" };
 const words = {
-  en: { starting: /Starting the gateway/, tail: /Tailscale's serve or funnel has port 8848\. .*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*another port in Settings/, named: /Port 8848 is in use by nginx \(pid 77\): quit it/, old: /start it with magpie serve/ },
-  zh: { starting: /正在启动网关/, tail: /Tailscale 的 serve 或 funnel 占用了端口 8848。.*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*其他端口/, named: /端口 8848 被 nginx（pid 77）占用：请退出它/, old: /magpie serve/ },
-  "zh-TW": { starting: /正在啟動閘道/, tail: /Tailscale 的 serve 或 funnel 佔用了連接埠 8848。.*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*其他連接埠/, named: /連接埠 8848 被 nginx（pid 77）佔用：請退出它/, old: /magpie serve/ },
-  ja: { starting: /ゲートウェイを起動しています/, tail: /Tailscale の serve または funnel がポート 8848 を使っています。.*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*別のポート/, named: /ポート 8848 は nginx（pid 77）が使用中です/, old: /magpie serve/ },
-  de: { starting: /Zugangspunkt wird gestartet/, tail: /Tailscales serve oder funnel belegt Port 8848\. .*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*anderen Port/, named: /Port 8848 wird von nginx \(PID 77\) verwendet/, old: /magpie serve/ },
+  en: { starting: /Starting the gateway/, tail: /Tailscale's serve or funnel has port 8848\. .*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*another port in Settings/, named: /Port 8848 is in use by nginx \(pid 77\): quit it/, old: /start it with eipgam serve/ },
+  zh: { starting: /正在启动网关/, tail: /Tailscale 的 serve 或 funnel 占用了端口 8848。.*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*其他端口/, named: /端口 8848 被 nginx（pid 77）占用：请退出它/, old: /eipgam serve/ },
+  "zh-TW": { starting: /正在啟動閘道/, tail: /Tailscale 的 serve 或 funnel 佔用了連接埠 8848。.*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*其他連接埠/, named: /連接埠 8848 被 nginx（pid 77）佔用：請退出它/, old: /eipgam serve/ },
+  ja: { starting: /ゲートウェイを起動しています/, tail: /Tailscale の serve または funnel がポート 8848 を使っています。.*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*別のポート/, named: /ポート 8848 は nginx（pid 77）が使用中です/, old: /eipgam serve/ },
+  de: { starting: /Zugangspunkt wird gestartet/, tail: /Tailscales serve oder funnel belegt Port 8848\. .*tailscale serve --https=8443 http:\/\/127\.0\.0\.1:8848.*anderen Port/, named: /Port 8848 wird von nginx \(PID 77\) verwendet/, old: /eipgam serve/ },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, world));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://eipgam.test/?view=gateway");
         await page.locator("#gateway .state").waitFor();
         return { context, page };
       };
@@ -79,10 +79,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.match(await sub(page).textContent(), w.named);
         await context.close();
       }
-      // magpie's own service starting after an update or a restart
+      // eipgam's own service starting after an update or a restart
       // (Norethcy on X): not an error, nothing to quit
       {
-        const { context, page } = await open({ held: { port: "8848", name: "magpie", pid: 47634, path: "/home/u/.local/bin/magpie", own: true }, answer: {} });
+        const { context, page } = await open({ held: { port: "8848", name: "eipgam", pid: 47634, path: "/home/u/.local/bin/eipgam", own: true }, answer: {} });
         assert.match(await sub(page).textContent(), w.starting);
         assert.equal(await page.locator("#gateway .sub.err").count(), 0);
         await context.close();

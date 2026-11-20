@@ -11,12 +11,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/mtls"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// hhdaxia on X: a Remote magpie behind mTLS took the provider's client
+// hhdaxia on X: a Remote eipgam behind mTLS took the provider's client
 // certificate for its model calls alone. The Library's server for its MCP
 // router is checked, and used, through the same transport: with the
 // certificate on the provider it answers; with none it is refused at the

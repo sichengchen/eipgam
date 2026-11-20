@@ -7,19 +7,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // A proxy exported in the shell profile (`export https_proxy=…` in
 // .zshrc, as Clash's and most proxy apps' guides say) reaches every
-// program run in a terminal, magpie run there too, but not magpie opened
+// program run in a terminal, eipgam run there too, but not eipgam opened
 // from the Dock or a desktop menu: with the proxy app's "system proxy"
 // off, Auto found none and went direct, and the user set the proxy in
-// magpie by hand, then took it out again when they left the proxy off
+// eipgam by hand, then took it out again when they left the proxy off
 // (jimlee0824v2 on X). Auto now takes the login shell's after the
 // system's, as a terminal would. A loopback one is taken only while
 // something listens on its port, so a profile that exports the proxy
-// app's port for good doesn't cut magpie off while the app is closed.
+// app's port for good doesn't cut eipgam off while the app is closed.
 
 // shellVar is what the login shell last said of a proxy variable
 // (proc.ProxyVars), "" for none; it never waits on the shell.
@@ -55,7 +55,7 @@ func fromShell(u *url.URL) *url.URL {
 	return liveShell(raw)
 }
 
-// shellProxy is the login shell's proxy for a CLI magpie starts, which
+// shellProxy is the login shell's proxy for a CLI eipgam starts, which
 // reads one for every request (HTTPS_PROXY, else HTTP_PROXY, else
 // ALL_PROXY), and its NO_PROXY's hosts; "" when there is none, or it is a
 // loopback one nothing listens on.
@@ -88,7 +88,7 @@ func liveShell(raw string) *url.URL {
 }
 
 // How long a loopback proxy's port is taken as listening (shellUp) or
-// not (shellDown) once looked at; a proxy app opened after magpie is
+// not (shellDown) once looked at; a proxy app opened after eipgam is
 // taken within shellDown.
 var (
 	shellUp   = 15 * time.Second

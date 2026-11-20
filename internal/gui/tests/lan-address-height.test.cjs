@@ -17,9 +17,9 @@ const assets = path.resolve(__dirname, "../assets");
 function server(lang, lanURLs) {
   const s = {
     theme: "light", lang, tray: "panel", currency: "usd", proxy: "", redactWords: [],
-    version: "0.1.400", dir: "/config/magpie", gateway: "http://0.0.0.0:3425", proxyNow: "none", proxySource: "none",
+    version: "0.1.400", dir: "/config/eipgam", gateway: "http://0.0.0.0:3425", proxyNow: "none", proxySource: "none",
     visionModels: [], imageGenModels: [],
-    lan: true, lanKey: "sk-magpie-0123456789abcdef", lanURLs, lanPublic: [],
+    lan: true, lanKey: "sk-eipgam-0123456789abcdef", lanURLs, lanPublic: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
   return async (route) => {

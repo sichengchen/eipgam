@@ -5,7 +5,7 @@ import (
 	"slices"
 )
 
-// A preset is a vendor magpie already knows: adding one only asks for the key.
+// A preset is a vendor eipgam already knows: adding one only asks for the key.
 
 // Kind groups presets in the picker.
 type Kind string
@@ -14,7 +14,7 @@ const (
 	KindVendor Kind = "vendor" // the model's own maker
 	KindRelay  Kind = "relay"  // an aggregator / API relay reselling many vendors
 	KindLocal  Kind = "local"  // something running on this machine
-	// KindRemote is another computer's magpie: not a relay, so the add
+	// KindRemote is another computer's eipgam: not a relay, so the add
 	// lists give it a heading of its own, after this machine's
 	KindRemote Kind = "remote"
 )
@@ -307,7 +307,7 @@ var presets = []PresetDef{
 	// 11-06). It has no /models, so its models are the docs' (pricing,
 	// embeddings, reranker): the current ones first, then the older ones
 	// it still serves. Its contextualized and multimodal embeddings are on
-	// APIs of their own, which magpie doesn't serve. heatonz on Discord.
+	// APIs of their own, which eipgam doesn't serve. heatonz on Discord.
 	{ID: "voyage", Name: "Voyage AI", Icon: "voyage-color", Kind: KindVendor,
 		Chat:    "https://api.voyageai.com/v1",
 		Website: "https://docs.voyageai.com", KeysURL: "https://dashboard.voyageai.com/organization/api-keys",
@@ -366,7 +366,7 @@ var presets = []PresetDef{
 	{ID: AzurePreset, Name: "Azure OpenAI", Icon: "azure-color", Kind: KindVendor, Catalog: "azure, openai", Hosts: true,
 		Note:         "your resource's endpoint and key",
 		Endpoint:     "https://<resource>.openai.azure.com",
-		EndpointHint: "Your resource's endpoint, from Keys and Endpoint in the Azure portal. Once added, magpie asks the resource for its deployments with this key, over its v1 API; the deployments' names are the model ids.",
+		EndpointHint: "Your resource's endpoint, from Keys and Endpoint in the Azure portal. Once added, eipgam asks the resource for its deployments with this key, over its v1 API; the deployments' names are the model ids.",
 		Website:      "https://ai.azure.com", KeysURL: "https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/OpenAI"},
 	// Ollama's own hosted models: the local server's API, at ollama.com with
 	// a key. Its decision models (Clef), served at /v1/systemone, are the
@@ -437,7 +437,7 @@ var presets = []PresetDef{
 		// so it routes groups like TypeSafe's own (#609's mixed provider)
 		Decide: "https://opencode.ai/zen/v1",
 		// its free models (-free, big-pickle) are served to OpenCode
-		// alone, which magpie asks them as (OpenCodeFree)
+		// alone, which eipgam asks them as (OpenCodeFree)
 		Website: "https://opencode.ai/docs/zen", KeysURL: "https://opencode.ai/auth"},
 	// Kilo Code's gateway, at the OpenRouter-style API its own clients use
 	// (kilo.go): its free models (isFree, ":free") are served with no key,
@@ -540,14 +540,14 @@ var presets = []PresetDef{
 		Decide: "http://localhost:11234/v1",
 		Note:   "local server, port 11234 by default", Website: "https://github.com/ddalcu/mlx-serve"},
 
-	// another computer's magpie, shared on its network (remote_magpie.go):
+	// another computer's eipgam, shared on its network (remote_magpie.go):
 	// its providers, routing groups and usage stay there, each request
 	// goes on in the API the agent spoke
-	{ID: RemoteMagpiePreset, Name: "Remote magpie", Icon: "magpie", Kind: KindRemote,
-		Note:           "another computer's magpie, shared on its network",
+	{ID: RemoteMagpiePreset, Name: "Remote eipgam", Icon: "eipgam", Kind: KindRemote,
+		Note:           "another computer's eipgam, shared on its network",
 		Endpoint:       "http://192.168.1.20:3425",
-		EndpointHint:   "The address and API key the other computer's magpie shows in Settings › Network and sharing, under Share on local network. Its models and routing groups are listed here; each request goes on in the API the agent spoke.",
-		EndpointNeeded: "The other magpie's address is needed"},
+		EndpointHint:   "The address and API key the other computer's eipgam shows in Settings › Network and sharing, under Share on local network. Its models and routing groups are listed here; each request goes on in the API the agent spoke.",
+		EndpointNeeded: "The other eipgam's address is needed"},
 }
 
 func bedrockChat(region string) string {
@@ -627,7 +627,7 @@ func Preset(id string) *PresetDef {
 	return builtinPreset(id)
 }
 
-// builtinPreset is the preset of that id built into magpie.
+// builtinPreset is the preset of that id built into eipgam.
 func builtinPreset(id string) *PresetDef {
 	if a, ok := presetAliases[id]; ok {
 		id = a.preset
@@ -645,7 +645,7 @@ func builtinPreset(id string) *PresetDef {
 func FromPreset(id string) (Provider, error) {
 	pr := Preset(id)
 	if pr == nil {
-		return Provider{}, errorf("no preset %q — magpie presets lists them", id)
+		return Provider{}, errorf("no preset %q — eipgam presets lists them", id)
 	}
 	p := Provider{
 		ID: pr.ID, Name: pr.Name, Icon: pr.Icon, Preset: pr.ID,

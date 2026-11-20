@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       };
 
       // the menu bar panel: each ring its group over its span, whole
-      const panel = await open("panel", "http://magpie.test/?mode=panel", { width: 440, height: 900 });
+      const panel = await open("panel", "http://eipgam.test/?mode=panel", { width: 440, height: 900 });
       await panel.locator('#ptabs [data-ptab="usage"]').click();
       for (const more of await panel.locator(".pq-group .pq-more").all()) await more.click();
       const card = (user) => panel.locator(".pq-card", { hasText: user });
@@ -110,7 +110,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert((await card("old@example.com").locator(".pq-ring").first().getAttribute("title")).startsWith("Gemini · 7 days"));
 
       // the Usage page: the models' windows under Every model; no pool's models, no toggle
-      const page = await open("usage", "http://magpie.test/?view=usage", { width: 900, height: 900 });
+      const page = await open("usage", "http://eipgam.test/?view=usage", { width: 900, height: 900 });
       const sub = page.locator(".subscription-card", { hasText: "AGY-CLI" });
       await sub.locator(".quota-windows").first().waitFor();
       const account = (user) => sub.locator(".subscription-account", { hasText: user });

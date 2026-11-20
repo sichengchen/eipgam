@@ -188,7 +188,7 @@ func add(dir string) bool {
 	watched.active = false
 	watched.Unlock()
 	if p.dir == "" {
-		d, err := os.MkdirTemp("", "magpie-watch-")
+		d, err := os.MkdirTemp("", "eipgam-watch-")
 		if err != nil {
 			return false
 		}

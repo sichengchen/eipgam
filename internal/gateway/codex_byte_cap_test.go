@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // nginx413 is the page nginx answers a body past client_max_body_size

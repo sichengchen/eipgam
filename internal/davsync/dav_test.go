@@ -21,7 +21,7 @@ func TestDAVForbidden(t *testing.T) {
 		}
 		path := strings.TrimSuffix(r.URL.Path, "/")
 		switch {
-		case r.Method == "PROPFIND" && (path == "" || path == "/ro" || path == "/ro/magpie"):
+		case r.Method == "PROPFIND" && (path == "" || path == "/ro" || path == "/ro/eipgam"):
 			w.WriteHeader(http.StatusMultiStatus)
 		case r.Method == "PROPFIND" && path == "/missing":
 			w.WriteHeader(http.StatusNotFound)
@@ -35,10 +35,10 @@ func TestDAVForbidden(t *testing.T) {
 	ctx := context.Background()
 	for _, c := range []struct{ dir, pass, want string }{
 		{"/missing", "pw", "there is no folder /missing"},
-		{"/ro", "pw", "doesn't let this account change files in /ro/magpie"},
+		{"/ro", "pw", "doesn't let this account change files in /ro/eipgam"},
 		{"/secret", "pw", "doesn't let this account use /secret"},
-		// the server's root in the address: its folder is /magpie, not //magpie
-		{"", "pw", "doesn't let magpie make its folder /magpie ("},
+		// the server's root in the address: its folder is /eipgam, not //eipgam
+		{"", "pw", "doesn't let eipgam make its folder /eipgam ("},
 		{"/missing", "bad", "user name or password"},
 	} {
 		d, err := newDAV(Config{URL: srv.URL + c.dir, User: "me", Password: c.pass})
@@ -56,11 +56,11 @@ func TestDAVForbidden(t *testing.T) {
 }
 
 // A 403 on the write itself, with everything listing fine, is told apart by
-// magpie's own folder: there, the server refuses to change files in it —
+// eipgam's own folder: there, the server refuses to change files in it —
 // 坚果云 (Nutstore)'s free tier refuses writes with 403 once the account's
 // upload quota is used up (#4927) — and the error names the folder the write
 // went to, not just the address's, and says the quota. Missing, the server
-// refused to have magpie make it, and the error says to make it by hand.
+// refused to have eipgam make it, and the error says to make it by hand.
 func TestDAVWriteRefused(t *testing.T) {
 	ctx := context.Background()
 	refuse := func(statusOf func(r *http.Request) int) *dav {
@@ -78,17 +78,17 @@ func TestDAVWriteRefused(t *testing.T) {
 	// the folder is there (an earlier sync made it), the write is refused
 	d := refuse(func(r *http.Request) int {
 		switch {
-		case r.Method == "PROPFIND" && (r.URL.Path == "/dav/" || r.URL.Path == "/dav/magpie/"):
+		case r.Method == "PROPFIND" && (r.URL.Path == "/dav/" || r.URL.Path == "/dav/eipgam/"):
 			return http.StatusMultiStatus
 		default:
 			return http.StatusForbidden
 		}
 	})
-	if _, err := d.put(ctx, []byte("x"), ""); err == nil || !strings.Contains(err.Error(), "change files in /dav/magpie") || !strings.Contains(err.Error(), "quota") {
+	if _, err := d.put(ctx, []byte("x"), ""); err == nil || !strings.Contains(err.Error(), "change files in /dav/eipgam") || !strings.Contains(err.Error(), "quota") {
 		t.Fatalf("a refused write into the folder there: %v", err)
 	}
 
-	// the folder isn't there, and the server refuses to have magpie make it
+	// the folder isn't there, and the server refuses to have eipgam make it
 	d = refuse(func(r *http.Request) int {
 		switch {
 		case r.Method == "PROPFIND" && r.URL.Path == "/dav/":
@@ -99,14 +99,14 @@ func TestDAVWriteRefused(t *testing.T) {
 			return http.StatusConflict
 		}
 	})
-	if _, err := d.put(ctx, []byte("x"), ""); err == nil || !strings.Contains(err.Error(), "doesn't let magpie make its folder /dav/magpie") || !strings.Contains(err.Error(), "make the folder magpie there first") {
+	if _, err := d.put(ctx, []byte("x"), ""); err == nil || !strings.Contains(err.Error(), "doesn't let eipgam make its folder /dav/eipgam") || !strings.Contains(err.Error(), "make the folder eipgam there first") {
 		t.Fatalf("a refused folder: %v", err)
 	}
 
-	// an address with no folder of its own: magpie's is at the root,
-	// named once, not "//magpie"
+	// an address with no folder of its own: eipgam's is at the root,
+	// named once, not "//eipgam"
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "PROPFIND" && (r.URL.Path == "/" || r.URL.Path == "/magpie/") {
+		if r.Method == "PROPFIND" && (r.URL.Path == "/" || r.URL.Path == "/eipgam/") {
 			w.WriteHeader(http.StatusMultiStatus)
 			return
 		}
@@ -117,7 +117,7 @@ func TestDAVWriteRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := d.put(ctx, []byte("x"), ""); err == nil || !strings.Contains(err.Error(), "change files in /magpie ") || strings.Contains(err.Error(), "//") {
+	if _, err := d.put(ctx, []byte("x"), ""); err == nil || !strings.Contains(err.Error(), "change files in /eipgam ") || strings.Contains(err.Error(), "//") {
 		t.Fatalf("a refused write under an address with no folder: %v", err)
 	}
 }
@@ -154,7 +154,7 @@ func TestDAVStorageRoot(t *testing.T) {
 }
 
 // A Synology answers 403 for anything under a folder that isn't there yet,
-// PROPFIND too: magpie's own folder, before the first sync, is made rather
+// PROPFIND too: eipgam's own folder, before the first sync, is made rather
 // than taken for a folder the account can't write in.
 func TestDAVForbiddenUntilMade(t *testing.T) {
 	made, stored := false, ""
@@ -163,10 +163,10 @@ func TestDAVForbiddenUntilMade(t *testing.T) {
 		switch {
 		case path == "/data" && r.Method == "PROPFIND":
 			w.WriteHeader(http.StatusMultiStatus)
-		case path == "/data/magpie" && r.Method == "MKCOL":
+		case path == "/data/eipgam" && r.Method == "MKCOL":
 			made = true
 			w.WriteHeader(http.StatusCreated)
-		case strings.HasPrefix(path, "/data/magpie") && made:
+		case strings.HasPrefix(path, "/data/eipgam") && made:
 			switch r.Method {
 			case "PROPFIND":
 				w.WriteHeader(http.StatusMultiStatus)
@@ -204,7 +204,7 @@ func TestDAVForbiddenUntilMade(t *testing.T) {
 
 // A relay or tunnel can cut a long write short: the server keeps half the
 // file and answers 2xx anyway, and every later read trips over the half as
-// "not a magpie backup". A write that kept less than was sent is read back,
+// "not a eipgam backup". A write that kept less than was sent is read back,
 // tried again over the version the short one made, and told as itself in
 // the end. A HEAD that can't be done leaves the write unchecked: it landed.
 func TestDAVShortWrite(t *testing.T) {

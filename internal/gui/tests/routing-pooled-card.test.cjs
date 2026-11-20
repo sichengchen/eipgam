@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [], asks = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang, asks));
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://eipgam.test/?view=routing");
             const act = page.locator(".rt-act", { hasText: "work@example.com" }).first();
             // the one figure routing went by, the windows each on hover over
             // it: a card keeps one line of what is left (ferock4669 on

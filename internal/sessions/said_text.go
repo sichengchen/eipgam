@@ -8,7 +8,7 @@ import (
 
 // A search over every agent's sessions, and a session read, as text an
 // agent reads: the sessions MCP server's search_sessions and
-// read_session (cryingLiu on X) and `magpie sessions search` / `show`
+// read_session (cryingLiu on X) and `eipgam sessions search` / `show`
 // (yansheng1003 on X) both write it, each saying how to ask it for more
 // in its own words (TextHow).
 

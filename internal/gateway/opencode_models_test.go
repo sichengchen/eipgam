@@ -6,14 +6,14 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// OpenCode's magpie plugin fills magpie's provider from
+// OpenCode's eipgam plugin fills eipgam's provider from
 // /v1/models?format=opencode (opencode2 for OpenCode 2): {"models": [{id,
-// entry}]}, the agent package's entries in magpie's order, never cached,
+// entry}]}, the agent package's entries in eipgam's order, never cached,
 // and only the models of OpenCode's catalog the key asking may use.
 func TestOpenCodeModelsList(t *testing.T) {
 	setup(t, provider.Anthropic, &fake{})

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // Settings › Models' Check (EV_John_Liu on X): each pipeline besides chat
@@ -25,7 +25,7 @@ func handlePipelineCheck(rw http.ResponseWriter, r *http.Request) {
 	}
 	gw := served.Load()
 	if gw == nil {
-		fail(rw, errors.New("Another magpie serves the gateway: check there"))
+		fail(rw, errors.New("Another eipgam serves the gateway: check there"))
 		return
 	}
 	writeJSON(rw, gw.CheckPipeline(r.Context(), in.Kind))
@@ -45,7 +45,7 @@ func handleRelayCheck(rw http.ResponseWriter, r *http.Request) {
 	}
 	gw := served.Load()
 	if gw == nil {
-		fail(rw, errors.New("Another magpie serves the gateway: check there"))
+		fail(rw, errors.New("Another eipgam serves the gateway: check there"))
 		return
 	}
 	writeJSON(rw, gw.CheckRelay(r.Context(), in.Provider, in.Model))

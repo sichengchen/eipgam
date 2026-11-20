@@ -1,5 +1,5 @@
 // Discover's counts (plugins.js): how many use each plugin and how many
-// like it, read from usemagpie.ai through /api/plugins/counts. Loaded when
+// like it, read from the configured stats service through /api/plugins/counts. Loaded when
 // the Plugins page loads, not with the core. Nothing is sent back.
 (() => {
   const HEART = "M8 13.4S2.6 10.2 2.6 6.3A2.8 2.8 0 0 1 8 5a2.8 2.8 0 0 1 5.4 1.3c0 3.9-5.4 7.1-5.4 7.1z";

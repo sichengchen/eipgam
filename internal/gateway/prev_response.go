@@ -13,15 +13,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // A Responses client may send only a turn's new input and name the
 // response it follows (previous_response_id), as OpenAI's own API lets it
 // (kevinzhow on X: every request carried the whole conversation, images
-// and all). magpie keeps each response it gave such a client, its input
+// and all). eipgam keeps each response it gave such a client, its input
 // and its output, under the response's id, and a request that names one
 // is given the conversation whole before anything else reads it: a
 // translation, a hook, the masking. A provider that keeps responses itself
@@ -35,7 +35,7 @@ import (
 // A client that says store false (Codex over HTTP, whose requests never
 // name a previous response: codex-rs/codex-api/src/common.rs keeps
 // previous_response_id to its websocket's response.create) has nothing
-// kept, but for another magpie asking its turns kept (remote_delta.go).
+// kept, but for another eipgam asking its turns kept (remote_delta.go).
 
 const (
 	prevTTL = 6 * time.Hour
@@ -213,7 +213,7 @@ func (t *prevTurn) add(items []json.RawMessage) {
 }
 
 // prevScope is whose responses a request may name: its gateway key, the
-// computer a remote magpie passed it on from, and for a request with no
+// computer a remote eipgam passed it on from, and for a request with no
 // key from another computer, that computer's address.
 func prevScope(r *http.Request) string {
 	keyID := access.Caller(r.Context()).KeyID
@@ -262,7 +262,7 @@ type prevAsk struct {
 	route        string
 	made         string // the route whose reply the named response was
 	// the client replayed the conversation whole itself (store false, no
-	// previous_response_id), so nothing of it is magpie's to take back;
+	// previous_response_id), so nothing of it is eipgam's to take back;
 	// a cross-resource refusal of an id it echoes is still recoverable
 	clientWhole bool
 	// which try answered: its route if it was relayed to a provider
@@ -279,7 +279,7 @@ func prevAskOf(ctx context.Context) *prevAsk {
 	return a
 }
 
-// prevHeld is whether the request named a response magpie holds and was
+// prevHeld is whether the request named a response eipgam holds and was
 // given its conversation whole.
 func prevHeld(r *http.Request) bool {
 	a := prevAskOf(r.Context())
@@ -287,14 +287,14 @@ func prevHeld(r *http.Request) bool {
 }
 
 // prevClientWhole is whether the client replayed the conversation whole
-// itself (store false, no previous_response_id), nothing of it magpie's
+// itself (store false, no previous_response_id), nothing of it eipgam's
 // to take back.
 func prevClientWhole(r *http.Request) bool {
 	a := prevAskOf(r.Context())
 	return a != nil && a.clientWhole
 }
 
-// prevLost is the id a request named that magpie doesn't hold, which a
+// prevLost is the id a request named that eipgam doesn't hold, which a
 // try that doesn't relay it to a provider as written can't honour.
 func prevLost(r *http.Request) string {
 	if a := prevAskOf(r.Context()); a != nil && a.id != "" && !a.known {
@@ -320,7 +320,7 @@ func noteAnswered(r *http.Request, route, by string) {
 	}
 }
 
-// previousResponse gives a Responses request that names a response magpie
+// previousResponse gives a Responses request that names a response eipgam
 // holds the conversation whole, and keeps the reply for the next turn.
 // Its done is deferred by the caller.
 func previousResponse(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte) (http.ResponseWriter, *http.Request, []byte, func()) {
@@ -348,7 +348,7 @@ func previousResponse(w http.ResponseWriter, r *http.Request, from provider.Prot
 	}
 	input, fresh := prevInput(q["input"])
 	if fresh == nil {
-		// an input magpie can't read as items: left as it came
+		// an input eipgam can't read as items: left as it came
 		return w, r, body, nothing
 	}
 	if ask.known {
@@ -379,7 +379,7 @@ func previousResponse(w http.ResponseWriter, r *http.Request, from provider.Prot
 		return w, r, body, nothing // the client asked that nothing be kept
 	}
 	if keepsTurnFor(r) {
-		// another magpie asked it kept, store false or not, and is told
+		// another eipgam asked it kept, store false or not, and is told
 		// it is (remote_delta.go)
 		w.Header().Set(KeptTurnHeader, "1")
 	}
@@ -394,7 +394,7 @@ func previousResponse(w http.ResponseWriter, r *http.Request, from provider.Prot
 		r = r.WithContext(context.WithValue(r.Context(), prevAskKey{}, ask))
 	}
 	sink := &conversationWriter{captureResponseWriter: &captureResponseWriter{
-		ResponseWriter: w, full: &spool{limit: prevReplyMax, pattern: "magpie-prevresp-*"},
+		ResponseWriter: w, full: &spool{limit: prevReplyMax, pattern: "eipgam-prevresp-*"},
 	}}
 	return sink, r, body, func() {
 		defer sink.full.discard()
@@ -523,12 +523,12 @@ func prevReply(ctype string, reply []byte) (id string, output []json.RawMessage,
 	return r.ID, r.Output, true
 }
 
-// prevDelta is body, a Responses request magpie gave its conversation
+// prevDelta is body, a Responses request eipgam gave its conversation
 // whole, with the new input alone after the id p keeps the previous
 // response under, when p is the provider and key that answered it and
 // keeps what it is sent. The tries' changes to the input are kept: the
 // new items are the body's own last ones, and only when the body still
-// has as many items as magpie gave it.
+// has as many items as eipgam gave it.
 func prevDelta(r *http.Request, p provider.Provider, body []byte) ([]byte, bool) {
 	a := prevAskOf(r.Context())
 	if a == nil || !a.known || a.upstreamID == "" || a.route != prevRoute(p) || !prevKeptBy(p) {
@@ -587,7 +587,7 @@ func prevForeign(status int, b []byte) bool {
 	return strings.Contains(s, "created under a different") && strings.Contains(s, "resource")
 }
 
-// prevElsewhere is body, a Responses request magpie gave its conversation
+// prevElsewhere is body, a Responses request eipgam gave its conversation
 // whole, with the items it brought back no longer naming what the
 // upstream that made them keeps them under, when they go to another
 // provider or key than the one whose reply they were (or always, when
@@ -597,7 +597,7 @@ func prevForeign(status int, b []byte) bool {
 // without it, its text and call_id kept; reasoning keeps its place only
 // with its encrypted_content, as Codex sends it, since what it held lives
 // only where it was made. Any other kind, and the client's own new input
-// of a conversation magpie gave, stay as they were. A body whose items
+// of a conversation eipgam gave, stay as they were. A body whose items
 // the tries changed in number is left as it is, as prevDelta leaves it.
 func prevElsewhere(r *http.Request, p provider.Provider, body []byte, force bool) []byte {
 	a := prevAskOf(r.Context())

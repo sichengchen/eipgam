@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// lazyCatDomain is the app's domain a box gives magpie (LAZYCAT_APP_DOMAIN).
-const lazyCatDomain = "magpie.box.heiyu.space"
+// lazyCatDomain is the app's domain a box gives eipgam (LAZYCAT_APP_DOMAIN).
+const lazyCatDomain = "eipgam.box.heiyu.space"
 
 // lazyCatPeer is where every request the box's ingress passes the app
 // comes from: the app's own proxy container.
@@ -79,16 +79,16 @@ func lazyCatCall(t *testing.T, h http.Handler, target string, hdr []string, agai
 	return w
 }
 
-// lazyCatBox is magpie web's page as StartWeb serves it in a LazyCat app
-// with MAGPIE_WEB_SIGN_IN=lazycat; reached says the page answered.
+// lazyCatBox is eipgam web's page as StartWeb serves it in a LazyCat app
+// with EIPGAM_WEB_SIGN_IN=lazycat; reached says the page answered.
 func lazyCatBox(t *testing.T, reached *bool) http.Handler {
 	t.Helper()
 	onePortHome(t)
 	t.Setenv("LAZYCAT_APP_DOMAIN", lazyCatDomain)
-	t.Setenv("MAGPIE_WEB_SIGN_IN", "lazycat")
+	t.Setenv("EIPGAM_WEB_SIGN_IN", "lazycat")
 	box, err := webBoxSignIn()
 	if err != nil || box == nil {
-		t.Fatalf("MAGPIE_WEB_SIGN_IN=lazycat: %v", err)
+		t.Fatalf("EIPGAM_WEB_SIGN_IN=lazycat: %v", err)
 	}
 	return webServed("3430", onePortWebKey, 0, box, http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		*reached = true
@@ -347,8 +347,8 @@ func TestLazyCatSignInIsNoGatewayKey(t *testing.T) {
 	}
 }
 
-// MAGPIE_WEB_SIGN_IN takes lazycat in a LazyCat app, or nothing for the
-// key alone. lazycat without the app's domain (nothing in front of magpie
+// EIPGAM_WEB_SIGN_IN takes lazycat in a LazyCat app, or nothing for the
+// key alone. lazycat without the app's domain (nothing in front of eipgam
 // to set the box's headers) or with one that is no domain, and any other
 // value, are errors StartWeb returns before it serves anything. Without
 // it the box's headers open nothing.
@@ -367,15 +367,15 @@ func TestWebBoxSignInChecksItsValue(t *testing.T) {
 		{"1", lazyCatDomain, false},
 		{"key", lazyCatDomain, false},
 	} {
-		t.Setenv("MAGPIE_WEB_SIGN_IN", c.sign)
+		t.Setenv("EIPGAM_WEB_SIGN_IN", c.sign)
 		t.Setenv("LAZYCAT_APP_DOMAIN", c.domain)
 		box, err := webBoxSignIn()
 		if (err == nil) != c.ok || (box != nil) != (c.ok && c.sign != "") {
-			t.Errorf("MAGPIE_WEB_SIGN_IN=%q, LAZYCAT_APP_DOMAIN=%q: %v, %v", c.sign, c.domain, box != nil, err)
+			t.Errorf("EIPGAM_WEB_SIGN_IN=%q, LAZYCAT_APP_DOMAIN=%q: %v, %v", c.sign, c.domain, box != nil, err)
 		}
 	}
 
-	t.Setenv("MAGPIE_WEB_SIGN_IN", "lazycat")
+	t.Setenv("EIPGAM_WEB_SIGN_IN", "lazycat")
 	t.Setenv("LAZYCAT_APP_DOMAIN", "")
 	was := Version
 	t.Cleanup(func() { Version = was })
@@ -386,7 +386,7 @@ func TestWebBoxSignInChecksItsValue(t *testing.T) {
 		t.Fatalf("StartWeb with lazycat outside LazyCat: %v", err)
 	}
 
-	t.Setenv("MAGPIE_WEB_SIGN_IN", "")
+	t.Setenv("EIPGAM_WEB_SIGN_IN", "")
 	t.Setenv("LAZYCAT_APP_DOMAIN", lazyCatDomain)
 	box, _ := webBoxSignIn()
 	var reached bool
@@ -395,7 +395,7 @@ func TestWebBoxSignInChecksItsValue(t *testing.T) {
 		rw.WriteHeader(http.StatusTeapot)
 	}))
 	if w := onePortCall(t, h, "GET", "/", lazyCatPeer, lazyCatDomain, "", over(lazyCatSignedIn, "Accept", "text/html")...); w.Code != http.StatusUnauthorized || reached {
-		t.Errorf("the box's headers without MAGPIE_WEB_SIGN_IN: %d, reached %v", w.Code, reached)
+		t.Errorf("the box's headers without EIPGAM_WEB_SIGN_IN: %d, reached %v", w.Code, reached)
 	}
 }
 

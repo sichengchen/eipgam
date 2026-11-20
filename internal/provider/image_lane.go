@@ -31,7 +31,7 @@ var ImageHeard func(agent, user string, now time.Time) (CodexLimit, bool)
 // ChatGPT account's card that was read: Text and Aside, so no share is told
 // and routing never reads it, with ResetsAt when a refusal or a reply's
 // headers named the time it comes back and no time otherwise. A card of
-// another magpie is as it came; qs and its windows, which the caches share,
+// another eipgam is as it came; qs and its windows, which the caches share,
 // are left as they were.
 func WithImageLane(qs []SubscriptionQuota, now time.Time) []SubscriptionQuota {
 	out := make([]SubscriptionQuota, len(qs))

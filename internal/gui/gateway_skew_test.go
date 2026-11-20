@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 func init() {
@@ -15,8 +15,8 @@ func init() {
 	}
 }
 
-// A magpie of another version serving the gateway that isn't an older
-// copy of this app (magpie serve, a newer magpie, a build of its own) is
+// A eipgam of another version serving the gateway that isn't an older
+// copy of this app (eipgam serve, a newer eipgam, a build of its own) is
 // someone else's to quit: it is left running, and the page is told what
 // it is, for the Agents page to say so.
 func TestGatewaySkewOfAnotherIsSaidNotQuit(t *testing.T) {
@@ -43,7 +43,7 @@ func TestGatewaySkewOfAnotherIsSaidNotQuit(t *testing.T) {
 			}
 			select {
 			case <-ended:
-				t.Fatal("quit a magpie that isn't an older copy of this app")
+				t.Fatal("quit a eipgam that isn't an older copy of this app")
 			case <-time.After(500 * time.Millisecond):
 			}
 			if sk.Version != c.v || sk.Mine != "0.1.2500" || sk.Serves != c.serves || sk.Older != c.older || sk.Newer != c.newer || sk.Replacing || sk.Pid == 0 {
@@ -60,7 +60,7 @@ func TestGatewaySkewOfAnotherIsSaidNotQuit(t *testing.T) {
 }
 
 // A copy of this very version serving the gateway (a second process of
-// it) is not a skew; nor does a dev build of this magpie say one.
+// it) is not a skew; nor does a dev build of this eipgam say one.
 func TestGatewaySkewNotForTheSameOrADevBuild(t *testing.T) {
 	was := gateway.Version
 	defer func() { gateway.Version = was }()

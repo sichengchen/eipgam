@@ -13,9 +13,9 @@ import (
 )
 
 // Who holds a port, for a message that names it (pluoki on X: Tailscale's
-// `tailscale serve` kept magpie's gateway port, and the page said only
+// `tailscale serve` kept eipgam's gateway port, and the page said only
 // "another program"). Only read, never ended: Terminate and Kill are the
-// take-over's, and only for a magpie.
+// take-over's, and only for a eipgam.
 
 // Holder is a process listening on a port.
 type Holder struct {

@@ -26,7 +26,7 @@ func depsSandbox(t *testing.T, deps map[string]string, list string) {
 	}
 	if err := setDeps(deps); err != nil {
 		// no package.json yet: setDeps reads one first
-		if err := os.WriteFile(filepath.Join(Dir(), "package.json"), []byte(`{"name":"magpie-plugins","private":true}`), 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(Dir(), "package.json"), []byte(`{"name":"eipgam-plugins","private":true}`), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		if err := setDeps(deps); err != nil {
@@ -76,7 +76,7 @@ func ctxMinute(t *testing.T) context.Context {
 // every add after it. It is taken out, and the add goes on.
 func TestLeftoverDoesNotFailAnotherAdd(t *testing.T) {
 	depsSandbox(t, map[string]string{agency: "github:msitarzewski/agency-agents"}, `{"plugins":[]}`)
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY", agency)
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY", agency)
 	const spec = "opencode-goany-auth@1.0.0"
 	if _, err := AddExact(ctxMinute(t), spec); err != nil {
 		t.Fatalf("add failed over a leftover no plugin needs: %v", err)
@@ -100,7 +100,7 @@ func TestLeftoverDoesNotFailAnotherAdd(t *testing.T) {
 // is a leftover that every bun command installs again.
 func TestFailedAddLeavesNoDependency(t *testing.T) {
 	depsSandbox(t, map[string]string{}, `{"plugins":[]}`)
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY", "opencode-broken-auth")
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY", "opencode-broken-auth")
 	if _, err := AddExact(ctxMinute(t), "opencode-broken-auth@1.0.0"); err == nil {
 		t.Fatal("an add Bun failed succeeded")
 	}
@@ -121,7 +121,7 @@ func TestFailedAddLeavesNoDependency(t *testing.T) {
 func TestAnotherPluginsFailureDoesNotFailAdd(t *testing.T) {
 	const other = "opencode-other-auth"
 	depsSandbox(t, map[string]string{other: other + "@1.0.0"}, `{"plugins":[{"spec":"`+other+`@1.0.0"}]}`)
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY", other)
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY", other)
 	const spec = "opencode-goany-auth@1.0.0"
 	if _, err := AddExact(ctxMinute(t), spec); err != nil {
 		t.Fatalf("add failed over another plugin's package: %v", err)
@@ -154,9 +154,9 @@ func goanyapiSandbox(t *testing.T, deps map[string]string, list, busy string) {
 	depsSandbox(t, deps, list)
 	npmHasNothing(t)
 	fakeDist(t, map[string][]string{goanyapi: {"0.1.1"}}, false)
-	t.Setenv("MAGPIE_FAKE_BUN_NPM404", goanyapi)
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY", busy)
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY_SAYS", strings.ReplaceAll(goanyapiBusy, "agency-agents", busy))
+	t.Setenv("EIPGAM_FAKE_BUN_NPM404", goanyapi)
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY", busy)
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY_SAYS", strings.ReplaceAll(goanyapiBusy, "agency-agents", busy))
 }
 
 // goanyapiUnnamed is what Bun 1.4.4 said adding GoAnyAPI's dist tarball
@@ -169,12 +169,12 @@ const goanyapiUnnamed = "bun add v1.4.4 (38afee6c8)\nResolving dependencies\nRes
 	"1 package removed [26.00ms]\nFailed to install 1 package\n"
 
 // The reporter's case on v0.1.4210: from the dist branch, GoAnyAPI went
-// in at the version asked and Bun failed over a package in words magpie
+// in at the version asked and Bun failed over a package in words eipgam
 // doesn't read. The add is done: Bun names a package of its own it
 // couldn't install.
 func TestUnnamedFailureDoesNotFailADistAdd(t *testing.T) {
 	goanyapiSandbox(t, nil, `{"plugins":[]}`, goanyapi)
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY_SAYS", goanyapiUnnamed)
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY_SAYS", goanyapiUnnamed)
 	if _, err := AddExact(ctxMinute(t), goanyapi+"@latest"); err != nil {
 		t.Fatalf("add from dist failed with GoAnyAPI in: %v", err)
 	}
@@ -240,7 +240,7 @@ func TestBunAddErrorSaysWhatFailed(t *testing.T) {
 // A leftover Bun names in another of its ways is taken out too.
 func TestLeftoverNamedOtherwiseIsTakenOut(t *testing.T) {
 	goanyapiSandbox(t, map[string]string{agency: "github:msitarzewski/agency-agents"}, `{"plugins":[]}`, agency)
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY_SAYS", "bun add v1.4.4 (38afee6c8)\nerror: Failed to open node_modules folder for agency-agents in C:\\p\\node_modules\nFailed to install 1 package\n")
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY_SAYS", "bun add v1.4.4 (38afee6c8)\nerror: Failed to open node_modules folder for agency-agents in C:\\p\\node_modules\nFailed to install 1 package\n")
 	if _, err := AddExact(ctxMinute(t), goanyapi+"@latest"); err != nil {
 		t.Fatalf("add failed over a leftover: %v", err)
 	}
@@ -295,7 +295,7 @@ func TestRemoveTakesDependencyOutWhenBunFails(t *testing.T) {
 	const p = "opencode-gone-auth"
 	depsSandbox(t, map[string]string{p: p + "@1.0.0", "opencode-kept-auth": "opencode-kept-auth@1.0.0"},
 		`{"plugins":[{"spec":"`+p+`@1.0.0"},{"spec":"opencode-kept-auth@1.0.0"}]}`)
-	t.Setenv("MAGPIE_FAKE_BUN_NOREMOVE", "1")
+	t.Setenv("EIPGAM_FAKE_BUN_NOREMOVE", "1")
 	if err := Remove(ctxMinute(t), p); err != nil {
 		t.Fatal(err)
 	}
@@ -327,8 +327,8 @@ func TestLeftoversListedAndRemoved(t *testing.T) {
 		t.Fatal("removed a plugin's dependency (one turned off) as a leftover")
 	}
 	// Bun can't copy it again either: the remove goes on by hand
-	t.Setenv("MAGPIE_FAKE_BUN_BUSY", agency)
-	t.Setenv("MAGPIE_FAKE_BUN_NOREMOVE", "1")
+	t.Setenv("EIPGAM_FAKE_BUN_BUSY", agency)
+	t.Setenv("EIPGAM_FAKE_BUN_NOREMOVE", "1")
 	if err := RemoveLeftover(ctxMinute(t), agency); err != nil {
 		t.Fatal(err)
 	}

@@ -22,8 +22,8 @@ function fixture() {
     model: "relay/m1", provider: "relay", order: [seat], tries: [{ id: seat.id, model: "m1", start: at(ago), done: true, status: 200, ms: 500 }],
     done: true, status: 200, ms: 500, tokens: 1000, ...extra });
   return [
-    req(1, "s-magpie", "workspace/magpie", 5),
-    req(2, "s-magpie", "workspace/magpie", 4, { sessionTitle: "Fix the gateway" }),
+    req(1, "s-eipgam", "workspace/eipgam", 5),
+    req(2, "s-eipgam", "workspace/eipgam", 4, { sessionTitle: "Fix the gateway" }),
     req(3, "s-dial", "src/dial", 3),
     req(4, "s-none", "", 2),
     req(5, "", "", 1),
@@ -76,8 +76,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, fixture()));
-        try { await page.addInitScript(() => localStorage.setItem("magpie.routingBySession", "1")); } catch {}
-        await page.goto("http://magpie.test/?view=routing");
+        try { await page.addInitScript(() => localStorage.setItem("eipgam.routingBySession", "1")); } catch {}
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-session").nth(4).waitFor();
         await page.waitForFunction(() => [...document.querySelectorAll(".rt-session .nm")].some((e) => e.textContent.includes("Rename")));
 
@@ -90,8 +90,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           return { text: nm.textContent, title: nm.title, dir: dir && !dir.hidden ? dir.textContent : "", dirTitle: dir?.title || "" };
         }));
         const of = (re) => names.find((n) => re.test(n.title)) || assert.fail(`no group for ${re}: ${JSON.stringify(names)}`);
-        assert.equal(of(/s-magpie$/).text, "Claude Code · Fix the gateway");
-        assert.equal(of(/s-magpie$/).dir, "workspace/magpie", "the folder beside the title");
+        assert.equal(of(/s-eipgam$/).text, "Claude Code · Fix the gateway");
+        assert.equal(of(/s-eipgam$/).dir, "workspace/eipgam", "the folder beside the title");
         assert.equal(of(/s-old$/).text, "Claude Code · Rename foo to bar", "the first prompt, on one line");
         assert.equal(of(/s-old$/).dir, "");
         assert.equal(of(/s-dial$/).text, "Claude Code · src/dial", "a folder stands in for the session id");
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.match(of(/s-old$/).title, new RegExp(`^Rename foo to bar\\n${w.session}: s-old$`));
         const clipped = await page.locator(".rt-session").evaluateAll((es) => es.some((e) => [...e.children].some((c) => c.getBoundingClientRect().right > e.getBoundingClientRect().right + 1)));
         assert.equal(clipped, false, "each heading's parts inside it");
-        assert.match(of(/s-magpie$/).title, new RegExp(`${w.folder}: workspace/magpie\\n${w.session}: s-magpie$`));
+        assert.match(of(/s-eipgam$/).title, new RegExp(`${w.folder}: workspace/eipgam\\n${w.session}: s-eipgam$`));
         assert.doesNotMatch(of(/s-none$/).title, new RegExp(w.folder));
 
         // a request's row says its folder under the pointer
@@ -111,8 +111,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the stage: one agent in two folders at once names both
         const node = page.locator(".rt-src").first();
         await page.waitForFunction(() => document.querySelector(".rt-src small")?.textContent.includes(","));
-        assert.equal(await node.locator("small").textContent(), "magpie, dial");
-        assert.match(await node.getAttribute("title"), new RegExp(`${w.folder}: workspace/magpie\\n${w.folder}: src/dial$`));
+        assert.equal(await node.locator("small").textContent(), "eipgam, dial");
+        assert.match(await node.getAttribute("title"), new RegExp(`${w.folder}: workspace/eipgam\\n${w.folder}: src/dial$`));
 
         const fit = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
         assert(fit.scroll <= fit.client + 1, `the page overflows at ${width}: ${JSON.stringify(fit)}`);
@@ -129,10 +129,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         panel.setDefaultNavigationTimeout(60000);
         panel.on("pageerror", (e) => errors.push(e.message));
         await panel.route("**/*", serve(lang, fixture()));
-        await panel.goto("http://magpie.test/?mode=panel");
+        await panel.goto("http://eipgam.test/?mode=panel");
         await panel.locator('[data-ptab="routing"]').click();
         await panel.locator(".ps-ag").first().waitFor();
-        assert.match(await panel.locator(".ps-ag").first().getAttribute("title"), new RegExp(`^Claude Code\\n${w.folder}: workspace/magpie\\n${w.folder}: src/dial$`));
+        assert.match(await panel.locator(".ps-ag").first().getAttribute("title"), new RegExp(`^Claude Code\\n${w.folder}: workspace/eipgam\\n${w.folder}: src/dial$`));
         assert.deepEqual(errors, []);
       });
     }

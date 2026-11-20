@@ -135,7 +135,7 @@ func TestPlainRolloutReadOnceForSessionsAndCalls(t *testing.T) {
 	}
 	same("an append", got)
 
-	// grown while magpie was closed: both windows are kept on disk, so
+	// grown while eipgam was closed: both windows are kept on disk, so
 	// each read goes on from where it was
 	forget()
 	run()

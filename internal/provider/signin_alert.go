@@ -4,7 +4,7 @@ package provider
 // in use has to be signed in again, and, for Claude, before its sign-in
 // ends. Until now a sign-in its vendor refused or revoked showed only on
 // the account's row (Sign-in required, Sign in again) and the row's
-// Signed out pill, seen only by opening magpie. The test of an account that
+// Signed out pill, seen only by opening eipgam. The test of an account that
 // has to be signed in again is the one the Providers page uses
 // (renderAccounts in app.js), so a notification names exactly the rows
 // that say so. Each is said once, until the account is usable again; what
@@ -15,7 +15,7 @@ package provider
 // refresh_token_expires_in, else 30 days from the sign-in) and says "Your
 // login expires in N days · run /login to renew" from three days before;
 // past it, it takes the sign-in for none. A refresh doesn't move it unless
-// Anthropic sends a new one. magpie tells the same, from the same field.
+// Anthropic sends a new one. eipgam tells the same, from the same field.
 
 import (
 	"context"
@@ -189,7 +189,7 @@ func dueSignIns(ss []signInState, marks map[string]alertMark, now time.Time) []S
 
 func signInAlertPath() string { return filepath.Join(filepath.Dir(Path()), "signin-alerts.json") }
 
-// signInAlertMu keeps the file to one writer in this magpie.
+// signInAlertMu keeps the file to one writer in this eipgam.
 var signInAlertMu sync.Mutex
 
 // checkSignIns says what the accounts ss call for, keeping the marks in
@@ -216,7 +216,7 @@ func checkSignIns(path string, ss []signInState, now time.Time) []SignInAlert {
 }
 
 // signInAlertEvery is how often the accounts are looked at: a mark is set
-// as a request is refused, so this reads magpie's own files, asking no
+// as a request is refused, so this reads eipgam's own files, asking no
 // vendor.
 const signInAlertEvery = 2 * time.Minute
 
@@ -240,7 +240,7 @@ func WatchSignIns(ctx context.Context, send func(SignInAlert)) {
 }
 
 // SignInHooksPath keeps what the gateway's request hooks were told, apart
-// from the app's notifications' marks (signInAlertPath): the magpie
+// from the app's notifications' marks (signInAlertPath): the eipgam
 // serving the gateway tells its hooks, and the app the user, each once.
 func SignInHooksPath() string { return filepath.Join(filepath.Dir(Path()), "signin-hooks.json") }
 

@@ -9,7 +9,7 @@ import (
 )
 
 // Claude run with CLAUDE_CONFIG_DIR set to a folder of each account's
-// (~/.claude-work beside the one magpie runs with) is counted too, a session
+// (~/.claude-work beside the one eipgam runs with) is counted too, a session
 // kept in both folders once, and a folder with no projects/ is no Claude
 // folder (@fivesmallq on X: only one Claude folder's token use counted).
 func TestCallsReadEveryClaudeFolder(t *testing.T) {

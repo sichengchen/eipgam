@@ -43,7 +43,7 @@ var holding atomic.Pointer[held]
 func fakeGitHub(t *testing.T, up *atomic.Bool, asked *atomic.Int32) {
 	t.Helper()
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "")
+	t.Setenv("EIPGAM_PLUGIN_MARKET", "")
 	b, err := os.ReadFile("testdata/github/search.json")
 	if err != nil {
 		t.Fatal(err)
@@ -227,9 +227,9 @@ func TestTaggedRepos(t *testing.T) {
 	if x := byRepo["someone/agent-aider"]; x.Kind != "agent" || x.Spec != "github:someone/agent-aider" {
 		t.Fatalf("an agent alone: %+v", x)
 	}
-	// a page alone: no module, magpie.page's file in the repository; one
+	// a page alone: no module, eipgam.page's file in the repository; one
 	// whose file isn't there would show nothing, and isn't listed
-	if x := byRepo["someone/page-glance"]; x.Kind != "page" || x.Spec != "github:someone/page-glance" || x.Package != "magpie-usage-glance" {
+	if x := byRepo["someone/page-glance"]; x.Kind != "page" || x.Spec != "github:someone/page-glance" || x.Package != "eipgam-usage-glance" {
 		t.Fatalf("a page alone: %+v", x)
 	}
 	if x := byRepo["someone/word-guard"]; x.Kind != "middleware" || x.Package != "@magpie-community/middleware-word-guard" || x.License != "MIT" {
@@ -321,7 +321,7 @@ func TestTaggedRepos(t *testing.T) {
 
 	// off: GitHub never asked
 	up.Store(true)
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("EIPGAM_PLUGIN_MARKET", "off")
 	taggedMu.Lock()
 	taggedL = nil
 	taggedMu.Unlock()
@@ -345,7 +345,7 @@ func TestTaggedReposSlowRead(t *testing.T) {
 		t.Fatalf("%d repos", len(l))
 	}
 
-	// magpie started again eleven minutes on, word-guard's package.json
+	// eipgam started again eleven minutes on, word-guard's package.json
 	// slow to come
 	wait, retry := taggedWait, taggedRetry
 	taggedWait, taggedRetry = 300*time.Millisecond, time.Second
@@ -390,7 +390,7 @@ func TestTaggedReposSlowRead(t *testing.T) {
 	if until.Before(cutAsked.Add(taggedRetry)) || until.After(cutDone.Add(taggedRetry)) {
 		t.Fatalf("a list cut short held till %v, asked between %v and %v", until, cutAsked, cutDone)
 	}
-	// nor is the list cut short kept ten minutes by a magpie started again
+	// nor is the list cut short kept ten minutes by a eipgam started again
 	if fi, err := os.Stat(taggedCache()); err != nil || time.Since(fi.ModTime()) < taggedTTL-taggedRetry-time.Second {
 		t.Fatalf("the copy on disk stands till %v", fi.ModTime().Add(taggedTTL))
 	}
@@ -613,7 +613,7 @@ type soonFake struct {
 func fakeSoon(t *testing.T) *soonFake {
 	t.Helper()
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "")
+	t.Setenv("EIPGAM_PLUGIN_MARKET", "")
 	f := &soonFake{}
 	f.pj.Store("")
 	var items []map[string]any

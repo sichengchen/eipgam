@@ -38,7 +38,7 @@ func TestListeningOn(t *testing.T) {
 }
 
 // A port nothing listens on is no listener and no error, on every system:
-// the take-over reads exactly that to know an older magpie let the port go
+// the take-over reads exactly that to know an older eipgam let the port go
 // (#2231, where Windows answered "exit status 1").
 func TestNothingListeningIsNoError(t *testing.T) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -63,28 +63,28 @@ func evalPath(p string) string {
 	return p
 }
 
-// Only magpie's own programs are taken for magpie. An update moves a running
+// Only eipgam's own programs are taken for eipgam. An update moves a running
 // exe aside to exe.old, and to exe.old-2, -3 when that one is held too, so
-// every name it can take while it still runs is magpie's.
+// every name it can take while it still runs is eipgam's.
 func TestIsMagpie(t *testing.T) {
 	for path, want := range map[string]bool{
-		"/Applications/Magpie.app/Contents/MacOS/magpie": true,
-		"/usr/local/bin/magpie":                          true,
-		`C:\Users\u\AppData\Local\magpie\magpie.exe`:     true,
-		`C:\Users\u\AppData\Local\magpie\magpie.exe.old`: true,
+		"/Applications/eipgam.app/Contents/MacOS/eipgam": true,
+		"/usr/local/bin/eipgam":                          true,
+		`C:\Users\u\AppData\Local\eipgam\eipgam.exe`:     true,
+		`C:\Users\u\AppData\Local\eipgam\eipgam.exe.old`: true,
 		// an update that finds .old still held leaves the running exe at
 		// .old-2, the name it holds the gateway port under
-		`C:\Users\u\AppData\Local\magpie\magpie.exe.old-2`: true,
-		`C:\Users\u\AppData\Local\magpie\magpie.exe.old-3`: true,
-		"/home/u/magpie.old-2":                             true,
+		`C:\Users\u\AppData\Local\eipgam\eipgam.exe.old-2`: true,
+		`C:\Users\u\AppData\Local\eipgam\eipgam.exe.old-3`: true,
+		"/home/u/eipgam.old-2":                             true,
 		"/home/u/dial.old-4":                               true,
 		// the numbered suffix is an update's, not another program's
 		`C:\Users\u\other-server.old-2`: false,
-		`C:\Users\u\magpie.old-backup`:  false,
+		`C:\Users\u\eipgam.old-backup`:  false,
 		"/home/u/.local/bin/dial":       true,
-		// the program a wrapper script named magpie runs (acezan)
-		"/root/.local/bin/magpie.real":    true,
-		"/opt/magpie-dev":                 true,
+		// the program a wrapper script named eipgam runs (acezan)
+		"/root/.local/bin/eipgam.real":    true,
+		"/opt/eipgam-dev":                 true,
 		"/usr/bin/python3":                false,
 		"/usr/bin/magpies":                false,
 		"/tmp/other-server":               false,
@@ -98,7 +98,7 @@ func TestIsMagpie(t *testing.T) {
 }
 
 // The programs holding a port for a container are told apart from others:
-// a magpie answering there runs inside it, out of this one's reach.
+// a eipgam answering there runs inside it, out of this one's reach.
 func TestIsForwarder(t *testing.T) {
 	for path, want := range map[string]bool{
 		"/Applications/OrbStack.app/Contents/Frameworks/OrbStack Helper.app/Contents/MacOS/OrbStack Helper": true,
@@ -108,7 +108,7 @@ func TestIsForwarder(t *testing.T) {
 		`C:\Windows\System32\wslrelay.exe`:                                true,
 		"/opt/homebrew/bin/limactl":                                       true,
 		"/usr/libexec/podman/gvproxy":                                     true,
-		"/Applications/Magpie.app/Contents/MacOS/magpie":                  false,
+		"/Applications/eipgam.app/Contents/MacOS/eipgam":                  false,
 		"/usr/bin/python3":                                                false,
 		"/tmp/other-server":                                               false,
 		"":                                                                false,
@@ -119,10 +119,10 @@ func TestIsForwarder(t *testing.T) {
 	}
 }
 
-// A magpie is told by what its program is, not only its name: Go's build
-// information names magpie's main package. On Linux that is read from the
+// A eipgam is told by what its program is, not only its name: Go's build
+// information names eipgam's main package. On Linux that is read from the
 // running process (/proc/<pid>/exe), so one whose file an update replaced
-// still reads as magpie (acezan on Discord). Here the test binary, copied
+// still reads as eipgam (acezan on Discord). Here the test binary, copied
 // under another name and its file removed once it runs, stands in, with
 // magpieMain the test binary's own package.
 func TestRunsMagpieByItsBuild(t *testing.T) {
@@ -146,7 +146,7 @@ func TestRunsMagpieByItsBuild(t *testing.T) {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(bin, "-test.run=^$")
-	cmd.Env = append(os.Environ(), "MAGPIE_PROC_SLEEP=1")
+	cmd.Env = append(os.Environ(), "EIPGAM_PROC_SLEEP=1")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		t.Fatal(err)
@@ -161,11 +161,11 @@ func TestRunsMagpieByItsBuild(t *testing.T) {
 	defer func() { magpieMain = was }()
 	magpieMain = bi.Path
 	if !RunsMagpie(pid, bin) {
-		t.Fatalf("%s, built from %s, not told as magpie", bin, bi.Path)
+		t.Fatalf("%s, built from %s, not told as eipgam", bin, bi.Path)
 	}
-	magpieMain = "github.com/yetone/magpie"
+	magpieMain = "github.com/sichengchen/eipgam"
 	if RunsMagpie(pid, bin) {
-		t.Fatal("another program's build told as magpie")
+		t.Fatal("another program's build told as eipgam")
 	}
 	if runtime.GOOS != "linux" {
 		return
@@ -180,6 +180,6 @@ func TestRunsMagpieByItsBuild(t *testing.T) {
 	}
 	magpieMain = bi.Path
 	if !RunsMagpie(pid, path) {
-		t.Fatal("a magpie whose file was replaced isn't told as magpie")
+		t.Fatal("a eipgam whose file was replaced isn't told as eipgam")
 	}
 }

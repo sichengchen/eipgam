@@ -16,7 +16,7 @@ i=$1 n=$2
 awk -v want="$i" -v n="$n" '
 BEGIN {
 	split("library 338 gui 261 usage 261 plugin 239 agent 217 provider 204 claudetui 180 davsync 108 sessions 89 cli 76 redact 57 update 34", w, " ")
-	for (k = 1; k in w; k += 2) secs["github.com/yetone/magpie/internal/" w[k]] = w[k + 1]
+	for (k = 1; k in w; k += 2) secs["github.com/sichengchen/eipgam/internal/" w[k]] = w[k + 1]
 }
 NF { p[++m] = $1; t[m] = ($1 in secs) ? secs[$1] : 5 }
 END {

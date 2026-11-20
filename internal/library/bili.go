@@ -14,13 +14,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/claudecode"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/claudecode"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
 )
 
 // billion-context (npm billion-context, its CLI bili) compresses an
@@ -28,27 +28,27 @@ import (
 // model can open again (compress, decompress, search_context), so a long
 // session stays under the window. Its native plugins are written into an
 // agent's own files by its own installer (bili plugin install <agent>);
-// magpie runs that for the agents switched on, and bili plugin remove for
+// eipgam runs that for the agents switched on, and bili plugin remove for
 // those switched off.
 //
-// Only the agents where bili's plugin works with magpie in front are
+// Only the agents where bili's plugin works with eipgam in front are
 // offered: Pi, omp and OpenCode load it in process, and their requests
-// still go to magpie with bili's tools added; Claude Code's goes through
+// still go to eipgam with bili's tools added; Claude Code's goes through
 // bili's local proxy, which forwards to the gateway (ANTHROPIC_BASE_URL
-// .../bili/<magpie's address>). Codex's lane is an MCP server only, ZCode's
+// .../bili/<eipgam's address>). Codex's lane is an MCP server only, ZCode's
 // routes only its own provider, Kimi Code's renames the default model in
 // config.toml at each start (bili-kimi): none of those is offered.
 //
 // Zed has no plugin of bili's, and Hermes' and dsh's ride proxy settings of
-// the agent's process, which magpie's http://127.0.0.1 provider never takes:
-// their magpie provider goes through bili's /bili/ prefix with bili start answering there
+// the agent's process, which eipgam's http://127.0.0.1 provider never takes:
+// their eipgam provider goes through bili's /bili/ prefix with bili start answering there
 // (biliURLLanes, bili_url.go).
 //
 // bili's remove doesn't put a file back as it was: it leaves "packages": []
 // in Pi's settings.json and "extensions:" in omp's config.yml, and after
-// magpie rewrote Claude Code's settings.json it took ANTHROPIC_BASE_URL out
+// eipgam rewrote Claude Code's settings.json it took ANTHROPIC_BASE_URL out
 // altogether (the agent then went to Anthropic) and put back the
-// DISABLE_AUTO_COMPACT it had added. So magpie keeps each file as it was
+// DISABLE_AUTO_COMPACT it had added. So eipgam keeps each file as it was
 // before the install and as the install left it, and after a remove puts
 // back what the install changed and nothing changed since (biliRestore).
 
@@ -57,11 +57,11 @@ import (
 // compress has nothing left to keep it under the window: Claude Desktop's
 // Code tab runs Claude Code on the same settings.json with its own base
 // URL, past bili's proxy (bili's #2290), and a window bili takes larger
-// than the one magpie serves lets the session reach it first. Claude Code
+// than the one eipgam serves lets the session reach it first. Claude Code
 // then answers each message at once with "Prompt is too long", sending
-// nothing. magpie sets the "1" bili added to "0", which bili leaves as a
+// nothing. eipgam sets the "1" bili added to "0", which bili leaves as a
 // value of the user's (and keeps across its SessionStart hook and a
-// reinstall): auto-compaction fires only at the window magpie wrote
+// reinstall): auto-compaction fires only at the window eipgam wrote
 // (CLAUDE_CODE_AUTO_COMPACT_WINDOW), which bili, when it compresses,
 // keeps the session under. A value the user had before the install is
 // left as theirs.
@@ -72,8 +72,8 @@ const BiliURL = "https://github.com/ranxianglei/billion-context"
 // biliPackage is its npm package.
 const biliPackage = "billion-context"
 
-// biliLanes are the agents (magpie's ids) bili's plugin is offered for,
-// each with the files its install writes that magpie puts back.
+// biliLanes are the agents (eipgam's ids) bili's plugin is offered for,
+// each with the files its install writes that eipgam puts back.
 var biliLanes = map[string]func(a *agent.Agent) []string{
 	"pi":       func(a *agent.Agent) []string { return []string{a.Path} },
 	"omp":      func(a *agent.Agent) []string { return []string{a.Path} },
@@ -102,7 +102,7 @@ type BiliView struct {
 	URL     string      `json:"url"`
 	// Install is the command Install runs, "" when there is no npm
 	Install string `json:"install,omitempty"`
-	// ListErr is why bili plugin list said nothing magpie could read
+	// ListErr is why bili plugin list said nothing eipgam could read
 	ListErr string   `json:"listErr,omitempty"`
 	Restart []string `json:"restart,omitempty"`
 	Backup  string   `json:"backup,omitempty"`
@@ -116,7 +116,7 @@ var biliMu sync.Mutex
 // biliPath is bili's, "" when it isn't installed: on PATH, or in a folder
 // a user's tools are installed in (proc.FindTool: npm -g's, with ~/.local
 // as its prefix where the documented install puts it, bun's including a
-// BUN_INSTALL), which may not be on magpie's PATH yet. On Windows npm's
+// BUN_INSTALL), which may not be on eipgam's PATH yet. On Windows npm's
 // shim is bili.cmd and bun's is bili.exe.
 var biliPath = func() string { return proc.FindTool("bili") }
 
@@ -161,9 +161,9 @@ var biliRun = func(bin string, tools []string, timeout time.Duration, args ...st
 // shell finds it; then the folder of each of tools that isn't on path.
 // bili's installer runs an agent's CLI by name (Claude Code's: `claude mcp
 // add bili`; OpenCode's: `opencode --version`, which picks the config key),
-// and magpie may have found that CLI where its own PATH doesn't reach:
+// and eipgam may have found that CLI where its own PATH doesn't reach:
 // in a folder only proc.FindTool looks in (an nvm Node other than the
-// default, pnpm's, mise's), or the Claude Code magpie downloaded. bili then failed with "spawnSync claude ENOENT" after it had
+// default, pnpm's, mise's), or the Claude Code eipgam downloaded. bili then failed with "spawnSync claude ENOENT" after it had
 // already written Claude Code's settings.json (fwxkogaia on X, 0.1.4179).
 func biliPATH(bin string, tools []string, path string) string {
 	have := filepath.SplitList(path)
@@ -185,7 +185,7 @@ func biliPATH(bin string, tools []string, path string) string {
 
 // biliTool is the program of a's that bili's install and remove run by
 // name: the agent's own, or for Claude Code with none of the user's, the
-// one magpie runs (claudecode.Find: the one magpie downloaded); "" when
+// one eipgam runs (claudecode.Find: the one eipgam downloaded); "" when
 // there is none.
 func biliTool(a *agent.Agent) string {
 	if p := a.BinPath(); p != "" {
@@ -198,7 +198,7 @@ func biliTool(a *agent.Agent) string {
 }
 
 // biliAgents are the agents here bili's plugin can be given to. One in
-// WSL isn't: bili there is the distro's, and magpie runs this machine's.
+// WSL isn't: bili there is the distro's, and eipgam runs this machine's.
 func biliAgents(agents []*agent.Agent) []*agent.Agent {
 	if agents == nil {
 		agents = detected()
@@ -458,7 +458,7 @@ func SetBili(id string, on bool) (*BiliView, error) {
 }
 
 // biliCompact is the setting of Claude Code's that turns auto-compaction
-// off, and biliCompactOn its value magpie writes in place of bili's "1".
+// off, and biliCompactOn its value eipgam writes in place of bili's "1".
 const (
 	biliCompact   = "env.DISABLE_AUTO_COMPACT"
 	biliCompactOn = "0"
@@ -480,7 +480,7 @@ func biliKeepCompact(path string, before *string) error {
 	return edit.SetJSON(path, edit.KV{Path: biliCompact, Value: biliCompactOn})
 }
 
-// keepBiliCompact does biliKeepCompact for a Claude Code plugin magpie
+// keepBiliCompact does biliKeepCompact for a Claude Code plugin eipgam
 // installed before it did so itself (KeepLinked runs it at start), and has the record of the install say
 // "0" where it said bili's "1", so that switching the plugin off takes the
 // "0" away with the rest of the install.
@@ -515,14 +515,14 @@ func keepBiliCompact() {
 	_ = writeBiliState(state)
 }
 
-// biliLane is bili's name of an agent's plugin: magpie's id, as both use it.
+// biliLane is bili's name of an agent's plugin: eipgam's id, as both use it.
 func biliLane(id string) string { return id }
 
 // biliRestore writes p after bili's remove: f is the file before and after
-// the install (nil when magpie didn't install it), cur as it was just
+// the install (nil when eipgam didn't install it), cur as it was just
 // before the remove and now as the remove left it. What the install changed
 // and nothing has changed since goes back to what it was; what was changed
-// since (magpie picking another model, the user) stays as the remove left
+// since (eipgam picking another model, the user) stays as the remove left
 // it; and what the remove changed that the install hadn't goes back.
 func biliRestore(p string, f *biliFile, cur, now *string) error {
 	var out *string
@@ -537,7 +537,7 @@ func biliRestore(p string, f *biliFile, cur, now *string) error {
 		}
 		s, err := biliMergeJSON(before, after, cur, now)
 		if err != nil {
-			// a file magpie can't read as JSON is left as bili left it
+			// a file eipgam can't read as JSON is left as bili left it
 			return nil
 		}
 		out = s

@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/maskrec"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/masking"
+	"github.com/sichengchen/eipgam/internal/maskrec"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // maskingFor is the masker for a request whose caller is ctx's, and the
@@ -208,7 +208,7 @@ func (e maskBlocked) Error() string {
 	if e.hit.Head != "" {
 		one = e.hit.Head + "…, " + one
 	}
-	return fmt.Sprintf("magpie held this request back: Settings › Privacy blocks %s, and it has one (%s). Nothing was sent.", e.hit.Kind, one)
+	return fmt.Sprintf("eipgam held this request back: Settings › Privacy blocks %s, and it has one (%s). Nothing was sent.", e.hit.Kind, one)
 }
 
 // blocked is the error for hits with a value to hold the request back
@@ -251,12 +251,12 @@ func restoring(w http.ResponseWriter) (http.ResponseWriter, func()) {
 	return w, func() {}
 }
 
-// maskedAsKey holds, on a request masked here or by the magpie that
+// maskedAsKey holds, on a request masked here or by the eipgam that
 // passed it on, what it was masked by (ownMaskedAs).
 type maskedAsKey struct{}
 
 // withMaskedAs is r noted as masked by the settings fp names, which a
-// remote magpie it is passed on to is told (passOnCaller); r as it is
+// remote eipgam it is passed on to is told (passOnCaller); r as it is
 // for "".
 func withMaskedAs(r *http.Request, fp string) *http.Request {
 	if fp == "" {
@@ -272,17 +272,17 @@ func maskedAsOf(ctx context.Context) string {
 	return fp
 }
 
-// maskedBefore says r came from another magpie that masked it already by
+// maskedBefore says r came from another eipgam that masked it already by
 // the settings this one masks by (MaskedAsHeader): masking it again here
 // finds nothing the first pass left, and costs the request another run of
 // the rules and the local model (YeYaka88 on X). It goes on masked as it
-// came, and that magpie puts its values back in the answer. A magpie
+// came, and that eipgam puts its values back in the answer. A eipgam
 // whose settings differ masks it again by its own, and one that masks
 // nothing never says so. A client can send the header only with a key
-// this magpie takes, and only for its own request: what it leaves
+// this eipgam takes, and only for its own request: what it leaves
 // unmasked is its own.
 //
-// A magpie that sends a request masked by its own model as written
+// A eipgam that sends a request masked by its own model as written
 // (Settings › Privacy's route, maskRouteFor) needs its own pass to know
 // there was something to mask, so it masks again.
 func maskedBefore(r *http.Request) (string, bool) {
@@ -295,7 +295,7 @@ func maskedBefore(r *http.Request) (string, bool) {
 		return "", false
 	}
 	// goes on as told: the build that masked it is the one a further
-	// magpie judges by
+	// eipgam judges by
 	return c.maskedAs, sameMasking(fp, c.maskedAs)
 }
 
@@ -337,7 +337,7 @@ func buildOf(v string) int {
 
 var buildRe = lazyre.New(`^v?0\.1\.(\d{1,7})(?:$|[-+])`)
 
-// ownMaskedAs names what this magpie masks a request by: its masking
+// ownMaskedAs names what this eipgam masks a request by: its masking
 // settings (masking.Fingerprint) and the masker's code, this build's
 // version, since a newer one can find what an older one let by. "" when
 // it masks nothing.
@@ -504,7 +504,7 @@ func maskedFor(ctx context.Context, p provider.Provider, model string, isGroup b
 
 // agentTurnKey marks a request an agent sent (serveAgent, count_tokens,
 // a Codex turn on its own sign-in), the ones the user's route for masked
-// requests is for (maskRouteFor); magpie's own asks made on an agent's
+// requests is for (maskRouteFor); eipgam's own asks made on an agent's
 // context take it off (ownAsk).
 type agentTurnKey struct{}
 
@@ -542,7 +542,7 @@ func MaskRoute(id string) bool {
 // masking changed (h counts a value masked), the request to go there as
 // written instead of masked (jessyoungyu on X); "" leaves it masked: none
 // set, nothing masked (a value only warned of goes as written anyway),
-// magpie's own ask, or a model that can't take it whole now (MaskRoute)
+// eipgam's own ask, or a model that can't take it whole now (MaskRoute)
 // or that the calling key may not use. Its failures are its own: what it
 // can go on to is only where the user set requests to go unmasked, and
 // the request is never handed back to be masked and sent to a vendor.

@@ -22,14 +22,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // sessionJSON is a session with what the UI needs to draw its agent.
@@ -38,13 +38,13 @@ type sessionJSON struct {
 	Name string `json:"name"`
 	Icon string `json:"icon"`
 	// Via: the models the gateway sent its calls to, at the reasoning
-	// each was asked for, when it went through magpie
+	// each was asked for, when it went through eipgam
 	Via []usage.Via `json:"via,omitempty"`
 }
 
 type sessionsJSON struct {
 	Sessions []sessionJSON `json:"sessions"`
-	// Terminal is set where magpie can open Terminal on the session: the
+	// Terminal is set where eipgam can open Terminal on the session: the
 	// Mac app, not a browser tab that may be on another computer.
 	Terminal bool     `json:"terminal"`
 	Dirs     []string `json:"dirs"` // where they were read from
@@ -73,7 +73,7 @@ func gatewayDays(g usage.GatewaySession) []sessions.ExternalDayUsage {
 }
 
 // gatewayListed is a gateway session as a list shows it: titled by what it
-// was first asked, when magpie recorded it, not by its ses_… id (YOU on
+// was first asked, when eipgam recorded it, not by its ses_… id (YOU on
 // Discord). title is a sessions.GatewayTitler's.
 func gatewayListed(g usage.GatewaySession, title func(agent, id string) string) sessions.ExternalSession {
 	e := gatewayExternal(g)
@@ -354,7 +354,7 @@ func sessionRoutes(mux *http.ServeMux, w Windows) {
 	})
 	// markdown is a session's whole conversation as a Markdown file (#1276),
 	// read from the agent's own file as transcript is: to the browser that
-	// asks (magpie web), which saves it itself, and, in the app, to
+	// asks (eipgam web), which saves it itself, and, in the app, to
 	// Downloads.
 	mux.HandleFunc("GET /api/sessions/markdown", func(rw http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
@@ -506,9 +506,9 @@ func sessionRoutes(mux *http.ServeMux, w Windows) {
 // page. It is made whole before any of it is sent, so a file that can't be
 // read is an error and not half a download.
 //
-// A session only magpie's gateway recorded is written from that record, as
-// transcript reads it: the agent of one that reaches this magpie through a
-// remote magpie ran on another machine, so there is no file of it here, and
+// A session only eipgam's gateway recorded is written from that record, as
+// transcript reads it: the agent of one that reaches this eipgam through a
+// remote eipgam ran on another machine, so there is no file of it here, and
 // its download was a 400 "no such session" (akic404 on Discord).
 func sessionMarkdown(agentID, id string) (stem string, md []byte, err error) {
 	s, ok := sessions.Find(agentID, id)
@@ -548,7 +548,7 @@ func sessionMarkdown(agentID, id string) (stem string, md []byte, err error) {
 		}
 		return '-'
 	}, s.Agent+"-"+string(short))
-	return "magpie-session-" + safe, b.Bytes(), nil
+	return "eipgam-session-" + safe, b.Bytes(), nil
 }
 
 // wslName is an agent's name for a session it ran in a WSL distro, as the
@@ -933,7 +933,7 @@ func withGatewaySessions(st sessions.Stats, days int, nativeKeys map[string]bool
 // skeleton for 40 s. Once a process: the app's page served to a browser
 // (apppage.go) is a second Handler beside the window's.
 //
-// Not at start: a magpie started at login, by `magpie tray` or as `magpie
+// Not at start: a eipgam started at login, by `eipgam tray` or as `eipgam
 // web` with no page open read the history for nobody, ~0.6 s of CPU and a
 // rebuilt Requests index after an update, and what the reads kept went
 // two minutes later (statsIdle, requestIdle). The tray panel's page
@@ -997,7 +997,7 @@ var warmCodexEffort = func() { usage.CodexModelEffort(usage.All) }
 // the system at once. Reading a long history allocates many times what it
 // keeps (a 13k-session Codex and Claude Code history: ~830 MB allocated to
 // keep ~80 MB of indexes), and Go's scavenger returns those pages only over
-// the next minutes: a magpie that had just started read ~470 MB for its
+// the next minutes: a eipgam that had just started read ~470 MB for its
 // first two minutes at rest.
 func warmUp(steps ...func()) {
 	// each file read looked at once a second, not for each session or row
@@ -1348,7 +1348,7 @@ func openMacTerminal(command, label, choice string) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.CreateTemp("", "magpie-resume-*.command")
+	f, err := os.CreateTemp("", "eipgam-resume-*.command")
 	if err != nil {
 		return err
 	}

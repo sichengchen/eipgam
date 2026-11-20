@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
-// PublicRef reads the groups magpie holds without copying them: it is asked
+// PublicRef reads the groups eipgam holds without copying them: it is asked
 // for every model a page lists, and each copied every group and its rules
-// (115 MB of a live magpie's 2.6 GB in a minute and a half). A group saved
+// (115 MB of a live eipgam's 2.6 GB in a minute and a half). A group saved
 // since is seen, and DisabledGroup's caller still gets a group of its own.
 func TestPublicRefCopiesNoGroups(t *testing.T) {
 	autoRefHome(t)

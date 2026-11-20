@@ -90,7 +90,7 @@ func TestCondHolds(t *testing.T) {
 		{Cond{"last", "matches", `^正在上下文压缩`}, RuleRequest{Message: "正在上下文压缩", System: []string{"正在上下文压缩"}}, false},
 		{Cond{"last", "starts", "正在"}, RuleRequest{Last: []string{"好的，正在"}}, false},
 
-		{Cond{"weather", "is", "rain"}, RuleRequest{}, false}, // one this magpie doesn't know
+		{Cond{"weather", "is", "rain"}, RuleRequest{}, false}, // one this eipgam doesn't know
 		{Cond{"tokens", "eq", "1"}, RuleRequest{Tokens: 1}, false},
 	} {
 		if got := tc.c.Holds(tc.q); got != tc.want {

@@ -10,16 +10,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A plugin that lists its accounts' calls made outside magpie
+// A plugin that lists its accounts' calls made outside eipgam
 // (plugin.Provider.Calls, auth.calls: Cursor's editor and cursor-agent,
 // WaiooT on X) has them read into the log as reported calls, so the Usage
 // page counts what the subscription spent wherever it was spent. Each is
 // written once (its rid, kept by IngestReported); the calls the plugin
-// sent for magpie's own gateway are the plugin's to leave out.
+// sent for eipgam's own gateway are the plugin's to leave out.
 
 // outsideEvery is how often the calls are read, and outsideOverlap how far
 // back each reading starts before the last one ended: a vendor lists a
@@ -69,7 +69,7 @@ func writeOutsideMarks(m map[string]time.Time) error {
 	return os.Rename(tmp, p)
 }
 
-// lastThrough is the time of the newest call magpie's gateway sent to
+// lastThrough is the time of the newest call eipgam's gateway sent to
 // provider (as the log names it), zero for none. The first reading starts
 // after it: the plugin's own calls are left out only from the version that
 // knows them, so one sent before could be read as made outside.
@@ -157,7 +157,7 @@ func ReadOutsideCalls(ctx context.Context) {
 }
 
 // outsideRecord is the log's row of a call plugin (whose provider id is
-// id) said its account user made outside magpie: by the plugin's own
+// id) said its account user made outside eipgam: by the plugin's own
 // agent (Cursor's is the "cursor" agent), with the vendor's cost when it
 // gave one.
 func outsideRecord(pluginID, id, user string, c plugin.OutsideCall) Record {
@@ -178,7 +178,7 @@ func outsideRecord(pluginID, id, user string, c plugin.OutsideCall) Record {
 	}
 }
 
-// KeepOutsideCallsRead reads the calls made outside magpie a minute after
+// KeepOutsideCallsRead reads the calls made outside eipgam a minute after
 // the start and every outsideEvery after, until ctx ends.
 func KeepOutsideCallsRead(ctx context.Context) {
 	t := time.NewTimer(time.Minute)

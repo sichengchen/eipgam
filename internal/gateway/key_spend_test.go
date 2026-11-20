@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // sparkling_lemur_62868 on Discord: a team's OpenAI key with credits that
-// other services spend from too, and magpie to stop at a share of them. A
-// key that has spent its spend cap, as the Usage page prices magpie's calls
+// other services spend from too, and eipgam to stop at a share of them. A
+// key that has spent its spend cap, as the Usage page prices eipgam's calls
 // on it, is passed over: the provider's next key serves the request, then
 // its fallback; with neither, the request is answered 429 with which key is
 // at which cap and how to go on. The key never reaches the upstream. A

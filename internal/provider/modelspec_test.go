@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // specHome is a sandbox with a custom relay whose models no list knows
@@ -35,7 +35,7 @@ func specFiles(t *testing.T) string {
 }
 
 // A custom provider's model with nothing known takes a whole spec at once,
-// the catalog entry every reader goes by carries it, `magpie model specs`
+// the catalog entry every reader goes by carries it, `eipgam model specs`
 // lists it, and a reset leaves the model as it was before, unknown on
 // every part. The agents are told once for a change that writes both files.
 func TestModelSpecSetListReset(t *testing.T) {
@@ -179,7 +179,7 @@ func TestModelSpecProviderWildcard(t *testing.T) {
 // fetched again with other numbers. A model with no spec keeps its list's.
 func TestModelSpecWinsOverTheListAndASync(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	catalog.Reset()
 	t.Cleanup(catalog.Reset)
 	spec := "@magpie-community/opencode-x-auth"

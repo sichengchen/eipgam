@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A plugin account whose proxy is down, HTTP or SOCKS5, never reached its
@@ -27,7 +27,7 @@ func TestPluginProxyDownDoesNotRest(t *testing.T) {
 			for _, k := range []string{"HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy", "ALL_PROXY", "all_proxy", "NO_PROXY", "no_proxy"} {
 				t.Setenv(k, "")
 			}
-			t.Setenv("MAGPIE_BUN", bun)
+			t.Setenv("EIPGAM_BUN", bun)
 			t.Cleanup(plugin.Settle)
 			// the proxy b goes through, which answers as the vendor
 			good := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

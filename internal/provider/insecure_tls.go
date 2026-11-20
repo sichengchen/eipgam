@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/netproxy"
 )
 
 // TakesInsecureTLS is whether the provider may have its certificate left
@@ -27,7 +27,7 @@ func (p Provider) TakesInsecureTLS() bool {
 // TakesClientCert is whether the provider may show a client certificate
 // of its own, or trust a server CA of its own (ClientCert, #5596): one the
 // user added with a base URL of its own, as TakesInsecureTLS, and Remote
-// magpie, whose other magpie may ask for one (`magpie mtls`).
+// eipgam, whose other eipgam may ask for one (`eipgam mtls`).
 func (p Provider) TakesClientCert() bool {
 	return p.Account == nil && (p.Preset == "" || p.IsRemoteMagpie()) && !p.IsVertex() && hasEndpoint(p) && !subscriptionID(p.ID)
 }

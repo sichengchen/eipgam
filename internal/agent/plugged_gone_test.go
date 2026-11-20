@@ -8,18 +8,18 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentplug"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // kiloGoneSrc is an agent plugin as agent-kilo is: a JSONC file, the model
 // under "model" with the provider's prefix, and a provider block of its own.
 const kiloGoneSrc = `
-export const agent = { id: "kilo", name: "Kilo", config: "~/.config/kilo/kilo.jsonc", model: "model", prefix: "magpie/" };
+export const agent = { id: "kilo", name: "Kilo", config: "~/.config/kilo/kilo.jsonc", model: "model", prefix: "eipgam/" };
 export function connect({ gateway, models }) {
-  return { "provider.magpie": { npm: "@ai-sdk/openai-compatible", options: { baseURL: gateway.v1, apiKey: gateway.key }, models: Object.fromEntries(models.map(m => [m.id, { name: m.name }])) } };
+  return { "provider.eipgam": { npm: "@ai-sdk/openai-compatible", options: { baseURL: gateway.v1, apiKey: gateway.key }, models: Object.fromEntries(models.map(m => [m.id, { name: m.name }])) } };
 }
 `
 
@@ -36,7 +36,7 @@ const kiloMine = `{
 `
 
 // kiloWired is a home with the kilo plugin and kilo.jsonc as its user
-// wrote it, put on one of magpie's models; it returns the file and the
+// wrote it, put on one of eipgam's models; it returns the file and the
 // plugin's spec.
 func kiloWired(t *testing.T) (string, string) {
 	t.Helper()
@@ -51,7 +51,7 @@ func kiloWired(t *testing.T) (string, string) {
 		t.Fatal(err)
 	}
 	setUpInMagpie(a.ID)
-	if err := a.Field("model").Set("magpie/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("eipgam/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(path); string(b) == kiloMine || !a.Wired() {
@@ -82,7 +82,7 @@ func TestPluginOffPutsItsAgentBack(t *testing.T) {
 	if _, err := Find("kilo"); err == nil {
 		t.Fatal("kilo is still an agent with its plugin off")
 	}
-	// `magpie kilo default` with the plugin off says so, not "unknown agent"
+	// `eipgam kilo default` with the plugin off says so, not "unknown agent"
 	if g, ok, err := RestoreGone("kilo"); !ok || err != nil || g.PluginOff != "Kilo" || len(g.Put)+len(g.Off) != 0 {
 		t.Fatalf("kilo default with its plugin off: %+v, %v, %v", g, ok, err)
 	}
@@ -98,13 +98,13 @@ func TestPluginOffPutsItsAgentBack(t *testing.T) {
 	// on again it stays as the user had it, till they switch it on
 	fileAsMine(t, path, kiloMine)
 	if a.Wired() {
-		t.Fatal("on again, magpie wired kilo by itself")
+		t.Fatal("on again, eipgam wired kilo by itself")
 	}
 	c, err := a.ConnectHow()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.How != "again" || a.Field("model").Get() != "magpie/deepseek/pro" {
+	if c.How != "again" || a.Field("model").Get() != "eipgam/deepseek/pro" {
 		t.Fatalf("switched on: %+v, model %q", c, a.Field("model").Get())
 	}
 }
@@ -121,7 +121,7 @@ func TestPluginRemovePutsItsAgentBack(t *testing.T) {
 	}
 }
 
-// A plugin switched off before magpie did this (its stash from then, with
+// A plugin switched off before eipgam did this (its stash from then, with
 // no spec or format) and then removed: its module, read as it is, puts the
 // agent back.
 func TestPluginRemovedWhileOffPutsItsAgentBack(t *testing.T) {
@@ -137,7 +137,7 @@ func TestPluginRemovedWhileOffPutsItsAgentBack(t *testing.T) {
 	fileAsMine(t, path, kiloMine)
 }
 
-// A plugin whose module is gone from disk, still listed: what magpie
+// A plugin whose module is gone from disk, still listed: what eipgam
 // stashed of the file puts it back.
 func TestPluginWithItsModuleGonePutsItsAgentBack(t *testing.T) {
 	path, spec := kiloWired(t)
@@ -151,7 +151,7 @@ func TestPluginWithItsModuleGonePutsItsAgentBack(t *testing.T) {
 	fileAsMine(t, path, kiloMine)
 }
 
-// A plugin deleted on disk and off plugins.json: `magpie kilo default`
+// A plugin deleted on disk and off plugins.json: `eipgam kilo default`
 // (RestoreGone) puts the file back from the stash alone, an old stash
 // with no format by its file's name.
 func TestRestoreGoneAgent(t *testing.T) {
@@ -177,7 +177,7 @@ func TestRestoreGoneAgent(t *testing.T) {
 	}
 }
 
-// A file the user took off magpie by hand since is theirs: RestoreGone
+// A file the user took off eipgam by hand since is theirs: RestoreGone
 // leaves it and forgets the stash.
 func TestRestoreGoneLeavesAFileOffMagpie(t *testing.T) {
 	path, spec := kiloWired(t)
@@ -198,7 +198,7 @@ func TestRestoreGoneLeavesAFileOffMagpie(t *testing.T) {
 }
 
 // oldStash takes the spec and format out of the stash under key, as a
-// magpie before #3810 wrote it.
+// eipgam before #3810 wrote it.
 func oldStash(t *testing.T, key string) {
 	t.Helper()
 	var st map[string]any

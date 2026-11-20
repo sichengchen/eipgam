@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Claude Desktop's gateway address (#4546): drawn only while magpie offers
+// Claude Desktop's gateway address (#4546): drawn only while eipgam offers
 // an https address of this computer, picked from the app's own menu. All
 // APIs and assets are intercepted; no backend or external network is used.
 const assert = require("node:assert/strict");
@@ -14,7 +14,7 @@ const fresh = (offer) => ({
   agents: [{
     id: "claude-desktop", name: "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired: true,
     fields: [
-      { key: "provider", label: "provider", value: "magpie", options: [{ value: "magpie", label: "magpie" }] },
+      { key: "provider", label: "provider", value: "eipgam", options: [{ value: "eipgam", label: "eipgam" }] },
       { key: "gateway", label: "gateway", value: "", options: offer ? [{ value: "", label: "This computer" }, { value: LAN, label: LAN }] : [] },
     ],
   }],
@@ -60,7 +60,7 @@ async function open(browser, lang, width, fixture, errors) {
   page.setDefaultNavigationTimeout(60000);
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, fixture));
-  await page.goto("http://magpie.test/");
+  await page.goto("http://eipgam.test/");
   await page.locator(cd).waitFor();
   return page;
 }

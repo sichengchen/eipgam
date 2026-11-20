@@ -13,12 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// healthcheck: magpie healthcheck [--addr host:port] — exits 0 when a
-// magpie gateway answers, for a container's HEALTHCHECK, which has no curl to
-// ask it with. It asks where --addr says, else MAGPIE_ADDR, else where the
+// healthcheck: eipgam healthcheck [--addr host:port] — exits 0 when a
+// eipgam gateway answers, for a container's HEALTHCHECK, which has no curl to
+// ask it with. It asks where --addr says, else EIPGAM_ADDR, else where the
 // running gateway wrote down it listens (gateway.ClientURL), else the port in
 // Settings' Gateway address on 127.0.0.1, 3425 unless set.
 func healthcheck(args []string) error {
@@ -33,8 +33,8 @@ func healthcheck(args []string) error {
 	}
 	defer res.Body.Close()
 	b, _ := io.ReadAll(io.LimitReader(res.Body, 4096))
-	if res.StatusCode != http.StatusOK || !bytes.Contains(b, []byte(`"magpie"`)) {
-		return fmt.Errorf("%s answers %s, not as a magpie gateway", base, res.Status)
+	if res.StatusCode != http.StatusOK || !bytes.Contains(b, []byte(`"eipgam"`)) {
+		return fmt.Errorf("%s answers %s, not as a eipgam gateway", base, res.Status)
 	}
 	return nil
 }
@@ -45,10 +45,10 @@ func healthcheck(args []string) error {
 func clientBase(name string, args []string) (string, error) {
 	rest, addr, err := addrFlag(args)
 	if err != nil {
-		return "", fmt.Errorf("magpie %s: %w", name, err)
+		return "", fmt.Errorf("eipgam %s: %w", name, err)
 	}
 	if len(rest) > 0 {
-		return "", fmt.Errorf("magpie %s: unknown %q · usage: magpie %s [--addr host:port]", name, rest[0], name)
+		return "", fmt.Errorf("eipgam %s: unknown %q · usage: eipgam %s [--addr host:port]", name, rest[0], name)
 	}
 	if addr == "" {
 		return gateway.ClientURL(), nil

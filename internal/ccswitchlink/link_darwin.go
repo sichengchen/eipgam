@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // bundleID is CC Switch's (its tauri.conf.json "identifier").
@@ -33,8 +33,8 @@ var run = func(name string, args ...string) error {
 var executable = os.Executable
 
 // forward has Launch Services open the link with CC Switch by its bundle
-// id, which fails when no app has that id. Then magpie's own bundle is
-// registered again: its Info.plist claims magpie:// only since 03314b25a,
+// id, which fails when no app has that id. Then eipgam's own bundle is
+// registered again: its Info.plist claims eipgam:// only since 03314b25a,
 // so Launch Services forgets the ccswitch:// claim it remembered.
 func forward(link string) error {
 	if err := run("open", "-b", bundleID, link); err != nil {

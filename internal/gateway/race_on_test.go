@@ -6,7 +6,7 @@ package gateway
 // what is put in it go, so a test of what a pool saves is skipped.
 const raceOn = true
 
-// oldBodyLimit is 64 MB, the request body limit magpie had before #118,
+// oldBodyLimit is 64 MB, the request body limit eipgam had before #118,
 // in the plain run. Under -race it is 20 MB: the race detector makes a
 // scan of the 64 MB bodies take 25 to 30 times as long, and the five
 // tests that send one took ~170s of the gateway's race run on an M5 Pro

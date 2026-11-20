@@ -1,6 +1,6 @@
 {
-  "name": "magpie",
-  "short_name": "magpie",
+  "name": "eipgam",
+  "short_name": "eipgam",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

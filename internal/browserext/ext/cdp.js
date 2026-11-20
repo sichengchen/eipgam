@@ -6,9 +6,9 @@
 // The page never learns it is driven. Runtime is left off (a page can
 // tell it is on: Chrome then reads what the page logs, and a logged
 // object's getters run), save on a developer's own host or once an agent
-// asks for the console. Everything magpie reads or runs in a page runs
+// asks for the console. Everything eipgam reads or runs in a page runs
 // in an isolated world of its own, which the page's scripts can't see or
-// patch: nothing of magpie's shows in the page's own JavaScript.
+// patch: nothing of eipgam's shows in the page's own JavaScript.
 
 // let go this long after the last call in a tab ends
 const IDLE_MS = 20 * 1000;
@@ -32,7 +32,7 @@ export function state(tabId) {
       // through a session of its own: frame id → session, and session →
       // { frame, parent session }
       children: new Map(), frameOf: new Map(),
-      worlds: new Map(), // "session|frame" → magpie's isolated world there
+      worlds: new Map(), // "session|frame" → eipgam's isolated world there
       sentInput: false,
       console: false, // Runtime is on: the page's logs are read
       mouse: null, // where the mouse last was, {x, y}
@@ -317,12 +317,12 @@ export { sleep };
 // it, and it counts what the page changes. Each read answers [how many
 // changes so far, ms since the last one].
 const WATCH = `(() => {
-  if (!window.__magpieWatch) {
-    const w = window.__magpieWatch = { n: 0, at: 0 };
+  if (!window.__eipgamWatch) {
+    const w = window.__eipgamWatch = { n: 0, at: 0 };
     new MutationObserver((r) => { w.n += r.length; w.at = Date.now(); })
       .observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
   }
-  const w = window.__magpieWatch;
+  const w = window.__eipgamWatch;
   return [w.n, w.at ? Date.now() - w.at : 1e9];
 })()`;
 
@@ -334,7 +334,7 @@ async function mainFrame(t) {
 
 const STALE_WORLD = /Cannot find context|context with specified id|Execution context was destroyed|Inspected target navigated/i;
 
-// world is magpie's isolated world in a frame (the tab's main frame
+// world is eipgam's isolated world in a frame (the tab's main frame
 // without one, or the frame of session sid): its execution context id, a
 // new one for each document
 export async function world(t, frame, sid) {
@@ -343,13 +343,13 @@ export async function world(t, frame, sid) {
   const k = (sid || "") + "|" + frame;
   let ctx = t.worlds.get(k);
   if (!ctx) {
-    ctx = (await send(t.tabId, "Page.createIsolatedWorld", { frameId: frame, worldName: "magpie" }, sid)).executionContextId;
+    ctx = (await send(t.tabId, "Page.createIsolatedWorld", { frameId: frame, worldName: "eipgam" }, sid)).executionContextId;
     t.worlds.set(k, ctx);
   }
   return ctx;
 }
 
-// inWorld runs fn(ctx) in magpie's world of a frame, in a new one when
+// inWorld runs fn(ctx) in eipgam's world of a frame, in a new one when
 // the document it had is gone
 async function inWorld(t, where, fn) {
   for (let i = 0; ; i++) {
@@ -366,7 +366,7 @@ async function inWorld(t, where, fn) {
   }
 }
 
-// read evaluates an expression in magpie's world of the main frame (or
+// read evaluates an expression in eipgam's world of the main frame (or
 // where: {frame, sid}) and answers its value
 export async function read(t, expression, where = {}) {
   return inWorld(t, where, async (contextId) => {
@@ -381,9 +381,9 @@ export async function evaluate(t, expression, objectGroup, where = {}) {
   return inWorld(t, where, async (contextId) => (await send(t.tabId, "Runtime.evaluate", { expression, contextId, objectGroup }, where.sid)).result);
 }
 
-// resolve is an element (by backendNodeId) as an object in magpie's world
+// resolve is an element (by backendNodeId) as an object in eipgam's world
 // of the frame its document is
-export async function resolve(t, backendNodeId, where = {}, objectGroup = "magpie-act") {
+export async function resolve(t, backendNodeId, where = {}, objectGroup = "eipgam-act") {
   return inWorld(t, where, async (executionContextId) =>
     (await send(t.tabId, "DOM.resolveNode", { backendNodeId, objectGroup, executionContextId }, where.sid)).object);
 }

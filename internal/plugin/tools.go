@@ -13,14 +13,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
 // Tool is a tool a plugin gives: OpenCode's tool hook ({tool: {name:
-// tool({description, args, execute})}}), which magpie offers every agent
+// tool({description, args, execute})}}), which eipgam offers every agent
 // through its plugin tools MCP server (internal/gateway/tools_mcp.go).
 type Tool struct {
 	Name        string `json:"name"`

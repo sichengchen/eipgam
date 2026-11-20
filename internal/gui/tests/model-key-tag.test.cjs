@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
 
       const editor = page.locator("#modal:not([hidden]) .editor");
       await page.locator(".row.provider", { hasText: "Relay" }).click();
@@ -132,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // a provider of one key: no tags
       await page.keyboard.press("Escape");
       await editor.waitFor({ state: "detached" }).catch(() => {});
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Single" }).click();
       await chips.first().waitFor();
       assert.equal(await editor.locator(".mkey").count(), 0);

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // Codex puts its own bookkeeping on each input item it sends OpenAI, in

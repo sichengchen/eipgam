@@ -16,7 +16,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_GUI_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_GUI_ASSETS || path.resolve(__dirname, "../assets"));
 const prov = (users) => ({
   id: "monkeycode", name: "MonkeyCode", icon: "", chat: "", responses: "", anthropic: "", catalog: "", routing: "",
   models: [{ id: "m", name: "", on: true }], agents: [], fallback: [], headers: {}, keyList: [], proxy: "",
@@ -54,7 +54,7 @@ async function open(browser, lang, web, width, height, ctl) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, web, ctl));
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://eipgam.test/?view=providers");
   await page.locator(".row.provider", { hasText: "MonkeyCode" }).first().click();
   await page.locator(`.editor .acc[data-account-id="${ctl.users.at(-1)}"] .quota-refresh`).waitFor();
   await page.waitForFunction(() => !loginUsage.monkeycode?.loading);

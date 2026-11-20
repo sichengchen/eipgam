@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Claude Code's advisor (/advisor) for magpie's models (Awad_Yoo on X):
+// Claude Code's advisor (/advisor) for eipgam's models (Awad_Yoo on X):
 // connected, the opened row's Tiers has an Advisor line after Auto mode.
 // Unset it says Off; a click opens the app's model picker with Off first,
 // noted "no advisor", and a model picked is posted; Off posts it empty. It
-// is no square of the row's own. Before Claude Code goes through magpie it
+// is no square of the row's own. Before Claude Code goes through eipgam it
 // has no options, so neither line nor square shows. No click scrolls the
 // page. In English and Chinese, at a normal and a narrow width. No
 // backend: the API is faked here.
@@ -14,12 +14,12 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const models = [{ value: "magpie/v/glm", label: "GLM", ref: "v/glm" }, { value: "magpie/v/flash", label: "Flash", ref: "v/flash" }];
+const models = [{ value: "eipgam/v/glm", label: "GLM", ref: "v/glm" }, { value: "eipgam/v/flash", label: "Flash", ref: "v/flash" }];
 const tiers = ["opus", "sonnet", "haiku", "fable"];
 const claude = (id, routed) => ({
   id, name: "Claude Code", path: "/test/settings.json", icon: "claudecode-color", wired: routed,
   fields: [
-    { key: "model", label: "model", value: routed ? "magpie/v/glm" : "opus", options: routed ? models : [{ value: "opus" }] },
+    { key: "model", label: "model", value: routed ? "eipgam/v/glm" : "opus", options: routed ? models : [{ value: "opus" }] },
     ...tiers.map((tier) => ({ key: tier, label: tier, value: "", options: models })),
     { key: "subagent", label: "subagents", value: "", options: routed ? models : [] },
     { key: "auto_mode", label: "auto mode", value: "", options: routed ? models : [] },
@@ -81,9 +81,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator(cc).waitFor();
-        // not through magpie: nothing to pick, so nothing shows
+        // not through eipgam: nothing to pick, so nothing shows
         assert.equal(await page.locator('.row.agent[data-id="cc-own"] [data-key="advisor"]').count(), 0);
         await page.locator(`${cc} .ag-link`).click();
         await page.locator(`${cc} .ag-exp`).waitFor();
@@ -110,7 +110,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(first.includes(w.off) && first.includes(w.note), first);
         await page.locator("#pop #list li", { hasText: "Flash" }).first().click();
         await page.waitForFunction(() => document.querySelector('.row.agent[data-id="claude"] .ag-exp .field[data-key="advisor"] .v:not(.empty)'));
-        assert.deepEqual(sets, [{ agent: "claude", field: "advisor", value: "magpie/v/flash" }]);
+        assert.deepEqual(sets, [{ agent: "claude", field: "advisor", value: "eipgam/v/flash" }]);
 
         // Off takes it out again
         await page.locator(`${cc} .ag-exp .field.ag-pick[data-key="advisor"]`).click();

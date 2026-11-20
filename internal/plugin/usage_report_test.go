@@ -11,7 +11,7 @@ import (
 
 // A plugin reports a request it sent its vendor on its own (Devin's cache
 // keepalive ping, plugins#592) through input.magpie.usage, from its own
-// timer: magpie is told its provider, the account it names (one of the
+// timer: eipgam is told its provider, the account it names (one of the
 // provider's; else the request's in hand, else the provider's own id) and
 // the call, its tokens whole numbers from 0. A call with no provider, no
 // kind of [a-z0-9_-] or no model throws, and nothing is told of it.

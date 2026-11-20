@@ -1,14 +1,14 @@
 package usageapi
 
 import (
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// The request feed as GET /v1/magpie/usage/requests?cursor= tells it
+// The request feed as GET /v1/eipgam/usage/requests?cursor= tells it
 // (rdsaltbo on X, #6060). See usage.FeedRead for how a change is found.
 
 // Originals are the ids the sources themselves gave a call, each told by who
-// gave it. A key that is absent is one the source did not give: magpie
+// gave it. A key that is absent is one the source did not give: eipgam
 // invents none, and its own id of the row is FeedRow.ID.
 type Originals struct {
 	// RequestID: the id the vendor gave the request, or, in a row read from
@@ -19,7 +19,7 @@ type Originals struct {
 	// has ClientResponseID instead
 	ResponseID string `json:"response_id,omitempty"`
 	// ClientResponseID: the response object id the gateway sent its client,
-	// which may be magpie's own when the reply was translated
+	// which may be eipgam's own when the reply was translated
 	ClientResponseID string `json:"client_response_id,omitempty"`
 	// MessageID: the id the agent's own file gives the call's message
 	// (Claude Code's msg_…), in a row read from that file
@@ -33,15 +33,15 @@ type Originals struct {
 
 // FeedRow is a row of the feed. Every row is one request: a call the
 // gateway served, one read from an agent's file, one a client reported, or
-// one another computer's magpie shared. None is a session or model summary.
+// one another computer's eipgam shared. None is a session or model summary.
 type FeedRow struct {
-	// ID is magpie's own, the same on every read and after a restart
+	// ID is eipgam's own, the same on every read and after a restart
 	ID string `json:"id"`
 	// Seq is the feed position of this version of the row
 	Seq int64 `json:"seq"`
-	// Origin: "gateway" (magpie served it), "session" (read from the agent's
+	// Origin: "gateway" (eipgam served it), "session" (read from the agent's
 	// own file; the gateway never saw it), "reported" (a client told
-	// magpie), "" (a call magpie rejected itself, or its own test)
+	// eipgam), "" (a call eipgam rejected itself, or its own test)
 	Origin    string    `json:"origin"`
 	Originals Originals `json:"original_ids"`
 	Row

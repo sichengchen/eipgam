@@ -12,7 +12,7 @@ import (
 )
 
 // 毅 on Discord: Codex 0.166's app refused to reopen a chat from before
-// magpie ("This chat uses openai, but your current provider is magpie").
+// eipgam ("This chat uses openai, but your current provider is eipgam").
 // RelabelCodexThreads moves the plain rollouts only; a packed one (.zst)
 // stayed on OpenAI. MovePackedCodexThreads moves the packed ones with a
 // turn since the time given, newest first, a copy of each kept, until the
@@ -63,7 +63,7 @@ func TestMovePackedCodexThreads(t *testing.T) {
 
 	// a budget the first thread's file reaches: that one alone, and it
 	// says one is left, for its caller to come back for it
-	moved, more, err := MovePackedCodexThreads(home, "openai", "magpie", since, 1)
+	moved, more, err := MovePackedCodexThreads(home, "openai", "eipgam", since, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,10 +77,10 @@ func TestMovePackedCodexThreads(t *testing.T) {
 		t.Fatalf("no copy kept: %v", err)
 	}
 	// the next call goes on with the rest
-	if moved, more, err = MovePackedCodexThreads(home, "openai", "magpie", since, 64<<20); err != nil || len(moved) != 1 || moved[0].ID != newer || more {
+	if moved, more, err = MovePackedCodexThreads(home, "openai", "eipgam", since, 64<<20); err != nil || len(moved) != 1 || moved[0].ID != newer || more {
 		t.Fatalf("again: %+v more %v %v", moved, more, err)
 	}
-	want := map[string]string{newest: "magpie", newer: "magpie", old: "openai", plain: "openai", theirs: "custom"}
+	want := map[string]string{newest: "eipgam", newer: "eipgam", old: "openai", plain: "openai", theirs: "custom"}
 	for id, prov := range want {
 		if got, _, _ := threadProvider(t, db, id); got != prov {
 			t.Errorf("row %s on %q, want %q", id, got, prov)
@@ -105,7 +105,7 @@ func TestMovePackedCodexThreads(t *testing.T) {
 		t.Fatalf("packed rollout after the move: %v\n%s", err, out)
 	}
 	// nothing left to move
-	if moved, more, err = MovePackedCodexThreads(home, "openai", "magpie", since, 64<<20); err != nil || len(moved) != 0 || more {
+	if moved, more, err = MovePackedCodexThreads(home, "openai", "eipgam", since, 64<<20); err != nil || len(moved) != 0 || more {
 		t.Fatalf("a third time: %+v more %v %v", moved, more, err)
 	}
 }
@@ -127,7 +127,7 @@ func TestMovePackedCodexThreadsNoUpdatedAt(t *testing.T) {
 		t.Fatal(err)
 	}
 	d.Close()
-	if moved, _, err := MovePackedCodexThreads(home, "openai", "magpie", time.Time{}, 64<<20); err != nil || len(moved) != 0 {
+	if moved, _, err := MovePackedCodexThreads(home, "openai", "eipgam", time.Time{}, 64<<20); err != nil || len(moved) != 0 {
 		t.Fatalf("moved %+v %v", moved, err)
 	}
 	if got, _, _ := threadProvider(t, db, id); got != "openai" {
@@ -136,9 +136,9 @@ func TestMovePackedCodexThreadsNoUpdatedAt(t *testing.T) {
 }
 
 // hxy920830 on X: Codex had been on a provider of the user's own, a
-// relay's table, and once magpie was its provider the app listed those
+// relay's table, and once eipgam was its provider the app listed those
 // threads and refused to open one ("This chat uses myrelay, but your
-// current provider is magpie"). An id of another length than magpie's
+// current provider is eipgam"). An id of another length than eipgam's
 // can't be written in place, so MoveRecentCodexThreads moves the recent
 // ones, plain or packed, each rewritten with a copy kept; an older one
 // and another provider's stay.
@@ -173,7 +173,7 @@ func TestMoveRecentCodexThreads(t *testing.T) {
 	}
 	d.Close()
 	since := now.Add(-30 * 24 * time.Hour)
-	moved, _, err := MoveRecentCodexThreads(home, "myrelay", "magpie", since, 64<<20)
+	moved, _, err := MoveRecentCodexThreads(home, "myrelay", "eipgam", since, 64<<20)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,7 +185,7 @@ func TestMoveRecentCodexThreads(t *testing.T) {
 			t.Fatalf("%s: no copy kept: %v", mv.ID, err)
 		}
 	}
-	want := map[string]string{plain: "magpie", packed: "magpie", old: "myrelay", theirs: "custom"}
+	want := map[string]string{plain: "eipgam", packed: "eipgam", old: "myrelay", theirs: "custom"}
 	for id, prov := range want {
 		if got, _, _ := threadProvider(t, db, id); got != prov {
 			t.Errorf("row %s on %q, want %q", id, got, prov)
@@ -202,7 +202,7 @@ func TestMoveRecentCodexThreads(t *testing.T) {
 		t.Fatalf("plain rollout after the move:\n%s", b)
 	}
 	// the packed-only move of the same leaves a plain thread
-	if moved, _, err = MovePackedCodexThreads(home, "custom", "magpie", since, 64<<20); err != nil || len(moved) != 0 {
+	if moved, _, err = MovePackedCodexThreads(home, "custom", "eipgam", since, 64<<20); err != nil || len(moved) != 0 {
 		t.Fatalf("packed-only: %+v %v", moved, err)
 	}
 }

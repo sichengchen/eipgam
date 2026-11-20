@@ -15,12 +15,12 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// The magpie before is gone but its WebView2 isn't yet: the start waits
+// The eipgam before is gone but its WebView2 isn't yet: the start waits
 // for the msedgewebview2 processes it left (vsoullai on X, 0.1.4096: the
-// new magpie's WebView2 joined the old browser going down and hung). The
-// old magpie here is this test binary; its "WebView2" is a copy of it named
+// new eipgam's WebView2 joined the old browser going down and hung). The
+// old eipgam here is this test binary; its "WebView2" is a copy of it named
 // msedgewebview2.exe that ends 3s after it.
-const testPredecessorEnv = "MAGPIE_TEST_PREDECESSOR"
+const testPredecessorEnv = "EIPGAM_TEST_PREDECESSOR"
 
 func init() {
 	v := os.Getenv(testPredecessorEnv)
@@ -104,17 +104,17 @@ func TestAwaitGoneWaitsForTheOldWebView(t *testing.T) {
 	}
 	go func() {
 		time.Sleep(300 * time.Millisecond)
-		in.Close() // the old magpie quits; its WebView2 runs on 3s
+		in.Close() // the old eipgam quits; its WebView2 runs on 3s
 	}()
-	t.Setenv("MAGPIE_REPLACES", strconv.Itoa(old.Process.Pid))
+	t.Setenv("EIPGAM_REPLACES", strconv.Itoa(old.Process.Pid))
 	start := time.Now()
 	AwaitPredecessor()
 	if _, err := os.Stat(done); err != nil {
-		t.Fatalf("the start went on after %s, while the old magpie's WebView2 still ran", time.Since(start).Round(time.Millisecond))
+		t.Fatalf("the start went on after %s, while the old eipgam's WebView2 still ran", time.Since(start).Round(time.Millisecond))
 	}
 }
 
-// The magpie before stuck in its exit, one thread left on the gateway's
+// The eipgam before stuck in its exit, one thread left on the gateway's
 // port and the WebView2 profile, is ended rather than waited for until the
 // new one goes on beside it and hangs (BESTLJP0412 on X, 0.1.4179 to
 // 0.1.4193: "Not Responding" after an update's restart). Its stand-in quits
@@ -139,22 +139,22 @@ func TestAwaitGoneEndsAMagpieStuckInItsExit(t *testing.T) {
 	pid := uint32(old.Process.Pid)
 	for deadline := time.Now().Add(10 * time.Second); threads(pid) != 1; time.Sleep(50 * time.Millisecond) {
 		if time.Now().After(deadline) {
-			t.Fatalf("the old magpie never got stuck in its exit: %d threads", threads(pid))
+			t.Fatalf("the old eipgam never got stuck in its exit: %d threads", threads(pid))
 		}
 	}
 	saved := predecessorMax
 	predecessorMax = 20 * time.Second
 	t.Cleanup(func() { predecessorMax = saved })
-	t.Setenv("MAGPIE_REPLACES", strconv.Itoa(old.Process.Pid))
+	t.Setenv("EIPGAM_REPLACES", strconv.Itoa(old.Process.Pid))
 	start := time.Now()
 	AwaitPredecessor()
 	took := time.Since(start)
 	select {
 	case <-exited:
 	case <-time.After(5 * time.Second):
-		t.Fatalf("the start went on after %s with the old magpie still stuck in its exit", took.Round(time.Millisecond))
+		t.Fatalf("the start went on after %s with the old eipgam still stuck in its exit", took.Round(time.Millisecond))
 	}
 	if took >= predecessorMax {
-		t.Fatalf("waited the whole %s for a magpie stuck in its exit", predecessorMax)
+		t.Fatalf("waited the whole %s for a eipgam stuck in its exit", predecessorMax)
 	}
 }

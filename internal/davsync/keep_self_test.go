@@ -3,13 +3,13 @@ package davsync
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Whether a Remote magpie that is this magpie is used anyway is this
+// Whether a Remote eipgam that is this eipgam is used anyway is this
 // computer's own (provider.Mirror keeps it): on the other computer the
-// same provider points at a magpie that is not that one (hanslin1666 on
+// same provider points at a eipgam that is not that one (hanslin1666 on
 // Discord). Changing it uploads nothing.
 func TestKeepSelfIsNoChange(t *testing.T) {
 	p := provider.Provider{ID: "rem", Name: "Rem", Preset: provider.RemoteMagpiePreset}

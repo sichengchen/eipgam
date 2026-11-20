@@ -10,7 +10,7 @@ import (
 )
 
 // Report a problem copies the version, the system, the architecture and
-// where magpie is open, and nothing that names the user: no home folder,
+// where eipgam is open, and nothing that names the user: no home folder,
 // user name or host. The post it opens carries no part of it in its link
 // (River_WLan on X).
 func TestFeedbackBlockHoldsNoPrivateFacts(t *testing.T) {
@@ -21,7 +21,7 @@ func TestFeedbackBlockHoldsNoPrivateFacts(t *testing.T) {
 	if rec.Code != 200 || json.Unmarshal(rec.Body.Bytes(), &got) != nil {
 		t.Fatalf("feedback: %d %s", rec.Code, rec.Body)
 	}
-	for _, want := range []string{"magpie " + Version, "OS: ", "Arch: " + runtime.GOARCH, "Opened in: browser"} {
+	for _, want := range []string{"eipgam " + Version, "OS: ", "Arch: " + runtime.GOARCH, "Opened in: browser"} {
 		if !strings.Contains(got.Text, want) {
 			t.Errorf("block lacks %q:\n%s", want, got.Text)
 		}
@@ -49,7 +49,7 @@ func TestFeedbackBlockHoldsNoPrivateFacts(t *testing.T) {
 }
 
 // A build that runs translated says so beside its architecture: an Intel
-// magpie under Rosetta, an x64 one under Windows on Arm's emulation
+// eipgam under Rosetta, an x64 one under Windows on Arm's emulation
 // (@EV_John_Liu on X), each of which the next update replaces with the
 // arm64 build. A native one says its architecture alone.
 func TestFeedbackArchSaysTranslated(t *testing.T) {

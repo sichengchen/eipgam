@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
-// `magpie claude-desktop launcher` (#5671): add and remove turn the
+// `eipgam claude-desktop launcher` (#5671): add and remove turn the
 // isolated Desktop on and off, nothing else is a word it takes, --help
 // changes nothing, and off a Mac it refuses.
 func TestClaudeDesktopLauncher(t *testing.T) {
@@ -22,7 +22,7 @@ func TestClaudeDesktopLauncher(t *testing.T) {
 		st.On = on
 		st.Launcher = ""
 		if on {
-			st.Launcher = "/Users/x/Applications/Claude Magpie.app"
+			st.Launcher = "/Users/x/Applications/Claude eipgam.app"
 		}
 		return st.Launcher, nil
 	}
@@ -33,11 +33,11 @@ func TestClaudeDesktopLauncher(t *testing.T) {
 		want  string
 		calls []bool
 	}{
-		{[]string{"claude-desktop", "launcher"}, "run `magpie claude-desktop launcher add`", nil},
-		{[]string{"claude-desktop", "launcher", "--help"}, "magpie claude-desktop launcher [add|remove]", nil},
-		{[]string{"claude-desktop", "launcher", "add"}, "Claude Magpie: /Users/x/Applications/Claude Magpie.app", []bool{true}},
-		{[]string{"claude-app", "launcher"}, "/Users/x/Applications/Claude Magpie.app\n", []bool{true}},
-		{[]string{"claude-desktop", "launcher", "remove"}, "removed /Users/x/Applications/Claude Magpie.app", []bool{true, false}},
+		{[]string{"claude-desktop", "launcher"}, "run `eipgam claude-desktop launcher add`", nil},
+		{[]string{"claude-desktop", "launcher", "--help"}, "eipgam claude-desktop launcher [add|remove]", nil},
+		{[]string{"claude-desktop", "launcher", "add"}, "Claude eipgam: /Users/x/Applications/Claude eipgam.app", []bool{true}},
+		{[]string{"claude-app", "launcher"}, "/Users/x/Applications/Claude eipgam.app\n", []bool{true}},
+		{[]string{"claude-desktop", "launcher", "remove"}, "removed /Users/x/Applications/Claude eipgam.app", []bool{true, false}},
 	} {
 		out, err := runOut(t, c.args...)
 		if err != nil || !strings.Contains(out, c.want) {
@@ -61,13 +61,13 @@ func TestClaudeDesktopLauncher(t *testing.T) {
 	}
 }
 
-// `magpie claude-desktop launcher claude-dir` (#6459): on and off reach
+// `eipgam claude-desktop launcher claude-dir` (#6459): on and off reach
 // the setting, nothing says which folder, another word refuses, and off a
 // Mac it refuses too.
 func TestClaudeDesktopLauncherClaudeDir(t *testing.T) {
 	helpHome(t)
 	var calls []bool
-	st := agent.DesktopIsolated{On: true, Launcher: "/Users/x/Applications/Claude Magpie.app", ClaudeDir: "/Users/x/.claude-magpie-desktop"}
+	st := agent.DesktopIsolated{On: true, Launcher: "/Users/x/Applications/Claude eipgam.app", ClaudeDir: "/Users/x/.claude-eipgam-desktop"}
 	here := true
 	oldSet, oldHere := setDesktopIsolatedClaude, desktopIsolatedHere
 	t.Cleanup(func() { setDesktopIsolatedClaude, desktopIsolatedHere = oldSet, oldHere })
@@ -83,9 +83,9 @@ func TestClaudeDesktopLauncherClaudeDir(t *testing.T) {
 		calls []bool
 	}{
 		{[]string{"claude-desktop", "launcher", "claude-dir"}, "~/.claude: run", nil},
-		{[]string{"claude-desktop", "launcher", "claude-dir", "on"}, "Quit Claude Magpie and open it again", []bool{true}},
-		{[]string{"claude-desktop", "launcher", "claude-dir"}, "/Users/x/.claude-magpie-desktop\n", []bool{true}},
-		{[]string{"claude-desktop", "launcher", "claude-dir", "off"}, "Claude Code in Claude Magpie: ~/.claude", []bool{true, false}},
+		{[]string{"claude-desktop", "launcher", "claude-dir", "on"}, "Quit Claude eipgam and open it again", []bool{true}},
+		{[]string{"claude-desktop", "launcher", "claude-dir"}, "/Users/x/.claude-eipgam-desktop\n", []bool{true}},
+		{[]string{"claude-desktop", "launcher", "claude-dir", "off"}, "Claude Code in Claude eipgam: ~/.claude", []bool{true, false}},
 	} {
 		out, err := runOut(t, c.args...)
 		if err != nil || !strings.Contains(out, c.want) {

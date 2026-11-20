@@ -15,7 +15,7 @@ import (
 // installed; the repository moved on to ba898e7 twenty seconds later, and
 // the reader's Update installed that
 const (
-	reportSpec = "github:faithleysath/magpie-oh-my-aihub"
+	reportSpec = "github:faithleysath/eipgam-oh-my-aihub"
 	reportPkg  = "@oh-my-aihub/magpie-plugin"
 	reportWas  = "fdaa691"
 	reportSeen = "3b411a5"
@@ -78,11 +78,11 @@ func TestGitWaitingGoneOnceUpdatedPastTheLook(t *testing.T) {
 		name, tag string
 		waits     bool
 	}{
-		{"updated past the look", "faithleysath-magpie-oh-my-aihub-" + reportNow, false},
-		{"updated to the look's", "faithleysath-magpie-oh-my-aihub-" + reportSeen, false},
-		{"not updated", "faithleysath-magpie-oh-my-aihub-" + reportWas, true},
+		{"updated past the look", "faithleysath-eipgam-oh-my-aihub-" + reportNow, false},
+		{"updated to the look's", "faithleysath-eipgam-oh-my-aihub-" + reportSeen, false},
+		{"not updated", "faithleysath-eipgam-oh-my-aihub-" + reportWas, true},
 		// installed again some other way: not the one the look saw installed
-		{"another install", "faithleysath-magpie-oh-my-aihub-1234567", false},
+		{"another install", "faithleysath-eipgam-oh-my-aihub-1234567", false},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			updatesSandbox(t)
@@ -104,7 +104,7 @@ func TestGitWaitingGoneOnceUpdatedPastTheLook(t *testing.T) {
 		if err := save(List{Plugins: []Entry{{Spec: pinned}}}); err != nil {
 			t.Fatal(err)
 		}
-		gitInstalledAt(t, pinned, reportPkg, "faithleysath-magpie-oh-my-aihub-"+reportNow)
+		gitInstalledAt(t, pinned, reportPkg, "faithleysath-eipgam-oh-my-aihub-"+reportNow)
 		writeWaiting(t, Waiting{Spec: pinned, Package: reportPkg, Version: reportWas, Latest: reportNow, Git: true})
 		if got := PendingUpdates().Waiting; len(got) != 0 {
 			t.Fatalf("at its pin, Waiting = %+v", got)
@@ -121,7 +121,7 @@ func TestSettleWaitingRewritesTheRecord(t *testing.T) {
 	if err := save(List{Plugins: []Entry{{Spec: reportSpec}, {Spec: theirs + "@latest"}}}); err != nil {
 		t.Fatal(err)
 	}
-	gitInstalledAt(t, reportSpec, reportPkg, "faithleysath-magpie-oh-my-aihub-"+reportNow)
+	gitInstalledAt(t, reportSpec, reportPkg, "faithleysath-eipgam-oh-my-aihub-"+reportNow)
 	installedAt(t, theirs, "1.2.0")
 	writeWaiting(t,
 		Waiting{Spec: reportSpec, Package: reportPkg, Version: reportWas, Latest: reportSeen, Git: true},

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // claudeStatusAt makes the status line written run exe.
@@ -17,7 +17,7 @@ func claudeStatusAt(t *testing.T, exe string) {
 }
 
 // steven_4422 on Discord: the 5h and 7d use in Claude Code. The Agents
-// page's switch writes settings.json's statusLine to run this magpie's
+// page's switch writes settings.json's statusLine to run this eipgam's
 // statusline by its full path, beside what else is there, and takes it
 // out again; nothing else in the file moves.
 func TestClaudeStatusLineSwitch(t *testing.T) {
@@ -27,7 +27,7 @@ func TestClaudeStatusLineSwitch(t *testing.T) {
 }
 `
 	home, path := claudeSettings(t, before)
-	claudeStatusAt(t, "/Applications/Magpie.app/Contents/MacOS/magpie")
+	claudeStatusAt(t, "/Applications/eipgam.app/Contents/MacOS/eipgam")
 	a := claude(home)
 	f := a.Field("statusline")
 	if f == nil {
@@ -43,7 +43,7 @@ func TestClaudeStatusLineSwitch(t *testing.T) {
 		t.Fatal(err)
 	}
 	get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
-	if get("statusLine.type") != "command" || get("statusLine.command") != "/Applications/Magpie.app/Contents/MacOS/magpie statusline" ||
+	if get("statusLine.type") != "command" || get("statusLine.command") != "/Applications/eipgam.app/Contents/MacOS/eipgam statusline" ||
 		get("model") != "opus" || get("env.FOO") != "1" {
 		t.Fatalf("on:\n%s", readFile(path))
 	}
@@ -74,11 +74,11 @@ func TestClaudeStatusLineLeavesTheUsers(t *testing.T) {
 }
 `
 	home, path := claudeSettings(t, theirs)
-	claudeStatusAt(t, "/usr/local/bin/magpie")
+	claudeStatusAt(t, "/usr/local/bin/eipgam")
 	a := claude(home)
 	f := a.Field("statusline")
 	if f.Get() != "" {
-		t.Fatalf("the user's read as magpie's: %q", f.Get())
+		t.Fatalf("the user's read as eipgam's: %q", f.Get())
 	}
 	if opts := f.Options(nil); opts != nil {
 		t.Fatalf("offered over the user's own: %+v", opts)
@@ -97,18 +97,18 @@ func TestClaudeStatusLineLeavesTheUsers(t *testing.T) {
 	}
 }
 
-// Disconnect takes magpie's status line out with the rest of magpie.
+// Disconnect takes eipgam's status line out with the rest of eipgam.
 func TestClaudeStatusLineGoesOnDisconnect(t *testing.T) {
-	home, path := claudeSettings(t, `{"statusLine": {"type": "command", "command": "magpie statusline"}, "model": "opus"}`)
+	home, path := claudeSettings(t, `{"statusLine": {"type": "command", "command": "eipgam statusline"}, "model": "opus"}`)
 	a := claude(home)
 	if a.Field("statusline").Get() != "on" {
-		t.Fatal("the reference's hand-written `magpie statusline` isn't read as magpie's")
+		t.Fatal("the reference's hand-written `eipgam statusline` isn't read as eipgam's")
 	}
 	if err := a.Unwire(); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSONRaw(path, "statusLine"); ok {
-		t.Fatalf("magpie's status line left after Disconnect:\n%s", readFile(path))
+		t.Fatalf("eipgam's status line left after Disconnect:\n%s", readFile(path))
 	}
 }
 
@@ -127,39 +127,39 @@ func TestClaudeStatusLineUnreadable(t *testing.T) {
 
 func TestClaudeStatusCommand(t *testing.T) {
 	for _, c := range []struct{ exe, goos, want string }{
-		{"/Applications/Magpie.app/Contents/MacOS/magpie", "darwin", "/Applications/Magpie.app/Contents/MacOS/magpie statusline"},
-		{"/home/me/Jo's Apps/Magpie-x86_64.AppImage", "linux", `'/home/me/Jo'\''s Apps/Magpie-x86_64.AppImage' statusline`},
-		{`C:\Users\Me Too\AppData\Local\Programs\magpie\magpie.exe`, "windows", `'C:/Users/Me Too/AppData/Local/Programs/magpie/magpie.exe' statusline`},
-		{`C:\Users\me\magpie.exe`, "windows", `C:/Users/me/magpie.exe statusline`},
+		{"/Applications/eipgam.app/Contents/MacOS/eipgam", "darwin", "/Applications/eipgam.app/Contents/MacOS/eipgam statusline"},
+		{"/home/me/Jo's Apps/eipgam-x86_64.AppImage", "linux", `'/home/me/Jo'\''s Apps/eipgam-x86_64.AppImage' statusline`},
+		{`C:\Users\Me Too\AppData\Local\Programs\eipgam\eipgam.exe`, "windows", `'C:/Users/Me Too/AppData/Local/Programs/eipgam/eipgam.exe' statusline`},
+		{`C:\Users\me\eipgam.exe`, "windows", `C:/Users/me/eipgam.exe statusline`},
 	} {
 		got := claudeStatusCommand(c.exe, c.goos)
 		if got != c.want {
 			t.Errorf("claudeStatusCommand(%q, %s) = %q, want %q", c.exe, c.goos, got, c.want)
 		}
 		if !claudeStatusOurs(got) {
-			t.Errorf("%q, written by magpie, isn't read as magpie's", got)
+			t.Errorf("%q, written by eipgam, isn't read as eipgam's", got)
 		}
 	}
 	for cmd, want := range map[string]bool{
-		"magpie statusline":              true,
-		"magpie statusline claude":       true,
-		`"C:/x/magpie.exe" statusline`:   true,
-		"magpie-darwin-arm64 statusline": true,
-		"magpie":                         false,
-		"magpie status":                  false,
-		"magpie statuslinex":             false,
+		"eipgam statusline":              true,
+		"eipgam statusline claude":       true,
+		`"C:/x/eipgam.exe" statusline`:   true,
+		"eipgam-darwin-arm64 statusline": true,
+		"eipgam":                         false,
+		"eipgam status":                  false,
+		"eipgam statuslinex":             false,
 		"notmagpie statusline":           false,
 		"~/.claude/statusline.sh":        false,
-		"bash -c 'magpie statusline'":    false,
-		`'/x/magpie`:                     false,
+		"bash -c 'eipgam statusline'":    false,
+		`'/x/eipgam`:                     false,
 		"":                               false,
-		`/x/my\ apps/magpie statusline`:  true,
-		"magpie statusline; rm -rf ~":    false,
-		"magpie;statusline":              false,
-		"magpie statusline && echo hi":   false,
-		"magpie statusline | tr a b":     false,
-		"$(which magpie) statusline":     false,
-		"'/x/magpie' 'statusline'":       true,
+		`/x/my\ apps/eipgam statusline`:  true,
+		"eipgam statusline; rm -rf ~":    false,
+		"eipgam;statusline":              false,
+		"eipgam statusline && echo hi":   false,
+		"eipgam statusline | tr a b":     false,
+		"$(which eipgam) statusline":     false,
+		"'/x/eipgam' 'statusline'":       true,
 	} {
 		if got := claudeStatusOurs(cmd); got != want {
 			t.Errorf("claudeStatusOurs(%q) = %v, want %v", cmd, got, want)
@@ -167,8 +167,8 @@ func TestClaudeStatusCommand(t *testing.T) {
 	}
 }
 
-// A WSL distro's Claude Code isn't offered magpie's status line, running
-// or stopped (a stopped one's fields fall back to magpie's models), and on
+// A WSL distro's Claude Code isn't offered eipgam's status line, running
+// or stopped (a stopped one's fields fall back to eipgam's models), and on
 // is refused there.
 func TestWSLClaudeNoStatusLine(t *testing.T) {
 	root, _ := claudeDistroHome(t, `{}`)

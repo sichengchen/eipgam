@@ -32,7 +32,7 @@ function server(lang, web, st) {
     }
     if (url.pathname === "/api/library") {
       return json({
-        dir: "/h/.magpie/library", backups: "/h/.magpie/backups", home: "/h",
+        dir: "/h/.eipgam/library", backups: "/h/.eipgam/backups", home: "/h",
         agents: [{ id: "codex", name: "Codex", icon: "", skills: "/h/.codex/skills", mcp: "/h/.codex/mcp.json" }],
         instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
         servers: [{ name: "cloudflare-api", transport: "http", url: "https://mcp.cloudflare.com/mcp", agents: ["codex"], signIn: { signedIn: false } }],
@@ -50,11 +50,11 @@ function server(lang, web, st) {
 }
 
 const W = {
-  en: { signIn: "Sign in", open: "Open in browser", said: "magpie didn't open the sign-in page, as set in Settings. Copy the link below into the browser you sign in with." },
-  zh: { signIn: "登录", open: "在浏览器中打开", said: "magpie 按设置没有打开登录页。把下面的链接复制到你用来登录的浏览器里。" },
-  "zh-TW": { signIn: "登入", open: "在瀏覽器中開啟", said: "magpie 依設定沒有開啟登入頁。把下面的連結複製到你用來登入的瀏覽器裡。" },
-  ja: { signIn: "サインイン", open: "ブラウザで開く", said: "設定に従い、magpie はサインインページを開いていません。下のリンクをサインインに使うブラウザにコピーしてください。" },
-  de: { signIn: "Anmelden", open: "Im Browser öffnen", said: "magpie hat die Anmeldeseite wie in den Einstellungen festgelegt nicht geöffnet. Kopiere den Link unten in den Browser, mit dem du dich anmeldest." },
+  en: { signIn: "Sign in", open: "Open in browser", said: "eipgam didn't open the sign-in page, as set in Settings. Copy the link below into the browser you sign in with." },
+  zh: { signIn: "登录", open: "在浏览器中打开", said: "eipgam 按设置没有打开登录页。把下面的链接复制到你用来登录的浏览器里。" },
+  "zh-TW": { signIn: "登入", open: "在瀏覽器中開啟", said: "eipgam 依設定沒有開啟登入頁。把下面的連結複製到你用來登入的瀏覽器裡。" },
+  ja: { signIn: "サインイン", open: "ブラウザで開く", said: "設定に従い、eipgam はサインインページを開いていません。下のリンクをサインインに使うブラウザにコピーしてください。" },
+  de: { signIn: "Anmelden", open: "Im Browser öffnen", said: "eipgam hat die Anmeldeseite wie in den Einstellungen festgelegt nicht geöffnet. Kopiere den Link unten in den Browser, mit dem du dich anmeldest." },
 };
 
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const ctx = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" });
           // window.open is counted, never followed: a test reaches no network
           await ctx.addInitScript(() => {
-            try { localStorage.setItem("magpie.libTab", "mcp"); } catch {}
+            try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {}
             window.__opened = [];
             window.open = (u) => { window.__opened.push(String(u)); return null; };
           });
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, web, st));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           await page.locator("#view-library .lib-row", { has: page.locator(".name", { hasText: /^cloudflare-api/ }) }).click();
           const lib = page.locator("#modal .lib-signin");

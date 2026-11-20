@@ -8,15 +8,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/rosetta"
-	"github.com/yetone/magpie/internal/winarm"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/rosetta"
+	"github.com/sichengchen/eipgam/internal/winarm"
 )
 
-// FeedbackURL is the post on X where users reply with feedback; Settings ›
+// FeedbackURL is the repository’s issue form; Settings ›
 // About's Report a problem opens it after copying the facts below.
-const FeedbackURL = "https://x.com/magpie_router/status/2119861020978188499"
+const FeedbackURL = "https://github.com/sichengchen/eipgam/issues/new/choose"
 
 var osVersionRE = lazyre.New(`\d+(\.\d+)+`)
 
@@ -73,21 +73,21 @@ func archNote() string {
 }
 
 // diagnostics is the block a report starts with. It holds the version, the
-// system, the architecture and where magpie is open, and never an account,
+// system, the architecture and where eipgam is open, and never an account,
 // a key, a path or a user name: the user pastes it into a public reply.
 func diagnostics(surface string) string {
 	if surface != "browser" {
 		surface = "app"
 	}
 	return strings.Join([]string{
-		"magpie " + Version,
+		"eipgam " + Version,
 		"OS: " + osVersion(),
 		"Arch: " + archNote(),
 		"Opened in: " + surface,
 	}, "\n")
 }
 
-// feedbackRoutes serves the facts to copy and the post to open, from
+// feedbackRoutes serves the facts to copy and the issue form to open, from
 // Settings › About. The block goes to the clipboard, never into a link.
 func feedbackRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/feedback", func(rw http.ResponseWriter, r *http.Request) {

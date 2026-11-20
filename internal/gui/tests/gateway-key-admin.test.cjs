@@ -1,7 +1,7 @@
-// A gateway key is given the management API (/v1/magpie/admin/, #6307,
+// A gateway key is given the management API (/v1/eipgam/admin/, #6307,
 // ljayic on X) from its row's menu, under Advanced: off, from this
-// computer or from any. A key that can manage magpie says so in its row.
-// The sharing key, a read-only key and Magpie Browser's can't hold it,
+// computer or from any. A key that can manage eipgam says so in its row.
+// The sharing key, a read-only key and eipgam Browser's can't hold it,
 // so their menus don't offer it.
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
@@ -9,19 +9,19 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
 const words = {
-  en: { more: "Key actions", adv: "Advanced", head: "Management API", off: "Off", local: "From this computer", any: "From any computer", tag: "Manages magpie", madeLocal: "Server can manage magpie from this computer", madeOff: "Server can't manage magpie" },
-  zh: { more: "密钥操作", adv: "高级", head: "管理 API", off: "关闭", local: "仅限本机", any: "任何电脑均可", tag: "可管理 magpie", madeLocal: "Server 现在可在本机管理 magpie", madeOff: "Server 不再能管理 magpie" },
-  "zh-TW": { more: "金鑰操作", adv: "進階", head: "管理 API", off: "關閉", local: "僅限本機", any: "任何電腦均可", tag: "可管理 magpie", madeLocal: "Server 現在可在本機管理 magpie", madeOff: "Server 不再能管理 magpie" },
-  ja: { more: "キーの操作", adv: "詳細設定", head: "管理 API", off: "オフ", local: "このコンピュータから", any: "どのコンピュータからでも", tag: "magpie を管理", madeLocal: "Server はこのコンピュータから magpie を管理できます", madeOff: "Server は magpie を管理できなくなりました" },
-  de: { more: "Schlüsselaktionen", adv: "Erweitert", head: "Verwaltungs-API", off: "Aus", local: "Von diesem Computer", any: "Von jedem Computer", tag: "Verwaltet magpie", madeLocal: "Server kann magpie von diesem Computer aus verwalten", madeOff: "Server kann magpie nicht mehr verwalten" },
+  en: { more: "Key actions", adv: "Advanced", head: "Management API", off: "Off", local: "From this computer", any: "From any computer", tag: "Manages eipgam", madeLocal: "Server can manage eipgam from this computer", madeOff: "Server can't manage eipgam" },
+  zh: { more: "密钥操作", adv: "高级", head: "管理 API", off: "关闭", local: "仅限本机", any: "任何电脑均可", tag: "可管理 eipgam", madeLocal: "Server 现在可在本机管理 eipgam", madeOff: "Server 不再能管理 eipgam" },
+  "zh-TW": { more: "金鑰操作", adv: "進階", head: "管理 API", off: "關閉", local: "僅限本機", any: "任何電腦均可", tag: "可管理 eipgam", madeLocal: "Server 現在可在本機管理 eipgam", madeOff: "Server 不再能管理 eipgam" },
+  ja: { more: "キーの操作", adv: "詳細設定", head: "管理 API", off: "オフ", local: "このコンピュータから", any: "どのコンピュータからでも", tag: "eipgam を管理", madeLocal: "Server はこのコンピュータから eipgam を管理できます", madeOff: "Server は eipgam を管理できなくなりました" },
+  de: { more: "Schlüsselaktionen", adv: "Erweitert", head: "Verwaltungs-API", off: "Aus", local: "Von diesem Computer", any: "Von jedem Computer", tag: "Verwaltet eipgam", madeLocal: "Server kann eipgam von diesem Computer aus verwalten", madeOff: "Server kann eipgam nicht mehr verwalten" },
 };
 
 const keys = () => [
-  { id: "ops", name: "Ops", masked: "sk-magpie-key-…000000", admin: "any" },
-  { id: "server", name: "Server", masked: "sk-magpie-key-…222222" },
-  { id: "laptop", name: "Laptop", masked: "sk-magpie-key-…111111", readOnly: true },
-  { id: "magpie", name: "Magpie", masked: "sk-magpie-key-…444444", lan: true },
-  { id: "ext", name: "Magpie Browser", masked: "sk-magpie-key-…555555", readOnly: true, browser: true },
+  { id: "ops", name: "Ops", masked: "sk-eipgam-key-…000000", admin: "any" },
+  { id: "server", name: "Server", masked: "sk-eipgam-key-…222222" },
+  { id: "laptop", name: "Laptop", masked: "sk-eipgam-key-…111111", readOnly: true },
+  { id: "eipgam", name: "eipgam", masked: "sk-eipgam-key-…444444", lan: true },
+  { id: "ext", name: "eipgam Browser", masked: "sk-eipgam-key-…555555", readOnly: true, browser: true },
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -36,7 +36,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const events = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", events, { lan: true, keys: keys() }));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://eipgam.test/?view=gateway");
         await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
         const row = (id) => page.locator(`#gatewayKeys .acc[data-key="${id}"]`);
         const tag = (id) => row(id).locator(".key-admin");
@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         const admins = () => events.filter((e) => e.action === "admin-key").map((e) => e.body);
 
-        // a key that can manage magpie says so always, not only on hover
+        // a key that can manage eipgam says so always, not only on hover
         await page.mouse.move(0, 0);
         assert.equal((await tag("ops").textContent()).trim(), w.tag);
         assert.ok((await tag("ops").boundingBox()).width > 0, "the tag is hidden");
@@ -91,7 +91,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.keyboard.press("Escape");
 
         // keys that can't hold it aren't offered it
-        for (const id of ["laptop", "magpie", "ext"]) {
+        for (const id of ["laptop", "eipgam", "ext"]) {
           await menu(id);
           assert.equal(await item(w.adv).count(), 0, `${id} offers the management API`);
           await page.keyboard.press("Escape");

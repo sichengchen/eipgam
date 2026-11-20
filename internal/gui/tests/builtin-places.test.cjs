@@ -38,7 +38,7 @@ function fixture(lang, { redact = true, otel = true, masks = true, routing = tru
   const settings = () => ({
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100,
     redact: st.redact && masks, redactPersonal: false, redactWords: [], redactRules: [], redactKinds: {},
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999", port: 3999,
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision: "", imageGen: "", lanURLs: [],
     visionModels: [], imageGenModels: [], searchChoices: [], searchAPIs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -70,7 +70,7 @@ function fixture(lang, { redact = true, otel = true, masks = true, routing = tru
     if (url.pathname === "/api/masking/records") return json({ records: [], more: false });
     if (url.pathname === "/api/window/fit") return route.fulfill({ status: 204 });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg" }[path.extname(file)];
     const body = await fs.readFile(file).catch(() => null);
@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; page.errors.push(e.message); }); // a goto in WebKit can cut off a fetch (#1350)
       await page.route("**/*", f.route);
-      await page.goto("http://magpie.test/" + where);
+      await page.goto("http://eipgam.test/" + where);
       return { page, posts: f.posts };
     };
     const builtinTab = async (page) => {

@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #408: magpie signs Codex in to the next ticked account when the first is
+// #408: eipgam signs Codex in to the next ticked account when the first is
 // all but used up, and back to the first once it has room. While it stands
 // in, the account Codex is on says "First for now", and the one it goes back
 // to "First again once it has room", each with a title saying why; with
 // nothing to go back to, the account Codex is on is just "First". The
-// Routing note says magpie moves back. The page doesn't move. In English and
+// Routing note says eipgam moves back. The page doesn't move. In English and
 // Chinese, Chromium and WebKit.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -25,7 +25,7 @@ const codex = (returns) => ({
   },
 });
 
-// hxy920830 on X: Claude Code's sign-in stays on the account magpie moved
+// hxy920830 on X: Claude Code's sign-in stays on the account eipgam moved
 // it to till that one is spent too (provider.returnsToFirst)
 const claude = () => ({
   id: "claude", name: "Claude", icon: "claude-color", chat: "", responses: "", anthropic: "", catalog: "", routing: "smart",
@@ -41,8 +41,8 @@ const claude = () => ({
 // WalterAIBuilder on X: routed Until used up, the gateway keeps the
 // requests on the account it went on to, and Codex's or Claude Code's
 // sign-in stays there with them (provider.returnsToFirst)
-const drains = "Routing picks the account for each request through magpie; {agent} on its own uses the one it is signed in to, which magpie moves to the next ticked account with room once it is used up, and keeps it there till that one is used up too.";
-const stays = "Routing picks the account for each request through magpie; {agent} on its own uses the one it is signed in to, which magpie moves to the next ticked account with room once it is 98% used, and keeps it there till that one is 98% used too.";
+const drains = "Routing picks the account for each request through eipgam; {agent} on its own uses the one it is signed in to, which eipgam moves to the next ticked account with room once it is used up, and keeps it there till that one is used up too.";
+const stays = "Routing picks the account for each request through eipgam; {agent} on its own uses the one it is signed in to, which eipgam moves to the next ticked account with room once it is 98% used, and keeps it there till that one is 98% used too.";
 
 function serve(lang, list) {
   const providers = { providers: list, presets: [], excluded: [], gateway: { running: true, window: true } };
@@ -81,13 +81,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const p = list || codex(returns);
       await page.route("**/*", serve(lang, [p]));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: p.name }).first().click();
       await page.locator(".editor .acc").first().waitFor();
       return { page, errors };
     };
 
-    test(`${engine} ${lang}: the account magpie moved Codex off says it is first again once it has room`, async (t) => {
+    test(`${engine} ${lang}: the account eipgam moved Codex off says it is first again once it has room`, async (t) => {
       const { page, errors } = await open(t, true);
       const top = await page.evaluate(() => document.scrollingElement.scrollTop);
       const spare = page.locator(".editor .acc", { hasText: "spare@example.com" });
@@ -99,9 +99,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.match(await page.locator(".editor").textContent(), w.note);
       const missing = await page.evaluate(() => [
         "First for now", "First again once it has room",
-        "{user} was nearly used up, so magpie signed {agent} in to this one; it goes back to {user} once that has room again",
-        "magpie signs {agent} back in to this account once it has room again",
-        "Routing picks the account for each request through magpie; {agent} on its own uses the one it is signed in to, which magpie moves to the next ticked account with room once it is 98% used, and back to the first once that has room again.",
+        "{user} was nearly used up, so eipgam signed {agent} in to this one; it goes back to {user} once that has room again",
+        "eipgam signs {agent} back in to this account once it has room again",
+        "Routing picks the account for each request through eipgam; {agent} on its own uses the one it is signed in to, which eipgam moves to the next ticked account with room once it is 98% used, and back to the first once that has room again.",
       ].filter((k) => !I18N.zh[k]));
       assert.deepEqual(missing, [], "every string has its Chinese");
       await work.locator(".using").click();

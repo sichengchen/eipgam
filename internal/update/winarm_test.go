@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-// onWindows runs the test as a Windows magpie built for arch, under Windows
+// onWindows runs the test as a Windows eipgam built for arch, under Windows
 // on Arm's x64 emulation or not.
 func onWindows(t *testing.T, arch string, em bool) {
 	t.Helper()
@@ -20,10 +20,10 @@ func onWindows(t *testing.T, arch string, em bool) {
 	emulated = func() bool { return em }
 }
 
-// An x64 magpie emulated on Windows on Arm updates to the arm64 exe, the
+// An x64 eipgam emulated on Windows on Arm updates to the arm64 exe, the
 // app and the terminal build alike (@EV_John_Liu on X); an x64 Windows
 // computer, and an arm64 build, update to their own. Emulation is
-// Windows' alone: a Mac or Linux magpie asked about it is unchanged.
+// Windows' alone: a Mac or Linux eipgam asked about it is unchanged.
 func TestWindowsOnArmUpdatesToArm64(t *testing.T) {
 	was := GUI
 	t.Cleanup(func() { GUI = was })
@@ -32,13 +32,13 @@ func TestWindowsOnArmUpdatesToArm64(t *testing.T) {
 		em, gui  bool
 		bin      string
 	}{
-		{"windows", "amd64", true, true, "magpie-windows-arm64.exe"},
-		{"windows", "amd64", true, false, "magpie-cli-windows-arm64.exe"},
-		{"windows", "amd64", false, true, "magpie-windows-amd64.exe"},
-		{"windows", "amd64", false, false, "magpie-cli-windows-amd64.exe"},
-		{"windows", "arm64", false, true, "magpie-windows-arm64.exe"},
-		{"darwin", "amd64", true, false, "magpie-cli-darwin-amd64"},
-		{"linux", "amd64", true, true, "magpie-linux-amd64"},
+		{"windows", "amd64", true, true, "eipgam-windows-arm64.exe"},
+		{"windows", "amd64", true, false, "eipgam-cli-windows-arm64.exe"},
+		{"windows", "amd64", false, true, "eipgam-windows-amd64.exe"},
+		{"windows", "amd64", false, false, "eipgam-cli-windows-amd64.exe"},
+		{"windows", "arm64", false, true, "eipgam-windows-arm64.exe"},
+		{"darwin", "amd64", true, false, "eipgam-cli-darwin-amd64"},
+		{"linux", "amd64", true, true, "eipgam-linux-amd64"},
 	} {
 		onSystem(t, c.os, c.arch, false)
 		emulated = func() bool { return c.em }
@@ -62,8 +62,8 @@ func TestWindowsOnArmInstallsArm64Exe(t *testing.T) {
 	canStart = func(string) error { return nil }
 
 	bodies := map[string]string{
-		"magpie-windows-amd64.exe": "2.0 for x64",
-		"magpie-windows-arm64.exe": "2.0 for arm64",
+		"eipgam-windows-amd64.exe": "2.0 for x64",
+		"eipgam-windows-arm64.exe": "2.0 for arm64",
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(bodies[strings.TrimPrefix(r.URL.Path, "/")]))
@@ -76,7 +76,7 @@ func TestWindowsOnArmInstallsArm64Exe(t *testing.T) {
 	}
 	rel := &Release{Version: "2.0", Assets: assets}
 
-	exe := filepath.Join(t.TempDir(), "magpie.exe")
+	exe := filepath.Join(t.TempDir(), "eipgam.exe")
 	if err := os.WriteFile(exe, []byte("1.0 for x64"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -88,6 +88,6 @@ func TestWindowsOnArmInstallsArm64Exe(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got, _ := os.ReadFile(exe); string(got) != "2.0 for arm64" {
-		t.Fatalf("magpie.exe is %q, want the arm64 build", got)
+		t.Fatalf("eipgam.exe is %q, want the arm64 build", got)
 	}
 }

@@ -20,7 +20,7 @@ base: &base
   url: http://127.0.0.1:3425/v1 # line
   key: "k"
 providers:
-  magpie:
+  eipgam:
     <<: *base
     model: gpt-5.4
   other: *base

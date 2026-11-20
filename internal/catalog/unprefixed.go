@@ -13,7 +13,7 @@ import (
 // Kimi Code lists Kimi K3.1 Pro as k3.1-pro and K3 as k3, whose entries
 // models.dev gives the canonical_model_id moonshotai/kimi-k3.1-pro and
 // moonshotai/kimi-k3; OpenCode Go and Devin serve them as kimi-k3.1-pro,
-// so the group magpie found for the model left Kimi Code out (tmr11235 on
+// so the group eipgam found for the model left Kimi Code out (tmr11235 on
 // X). A relay's minimax/m3.1-flash is MiniMax-M3.1-Flash the same way.
 //
 // Only a dropped prefix counts, never the canonical id alone: models.dev

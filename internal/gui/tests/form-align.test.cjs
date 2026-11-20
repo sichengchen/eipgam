@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // the provider editors
         for (const name of ["Acme", "Local Box", "Codex"]) {
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator(".row.provider", { hasText: name }).first().click();
           await page.locator(".editor .bar").first().waitFor();
           await openFolds(page, ".editor");
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // a group's editor, new and existing
         const w = await page.evaluate((lang) => Object.fromEntries(["New group", "Edit"].map((k) => [k, lang === "en" ? k : I18N[lang][k]])), lang);
         for (const existing of [false, true]) {
-          await page.goto("http://magpie.test/?view=groups");
+          await page.goto("http://eipgam.test/?view=groups");
           if (existing) await page.locator(".rt-group", { hasText: "Glim" }).locator("button", { hasText: w.Edit }).click();
           else await page.locator("button", { hasText: w["New group"] }).first().click();
           await page.locator(".rt-gedit").waitFor();
@@ -111,10 +111,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const cpage = await cctx.newPage();
         cpage.setDefaultTimeout(6000);
         cpage.setDefaultNavigationTimeout(60000);
-        await cpage.addInitScript(() => { try { localStorage.setItem("magpie.gwConnectFolded", "0"); } catch {} });
+        await cpage.addInitScript(() => { try { localStorage.setItem("eipgam.gwConnectFolded", "0"); } catch {} });
         cpage.on("pageerror", (e) => errors.push(`${at} connect: ${e.message}`));
         await cpage.route("**/*", fixture(lang, "light", [], { lan: true }));
-        await cpage.goto("http://magpie.test/?view=gateway");
+        await cpage.goto("http://eipgam.test/?view=gateway");
         await cpage.locator("#connect .snip").waitFor();
         await settle(cpage);
         const rows = await formRows(cpage, ".connect");

@@ -22,7 +22,7 @@ function fixture(lang, refused = "") {
   const state = () => ({
     agents: [{
       id: "gemini", name: "Gemini CLI", path: "/test/.gemini/settings.json", icon: "geminicli-color", wired: true,
-      fields: [{ key: "model", label: "model", value: "magpie/glm-5", options: [{ value: "magpie/glm-5", label: "GLM-5", ref: "magpie/glm-5" }] }],
+      fields: [{ key: "model", label: "model", value: "eipgam/glm-5", options: [{ value: "eipgam/glm-5", label: "GLM-5", ref: "eipgam/glm-5" }] }],
       telemetry: { off: !!settings.agentTelemetryOff, all: !!settings.agentTelemetryOff, keys: ["privacy.usageStatisticsEnabled"], file: "/test/.gemini/settings.json" },
     }],
     profiles: [], settings,
@@ -77,7 +77,7 @@ async function open(engine, lang, width, refused, t) {
   const fx = fixture(lang, refused);
   await page.route("**/*", fx.serve);
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings&tab=privacy");
+  await page.goto("http://eipgam.test/?view=settings&tab=privacy");
   await settingsDrawn(page);
   await page.locator(ROW).waitFor();
   return { page, fx, errors };
@@ -118,7 +118,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.evaluate(() => document.querySelector("#view-settings").scrollTop + scrollY), y, "a click scrolled the page");
 
         // the agent's own row: off, why, held
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await page.locator(gm).waitFor();
         await page.locator(`${gm} .ag-link`, { hasText: w.details }).click();
         const row = `${gm} .ag-exp .ag-telemetry`;
@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     }
   }
   test(`${engine}: an agent that couldn't follow is said, the switch on`, async (t) => {
-    const refused = "Codex: /test/.codex/config.toml sets analytics.enabled to true; magpie leaves a value of yours as it is (change it there)";
+    const refused = "Codex: /test/.codex/config.toml sets analytics.enabled to true; eipgam leaves a value of yours as it is (change it there)";
     const { page, fx, errors } = await open(engine, "en", 1100, refused, t);
     await reveal(page, ROW);
     await page.locator(`${ROW} .opt`, { hasText: "On" }).click();

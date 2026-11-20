@@ -1,7 +1,7 @@
 package provider
 
 // A Claude account's allowance, as Claude Code's own /usage tells it:
-// magpie runs `claude -p /usage` (a command Claude Code answers itself,
+// eipgam runs `claude -p /usage` (a command Claude Code answers itself,
 // asking no model) and reads its lines, never asking Anthropic itself.
 
 import (
@@ -20,7 +20,7 @@ import (
 	// and without one a reset was read in the machine's own zone
 	_ "time/tzdata"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // claudeCLIUsage runs Claude Code's /usage in configDir, or its own
@@ -121,7 +121,7 @@ var claudeOverages = lazyre.New(`(?i)using your overages`)
 // account with extra usage on ("usage credits"): Claude Code's -p /usage
 // prints no figure for it, but the usage_report it carries (verbose json)
 // has the month's cap and spend, which Claude Code read from Anthropic, so
-// magpie asks Anthropic nothing. "Extra usage: 271.40 / 500.00 USD spent".
+// eipgam asks Anthropic nothing. "Extra usage: 271.40 / 500.00 USD spent".
 // ClaudeExtraLine writes it.
 var claudeExtraLineRE = lazyre.New(`^Extra usage: ([0-9.]+) / ([0-9.]+) ([A-Za-z]{3}) spent$`)
 

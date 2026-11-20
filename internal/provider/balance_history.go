@@ -1,6 +1,6 @@
 package provider
 
-// A key's balance over time (TJHHHH on Discord): each balance magpie reads
+// A key's balance over time (TJHHHH on Discord): each balance eipgam reads
 // anyway (KeyBalances, a minute apart at most while something asks) is kept
 // as a point — when it was read and the amount — so the balance's card can
 // draw it, as the subscriptions' windows are (quota_history.go), and say
@@ -28,9 +28,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 const (

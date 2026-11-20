@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Antigravity's accounts serve requests through magpie only; the app keeps
+// Antigravity's accounts serve requests through eipgam only; the app keeps
 // its own sign-in (Greatrobbort on X: the preferred account and smart routing
 // didn't change the account Antigravity itself uses). Its editor says so,
 // with Routing on and off, and never that Antigravity signs in to the first.
-// Codex, whose own sign-in magpie does move, doesn't say it.
+// Codex, whose own sign-in eipgam does move, doesn't say it.
 // Chromium and WebKit, every language, a wide and a narrow window; no
 // backend, the API is faked here.
 const assert = require("node:assert/strict");
@@ -38,11 +38,11 @@ function serve(lang) {
 }
 
 const says = {
-  en: ["Only requests through magpie use them; Antigravity itself stays signed in as it is.", "The gateway uses the first."],
-  zh: ["只有经过 magpie 的请求会用这些账号；Antigravity 本身的登录不变。", "网关"],
-  "zh-TW": ["只有經過 magpie 的請求會用這些帳號；Antigravity 本身的登入不變。", "閘道"],
-  ja: ["これらのアカウントを使うのは magpie を通るリクエストだけです。Antigravity 自身のサインインはそのままです。", "ゲートウェイ"],
-  de: ["Nur Anfragen über magpie verwenden diese Konten; Antigravity selbst bleibt angemeldet wie bisher.", "Zugangspunkt"],
+  en: ["Only requests through eipgam use them; Antigravity itself stays signed in as it is.", "The gateway uses the first."],
+  zh: ["只有经过 eipgam 的请求会用这些账号；Antigravity 本身的登录不变。", "网关"],
+  "zh-TW": ["只有經過 eipgam 的請求會用這些帳號；Antigravity 本身的登入不變。", "閘道"],
+  ja: ["これらのアカウントを使うのは eipgam を通るリクエストだけです。Antigravity 自身のサインインはそのままです。", "ゲートウェイ"],
+  de: ["Nur Anfragen über eipgam verwenden diese Konten; Antigravity selbst bleibt angemeldet wie bisher.", "Zugangspunkt"],
 };
 const signsIn = { en: "Antigravity signs in to the first" };
 
@@ -61,7 +61,7 @@ for (const engine of engines) {
         await page.route("**/*", serve(lang));
         for (const routing of ["smart", ""]) {
           providers = [sub("antigravity", "Antigravity", "antigravity-color", "Antigravity", routing), sub("codex", "Codex", "openai", "Codex", "smart")];
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator(".row.provider", { hasText: "Antigravity" }).first().click();
           await page.locator(".editor .acc").first().waitFor();
           const text = await page.locator(".editor").innerText();
@@ -69,7 +69,7 @@ for (const engine of engines) {
           else assert.ok(text.includes(says[lang][1]), `without Routing, Antigravity's editor doesn't name the gateway:\n${text}`);
           if (signsIn[lang]) assert.ok(!text.includes(signsIn[lang]), "Antigravity's editor says the app signs in to the first");
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, "the editor is wider than the window");
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator(".row.provider", { hasText: "Codex" }).first().click();
           await page.locator(".editor .acc").first().waitFor();
           assert.ok(!(await page.locator(".editor").innerText()).includes(says[lang][0].replace("Antigravity", "Codex")), "Codex's editor says its own sign-in stays");

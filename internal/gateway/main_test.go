@@ -7,21 +7,21 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/gwbudget"
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/middleware"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/gwbudget"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/gwtool"
+	"github.com/sichengchen/eipgam/internal/masking"
+	"github.com/sichengchen/eipgam/internal/middleware"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/routes"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // standInsEnv names the folder of a test binary's stand-in CLIs, for a
 // test binary it starts again.
-const standInsEnv = "MAGPIE_GATEWAY_TEST_STAND_INS"
+const standInsEnv = "EIPGAM_GATEWAY_TEST_STAND_INS"
 
 func TestMain(m *testing.M) {
 	serveRotation()
@@ -29,10 +29,10 @@ func TestMain(m *testing.M) {
 	serveMiddleware()
 	searchOn = gwtool.Serve(gwtool.WebSearch)
 	limitsOn = gwbudget.Limit(budget.Limiter{})
-	// the test binary is no magpie: it runs no claude-tui-helper
+	// the test binary is no eipgam: it runs no claude-tui-helper
 	claudeTUIRuns = false
-	// the tests serve their Remote magpie from this process, which is
-	// then this magpie itself (remote_self_test.go turns it on again)
+	// the tests serve their Remote eipgam from this process, which is
+	// then this eipgam itself (remote_self_test.go turns it on again)
 	provider.LeaveOutSelf = false
 	code, err := isolatedTests(m)
 	if err != nil {
@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 // alone does not isolate the macOS Keychain, and account caches eventually
 // expire: discovery must keep finding only the test's sign-ins and CLIs.
 func isolatedTests(m *testing.M) (int, error) {
-	home, err := os.MkdirTemp("", "magpie-gateway-test-")
+	home, err := os.MkdirTemp("", "eipgam-gateway-test-")
 	if err != nil {
 		return 1, err
 	}
@@ -194,7 +194,7 @@ func withoutGroups(t *testing.T) {
 }
 
 // searchOn is plugins/search on: the gateway's tests offer and answer
-// magpie's web search, as a user with it on has.
+// eipgam's web search, as a user with it on has.
 var searchOn func()
 
 // limitsOn is plugins/budget on: the gateway's tests hold gateway keys to
@@ -209,7 +209,7 @@ func withoutLimits(t *testing.T) {
 }
 
 // withoutSearch is plugins/search off for t, in a process serving the
-// gateway (gwtool.Gate): magpie's web search is neither offered nor
+// gateway (gwtool.Gate): eipgam's web search is neither offered nor
 // answered.
 func withoutSearch(t *testing.T) {
 	searchOn()

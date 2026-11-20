@@ -23,7 +23,7 @@ type ServerOpts struct {
 }
 
 // optionNames are the words that, as key=value, are never a child's
-// argument in a line that has no "--": they were meant as magpie's own
+// argument in a line that has no "--": they were meant as eipgam's own
 // setting, and passing them on to the program silently was #6111's footgun.
 var optionNames = map[string]bool{
 	"header": true, "headers": true, "env": true, "envs": true, "environment": true,
@@ -35,7 +35,7 @@ var optionNames = map[string]bool{
 // SplitServerWords takes the options out of the words typed after a
 // server's name and leaves its command or URL. Words after a "--" are the
 // command's, however they look. A word that looks like a setting of
-// magpie's but isn't one it knows is refused rather than handed to the
+// eipgam's but isn't one it knows is refused rather than handed to the
 // program.
 func SplitServerWords(words []string) (cmd []string, o ServerOpts, err error) {
 	for i, w := range words {
@@ -95,7 +95,7 @@ func SplitServerWords(words []string) (cmd []string, o ServerOpts, err error) {
 			o.Timeout = &n
 		default:
 			if optionNames[key] {
-				return nil, o, fmt.Errorf("%s= isn't a setting magpie knows here: header=K=V, env=K=V, timeout=SECS, agents=a,b (put it after -- to hand it to the program)", k)
+				return nil, o, fmt.Errorf("%s= isn't a setting eipgam knows here: header=K=V, env=K=V, timeout=SECS, agents=a,b (put it after -- to hand it to the program)", k)
 			}
 			cmd = append(cmd, w)
 		}

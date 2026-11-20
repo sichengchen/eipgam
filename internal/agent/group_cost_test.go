@@ -4,13 +4,13 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // taotao7 on Discord: an agent on a group/* model counted every call at 0.
 // A custom provider prices a call by the cost in its own file alone, and a
-// group whose members cost differently had no price in magpie's list at
+// group whose members cost differently had no price in eipgam's list at
 // all, so Pi and OpenCode got none. A group is now priced at the member it sends to first, and that
 // price follows the group's members.
 func TestGroupModelsCarryTheirFirstMembersPrice(t *testing.T) {

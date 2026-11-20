@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/filelock"
 )
 
-// hubo31377762 on X: switching Codex's provider between magpie and OpenAI
+// hubo31377762 on X: switching Codex's provider between eipgam and OpenAI
 // left the running Codex session unusable. The Codex app holds the writer
 // lock of the chat on screen, so no move touched its row, and Codex 0.167
 // answers a thread/resume for a chat of another provider with
@@ -24,10 +24,10 @@ func TestCodexOpenThreadsMoveBeforeAppServerEnds(t *testing.T) {
 		used           bool
 		paged          bool
 	}{
-		{"paginated openai to magpie", "openai", "magpie", true, true},
-		{"paginated magpie to openai", "magpie", "openai", false, true},
-		{"legacy openai to magpie", "openai", "magpie", true, false},
-		{"legacy magpie to openai", "magpie", "openai", false, false},
+		{"paginated openai to eipgam", "openai", "eipgam", true, true},
+		{"paginated eipgam to openai", "eipgam", "openai", false, true},
+		{"legacy openai to eipgam", "openai", "eipgam", true, false},
+		{"legacy eipgam to openai", "eipgam", "openai", false, false},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			const id = "019a0000-0000-7000-8000-0000000000c1"
@@ -77,9 +77,9 @@ func TestCodexOpenThreadsMoveBeforeAppServerEnds(t *testing.T) {
 			if err := cx.Sync(); err != nil {
 				t.Fatal(err)
 			}
-			wantCfg := strings.Contains(read(), `model_provider = "magpie"`)
+			wantCfg := strings.Contains(read(), `model_provider = "eipgam"`)
 			if wantCfg != c.used {
-				t.Fatalf("config on magpie = %v, want %v", wantCfg, c.used)
+				t.Fatalf("config on eipgam = %v, want %v", wantCfg, c.used)
 			}
 			if p := codexRowOn(t, dir, id); p != c.from {
 				t.Fatalf("a chat the app holds was moved by the Sync: %q", p)

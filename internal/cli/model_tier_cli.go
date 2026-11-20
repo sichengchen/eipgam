@@ -5,18 +5,18 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// magpie model tier: a model's own speed (kdajenks on X).
+// eipgam model tier: a model's own speed (kdajenks on X).
 
 const tierUsage = `usage:
-  magpie model tier <provider/model>              the speed it is sent at
-  magpie model tier <provider/model> fast         send every request for it in its vendor's fast mode
-  magpie model tier <provider/model> ultrafast    send it in the faster Ultrafast mode where an account offers it
+  eipgam model tier <provider/model>              the speed it is sent at
+  eipgam model tier <provider/model> fast         send every request for it in its vendor's fast mode
+  eipgam model tier <provider/model> ultrafast    send it in the faster Ultrafast mode where an account offers it
                                                   (priority where not)
-  magpie model tier <provider/model> usual        the usual speed again (also --reset)
+  eipgam model tier <provider/model> usual        the usual speed again (also --reset)
 
 An agent's own fast pick (the bolt in its model list) goes first, and a routing group
 sends its members as it says.`

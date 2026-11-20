@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // daoche_wuzui on X: turn telemetry off for every agent where it can be.
@@ -63,7 +63,7 @@ func TestMoreAgentsTelemetrySwitch(t *testing.T) {
 }
 
 // A value of the user's that keeps telemetry on is never written over; one
-// that already turns it off stays theirs when magpie's goes.
+// that already turns it off stays theirs when eipgam's goes.
 func TestMoreAgentsTelemetryLeavesTheUsers(t *testing.T) {
 	for _, c := range moreTelemetry {
 		t.Run(c.name, func(t *testing.T) {
@@ -83,7 +83,7 @@ func TestMoreAgentsTelemetryLeavesTheUsers(t *testing.T) {
 				t.Fatal(err)
 			}
 			if err := c.of(home).SetTelemetry(false); err == nil {
-				t.Fatal("their own off was taken as magpie's")
+				t.Fatal("their own off was taken as eipgam's")
 			}
 			if readFile(path) != c.own {
 				t.Fatalf("changed:\n%s", readFile(path))

@@ -13,12 +13,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/probelog"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/probelog"
-	"github.com/yetone/magpie/internal/settings"
 )
 
 // A plugin's provider (see internal/plugin) is a subscription like the
@@ -46,7 +46,7 @@ const (
 	WorkGitHeader = "X-Magpie-Work-Git"
 )
 
-// FallbackHeader, "1", tells a plugin's fetch that magpie needn't have the
+// FallbackHeader, "1", tells a plugin's fetch that eipgam needn't have the
 // answer waited for: a request its vendor queues (Qoder's free models)
 // comes back at once with the queue's 503 and Retry-After instead of being
 // waited out for minutes. Without it the plugin waits. A model's test
@@ -55,11 +55,11 @@ const (
 // (host.js), as it does the two above.
 const FallbackHeader = "X-Magpie-Fallback"
 
-// WaitHeader tells a magpie's gateway how many seconds its client waits
-// for the answer: a model test asking a remote magpie sends its own wait,
+// WaitHeader tells a eipgam's gateway how many seconds its client waits
+// for the answer: a model test asking a remote eipgam sends its own wait,
 // and the gateway takes no retry pause or patience round that would end
 // past it, so the test is told the error rather than running out of time
-// (plugins#827). Like every X-Magpie- header it goes no further.
+// (plugins#827). Like every X-eipgam- header it goes no further.
 const WaitHeader = "X-Magpie-Wait"
 
 // SessionToPluginHeader and SubagentToPluginHeader tell a plugin's fetch
@@ -93,7 +93,7 @@ func (p Provider) warmPlugin(ctx context.Context) {
 	_, _ = plugin.LoaderOptions(p.Via(ctx), id, p.Account.pluginKey)
 }
 
-// PluginID is the id magpie gives the provider OpenCode calls id: the same,
+// PluginID is the id eipgam gives the provider OpenCode calls id: the same,
 // unless a preset or a built-in subscription has it (google, openai,
 // anthropic), or a provider of the user's own made before the plugin was
 // installed (zenmux, #867), or "auto" or "group", which start the ids of
@@ -103,7 +103,7 @@ func PluginID(id string) string {
 	if PluginServes(id) {
 		return id
 	}
-	if slices.Contains(accountIDs, id) || Preset(id) != nil || id == "magpie" || id == autoID || id == strings.TrimSuffix(GroupPrefix, "/") || customIDs()[id] {
+	if slices.Contains(accountIDs, id) || Preset(id) != nil || id == "eipgam" || id == autoID || id == strings.TrimSuffix(GroupPrefix, "/") || customIDs()[id] {
 		return id + "-plugin"
 	}
 	return id
@@ -155,7 +155,7 @@ func PluginAtForTest(id, pluginID, api string) Provider {
 }
 
 // PluginProvider is the id OpenCode knows the plugin's provider p is by
-// (grok, kiro), whatever magpie names it; "" for one no plugin gives.
+// (grok, kiro), whatever eipgam names it; "" for one no plugin gives.
 func (p Provider) PluginProvider() string {
 	if !p.IsPlugin() {
 		return ""
@@ -216,7 +216,7 @@ func (p Provider) PluginOpenAICompatible(model string) bool {
 	return ok && firstOf(m.NPM, pp.NPM) == "@ai-sdk/openai-compatible"
 }
 
-// PluginOf is the plugin provider magpie's provider id is, when it is one.
+// PluginOf is the plugin provider eipgam's provider id is, when it is one.
 func PluginOf(id string) (plugin.Provider, bool) {
 	for _, pp := range heldPlugins() {
 		if PluginID(pp.ID) == id {
@@ -315,7 +315,7 @@ var npmBase = map[string]string{
 }
 
 // pluginModel is the model of pp's list by the id id, which is the
-// plugin's own or one the user lists it by at magpie's provider of pp
+// plugin's own or one the user lists it by at eipgam's provider of pp
 // (SetModelID): what the plugin says of its model (its API, tiers, price)
 // holds under either.
 func pluginModel(pp plugin.Provider, id string) (plugin.Model, bool) {
@@ -769,7 +769,7 @@ func pluginFetch(pp plugin.Provider, account string, req *http.Request) (*http.R
 		url = base + "/models/" + GeminiModelPath(api) + ":streamGenerateContent?alt=sse"
 	case strings.HasPrefix(rest, "/v1/"):
 		// chat, responses and Anthropic's messages: the AI SDK's base
-		// ends where magpie's /v1 does
+		// ends where eipgam's /v1 does
 		url = base + strings.TrimPrefix(rest, "/v1")
 	case strings.HasPrefix(rest, "https://") || strings.HasPrefix(rest, "http://"):
 		// a URL of the vendor's own outside the base (Provider.Origin's),
@@ -920,7 +920,7 @@ func init() {
 		}
 		return ProxyOf(mid)
 	}
-	// a plugin provider switched off in magpie isn't asked its models:
+	// a plugin provider switched off in eipgam isn't asked its models:
 	// Off means no request goes to it (ChangQiu on Discord)
 	plugin.ListingOff = pluginsOff
 	// a models hook saying its account's sign-in expired marks it, as a
@@ -1003,7 +1003,7 @@ func firstOf(ss ...string) string {
 // for one (ZCode's Start Plan: zcodeStartClient), and client otherwise,
 // following a redirect only to the request's own origin (Keyed).
 //
-// A request sent for magpie's own test (probelog.With) is written into the
+// A request sent for eipgam's own test (probelog.With) is written into the
 // request log here, whichever way it goes: a plugin's fetch and a client
 // of the account's own pass no transport that would.
 func (p Provider) Do(client *http.Client, req *http.Request) (*http.Response, error) {
@@ -1048,8 +1048,8 @@ func (p Provider) do(client *http.Client, req *http.Request) (*http.Response, er
 }
 
 // pluginsOff is the plugins' own ids of the plugin providers switched off
-// in magpie, which a listing of the plugins asks nothing: a plugin's id
-// is magpie's (PluginID) as it is, or with "-plugin" taken off. It reads
+// in eipgam, which a listing of the plugins asks nothing: a plugin's id
+// is eipgam's (PluginID) as it is, or with "-plugin" taken off. It reads
 // providers.json alone, never the plugins' list, which a listing is
 // asking for.
 func pluginsOff() []string {

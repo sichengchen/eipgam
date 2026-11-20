@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A group may ask Jev to be surer, or less sure, of an intent than 0.4
-// before a rule follows it (#5101): `magpie group set <id> intent-sure=0.25`.
+// before a rule follows it (#5101): `eipgam group set <id> intent-sure=0.25`.
 // The Routing page has no field for it yet, so every save it makes of the
 // group carries the value back as it was: the editor's Save and a pick in
 // the card's routing menu. A group without one saves none. In English and
@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const last = () => posts.filter((p) => p.path === "/api/groups/save").at(-1)?.body;
 
       const save = async (id) => {

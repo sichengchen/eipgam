@@ -9,10 +9,10 @@
 package otel
 
 import (
-	"github.com/yetone/magpie/internal/otlp"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/otlp"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 func init() {
@@ -20,7 +20,7 @@ func init() {
 		ID: "otel", API: "^1", Requires: []string{"window", "settings", "gateway"},
 		Name: "Observability", Sub: "Send each request's traces and metrics to an OpenTelemetry collector, such as Langfuse",
 		One: "Sending to a collector", Many: "Sending to a collector",
-		// on while settings.json or MAGPIE_OTEL_ENABLED says to send: off,
+		// on while settings.json or EIPGAM_OTEL_ENABLED says to send: off,
 		// nothing would
 		InUse: func() (int, error) {
 			if _, err := settings.LoadChecked(); err != nil {

@@ -21,7 +21,7 @@ func storedTavily(t *testing.T) SearchAPI {
 // A search API's keys are a list (辰林鸭~ on Discord): added one or several
 // at once, switched off one by one and kept, put in order and removed,
 // each named by its ref. Key stays the keys that are on, so the gateway
-// and an older magpie never ask one switched off; the list is written
+// and an older eipgam never ask one switched off; the list is written
 // only while a key is off.
 func TestSearchKeyList(t *testing.T) {
 	claudeHome(t)
@@ -91,7 +91,7 @@ func TestSearchKeyList(t *testing.T) {
 	if a := storedTavily(t); a.URL != "https://t.example.com" || len(a.SearchKeys()) != 3 || a.Key != "tvly-c" {
 		t.Fatalf("an address took keys away: %+v", a)
 	}
-	// every key on again: the file is as an older magpie writes it
+	// every key on again: the file is as an older eipgam writes it
 	for _, k := range []string{"tvly-b", "tvly-d"} {
 		if err := SwitchSearchKey("tavily", ref(k), true); err != nil {
 			t.Fatal(err)
@@ -113,7 +113,7 @@ func TestSearchKeyList(t *testing.T) {
 	}
 }
 
-// A Key written by a magpie that knows no list (an older one, or one this
+// A Key written by a eipgam that knows no list (an older one, or one this
 // one syncs with) is the keys on, in its order; a key the list had off
 // that it doesn't name stays, off, after them.
 func TestSearchKeysKeyWins(t *testing.T) {

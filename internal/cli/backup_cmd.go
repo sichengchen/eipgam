@@ -12,13 +12,13 @@ import (
 
 	"golang.org/x/term"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // backupCmd writes every provider, setting, profile and agent model, and
 // the library, and the usage history, to one file sealed with a passphrase:
-// magpie backup [--no-keys] [--no-library] [--no-usage] [--sign-ins] [file].
+// eipgam backup [--no-keys] [--no-library] [--no-usage] [--sign-ins] [file].
 func backupCmd(args []string) error {
 	keys, lib, use, signIns, file := true, true, true, false, ""
 	for _, a := range args {
@@ -32,15 +32,15 @@ func backupCmd(args []string) error {
 		case a == "--sign-ins":
 			signIns = true
 		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %s (magpie backup [--no-keys] [--no-library] [--no-usage] [--sign-ins] [file])", a)
+			return fmt.Errorf("unknown flag %s (eipgam backup [--no-keys] [--no-library] [--no-usage] [--sign-ins] [file])", a)
 		case file == "":
 			file = a
 		default:
-			return errors.New("usage: magpie backup [--no-keys] [--no-library] [--no-usage] [--sign-ins] [file]")
+			return errors.New("usage: eipgam backup [--no-keys] [--no-library] [--no-usage] [--sign-ins] [file]")
 		}
 	}
 	if file == "" {
-		file = "magpie" + backup.Ext
+		file = "eipgam" + backup.Ext
 	}
 	b, err := backup.Collect(keys, version)
 	if err != nil {
@@ -51,7 +51,7 @@ func backupCmd(args []string) error {
 	}
 	if use {
 		if err := backup.WithUsage(&b); err != nil {
-			return fmt.Errorf("the usage history couldn't be read, so no backup was made (magpie backup --no-usage leaves it out): %w", err)
+			return fmt.Errorf("the usage history couldn't be read, so no backup was made (eipgam backup --no-usage leaves it out): %w", err)
 		}
 	}
 	if signIns {
@@ -104,7 +104,7 @@ func backupCmd(args []string) error {
 	return nil
 }
 
-// restoreCmd puts a backup in: magpie restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>.
+// restoreCmd puts a backup in: eipgam restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>.
 func restoreCmd(args []string) error {
 	parts, file := backup.All, ""
 	for _, a := range args {
@@ -118,15 +118,15 @@ func restoreCmd(args []string) error {
 		case a == "--no-sign-ins":
 			parts.SignIns = false
 		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %s (magpie restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>)", a)
+			return fmt.Errorf("unknown flag %s (eipgam restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>)", a)
 		case file == "":
 			file = a
 		default:
-			return errors.New("usage: magpie restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>")
+			return errors.New("usage: eipgam restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>")
 		}
 	}
 	if file == "" {
-		return errors.New("usage: magpie restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>")
+		return errors.New("usage: eipgam restore [--no-agents] [--no-library] [--no-usage] [--no-sign-ins] <file>")
 	}
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -163,10 +163,10 @@ func restoreCmd(args []string) error {
 	}
 	fmt.Println()
 	if len(r.NeedKey) > 0 {
-		fmt.Println(muted.Render("Needs a key (magpie provider key <id>): " + strings.Join(r.NeedKey, ", ")))
+		fmt.Println(muted.Render("Needs a key (eipgam provider key <id>): " + strings.Join(r.NeedKey, ", ")))
 	}
 	if len(r.SignIn) > 0 {
-		fmt.Println(muted.Render("The backup's settings use these, not signed in on this computer (a backup carries settings, not sign-ins; to use one here: magpie accounts add <id>): " + strings.Join(r.SignIn, ", ")))
+		fmt.Println(muted.Render("The backup's settings use these, not signed in on this computer (a backup carries settings, not sign-ins; to use one here: eipgam accounts add <id>): " + strings.Join(r.SignIn, ", ")))
 	}
 	if len(r.Plugins) > 0 {
 		fmt.Println(muted.Render("Plugins added: " + strings.Join(r.Plugins, ", ")))

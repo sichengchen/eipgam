@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // POST /api/signin/export (heyiwei5 and Rk1ngggg on X): the accounts are
@@ -66,7 +66,7 @@ func TestSigninExportWritesPrivateFiles(t *testing.T) {
 			t.Fatalf("%s: path %q", format, p)
 		}
 		file := filepath.Join(h, strings.TrimPrefix(p, "~"))
-		if format == "cliproxyapi" && !strings.Contains(file, "magpie-cliproxyapi-codex-") {
+		if format == "cliproxyapi" && !strings.Contains(file, "eipgam-cliproxyapi-codex-") {
 			t.Errorf("not in a folder of its own: %s", file)
 		}
 		data, err := os.ReadFile(file)

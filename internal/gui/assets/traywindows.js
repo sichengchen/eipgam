@@ -83,7 +83,7 @@ const TRAY_WORDS = {
   "Menu bar pace": "Tray pace",
   "Menu bar cost": "Tray cost",
   "Menu bar currency": "Tray currency",
-  "What magpie's requests cost, beside their tokens in the menu bar and its tooltip; off, the tokens alone": "What magpie's requests cost, beside their tokens in the tray and its tooltip; off, the tokens alone",
+  "What eipgam's requests cost, beside their tokens in the menu bar and its tooltip; off, the tokens alone": "What eipgam's requests cost, beside their tokens in the tray and its tooltip; off, the tokens alone",
   "How much of each window is used, or how much is left, on the Usage page, the panel and the menu bar": "How much of each window is used, or how much is left, on the Usage page, the panel and the tray",
-  "When I ask: opening or refreshing the Usage page, a card's refresh, and magpie quota or accounts read them; routing, the menu bar and alerts go by the last reading till then. An account a vendor turns away for its quota is still read.": "When I ask: opening or refreshing the Usage page, a card's refresh, and magpie quota or accounts read them; routing, the tray and alerts go by the last reading till then. An account a vendor turns away for its quota is still read.",
+  "When I ask: opening or refreshing the Usage page, a card's refresh, and eipgam quota or accounts read them; routing, the menu bar and alerts go by the last reading till then. An account a vendor turns away for its quota is still read.": "When I ask: opening or refreshing the Usage page, a card's refresh, and eipgam quota or accounts read them; routing, the tray and alerts go by the last reading till then. An account a vendor turns away for its quota is still read.",
 };

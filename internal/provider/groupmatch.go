@@ -7,7 +7,7 @@ package provider
 //
 // The patterns are kept beside the members (Group.Match), never written
 // into them: what they match is worked out each time the groups are read
-// (groupsIn), from the models magpie serves now, so a model the vendor adds
+// (groupsIn), from the models eipgam serves now, so a model the vendor adds
 // joins the group and one it drops leaves it without the group being saved
 // again. Every reader — the gateway's routing, /v1/models, rules, the
 // Routing view, the TUI and the CLI — gets the group from there, so all of
@@ -91,7 +91,7 @@ func compilePattern(p string) (matcher, error) {
 		// is never read this way, so its matches stay what they were.
 		y, err2 := regexp2.Compile("(?i)^(?:"+re+")\\z", regexp2.None)
 		if err2 != nil {
-			return nil, fmt.Errorf("%q is not a regular expression magpie can read: %v", p, err)
+			return nil, fmt.Errorf("%q is not a regular expression eipgam can read: %v", p, err)
 		}
 		y.MatchTimeout = patternTimeout
 		return backtracking{y}, nil
@@ -136,13 +136,13 @@ func compileRule(p string) (rule, error) {
 }
 
 // CleanPatterns are a group's patterns as they are kept: trimmed, each
-// once, every one one magpie can read.
+// once, every one one eipgam can read.
 func CleanPatterns(in []string) ([]string, error) {
 	var out []string
 	for _, p := range in {
-		p = strings.TrimPrefix(strings.TrimSpace(p), "magpie/")
+		p = strings.TrimPrefix(strings.TrimSpace(p), "eipgam/")
 		if scope, ok := strings.CutPrefix(p, FreePrefix); ok {
-			p = FreePrefix + strings.TrimPrefix(strings.TrimSpace(scope), "magpie/")
+			p = FreePrefix + strings.TrimPrefix(strings.TrimSpace(scope), "eipgam/")
 		}
 		if p == "" || slices.Contains(out, p) {
 			continue

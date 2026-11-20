@@ -17,7 +17,7 @@ func sandbox(t *testing.T) string {
 	t.Setenv("HOME", dir)
 	t.Setenv("USERPROFILE", dir)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
-	return filepath.Join(dir, "config", "magpie")
+	return filepath.Join(dir, "config", "eipgam")
 }
 
 // An id New makes is a version 4 UUID Claude Code takes, and Is knows it;
@@ -50,7 +50,7 @@ func TestNewIsKnown(t *testing.T) {
 	}
 }
 
-// The key is kept in magpie's config folder: an id made before is known
+// The key is kept in eipgam's config folder: an id made before is known
 // after a restart (the key read again), and another computer's (another
 // key) is not.
 func TestKeyKept(t *testing.T) {

@@ -17,7 +17,7 @@ import (
 // Desktop show either as "400 due to tool use concurrency issues", and
 // every later request of the conversation carries the same history, so
 // the conversation was stuck (miwanzi on Discord: several conversations
-// at once through magpie). A reply cut after a call's block was told, a
+// at once through eipgam). A reply cut after a call's block was told, a
 // stop while parallel calls ran, or a client that lost a result leaves
 // such a history; the translations had it mended (pairToolBlocks), the
 // relay sent it as it came.

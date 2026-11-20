@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Sign-ins in a backup or a sync (qianxunji and curtinp118 on Discord:
@@ -71,7 +71,7 @@ func TestMergeSignInsRemovedOnlyWhenTheOtherSideRemovedIt(t *testing.T) {
 		t.Fatalf("an account renewed here since is taken away: %+v %v", plan.remove, hashes)
 	}
 	// a server file without sign-ins at all (a computer with them off, or
-	// an older magpie): nothing is taken away
+	// an older eipgam): nothing is taken away
 	if _, plan, _ := MergeSignIns(local, nil, map[string]string{id: h}); len(plan.remove) != 0 {
 		t.Fatalf("a file without sign-ins takes them away here: %+v", plan.remove)
 	}
@@ -329,7 +329,7 @@ func TestApplySignInsKeepsWhatChangedSinceTheMerge(t *testing.T) {
 // skalitz-wolf). Its sign-in is never carried.
 func declaresRotating(t *testing.T) {
 	t.Helper()
-	t.Setenv("MAGPIE_BUN", "") // nothing here runs a plugin
+	t.Setenv("EIPGAM_BUN", "") // nothing here runs a plugin
 	write := func(name string, v any) {
 		b, _ := json.Marshal(v)
 		os.MkdirAll(settings.Dir(), 0o700)
@@ -406,7 +406,7 @@ func TestRestoreSignInsLeavesARotatingSignInOut(t *testing.T) {
 		"kiro": map[string]any{"type": "oauth", "access": "k", "refresh": "r", "expires": 3000, "accountId": "k2@x.com"},
 	})
 	s := &SignIns{Plugins: map[string]json.RawMessage{
-		// a backup made before the plugin said so, or on a magpie older
+		// a backup made before the plugin said so, or on a eipgam older
 		// than the flag
 		"minimax-code": json.RawMessage(`{"type":"oauth","access":"m","refresh":"r2","expires":5000,"accountId":"k@x.com"}`),
 	}}

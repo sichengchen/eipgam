@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // The APIs are close cousins; everything below is the shape they have
@@ -28,7 +28,7 @@ const (
 	ToolResult Kind = "tool_result"
 	Thinking   Kind = "thinking"
 	Search     Kind = "web_search" // a web search run for the model: its query and hits
-	// Advice is Claude Code's advisor run by magpie for the model
+	// Advice is Claude Code's advisor run by eipgam for the model
 	// (advisor_serve.go): ID the call's, Text the advice, or Name an
 	// error_code and nothing in Text
 	Advice Kind = "advisor"
@@ -186,7 +186,7 @@ type Request struct {
 	// translated to an Anthropic upstream (parseTranslated, #4571).
 	clientCache *clientCache
 	// cacheTTL is how long a Claude bridge run started for the request
-	// keeps its prompt cache (claudeRunTTL), which the marks magpie adds
+	// keeps its prompt cache (claudeRunTTL), which the marks eipgam adds
 	// follow (runMark); "" is an hour
 	cacheTTL string
 	// askedTTL is the longest TTL the request's own cache marks ask for
@@ -234,7 +234,7 @@ type Request struct {
 	// did: its run branches off it there (subscriptionBridge.branch).
 	branch *savedSession
 	// runTold, for the Claude bridge, sets what a run started for this
-	// request is told (its tools, magpie's search and answer tools)
+	// request is told (its tools, eipgam's search and answer tools)
 	// before its agent starts, so the first call it reads is named by them
 	runTold func(*subscriptionRun)
 	// told, for the Claude bridge's interactive mode, is a run's being
@@ -259,7 +259,7 @@ type Request struct {
 	// machine where it didn't take an image (ok123now on X): its run is
 	// claude -p, with the interactive mode on all the same
 	unpasted bool
-	// hourMarks has the cache marks magpie adds on Anthropic's Messages
+	// hourMarks has the cache marks eipgam adds on Anthropic's Messages
 	// (anthropicBody) last an hour: a Responses client's (Codex's), whose
 	// turns are often more than five minutes apart and whose own vendor
 	// keeps a thread's prompt cached an hour (chatGPTCold). Off when the
@@ -290,7 +290,7 @@ type Request struct {
 
 	// systemParts: each block of the system prompt as the client sent it
 	// (Anthropic's system blocks, a system or developer message, Responses'
-	// instructions), before magpie adds to or joins them, for a rule's
+	// instructions), before eipgam adds to or joins them, for a rule's
 	// system condition (SucroseMoE on X). systemRaw holds the ones still
 	// as JSON (a string or text blocks), read only when a rule asks
 	// (systemTexts): a Claude Code system prompt is tens of KB.
@@ -324,13 +324,13 @@ type Request struct {
 	// client's URL context and code execution were dropped on every
 	// translated route (daoche_wuzui on X). No other API runs them.
 	GoogleTools []json.RawMessage
-	// Advisor is the model of Claude Code's advisor that magpie runs
+	// Advisor is the model of Claude Code's advisor that eipgam runs
 	// itself (advisor_serve.go), "" when it doesn't: its calls and results
 	// in the conversation are ToolCall and ToolResult parts then
 	Advisor string
 	// WebAccess is the external_web_access of the client's web_search
 	// tool, as it sent it: Codex's web_search mode (false for "cached",
-	// true for "live"), which magpie's own search for a model that can't
+	// true for "live"), which eipgam's own search for a model that can't
 	// is made in (withWebAccess, #5018)
 	WebAccess json.RawMessage
 	Fast      bool // the client asked for priority processing: service_tier priority (Codex's Fast mode)
@@ -340,14 +340,14 @@ type Request struct {
 	Ultrafast bool
 	// Tier is the service_tier the client sent, as it sent it. It goes on
 	// as it is to a provider the user added by its address (OwnTier):
-	// a relay of theirs may serve Fast and Ultrafast where magpie can't
+	// a relay of theirs may serve Fast and Ultrafast where eipgam can't
 	// tell (hsiangron on X: both were left out)
 	Tier string
 	// OwnTier is set for such a provider (gateway.go, as each attempt is
 	// built); one that turns the field away is asked again without it
 	// (optionalFields)
 	OwnTier bool
-	// OwnEffort is set when Effort is magpie's own ask, not the client's:
+	// OwnEffort is set when Effort is eipgam's own ask, not the client's:
 	// auto mode's classifier asked to reason least of a model whose levels
 	// aren't known (fitAutoModeClassifier). An upstream that turns it away
 	// is asked at low, or without it, as it would have been
@@ -375,7 +375,7 @@ type Request struct {
 	// was sent, null and all, when the request is built again for a
 	// Responses upstream, whose answer to a value it doesn't take
 	// (invalid_access_program) is the client's to read; no other API takes
-	// it (magpie-releases#18). Only OpenAI's upstreams are sent it
+	// it (eipgam-releases#18). Only OpenAI's upstreams are sent it
 	// (keepsAccessPrograms, #3172).
 	AccessPrograms json.RawMessage
 	// Metadata is an Anthropic client's metadata (Claude Code's user_id),
@@ -391,7 +391,7 @@ type Request struct {
 	// (buildCodeAssistSent). Left out, the picture came back at the
 	// model's default size (#3820). No other API is known to take it.
 	ImageConfig json.RawMessage
-	// GenConfig holds a Gemini client's generationConfig keys magpie
+	// GenConfig holds a Gemini client's generationConfig keys eipgam
 	// doesn't read or write itself — topK, seed, the penalties, responseModalities, mediaResolution, speechConfig,
 	// responseFormat — which go on as they were sent when the request is
 	// built again for an upstream that speaks Gemini's own API (the Gemini
@@ -487,7 +487,7 @@ const (
 	// keepaliveGap of nothing else: a reply read in rounds (searchReply)
 	// keeps its client alive with it as a translated stream does (#2316)
 	KAlive
-	// KAdvice: Claude Code's advisor run by magpie (advisor_serve.go), ID
+	// KAdvice: Claude Code's advisor run by eipgam (advisor_serve.go), ID
 	// the call's, Text the advice, or Code its error_code
 	KAdvice
 )
@@ -596,7 +596,7 @@ type Usage struct {
 // advisedUse is the advisor calls one reply reported, in the order its
 // iterations listed them.
 type advisedUse struct {
-	// model is magpie's id of the advisor model the request named, which
+	// model is eipgam's id of the advisor model the request named, which
 	// its rows are priced by; "" until the route names it (advisedAs)
 	model string
 	calls []advisorCall
@@ -609,7 +609,7 @@ type advisorCall struct {
 	use    Usage
 }
 
-// advisedAs is u with its advisor calls named by magpie's id of the
+// advisedAs is u with its advisor calls named by eipgam's id of the
 // advisor model the request asked for: the iterations name the vendor's.
 func (u Usage) advisedAs(model string) Usage {
 	if u.advised != nil && model != "" {
@@ -1138,7 +1138,7 @@ func ByStrength(efforts []string) []string {
 // and max only.
 //
 // Codex's ultra is no API's level, whatever a list says (ChatGPT's lists
-// it for Codex's picker; magpie offers it on Copilot's gpt-6.1-sol, #656):
+// it for Codex's picker; eipgam offers it on Copilot's gpt-6.1-sol, #656):
 // it is sent as max, or the nearest the model has below it.
 func fitEffort(want string, levels []string) string {
 	if want == "ultra" {

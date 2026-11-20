@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 // A vendor that lists its models away from the base URL requests go to

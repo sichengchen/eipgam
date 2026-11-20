@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/claudetui"
 )
 
 // writeProfile writes the account's Claude Code profile (CLAUDE_CONFIG_DIR's
@@ -38,7 +38,7 @@ func trustInProfile(t *testing.T, h *resumeHarness, folder string) {
 
 // askingClaude is a tuiHelperHarness hold for a Claude Code that asks
 // whether to trust its folder, which only its user answers, unless
-// magpie's own folder answered yes for it or its profile says the user
+// eipgam's own folder answered yes for it or its profile says the user
 // trusted one; each run's folder goes to cwds.
 func askingClaude(cwds string) string {
 	return `if [ "$` + claudetui.TrustEnv + `" != 1 ] && ! grep -q hasTrustDialogAccepted "$CLAUDE_CONFIG_DIR/.claude.json" 2>/dev/null; then
@@ -49,17 +49,17 @@ pwd >> '` + cwds + `'`
 }
 
 // sleepy_shibe on Discord (Claude Code 2.1.318, its own account): a
-// conversation in a folder the user never trusted was run in magpie's
+// conversation in a folder the user never trusted was run in eipgam's
 // folder, and its session kept there. Once passedOver's 10 minutes were
 // up, its next run went in the caller's folder again: no session of the
 // conversation's there, so Claude Code was told the whole conversation,
-// asked about the folder, and the run went in magpie's folder started
+// asked about the folder, and the run went in eipgam's folder started
 // anew, told the whole conversation once more, the conversation's branch
 // dropped. The folder is known untrusted from the user's own answers now,
-// and the conversation goes on from its session in magpie's folder.
+// and the conversation goes on from its session in eipgam's folder.
 //
 // When the user's answers can't be read, the run goes in the caller's
-// folder as before, and once Claude Code asks, in magpie's folder from the
+// folder as before, and once Claude Code asks, in eipgam's folder from the
 // conversation's session there: once, not from the transcript again.
 func TestClaudeTUIUntrustedFolderKeepsItsSession(t *testing.T) {
 	for _, c := range []struct {
@@ -132,7 +132,7 @@ func untrustedKeepsSession(t *testing.T, profile string, starts int) {
 	}
 }
 
-// A folder the user trusts in Claude Code after magpie went around it is
+// A folder the user trusts in Claude Code after eipgam went around it is
 // run in from the next run on, not after untrustedFor.
 func TestClaudeTUIFolderTrustedLaterRunInAtOnce(t *testing.T) {
 	caller := t.TempDir()

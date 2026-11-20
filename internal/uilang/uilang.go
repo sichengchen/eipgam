@@ -1,4 +1,4 @@
-// Package uilang is the language magpie speaks in: the one the user picked
+// Package uilang is the language eipgam speaks in: the one the user picked
 // in Settings (settings.Lang), or with "system" the system's. The GUI's
 // page picks its own the same way (i18n.js setLocale and sysLocale); the
 // tray, notices and the TUI ask Pick.

@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/probelog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/probelog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // ledgerSpy is an Observer that only counts the rows Append hands it.
@@ -20,8 +20,8 @@ func (*ledgerSpy) Bodies() Bodies       { var b Bodies; return b }
 func (*ledgerSpy) Begin(Request) Watch  { return nil }
 func (s *ledgerSpy) Ledger(r Record)    { s.rows = append(s.rows, r) }
 
-// A request magpie sends a provider on its own (the editor's Test, Detect
-// APIs, a model list) is a row of the request log, marked as magpie's own
+// A request eipgam sends a provider on its own (the editor's Test, Detect
+// APIs, a model list) is a row of the request log, marked as eipgam's own
 // with what it was for, and counts in nothing: no total, source, group,
 // summary, Load, LastSeen, shared day or observer (neiko, gys619).
 func TestProbeRowsListedNotCounted(t *testing.T) {
@@ -48,7 +48,7 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 		t.Fatalf("probe rows %+v", page.Rows)
 	}
 	test := probes[1] // newest first
-	if probes[0].Kind != probelog.KindList || test.Kind != probelog.KindTest || test.Agent != "magpie" || test.Provider != "relay" ||
+	if probes[0].Kind != probelog.KindList || test.Kind != probelog.KindTest || test.Agent != "eipgam" || test.Provider != "relay" ||
 		test.ProviderAccount != "me" || test.Model != "gpt-9" || test.Status != 401 || test.Endpoint != "/v1/chat/completions" {
 		t.Fatalf("probe rows %+v", probes)
 	}
@@ -60,7 +60,7 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 	}
 	for dim, shares := range page.By {
 		for _, s := range shares {
-			if s.ID == "relay" || s.ID == "magpie" || s.ID == "gpt-9" {
+			if s.ID == "relay" || s.ID == "eipgam" || s.ID == "gpt-9" {
 				t.Fatalf("%s counts a probe: %+v", dim, shares)
 			}
 		}
@@ -71,8 +71,8 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 	if rs := Load(time.Time{}); len(rs) != 1 {
 		t.Fatalf("Load %+v", rs)
 	}
-	if !LastSeen("magpie").IsZero() {
-		t.Fatal("a probe is a request from agent magpie")
+	if !LastSeen("eipgam").IsZero() {
+		t.Fatal("a probe is a request from agent eipgam")
 	}
 	n := 0
 	for _, calls := range OwnDays(now.Add(-time.Hour)) {
@@ -91,7 +91,7 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 }
 
 // ferock on Discord: Usage > Requests filled with "Model list" rows, 0
-// tokens and 200, one every 10 minutes for a Remote magpie, that no agent
+// tokens and 200, one every 10 minutes for a Remote eipgam, that no agent
 // sent. A model list that was answered is no row, neither written nor
 // read back from a log that has it from before; one that failed is still
 // listed (it is why models are missing), and so is every Test.
@@ -109,7 +109,7 @@ func TestAnsweredModelListIsNoRow(t *testing.T) {
 	probelog.Sink(probelog.Row{Time: now.Add(5 * time.Second), Kind: probelog.KindTest, Provider: "remote", Host: "10.0.0.2:3425",
 		Endpoint: "/v1/chat/completions", Model: "m", Status: 200, Millis: 900})
 	// a log written before: its answered lists are left out as it is read
-	Append(Record{Time: now.Add(6 * time.Second), Agent: "magpie", Provider: "remote", Host: "10.0.0.2:3425",
+	Append(Record{Time: now.Add(6 * time.Second), Agent: "eipgam", Provider: "remote", Host: "10.0.0.2:3425",
 		Endpoint: "GET /v1/models", Kind: probelog.KindList, Status: 200, Millis: 700, Source: SourceProbe})
 
 	b, err := os.ReadFile(Path())
@@ -140,7 +140,7 @@ func TestProbeChunkMadeOncePerChange(t *testing.T) {
 	at := time.Date(2026, 8, 1, 9, 0, 0, 0, time.UTC)
 	rows := probeRows{}
 	for i := range 3 {
-		rows.add(Record{Time: at.Add(time.Duration(i) * time.Minute), Agent: "magpie", Provider: "p", Host: "api.example.com", Status: 500, Source: SourceProbe}, int64(i))
+		rows.add(Record{Time: at.Add(time.Duration(i) * time.Minute), Agent: "eipgam", Provider: "p", Host: "api.example.com", Status: 500, Source: SourceProbe}, int64(i))
 	}
 	blocks := rows.done()
 	hosts := map[string]string{"api.example.com": "p"}
@@ -158,7 +158,7 @@ func TestProbeChunkMadeOncePerChange(t *testing.T) {
 		t.Fatal("a changed host kept the old chunk")
 	}
 	more := probeRows{blocks: slices.Clone(blocks)}
-	more.add(Record{Time: at.Add(5 * time.Minute), Agent: "magpie", Provider: "p", Host: "api.example.com", Status: 500, Source: SourceProbe}, 3)
+	more.add(Record{Time: at.Add(5 * time.Minute), Agent: "eipgam", Provider: "p", Host: "api.example.com", Status: 500, Source: SourceProbe}, 3)
 	if c := probeChunk(more.done(), at, provider.Renames{}, hosts); c == first || c.Count != 4 {
 		t.Fatalf("a new probe kept the old chunk: %+v", c)
 	}
@@ -169,7 +169,7 @@ func TestProbeChunkMadeOncePerChange(t *testing.T) {
 func TestProbeChunkLetGoAtRest(t *testing.T) {
 	at := time.Date(2026, 8, 1, 9, 0, 0, 0, time.UTC)
 	rows := probeRows{}
-	rows.add(Record{Time: at, Agent: "magpie", Provider: "p", Host: "api.example.com", Status: 500, Source: SourceProbe}, 0)
+	rows.add(Record{Time: at, Agent: "eipgam", Provider: "p", Host: "api.example.com", Status: 500, Source: SourceProbe}, 0)
 	blocks := rows.done()
 	for name, release := range map[string]func(){"ReleaseScratch": ReleaseScratch, "ReleaseMatchScratch": ReleaseMatchScratch} {
 		probeChunk(blocks, at, provider.Renames{}, nil)

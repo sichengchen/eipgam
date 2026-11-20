@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// #1907 (foobra): two ChatGPT accounts, both on in magpie, for Codex
+// #1907 (foobra): two ChatGPT accounts, both on in eipgam, for Codex
 // Desktop and the CLI alone, not for the gateway. Codex isn't connected, so
-// it goes straight to OpenAI whether switch-only is on or off, and magpie
+// it goes straight to OpenAI whether switch-only is on or off, and eipgam
 // only switches its sign-in; a base URL the user wrote by hand is theirs,
 // and stays either way (#856).
 func TestCodexSwitchOnlyKeepsCodexOffTheGateway(t *testing.T) {

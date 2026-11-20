@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // Norethcy on X: the app updated and the background service stayed on the
-// version before, until `magpie daemon restart` by hand. The app now asks
+// version before, until `eipgam daemon restart` by hand. The app now asks
 // its own service, once, to restart into the version on disk.
 func TestNudgeAsksOwnOlderDaemonOnce(t *testing.T) {
 	was := gateway.Version

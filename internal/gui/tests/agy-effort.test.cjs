@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Antigravity CLI's effort (xyenon on Discord): agy's --effort is for one
-// session and turned away for magpie's models, and its settings.json has
-// no key for one, so its row has an effort, which magpie's gateway asks
+// session and turned away for eipgam's models, and its settings.json has
+// no key for one, so its row has an effort, which eipgam's gateway asks
 // its requests for. The default (as agy asks) is the first stop, then the
 // levels its models have. In the window it is in the row opened from its
 // link; in the tray panel the row opens to its slider. A pick posts the
@@ -16,7 +16,7 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const levels = ["low", "high"];
-const model = "magpie/think/gemini-3.8-flash";
+const model = "eipgam/think/gemini-3.8-flash";
 const agy = (effort) => ({
   id: "agy", name: "Antigravity CLI", icon: "antigravity-color", path: "/home/u/.gemini/antigravity-cli/settings.json", wired: true,
   fields: [
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, sets));
-        await page.goto("http://magpie.test/" + (mode ? "?mode=" + mode : ""));
+        await page.goto("http://eipgam.test/" + (mode ? "?mode=" + mode : ""));
         await page.locator(row).waitFor();
         return page;
       };

@@ -6,7 +6,7 @@ import (
 )
 
 // davezfr on X, after v0.1.4216: account 1, used up and out of credits
-// (held), picked as Codex's sign-in showed "magpie" in the Codex app;
+// (held), picked as Codex's sign-in showed "eipgam" in the Codex app;
 // account 2, with room, showed itself. The agents' sync reads both
 // CodexUsedUpKnown (held) and CodexSignInKept (the account is the user's
 // pick), and leaves Codex beside the kept account's sign-in.

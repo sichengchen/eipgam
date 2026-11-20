@@ -4,7 +4,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // keptList is the listing listSessions last made, and what it was made
@@ -24,7 +24,7 @@ var keptList struct {
 	titles  titleAnswers
 	desktop map[string]string
 	// the command an agy row resumes with (AgyStart), when one is listed:
-	// it changes when agy is wired to magpie's gateway or let go of
+	// it changes when agy is wired to eipgam's gateway or let go of
 	agy      bool
 	agyStart string
 	made     int // listings assembled: ListUnless's number for the one kept

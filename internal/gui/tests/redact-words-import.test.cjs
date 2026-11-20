@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, box));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=privacy");
+      await page.goto("http://eipgam.test/?view=settings&tab=privacy");
       await page.locator(LIST("words")).waitFor();
       await settingsDrawn(page);
 

@@ -8,7 +8,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { agentRow } = require("./reader.cjs");
 
-const assets = process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets");
 const languages = ["en", "zh", "zh-TW", "ja", "de"];
 const row = (id) => `.row.agent[data-id="${id}"]`;
 const link = (page, id) => page.locator(row(id) + " .ag-link");
@@ -62,7 +62,7 @@ async function openPage(t, engine, lang = "en", width = 1180, reducedMotion = "n
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); }
     catch { await route.fulfill({ status: 404, body: "" }); }
   });
-  await page.goto("http://magpie.test/?view=agents");
+  await page.goto("http://eipgam.test/?view=agents");
   await link(page, "codex").waitFor();
   return { page, errors, settingsAsked, settings, compactAsked, compact, reads: () => reads, fail: (v) => { fail = v; } };
 }

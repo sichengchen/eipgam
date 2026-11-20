@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // simonzyzy on X: with no provider set up, Claude Code's and Codex's own
-// sessions, tokens and speed seemed impossible. magpie reads no agent's
+// sessions, tokens and speed seemed impossible. eipgam reads no agent's
 // session files until they are allowed (sessions/reads asked false), and an
 // empty Usage page only told people to route an agent through the gateway.
 // Now the Overview and the Requests page say the files aren't read yet and
@@ -62,7 +62,7 @@ function serve(lang, store, posts) {
   };
 }
 
-const ASK = "magpie reads no agent's session files until you allow it, so {names} calls aren't counted here yet.";
+const ASK = "eipgam reads no agent's session files until you allow it, so {names} calls aren't counted here yet.";
 const LANGS = [["en", 900], ["zh", 420], ["zh-TW", 420], ["ja", 420], ["de", 390]];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const store = { asked: false }, posts = [];
       await page.route("**/*", serve(lang, store, posts));
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://eipgam.test/?view=usage");
       const names = "Claude Code, Codex";
       const ask = await page.evaluate(([s, n]) => t(s, { names: n }), [ASK, names.replace(", ", await page.evaluate(() => t(", ")))]);
       if (lang !== "en") assert.notEqual(ask, ASK.replace("{names}", names), "translated");
@@ -103,10 +103,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 }
 
 // baysonfox on X: the Antigravity app was left off in the first choice
-// beside agy CLI, and its calls made without magpie were counted nowhere,
+// beside agy CLI, and its calls made without eipgam were counted nowhere,
 // with nothing on Usage saying why. Requests says so above its rows and asks
 // once: Count reads it, Don't count keeps it off; either way the line goes.
-const LATER = "magpie doesn't read the session files of {names}, so their calls that didn't go through magpie aren't counted here.";
+const LATER = "eipgam doesn't read the session files of {names}, so their calls that didn't go through eipgam aren't counted here.";
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const [lang, width] of LANGS) {
     for (const on of [true, false]) {
@@ -120,7 +120,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const store = { asked: true, later: true }, posts = [];
         await page.route("**/*", serve(lang, store, posts));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         const line = page.locator("#ledReads");
         await line.locator("p").waitFor();
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   }
 }
 
-const SPEED = "Live output speed is measured on requests that go through magpie's gateway. For agents that don't, each call's tokens and time are in Usage › Requests, read from their session files.";
+const SPEED = "Live output speed is measured on requests that go through eipgam's gateway. For agents that don't, each call's tokens and time are in Usage › Requests, read from their session files.";
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const [lang, width] of LANGS) {
     test(`${engine} ${lang} ${width}px: Sessions say where the output speed is when none was measured`, async (t) => {
@@ -159,7 +159,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, { asked: true }, []));
-      await page.goto("http://magpie.test/?view=sessions");
+      await page.goto("http://eipgam.test/?view=sessions");
       const note = page.locator("#view-sessions .sm-speed-note");
       await note.waitFor();
       const want = await page.evaluate((s) => t(s), SPEED);

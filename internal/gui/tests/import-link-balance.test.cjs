@@ -1,4 +1,4 @@
-// A magpie://import link naming its balance query (balance=, balance_path=,
+// A eipgam://import link naming its balance query (balance=, balance_path=,
 // balance_method=): the dialog shows where the balance will be asked, the
 // dialog asks nothing of it before Add, and Add saves the query with the
 // provider. All APIs and keys are fixtures.
@@ -30,7 +30,7 @@ for (const engine of engines) {
           const req = route.request(), url = new URL(req.url());
           const json = (data) => route.fulfill({ json: data });
           const state = { providers: [], presets: [], excluded: [], gateway: { running: true, window: true } };
-          if (url.host !== "magpie.test") { foreign.push(req.url()); return route.abort(); }
+          if (url.host !== "eipgam.test") { foreign.push(req.url()); return route.abort(); }
           if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs={lang:"${lang}",theme:"light",web:true};` });
           if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
           if (url.pathname === "/api/providers") return json(state);
@@ -51,7 +51,7 @@ for (const engine of engines) {
           await browser.close();
           assert.deepEqual(errors, []);
         });
-        await page.goto("http://magpie.test/?view=providers&import=bal1");
+        await page.goto("http://eipgam.test/?view=providers&import=bal1");
         const ed = page.locator(".editor.import");
         await ed.waitFor();
         const bal = ed.locator("code.imp-bal");

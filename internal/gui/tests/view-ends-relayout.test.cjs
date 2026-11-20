@@ -103,7 +103,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // Routing groups: a screen down, the capsule in sight (with the
           // page to themselves, the groups need more rows to be a screen
           // and more down)
-          await page.goto("http://magpie.test/?view=groups");
+          await page.goto("http://eipgam.test/?view=groups");
           await page.locator(".rt-group").nth(15).waitFor();
           const v = "#view-groups";
           await page.mouse.move(width / 2, 300);
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // What goes is a block at the list's end, made for the test: the
           // foot must stay below the window, or the browser moves the page
           // up itself, which is a scroll
-          await page.goto("http://magpie.test/?view=agents");
+          await page.goto("http://eipgam.test/?view=agents");
           await page.locator("#view-agents .ag-lead").first().waitFor();
           await page.waitForFunction(() => { const v = document.getElementById("view-agents"); return v.scrollHeight > v.clientHeight * 3; });
           await page.evaluate(() => {

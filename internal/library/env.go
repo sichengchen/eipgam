@@ -12,10 +12,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/pelletier/go-toml/v2"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
 )
 
 // Environment variables (paopao_baobao on X) are set once in the library
@@ -27,10 +27,10 @@ import (
 //	Codex        <codex home>/config.toml    [shell_environment_policy.set] NAME = "value" (its config docs:
 //	             "set" is the variables forced into the environment of every command it runs)
 //
-// What magpie wrote is recorded name and value (Applied.Env). A variable
+// What eipgam wrote is recorded name and value (Applied.Env). A variable
 // the file already has is the user's: another value is never written over
-// it, and one the user changed after magpie wrote it is theirs from then
-// on. Turning a variable off takes out only what is still as magpie wrote
+// it, and one the user changed after eipgam wrote it is theirs from then
+// on. Turning a variable off takes out only what is still as eipgam wrote
 // it.
 
 // EnvVar is a variable the agents ticked for it are given.
@@ -40,13 +40,13 @@ type EnvVar struct {
 	Agents []string `json:"agents"`
 }
 
-// EnvEntry is a variable magpie wrote into an agent, with its value.
+// EnvEntry is a variable eipgam wrote into an agent, with its value.
 type EnvEntry struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
-// envAgents are the agents magpie can give variables to.
+// envAgents are the agents eipgam can give variables to.
 var envAgents = []string{"claude", "codex"}
 
 const (
@@ -65,7 +65,7 @@ func (e *EnvVar) check() error {
 	}
 	for _, a := range e.Agents {
 		if !slices.Contains(envAgents, a) {
-			return fmt.Errorf("magpie gives variables to Claude Code and Codex, not %s", a)
+			return fmt.Errorf("eipgam gives variables to Claude Code and Codex, not %s", a)
 		}
 	}
 	return nil
@@ -80,14 +80,14 @@ func (l *Library) env(name string) *EnvVar {
 	return nil
 }
 
-// envFile is where t keeps the variables it sets, or why magpie can't give
+// envFile is where t keeps the variables it sets, or why eipgam can't give
 // it any.
 func envFile(t *Target) (string, string) {
 	switch {
 	case !slices.Contains(envAgents, t.Agent.ID):
-		return "", fmt.Sprintf("%s has no setting for variables magpie can write", t.Agent.Name)
+		return "", fmt.Sprintf("%s has no setting for variables eipgam can write", t.Agent.Name)
 	case t.Agent.WSL != "":
-		return "", fmt.Sprintf("magpie gives variables only to agents on this computer, not yet to %s in WSL", t.Agent.Name)
+		return "", fmt.Sprintf("eipgam gives variables only to agents on this computer, not yet to %s in WSL", t.Agent.Name)
 	case t.Agent.ID == "claude":
 		return filepath.Join(claudeDir(), "settings.json"), ""
 	}
@@ -125,7 +125,7 @@ func readEnv(id, path string) (map[string]string, error) {
 	}
 	var doc map[string]any
 	if err := toml.Unmarshal(edit.TrimBOM(raw), &doc); err != nil {
-		return nil, fmt.Errorf("%s isn't TOML magpie can read: it is left as it is", path)
+		return nil, fmt.Errorf("%s isn't TOML eipgam can read: it is left as it is", path)
 	}
 	pol, ok := doc[codexEnvTable]
 	if !ok {
@@ -190,7 +190,7 @@ func writeEnv(id, path string, set map[string]string, del []string) error {
 		}
 		out, err := edit.PatchJSON(raw, kvs, dels)
 		if err == nil && len(del) > 0 && len(set) == 0 {
-			// an env left empty by magpie goes with what it held
+			// an env left empty by eipgam goes with what it held
 			if e := gjson.GetBytes(jsonc.ToJSON(edit.TrimBOM(out)), "env"); e.IsObject() && len(e.Map()) == 0 {
 				out, err = edit.PatchJSON(out, nil, []string{"env"})
 			}
@@ -216,11 +216,11 @@ func writeEnv(id, path string, set map[string]string, del []string) error {
 		if codexHasSet(path) {
 			keys, err := edit.GetTOMLTable(path, codexEnvTable)
 			if err != nil || !slices.Contains(tables, codexEnvTable) {
-				return fmt.Errorf("%s has its set variables in a spelling magpie doesn't edit: it is left as it is", path)
+				return fmt.Errorf("%s has its set variables in a spelling eipgam doesn't edit: it is left as it is", path)
 			}
 			for k := range keys {
 				if strings.HasPrefix(k, "set.") {
-					return fmt.Errorf("%s has its set variables as dotted keys, which magpie doesn't edit: it is left as it is", path)
+					return fmt.Errorf("%s has its set variables as dotted keys, which eipgam doesn't edit: it is left as it is", path)
 				}
 			}
 			for _, k := range del {
@@ -283,7 +283,7 @@ func (l *Library) syncEnv(t *Target, b *backups, res *Result) {
 	var kept []EnvEntry
 	set := map[string]string{}
 	var del []string
-	mine := map[string]bool{} // names whose record stands, or whose value magpie is writing
+	mine := map[string]bool{} // names whose record stands, or whose value eipgam is writing
 	for _, rec := range a.Env {
 		v, there := cur[rec.Name]
 		switch w, wanted := want[rec.Name]; {
@@ -308,7 +308,7 @@ func (l *Library) syncEnv(t *Target, b *backups, res *Result) {
 			// the user's own: the same value is no change, another is
 			// never written over it
 			if v != want[n] {
-				res.fail(id, "env:"+n, fmt.Errorf("%s already sets %s to another value: magpie leaves it as it is", path, n))
+				res.fail(id, "env:"+n, fmt.Errorf("%s already sets %s to another value: eipgam leaves it as it is", path, n))
 			}
 			continue
 		}
@@ -375,7 +375,7 @@ func EnvAgents(name string, agents []string) (*Result, error) {
 	})
 }
 
-// RemoveEnv takes a variable out of the library, and what magpie wrote of
+// RemoveEnv takes a variable out of the library, and what eipgam wrote of
 // it out of every agent.
 func RemoveEnv(name string) (*Result, error) {
 	return change(func(l *Library) error {
@@ -396,7 +396,7 @@ type EnvView struct {
 }
 
 // EnvAgentView is an agent the Variables tab lists: File is where its
-// variables are, No why magpie can't give it any.
+// variables are, No why eipgam can't give it any.
 type EnvAgentView struct {
 	ID   string `json:"id"`
 	File string `json:"file,omitempty"`

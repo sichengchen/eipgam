@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // streamModels is every "model" the data lines of an SSE body hold, at
@@ -176,7 +176,7 @@ func keptThenFailed(t *testing.T, code int, body, model string) {
 	}
 }
 
-// #3728's own route: fx on magpie's codex provider (Codex's sign-in), its
+// #3728's own route: fx on eipgam's codex provider (Codex's sign-in), its
 // Chat turn asked on the ChatGPT backend, which hangs up once fx was kept
 // alive, each time it is asked. The error is the report's EOF.
 func TestKeptAliveChatOnCodexErrorNamesTheModel(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // An agent in a WSL distro that keeps everything in its own folder —
@@ -35,7 +35,7 @@ func TestWSLOwnFolderTargets(t *testing.T) {
 			t.Errorf("%s isn't a target: %v", id, ids(Targets()))
 			continue
 		}
-		if tg.MCP == nil || tg.MCP.Path != filepath.Join(h, w[0]) || !tg.MCP.WSL || tg.MCP.Distro != "Ubuntu" || tg.Skills != filepath.Join(h, w[1]) || tg.Copy || tg.Store != filepath.Join(h, ".local/share/magpie/skills") || tg.Agent.ID != id {
+		if tg.MCP == nil || tg.MCP.Path != filepath.Join(h, w[0]) || !tg.MCP.WSL || tg.MCP.Distro != "Ubuntu" || tg.Skills != filepath.Join(h, w[1]) || tg.Copy || tg.Store != filepath.Join(h, ".local/share/eipgam/skills") || tg.Agent.ID != id {
 			t.Errorf("%s: %+v (mcp %+v)", id, tg, tg.MCP)
 		}
 	}
@@ -48,7 +48,7 @@ func TestWSLOwnFolderTargets(t *testing.T) {
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	ok(t)(InstallSkills(src, []string{"pdf"}, []string{grok}))
 	p := filepath.Join(h, ".grok", "skills", "pdf")
-	if to, err := os.Readlink(p); err != nil || to != filepath.Join(h, ".local/share/magpie/skills/pdf") || !ours(p, "pdf") {
+	if to, err := os.Readlink(p); err != nil || to != filepath.Join(h, ".local/share/eipgam/skills/pdf") || !ours(p, "pdf") {
 		t.Fatalf("grok@wsl has no link to the distro's copy of the skill: %q %v", to, err)
 	}
 	if _, err := os.Lstat(filepath.Join(home(), ".grok", "skills", "pdf")); !os.IsNotExist(err) {

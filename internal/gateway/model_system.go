@@ -6,7 +6,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A model's own system prompt (liucl on X): the text the user gave one
@@ -36,9 +36,9 @@ import (
 //     its own.
 //
 // Prepending is not offered. A model with no prompt of its own is sent the
-// body byte for byte as the agent wrote it. magpie's own asks (titles, the
+// body byte for byte as the agent wrote it. eipgam's own asks (titles, the
 // router's classifier, search and vision stand-ins) go without it: their
-// replies are magpie's to read, in a shape the text could break.
+// replies are eipgam's to read, in a shape the text could break.
 func withModelSystem(r *http.Request, p provider.Provider, model string, from provider.Protocol, body []byte) []byte {
 	text := provider.ModelSystemPrompt(p.ID, model)
 	if text == "" || magpiesOwnAsk(r) {
@@ -47,7 +47,7 @@ func withModelSystem(r *http.Request, p provider.Provider, model string, from pr
 	return addSystem(from, body, text)
 }
 
-// magpiesOwnAsk says r is a request magpie makes of a model for itself.
+// magpiesOwnAsk says r is a request eipgam makes of a model for itself.
 func magpiesOwnAsk(r *http.Request) bool {
 	if r == nil {
 		return false

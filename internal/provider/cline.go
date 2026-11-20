@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
-// ClineVersion is the Cline desktop release magpie says it is to the Cline
+// ClineVersion is the Cline desktop release eipgam says it is to the Cline
 // API.
 const ClineVersion = "3.5.54"
 
@@ -169,7 +169,7 @@ func (p Provider) clineFreeModel(model string) bool {
 // ClinePinnable reports whether p's requests reach Cline's API and can be
 // pinned to an upstream (PinUpstream): the ClinePass provider, one on
 // cline.bot, or the Cline plugin's (@magpie-community/opencode-cline-auth),
-// whose requests magpie writes before the plugin sends them on.
+// whose requests eipgam writes before the plugin sends them on.
 func (p Provider) ClinePinnable() bool {
 	return p.IsCline() || p.PluginProvider() == "cline"
 }
@@ -227,7 +227,7 @@ func (p Provider) ClinePin(model string) (upstream string, openRouter bool) {
 }
 
 // ClinePassAsked is the upstream a request for model asked the Cline
-// API to serve it from on p, "" when it asked for none: what magpie
+// API to serve it from on p, "" when it asked for none: what eipgam
 // wrote into it (ClinePin). The Routing page says it beside a reply that
 // names no provider, so a route ClinePass picked reads as asked for an
 // upstream or not (zRain on Discord, 10-24). The Cline plugin's own

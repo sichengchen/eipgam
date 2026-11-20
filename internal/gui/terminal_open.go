@@ -13,7 +13,7 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // Opening a session or an agent in a terminal off a Mac (lileo0668 on
@@ -172,9 +172,9 @@ func linuxTerminalArgv(choice, script string) ([]string, error) {
 // after it. The line goes as -EncodedCommand: no script file, so no
 // execution policy, no encoding of a file's to guess and no quoting
 // between here and PowerShell. A shell goes through cmd's start, which
-// gives it a console of its own: magpie's children have none
+// gives it a console of its own: eipgam's children have none
 // (CREATE_NO_WINDOW), and a shell started from here would write to
-// handles magpie passed it, not a window. Windows Terminal opens its own.
+// handles eipgam passed it, not a window. Windows Terminal opens its own.
 func winTerminalArgv(line, choice string) ([]string, error) {
 	shell := func(ids ...string) (string, error) {
 		for _, id := range ids {
@@ -240,7 +240,7 @@ func openWinTerminal(line, choice string) error {
 // openLinuxTerminal runs line from a script of its own in sh, as a Mac's
 // .command file runs it, then the user's shell, so the window stays.
 func openLinuxTerminal(line, choice string) error {
-	f, err := os.CreateTemp("", "magpie-resume-*.sh")
+	f, err := os.CreateTemp("", "eipgam-resume-*.sh")
 	if err != nil {
 		return err
 	}

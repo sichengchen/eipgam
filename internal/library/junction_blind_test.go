@@ -10,7 +10,7 @@ import (
 )
 
 // onWindowsLinks makes the sync judge links as it does on Windows, where
-// magpie's link may be a junction (skipsJunctions).
+// eipgam's link may be a junction (skipsJunctions).
 func onWindowsLinks(t *testing.T) {
 	t.Helper()
 	old := linkOS
@@ -40,7 +40,7 @@ func TestJunctionBlindAgentsGetCopies(t *testing.T) {
 	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"agy", "claude"}))
 	ag, cl := filepath.Join(cfg, "skills/pdf"), filepath.Join(h, ".claude/skills/pdf")
 	if isLink(t, ag) || !ours(ag, "pdf") {
-		t.Fatalf("%s isn't magpie's copy", ag)
+		t.Fatalf("%s isn't eipgam's copy", ag)
 	}
 	if runtime.GOOS != "windows" && !isLink(t, cl) {
 		t.Fatal("Claude Code's isn't a link")
@@ -66,7 +66,7 @@ func TestJunctionBlindAgentsGetCopies(t *testing.T) {
 			}
 		}
 		if isLink(t, ag) || !ours(ag, "pdf") {
-			t.Fatal("Antigravity's isn't magpie's copy any more")
+			t.Fatal("Antigravity's isn't eipgam's copy any more")
 		}
 	}
 
@@ -92,7 +92,7 @@ func TestJunctionBlindProjectCopies(t *testing.T) {
 	ok(t)(ProjectSkill(proj, "pdf", []string{"agy", "claude"}))
 	sh, cl := filepath.Join(proj, ".agents/skills/pdf"), filepath.Join(proj, ".claude/skills/pdf")
 	if isLink(t, sh) || !ours(sh, "pdf") {
-		t.Fatal(".agents/skills/pdf isn't magpie's copy")
+		t.Fatal(".agents/skills/pdf isn't eipgam's copy")
 	}
 	if runtime.GOOS != "windows" && !isLink(t, cl) {
 		t.Fatal(".claude/skills/pdf isn't a link")
@@ -110,7 +110,7 @@ func TestJunctionBlindProjectCopies(t *testing.T) {
 		}
 	}
 	if isLink(t, sh) || !ours(sh, "pdf") {
-		t.Fatal("the project's copy isn't magpie's any more")
+		t.Fatal("the project's copy isn't eipgam's any more")
 	}
 
 	// Antigravity unticked: Codex's entry is a link again (on Windows a

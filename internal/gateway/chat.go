@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // ---- OpenAI Chat Completions --------------------------------------------------
@@ -386,7 +386,7 @@ func dataURL(p Part) string {
 // buildHost is the host a request for p is built for. Cursor's plugin is
 // "cursor" (plugin://cursor) moved or not: a moved one's Host is the
 // built-in's, for show, which Cursor's is none, and its fast mode was lost
-// on every request magpie translated (#1360).
+// on every request eipgam translated (#1360).
 func buildHost(p provider.Provider) string {
 	if p.IsPlugin() {
 		switch id := p.PluginProvider(); id {

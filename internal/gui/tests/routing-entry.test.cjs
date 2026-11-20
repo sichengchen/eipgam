@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       await page.locator(".rt-req").nth(routes.length - 1).waitFor();
       const chips = await page.locator(".rt-req").evaluateAll((rows) => rows.map((r) => {
         const c = [...r.querySelectorAll(".ef")].find((e) => /^(TUI|-p)$/.test(e.textContent.trim()));

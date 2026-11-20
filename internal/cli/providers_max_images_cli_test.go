@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// magpie provider set max-images=8 is the user's word on how many images
+// eipgam provider set max-images=8 is the user's word on how many images
 // one request to a provider may carry (#6849, ID-VerNe: 100milionseek's and
 // Coarena's APIs take 8 and refuse the ninth with their own words, and
 // Copilot's wording alone is learned), show says so, max-images=0 hands it

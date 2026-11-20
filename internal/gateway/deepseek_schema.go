@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // toolPatterns is body with fix applied to every "pattern" of its tools'

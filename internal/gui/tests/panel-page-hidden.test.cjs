@@ -58,13 +58,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         usageCardsHidden: ["deepseek|balance", "codex|x@y.z|plan"], usageWindowsHidden: ["claude|5-hour"],
       };
       const context = await browser.newContext({ viewport: { width: 440, height: 600 }, reducedMotion: "reduce" });
-      await context.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "usage"); } catch {} });
+      await context.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "usage"); } catch {} });
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, settings));
-      await page.goto("http://magpie.test/?mode=panel");
+      await page.goto("http://eipgam.test/?mode=panel");
       await page.waitForFunction(() => document.querySelectorAll("#panelQuota .pq-card").length >= 2);
       const tr = (s, v) => page.evaluate(([s, v]) => t(s, v), [s, v]);
       const cards = () => page.evaluate(() => [...document.querySelectorAll("#panelQuota .pq-card")].map((c) => c.dataset.card));

@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Antigravity's accounts, onto Antigravity (local agy CLI). The withdrawn
@@ -136,7 +136,7 @@ func MoveToAgy(ctx context.Context) ([]ImportedAccount, error) {
 	forgetAccountCaches()
 	// agy is downloaded from Google and checks each account with Google,
 	// so it goes the way Antigravity's requests went: where Google is
-	// reached only through Antigravity's own proxy (magpie in a container
+	// reached only through Antigravity's own proxy (eipgam in a container
 	// in China), going direct failed the install every time (huiqiang6 on
 	// X). agy-cli keeps that proxy for its requests after the move too.
 	if err := carryAgyProxy(accts); err != nil {

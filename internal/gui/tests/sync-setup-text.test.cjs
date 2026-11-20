@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A sync setup copied as text (WJaunita45604 on X): Copy setup in the open
-// sync form copies the text magpie seals with the passphrase; on another
+// sync form copies the text eipgam seals with the passphrase; on another
 // computer, the text pasted into the form asks for that passphrase, says a
 // wrong one in the reader's language, and with the right one fills the
 // form, the kind picked from the server's address. Nothing is saved until
@@ -13,11 +13,11 @@ const { chromium, webkit } = require("playwright");
 const { openPart } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-const TEXT = "magpie-sync:eyJmb3JtYXQiOiJtYWdwaWUtZGF0YSJ9AbCdEf0123456789";
+const TEXT = "eipgam-sync:eyJmb3JtYXQiOiJtYWdwaWUtZGF0YSJ9AbCdEf0123456789";
 const opened = { url: "s3://bucket/team", user: "AKIAEXAMPLE", password: "s3-secret-Qx7", endpoint: "https://acct.r2.cloudflarestorage.com", region: "auto", pathStyle: true, keys: true, agents: true, library: false, memory: true, signIns: true };
 
 function serve(lang, on, posts) {
-  const settings = { theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie", gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [], fx: { rate: 7.2, stale: false } };
+  const settings = { theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/eipgam", gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [], fx: { rate: 7.2, stale: false } };
   const sync = on ? { on: true, kind: "webdav", url: "https://dav.example.com/dav/", user: "me", passwordSet: true, passphraseSet: true, keys: true, agents: true, library: true, memory: true, last: "2026-11-13T08:00:00Z" }
     : { on: false, keys: true, agents: true, library: true, memory: true };
   return async (route) => {
@@ -63,7 +63,7 @@ async function open(engine, lang, width, on, t) {
   const errors = [], posts = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, on, posts));
-  await page.goto("http://magpie.test/");
+  await page.goto("http://eipgam.test/");
   await page.locator("#prefs").click();
   await openPart(page, "sync");
   const first = page.locator("#syncList .row.pref").first();

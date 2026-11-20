@@ -150,7 +150,7 @@ func (l *Library) holdPluginParts() *heldParts {
 }
 
 // without is b without the items that have the name of a held part: a
-// bundle from a magpie before plugins were carried has a plugin's parts as
+// bundle from a eipgam before plugins were carried has a plugin's parts as
 // its own items, and this computer's plugin keeps its own.
 func (h *heldParts) without(b *Bundle) *Bundle {
 	c := *b
@@ -284,7 +284,7 @@ func (l *Library) putPlugins(in []*CarriedPlugin, stage string) (fetch []*Carrie
 			continue
 		}
 		if pl.parts() == 0 {
-			fail(fmt.Errorf("%s has no skills, MCP servers, hooks or subagents magpie can give an agent", c.Name))
+			fail(fmt.Errorf("%s has no skills, MCP servers, hooks or subagents eipgam can give an agent", c.Name))
 			continue
 		}
 		skipped, err := installPlugin(l, pl, dir, c.Source, c.Pick, c.Agents)

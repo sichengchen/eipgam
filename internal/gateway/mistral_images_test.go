@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 const mistralTooMany = `{"object":"error","message":"Total number of images exceeds the maximum allowed of 20.","type":"invalid_request_error","param":null,"code":null}`

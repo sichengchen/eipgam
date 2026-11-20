@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // searchRoute is the newest web_search route the Routing page lists.
@@ -44,7 +44,7 @@ func noSecret(t *testing.T, b *memBucket, secrets ...string) {
 }
 
 // axelburks on Discord: 搜索API代搜时 路由页面不显示是请求了哪个API … 用量-请求
-// 页面 能看到请求记录 但是无请求存档. A search magpie asks a search API for
+// 页面 能看到请求记录 但是无请求存档. A search eipgam asks a search API for
 // is a route of the Routing page naming the API and the key (masked), a
 // Recent call with its request and answer, and, with the request archive
 // on, an archive its usage row names, the key nowhere in it, even where
@@ -86,7 +86,7 @@ func TestSearchAPIAskIsRoutedAndArchived(t *testing.T) {
 	}
 	// the API by name, and where it was asked, as the usage row says them
 	host := provider.HostOf(srv.URL)
-	if r.Model != "Tavily" || r.Provider != host || r.Agent != "magpie" || r.For == nil || r.For.Agent != "claude" || !r.Done || r.Status != 200 ||
+	if r.Model != "Tavily" || r.Provider != host || r.Agent != "eipgam" || r.For == nil || r.For.Agent != "claude" || !r.Done || r.Status != 200 ||
 		len(r.Order) != 1 || r.Order[0].Who != provider.MaskSearchKey(key) || r.Order[0].Kind != "key" {
 		t.Fatalf("route %+v", r)
 	}
@@ -156,7 +156,7 @@ func TestSearchAPIKeyInQueryNotArchived(t *testing.T) {
 	noSecret(t, b, key)
 }
 
-// A plugin's search API is a route and an archive too: what magpie
+// A plugin's search API is a route and an archive too: what eipgam
 // handed the plugin, its key masked, and the pages it gave back, or the
 // refusal it threw.
 func TestPluginSearchAPIRoutedAndArchived(t *testing.T) {

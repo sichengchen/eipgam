@@ -28,7 +28,7 @@
 // of theirs adds up. No account is named in it (Hide accounts). A click on
 // it, or its chevron, folds the accounts under it away (justfreefall on X),
 // remembered by provider for the window and the panel alike
-// (magpie.usageAllFolded): quotaAllFolded says whether a provider's are.
+// (eipgam.usageAllFolded): quotaAllFolded says whether a provider's are.
 function mergeQuotas(subs, now = Date.now()) {
   const read = subs.filter((q) => !q.error && (q.windows?.length || q.balance));
   const unknown = subs.length - read.length;
@@ -126,7 +126,7 @@ function quotaAll(subs, cls = "", max = Infinity) {
 // read on first use: loading this file touches nothing of app.js's
 let allFolded;
 const allFolds = () => (allFolded ||= new Set(kept("usageAllFolded", [])));
-globalThis.addEventListener?.("storage", (e) => { if (e.key === "magpie.usageAllFolded") { allFolded = null; renderQuotas(); } });
+globalThis.addEventListener?.("storage", (e) => { if (e.key === "eipgam.usageAllFolded") { allFolded = null; renderQuotas(); } });
 const quotaAllFolded = (p) => allFolds().has(p);
 // setQuotaAllFolded: true when it changed
 function setQuotaAllFolded(p, fold) {

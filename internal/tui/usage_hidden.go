@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // usageShown is the cards the Usage page leaves as the app's Overview does

@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [], st = { defaults: { sink: false, firstToken: 0, patience: 0 }, group: {} };
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, st));
-      await page.goto("http://magpie.test/?view=groups");
+      await page.goto("http://eipgam.test/?view=groups");
       const card = page.locator(".rt-group", { hasText: "Sol" });
       await card.waitFor();
       const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       };
 
       // the Settings card under the list: each row says what it is and
-      // starts at magpie's own
+      // starts at eipgam's own
       const set = page.locator(".rt-gset");
       const sink = set.locator(".rt-gdef-sink"), first = set.locator(".rt-gdef-first"), pat = set.locator(".rt-gdef-patience");
       await reach(pat);

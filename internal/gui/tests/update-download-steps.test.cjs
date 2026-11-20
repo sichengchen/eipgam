@@ -29,7 +29,7 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -49,7 +49,7 @@ function server(lang, ctl) {
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (const width of [900, 420]) {
         await t.test(`${lang} at ${width}px: the pill`, async () => {
           const ctl = { update: { state: "error", retry: true, current: "0.1.400", latest: "0.1.401", error: "timed out" } };
-          const { page, errors } = await open(browser, lang, ctl, width, "http://magpie.test/");
+          const { page, errors } = await open(browser, lang, ctl, width, "http://eipgam.test/");
           const pill = page.locator("#update"), label = pill.locator("span").first();
           await pill.waitFor({ state: "visible" });
           const seen = [];
@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         await t.test(`${lang} at ${width}px: Settings' Version row`, async () => {
           const ctl = { update: at({ done: 15_000_000, step: "download", speed: 1_500_000 }) };
-          const { page, errors } = await open(browser, lang, ctl, width, "http://magpie.test/?view=settings&tab=about");
+          const { page, errors } = await open(browser, lang, ctl, width, "http://eipgam.test/?view=settings&tab=about");
           const sub = page.locator("#about .row.pref .sub", { hasText: "0.1.401" }).first();
           await sub.waitFor();
           await page.waitForFunction(() => /50%|50 %/.test([...document.querySelectorAll("#about .row.pref .sub")].map((s) => s.textContent).join("|")));

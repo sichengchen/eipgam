@@ -270,7 +270,7 @@ func TestImportClaudeSetupToken(t *testing.T) {
 	if !claudeTokenAccount(name) {
 		t.Fatal("not kept as a setup-token account")
 	}
-	// the same token again is the account magpie has
+	// the same token again is the account eipgam has
 	rs, err = ImportLogins(context.Background(), "claude", []string{testSetupToken})
 	if err != nil || importStatuses(rs) != name+":exists" {
 		t.Fatalf("again: %+v %v", rs, err)

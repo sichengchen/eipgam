@@ -8,7 +8,7 @@ Library → Instructions, and the Library's Memory tab.
 
 ## Source of truth
 
-The `memory` folder in magpie's config folder, one Markdown file per memory
+The `memory` folder in eipgam's config folder, one Markdown file per memory
 ([internal/memory/store.go](../../internal/memory/store.go)):
 
 - `<id>.md` is the memory: its fields as YAML front matter, its text as the
@@ -17,7 +17,7 @@ The `memory` folder in magpie's config folder, one Markdown file per memory
   digest, dismissed texts, deletions, declined suggestions, when a search
   last returned each memory and how often (so a search never rewrites a
   memory's file, `TestUseDoesNotRewriteTheMemory`), and the hash of each
-  file as magpie last wrote it.
+  file as eipgam last wrote it.
 - `index.json` is a cache of the parsed files by size and mtime: gone or
   garbled, memory reads the same (`TestIndexIsOnlyACache`).
 - `journal.json` holds a change to more than one file (a merge, a sync)
@@ -30,12 +30,12 @@ Rules:
 - One writer at a time across magpies (`filelock`, `memory.lock`), each file
   written through a temp file, and only the files that changed. The last
   good meta.json is kept beside it (`lastgood`).
-- A file whose hash isn't the one magpie wrote was edited (or added) by
+- A file whose hash isn't the one eipgam wrote was edited (or added) by
   hand: it is the user's (origin user, `Edited`), so a tidy leaves it and an
   agent's change synced from another computer never writes over it
   (`TestHandEditIsTheUsers`). A file with no front matter is a fact that
   holds everywhere, its name its id (`TestHandAddedFileIsAMemory`). A file
-  edited by hand while magpie changes or removes it is left as the user
+  edited by hand while eipgam changes or removes it is left as the user
   wrote it (`TestHandEditDuringAChangeStays`,
   `TestHandEditDuringARemoveStays`).
 - A memory file that can't be parsed is unknown: left out, never written
@@ -77,7 +77,7 @@ and refuses empty or over-long text, an unknown kind and a bad scope
 
 [internal/gateway/memory_mcp.go](../../internal/gateway/memory_mcp.go):
 `memory_search`, `memory_save`, `memory_forget`, `memory_context`, Streamable HTTP at
-`MemoryMCPPath` (`/mcp/magpie/memory`), served like the search server
+`MemoryMCPPath` (`/mcp/eipgam/memory`), served like the search server
 (`serveMCP`) but to the agents on this computer alone, as the hub gives it
 (`HereOnly`): memory is what is known about this computer's user, and its
 digest goes into every agent's instructions here, so another computer's
@@ -85,13 +85,13 @@ gateway key (which may be a friend's, and may use every MCP server unless
 it is held to some) and a web page, even one Settings lists, are turned
 away (`TestMemoryMCPGuarded`).
 
-- The Library offers it in the market as `magpie-memory`
+- The Library offers it in the market as `eipgam-memory`
   ([market.go](../../internal/library/market.go)), run as
-  `magpie mcp memory` ([browsermcp.RunMemory](../../internal/browsermcp/browsermcp.go)),
+  `eipgam mcp memory` ([browsermcp.RunMemory](../../internal/browsermcp/browsermcp.go)),
   which relays stdio to the gateway with the folder the agent started it in
   (`X-Magpie-Cwd`) and the client name from `initialize`
   (`X-Magpie-Mcp-Client`).
-- `magpie tool memory_*` names its folder the same way, and reads an
+- `eipgam tool memory_*` names its folder the same way, and reads an
   answer sent as an event stream, answering a server's roots/list
   (`TestToolMemoryThroughTheGateway`, #6049).
 - Behind the [MCP router](mcp-router.md) the hub passes the caller in the
@@ -116,9 +116,9 @@ away (`TestMemoryMCPGuarded`).
 EverMe and Nowledge Mem are not built in: both publish an MCP server, so the
 Library's market offers them as servers (`evermeServer`, `nowledgeServer` in
 [market.go](../../internal/library/market.go)), added in one step beside
-Magpie Memory and given to the agents like any server
+eipgam Memory and given to the agents like any server
 (`TestThirdPartyMemoryServers`). Their memories live in their own service;
-magpie's digest, Memory tab, distillation and search don't read or write them.
+eipgam's digest, Memory tab, distillation and search don't read or write them.
 EverMe runs `npx -y @everme/memory-mcp` with the agent id and `evt_` token
 its console or `evercli auth login` gives (`EVERME_API_BASE` defaults to the
 managed backend, editable for a self-hosted one). Nowledge Mem is its
@@ -132,7 +132,7 @@ after adding.
 digest per scope within a budget (global 4000, project 1500, agent 1000,
 the whole 8000 characters), pinned and longer-lived kinds first, no memory
 cut in the middle. The text goes to every agent's vendor: it names neither
-magpie nor any vendor.
+eipgam nor any vendor.
 
 The digest changes only when published, so an agent's instructions — and
 the prompt cache built on them — change mid-session only then
@@ -213,10 +213,10 @@ further (`State.Since`), unless a range is picked.
 - What is sent: the conversation's user and assistant text only (no
   tools, no reasoning), cut to 24k characters keeping the head and the
   tail, plus the memories already kept for that project, under neutral
-  instructions that name neither magpie nor the vendor
+  instructions that name neither eipgam nor the vendor
   (`TestWhatIsSent`, `TestLongConversationCut`).
 - The request goes through the gateway this process serves
-  (`distillComplete`), as `x-api-key: magpie-memory`, so it is routed,
+  (`distillComplete`), as `x-api-key: eipgam-memory`, so it is routed,
   masked and counted in Usage under the agent `memory`
   (`TestDistillCompleteThroughGateway`). With no model picked it uses
   `gateway.AutoVision()`. A reasoning level picked (`State.Effort`,
@@ -262,7 +262,7 @@ off until switched on under Memory → Tidy up every night.
   and at least one not fixed, up to 120 (`perAsk`) a request, each as
   `nN | kind | date | used N× | [fixed |] text — why`. Ids are replaced by
   the short names, and a name not shown is ignored. The prompt names
-  neither magpie nor the vendor.
+  neither eipgam nor the vendor.
 - What the user wrote or pinned (`memory.Fixed`) is never rewritten or
   set aside. Merged with others, it is the one kept and the others go into
   it; two fixed ones are never merged (`TestTidyNeverChangesTheUsers`).
@@ -408,7 +408,7 @@ over the In use list, unsearched and not narrowed to a scope
 
 ```sh
 mote-run go test ./internal/memory ./internal/backup ./internal/davsync ./internal/memdistill ./internal/memembed ./internal/library
-mote-run sh -c 'MAGPIE_EMBED_DIR=$HOME/models/pml go test -run Embedder ./internal/pii/guard'
+mote-run sh -c 'EIPGAM_EMBED_DIR=$HOME/models/pml go test -run Embedder ./internal/pii/guard'
 mote-run go test -run 'Distill|Dream' ./internal/gui
 mote-run go test -tags nogui -run 'MemoryMCP|OwnMCP' ./internal/gateway
 mote-run go test ./internal/browsermcp ./internal/cli

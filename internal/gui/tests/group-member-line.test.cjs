@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=groups");
+        await page.goto("http://eipgam.test/?view=groups");
         const card = page.locator('.rt-group[data-id="auto-kimi-k3-1-pro"]');
         await card.waitFor();
 

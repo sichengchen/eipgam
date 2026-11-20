@@ -10,16 +10,16 @@ import (
 )
 
 // An agent that was uninstalled leaves its sessions behind: OpenCode's are
-// rows in a database magpie only reads (_SekiBetu_ on X: after removing
+// rows in a database eipgam only reads (_SekiBetu_ on X: after removing
 // OpenCode, its sessions stayed listed with a Resume and no Delete). Two
 // things follow from the command being gone. Resume is no longer offered:
-// the line would fail. And the list may be cleared: magpie can't delete
+// the line would fail. And the list may be cleared: eipgam can't delete
 // rows of a database the agent keeps, but it can stop listing them, which
 // is what Forget does. The agent's own files are never touched, and Restore
 // in the trash lists the session again.
 
 // cliOf is the command each agent's sessions are resumed with, for the
-// agents magpie can't move to the trash (Deletable) as well.
+// agents eipgam can't move to the trash (Deletable) as well.
 var cliOf = map[string]string{
 	"claude": "claude", "codex": "codex", "opencode": "opencode", "pi": "pi",
 	"cline": "cline", "qoder": "qodercli", "qoder-cn": "qoderclicn",
@@ -35,7 +35,7 @@ var cliGone = func(agent string) bool {
 	return bin != "" && !testing.Testing() && !lookOK(bin)
 }
 
-// Forgettable says whether magpie can stop listing an agent's sessions: its
+// Forgettable says whether eipgam can stop listing an agent's sessions: its
 // sessions can't be moved to the trash, and its command is gone.
 func Forgettable(agent string) bool { return !Deletable(agent) && cliGone(agent) }
 
@@ -48,7 +48,7 @@ func Removable(agent string) bool { return Deletable(agent) || Forgettable(agent
 // the trash, and Restore lists it again, as does a use of it after.
 func Forget(agent, id string) (Trashed, error) {
 	if !Forgettable(agent) {
-		return Trashed{}, errors.New("magpie can't delete this agent's sessions")
+		return Trashed{}, errors.New("eipgam can't delete this agent's sessions")
 	}
 	for _, m := range ListAgent(agent) {
 		if m.ID == id {

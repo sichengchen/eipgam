@@ -3,7 +3,7 @@ package edit
 import (
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // dotenv files (KEY=value per line) as Gemini CLI reads from ~/.gemini/.env.
@@ -64,7 +64,7 @@ func SetEnvFile(path string, kvs ...KV) error {
 }
 
 // DelEnvFile removes keys from a dotenv file, and the file when they were
-// all it held (Gemini CLI's .env, made by magpie for its key).
+// all it held (Gemini CLI's .env, made by eipgam for its key).
 func DelEnvFile(path string, keys ...string) error {
 	raw, err := Read(path)
 	if err != nil || len(raw) == 0 {
@@ -86,7 +86,7 @@ func DelEnvFile(path string, keys ...string) error {
 	if !changed {
 		return nil
 	}
-	// a note magpie put above a key goes with it
+	// a note eipgam put above a key goes with it
 	out = markEnv(out, string(raw))
 	if strings.TrimSpace(strings.Join(withoutNotes(out), "")) == "" {
 		return Remove(path)

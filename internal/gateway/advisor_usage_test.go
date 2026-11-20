@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // advisedUsage is the usage of a reply whose advisor ran once, word for
@@ -87,7 +87,7 @@ func TestAdvisorIterationsRead(t *testing.T) {
 
 // A Claude Code turn with its advisor on, sent as it is to a provider's
 // Messages API, where Anthropic's server runs the advisor: its call is a
-// usage row of its own under the advisor's model, by magpie's id (here
+// usage row of its own under the advisor's model, by eipgam's id (here
 // claude-opus-5.5, which Claude Code names claude-opus-5-5 and the
 // iteration names as the vendor does), priced as that model, and the
 // request's own row is the executor's usage as the reply said it (Refeccd

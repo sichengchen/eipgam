@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// xiaomanweiman on X: Pi's opened row has a Protocol row, the API magpie's
+// xiaomanweiman on X: Pi's opened row has a Protocol row, the API eipgam's
 // models are asked on, picked in the app's menu (never a native select):
 // each model's own (as before), OpenAI Chat Completions, OpenAI Responses
 // or Anthropic Messages. The pick posts the protocol field; an api the user
@@ -19,11 +19,11 @@ const protocols = [
   { value: "openai-responses", label: "OpenAI Responses", note: "openai-responses" },
   { value: "anthropic-messages", label: "Anthropic Messages", note: "anthropic-messages" },
 ];
-const models = [{ value: "magpie/relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via magpie" }];
+const models = [{ value: "eipgam/relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via eipgam" }];
 const pi = (proto) => ({
   id: "pi", name: "Pi", icon: "generic", path: "/fixture/pi", wired: true,
   fields: [
-    { key: "model", label: "model", value: "magpie/relay/m1", options: models },
+    { key: "model", label: "model", value: "eipgam/relay/m1", options: models },
     { key: "protocol", label: "protocol", value: proto, options: protocols },
   ],
 });
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], sets = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, proto, sets));
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await page.locator(row).waitFor();
         // the words as i18n.js has them in this language
         const tr = (s) => page.evaluate(([l, s]) => (l === "en" ? s : I18N[l][s]), [lang, s]);

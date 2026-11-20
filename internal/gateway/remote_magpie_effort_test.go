@@ -10,12 +10,12 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A budget that reads as max beside a turn that asked high: the first
-// magpie must not write the budget's level as a top-level effort, which the
-// next magpie reads before the turn's (DIYgod on X).
+// eipgam must not write the budget's level as a top-level effort, which the
+// next eipgam reads before the turn's (DIYgod on X).
 func TestRemoteMagpieKeepsTurnEffortOverBudget(t *testing.T) {
 	fresh(t)
 	got := make(chan []byte, 1)
@@ -64,10 +64,10 @@ func TestRemoteMagpieKeepsTurnEffortOverBudget(t *testing.T) {
 	select {
 	case b := <-hop:
 		if e := gjson.GetBytes(b, "output_config.effort").String(); e != "" {
-			t.Errorf("the remote magpie was sent top-level effort %q: %s", e, b)
+			t.Errorf("the remote eipgam was sent top-level effort %q: %s", e, b)
 		}
 	default:
-		t.Fatal("the remote magpie received no /v1/messages request")
+		t.Fatal("the remote eipgam received no /v1/messages request")
 	}
 	select {
 	case b := <-got:

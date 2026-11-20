@@ -71,7 +71,7 @@ func TestDeleteGroups(t *testing.T) {
 	}
 }
 
-// Removing every group magpie found says the user wants none: a model a
+// Removing every group eipgam found says the user wants none: a model a
 // provider serves later brings no new one (xwang_sh on X), and found groups
 // on again brings the removed ones back. Removing only some leaves them on.
 func TestDeletingEveryFoundGroupKeepsThemOff(t *testing.T) {

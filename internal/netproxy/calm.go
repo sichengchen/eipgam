@@ -19,7 +19,7 @@ import (
 var PingAgain = 5 * time.Minute
 
 // CalmHTTP2 has t, a transport to the vendors, speak HTTP/2 with a health
-// check of magpie's own instead of Go's (HTTP2Health). Go's pings a
+// check of eipgam's own instead of Go's (HTTP2Health). Go's pings a
 // connection each time it has read no frame for PingAfter, and the ping's
 // own answer is a frame, so a vendor silent for minutes before a turn's
 // first byte is pinged every 10s for all of them. Google's front end

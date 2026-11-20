@@ -18,7 +18,7 @@ func TestSetupTextOpensWithItsPassphrase(t *testing.T) {
 	for _, c := range []Config{
 		{URL: "https://dav.jianguoyun.com/dav/", User: "me@example.com", Password: "dav-app-password-9z", Passphrase: "correct horse", Keys: true, Agents: true, Usage: true},
 		{URL: "s3://bucket/team", User: "AKIAEXAMPLE", Password: "s3-secret-Qx7", Passphrase: "correct horse", Endpoint: "https://acc.r2.cloudflarestorage.com", Region: "auto", PathStyle: true, Library: new(bool), SignIns: true},
-		{URL: "github://me/backup/magpie", Password: "github_pat_11ABCDEF", Passphrase: "correct horse", Branch: "sync", Memory: new(bool)},
+		{URL: "github://me/backup/eipgam", Password: "github_pat_11ABCDEF", Passphrase: "correct horse", Branch: "sync", Memory: new(bool)},
 	} {
 		newComputer(t).use(t)
 		writeSetup(t, c)
@@ -62,7 +62,7 @@ func TestSetupTextNeedsSyncAndItsOwnText(t *testing.T) {
 	if _, err := SetupText(); !errors.Is(err, ErrSetupOff) {
 		t.Fatalf("sync off: %v", err)
 	}
-	for _, s := range []string{"", "magpie-sync:", "magpie-sync:!!!", "magpie-sync:aGVsbG8", "https://dav.example.com"} {
+	for _, s := range []string{"", "eipgam-sync:", "eipgam-sync:!!!", "eipgam-sync:aGVsbG8", "https://dav.example.com"} {
 		if _, err := OpenSetupText(s, "x"); !errors.Is(err, ErrNotSetup) {
 			t.Fatalf("%q: %v", s, err)
 		}

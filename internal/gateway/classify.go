@@ -3,9 +3,9 @@ package gateway
 // A rule with an intent (provider.Rule.Intent) is for a kind of message:
 // as a user's turn begins, the group's classifier model is asked which of
 // the intents the user's message is — once, before the turn goes anywhere,
-// and never again within it. The call goes through magpie itself, so the
-// classifier is any model magpie has, with its keys, failover and usage;
-// it shows in the usage as magpie's own call. When it can't say
+// and never again within it. The call goes through eipgam itself, so the
+// classifier is any model eipgam has, with its keys, failover and usage;
+// it shows in the usage as eipgam's own call. When it can't say
 // (it fails, is slow, or answers something else) no intent matches, and
 // the trace tells why.
 
@@ -25,14 +25,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// RouterAgent is the User-Agent magpie's own classifier calls carry.
-const RouterAgent = "magpie-router/1"
+// RouterAgent is the User-Agent eipgam's own classifier calls carry.
+const RouterAgent = "eipgam-router/1"
 
 var (
 	classifyKeep = 10 * time.Minute // an answer, for the same message and intents
@@ -497,7 +497,7 @@ func (s *Server) askWaited(ctx context.Context) classifier {
 	var mu sync.Mutex
 	var until time.Time
 	// the caller's accounts (a gateway key's, the group the request names)
-	// hold its classifier's calls too, as they hold magpie's other calls
+	// hold its classifier's calls too, as they hold eipgam's other calls
 	// for it (accountHolds): only the accounts, not the key's models, as
 	// the classifier is the group's pick, not the caller's
 	caller := access.Caller(ctx)
@@ -627,14 +627,14 @@ func readEffort(answer string) (string, float64, error) {
 // held, when it names accounts, holds it to them, as heldByGroup does a
 // request through a group.
 //
-// A call the wait ends is magpie's own limit running out, as an image's
+// A call the wait ends is eipgam's own limit running out, as an image's
 // description's is (sideTimedOut, #2318): the usage log said "the agent
 // canceled the request", a 499 no failure, though no agent had
 // (ESern29751 on X).
 func (s *Server) askChat(wait time.Duration, held access.Identity, model string, body []byte) (string, error) {
 	ctx, cancel := context.WithTimeoutCause(context.Background(), wait, sideTimedOut{"decision model", wait})
 	defer cancel()
-	r, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://magpie/v1/chat/completions", nil)
+	r, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://eipgam/v1/chat/completions", nil)
 	if err != nil {
 		return "", err
 	}

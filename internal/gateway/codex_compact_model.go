@@ -4,15 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// codexCompactTo is the model a Codex compaction that magpie makes (the
-// session's model is one of magpie's, asked for the summary as a turn)
+// codexCompactTo is the model a Codex compaction that eipgam makes (the
+// session's model is one of eipgam's, asked for the summary as a turn)
 // goes on: the one set for Codex's compactions, "" to leave it on asked.
 // A compaction sealed by a ChatGPT account (native) is only read by the
 // account that wrote it, so neither it nor one put on such a model is
-// moved: the summary magpie asks for is plain text any model reads back.
+// moved: the summary eipgam asks for is plain text any model reads back.
 // The model set must be enabled, served by its exact id and allowed to
 // the gateway key; when it isn't, the compaction goes on as asked and the
 // log says why. nativeOf says whether a model compacts natively.

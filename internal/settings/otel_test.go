@@ -75,28 +75,28 @@ func TestOTelSettingsPreservesReadOnlyPermissions(t *testing.T) {
 
 func TestOTelSettingsAndOverrides(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(t.TempDir(), "config"))
-	for _, k := range []string{"MAGPIE_OTEL_ENABLED", "MAGPIE_OTEL_ENDPOINT", "MAGPIE_OTEL_HEADERS", "MAGPIE_OTEL_METRICS", "MAGPIE_OTEL_BODIES", "MAGPIE_OTEL_BODIES_WHOLE", "MAGPIE_OTEL_SESSIONS"} {
+	for _, k := range []string{"EIPGAM_OTEL_ENABLED", "EIPGAM_OTEL_ENDPOINT", "EIPGAM_OTEL_HEADERS", "EIPGAM_OTEL_METRICS", "EIPGAM_OTEL_BODIES", "EIPGAM_OTEL_BODIES_WHOLE", "EIPGAM_OTEL_SESSIONS"} {
 		t.Setenv(k, "")
 	}
 	// Empty overrides are explicit; a malformed enabled value fails closed.
 	if _, err := OTelExport(); err == nil {
 		t.Fatal("empty enabled override accepted")
 	}
-	t.Setenv("MAGPIE_OTEL_ENABLED", "false")
-	t.Setenv("MAGPIE_OTEL_METRICS", "false")
-	t.Setenv("MAGPIE_OTEL_BODIES", "false")
-	t.Setenv("MAGPIE_OTEL_BODIES_WHOLE", "false")
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "false")
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", "http://localhost:4318")
+	t.Setenv("EIPGAM_OTEL_ENABLED", "false")
+	t.Setenv("EIPGAM_OTEL_METRICS", "false")
+	t.Setenv("EIPGAM_OTEL_BODIES", "false")
+	t.Setenv("EIPGAM_OTEL_BODIES_WHOLE", "false")
+	t.Setenv("EIPGAM_OTEL_SESSIONS", "false")
+	t.Setenv("EIPGAM_OTEL_ENDPOINT", "http://localhost:4318")
 	if o, err := OTelExport(); err != nil || o.Enabled {
 		t.Fatalf("endpoint enabled export: %+v %v", o, err)
 	}
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-	t.Setenv("MAGPIE_OTEL_METRICS", "true")
-	t.Setenv("MAGPIE_OTEL_BODIES", "true")
-	t.Setenv("MAGPIE_OTEL_BODIES_WHOLE", "true")
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
-	t.Setenv("MAGPIE_OTEL_HEADERS", "Authorization=Basic%20YWJjZA==,X-Tag=a%2Cb%2Bc")
+	t.Setenv("EIPGAM_OTEL_ENABLED", "true")
+	t.Setenv("EIPGAM_OTEL_METRICS", "true")
+	t.Setenv("EIPGAM_OTEL_BODIES", "true")
+	t.Setenv("EIPGAM_OTEL_BODIES_WHOLE", "true")
+	t.Setenv("EIPGAM_OTEL_SESSIONS", "true")
+	t.Setenv("EIPGAM_OTEL_HEADERS", "Authorization=Basic%20YWJjZA==,X-Tag=a%2Cb%2Bc")
 	o, err := OTelExport()
 	if err != nil || !o.Enabled || !o.Metrics || !o.Bodies || !o.BodiesWhole || !o.Sessions || o.Headers["Authorization"] != "Basic YWJjZA==" || o.Headers["X-Tag"] != "a,b+c" {
 		t.Fatalf("%+v %v", o, err)

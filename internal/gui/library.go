@@ -11,11 +11,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The problems of the last change to the library stay on the page until the
@@ -117,7 +117,7 @@ func instructionsView(res *library.Result) (instructionsJSON, error) {
 }
 
 // marketJSON is a market's list, and why it may be short: a search that
-// couldn't reach the registry still shows what magpie has of its own.
+// couldn't reach the registry still shows what eipgam has of its own.
 type marketJSON struct {
 	Items any    `json:"items"`
 	Error string `json:"error,omitempty"`
@@ -199,7 +199,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 	mux.HandleFunc("GET /api/library/market/servers", func(rw http.ResponseWriter, r *http.Request) {
 		list, err := library.MarketServers(r.URL.Query().Get("q"))
 		for i := range list {
-			// magpie's own that can't answer yet says why on its row
+			// eipgam's own that can't answer yet says why on its row
 			list[i].Unready = gateway.OwnUnready(list[i].ID)
 		}
 		m := marketOf(list, err)
@@ -440,7 +440,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 		}
 		writeJSON(rw, v)
 	})
-	// rtk put on the PATH the agents get, when magpie found it off it
+	// rtk put on the PATH the agents get, when eipgam found it off it
 	mux.HandleFunc("POST /api/library/rtk/path", func(rw http.ResponseWriter, r *http.Request) {
 		v, err := library.PathRTK()
 		if err != nil {
@@ -492,7 +492,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 		writeJSON(rw, v)
 	})
 	// billion-context.json's settings the tab changes, with the models
-	// magpie can give its summaries; a change is written and every
+	// eipgam can give its summaries; a change is written and every
 	// running billion-context asked to reload it
 	mux.HandleFunc("GET /api/library/bili/settings", func(rw http.ResponseWriter, r *http.Request) {
 		v, err := library.ReadBiliSettings()
@@ -566,7 +566,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 		}
 		rw.WriteHeader(http.StatusNoContent)
 	})
-	// magpie signs in to a remote server once, for every agent given it (#615)
+	// eipgam signs in to a remote server once, for every agent given it (#615)
 	mux.HandleFunc("POST /api/library/mcp-signin", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
 			Name  string
@@ -602,7 +602,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 		mcpauth.Cancel(r.PathValue("id"))
 		rw.WriteHeader(http.StatusNoContent)
 	})
-	// a server's accounts (Elorynth on X): Kind "signin" is magpie's OAuth
+	// a server's accounts (Elorynth on X): Kind "signin" is eipgam's OAuth
 	// sign-ins to it, "header" the sets of headers it is asked with; ID "" in
 	// a use is the server's own headers
 	mux.HandleFunc("POST /api/library/mcp-account", func(rw http.ResponseWriter, r *http.Request) {
@@ -677,7 +677,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 		writeJSON(rw, map[string]any{"servers": m})
 	})
 	// the servers as an agent's project file has them, for the user to
-	// paste into a project magpie doesn't keep (#1478); nothing is written
+	// paste into a project eipgam doesn't keep (#1478); nothing is written
 	mux.HandleFunc("POST /api/library/mcp/config", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
 			Agent string
@@ -721,7 +721,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 			Dir      string            // a project's folder
 			Instr    *string           `json:"instr"` // a project's own instructions (projects/instructions)
 			Copy     bool              // a project gets copies, not links
-			Keep     bool              // a project removed keeps what magpie put in it
+			Keep     bool              // a project removed keeps what eipgam put in it
 			On       bool              // every skill or server given to the agents, or taken from them
 			How      string            // link or copy: how skills are given to Agent, or to every agent with none (#896)
 			// Replace updates a skill changed here all the same, its
@@ -750,7 +750,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 		case "servers/agents":
 			res, err = library.ServerAgents(in.Name, in.Agents)
 		case "servers/hub":
-			// magpie as the agents' one MCP server (#2679)
+			// eipgam as the agents' one MCP server (#2679)
 			res, err = library.SetMCPHub(in.On)
 		case "servers/hub-note":
 			// what the router says of itself to the agents, this
@@ -897,7 +897,7 @@ func libraryRoutes(mux *http.ServeMux, w Windows) {
 			// fetched again by themselves when changed there (skill_autoupdate.go)
 			res, err = library.SetAutoUpdateSkills(in.On)
 		case "skills/router":
-			// magpie's one skill listing the rest (skill_router.go)
+			// eipgam's one skill listing the rest (skill_router.go)
 			res, err = library.SetSkillRouter(in.On)
 		case "skills/router-direct":
 			// a skill kept out of the router, each agent's own link

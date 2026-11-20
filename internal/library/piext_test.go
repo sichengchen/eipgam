@@ -10,10 +10,10 @@ import (
 
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
-// piTwo is the sandbox's own Pi, found as magpie finds it, and a second
+// piTwo is the sandbox's own Pi, found as eipgam finds it, and a second
 // one standing for a Pi in a WSL distro (leokon3's), its home a folder of
 // the test's.
 func piTwo(t *testing.T) (here, wsl string) {

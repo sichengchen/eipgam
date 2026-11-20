@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // adminGroupsHome is a sandbox with two providers, the first with one
@@ -131,13 +131,13 @@ func TestAdminAPIRoutingGroups(t *testing.T) {
 
 // The routing groups are behind the management API's guard like every
 // route under it, as the gateway's own listener serves them: no key,
-// a key that may not manage magpie, a key allowed from this computer
+// a key that may not manage eipgam, a key allowed from this computer
 // only from another, and a browser, are refused; and nothing is changed.
 func TestAdminAPIRoutingGroupsGuarded(t *testing.T) {
 	adminGroupsHome(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	s := settings.Load()
 	s.LAN = true
 	if err := settings.Save(s); err != nil {

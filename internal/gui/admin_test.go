@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 func adminDo(t *testing.T, method, path, body string) *httptest.ResponseRecorder {
@@ -126,10 +126,10 @@ func TestAdminRoutesEveryAPIRoute(t *testing.T) {
 	}
 }
 
-// A key allowed to manage magpie from this computer only can't rotate a
+// A key allowed to manage eipgam from this computer only can't rotate a
 // key allowed from anywhere through the API (it would get that key's new
 // secret, or set one of its own), nor turn off or remove another key that
-// manages magpie. Its own key and keys that don't manage magpie it can.
+// manages eipgam. Its own key and keys that don't manage eipgam it can.
 func TestAdminAPILeavesOtherManagingKeys(t *testing.T) {
 	sandboxHome(t)
 	add := func(name string) string {
@@ -166,7 +166,7 @@ func TestAdminAPILeavesOtherManagingKeys(t *testing.T) {
 		if w.Code != http.StatusForbidden {
 			t.Errorf("%s %s: %d, want 403 (%s)", c.action, c.body, w.Code, w.Body)
 		}
-		if strings.Contains(w.Body.String(), `"secret":"magpie`) {
+		if strings.Contains(w.Body.String(), `"secret":"eipgam`) {
 			t.Errorf("%s told a secret: %s", c.action, w.Body)
 		}
 	}

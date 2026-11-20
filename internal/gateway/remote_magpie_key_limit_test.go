@@ -11,14 +11,14 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// #2077: a magpie that uses another computer's (a Remote magpie provider)
+// #2077: a eipgam that uses another computer's (a Remote eipgam provider)
 // was told by it that Claude Code was out of its session limit, and
-// rested its key to that magpie: a request for one of the other magpie's
+// rested its key to that eipgam: a request for one of the other eipgam's
 // Qoder models was refused here with Claude Code's 429, never asked
-// there. A refusal from the other magpie for one of its models is that
+// there. A refusal from the other eipgam for one of its models is that
 // model's; only the key's own limit there rests the key.
 func TestRemoteMagpieRestsTheModel(t *testing.T) {
 	spent := `{"type":"error","error":{"type":"rate_limit_error","message":"You've hit your session limit · resets 8:10pm (America/Los_Angeles)"}}`
@@ -49,7 +49,7 @@ func TestRemoteMagpieRestsTheModel(t *testing.T) {
 	}
 	remote := httptest.NewServer(New().Handler())
 	t.Cleanup(remote.Close)
-	id, err := provider.Add(provider.Provider{ID: "office", Name: "Remote magpie", Preset: provider.RemoteMagpiePreset, Chat: strings.TrimPrefix(remote.URL, "http://")})
+	id, err := provider.Add(provider.Provider{ID: "office", Name: "Remote eipgam", Preset: provider.RemoteMagpiePreset, Chat: strings.TrimPrefix(remote.URL, "http://")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,8 +75,8 @@ func TestRemoteMagpieRestsTheModel(t *testing.T) {
 		t.Errorf("Qoder was asked %d times; want once", asked.Load())
 	}
 	// Claude Code itself still rests: refused again (a rest of a length
-	// magpie guessed is asked once more after the first refusal, zoecats
-	// on Discord), it is refused here without the other magpie being asked
+	// eipgam guessed is asked once more after the first refusal, zoecats
+	// on Discord), it is refused here without the other eipgam being asked
 	if rec := send(id + "/cc/claude-opus-5-5"); rec.Code != http.StatusTooManyRequests {
 		t.Fatalf("Claude Code asked again: %d %s; want its 429", rec.Code, rec.Body.String())
 	}
@@ -85,14 +85,14 @@ func TestRemoteMagpieRestsTheModel(t *testing.T) {
 	}
 }
 
-// The key's own limit on the other magpie (keyLimited's 429, marked with
+// The key's own limit on the other eipgam (keyLimited's 429, marked with
 // remoteKeyLimitHeader) is the key's whatever model it was asked for: the
 // key rests, every model with it.
 func TestRemoteMagpieKeyLimitRestsTheKey(t *testing.T) {
 	c := candidate{p: provider.Provider{ID: "office", Preset: provider.RemoteMagpiePreset, Key: "k"}, model: "cc/claude-opus-5-5", rest: "office"}
 	h := http.Header{}
 	if !remoteModelRest(c, failQuota, h) {
-		t.Error("a quota refusal from the other magpie rests the key, not the model")
+		t.Error("a quota refusal from the other eipgam rests the key, not the model")
 	}
 	h.Set(remoteKeyLimitHeader, "2026-10-15T00:00:00Z")
 	if remoteModelRest(c, failQuota, h) || remoteModelRest(c, failRate, h) {
@@ -100,17 +100,17 @@ func TestRemoteMagpieKeyLimitRestsTheKey(t *testing.T) {
 	}
 	c.p.Preset = ""
 	if remoteModelRest(c, failQuota, http.Header{}) {
-		t.Error("a provider that isn't a remote magpie rests the model on a quota refusal")
+		t.Error("a provider that isn't a remote eipgam rests the model on a quota refusal")
 	}
 }
 
-// lagrangepoint1813 on Discord: another computer's magpie added as an
-// OpenAI-compatible provider of its own name, not the Remote magpie
+// lagrangepoint1813 on Discord: another computer's eipgam added as an
+// OpenAI-compatible provider of its own name, not the Remote eipgam
 // preset, said its Claude Code was out of its session limit, and every
 // model of it was refused here with that 429 for the five hours it
 // named, whichever one Pi was switched to. A reply that came from a
-// magpie (it names the provider that answered, providerHeader) is that
-// magpie's model's, whatever the provider here was added as.
+// eipgam (it names the provider that answered, providerHeader) is that
+// eipgam's model's, whatever the provider here was added as.
 func TestAnotherMagpieAddedByHandRestsTheModel(t *testing.T) {
 	t.Run("asked there", func(t *testing.T) { anotherMagpieAddedByHand(t, false) })
 	t.Run("held there", func(t *testing.T) { anotherMagpieAddedByHand(t, true) })
@@ -147,8 +147,8 @@ func anotherMagpieAddedByHand(t *testing.T, held bool) {
 	remote := httptest.NewServer(New().Handler())
 	t.Cleanup(remote.Close)
 	// as it is added by hand: an OpenAI-compatible endpoint, a key, the
-	// other magpie's model ids
-	if err := provider.Save(provider.Provider{ID: "rm", Name: "Remote Magpie", Key: "k3", Chat: remote.URL + "/v1",
+	// other eipgam's model ids
+	if err := provider.Save(provider.Provider{ID: "rm", Name: "Remote eipgam", Key: "k3", Chat: remote.URL + "/v1",
 		Models: []string{"cc/claude-opus-5-5", "qd/fast"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -160,14 +160,14 @@ func anotherMagpieAddedByHand(t *testing.T, held bool) {
 		return rec
 	}
 	if held {
-		// the other magpie already holds Claude Code, refused twice
+		// the other eipgam already holds Claude Code, refused twice
 		// there, and answers it without asking: its answer names the
 		// provider all the same
 		for range 2 {
 			send("cc/claude-opus-5-5")
 		}
 		if rec := send("cc/claude-opus-5-5"); !strings.Contains(rec.Body.String(), "not asked again") {
-			t.Fatalf("the other magpie asked Claude Code again: %d %s; want it held there", rec.Code, rec.Body.String())
+			t.Fatalf("the other eipgam asked Claude Code again: %d %s; want it held there", rec.Code, rec.Body.String())
 		}
 	}
 	if rec := send("rm/cc/claude-opus-5-5"); rec.Code != http.StatusTooManyRequests {
@@ -186,7 +186,7 @@ func anotherMagpieAddedByHand(t *testing.T, held bool) {
 	if rec := send("rm/cc/claude-opus-5-5"); rec.Code != http.StatusTooManyRequests || !strings.Contains(rec.Body.String(), "not asked again") {
 		t.Errorf("Claude Code asked again while it rests: %d %s; want its 429 held here", rec.Code, rec.Body.String())
 	}
-	// held here now, Claude Code holds nothing else of that magpie's
+	// held here now, Claude Code holds nothing else of that eipgam's
 	rec = send("rm/qd/fast")
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "hello") {
 		t.Fatalf("Qoder there, while Claude Code is held here: %d %s; want Qoder's answer", rec.Code, rec.Body.String())
@@ -196,7 +196,7 @@ func anotherMagpieAddedByHand(t *testing.T, held bool) {
 	}
 }
 
-// The marker comes by wire: the other magpie's keyLimited answers a 429
+// The marker comes by wire: the other eipgam's keyLimited answers a 429
 // with remoteKeyLimitHeader, and what reaches restAfterMarked here is what
 // the relay kept of the upstream reply. The key's own limit there rests
 // the whole remote, not the model it was asked for — the opposite of that
@@ -270,10 +270,10 @@ func TestRemoteMagpieKeyLimitRestsTheRemote(t *testing.T) {
 	}
 }
 
-// The other magpie's key-limit marker is read here, not passed on: a
-// magpie that asks this one would read it as this magpie's own key limit
+// The other eipgam's key-limit marker is read here, not passed on: a
+// eipgam that asks this one would read it as this eipgam's own key limit
 // and rest all of this one, every provider behind it, for one key there
-// (#2791). The agent gets the 429 without the marker or magpie's own
+// (#2791). The agent gets the 429 without the marker or eipgam's own
 // note of it.
 func TestRemoteMagpieKeyLimitMarkerStaysHere(t *testing.T) {
 	fresh(t)

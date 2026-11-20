@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A provider that names a saved proxy ("@id") works on the computer it is
@@ -55,7 +55,7 @@ func TestSavedProxiesTravelWithProviders(t *testing.T) {
 				t.Fatalf("restored password %q with keys=%v", pass, keys)
 			}
 
-			// no list came (an older magpie): fails closed, naming the proxy it was
+			// no list came (an older eipgam): fails closed, naming the proxy it was
 			s2 := settings.Load()
 			s2.Proxies = nil
 			if err := settings.Save(s2); err != nil {

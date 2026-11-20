@@ -2,7 +2,7 @@
 // Installed is narrowed as Discover is (WJaunita45604 on X: 要求在已安装的
 // 插件里面，也要按照发现界面里面的分类…并且可以筛选是否为官方插件，具体实现
 // 分类方法与发现界面里的分类方法一致): the same strip of kinds, each with how
-// many are installed, and the same Origin menu (magpie community, other
+// many are installed, and the same Origin menu (eipgam community, other
 // authors, unofficial on GitHub), with nothing about installing. A plugin
 // Discover lists is put where its card is; one it doesn't (a folder, an
 // npm package nobody listed) by what it is. A pick that leaves nothing
@@ -30,15 +30,15 @@ const INSTALLED = [
   { spec: "@magpie-community/opencode-zed-auth", providers: [], version: "0.2.0", moved: [] },
   { spec: "@magpie-community/opencode-think-tags", providers: [], version: "0.1.2", moved: [], isMiddleware: true, middlewareOnly: true },
   { spec: "opencode-some-agent", providers: [], version: "1.0.0", moved: [], isAgent: true },
-  ghEntry("mu-zi-lee/magpie-our-free-model"),
-  ghEntry("ezdemo/magpie-haiku55-thinking"),
+  ghEntry("mu-zi-lee/eipgam-our-free-model"),
+  ghEntry("ezdemo/eipgam-haiku55-thinking"),
   { spec: "/Users/me/plugins/my-hook", ownName: "My hook", providers: [], moved: [], isMiddleware: true, middlewareOnly: true },
   { spec: "opencode-unlisted-auth", providers: [], version: "3.0.0", moved: [] },
 ];
 // what Discover calls each: [kind, origin]
 const WANT = {
   "Zed": ["pv", "ours"], "Think tags": ["mw", "ours"], "Some Agent": ["ag", "third"],
-  "magpie-our-free-model": ["pv", "gh"], "magpie-opendesign-compatible-fix": ["mw", "gh"],
+  "eipgam-our-free-model": ["pv", "gh"], "eipgam-opendesign-compatible-fix": ["mw", "gh"],
   "My hook": ["mw", "third"], "opencode-unlisted-auth": ["pv", "third"],
 };
 
@@ -57,7 +57,7 @@ function server(lang, fetched) {
     if (url.pathname === "/api/plugins/npm") return json({ npm: {} });
     if (url.pathname === "/api/plugins/github") return json(GH);
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
+    if (url.host !== "eipgam.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, fetched));
         try {
-          await page.goto("http://magpie.test/?view=plugins");
+          await page.goto("http://eipgam.test/?view=plugins");
           const view = page.locator("#view-plugins");
           await view.locator(".pm-bar").first().waitFor();
           await view.locator(".pm-ghlook").waitFor({ state: "detached" });
@@ -121,10 +121,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert(!(await page.locator(".proto-menu .pm-item", { hasText: await tr("Not installed only") }).count()), "no Not installed only");
           await page.keyboard.press("Escape");
           await page.locator(".proto-menu").waitFor({ state: "hidden" }).catch(() => {});
-          await choose("magpie community");
+          await choose("eipgam community");
           assert.deepEqual(await shown(), names("mw", "ours"));
           assert.deepEqual(await said(), await want("ours"));
-          assert.equal((await pop.locator("b").textContent()).trim(), await tr("magpie community"));
+          assert.equal((await pop.locator("b").textContent()).trim(), await tr("eipgam community"));
           await choose("Unofficial, on GitHub");
           assert.deepEqual(await shown(), names("mw", "gh"));
           await kinds.nth(0).click();

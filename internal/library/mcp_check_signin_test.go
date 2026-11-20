@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/mcpauth/mcpauthtest"
 )
 
-// A server magpie is signed in to is checked as the gateway relays it: a
+// A server eipgam is signed in to is checked as the gateway relays it: a
 // token the server ended early is renewed and asked again with, so the row
 // doesn't say "needs sign-in" beside "Signed in" (新v学员 on Discord). A
 // token refused just after it was renewed, or one that can't be renewed,

@@ -6,35 +6,35 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lastgood"
 )
 
-// Codex's profile-only wiring (hpnjstar on X: `codex -p magpie` on magpie,
+// Codex's profile-only wiring (hpnjstar on X: `codex -p eipgam` on eipgam,
 // plain `codex` on its own provider). Codex reads --profile <name> from
 // <name>.config.toml beside config.toml, a layer with the keys config.toml
 // has, and refuses -p while config.toml holds the legacy [profiles.<name>]
-// or profile = "<name>" (tried with codex-cli 0.165.0). So magpie writes
-// magpie.config.toml alone: model_provider, model, effort, the catalog and
-// its own [model_providers.magpie]. config.toml, its top-level
+// or profile = "<name>" (tried with codex-cli 0.165.0). So eipgam writes
+// eipgam.config.toml alone: model_provider, model, effort, the catalog and
+// its own [model_providers.eipgam]. config.toml, its top-level
 // model_provider, model and openai_base_url are never touched. Disconnect
-// deletes that file and magpie's catalog. It is chosen by the Codex agent's
+// deletes that file and eipgam's catalog. It is chosen by the Codex agent's
 // "applies to" field, which changes only while Codex is not connected, so
 // the two wirings never meet in one config.
 
 // codexScopeKey is where the choice is kept: "profile" or nothing.
 const codexScopeKey = "codex.scope"
 
-// codexProfileFile is the file `codex -p magpie` reads.
+// codexProfileFile is the file `codex -p eipgam` reads.
 const codexProfileFile = magpieID + ".config.toml"
 
-// codexProviderTable is magpie's [model_providers.magpie], with token as
+// codexProviderTable is eipgam's [model_providers.eipgam], with token as
 // the bearer key.
 func codexProviderTable(v1, token string) []edit.KV {
 	return []edit.KV{
-		{Path: "name", Value: "magpie"},
+		{Path: "name", Value: "eipgam"},
 		{Path: "base_url", Value: v1},
 		{Path: "wire_api", Value: "responses"},
 		{Path: "experimental_bearer_token", Value: token},
@@ -42,15 +42,15 @@ func codexProviderTable(v1, token string) []edit.KV {
 		// the other OpenAI-provider tools only to a provider it reads as
 		// the OpenAI actor: one that does not require OpenAI auth but
 		// carries x-openai-actor-authorization. Without this header the
-		// model is never given the tool, so a Codex on magpie can't draw
+		// model is never given the tool, so a Codex on eipgam can't draw
 		// (the request that names model/draws never happens at all).
 		// uses_openai_actor_authorization() is exactly this check.
 		// An Inline table: a config that holds the headers as their own
-		// [model_providers.magpie.http_headers] table, or as dotted keys,
+		// [model_providers.eipgam.http_headers] table, or as dotted keys,
 		// gets the header set there, the user's others kept; written
 		// inline beside that table it defined http_headers twice and
 		// every model switch failed (wztlink1013 on Discord).
-		{Path: "http_headers", Value: edit.Inline{{Path: "x-openai-actor-authorization", Value: "magpie"}}},
+		{Path: "http_headers", Value: edit.Inline{{Path: "x-openai-actor-authorization", Value: "eipgam"}}},
 	}
 }
 
@@ -83,7 +83,7 @@ func codexScopeField(at place, connected func() bool) Field {
 				return nil
 			}
 			if connected() {
-				return fmt.Errorf("disconnect Codex from magpie first, then change what it applies to")
+				return fmt.Errorf("disconnect Codex from eipgam first, then change what it applies to")
 			}
 			stash(map[string]string{at.key(codexScopeKey): v})
 			return nil
@@ -91,7 +91,7 @@ func codexScopeField(at place, connected func() bool) Field {
 		Options: func(map[string]string) []Option {
 			return []Option{
 				{Value: "", Label: "All of Codex"},
-				{Value: "profile", Label: "codex -p magpie only", Note: "magpie writes magpie.config.toml and nothing else; plain codex keeps its own provider and models"},
+				{Value: "profile", Label: "codex -p eipgam only", Note: "eipgam writes eipgam.config.toml and nothing else; plain codex keeps its own provider and models"},
 			}
 		},
 	}
@@ -101,7 +101,7 @@ func codexScopeField(at place, connected func() bool) Field {
 func codexProfileIn(at place) *Agent {
 	dir := at.codexHome()
 	path := filepath.Join(dir, codexProfileFile)
-	catalogPath := filepath.Join(dir, "magpie-models.json")
+	catalogPath := filepath.Join(dir, "eipgam-models.json")
 	table := "model_providers." + magpieID
 	get := func(k string) string { v, _ := edit.GetTOMLTop(path, k); return v }
 	// the catalog as Codex reads it from this file: beside it, so by name
@@ -140,7 +140,7 @@ func codexProfileIn(at place) *Agent {
 			edit.KV{Path: "model", Value: model},
 		)
 	}
-	// drop removes magpie's profile and its list: these two files only
+	// drop removes eipgam's profile and its list: these two files only
 	drop := func() error {
 		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
 			return err
@@ -155,9 +155,9 @@ func codexProfileIn(at place) *Agent {
 		Routed: wired,
 		Sync: func() error {
 			if !wired() {
-				// the profile names magpie and its list, but not a model
-				// magpie serves now (the provider of the model it was set
-				// to was deleted): the list is still magpie's, and Codex
+				// the profile names eipgam and its list, but not a model
+				// eipgam serves now (the provider of the model it was set
+				// to was deleted): the list is still eipgam's, and Codex
 				// would keep offering the models it had (JNDliuliuM on X)
 				if get("model_provider") == magpieID && get("model_catalog_json") == catalogRef {
 					if cur, err := edit.Read(catalogPath); err == nil {
@@ -186,7 +186,7 @@ func codexProfileIn(at place) *Agent {
 				return ""
 			}
 			if t, _ := edit.GetTOMLTable(path, table); t["base_url"] != at.v1() {
-				return "Codex's " + codexProfileFile + " no longer points at magpie's gateway (" + at.v1() + ")"
+				return "Codex's " + codexProfileFile + " no longer points at eipgam's gateway (" + at.v1() + ")"
 			}
 			return ""
 		},
@@ -207,7 +207,7 @@ func codexProfileIn(at place) *Agent {
 					case v == "":
 						return drop()
 					case !isMagpie(v):
-						return fmt.Errorf("pick a model through magpie: Codex's own models are what plain codex runs")
+						return fmt.Errorf("pick a model through eipgam: Codex's own models are what plain codex runs")
 					}
 					return put(v)
 				},
@@ -235,6 +235,6 @@ func codexProfileIn(at place) *Agent {
 	}, path, catalogPath)
 }
 
-var noticeCodexProfile = newNotice("Start Codex with codex -p magpie; plain codex keeps its own provider.")
+var noticeCodexProfile = newNotice("Start Codex with codex -p eipgam; plain codex keeps its own provider.")
 
 func fileBytes(path string) []byte { b, _ := edit.Read(path); return b }

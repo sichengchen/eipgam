@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 var loginUsageCache struct {
@@ -61,8 +61,8 @@ func (e loginUsageEntry) state() readState {
 // as it was made, and with allowances read only when asked, or for the
 // catalog sync (CodexUsedUpKnown), one made hours before is handed back:
 // a Codex account that had run out read as held past its reset, and once
-// Codex was signed in to it again magpie was made its provider for it
-// (codex.out), the Codex app showing "magpie" for its account (davezfr on
+// Codex was signed in to it again eipgam was made its provider for it
+// (codex.out), the Codex app showing "eipgam" for its account (davezfr on
 // X).
 //
 // A window whose reset had passed when the reading was made says nothing
@@ -129,10 +129,10 @@ func LoginUsage(ctx context.Context, agent string) map[string]SubscriptionQuota 
 // errLeftAlone is what a card says of an account whose provider is switched
 // off or removed: nothing is read for it in the background, and it is no
 // failed read. keepLast gives the reading kept from before ("not read yet").
-var errLeftAlone = errors.New("not read yet: this subscription is switched off in magpie, so nothing is read for it")
+var errLeftAlone = errors.New("not read yet: this subscription is switched off in eipgam, so nothing is read for it")
 
 // LoginUsageShown is LoginUsage for the account lists (the editor's cards,
-// `magpie accounts`): a provider magpie leaves alone (switched off or
+// `eipgam accounts`): a provider eipgam leaves alone (switched off or
 // removed) makes no request, and its accounts show what was last known of
 // them, as leftAlone promises, not an empty card ("No allowance reported",
 // Kunlin03 on X: a Claude Pro account with the Claude Code switch off).
@@ -169,7 +169,7 @@ func loginUsageAt(ctx context.Context, agent string) (map[string]SubscriptionQuo
 // background look needs is the account the agent is on, and the others
 // only once that one is spent: reading every account at once, every few
 // minutes from one address, is a pattern no single official client makes
-// (owl on Discord, accounts held in magpie with no agent wired).
+// (owl on Discord, accounts held in eipgam with no agent wired).
 func someLoginUsage(ctx context.Context, agent string, users ...string) map[string]SubscriptionQuota {
 	want := map[string]bool{}
 	for _, u := range users {
@@ -237,7 +237,7 @@ func loginUsageOf(ctx context.Context, agent string, only map[string]bool) (map[
 	usageRead(agent, out) // a window not started: the warm-up looks now
 	if len(out) > 0 {
 		// the batch's readings are points of each account's quota history
-		// too, as a Usage-page reading is: a magpie only ever serving
+		// too, as a Usage-page reading is: a eipgam only ever serving
 		// other magpies has nobody on its Usage page, and its quota
 		// history stayed empty otherwise (#1313). One note for the whole
 		// batch: the file is read, parsed and written once for all
@@ -279,7 +279,7 @@ var noteHistoryWrite = noteQuotaHistory
 func loginReading(ctx context.Context, l Login) loginUsageEntry {
 	e := cachedLoginReading(ctx, l).asOf(time.Now())
 	if l.Agent == "codex" {
-		// what magpie spent of its resets, as of now: a reading kept from
+		// what eipgam spent of its resets, as of now: a reading kept from
 		// before one was spent still says it was
 		used := ResetsUsed(l.User)
 		e.q.ResetsUsed, e.read.ResetsUsed = used, used
@@ -322,7 +322,7 @@ func cachedLoginReading(ctx context.Context, l Login) loginUsageEntry {
 	}
 	r := c.pending[key]
 	if r == nil && held {
-		// nothing read since magpie started: the reading kept on disk,
+		// nothing read since eipgam started: the reading kept on disk,
 		// as of when it was made
 		c.Unlock()
 		return entry(keepLast(cutShort(l, errNotAsked), l.User))
@@ -424,7 +424,7 @@ func loginQuota(ctx context.Context, l Login) SubscriptionQuota {
 	}
 	if l.Agent == ChatGPTAPIID {
 		// a ChatGPT plan through OpenAI's API (chatgpt_api.go): OpenAI
-		// tells its usage nowhere magpie can ask, only at SIWCUsageURL, so
+		// tells its usage nowhere eipgam can ask, only at SIWCUsageURL, so
 		// its row says so and what does show it, the account added as
 		// ChatGPT (danzi002 on Discord: accounts added through the API
 		// show no allowance, ones signed in as ChatGPT do). It used to be
@@ -485,7 +485,7 @@ func loginQuota(ctx context.Context, l Login) SubscriptionQuota {
 	case l.Agent == "claude": // Claude Code reads its own (claudeWindows)
 	case l.Active && leftAlone(l.Agent):
 		// read for the Codex app's hold alone (codexHoldReading): the
-		// token as Codex keeps it, never renewed nor written by magpie
+		// token as Codex keeps it, never renewed nor written by eipgam
 		tok, accountID, err = codexTokenAsKept(codexHome())
 	case l.Active:
 		tok, accountID, err = codexToken(ctx, codexHome())
@@ -527,7 +527,7 @@ func loginQuota(ctx context.Context, l Login) SubscriptionQuota {
 // again). Turned away for the sign-in itself with a refresh tried, or the
 // refresh of the one Codex is signed in to refused, the account is marked
 // signed out as a revoked one is (signin_revoked.go): its row says Sign in
-// again, which runs magpie's sign-in for it and replaces its tokens, and
+// again, which runs eipgam's sign-in for it and replaces its tokens, and
 // the gateway passes over it till then. A saved account's refused refresh
 // is marked lapsed already (savedRefreshFailed), but not one Codex is
 // signed in to in another of its folders (codexHeldRefusal: charliepu's
@@ -572,19 +572,19 @@ func CodexUsedUp(ctx context.Context) bool {
 }
 
 // CodexHoldMatters is set by the agent package: whether Codex is wired to
-// magpie beside its ChatGPT sign-in, so that magpie becomes its provider
+// eipgam beside its ChatGPT sign-in, so that eipgam becomes its provider
 // while the Codex app holds the account (codex.out), or is its provider
 // for that already. Nil or false: what the app holds changes nothing.
 var CodexHoldMatters func() bool
 
 // codexHoldReading is the reading CodexUsedUp goes by for a Codex switched
-// off or removed in magpie (leftAlone), which LoginUsage reads nothing
+// off or removed in eipgam (leftAlone), which LoginUsage reads nothing
 // of: the account Codex is signed in to alone, only while Codex takes
-// magpie's models (CodexHoldMatters), at most once a minute (loginReading),
+// eipgam's models (CodexHoldMatters), at most once a minute (loginReading),
 // its sign-in never renewed (loginQuota). The Codex app greys Send for
-// every model, magpie's too, while it holds the account, and turning
-// Codex off in magpie once its allowance ran out left the app so for good:
-// nothing read, magpie never became its provider, and one that was
+// every model, eipgam's too, while it holds the account, and turning
+// Codex off in eipgam once its allowance ran out left the app so for good:
+// nothing read, eipgam never became its provider, and one that was
 // stopped being it (sherlock_23333 on X).
 func codexHoldReading(ctx context.Context) map[string]SubscriptionQuota {
 	if settings.AccountDiscoveryOff() || CodexHoldMatters == nil || !CodexHoldMatters() {
@@ -663,7 +663,7 @@ func loginReadingKnown(l Login) (loginUsageEntry, bool) {
 	return e.asOf(time.Now()), ok
 }
 
-// codexLoginAuth is the auth.json of a ChatGPT account magpie knows: the
+// codexLoginAuth is the auth.json of a ChatGPT account eipgam knows: the
 // sign-in Codex goes by (auth.json or its keychain item), or the one kept for it.
 func codexLoginAuth(l Login) []byte {
 	if l.Active {

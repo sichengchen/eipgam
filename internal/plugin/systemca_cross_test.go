@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // crossChain is a server whose chain goes up to a root (root) that
@@ -62,14 +62,14 @@ func newCrossChain(t *testing.T) crossChain {
 	}
 	topKey, rootKey, intKey, leafKey := key(), key(), key(), key()
 	var c crossChain
-	topTpl := ca("magpie test AAA root", 1)
+	topTpl := ca("eipgam test AAA root", 1)
 	var top *x509.Certificate
 	c.top, top = mk(topTpl, topTpl, &topKey.PublicKey, topKey)
-	rootTpl := ca("magpie test USERTrust root", 2)
+	rootTpl := ca("eipgam test USERTrust root", 2)
 	var root *x509.Certificate
 	c.root, root = mk(rootTpl, rootTpl, &rootKey.PublicKey, rootKey)
-	c.cross, _ = mk(ca("magpie test USERTrust root", 2), top, &rootKey.PublicKey, topKey)
-	intTpl := ca("magpie test DV server CA", 3)
+	c.cross, _ = mk(ca("eipgam test USERTrust root", 2), top, &rootKey.PublicKey, topKey)
+	intTpl := ca("eipgam test DV server CA", 3)
 	var in *x509.Certificate
 	c.int, in = mk(intTpl, root, &intKey.PublicKey, rootKey)
 	serial++
@@ -87,7 +87,7 @@ func newCrossChain(t *testing.T) crossChain {
 	return c
 }
 
-// The roots magpie hands Bun go self-signed first, and a certificate whose
+// The roots eipgam hands Bun go self-signed first, and a certificate whose
 // issuer isn't among them is left out (rootsFirst).
 func TestRootsFirstPutsTheSelfSignedCopyAhead(t *testing.T) {
 	c := newCrossChain(t)
@@ -121,7 +121,7 @@ func TestRootsFirstPutsTheSelfSignedCopyAhead(t *testing.T) {
 // to agent.minimaxi.com failed "unable to get issuer certificate", while
 // the same chain verified outside the plugin host. USERTrust RSA's copy
 // cross-signed by AAA Certificate Services was in the user's ROOT store,
-// so in the file magpie gives Bun, and Bun took it over the self-signed
+// so in the file eipgam gives Bun, and Bun took it over the self-signed
 // one and found no AAA. Here the ROOT store holds the cross-signed copy
 // ahead of the self-signed one; Bun gets through, as it does with the
 // copy's issuer beside it, and still refuses with neither.

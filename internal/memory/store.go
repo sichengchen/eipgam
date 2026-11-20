@@ -10,8 +10,8 @@ package memory
 //   - meta.json: what isn't one memory's. The projects, the published
 //     digests, the texts dismissed, the memories removed, the suggestions
 //     declined, when each memory was last used (so a search rewrites this
-//     file, not the memory's), and each memory file's hash as magpie last
-//     wrote it, which tells a hand edit from magpie's own.
+//     file, not the memory's), and each memory file's hash as eipgam last
+//     wrote it, which tells a hand edit from eipgam's own.
 //   - index.json: each file's size, time, hash and what it says, so a
 //     read parses only the files that changed since. It is a cache, never
 //     read for what isn't in the files: deleted, it is made again.
@@ -41,10 +41,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/lastgood"
 )
 
 // Path is memory.json, where memory was kept before Dir; a variable for
@@ -116,7 +116,7 @@ func stamp(t time.Time) string {
 	return t.Format(time.RFC3339Nano)
 }
 
-// unstamp reads a time as magpie writes it, or as a person may: a date, or
+// unstamp reads a time as eipgam writes it, or as a person may: a date, or
 // a date and time with no zone (local).
 func unstamp(s string, or time.Time) (time.Time, error) {
 	s = strings.TrimSpace(s)
@@ -546,7 +546,7 @@ func migrate() (*file, error) {
 }
 
 // change reads memory, lets fn change it and writes what changed, one
-// magpie at a time. Memory that can't be read is never written over.
+// eipgam at a time. Memory that can't be read is never written over.
 func change(fn func(f *file) error) error {
 	mu.Lock()
 	defer mu.Unlock()

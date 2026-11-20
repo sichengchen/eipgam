@@ -10,8 +10,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Slash commands are prompts kept once and typed as /name in the agents
@@ -22,8 +22,8 @@ import (
 // own shape (each read from the agent's docs and source):
 //
 //	Claude Code     <claude dir>/commands/<name>.md    description; $n is $ARGUMENTS[n-1] there, counted from 0
-//	OpenCode        <config>/commands/<name>.md        description; $ARGUMENTS and $1… as magpie's
-//	Pi              <agent dir>/prompts/<name>.md      description; $ARGUMENTS and $1… as magpie's
+//	OpenCode        <config>/commands/<name>.md        description; $ARGUMENTS and $1… as eipgam's
+//	Pi              <agent dir>/prompts/<name>.md      description; $ARGUMENTS and $1… as eipgam's
 //	Gemini CLI      ~/.gemini/commands/<name>.toml     description, prompt; $ARGUMENTS is {{args}}, no $1…
 //	Qwen Code       <qwen home>/commands/<name>.md     description; $ARGUMENTS is {{args}}, no $1…
 //	Factory Droid   ~/.factory/commands/<name>.md      description; $ARGUMENTS, no $1…
@@ -31,10 +31,10 @@ import (
 // A command that uses $1… isn't written for an agent that has no such
 // thing: the page says why. Codex's custom prompts (~/.codex/prompts) are
 // listed but greyed: Codex reads them no more, its skills having taken
-// their place. What magpie wrote is recorded file by file with its hash
+// their place. What eipgam wrote is recorded file by file with its hash
 // (Applied.Commands), as subagents' are (syncOwnFiles): a file still as
-// magpie wrote it is magpie's to rewrite or remove, one the user changed
-// is theirs from then on, and a file by that name magpie didn't write is
+// eipgam wrote it is eipgam's to rewrite or remove, one the user changed
+// is theirs from then on, and a file by that name eipgam didn't write is
 // never touched.
 
 // Command is a slash command the agents ticked for it are given.
@@ -77,7 +77,7 @@ func (sp *commandSpec) path(name string) string { return filepath.Join(sp.dir, n
 const (
 	// wslNoCommands is why an agent in WSL is given no slash commands,
 	// its distro running or not.
-	wslNoCommands = "magpie gives no slash commands to an agent in WSL yet"
+	wslNoCommands = "eipgam gives no slash commands to an agent in WSL yet"
 	// codexNoCommands is why Codex is given none: custom prompts were
 	// deprecated for skills, and Codex no longer reads ~/.codex/prompts.
 	codexNoCommands = "Codex reads custom prompts no more: its skills took their place"
@@ -142,7 +142,7 @@ func commandSpecOf(t *Target) (*commandSpec, string) {
 	case "droid":
 		return md(filepath.Join(a.Dir, "commands"), same), ""
 	}
-	return nil, "magpie can't give " + a.Name + " slash commands: it reads none from a folder of its own"
+	return nil, "eipgam can't give " + a.Name + " slash commands: it reads none from a folder of its own"
 }
 
 // claudeArgs is a prompt as Claude Code reads one: $n is $ARGUMENTS[n-1],
@@ -221,7 +221,7 @@ func (l *Library) syncCommands(t *Target, b *backups, res *Result) {
 			continue
 		}
 		if !sp.args && usesArgs(c.Prompt) {
-			// not written: what magpie wrote of it before goes
+			// not written: what eipgam wrote of it before goes
 			res.fail(id, "command:"+c.Name, noArgs(t.Agent.Name))
 			continue
 		}
@@ -231,7 +231,7 @@ func (l *Library) syncCommands(t *Target, b *backups, res *Result) {
 		files = append(files, ownFile{name: c.Name, path: path, body: func() []byte { return sp.render(c) }})
 	}
 	// a stub the skill router wrote by that name (routerCommands) is
-	// magpie's to write over: the library's command takes its place
+	// eipgam's to write over: the library's command takes its place
 	had := a.Commands
 	for _, f := range files {
 		if i := slices.IndexFunc(a.RouterCommands, func(r SubagentFile) bool { return r.Path == f.path }); i >= 0 {
@@ -245,7 +245,7 @@ func (l *Library) syncCommands(t *Target, b *backups, res *Result) {
 // ---- changes ---------------------------------------------------------------
 
 // SaveCommand adds a slash command, or replaces the one called old
-// (renaming it: the files magpie wrote by the old name go).
+// (renaming it: the files eipgam wrote by the old name go).
 func SaveCommand(old string, c Command) (*Result, error) {
 	c.Name = strings.TrimSpace(c.Name)
 	c.Description = strings.Join(strings.Fields(c.Description), " ")
@@ -294,7 +294,7 @@ func CommandAgentsSet(name string, agents []string) (*Result, error) {
 }
 
 // RemoveCommands takes the slash commands named out of the library, and
-// the files magpie wrote of them, still as it wrote them, out of every
+// the files eipgam wrote of them, still as it wrote them, out of every
 // agent.
 func RemoveCommands(names []string) (*Result, error) {
 	if len(names) == 0 {
@@ -325,7 +325,7 @@ type CommandView struct {
 // CommandAgentView is an agent the Slash commands tab lists.
 type CommandAgentView struct {
 	ID string `json:"id"`
-	// Dir is where its commands are; No is why magpie can't give it any
+	// Dir is where its commands are; No is why eipgam can't give it any
 	Dir string `json:"dir,omitempty"`
 	No  string `json:"no,omitempty"`
 	WSL bool   `json:"wsl,omitempty"`

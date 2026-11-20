@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Settings › About › Command line (PAMI on Discord): whether `magpie` in a
+// Settings › About › Command line (PAMI on Discord): whether `eipgam` in a
 // terminal opened now runs this app, said for each shell (a dot, no left
 // border), and Add to PATH, which posts /api/cli and shows the answer. On
-// Windows a program not named magpie.exe (the site's portable download,
-// #942) is said to get a magpie.cmd that runs it, and a magpie.com that
+// Windows a program not named eipgam.exe (the site's portable download,
+// #942) is said to get a eipgam.cmd that runs it, and a eipgam.com that
 // runs the app is said to run it (#3737). A
 // shell whose PATH lacks the folder has its own button naming its profile,
 // and only that button posts that shell. On Windows PowerShell and cmd are
@@ -20,34 +20,34 @@ const { watchSettingsReads, settingsDrawn, openPart } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 
 const words = {
-  en: { row: "Command line", add: "Add to PATH", none: "can't find the magpie command", ours: "runs this app", fish: "Add to ~/.config/fish/config.fish",
+  en: { row: "Command line", add: "Add to PATH", none: "can't find the eipgam command", ours: "runs this app", fish: "Add to ~/.config/fish/config.fish",
     added: "open a new terminal window", ps: "PowerShell and cmd take up a change in new windows", moved: "moved to Applications",
-    shimTitle: "writes magpie.cmd there, which runs magpie-windows-amd64.exe", shimAdded: "magpie.cmd beside magpie-windows-amd64.exe runs it as magpie", shimRuns: "which runs magpie-windows-amd64.exe", comRuns: "which runs magpie.exe" },
-  zh: { row: "命令行", add: "添加到 PATH", none: "新终端里找不到 magpie 命令", ours: "运行这个 app", fish: "添加到 ~/.config/fish/config.fish",
+    shimTitle: "writes eipgam.cmd there, which runs eipgam-windows-amd64.exe", shimAdded: "eipgam.cmd beside eipgam-windows-amd64.exe runs it as eipgam", shimRuns: "which runs eipgam-windows-amd64.exe", comRuns: "which runs eipgam.exe" },
+  zh: { row: "命令行", add: "添加到 PATH", none: "新终端里找不到 eipgam 命令", ours: "运行这个 app", fish: "添加到 ~/.config/fish/config.fish",
     added: "新开一个终端窗口", ps: "PowerShell 和 cmd 在新窗口里生效", moved: "移到「应用程序」",
-    shimTitle: "写一个 magpie.cmd 来运行 magpie-windows-amd64.exe", shimAdded: "magpie-windows-amd64.exe 旁边的 magpie.cmd", shimRuns: "它运行 magpie-windows-amd64.exe", comRuns: "它运行 magpie.exe" },
+    shimTitle: "写一个 eipgam.cmd 来运行 eipgam-windows-amd64.exe", shimAdded: "eipgam-windows-amd64.exe 旁边的 eipgam.cmd", shimRuns: "它运行 eipgam-windows-amd64.exe", comRuns: "它运行 eipgam.exe" },
 };
 
-const EXE = "/Applications/magpie.app/Contents/MacOS/magpie";
+const EXE = "/Applications/eipgam.app/Contents/MacOS/eipgam";
 
 function view(ctl) {
   if (ctl.windows) {
-    // the site's portable download (#942) runs as magpie through the
-    // magpie.cmd Add writes beside it
-    const dir = ctl.portable ? "D:\\portable_app" : "C:\\Users\\u\\AppData\\Local\\magpie";
-    const exe = dir + (ctl.portable ? "\\magpie-windows-amd64.exe" : "\\magpie.exe"), shim = ctl.portable ? dir + "\\magpie.cmd" : "";
-    // a release build runs as magpie through the magpie.com it writes
+    // the site's portable download (#942) runs as eipgam through the
+    // eipgam.cmd Add writes beside it
+    const dir = ctl.portable ? "D:\\portable_app" : "C:\\Users\\u\\AppData\\Local\\eipgam";
+    const exe = dir + (ctl.portable ? "\\eipgam-windows-amd64.exe" : "\\eipgam.exe"), shim = ctl.portable ? dir + "\\eipgam.cmd" : "";
+    // a release build runs as eipgam through the eipgam.com it writes
     // beside the app, which a shell waits for (#3737)
-    const cmd = ctl.added ? shim || (ctl.com ? dir + "\\magpie.com" : exe) : "";
+    const cmd = ctl.added ? shim || (ctl.com ? dir + "\\eipgam.com" : exe) : "";
     return { exe, ours: ctl.added, command: cmd, dir, windows: true, shim,
       shells: ["PowerShell", "cmd"].map((name, i) => ({ name, default: i === 0, known: true, ours: ctl.added, command: cmd })) };
   }
-  const link = "/Users/u/.local/bin/magpie";
+  const link = "/Users/u/.local/bin/eipgam";
   return {
     exe: EXE, ours: ctl.added, command: ctl.added ? link : "", dir: ctl.added ? "" : "/Users/u/.local/bin", stuck: ctl.stuck || "",
     shells: [
       { name: "zsh", default: true, known: true, ours: ctl.added, command: ctl.added ? link : "", profile: "~/.zshrc", hasDir: !ctl.added },
-      { name: "fish", known: true, ours: ctl.fish, command: ctl.fish ? link : "/opt/old/magpie", profile: "~/.config/fish/config.fish" },
+      { name: "fish", known: true, ours: ctl.fish, command: ctl.fish ? link : "/opt/old/eipgam", profile: "~/.config/fish/config.fish" },
     ],
   };
 }
@@ -58,7 +58,7 @@ function server(lang, ctl) {
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
-    if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { theme: "light", lang, version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 } } });
+    if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { theme: "light", lang, version: "0.1.900", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 } } });
     if (url.pathname === "/api/cli") {
       if (req.method() === "POST") {
         const body = req.postDataJSON();
@@ -98,7 +98,7 @@ async function open(browser, lang, ctl, errors) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, ctl));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings");
+  await page.goto("http://eipgam.test/?view=settings");
   await settingsDrawn(page); // rows found are the ones that stay (#1659)
   await openPart(page, "about");
   await page.locator("#setPage-about").waitFor({ state: "visible" });
@@ -108,7 +108,7 @@ async function open(browser, lang, ctl, errors) {
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Command line says what `magpie` runs, and adds it", async (t) => {
+  test(engine + ": Command line says what `eipgam` runs, and adds it", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     for (const lang of ["en", "zh"]) {
@@ -121,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await row.locator(".sub", { hasText: w.none }).waitFor();
         const zsh = row.locator('.cli-shell[data-shell="zsh"]'), fish = row.locator('.cli-shell[data-shell="fish"]');
         assert.equal(await zsh.evaluate((e) => e.classList.contains("on")), false);
-        assert.match(await fish.innerText(), /\/opt\/old\/magpie/, "fish names the other magpie it runs");
+        assert.match(await fish.innerText(), /\/opt\/old\/eipgam/, "fish names the other eipgam it runs");
         assert.equal(await row.locator("select").count(), 0, "no native select");
         assert.equal(await zsh.locator("button").count(), 0, "zsh, whose PATH has the folder, is reached by Add to PATH");
         assert.equal(await fish.locator("button", { hasText: w.fish }).count(), 1, "fish, whose PATH hasn't, has its profile's button");
@@ -135,7 +135,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await showRow(page, row);
         let before = await scrolls(page);
         await add.click();
-        await row.locator(".sub", { hasText: "/Users/u/.local/bin/magpie" }).waitFor();
+        await row.locator(".sub", { hasText: "/Users/u/.local/bin/eipgam" }).waitFor();
         await zsh.locator(".cli-state", { hasText: w.ours }).waitFor();
         assert.deepEqual(ctl.posts, [{}], "Add to PATH posts no shell");
         assert.equal(await zsh.evaluate((e) => e.classList.contains("on")), true);
@@ -169,14 +169,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.context().close();
       });
 
-      await t.test(lang + ": Windows' portable download gets a magpie.cmd, and says so (#942)", async () => {
+      await t.test(lang + ": Windows' portable download gets a eipgam.cmd, and says so (#942)", async () => {
         const ctl = { posts: [], gets: 0, windows: true, portable: true };
         const errors = [];
         const { page, row } = await open(browser, lang, ctl, errors);
         const add = row.locator("button.cli-add");
         assert.match(await add.getAttribute("title"), new RegExp(w.shimTitle));
         await add.click();
-        await row.locator(".sub", { hasText: "D:\\portable_app\\magpie.cmd" }).waitFor();
+        await row.locator(".sub", { hasText: "D:\\portable_app\\eipgam.cmd" }).waitFor();
         assert.match(await row.locator(".sub").innerText(), new RegExp(w.shimRuns));
         assert.match(await page.locator("#status").innerText(), new RegExp(w.shimAdded));
         assert.deepEqual(ctl.posts, [{}]);
@@ -184,12 +184,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.context().close();
       });
 
-      await t.test(lang + ": Windows' magpie.com is said to run the app (#3737)", async () => {
+      await t.test(lang + ": Windows' eipgam.com is said to run the app (#3737)", async () => {
         const ctl = { posts: [], gets: 0, windows: true, com: true };
         const errors = [];
         const { page, row } = await open(browser, lang, ctl, errors);
         await row.locator("button.cli-add").click();
-        await row.locator(".sub", { hasText: "AppData\\Local\\magpie\\magpie.com" }).waitFor();
+        await row.locator(".sub", { hasText: "AppData\\Local\\eipgam\\eipgam.com" }).waitFor();
         assert.match(await row.locator(".sub").innerText(), new RegExp(w.comRuns));
         assert.deepEqual(errors, []);
         await page.context().close();

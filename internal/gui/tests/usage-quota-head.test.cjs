@@ -50,7 +50,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const gate = { usage: Promise.resolve(), quotas: Promise.resolve(), calls: 3 };
       await page.route("**/*", serve(lang, gate));
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://eipgam.test/?view=usage");
       const head = page.locator("#quotaHead");
       await page.locator(".subscription-card", { hasText: "Trae CN" }).waitFor();
       await head.waitFor();

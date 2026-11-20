@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// xMopf7RF on X: Claude Magpie, the separate Claude Desktop, is an agent of
-// its own in the Library. Its Desktop (claude-desktop#magpie) and its Code
-// tab's Claude Code (claude#magpie-desktop) each have a chip of their own
+// xMopf7RF on X: Claude eipgam, the separate Claude Desktop, is an agent of
+// its own in the Library. Its Desktop (claude-desktop#eipgam) and its Code
+// tab's Claude Code (claude#eipgam-desktop) each have a chip of their own
 // beside Claude Desktop's and Claude Code's, named for them, lit only for
 // what was given to them; a click on Claude Desktop's chip asks for Claude
 // Desktop alone. MCP and skills, 980px and 420px, every language, both
@@ -16,15 +16,15 @@ const { strings } = require("./strings.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/mo";
 const AS = `${HOME}/Library/Application Support`;
-const TWIN = "claude-desktop#magpie", CODE = "claude#magpie-desktop";
-const NAMES = { [TWIN]: "Claude Magpie", [CODE]: "Claude Code · Claude Magpie", "claude-desktop": "Claude Desktop", claude: "Claude Code" };
+const TWIN = "claude-desktop#eipgam", CODE = "claude#eipgam-desktop";
+const NAMES = { [TWIN]: "Claude eipgam", [CODE]: "Claude Code · Claude eipgam", "claude-desktop": "Claude Desktop", claude: "Claude Code" };
 const fixture = () => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [
     { id: "claude", name: NAMES.claude, icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` },
-    { id: CODE, name: NAMES[CODE], icon: "claudecode-color", skills: `${HOME}/.claude-magpie-desktop/skills`, mcp: `${HOME}/.claude-magpie-desktop/.claude.json` },
+    { id: CODE, name: NAMES[CODE], icon: "claudecode-color", skills: `${HOME}/.claude-eipgam-desktop/skills`, mcp: `${HOME}/.claude-eipgam-desktop/.claude.json` },
     { id: "claude-desktop", name: NAMES["claude-desktop"], icon: "claude-color", mcp: `${AS}/Claude/claude_desktop_config.json`, skills: `${AS}/Claude-3p/local-agent-mode-sessions/skills-plugin/o/a/skills` },
-    { id: TWIN, name: NAMES[TWIN], icon: "claude-color", mcp: `${AS}/Claude-Magpie-3p/claude_desktop_config.json`, skills: `${AS}/Claude-Magpie-3p/local-agent-mode-sessions/skills-plugin/o/a/skills` },
+    { id: TWIN, name: NAMES[TWIN], icon: "claude-color", mcp: `${AS}/Claude-eipgam-3p/claude_desktop_config.json`, skills: `${AS}/Claude-eipgam-3p/local-agent-mode-sessions/skills-plugin/o/a/skills` },
   ],
   instructions: { agents: [], sets: [] }, foundSkills: [], problems: [], foundServers: [], projects: [],
   servers: [{ name: "fs", transport: "stdio", command: "npx", args: ["-y", "fs"], agents: [TWIN] }],
@@ -60,7 +60,7 @@ function server(lang, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     const body = await fs.readFile(file).catch(() => null);
@@ -80,7 +80,7 @@ const sideways = (page) => page.evaluate(() => {
 });
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Claude Magpie is an agent of its own in the Library", async (t) => {
+  test(engine + ": Claude eipgam is an agent of its own in the Library", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     I18N = strings().I18N;
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium" }));
@@ -90,13 +90,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang} ${width}px ${tab}`, async () => {
         const errors = [], posts = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript((x) => { try { localStorage.setItem("magpie.libTab", x); } catch {} }, tab);
+        await ctx.addInitScript((x) => { try { localStorage.setItem("eipgam.libTab", x); } catch {} }, tab);
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posts));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         const row = tab === "mcp" ? v.locator('.lib-server[data-server="fs"]') : v.locator(".lib-row", { hasText: "Read PDFs" }).first();
@@ -114,11 +114,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await row.locator(".lib-ag[data-members]").count(), 0, "folded into a menu");
         // the page never scrolls sideways; a row's hand of four or more
         // chips can reach past its edge at 420px in ja, before Claude
-        // Magpie too (six agents do it in en), #6558
+        // eipgam too (six agents do it in en), #6558
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, "sideways scroll");
         if (!(width < 800 && lang === "ja")) assert.deepEqual(await sideways(page), [], "past the row's edge");
 
-        // given to Claude Desktop, Claude Magpie's keeps what it had
+        // given to Claude Desktop, Claude eipgam's keeps what it had
         const sent = page.waitForResponse((r) => /\/api\/library\/(servers|skills)\/agents$/.test(new URL(r.url()).pathname) && r.request().method() === "POST");
         await row.locator('.lib-ag[data-agent="claude-desktop"]').click();
         await sent;

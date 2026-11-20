@@ -62,8 +62,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, polls));
-        try { await page.addInitScript(() => localStorage.setItem("magpie.routingBySession", "1")); } catch {}
-        await page.goto("http://magpie.test/?view=routing");
+        try { await page.addInitScript(() => localStorage.setItem("eipgam.routingBySession", "1")); } catch {}
+        await page.goto("http://eipgam.test/?view=routing");
         const name = page.locator(".rt-session .nm").first();
         await page.waitForFunction(() => document.querySelector(".rt-session .nm")?.textContent.includes("Port the parser"));
 

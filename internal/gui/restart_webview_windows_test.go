@@ -18,14 +18,14 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // vsoullai on X (0.1.4096, Windows): the restart after an update didn't
-// wait for the old magpie's WebView2 to let go of its profile folder, and
-// the new magpie hung. The restart is played here as magpie makes it on
-// Windows, with Wails' single instance on as the app has it: an old magpie
+// wait for the old eipgam's WebView2 to let go of its profile folder, and
+// the new eipgam hung. The restart is played here as eipgam makes it on
+// Windows, with Wails' single instance on as the app has it: an old eipgam
 // with its window up starts the new one detached and quits; the new one
 // starts as Run does (AwaitPredecessor, webView2Prepare's wait,
 // application.New) and must come up with its own window and page.
@@ -33,7 +33,7 @@ import (
 //
 // The windows are real, so this runs on the Windows box's signed-in
 // session, not over ssh (session 0).
-const testRestartWebViewEnv = "MAGPIE_TEST_RESTART_WEBVIEW"
+const testRestartWebViewEnv = "EIPGAM_TEST_RESTART_WEBVIEW"
 
 func TestRestartWaitsForTheOldWebView(t *testing.T) {
 	var session uint32
@@ -49,7 +49,7 @@ func TestRestartWaitsForTheOldWebView(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 150*time.Second)
 			defer cancel()
 			// not t.TempDir: WebView2's processes still hold files in it
-			home, err := os.MkdirTemp("", "magpie-restart-webview-")
+			home, err := os.MkdirTemp("", "eipgam-restart-webview-")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -120,7 +120,7 @@ func init() {
 	os.Exit(0)
 }
 
-// restartWebViewOld is the magpie before: Wails' single instance on, its
+// restartWebViewOld is the eipgam before: Wails' single instance on, its
 // window up and drawn; it starts the new one as update's launch does and
 // quits, taking 25s over it when slow.
 func restartWebViewOld(mode, id string, report func(string, ...any)) {
@@ -128,7 +128,7 @@ func restartWebViewOld(mode, id string, report func(string, ...any)) {
 	loaded := make(chan struct{}, 16)
 	seen := make(chan string, 4096)
 	app := application.New(application.Options{
-		Name:           "magpie restart webview regression",
+		Name:           "eipgam restart webview regression",
 		SingleInstance: &application.SingleInstanceOptions{UniqueID: id},
 		Windows:        windowsOptions(),
 		Assets:         application.AssetOptions{Handler: restartDrawPage(loaded, seen)},
@@ -150,7 +150,7 @@ func restartWebViewOld(mode, id string, report func(string, ...any)) {
 			time.Sleep(time.Second)
 			self, _ := os.Executable()
 			cmd := proc.Command(self, "-test.run=^$")
-			cmd.Env = append(os.Environ(), "MAGPIE_REPLACES="+strconv.Itoa(os.Getpid()),
+			cmd.Env = append(os.Environ(), "EIPGAM_REPLACES="+strconv.Itoa(os.Getpid()),
 				testRestartWebViewEnv+"=new,"+strings.SplitN(os.Getenv(testRestartWebViewEnv), ",", 2)[1])
 			if cmd.SysProcAttr == nil {
 				cmd.SysProcAttr = &syscall.SysProcAttr{}
@@ -177,13 +177,13 @@ func restartWebViewOld(mode, id string, report func(string, ...any)) {
 func restartWebViewNew(id string, report func(string, ...any), end func(bool)) {
 	dir := webView2Dir()
 	// what happens to the old one, for the record
-	if pid, err := strconv.Atoi(os.Getenv("MAGPIE_REPLACES")); err == nil {
+	if pid, err := strconv.Atoi(os.Getenv("EIPGAM_REPLACES")); err == nil {
 		go func() {
 			if h, err := windows.OpenProcess(windows.SYNCHRONIZE, false, uint32(pid)); err == nil {
 				windows.WaitForSingleObject(h, windows.INFINITE)
 				windows.CloseHandle(h)
 			}
-			report("the old magpie %d ended", pid)
+			report("the old eipgam %d ended", pid)
 			for !webView2Free(dir) {
 				time.Sleep(50 * time.Millisecond)
 			}
@@ -198,7 +198,7 @@ func restartWebViewNew(id string, report func(string, ...any), end func(bool)) {
 	seen := make(chan string, 4096)
 	var app *application.App
 	app = application.New(application.Options{
-		Name:           "magpie restart webview regression",
+		Name:           "eipgam restart webview regression",
 		SingleInstance: &application.SingleInstanceOptions{UniqueID: id},
 		Windows:        windowsOptions(),
 		Assets:         application.AssetOptions{Handler: restartDrawPage(loaded, seen)},

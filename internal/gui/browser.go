@@ -10,12 +10,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/browserext"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/browserext"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// Magpie Browser's extension, as the Library page sets it up: written to a
+// eipgam Browser's extension, as the Library page sets it up: written to a
 // folder the user can see, in their home folder, which they drop on their
 // own browser's chrome://extensions (or choose with Load unpacked), and
 // connected or not as the gateway says.
@@ -34,32 +34,32 @@ type browserJSON struct {
 	Browser   string `json:"browser,omitempty"`
 	// Drag: the page may drag the folder out of the window itself
 	Drag bool `json:"drag,omitempty"`
-	// Away: the page is looked at from another computer than magpie's, or
-	// magpie runs in a container, so the folder magpie writes is out of
+	// Away: the page is looked at from another computer than eipgam's, or
+	// eipgam runs in a container, so the folder eipgam writes is out of
 	// the browser's reach; the extension is downloaded instead, with a
 	// gateway key of its own (browserKey)
 	Away bool `json:"away,omitempty"`
 	// Outdated: the connected extension is older than Version. Its folder
-	// has this magpie's, but the browser runs what it loaded until the
+	// has this eipgam's, but the browser runs what it loaded until the
 	// extension is reloaded, so the sheet says to reload it
 	Outdated bool `json:"outdated,omitempty"`
 }
 
-// browserAway is whether r's page is in a browser magpie's folders are out
+// browserAway is whether r's page is in a browser eipgam's folders are out
 // of reach of (browserJSON's Away).
 func browserAway(r *http.Request) bool {
 	return gateway.InContainer() || !loopbackPeer(r.RemoteAddr)
 }
 
 // browserKeyName names the gateway key a downloaded extension connects with.
-const browserKeyName = "Magpie Browser"
+const browserKeyName = "eipgam Browser"
 
 // browserKey is the secret of the gateway key a downloaded extension
 // connects with: the one recorded as the user's own browser's
 // (gateway.OwnBrowserKey) while it is on, else a new one, recorded. It is
 // a browser key (access.Key.Browser), which connects the extension and
 // nothing else: the zip it is written into lands in Downloads, and a copy
-// of it must not reach the user's models. One a magpie from before made
+// of it must not reach the user's models. One a eipgam from before made
 // with full access is held to that first (access.ScopeBrowser). The
 // browser it connects is used by that key's callers, and by this
 // computer's when it connects from this computer (gateway/browser.go),
@@ -88,7 +88,7 @@ func browserKey() (string, error) {
 
 // browserAt is the gateway address a downloaded extension dials: the
 // page's own (at, its origin, whose port hands the gateway's routes on,
-// onePort), else MAGPIE_PUBLIC_URL, else the gateway's.
+// onePort), else EIPGAM_PUBLIC_URL, else the gateway's.
 func browserAt(at string) (string, error) {
 	if at == "" {
 		if u := gateway.PublicURL(); u != "" {
@@ -108,7 +108,7 @@ func browserState(ctx context.Context) browserJSON {
 	for _, dir := range []string{out.Dir, browserExtOldDir()} {
 		if _, err := os.Stat(filepath.Join(dir, "manifest.json")); err == nil {
 			out.Written = out.Written || dir == out.Dir
-			// kept as this magpie has it, and pointed at its gateway: the
+			// kept as this eipgam has it, and pointed at its gateway: the
 			// browser reads the folder again when it starts
 			browserext.Write(dir, gateway.URL())
 		}
@@ -142,7 +142,7 @@ func browserRoutes(mux *http.ServeMux, w Windows) {
 		st.Away = browserAway(r)
 		writeJSON(rw, st)
 	})
-	// the extension as a zip, for a browser magpie's folders are out of
+	// the extension as a zip, for a browser eipgam's folders are out of
 	// reach of (browserJSON's Away): pointed at the page's own address,
 	// and given a gateway key of its own
 	mux.HandleFunc("POST /api/library/browser/extension", func(rw http.ResponseWriter, r *http.Request) {

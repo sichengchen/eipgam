@@ -11,12 +11,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // Gateway is the asynchronous request-hook entry a package runs in Bun:
 // package.json magpie.hooks, or a *.hooks.{js,mjs,ts,mts} file. Unlike
-// middleware (magpie.middleware/magpie.gateway, *.gateway.js), it can await
+// middleware (eipgam.middleware/eipgam.gateway, *.gateway.js), it can await
 // I/O and observe the completed exchange; the names never overlap, so one
 // file is never loaded as both.
 func Gateway(target string) string {
@@ -81,7 +81,7 @@ func GatewayOnly(target string) bool {
 // GatewayContext contains only the request identity and text, never its
 // authorization headers. Empty fields mean the agent supplied no identity.
 type GatewayContext struct {
-	Origin   string `json:"origin"` // local, remote, magpie-key or gateway-key; empty means unknown
+	Origin   string `json:"origin"` // local, remote, eipgam-key or gateway-key; empty means unknown
 	Protocol string `json:"protocol"`
 	Model    string `json:"model"`
 	Stream   bool   `json:"stream"`
@@ -132,7 +132,7 @@ func GatewayStates(ctx context.Context) map[string]GatewayState {
 
 // HasGateway avoids starting Bun for users who have no asynchronous hooks.
 // Every request asks it, so the plugins are looked at once a second, and at
-// once after magpie wrote a file of its own (filememo.Gen): reading
+// once after eipgam wrote a file of its own (filememo.Gen): reading
 // plugins.json and each plugin's package.json took ~1ms a request with 12
 // plugins on Windows (#3725).
 func HasGateway() bool {
@@ -323,7 +323,7 @@ func (r *GatewayRun) Close() {
 
 // SignInEvent is a subscription account that has to be signed in again
 // (State "signed-out"), or whose sign-in ends at EndsAt (State "ending",
-// Claude's), as magpie's own sign-in alert tells it. Account is the
+// Claude's), as eipgam's own sign-in alert tells it. Account is the
 // account's label as the Providers page shows it; no token, mark or
 // vendor text is sent.
 type SignInEvent struct {

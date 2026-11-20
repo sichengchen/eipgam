@@ -1,7 +1,4 @@
-// Package stats reads Discover's public counts from usemagpie.ai: how many
-// computers use each plugin, and each of the Library market's MCP servers.
-// It only reads them. magpie sends no telemetry: no count of its users,
-// no id, and nothing about what it is used with.
+// Package stats reads counts from a configured plugin statistics service.
 package stats
 
 import (
@@ -12,39 +9,41 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/yetone/magpie/internal/update"
 )
 
-// Site serves the counts; MAGPIE_SITE_HOST points them elsewhere, for
+// Site serves the counts; EIPGAM_SITE_HOST points them elsewhere, for
 // testing.
 func Site() string {
-	if h := os.Getenv("MAGPIE_SITE_HOST"); h != "" {
+	if h := os.Getenv("EIPGAM_SITE_HOST"); h != "" {
 		return strings.TrimRight(h, "/")
 	}
-	return update.Site
+	return ""
 }
 
-// Counts is what usemagpie.ai says of each plugin: the computers that
+// Counts is the reported numbers for a plugin: the computers that
 // had it in the last seven days, and its likes.
 type Counts struct {
 	Users int `json:"users,omitempty"`
 	Likes int `json:"likes,omitempty"`
 }
 
-// Board is what usemagpie.ai counts: each plugin's, by Discover's key,
+// Board is plugin and server counts: each plugin's, by Discover's key,
 // and each MCP server's, by its market id.
 type Board struct {
 	Plugins map[string]Counts `json:"plugins"`
 	Servers map[string]Counts `json:"servers"`
 }
 
-// PluginCounts asks usemagpie.ai each plugin's and each server's counts.
+// PluginCounts reads the configured plugin and server counts.
 // The request carries no id.
 func PluginCounts(ctx context.Context) (Board, error) {
+	site := Site()
+	if site == "" {
+		return Board{}, nil
+	}
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, "GET", Site()+"/api/plugins/stats", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", site+"/api/plugins/stats", nil)
 	if err != nil {
 		return Board{}, err
 	}

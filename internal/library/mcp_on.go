@@ -10,7 +10,7 @@ import (
 // no agent is given it, nor a project's, nor an app at the MCP router's
 // address, and the router ends it; the agents it had are kept (Paused),
 // with its command or address, env, headers, tools turned off and
-// magpie's sign-in to it, which stay in the library. On, those agents get
+// eipgam's sign-in to it, which stay in the library. On, those agents get
 // it back, none when it had none (it is the router's alone again). A
 // plugin's server is the same switch as its row on the Plugins page.
 func ServerOn(name string, on bool) (*Result, error) {

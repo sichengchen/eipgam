@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 // readsEnv matches the two ways these packages name a variable they read to
@@ -24,20 +24,20 @@ var notAnAgent = map[string]string{
 	"LOCALAPPDATA":          "the same",
 	"PATH":                  "the process' own",
 	"USER":                  "the process' own",
-	"XDG_CONFIG_HOME":       "magpie's own folder's, which appdir decides",
+	"XDG_CONFIG_HOME":       "eipgam's own folder's, which appdir decides",
 	"XDG_DATA_HOME":         "the same",
 	"XDG_DATA_DIRS":         "the system's own data folders, where a desktop app's entry is read (desktopapp_xdg.go)",
-	"MAGPIE_ADDR":           "magpie's own",
-	"MAGPIE_DEBUG":          "magpie's own debug flag",
-	"MAGPIE_PUBLIC_URL":     "magpie's own public URL",
-	"MAGPIE_TRUST_PROXY":    "magpie's own: a proxy here signs its clients in (#1022)",
-	"MAGPIE_EFFORT_UPDATES": "magpie's own switch for effort updates (#617)",
-	"MAGPIE_SITE_ORIGIN":    "a site origin magpie's Omarchy theme answers, to try the site locally",
+	"EIPGAM_ADDR":           "eipgam's own",
+	"EIPGAM_DEBUG":          "eipgam's own debug flag",
+	"EIPGAM_PUBLIC_URL":     "eipgam's own public URL",
+	"EIPGAM_TRUST_PROXY":    "eipgam's own: a proxy here signs its clients in (#1022)",
+	"EIPGAM_EFFORT_UPDATES": "eipgam's own switch for effort updates (#617)",
+	"EIPGAM_SITE_ORIGIN":    "a site origin eipgam's Omarchy theme answers, to try the site locally",
 	"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "Claude Code's behaviour flag, not an agent's folder",
 	"GIT_SSH":            "the user's own SSH program for git, which a skill fetched with their git keeps",
 	"GIT_SSH_COMMAND":    "the same, as a command",
 	"TZ":                 "the machine's time zone, which a routing rule's hours fall back to (c888ef272), not a folder",
-	"LAZYCAT_APP_DOMAIN": "the domain LazyCat serves magpie at, which sharing offers (ac4af5823), not a folder",
+	"LAZYCAT_APP_DOMAIN": "the domain LazyCat serves eipgam at, which sharing offers (ac4af5823), not a folder",
 }
 
 // TestFolderVarsAreListed says every variable the packages that find an
@@ -48,8 +48,8 @@ var notAnAgent = map[string]string{
 //
 // The five packages are this one, sessions, provider, library and gateway,
 // with appdir's codex.go, where CODEX_HOME is read for all of them:
-// every agent's folder variable magpie reads is read in one of them, and the
-// rest of the repository reads only magpie's own variables, the process' and
+// every agent's folder variable eipgam reads is read in one of them, and the
+// rest of the repository reads only eipgam's own variables, the process' and
 // the desktop's. Their sources are read as files rather than imported, since a
 // test in sessions or provider cannot import this package, which imports
 // them; what the walk looks at is what they say, not what they do.

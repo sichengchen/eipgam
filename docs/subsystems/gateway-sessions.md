@@ -5,13 +5,13 @@ projection of gateway usage records. A gateway session identity is exactly
 `AgentOf(record.Agent) + record.Session`, where the session is the one the
 client sent (`X-Magpie-Session`, or its own session header), whatever it starts
 with. The response returns that id in `X-Magpie-Session`; listed browser
-origins can read this header through CORS. magpie never makes up an id for a
+origins can read this header through CORS. eipgam never makes up an id for a
 request without one, so such a request has no session and its text is not
 recorded: text kept under an id nothing lists couldn't be opened. Prompt text,
 caller keys and network addresses are never used to guess conversation ownership,
 with one exception, Qoder's below, where the prompt is matched against the
 session files the agent itself wrote.
-So the configs magpie writes have each agent name its session: Pi's provider
+So the configs eipgam writes have each agent name its session: Pi's provider
 block sets `compat.sendSessionAffinityHeaders` (`x-session-affinity` on Chat and
 Messages; Responses sends `session_id` anyway), and omp 16.0.6 and later gets
 `compat.promptCacheSessionHeader: x-session-affinity`. A user's own
@@ -46,7 +46,7 @@ session), the one whose typed prompts (`user` lines with `humanInput`, or
 turn holds every prompt of its session, a subagent's turn the Agent tool's
 prompt, a title call the latest prompt or a transcript, a suggestion call
 "User: …". The id goes on the request as `session-id`, and in the caller
-passed to a remote magpie, so it is recorded, titled and grouped as 1.1.81's
+passed to a remote eipgam, so it is recorded, titled and grouped as 1.1.81's
 was. Files are read incrementally (whole lines only) and listed at most once
 a second, again at once when nothing matches; a side call (no tools) nothing
 matches is held up to 600 ms, since Qoder asks the first title as the prompt
@@ -61,10 +61,10 @@ after the others, and marks a request that compacts its context with
 `x-deepseek-harness-compact` (#2505). `callKind` records such a call as
 `compact`, the Requests list's Compaction; a value of `0`, `false`, `no` or
 `off` is no mark, and a request without one is never taken for a compaction
-by its prompt. `passOnCaller` sends the mark on to a remote magpie beside
+by its prompt. `passOnCaller` sends the mark on to a remote eipgam beside
 the session, and no vendor is sent either (`TestDshMarksSessionAndCompaction`).
 Both are read on Messages and Responses as on Chat Completions, which a
-user's own llm-deepseek row pointed at magpie relies on (#3298,
+user's own llm-deepseek row pointed at eipgam relies on (#3298,
 `TestDshMarksOnEveryRoute`).
 
 When the same identity is present in a native session, the native session wins
@@ -74,7 +74,7 @@ agents run Pi in their folders under `$SLOCK_HOME` (else `~/.slock`,
 `%USERPROFILE%\.slock` on Windows), `agents/<id>/.pi-sessions/` and
 `.builtin-sessions/`, Pi's SDK files read as agent `raft`
 ([`raft.go`](../../internal/sessions/raft.go)). Raft's Pi reads the user's
-own Pi folder, so through magpie it says it is Pi, and a Raft session is
+own Pi folder, so through eipgam it says it is Pi, and a Raft session is
 the gateway's `pi|<id>` too: in `MergeExternal`, the stats' native keys,
 the GUI's list and Via, and `NativeIDs` for `pi`. Raft's sessions are
 listed, read and deleted as Pi's (one file to the trash, nothing beside
@@ -99,7 +99,7 @@ header's `parentSession` names the lead's file (`piFilesIn`,
 `piSubagentFiles` in [`pi.go`](../../internal/sessions/pi.go)). Its calls
 are the lead session's, on its own model and provider, and the lead's
 `subagent` tool result, which carries their usage summed, counts nothing
-once those files are read (`piSubagentsRead`). Before, a lead on magpie's
+once those files are read (`piSubagentsRead`). Before, a lead on eipgam's
 entry left a DeepSeek subagent on no page: its files went unread and the
 sum went under the lead's model, the gateway's to count (nzvzbmz78932 on
 X, `TestPiSubagentCalls`). A Claude Code session's
@@ -165,8 +165,8 @@ Claude Code's `/cd` moved it: the file goes to the new folder's project
 directory with a `{"type":"relocated","relocatedCwd":…}` line, while the
 lines before it keep the old `cwd`, and the last such line names the folder
 (`ccRelocated`; a glance reads it in the file's last 64 KB too). A parse
-saved by a magpie that didn't read those lines (`state.CdRead` unset) whose
-folder isn't the one the file is in is read again (`ccStale`). Magpie's own
+saved by a eipgam that didn't read those lines (`state.CdRead` unset) whose
+folder isn't the one the file is in is read again (`ccStale`). eipgam's own
 project move rewrites `relocatedCwd` and judges the session by its last
 move. See `TestClaudeCdListedUnderNewFolder` and the fixtures in
 `internal/sessions/testdata/claude-cd` (Claude Code 2.1.316's own lines,
@@ -175,7 +175,7 @@ Gateway projections have no path,
 resume command or terminal action: the agent's own files of them are not on
 this computer. Their rows carry `gateway: true`; the Sessions page groups them
 under "Seen through the gateway" rather than "No folder", and their size is the
-text magpie recorded of them (`sessions.GatewaySizes`), shown only when there
+text eipgam recorded of them (`sessions.GatewaySizes`), shown only when there
 is some. The overview's top summaries (`MergeExternalStats`) carry
 `gateway: true` too, and Usage › Sessions names such a row "Gateway session"
 where a folder would be, with "(prompt not recorded)" when no text was kept,
@@ -194,7 +194,7 @@ models, token totals, start/last timestamps and effective prices come from the
 same usage records used by Usage and stats endpoints.
 
 A model the user counts under another id (`usageAliases` in settings.json,
-`magpie model alias`; [`provider.UsageAlias`](../../internal/provider/usagealias.go))
+`eipgam model alias`; [`provider.UsageAlias`](../../internal/provider/usagealias.go))
 is merged after pricing, never before: `buildGatewaySessions` prices each
 record by its own model and keys its day and model rows by the alias, and
 `sessions.List`, `Get`, `Find` and the stats (`aliasStats` in
@@ -252,7 +252,7 @@ Claude Code's sessions are read from every folder it is run in
 (`appdir.ClaudeHomes`, `sessions.ClaudeDirs`): `$CLAUDE_CONFIG_DIR` or
 `~/.claude`, a folder beside it or in the home folder whose name starts with
 `claude` or `.claude` (or one level down) and holds `projects/`, and the
-folders of the Claude accounts saved in magpie. A session id kept in two of
+folders of the Claude accounts saved in eipgam. A session id kept in two of
 them is one session, under the first. Verification:
 `TestClaudeHomesIn`, `TestCallsReadEveryClaudeFolder`,
 `TestListReadsEveryClaudeFolderOnce`.
@@ -291,7 +291,7 @@ answers under the id asked for (#5195). Verification:
 The calls read from ZCode's database name their session the same way
 (`readZCodeCalls`, `zcodeBareID`). The Usage page pairs a gateway record with
 the session file's call by session, tokens and end time, so under `sess_…` a
-call magpie had routed was counted again as a local session's whatever
+call eipgam had routed was counted again as a local session's whatever
 provider id ZCode wrote beside it (nori_tsukiji on X). Verification:
 `TestZCodeCallsPairWithTheGatewaysRecords`.
 
@@ -352,7 +352,7 @@ GUI. Verification: `TestSessionTitlesFallBackToFirstPrompt`,
 
 A gateway projection can be deleted (lc on Discord). `sessions.DeleteGateway`
 moves its recorded text folders (`gateway-conversations/<date>/<identity hash>`)
-into magpie's session trash under `trash/sessions/gateway/`, with a note
+into eipgam's session trash under `trash/sessions/gateway/`, with a note
 marked `gateway`, and adds `{agent, id, last}` to
 `gateway-sessions-hidden.json` in the config directory. `/api/sessions` and
 `/api/sessions/manage` leave out a hidden session up to that last request; a
@@ -369,7 +369,7 @@ list the session), and `HasGatewayConversations` counts it.
 Implementation: [`internal/sessions/gateway_delete.go`](../../internal/sessions/gateway_delete.go),
 `Restore` in [`internal/sessions/manage.go`](../../internal/sessions/manage.go), and
 [`internal/gui/sessions_manage.go`](../../internal/gui/sessions_manage.go).
-An agent whose sessions magpie cannot delete (OpenCode, Cline, Grok, Kimi, Hermes:
+An agent whose sessions eipgam cannot delete (OpenCode, Cline, Grok, Kimi, Hermes:
 rows in the agent's own database or store) and whose command is no longer on
 PATH (`cliGone`) is forgettable (_SekiBetu_ on X): its rows get Delete, which
 only hides them through the same hidden list (`sessions.Forget`, trash note
@@ -403,7 +403,7 @@ Implementation: [`internal/usage/gateway_sessions.go`](../../internal/usage/gate
 [`internal/sessions/external.go`](../../internal/sessions/external.go), and
 [`internal/gui/sessions.go`](../../internal/gui/sessions.go).
 
-## Which agents' sessions magpie reads
+## Which agents' sessions eipgam reads
 
 An agent's own session files are read only when the user allows that
 agent (RustCats on X: a new install showed every agent's history before
@@ -444,11 +444,11 @@ saves `all: false` with each agent picked or not, Allow all `all: true`.
 A choice with `all` false reads no agent it doesn't name. An agent off
 and found here is `new` in `found` unless it was turned off on its own:
 a post without `all` that sets it `false` (Keep off, a Settings ›
-Privacy row, `magpie sessions read off <agent>`) records it in
+Privacy row, `eipgam sessions read off <agent>`) records it in
 `sessionReads.kept`, and one that sets it `true` takes it out. So an
 agent found after the first choice, and one left off in that choice's
 list (Antigravity 2.0 beside agy CLI: baysonfox on X, whose app calls
-made without magpie were counted nowhere), are asked about once more:
+made without eipgam were counted nowhere), are asked about once more:
 on the Sessions page (`laterCard`: Show their sessions sends each
 `true`, Keep off `false`) and above Usage › Requests' rows (`readsLater`
 in the usage plugin's `page.js`: Count / Don't count, the same posts).
@@ -458,9 +458,9 @@ is asked once (`TestSessionReadsUncheckedAgentAskedAgain`,
 Settings › Privacy, *Agents' session history* (`renderSessionReads` in
 the sessions plugin's `settings.js`), has *Agents found later* (`all`, sent with each listed agent
 at the value its row shows) and a row per agent.
-`magpie sessions read [on|off all|<agent>…]` shows and changes the same
+`eipgam sessions read [on|off all|<agent>…]` shows and changes the same
 choice from the CLI (`sessionReadsTo`); while it is not asked,
-`magpie sessions` says so on stderr and the TUI's empty Sessions page
+`eipgam sessions` says so on stderr and the TUI's empty Sessions page
 says how (`sessNothing`). With no provider set up, Claude Code's and Codex's sessions, and each
 call's tokens and duration, need only this consent: the session files are
 the source (`/api/usage/requests` rows with `source: "log"`, the speed a
@@ -472,7 +472,7 @@ speed curve is measured only on requests through the gateway
 (`sm-speed-note`). Tests: `TestSessionsRead`,
 `TestSessionsNotAskedSaysHow`, `usage-reads-note.test.cjs`.
 
-In gateway mode (`magpie web`'s page, [`gatewaymode.go`](../../internal/gui/gatewaymode.go))
+In gateway mode (`eipgam web`'s page, [`gatewaymode.go`](../../internal/gui/gatewaymode.go))
 no agent's own session files are read, whatever `SessionReads` says
 (paultian on Discord: a server put in gateway mode with agents installed
 listed its own sessions beside those other computers sent). The gui sets
@@ -495,11 +495,11 @@ computers' agents that use this gateway, and Settings › Privacy leaves
 *Agents' session history* out. A session is listed only when its
 requests name one in a header (`sessionOf`: `X-Magpie-Session`, or the
 agent's own, `sessionHeaders`), under the agent its User-Agent names
-(`usage.AgentOf`, magpie's agents and plugins' agents; another client by
+(`usage.AgentOf`, eipgam's agents and plugins' agents; another client by
 its product name).
 The stats' `keys` name these sessions too (`MergeExternalStats`), since
 Usage › Sessions lists only the keys it is given (linkaww on Discord: a
-Docker magpie in gateway mode listed almost none;
+Docker eipgam in gateway mode listed almost none;
 `TestGatewayStatsNameTheGatewaySessions`,
 `TestGatewayModeStatsNameTheGatewaySessions`). Usage › Context's Tuned for
 you is left out (`/api/tune` says `gateway: true`, and Use and Undo are
@@ -510,10 +510,10 @@ The app's windows are never in gateway mode. Tests:
 `TestGatewayModeListsNoOwnSessions`, `gateway-mode-sessions.test.cjs`.
 
 What is read either way: the gateway's own usage ledger, its
-projections and the conversations it recorded (they are magpie's own),
+projections and the conversations it recorded (they are eipgam's own),
 the agents' config and sign-in files, Claude Code's and Codex's
 `history.jsonl` last-used time and a session file's mtime for a quota's first use, and
-Codex's newest rollout's last line before magpie restarts Codex
+Codex's newest rollout's last line before eipgam restarts Codex
 (`codexTurnOpen`), none of which lists or shows a session. Tests:
 `TestFreshInstallReadsNoAgentUntilAllowed`,
 `TestSettleReadsKeepsWhatWasThere`, `TestSessionReadsRoutes`,
@@ -550,7 +550,7 @@ applies: on an agent whose list has gateway sessions (`gateway` on a
 is kept. Its "Delete saved conversations…" shows while
 `/api/sessions/manage`'s `recorded` says some text is kept
 (`sessions.HasGatewayConversations`, true when the folder can't be read), and
-asks in magpie's own dialog first. `Settings.GatewayConversations` is machine-local consent:
+asks in eipgam's own dialog first. `Settings.GatewayConversations` is machine-local consent:
 `settings.SetGatewayConversations` updates it under the settings file lock.
 Other Settings saves retain the latest stored consent under that lock, so an
 older snapshot cannot re-enable recording after it is stopped. `KeepOwn`
@@ -582,7 +582,7 @@ session synchronization, and existing S3 archives are not imported.
 [`SaveGatewayTurn`](../../internal/sessions/gateway.go) stores normalized,
 scrubbed exchanges in one append-only `turns.jsonl` per
 `gateway-conversations/<UTC date>/<identity hash>/` under
-the Magpie config directory, using 0700 directories and 0600 files. Each line is
+the eipgam config directory, using 0700 directories and 0600 files. Each line is
 one bounded turn; legacy per-turn JSON files remain readable until they expire.
 An incomplete final append is omitted from reads (marked truncated) and removed
 before the next append; complete earlier lines remain available. No headers are
@@ -620,9 +620,9 @@ cannot replace content fetched after clearing the store.
 `GET /api/sessions/markdown` and `POST /api/sessions/export` take the same
 choice: a native session is written from its file (`sessions.WriteMarkdown`),
 and otherwise a known gateway session from what its transcript reads
-(`sessions.WriteGatewayMarkdown`, "Recorded by: magpie's gateway", with a note
-when turns or a part's end weren't kept). A magpie that others reach as a
-remote magpie has no file of their agents' sessions, so this is the only way
+(`sessions.WriteGatewayMarkdown`, "Recorded by: eipgam's gateway", with a note
+when turns or a part's end weren't kept). A eipgam that others reach as a
+remote eipgam has no file of their agents' sessions, so this is the only way
 it can export them. Verification: `TestGatewaySessionExportsMarkdown`.
 
 A gateway session without a saved Desktop name is titled by what it was
@@ -692,7 +692,7 @@ the MCP server reads an empty first answer as "no session says it". Words are le
 two characters side by side (`saidWords`, `saidTerms`). The index only says
 which sessions are worth reading: those are read newest first with
 `SearchSession` for the hit and the words round it, to `limit` hits.
-An agent magpie may not read (`Reads`, Settings › Sessions and gateway
+An agent eipgam may not read (`Reads`, Settings › Sessions and gateway
 mode) is left out of every answer at once and out of the index on its next
 update; turning gateway mode on or off closes the index (`Reset` →
 `ForgetSaid`, which stops a refresh running at the next session).
@@ -707,15 +707,15 @@ update; turning gateway mode on or off closes the index (`Reset` →
   list or another's, opens the conversation sheet there: the part is ringed
   (`sess-found`), its words marked with the CSS Custom Highlight API where
   the browser has it, and the sheet, never the page, scrolled to it once.
-- The `magpie-sessions` MCP server (`SessionsMCPPath`,
-  `/mcp/magpie/sessions`, [`sessions_mcp.go`](../../internal/gateway/sessions_mcp.go))
+- The `eipgam-sessions` MCP server (`SessionsMCPPath`,
+  `/mcp/eipgam/sessions`, [`sessions_mcp.go`](../../internal/gateway/sessions_mcp.go))
   gives an agent `search_sessions(query, agent?, limit)` and
   `read_session(session, find?, from?, max_chars?)`, as text: each hit's
   `agent:id`, title, folder, time and the words round it; a read numbers
   each message, shortens tool calls and answers, leaves thinking out, and
-  says how to go on (`from=`). Like Magpie Memory it answers the agents on
+  says how to go on (`from=`). Like eipgam Memory it answers the agents on
   this computer alone, never another computer's key or a web page. The
-  Library offers it as opt-in, run as `magpie mcp sessions`
+  Library offers it as opt-in, run as `eipgam mcp sessions`
   (`browsermcp.RunSessions`).
 
 Implementation: [`internal/sessions/said_index.go`](../../internal/sessions/said_index.go),
@@ -775,7 +775,7 @@ What a conversion carries:
   custom tool, MCP tools) is written as the agent's own text: its name,
   input and result in fences. A result is cut at 64 KiB.
 - **Not carried:** thinking, reasoning, signatures and encrypted content, and
-  a compaction encrypted by OpenAI. Of compactions, only magpie's own
+  a compaction encrypted by OpenAI. Of compactions, only eipgam's own
   summary is read.
 
 What it writes:
@@ -791,7 +791,7 @@ What it writes:
   (`CodexProviderIn`), so the thread is listed under the provider in use.
   `response_item`s are written, plus the `event_msg` user and agent messages
   the TUI shows as history. Codex indexes the file into its state database
-  itself on resume, so magpie writes no index. `codex resume <id>` opens it.
+  itself on resume, so eipgam writes no index. `codex resume <id>` opens it.
 
 The source file is only read. The new file is written to a temp file
 beside it, synced and renamed, and is never written over an existing path.
@@ -810,12 +810,12 @@ Claude Code 2.1.310 and Codex 0.162.1 files in `testdata/carry`),
 
 ## Usage over the gateway, and subagents
 
-`GET /v1/magpie/usage` and `GET /v1/magpie/usage/requests`
+`GET /v1/eipgam/usage` and `GET /v1/eipgam/usage/requests`
 ([`internal/gateway/usage_api.go`](../../internal/gateway/usage_api.go)) serve
 the Usage page's summary and request ledger from the same builders as the
 window's `/api/usage` and `/api/usage/requests`
 ([`internal/usageapi`](../../internal/usageapi/usageapi.go)), read-only and
-without conversation text. They follow `/v1/magpie/quotas`' guard: this
+without conversation text. They follow `/v1/eipgam/quotas`' guard: this
 machine, or another with an enabled gateway key, behind the same Host check.
 A key that is held (`heldKey`: a budget, models or accounts) is refused the
 summary and gets the ledger filtered to its own `CallerKey`, with its filter
@@ -825,15 +825,15 @@ from every call in the period, so without the cut they would name other keys.
 Each gateway row keeps the address its request came from
 (`Record.ClientIP`, set in `appendUsage` from `peerAddr`: the connection's
 own, never a forwarding header). The window's `/api/usage/requests` has it
-for the Usage page's request detail; `/v1/magpie/usage/requests` takes it
+for the Usage page's request detail; `/v1/eipgam/usage/requests` takes it
 out for every caller (`withoutClientIPs`), and sync's `OwnDays` leaves it
 out, so it never leaves this computer. CSV export, OTel and middleware
 points name their columns and don't carry it. `rowText` packs it, or the
 ledger's cache reads it back empty
 (`TestUsageRowsKeepTheClientsAddress`, `TestClientIPKeptHereNotShared`).
 A held key is refused (`refuseHeld`, 403 `provider.KeyHeldCode`) the
-quotas, their history, kept cards and refresh, and `/v1/magpie/concurrency`
-(#1981); `/v1/magpie/route` tells it only routes whose `callerKey` is its
+quotas, their history, kept cards and refresh, and `/v1/eipgam/concurrency`
+(#1981); `/v1/eipgam/route` tells it only routes whose `callerKey` is its
 own. `Route.CallerKey` (and `CallerKeyName`, the key's name then; never
 its secret) is set by `trace.beginFor` from the request's caller, so a
 route begun without it is told to no held key. Both go out in the GUI's
@@ -866,7 +866,7 @@ count the same bytes once. Rows sum into `Totals` and into each chart
 point's `Part` (`add` from rows, `plus` from the request page's cells).
 The Requests chart's Traffic metric draws them per hour/day by model,
 provider or agent. `GET /api/usage/traffic` answers the totals with the
-requests in flight (`{}` when another magpie serves the gateway); the
+requests in flight (`{}` when another eipgam serves the gateway); the
 Requests card reads it a second apart while it is shown and says
 "↑ x/s · ↓ y/s" over the last ~3s while requests are in flight. Not counted:
 Claude bridge turns (no HTTP to the vendor), and a plugin's row counts the
@@ -900,7 +900,7 @@ reader on a 1.2 MB body.
 
 ### Calls read from the agents' own files
 
-A call an agent made without magpie reaches Usage only when its own files
+A call an agent made without eipgam reaches Usage only when its own files
 are read (`sessions.Calls`, from `callSources` in
 [`calls.go`](../../internal/sessions/calls.go)). The readers are Claude
 Code's, Claude Desktop's and Cowork's, Codex's (and both in WSL), and,
@@ -926,9 +926,9 @@ is set (qodercli 1.1.0 on, and the app's worker), and with the reply's
 `credits`: such a call has no tokens and no price, and its `Credits` are
 summed as a plan's credits are; a reply written with no usage at all is no
 call (`TestQoderCalls`, `TestDirectQoderCallsByCredits`). Each skips the
-calls the agent made through magpie's own entry, which the gateway logged
+calls the agent made through eipgam's own entry, which the gateway logged
 with the account that answered: Kimi Code's are the ones whose
-`usage.record` model begins `magpie/`. Kimi Code's calls are its
+`usage.record` model begins `eipgam/`. Kimi Code's calls are its
 `usage.record`s in every agent's `wire.jsonl` under
 `$KIMI_CODE_HOME/sessions` (else `~/.kimi-code`), protocols 1.4 and 1.5;
 a fork repeats its parent's records, so each is keyed by agent, time,
@@ -940,13 +940,13 @@ being `kimi-desktop/daimon-share` in Electron's userData, the absolute
 `shareDir` of `daimon-storage.json` there, or `~/.kimi`; they count as
 Kimi Code's. A record's model there is Daimon's alias, read as its
 `model` in the runtime's `config.toml`, and a call whose alias's provider
-`base_url` is a loopback address (magpie's kimi-desktop plugin bridge) is
+`base_url` is a loopback address (eipgam's kimi-desktop plugin bridge) is
 the gateway's. That file is the current setting only
 (`TestKimiWorkCalls`). Pi's and omp's calls are the session
 files' assistant messages, and the calls beside them that Sessions counts
 too ("usage" and omp's "model_usage" entries, a compaction's, a branch
 summary's and a tool result's usage, on the model and provider in use);
-the provider `magpie` (or `dial`) is magpie's entry, a failed call has no
+the provider `eipgam` (or `dial`) is eipgam's entry, a failed call has no
 usage, and a fork's copy of its parent's entries (written before its
 header) is the parent's. A Codex fork (/fork, a spawn_agent with the
 parent's context) writes every line of its parent's rollout into its own
@@ -1007,7 +1007,7 @@ read keeps the rows read before. A row whose conversation has its
 `conversations/<id>.db` and no transcript (#1718; that database is protobuf,
 not read) is listed from the row alone: title, folder, `last_modified_time`,
 no tokens and no conversation to open (`readable`). Resume is `agy --conversation <id>`, which
-picks it up from any folder; when agy is set to use magpie it is the
+picks it up from any folder; when agy is set to use eipgam it is the
 agent's launch command (the gateway's variables and `--model`) with
 `--conversation` after it (`sessions.AgyStart`, set by package agent).
 Subagents (`parent_conversation_id`) and agy in WSL are not read.
@@ -1025,7 +1025,7 @@ store. Each conversation takes its title and workspace from the
 `conversation_summaries.db` beside its own store, including later title
 updates. Model calls reuse the app's read-only SQLite/protobuf reader,
 including response folding and gateway matching. Insiders session ids
-have an `insiders-` prefix in magpie, leaving stable ids unchanged and
+have an `insiders-` prefix in eipgam, leaving stable ids unchanged and
 keeping equal UUIDs in the two stores from sharing a session or call id.
 The files themselves are not renamed. Sessions stay read-only with no
 terminal resume command. The database's step text is encrypted and not
@@ -1064,9 +1064,9 @@ answer equals the whole ledger's), and `sessions-overview-once.test.cjs`.
 
 ### Calls an app reports itself
 
-`POST /v1/magpie/usage/requests`
+`POST /v1/eipgam/usage/requests`
 ([`internal/gateway/usage_ingest.go`](../../internal/gateway/usage_ingest.go),
-#1874) takes calls that never went through magpie, from an app that sends
+#1874) takes calls that never went through eipgam, from an app that sends
 them straight to its vendor, so the Usage page covers them too. The body is
 one record or an array of up to 5000 (32 MiB at most), in `usage.jsonl`'s
 shape: `t`, `agent`, `provider`, `model` and `rid` are required; `in`,
@@ -1103,7 +1103,7 @@ however old, so a client's history can be backfilled.
   without `served` says nothing of what answered, so it is never filled
   from `model`. `TestUsageIngestRequestedAndServed`.
 - **Pricing:** a record with `cost` keeps it (`Record.OwnCost`, the
-  `rowOwnCost` flag on a packed row). Without one it is priced at magpie's
+  `rowOwnCost` flag on a packed row). Without one it is priced at eipgam's
   own prices, like a gateway row.
 - **Speed:** `first_text_ms` and `flow_ms` (#2637) mean what they do in
   `usage.jsonl` (`Record.FirstText`, `Record.Flow`), so a reported row's
@@ -1132,18 +1132,18 @@ however old, so a client's history can be backfilled.
 concurrent posts beside the gateway's own writes, and a backfill of a full
 5000-record batch landing on the right 7d/30d/all days.
 
-### Calls to magpie's own MCP tools
+### Calls to eipgam's own MCP tools
 
-An agent's call to a tool of one of magpie's own MCP servers is a row of
+An agent's call to a tool of one of eipgam's own MCP servers is a row of
 `usage.jsonl` too (ferock on Discord): the image server's
 `generate_image`, `generate_video` and `generation_result`, vision, web
 search, plugin tools and the router's. The row has `source: "mcp"`,
 `kind: "mcp"`, operation `execute_tool`, the tool's name as `req`, the
-server's name as `host` (`magpie-image`, `magpie-vision`,
-`magpie-web-search`, `magpie-tools`, or the Library server a router tool is
+server's name as `host` (`eipgam-image`, `eipgam-vision`,
+`eipgam-web-search`, `eipgam-tools`, or the Library server a router tool is
 of), the agent, the provider and model of the last gateway request the
 call made, its duration, its endpoint (the server's path, `stdio` for the
-Magpie Image server an agent runs) and, when it failed, the JSON-RPC
+eipgam Image server an agent runs) and, when it failed, the JSON-RPC
 error or the `isError` result's first text, clipped by `keepMsg`. Its
 arguments are never kept, not even masked.
 
@@ -1153,11 +1153,11 @@ arguments are never kept, not even masked.
   row's provider and model; the image server's jobs keep it, so a
   `generation_result` names the model of the job it waited on. A drawing
   still running when its call answers leaves that call's row without a
-  model. The stdio Magpie Image server calls the gateway's `/v1/images`
+  model. The stdio eipgam Image server calls the gateway's `/v1/images`
   and `/v1/videos` itself, so it reports each call it answered to the
-  gateway's image MCP server with the JSON-RPC method `magpie/toolCalled`
+  gateway's image MCP server with the JSON-RPC method `eipgam/toolCalled`
   (`gateway.MCPCalledMethod`, params `MCPCalled`: tool, ms, model,
-  error); a tool not Magpie Image's is -32602. Behind the [MCP router](mcp-router.md) it sends none: the router's `tools/call` is the row. An older gateway that
+  error); a tool not eipgam Image's is -32602. Behind the [MCP router](mcp-router.md) it sends none: the router's `tools/call` is the row. An older gateway that
   doesn't know the method just leaves the call unlisted.
 - **Counted nowhere:** `Record.IsProbe` is true for these rows, so they
   ride the probe lane above: listed (`probeChunk`, kept as they are),
@@ -1201,18 +1201,18 @@ recorded: no structured field holds it.
 A request a provider plugin sends its vendor by itself (Devin's cache
 keep-alive ping, plugins#592) never passes the gateway. The plugin
 reports it through `input.magpie.usage` and `usage.pluginCall` writes it
-as a row of agent `magpie` with the plugin's kind (`cache_keepalive`,
+as a row of agent `eipgam` with the plugin's kind (`cache_keepalive`,
 "Cache keep-alive" in `purposeKinds`). Unlike a probe it is counted:
 priced and in every total (see
 [provider-plugins.md](provider-plugins.md#a-request-a-plugin-sends-by-itself)).
 `TestPluginKeepaliveIsCounted`.
 
-### Requests magpie sends on its own
+### Requests eipgam sends on its own
 
 The provider editor's Test, Detect APIs and per-model detection, and a
 model list's refresh, reach the vendor outside any agent's turn (neiko and
 gys619 on Discord: a test left no trace). Each such request is one row of
-`usage.jsonl` with `source: "probe"`, agent `magpie`, the provider's id
+`usage.jsonl` with `source: "probe"`, agent `eipgam`, the provider's id
 (the host for one not yet saved), its account, model, endpoint, status,
 time and the error clipped to 500 bytes, and a `kind` saying what it was
 for: `provider_test`, `api_detect` or `model_list`
@@ -1236,9 +1236,9 @@ for: `provider_test`, `api_detect` or `model_list`
   request page lists them as a chunk of their own (`probeChunk`) and adds
   them to no total, cell, group, chart or filter count; `?via=` other than
   all leaves them out.
-- **A model list answered is no row:** magpie fetches lists by itself
+- **A model list answered is no row:** eipgam fetches lists by itself
   (start-up's `FetchNew`, the panel's and the Providers page's, and
-  `KeepListsFresh`, which asks a Remote magpie every 10 minutes, and
+  `KeepListsFresh`, which asks a Remote eipgam every 10 minutes, and
   `KeepRemoteListsFollowed`, as soon as its list changes there), so a
   `model_list` row with a 2xx/3xx status and no error is neither written
   (`usage`'s `probelog.Sink`) nor read back from an older log
@@ -1263,7 +1263,7 @@ for: `provider_test`, `api_detect` or `model_list`
   `TestProbesOfAProviderBeingAddedListItOnce` and
   `TestProbesOfADeletedProviderStayWithIt` cover it.
 - **Showing:** the row's badge is the kind's name ("Test", "Detect APIs",
-  "Model list", from `purposeKinds`), and its tooltip and the "magpie's
+  "Model list", from `purposeKinds`), and its tooltip and the "eipgam's
   own" badge's say it counts in no total (`probeWhy` in
   `plugins/usage/page.js`).
 
@@ -1416,7 +1416,7 @@ one Codex is on runs as `codex resume -c model_provider=<its provider> <id>`
 while config.toml has that table, or it is a built-in (`openai`, `ollama`,
 …), and Codex runs it embedded, on its own provider; when the provider is
 gone, `MoveCodexProvider` moves it to the one Codex is on first (its files
-in magpie's trash), and it resumes there (mrten_95615 on Discord). A WSL
+in eipgam's trash), and it resumes there (mrten_95615 on Discord). A WSL
 distro's Codex session is as listed. `TestCodexResumeOnItsProvider`; both
 cases were resumed by a real Codex 0.166.0 in a sandbox `CODEX_HOME`.
 
@@ -1472,7 +1472,7 @@ parent thread ID. `native_session` stays the recorded native header. The new
 unchanged. Ambiguous or unpaired calls do not inherit a relationship from shared
 session metadata.
 
-`GET /api/usage/requests` and `GET /v1/magpie/usage/requests` expose Codex
+`GET /api/usage/requests` and `GET /v1/eipgam/usage/requests` expose Codex
 `compaction` as `true` or `false` when a native Codex call establishes the
 marker state, and omit it when there is no matching native evidence. Only a
 call read from a `token_usage_record` (it has a `response_id`) establishes it:
@@ -1483,11 +1483,11 @@ rather than saying `false`. A unique
 row's model, usage, cost and kind.
 Compaction is already included in Codex's total consumption, so this marker
 does not add tokens or cost. This is Codex-only; Claude behavior and the POST
-`/v1/magpie/usage/requests` ingest allowlist are unchanged.
+`/v1/eipgam/usage/requests` ingest allowlist are unchanged.
 
 ### The request feed
 
-`GET /v1/magpie/usage/requests?cursor=` (#6060, rdsaltbo on X) reads the
+`GET /v1/eipgam/usage/requests?cursor=` (#6060, rdsaltbo on X) reads the
 ledger as changes for a program keeping a ledger of its own. The contract is
 in [reference.md](../reference.md); the code is
 [`internal/usage/feed.go`](../../internal/usage/feed.go) (state and ids) and

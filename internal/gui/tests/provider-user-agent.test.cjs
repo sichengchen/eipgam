@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #1851: a coding plan that serves only the agents it names knows them by
-// their User-Agent, and a gateway of the user's own behind magpie wants to
+// their User-Agent, and a gateway of the user's own behind eipgam wants to
 // see the agent's (nb5p on Discord). The provider editor's User-Agent row,
 // "Send the agent's own User-Agent", is there for a provider with a key,
-// opens ticked unless it was saved as magpie, and Save posts it. A signed-in account and a vendor magpie goes as
+// opens ticked unless it was saved as eipgam, and Save posts it. A signed-in account and a vendor eipgam goes as
 // the client of (OpenCode here) have no such row. In every language, wide
 // and narrow.
 const assert = require("node:assert/strict");
@@ -26,7 +26,7 @@ const base = {
   key: { set: true, masked: "sk-…1234" }, keyList: [], balanceToken: { takes: false, set: false }, proxy: "", searches: false, unredacted: false, passUserAgent: true,
 };
 const plan = { ...base, id: "plan", name: "Agent Plan", chat: "https://plan.example.com/v1" };
-const asMagpie = { ...base, id: "asmagpie", name: "Magpie Plan", chat: "https://asmagpie.example.com/v1", passUserAgent: false };
+const asMagpie = { ...base, id: "asmagpie", name: "eipgam Plan", chat: "https://asmagpie.example.com/v1", passUserAgent: false };
 const zen = { ...base, id: "opencode", name: "OpenCode Zen", chat: "https://opencode.ai/zen/v1", ownClient: true };
 const codex = {
   id: "codex", name: "Codex", icon: "codex-color", chat: "", responses: "", anthropic: "", catalog: "",
@@ -59,7 +59,7 @@ function serve(lang, posts) {
 
 const strings = [
   "User-Agent", "Send the agent's own User-Agent",
-  "Off, every request goes as magpie. A User-Agent set in Headers above always wins.",
+  "Off, every request goes as eipgam. A User-Agent set in Headers above always wins.",
 ];
 const words = {
   en: { tick: "Send the agent's own User-Agent", save: "Save" },
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: name }).click();
         await unfold(page);
         await page.locator(".editor .bar").waitFor();
@@ -104,10 +104,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         return posts.at(-1);
       };
 
-      test(`${engine} ${lang} ${width}: one saved as magpie opens unticked, and is set to send the agent's User-Agent`, async (t) => {
-        const { page, errors, posts } = await open(t, "Magpie Plan");
+      test(`${engine} ${lang} ${width}: one saved as eipgam opens unticked, and is set to send the agent's User-Agent`, async (t) => {
+        const { page, errors, posts } = await open(t, "eipgam Plan");
         assert.equal(await row(page).isVisible(), true);
-        assert.equal(await box(page).isChecked(), false, "opens as magpie");
+        assert.equal(await box(page).isChecked(), false, "opens as eipgam");
         const r = await row(page).boundingBox();
         assert.ok(r.width > 60 && r.x + r.width <= width, `the row fits: ${JSON.stringify(r)}`);
         await box(page).scrollIntoViewIfNeeded();
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(errors, []);
       });
 
-      test(`${engine} ${lang} ${width}: a plan with a key opens ticked by default, and unticked is saved as magpie`, async (t) => {
+      test(`${engine} ${lang} ${width}: a plan with a key opens ticked by default, and unticked is saved as eipgam`, async (t) => {
         const { page, errors, posts } = await open(t, "Agent Plan");
         assert.equal(await box(page).isChecked(), true, "sends the agent's by default");
         await box(page).scrollIntoViewIfNeeded();
@@ -137,7 +137,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(errors, []);
       });
 
-      test(`${engine} ${lang} ${width}: a vendor magpie goes as the client of, and a signed-in account, have no such row`, async (t) => {
+      test(`${engine} ${lang} ${width}: a vendor eipgam goes as the client of, and a signed-in account, have no such row`, async (t) => {
         for (const name of ["OpenCode Zen", "Codex"]) {
           const { page, errors } = await open(t, name);
           assert.equal(await row(page).count(), 0, name);

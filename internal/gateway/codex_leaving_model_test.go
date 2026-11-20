@@ -6,16 +6,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/codexsummary"
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/codexsummary"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // hiwise_aigc on X: Codex's allowance used up, an existing thread switched
-// to a magpie model failed every turn with ChatGPT's usage limit, "还会走
+// to a eipgam model failed every turn with ChatGPT's usage limit, "还会走
 // gpt模型", restarts or not; a new thread worked. Before a turn on a model
 // with a smaller window Codex compacts the thread on the model it was on
-// (reason model_downshift). Under magpie's provider, the one Codex has
+// (reason model_downshift). Under eipgam's provider, the one Codex has
 // while its sign-in is used up, that went to the used-up account, and
 // Codex asks the turn's own model instead only under its provider named
 // "OpenAI": the refusal was the turn's. Compacted locally, the thread goes

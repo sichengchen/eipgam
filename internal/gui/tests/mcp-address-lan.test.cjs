@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// xzhih on X: magpie as a server on the local network, and Settings › Models'
+// xzhih on X: eipgam as a server on the local network, and Settings › Models'
 // MCP server addresses (Image recognition, Image generation, Web search)
-// still said 127.0.0.1. While magpie is shared, each now has the gateway's
+// still said 127.0.0.1. While eipgam is shared, each now has the gateway's
 // This computer / Local network switch beside it; the pick is kept, a page
 // other machines opened starts at the network address, and with sharing off
 // there is no switch. Chromium and WebKit, every language; no backend.
@@ -11,7 +11,7 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
 const LAN = "http://192.168.1.10:3999";
-const ROWS = { visionMcpRow: "/mcp/magpie/vision", imageMcpRow: "/mcp/magpie/image", searchMcpRow: "/mcp/magpie/web-search" };
+const ROWS = { visionMcpRow: "/mcp/eipgam/vision", imageMcpRow: "/mcp/eipgam/image", searchMcpRow: "/mcp/eipgam/web-search" };
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 
 async function setup(t, engine, lang, width, options) {
@@ -23,7 +23,7 @@ async function setup(t, engine, lang, width, options) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", fixture(lang, "light", [], options));
-  const open = () => page.goto("http://magpie.test/?view=settings&tab=models");
+  const open = () => page.goto("http://eipgam.test/?view=settings&tab=models");
   const code = (id) => page.locator(`#${id} code`);
   return { page, errors, open, code };
 }

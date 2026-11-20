@@ -1,9 +1,9 @@
-// Package provider holds the model vendors magpie can reach: where each one
+// Package provider holds the model vendors eipgam can reach: where each one
 // lives, which protocols it speaks, the API key the user typed in, and which
 // of its models should show up in the agents' pickers.
 //
 // Provider keys are never read from environment variables. A provider is
-// exactly what the user entered, kept in ~/.config/magpie/providers.json
+// exactly what the user entered, kept in ~/.config/eipgam/providers.json
 // (mode 0600).
 package provider
 
@@ -24,17 +24,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
-// Protocol is a wire API magpie can speak to an upstream.
+// Protocol is a wire API eipgam can speak to an upstream.
 type Protocol string
 
 const (
@@ -44,7 +44,7 @@ const (
 	Gemini    Protocol = "gemini"    // Google Gemini's generateContent: served to clients; spoken upstream at a custom provider's Gemini URL, Vertex AI and Factory's generate route
 )
 
-// Protocols in the order magpie prefers them when it has to translate.
+// Protocols in the order eipgam prefers them when it has to translate.
 var Protocols = []Protocol{Chat, Responses, Anthropic}
 
 // Provider is one configured vendor.
@@ -91,7 +91,7 @@ type Provider struct {
 	// KeyPlan is the first key's plan (see KeyAccount.Plan).
 	KeyPlan string `json:"keyPlan,omitempty"`
 
-	// Base URLs, one per protocol the vendor serves natively. magpie appends
+	// Base URLs, one per protocol the vendor serves natively. eipgam appends
 	// the usual paths: chat/responses bases end in /v1 (OpenAI style),
 	// the Anthropic base is the root (what ANTHROPIC_BASE_URL takes).
 	Chat      string `json:"chat,omitempty"`
@@ -102,7 +102,7 @@ type Provider struct {
 	// under it, with the key in x-goog-api-key, and models under it lists
 	// them (#1346).
 	Gemini string `json:"gemini,omitempty"`
-	// GeminiFilled is that magpie filled Gemini in once, for a provider
+	// GeminiFilled is that eipgam filled Gemini in once, for a provider
 	// at AI Studio's OpenAI-compatible URL (aiStudioNative): a Gemini URL
 	// the user cleared after that stays empty.
 	GeminiFilled bool `json:"geminiFilled,omitempty"`
@@ -172,7 +172,7 @@ type Provider struct {
 	Affinity string `json:"affinity,omitempty"`
 
 	// KeepLogin, on Codex's or Claude Code's subscription, keeps the agent
-	// signed in to the account the user made first: magpie doesn't sign it
+	// signed in to the account the user made first: eipgam doesn't sign it
 	// in to another when that one runs low or out (#524). The gateway still
 	// spreads its requests over the accounts that are on, as Routing says.
 	KeepLogin bool `json:"keepLogin,omitempty"`
@@ -181,15 +181,15 @@ type Provider struct {
 	// the user uses the agent as, while the first is only the one whose
 	// allowance is spent first (#524). Empty, it is the first.
 	KeepLoginAs string `json:"keepLoginAs,omitempty"`
-	// SwitchOnly, on Codex's subscription, has magpie only move Codex's
+	// SwitchOnly, on Codex's subscription, has eipgam only move Codex's
 	// own sign-in (auth.json) to the next account with room and back:
 	// Codex's requests then go straight to OpenAI, never through the
 	// gateway for account failover, however many of its accounts are on
 	// (#1907). On Claude's subscription it keeps the accounts to Claude
-	// Code's own sign-in, which magpie still moves: the gateway serves no
+	// Code's own sign-in, which eipgam still moves: the gateway serves no
 	// request on them (KeptToAgent; myduso on Discord).
 	SwitchOnly bool `json:"switchOnly,omitempty"`
-	// RestartApp, on Codex's subscription, has magpie restart the Codex
+	// RestartApp, on Codex's subscription, has eipgam restart the Codex
 	// app's own app-server for a change it makes by itself that the app
 	// works without: the switch back once the account it moved off has
 	// room (SwitchWhenSpent), and giving Codex its account back at the
@@ -201,11 +201,11 @@ type Provider struct {
 	// used-up account (a switch off it, becoming its provider for it)
 	// restart it either way: the app greys Send there (8b0132b3d).
 	RestartApp bool `json:"restartApp,omitempty"`
-	// KeepSelf, on a Remote magpie that turned out to be this magpie
+	// KeepSelf, on a Remote eipgam that turned out to be this eipgam
 	// (SelfAnswered), keeps it in routing anyway: left alone, such a
 	// provider is left out (SelfLeftOut). It is this computer's own, as
 	// sync's copy of the provider on the other computer points at a
-	// magpie that is not that one (hanslin1666 on Discord).
+	// eipgam that is not that one (hanslin1666 on Discord).
 	KeepSelf bool `json:"keepSelf,omitempty"`
 	// ThisDevice keeps the provider on this computer: sync never sends it
 	// out, and what another computer's sync brings neither replaces nor
@@ -281,7 +281,7 @@ type Provider struct {
 	// they are out of quota or answers 429 (zoecats on Discord: a local
 	// aggregator says "quota exhausted" for a moment while it switches
 	// upstreams, and a rest of half an hour held every request back until
-	// magpie restarted). Off by default: such a refusal rests it as ever.
+	// eipgam restarted). Off by default: such a refusal rests it as ever.
 	LimitRestOff bool `json:"limitRestOff,omitempty"`
 
 	// PriceRate is what the provider charges against the official price
@@ -298,7 +298,7 @@ type Provider struct {
 	// listed: it says what to spend first, not what a call cost.
 	CountFree bool `json:"countFree,omitempty"`
 	// Billing is the user's word on how the provider bills: BillingPlan
-	// or BillingPAYG (EV_John_Liu on X); "" has magpie read it
+	// or BillingPAYG (EV_John_Liu on X); "" has eipgam read it
 	// (BillingKind). It only marks the provider on Providers and Routing.
 	Billing string `json:"billing,omitempty"`
 	// RateWindows are the time-of-day windows it bills at its own rate
@@ -310,7 +310,7 @@ type Provider struct {
 
 	// Headers are extra HTTP request headers sent to the vendor, as the user
 	// typed them but for ${sessionId} and ${threadId} in a value, the
-	// request's conversation ids (SentHeaders, conversation.go). They ride on every request magpie makes to a plain
+	// request's conversation ids (SentHeaders, conversation.go). They ride on every request eipgam makes to a plain
 	// key+URL provider — forwarded calls, connectivity tests, and model-list
 	// fetches — applied after the auth headers, so the user can override those
 	// when a gateway insists on a private scheme. Signed-in agent accounts
@@ -328,8 +328,8 @@ type Provider struct {
 	// relay's own request id (X-Oneapi-Request-Id), for the agent's side
 	// to match with the relay's logs. Streamed or whole, an error too, on
 	// every API, translated or not; only the reply the agent is given
-	// has its headers passed on. One magpie writes itself, or that would
-	// act on magpie's address, never is (ReplyHeaderPassable).
+	// has its headers passed on. One eipgam writes itself, or that would
+	// act on eipgam's address, never is (ReplyHeaderPassable).
 	ReplyHeaders []string `json:"replyHeaders,omitempty"`
 
 	// PassHeaders are headers of the agent's request passed on to the
@@ -338,32 +338,32 @@ type Provider struct {
 	// can't give. The client's stands over a Header of the same name;
 	// with none sent the Header goes. Every API, count_tokens, a group's
 	// member, a plugin's fetch; a signed-in account's signing has the
-	// last word. One that carries magpie's key or the connection's own
+	// last word. One that carries eipgam's key or the connection's own
 	// never is (RequestHeaderPassable).
 	PassHeaders []string `json:"passHeaders,omitempty"`
 
 	// Searches says the vendor answers a web search tool offered on its
 	// Anthropic or Responses API by itself (web_search_20250305,
 	// web_search): a relay in front of Anthropic's or OpenAI's API, which
-	// magpie can't tell from its host. A request offering one then goes to
-	// it as the client sent it, rather than given magpie's search (#359).
+	// eipgam can't tell from its host. A request offering one then goes to
+	// it as the client sent it, rather than given eipgam's search (#359).
 	Searches bool `json:"searches,omitempty"`
 
 	// CodexAsSent has a request Codex sends on the Responses API go to it
 	// as Codex sent it, its model name alone swapped: a relay that checks
 	// it is Codex's own (#1758: "Codex 客户端请求特征无效", 10014), which
-	// the shape magpie fits it to for another backend (Responses Lite's
+	// the shape eipgam fits it to for another backend (Responses Lite's
 	// additional_tools lifted into tools, the tool search as a function,
 	// OpenAI-only fields left out) fails. Off, the default, keeps that
 	// fitting, which a backend that isn't OpenAI's needs (#350).
 	CodexAsSent bool `json:"codexAsSent,omitempty"`
 
-	// UpstreamProviders, on a Remote magpie, `upstream-providers=on`, names each
+	// UpstreamProviders, on a Remote eipgam, `upstream-providers=on`, names each
 	// of its models in the agents' lists by the provider serving it on
-	// the other magpie, the first in a chain of them: "Claude Sonnet 5 ·
-	// Office › RelayA", whatever that magpie's own Provider in model names
+	// the other eipgam, the first in a chain of them: "Claude Sonnet 5 ·
+	// Office › RelayA", whatever that eipgam's own Provider in model names
 	// is, so one model from two of its providers is told apart here
-	// (lcc580 on X). Off, the default, names each as that magpie's list
+	// (lcc580 on X). Off, the default, names each as that eipgam's list
 	// does. The ids stay as they are: office/relaya/claude-sonnet-5.
 	UpstreamProviders bool `json:"upstreamProviders,omitempty"`
 
@@ -374,7 +374,7 @@ type Provider struct {
 	// identity line, Codex's GPT-5 identity lines, Hermes Agent's earlier
 	// default persona, oh-my-pi's RFC 2119 line) go reworded with the same
 	// meaning, the billing line left out, which Google lets through and the
-	// model reads the same (gateway's antigravityCloak). Set with `magpie provider set antigravity
+	// model reads the same (gateway's antigravityCloak). Set with `eipgam provider set antigravity
 	// prompt=as-written`; prompt=default turns it back.
 	PromptAsWritten bool `json:"promptAsWritten,omitempty"`
 
@@ -389,18 +389,18 @@ type Provider struct {
 	// (#350).
 	AdditionalTools bool `json:"additionalTools,omitempty"`
 	// AdditionalToolsOff, `additional-tools=off`, sends a loaded tool in
-	// the top-level tools even where magpie's default would send the item.
+	// the top-level tools even where eipgam's default would send the item.
 	AdditionalToolsOff bool `json:"additionalToolsOff,omitempty"`
 
 	// PassErrors, `errors=pass`, is the user's word that the client, not
-	// magpie, deals with what the provider's errors say (ne9ko9 on
+	// eipgam, deals with what the provider's errors say (ne9ko9 on
 	// Discord): a request to it is asked once, its error goes to the
 	// agent as it came (its status, and its body as written where the
 	// agent's API is the provider's own, else in the agent's shape with
 	// the vendor's type, code and words), nothing about it is inferred
 	// (a prompt too long, a busy relay), it is not asked again in place
 	// or of a fallback or a group's next member, and none of its keys
-	// rests for it. Off, the default, magpie handles them. Only a provider
+	// rests for it. Off, the default, eipgam handles them. Only a provider
 	// of a key takes it (TakesPassErrors).
 	PassErrors bool `json:"passErrors,omitempty"`
 
@@ -410,40 +410,40 @@ type Provider struct {
 	// same-one retries are spent, as a group's Patience is (zoecats on
 	// Discord): 0 keeps it PatienceDefault, PatienceOff hands the agent
 	// the error at once, and it is at most PatienceLongest. Set with
-	// `magpie provider set <id> patience=`; a group it is in keeps the
+	// `eipgam provider set <id> patience=`; a group it is in keeps the
 	// group's own.
 	Patience int `json:"patience,omitempty"`
 
 	// Socket has a Responses API provider's turns go over the Responses
-	// WebSocket magpie speaks to chatgpt.com (#5781, matrix0487 on
+	// WebSocket eipgam speaks to chatgpt.com (#5781, matrix0487 on
 	// Discord): SocketAuto tries it and falls back to HTTP, and leaves the
 	// host to HTTP for a while once it refuses the handshake, as
 	// chatgpt.com is; SocketOn tries it every time and falls back without
 	// that; SocketOff is HTTP alone. "", the default, is auto on OpenAI's
 	// own API and HTTP alone elsewhere (SocketMode). Only a provider of a
-	// key with a Responses URL takes it (TakesSocket). Set with `magpie
+	// key with a Responses URL takes it (TakesSocket). Set with `eipgam
 	// provider set <id> socket=`.
 	Socket string `json:"socket,omitempty"`
 
 	// NativeCompaction has Codex's compaction_trigger go to the provider
 	// as Codex sent it, and the compaction the provider writes back go to
-	// Codex as it came (#1099), where magpie otherwise asks the model for
+	// Codex as it came (#1099), where eipgam otherwise asks the model for
 	// a summary and hands Codex that (its "magpie1:" compaction). Only a
 	// provider whose wire carries it takes it (CarriesCompaction): a
-	// Responses API (Sub2API, a remote magpie), a ChatGPT account, GitHub
+	// Responses API (Sub2API, a remote eipgam), a ChatGPT account, GitHub
 	// Copilot's GPT models. Such a compaction is sealed by the key or
 	// account that wrote it, so its conversation stays there, or is
 	// refused, never sent elsewhere to be dropped. Off, the default,
-	// keeps magpie's summary.
+	// keeps eipgam's summary.
 	NativeCompaction bool `json:"nativeCompaction,omitempty"`
 
-	// MagpieUserAgent has every request go to the vendor with magpie's own
-	// User-Agent (magpie/<version>). Off, the default, a key+URL provider is
+	// MagpieUserAgent has every request go to the vendor with eipgam's own
+	// User-Agent (eipgam/<version>). Off, the default, a key+URL provider is
 	// sent the User-Agent the agent gave (pi, opencode, Claude Code…) as it
 	// gave it (#1851, nb5p on Discord): a coding plan that serves only
-	// agents it names, or the user's own gateway behind magpie, knows them
-	// by it. One the agent didn't give, and magpie's own requests, go as
-	// magpie either way. A signed-in account, a plugin's and one that goes
+	// agents it names, or the user's own gateway behind eipgam, knows them
+	// by it. One the agent didn't give, and eipgam's own requests, go as
+	// eipgam either way. A signed-in account, a plugin's and one that goes
 	// as a client of its vendor's own keep the identity their signing
 	// gives (see PassesUserAgent). The opt-in "passUserAgent" it replaces
 	// is the default now, so a file that still says it reads the same.
@@ -480,14 +480,14 @@ type Provider struct {
 	// SkipsRedaction.
 	Unredacted bool `json:"unredacted,omitempty"`
 
-	// InsecureTLS has magpie take the certificate of the provider's own
+	// InsecureTLS has eipgam take the certificate of the provider's own
 	// HTTPS host as it is, unchecked (#2383, fangzhengjin: a vLLM on the
 	// LAN, Ollama behind a self-signed cert). Only a provider the user
 	// added takes it (TakesInsecureTLS), and only for the hosts of its own
 	// base URLs (UncheckedHosts); see Via.
 	InsecureTLS bool `json:"insecureTLS,omitempty"`
 
-	// HTTP1 has magpie speak HTTP/1.1 to the provider's own hosts, never
+	// HTTP1 has eipgam speak HTTP/1.1 to the provider's own hosts, never
 	// HTTP/2 (kepner_53726 on Discord: a company gateway whose HTTP/2
 	// connections broke mid-reply with "tls: bad record MAC" while
 	// HTTP/1.1 to it held). Only a provider the user added takes it
@@ -496,12 +496,12 @@ type Provider struct {
 	HTTP1 bool `json:"http1,omitempty"`
 
 	// ClientCert and ClientKey are the PEM files of a client certificate
-	// magpie shows the provider's own HTTPS hosts when they ask for one,
+	// eipgam shows the provider's own HTTPS hosts when they ask for one,
 	// and ServerCA a PEM CA their certificate may be signed by beside the
-	// system's roots (#5596, clxsh, and hhdaxia on X: Remote magpie to a
-	// magpie at home behind an Nginx that requires a client certificate,
-	// or one with `magpie mtls` on). Only a provider the user added, and
-	// Remote magpie, takes them (TakesClientCert), for the hosts of its
+	// system's roots (#5596, clxsh, and hhdaxia on X: Remote eipgam to a
+	// eipgam at home behind an Nginx that requires a client certificate,
+	// or one with `eipgam mtls` on). Only a provider the user added, and
+	// Remote eipgam, takes them (TakesClientCert), for the hosts of its
 	// own base URLs (UncheckedHosts), on every request made for it:
 	// models, the connection test, requests, quotas; see Via.
 	ClientCert string `json:"clientCert,omitempty"`
@@ -510,7 +510,7 @@ type Provider struct {
 
 	// ServerPin is the SHA-256 (lower-case hex) of the one server
 	// certificate its own HTTPS hosts are taken with, trusted as it is
-	// (Zhangzhangi on X: a magpie at home on a domain of its own with a
+	// (Zhangzhangi on X: a eipgam at home on a domain of its own with a
 	// self-signed certificate, which macOS calls not standards
 	// compliant): the certificate's chain, name and dates aren't checked
 	// there, and any other certificate is refused. "" checks them as
@@ -530,7 +530,7 @@ type Provider struct {
 	// no way to be told. See netproxy.WithResolve and CheckResolve.
 	Resolve map[string][]string `json:"resolve,omitempty"`
 
-	// Proxy is the proxy magpie's requests to this provider go through
+	// Proxy is the proxy eipgam's requests to this provider go through
 	// (#237: Codex through one, a vendor at home without): "" follows
 	// the global one (Settings' Proxy, the environment's, the system's),
 	// "direct" none, anything else the proxy's address (http://, https://,
@@ -583,7 +583,7 @@ type Provider struct {
 	// AccountNames is, for a subscription, the name the user gave each
 	// account they named (#1515: a team's seats told apart by who holds
 	// them, not by a masked email), by the account's name in lower case.
-	// It is magpie's own: the vendor's or plugin's sign-in never sees it
+	// It is eipgam's own: the vendor's or plugin's sign-in never sees it
 	// (see account_names.go).
 	AccountNames map[string]string `json:"accountNames,omitempty"`
 	// KeySpendCaps is, for a provider of API keys, how much each key the
@@ -593,7 +593,7 @@ type Provider struct {
 	KeySpendCaps map[string]SpendCap `json:"keySpendCaps,omitempty"`
 	// KeyOwnBalances is, for a provider of API keys whose vendor tells no
 	// balance, what the user typed is left on each key, by its KeyID: the
-	// key's card shows it less what magpie priced its calls at since
+	// key's card shows it less what eipgam priced its calls at since
 	// (see key_balance_own.go).
 	KeyOwnBalances map[string]OwnBalance `json:"keyOwnBalances,omitempty"`
 	// KeyPriceRates is, for a provider of API keys, the price rate of each
@@ -605,7 +605,7 @@ type Provider struct {
 	// BalanceURL, when set, is where the vendor tells what is left on a
 	// key, asked with the key the way a chat request carries it; BalancePath
 	// picks the amount out of the JSON reply (see balance.go). The vendors
-	// magpie knows need neither.
+	// eipgam knows need neither.
 	BalanceURL  string `json:"balanceURL,omitempty"`
 	BalancePath string `json:"balancePath,omitempty"`
 	// BalanceMethod is how BalanceURL is asked: "" (or GET), or POST with
@@ -697,7 +697,7 @@ type Provider struct {
 	Unlisted bool `json:"unlisted,omitempty"`
 	// HiddenDrawers are the provider's image models the user unticked in
 	// its editor (321sssrt on X: an OpenAI key lists a dozen): left out of
-	// every list one is picked from (Settings › Models › Images, another magpie's
+	// every list one is picked from (Settings › Models › Images, another eipgam's
 	// list, Aside's) and of Automatic's choice, as an unticked chat model
 	// is left out of the agents' lists. A deny list beside Models, not in
 	// it: Models is what agents chat with, empty meaning the vendor's list,
@@ -710,7 +710,7 @@ type Provider struct {
 	// HiddenDrawers are its image models (axelburks on Discord: a
 	// Volcengine Ark key lists a dozen Seedance models): left out of
 	// what lists video models to pick from (generate_video's, another
-	// magpie's, /v1/models' ?kind=video) and of Automatic's choice. A
+	// eipgam's, /v1/models' ?kind=video) and of Automatic's choice. A
 	// request that names one still makes its video.
 	HiddenVideomakers []string `json:"hiddenVideomakers,omitempty"`
 	// Off switches the provider off without removing it: its keys and
@@ -735,8 +735,8 @@ type Provider struct {
 	// fetch: Save drops it, so it never reaches providers.json.
 	IconURL string `json:"iconUrl,omitempty"`
 
-	// Hidden is set on an account the user removed from magpie; the
-	// agent stays signed in, magpie just leaves it alone.
+	// Hidden is set on an account the user removed from eipgam; the
+	// agent stays signed in, eipgam just leaves it alone.
 	Hidden bool `json:"hidden,omitempty"`
 	// Quiet is set on a removed account whose "Add it back" line the user
 	// dismissed: it is offered again only from the Add sheet (#116).
@@ -745,8 +745,8 @@ type Provider struct {
 	// it is listed there only behind "Show N hidden", or when searched
 	// for by name (#116).
 	Tucked bool `json:"tucked,omitempty"`
-	// Forgot is set on a removed account the user signed out of magpie
-	// while its agent stays signed in, which magpie never signs out
+	// Forgot is set on a removed account the user signed out of eipgam
+	// while its agent stays signed in, which eipgam never signs out
 	// (Claude Code): it is no longer listed among the removed, and stays
 	// hidden until it is added back by a new sign-in (ikunbots on X).
 	Forgot bool `json:"forgot,omitempty"`
@@ -766,11 +766,11 @@ type file struct {
 	// Searches are the web search APIs a model's search goes to when no
 	// provider can search (see search_api.go).
 	Searches []SearchAPI `json:"searches,omitempty"`
-	// NoAutoGroups: the user turned off the groups magpie finds on its
+	// NoAutoGroups: the user turned off the groups eipgam finds on its
 	// own (SetAutoGroups); the groups they made or changed stay.
 	NoAutoGroups bool `json:"noAutoGroups,omitempty"`
 	// AutoGroupSkip are the providers, by id, the user keeps out of the
-	// groups magpie finds (SetAutoGroupSkip; chenxiang0010 on Discord):
+	// groups eipgam finds (SetAutoGroupSkip; chenxiang0010 on Discord):
 	// their models are in none, so a model only one other provider serves
 	// is no group. The groups the user made or changed keep them.
 	AutoGroupSkip []string `json:"autoGroupSkip,omitempty"`
@@ -807,7 +807,7 @@ func load() file {
 // file changes: the gateway asked for one provider's proxy (storedPicks)
 // and whether it is left alone (leftAlone) for each request and each
 // background look, each a parse of the whole file, 3.6 GB of a live
-// magpie's 33 GB in 53 minutes. What it returns is shared: the caller
+// eipgam's 33 GB in 53 minutes. What it returns is shared: the caller
 // must not change it, nor a list or map in it.
 func storedFile() file {
 	f, err := filememo.Read("providers", Path(), parseProviders)
@@ -835,7 +835,7 @@ type unreadableError struct {
 }
 
 func (e *unreadableError) Error() string {
-	return fmt.Sprintf("%s can't be read (%v); magpie left it unchanged — fix it or move it aside", e.path, e.err)
+	return fmt.Sprintf("%s can't be read (%v); eipgam left it unchanged — fix it or move it aside", e.path, e.err)
 }
 
 func (e *unreadableError) Unwrap() []error { return []error{ErrUnreadable, e.err} }
@@ -967,13 +967,13 @@ func All() []Provider {
 // request holds, less the accounts discovery off leaves out. Find, a
 // model's price and a value resolved each copied every provider, every
 // account's keys and headers, to read one (~15 MB in 2 minutes of an
-// idle magpie with its window open).
+// idle eipgam with its window open).
 func sharedAll() []Provider {
 	held := heldOf("all", allProviders)
 	// asked once, from the settings a held look has read already: asked for
 	// each account, settings.json was parsed for every account of every
 	// model's price (agent.magpieModels, the GUI's drift every 15s and dsh's
-	// round every 30s), most of an idle magpie's CPU (xsw on Discord)
+	// round every 30s), most of an idle eipgam's CPU (xsw on Discord)
 	off := sync.OnceValue(func() bool { return settings.AccountDiscoveryOffIn(heldSettings()) })
 	for i, p := range held {
 		if p.Account != nil && off() && !p.publicAccount() {
@@ -1124,7 +1124,7 @@ func accountSettings(a, pk Provider) Provider {
 	a.NativeCompaction = pk.NativeCompaction
 	a.PromptAsWritten = pk.PromptAsWritten
 	// a deferred tool a tool search loaded goes where it was loaded, set
-	// with `magpie provider set <id> additional-tools=on` (#2660, #4738)
+	// with `eipgam provider set <id> additional-tools=on` (#2660, #4738)
 	a.AdditionalTools, a.AdditionalToolsOff = pk.AdditionalTools, pk.AdditionalToolsOff
 	// Send requests unmasked, the user's for a subscription and a
 	// plugin's provider too (isee1_1 on Discord)
@@ -1157,7 +1157,7 @@ func accountSettings(a, pk Provider) Provider {
 	// keeps them for the account like the rest of these
 	a.RateWindows = pk.RateWindows
 	// the extra body fields written for it, which a ChatGPT account's
-	// requests take (WithExtraBody, magpie-releases#18)
+	// requests take (WithExtraBody, eipgam-releases#18)
 	a.ExtraBody = pk.ExtraBody
 	// the image models unticked in its editor (HiddenDrawers)
 	a.HiddenDrawers = pk.HiddenDrawers
@@ -1169,7 +1169,7 @@ func accountSettings(a, pk Provider) Provider {
 	return a
 }
 
-// Hidden lists the signed-in accounts the user removed from magpie. The
+// Hidden lists the signed-in accounts the user removed from eipgam. The
 // file is read once, as parsed until it changes: a parse of it for each
 // account was 68 MB of the Providers page's 1.4 GB in twenty loads.
 func Hidden() []Provider {
@@ -1215,11 +1215,11 @@ func findIn(all []Provider, id string) (*Provider, error) {
 	if p := lookIn(all, id); p != nil {
 		return p, nil
 	}
-	return nil, fmt.Errorf("no provider %q — magpie providers lists them%s", id, readElsewhere())
+	return nil, fmt.Errorf("no provider %q — eipgam providers lists them%s", id, readElsewhere())
 }
 
 // lookIn is findIn without its error, which looks on disk for where else
-// this magpie's files may be (readElsewhere): a request's model not found
+// this eipgam's files may be (readElsewhere): a request's model not found
 // among the providers asked it twice, for nothing (#3394).
 func lookIn(all []Provider, id string) *Provider {
 	q := strings.ToLower(strings.TrimSpace(id))
@@ -1241,16 +1241,16 @@ func lookIn(all []Provider, id string) *Provider {
 	return nil
 }
 
-// readElsewhere says, for a provider not found, that this magpie reads its
+// readElsewhere says, for a provider not found, that this eipgam reads its
 // files from another folder than the app's when XDG_CONFIG_HOME moves them
-// and the app's has some (蒙面人 on Discord: a terminal's magpie had no
+// and the app's has some (蒙面人 on Discord: a terminal's eipgam had no
 // Antigravity, which the window showed signed in).
 func readElsewhere() string {
 	def := appdir.Redirected()
 	if def == "" || !isFile(filepath.Join(def, "providers.json")) && !isFile(filepath.Join(def, "logins.json")) {
 		return ""
 	}
-	return fmt.Sprintf("\n  this magpie reads its files from %s, as XDG_CONFIG_HOME says; the app opened from the Dock or Start menu keeps them in %s. Run it with XDG_CONFIG_HOME unset (env -u XDG_CONFIG_HOME magpie …) to use those", appdir.Config(), def)
+	return fmt.Sprintf("\n  this eipgam reads its files from %s, as XDG_CONFIG_HOME says; the app opened from the Dock or Start menu keeps them in %s. Run it with XDG_CONFIG_HOME unset (env -u XDG_CONFIG_HOME eipgam …) to use those", appdir.Config(), def)
 }
 
 var idRe = lazyre.New(`[^a-z0-9]+`)
@@ -1287,8 +1287,8 @@ func Save(p Provider) error {
 	if p.ID == "" || p.ID != Slug(p.ID) && !stored(p.ID) {
 		return fmt.Errorf("provider id must be lowercase letters, digits and dashes, not %q", p.ID)
 	}
-	if p.ID == "magpie" {
-		return errors.New(`"magpie" is what agents call the gateway itself; pick another id`)
+	if p.ID == "eipgam" {
+		return errors.New(`"eipgam" is what agents call the gateway itself; pick another id`)
 	}
 	if p.ID == strings.TrimSuffix(GroupPrefix, "/") {
 		return errors.New(`"group" starts the ids of routing groups; pick another id`)
@@ -1353,12 +1353,12 @@ func Save(p Provider) error {
 				return fmt.Errorf("%s: %q isn't a certificate's SHA-256 fingerprint (64 hex digits)", p.ID, v)
 			}
 			if !p.TakesServerPin() {
-				return fmt.Errorf("%s: a trusted server certificate is only for an https:// address of your own: a provider you added with a base URL of its own, Remote magpie, or a preset you pointed at your own server", p.ID)
+				return fmt.Errorf("%s: a trusted server certificate is only for an https:// address of your own: a provider you added with a base URL of its own, Remote eipgam, or a preset you pointed at your own server", p.ID)
 			}
 		}
 		if p.ClientCert != "" || p.ClientKey != "" || p.ServerCA != "" {
 			if !p.TakesClientCert() {
-				return fmt.Errorf("%s: a client certificate or server CA is only for a provider you added with a base URL of its own, or Remote magpie", p.ID)
+				return fmt.Errorf("%s: a client certificate or server CA is only for a provider you added with a base URL of its own, or Remote eipgam", p.ID)
 			}
 			for _, f := range []*string{&p.ClientCert, &p.ClientKey, &p.ServerCA} {
 				v, err := CertPath(*f)
@@ -1533,7 +1533,7 @@ func add(p Provider, once bool) (string, error) {
 	// for is taken (AddCopy).
 	for _, h := range All() {
 		if once && h.Account == nil && sameProvider(h, normalize(p)) && servesAll(h, normalize(p)) {
-			return "", fmt.Errorf("%s is already added with that key (%s); magpie provider key %s <key> changes its key", h.Name, h.ID, h.ID)
+			return "", fmt.Errorf("%s is already added with that key (%s); eipgam provider key %s <key> changes its key", h.Name, h.ID, h.ID)
 		}
 	}
 	p.ID, p.Name = freeID(p.ID), freeName(p.Name)
@@ -1663,7 +1663,7 @@ func freeName(name string) string {
 	}
 }
 
-// accountIDs are the ids of the subscriptions magpie can list (account.go).
+// accountIDs are the ids of the subscriptions eipgam can list (account.go).
 var accountIDs = []string{"antigravity", "claude", "codex", CommandCodePlanID, "copilot", "cursor", "devin", "factory", "gemini", "grok", "kiro", MiMoID, ChatGPTAPIID, "qoder", QoderCNID, "workbuddy", WorkBuddyAIID, "zcode", "zed"}
 
 func stored(id string) bool {
@@ -1703,7 +1703,7 @@ func tuckedAccount(id string) bool {
 }
 
 // TuckAccount hides a removed account from the Add sheet's "Removed from
-// magpie" too (on), or lists it there again (off). Tucked, it is quiet as
+// eipgam" too (on), or lists it there again (off). Tucked, it is quiet as
 // well: no reminder line either (#116).
 func TuckAccount(id string, on bool) error {
 	f, err := read()
@@ -1738,7 +1738,7 @@ func QuietAccount(id string) error {
 	return nil
 }
 
-// forgetKeptAccount marks a removed account signed out of magpie while its
+// forgetKeptAccount marks a removed account signed out of eipgam while its
 // agent's own sign-in stays: Excluded leaves it out.
 func forgetKeptAccount(id string) error {
 	f, err := read()
@@ -1755,7 +1755,7 @@ func forgetKeptAccount(id string) error {
 }
 
 // ShowAccount brings back the signed-in account of an agent the user had
-// removed from magpie.
+// removed from eipgam.
 func ShowAccount(id string) error {
 	f, err := read()
 	if err != nil {
@@ -1771,7 +1771,7 @@ func ShowAccount(id string) error {
 }
 
 // Delete removes a provider. An account, a built-in's or a plugin's, is
-// only hidden from magpie (its accounts and model picks kept, shown again
+// only hidden from eipgam (its accounts and model picks kept, shown again
 // from Hidden or by signing in); signing out is each account's Remove.
 func Delete(id string) error {
 	f, err := read()
@@ -2031,7 +2031,7 @@ func normalize(p Provider) Provider {
 			p.KeysURL = cmp.Or(r.KeysURL, p.KeysURL)
 			p.Website = cmp.Or(r.Website, p.Website)
 			// the catalog follows the region unless the user gave one
-			// of their own: the preset's or a region's is magpie's
+			// of their own: the preset's or a region's is eipgam's
 			if slices.ContainsFunc(pr.Regions, func(x Region) bool { return x.Catalog != "" }) &&
 				(p.Catalog == pr.Catalog || slices.ContainsFunc(pr.Regions, func(x Region) bool { return x.Catalog == p.Catalog })) {
 				p.Catalog = cmp.Or(r.Catalog, pr.Catalog)
@@ -2076,7 +2076,7 @@ func cleanHeaders(h map[string]string) map[string]string {
 
 // userIDHeader is h with a header named by digits alone and no value
 // read as the new-api user id it is, New-Api-User: the user id typed in
-// a header's name box, where magpie's old hint asked for a header
+// a header's name box, where eipgam's old hint asked for a header
 // (zxc56823 on Discord, "272298" with its value left empty). Sent as it
 // was, the relay is told a header it never reads and still no user. One
 // with a New-Api-User of its own already has it; the digits are dropped.
@@ -2578,12 +2578,12 @@ func (p Provider) Ready() bool {
 
 // On is whether the provider takes requests: ready, not switched off,
 // not kept to its agent's own sign-in (KeptToAgent) and not a Remote
-// magpie that is this magpie (SelfLeftOut).
+// eipgam that is this eipgam (SelfLeftOut).
 func (p Provider) On() bool { return p.Ready() && !p.Off && !p.KeptToAgent() && !p.SelfLeftOut() }
 
 // KeptToAgent is whether the provider is Claude's subscription with
 // SwitchOnly on: its accounts are Claude Code's own sign-in alone, which
-// magpie moves to the next account with room and back, and the gateway
+// eipgam moves to the next account with room and back, and the gateway
 // sends no request to them, so none goes through Claude Code's SDK run,
 // which spends more of the allowance than Claude Code's own sessions
 // (myduso on Discord). Codex's SwitchOnly only keeps failover out of its
@@ -2603,9 +2603,9 @@ func SetOff(id string, off bool) error {
 	return Save(*p)
 }
 
-// SwitchedOff is the provider switched off in magpie that a model id
+// SwitchedOff is the provider switched off in eipgam that a model id
 // names: as "provider/model", or a model only switched-off providers list.
-// A request for it is refused as that, not as a model magpie doesn't know.
+// A request for it is refused as that, not as a model eipgam doesn't know.
 func SwitchedOff(id string) (Provider, bool) {
 	id = strings.TrimSuffix(strings.TrimSpace(id), "[1m]")
 	if pid, _, ok := strings.Cut(id, "/"); ok {

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // x-codex-turn-state is the ChatGPT backend's routing of a turn: the first
@@ -14,11 +14,11 @@ import (
 // of that turn (each tool call's result), which the backend then serves
 // as the same turn. Sent without it, each request of the turn was a new
 // one there, admitted again (legeling567 on X: 529s, "high load", on Astra
-// with three Pro accounts in magpie, none with Codex's own sign-in).
+// with three Pro accounts in eipgam, none with Codex's own sign-in).
 //
 // Through the pool Codex never hears the state (the reply is the pool's),
 // and on its socket it continues a turn by previous_response_id with no
-// state at all, so magpie keeps it: the state the account's reply said
+// state at all, so eipgam keeps it: the state the account's reply said
 // for a turn (client_metadata's thread and turn_id) goes with that turn's
 // later requests to that account. The state is one account's: another
 // account gets the turn without it, as a new turn there. A state Codex

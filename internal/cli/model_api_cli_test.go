@@ -9,9 +9,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // apiHome is groupsHome with a relay whose one key serves its models on
@@ -29,7 +29,7 @@ func apiHome(t *testing.T, chat, anthropic string) {
 	}
 }
 
-// magpie model api sets the API a model is asked on, as the provider
+// eipgam model api sets the API a model is asked on, as the provider
 // editor's picker does, for several models at once (yew_fence_931206 on
 // Discord: a script setting each model of one key's relay); apis lists
 // them, and --reset or auto takes them off. --help prints the usage, and a
@@ -94,7 +94,7 @@ func TestModelAPICmd(t *testing.T) {
 		{"model", "api", "-h"},
 		{"model", "apis", "--help"},
 	} {
-		if out, err := runOut(t, help...); err != nil || !strings.Contains(out, "magpie model api <provider/model>... <api>") {
+		if out, err := runOut(t, help...); err != nil || !strings.Contains(out, "eipgam model api <provider/model>... <api>") {
 			t.Errorf("%v: %q %v", help, out, err)
 		}
 	}

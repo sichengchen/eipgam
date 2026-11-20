@@ -5,7 +5,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The main window's pin keeps it above other apps' windows, for Usage or
@@ -16,7 +16,7 @@ import (
 // on the one showing.
 
 // onTopper is a host whose main window can stay on top; a browser's page
-// (magpie web) has no window of its own to pin.
+// (eipgam web) has no window of its own to pin.
 type onTopper interface {
 	// SetOnTop puts the main window above other windows, or back among
 	// them.
@@ -34,7 +34,7 @@ func canOnTop(goos string, getenv func(string) string) bool {
 var errNoOnTop = errors.New("this window can't stay on top here")
 
 // pinnable says whether w's main window can be pinned: the app's host
-// (not a browser's page, magpie web's or the app's served to a browser) on
+// (not a browser's page, eipgam web's or the app's served to a browser) on
 // a desktop that can keep a window on top.
 func pinnable(w Windows) bool {
 	_, ok := w.(onTopper)

@@ -9,15 +9,15 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Most agents can't ask the gateway which models it has: magpie writes the
+// Most agents can't ask the gateway which models it has: eipgam writes the
 // catalog into a file of the agent's own (Pi's models.json, OpenCode's
 // provider block, Codex's model catalog …) when a model is picked through
-// magpie. That list was the catalog as it was then, so a provider added
+// eipgam. That list was the catalog as it was then, so a provider added
 // later never reached the agent, and one removed stayed listed. SyncCatalog
 // rewrites each such list whenever the catalog may have changed.
 
@@ -26,11 +26,11 @@ var syncing struct {
 	running, again bool
 }
 
-// SyncCatalog brings every model list magpie wrote into an agent's files up
+// SyncCatalog brings every model list eipgam wrote into an agent's files up
 // to the catalog as it is now. It is what catalog.Changed is set to, so a
 // provider saved or removed, or a vendor's list fetched anew, reaches the
 // agents; one already running asks for another round rather than waiting.
-// Errors are left for the picker: a file magpie can't write now is one the
+// Errors are left for the picker: a file eipgam can't write now is one the
 // next change, or a pick, writes.
 func SyncCatalog() {
 	syncing.Lock()
@@ -43,7 +43,7 @@ func SyncCatalog() {
 	syncing.Unlock()
 	for {
 		// the catalog built once for every agent's lists, not for each
-		// look-up of each (thousands at magpie's start, with 30 providers)
+		// look-up of each (thousands at eipgam's start, with 30 providers)
 		ConnectCodexTwins()
 		release := provider.Hold()
 		// and each agent's files looked at once a round, not each time
@@ -52,12 +52,12 @@ func SyncCatalog() {
 		unhold := filememo.Hold()
 		renaming := setToFoundGroups()
 		for _, a := range All() {
-			// a provider named magpie written by hand is the user's, its
+			// a provider named eipgam written by hand is the user's, its
 			// model list too (handWired)
 			if a.Sync != nil && !a.handWired() && (!a.ListOnly || a.Wired()) {
 				_ = synced(a.Sync)
 			}
-			// a field magpie set to a found group's id before (autoref.go)
+			// a field eipgam set to a found group's id before (autoref.go)
 			if renaming[a.ID] {
 				a.renameFoundGroups()
 			}
@@ -136,12 +136,12 @@ func syncJSON(path, key string, value func() any) error {
 	return edit.SetJSON(path, edit.KV{Path: key, Value: v})
 }
 
-// theirsKept is value, magpie's provider block for the agent, with what
-// else the block at key of the JSON file holds kept: a key magpie doesn't
+// theirsKept is value, eipgam's provider block for the agent, with what
+// else the block at key of the JSON file holds kept: a key eipgam doesn't
 // write there, at any depth, is the user's or another tool's (Pi's
-// providers.magpie.compat.sendSessionAffinityHeaders, which
+// providers.eipgam.compat.sendSessionAffinityHeaders, which
 // pi-cache-optimizer adds, #1103) and stays. The keys named in whole (the
-// model list) are magpie's alone, so a model gone from the catalog leaves
+// model list) are eipgam's alone, so a model gone from the catalog leaves
 // the agent's list.
 func theirsKept(path, key string, value func() any, whole ...string) func() any {
 	return func() any {
@@ -188,7 +188,7 @@ func mergeTheirs(have, want map[string]json.RawMessage, whole []string) map[stri
 
 // syncJSONInOrder is syncJSON for a block whose keys' order the agent reads
 // (OpenCode lists a model's variants in theirs): one that says the same in
-// another order is rewritten too, as an older magpie wrote the variants
+// another order is rewritten too, as an older eipgam wrote the variants
 // alphabetically (#713).
 func syncJSONInOrder(path, key string, value func() any) error {
 	cur, ok := edit.GetJSON(path, key)

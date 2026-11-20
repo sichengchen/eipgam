@@ -91,7 +91,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, web));
-        await page.goto("http://magpie.test/?view=groups");
+        await page.goto("http://eipgam.test/?view=groups");
         await page.locator(".rt-group").nth(2).waitFor();
         const memLine = await page.locator(".rt-group[data-id=g1] .mem").first().textContent();
         assert(memLine.includes("WorkBuddy AI · Hy3"), `the reporter's member line: ${memLine}`);

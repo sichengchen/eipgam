@@ -12,15 +12,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/ghtoken"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/middleware"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/ghtoken"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/middleware"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // OpenCode's provider plugins (internal/plugin): the providers they sign
@@ -29,7 +29,7 @@ import (
 
 // pluginSubJSON is a plugin's provider as the add sheet lists it.
 type pluginSubJSON struct {
-	ID       string          `json:"id"`  // magpie's
+	ID       string          `json:"id"`  // eipgam's
 	PID      string          `json:"pid"` // OpenCode's, which the plugin knows it by
 	Name     string          `json:"name"`
 	Icon     string          `json:"icon"`
@@ -129,7 +129,7 @@ type pluginEntryJSON struct {
 	// the row's "Serves" chip names after Moved's (#3902): only when the
 	// two come to two or more, as one provider alone is the row's title
 	Serves []string `json:"serves,omitempty"`
-	// AutoUpdated is the update magpie made to it by itself lately
+	// AutoUpdated is the update eipgam made to it by itself lately
 	AutoUpdated *plugin.Updated `json:"autoUpdated,omitempty"`
 	// Middleware is the gateway middleware it has, run in the gateway
 	// rather than the host: its hooks, how often they ran and how long
@@ -152,29 +152,29 @@ type pluginEntryJSON struct {
 	MiddlewareOnly bool `json:"middlewareOnly,omitempty"`
 	// Agent is the agent it adds (internal/agentplug), or why it isn't
 	// listed; IsAgent is whether its package has one, said of one switched
-	// off too; InMagpieOnly is whether all it has runs in magpie itself,
+	// off too; InMagpieOnly is whether all it has runs in eipgam itself,
 	// middleware and an agent, no provider to sign in to
 	Agent        *pluginAgentJSON `json:"agent,omitempty"`
 	IsAgent      bool             `json:"isAgent,omitempty"`
 	InMagpieOnly bool             `json:"inMagpieOnly,omitempty"`
-	// Page is the page it adds to the window (magpie.page), said of one
+	// Page is the page it adds to the window (eipgam.page), said of one
 	// switched off too: what the row shows before it is turned on, with
-	// what the page may read of magpie's
+	// what the page may read of eipgam's
 	Page *pluginPageInfoJSON `json:"page,omitempty"`
-	// Panels are the panels it adds to magpie's own pages
-	// (magpie.panels), said of one switched off too, and PanelReads what
-	// they may read of magpie's
+	// Panels are the panels it adds to eipgam's own pages
+	// (eipgam.panels), said of one switched off too, and PanelReads what
+	// they may read of eipgam's
 	Panels     []pluginPanelInfoJSON `json:"panels,omitempty"`
 	PanelReads []string              `json:"panelReads,omitempty"`
-	// Actions are the items its page adds to magpie's menus
-	// (magpie.actions), said of one switched off too
+	// Actions are the items its page adds to eipgam's menus
+	// (eipgam.actions), said of one switched off too
 	Actions []pluginActionInfoJSON `json:"actions,omitempty"`
 	// Clashes are the providers it signs in to that another plugin signs
 	// in to as well (a plugin of the user's own beside a third party's):
 	// the host runs one plugin for each, and the row says which, with a
 	// way to pick this one
 	Clashes []pluginClashJSON `json:"clashes,omitempty"`
-	// Tools are the tools it gives, which magpie's plugin tools MCP server
+	// Tools are the tools it gives, which eipgam's plugin tools MCP server
 	// offers every agent under MCP's name: with their descriptions while
 	// the host runs, by name alone from what it noted last when it doesn't
 	Tools []pluginToolJSON `json:"tools,omitempty"`
@@ -216,7 +216,7 @@ type pluginClashJSON struct {
 	Name string `json:"name"` // the provider's, as the plugin serving it names it
 }
 
-// autoUpdatedFor is how long a plugin's row says magpie updated it.
+// autoUpdatedFor is how long a plugin's row says eipgam updated it.
 const autoUpdatedFor = 3 * 24 * time.Hour
 
 type pluginsJSON struct {
@@ -224,8 +224,8 @@ type pluginsJSON struct {
 	Bun     bool              `json:"bun"` // Bun is here; adding the first plugin downloads it otherwise
 	BunVer  string            `json:"bunVersion"`
 	Error   string            `json:"error,omitempty"` // the plugins couldn't be asked
-	// Picker is whether this magpie can show the system's folder picker:
-	// `magpie web` has none, and the page then offers no button for it
+	// Picker is whether this eipgam can show the system's folder picker:
+	// `eipgam web` has none, and the page then offers no button for it
 	Picker bool `json:"picker"`
 	// Movable are the built-ins with accounts a plugin could run, which
 	// its card and its row offer to move
@@ -234,7 +234,7 @@ type pluginsJSON struct {
 	// answers asked of, and where it came from (plugin.Registry)
 	Registry plugin.RegistryInUse `json:"registry"`
 	// Leftovers are plugins/'s dependencies no plugin is installed as (a
-	// failed install's, from before magpie took them out), each with a
+	// failed install's, from before eipgam took them out), each with a
 	// Remove: Bun installs every one again at every install
 	Leftovers []plugin.Leftover `json:"leftovers"`
 }
@@ -457,7 +457,7 @@ func npmNames(es []plugin.Entry) []string {
 	return out
 }
 
-// pluginListings are the plugins magpie suggests, each with what npm said
+// pluginListings are the plugins eipgam suggests, each with what npm said
 // of it last (asking npm again is /api/plugins/npm's), so Discover is drawn
 // without waiting on npm.
 func pluginListings(ctx context.Context) []pluginListingJSON {
@@ -543,7 +543,7 @@ func npmIcons(ns []*plugin.NPM, wait time.Duration) {
 	}
 }
 
-// pluginMarketJSON is the plugin market: the plugins magpie suggests, what npm
+// pluginMarketJSON is the plugin market: the plugins eipgam suggests, what npm
 // says of each, and those added.
 type pluginMarketJSON struct {
 	Listings []pluginListingJSON `json:"listings"`
@@ -725,7 +725,7 @@ func pluginRoutes(mux *http.ServeMux, w Windows) {
 		c := plugin.CheckNow(ctx)
 		writeJSON(rw, map[string]any{"at": c.At, "plugins": c.Plugins, "state": pluginsState(ctx, w)})
 	})
-	// the npm registry set in magpie, "" for none of its own: an address
+	// the npm registry set in eipgam, "" for none of its own: an address
 	// that isn't an http(s) one is refused, not kept
 	mux.HandleFunc("POST /api/plugins/registry", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ URL string }
@@ -754,7 +754,7 @@ func pluginRoutes(mux *http.ServeMux, w Windows) {
 		}
 		// a first plugin downloads Bun, and npm installs it. It goes on
 		// though the page's connection goes: a proxy or tunnel in front of
-		// magpie web gives up first (Cloudflare after 100 seconds, #2032),
+		// eipgam web gives up first (Cloudflare after 100 seconds, #2032),
 		// and bun stopped halfway leaves plugins/ half-written
 		ctx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), 5*time.Minute)
 		defer cancel()
@@ -893,7 +893,7 @@ type pluginAgentJSON struct {
 	Name  string `json:"name,omitempty"`
 	Icon  string `json:"icon,omitempty"`
 	Error string `json:"error,omitempty"`
-	// Missing is an agent magpie doesn't find on this computer, so Agents
+	// Missing is an agent eipgam doesn't find on this computer, so Agents
 	// has no row for it (zzZ: Kimi's plugin installed and no Kimi there);
 	// Looks is where it looks, and Notice the plugin's own word on what
 	// the agent needs first
@@ -925,7 +925,7 @@ func pluginAgentOf(spec string, errs map[string]string) *pluginAgentJSON {
 
 // taggedWhyKind is what kind of failure keeps GitHub's list from being
 // whole: "slow" when GitHub didn't answer in time, "limited" when it
-// turned magpie away for its rate limit, "" for anything else (the page
+// turned eipgam away for its rate limit, "" for anything else (the page
 // shows that error as it is).
 func taggedWhyKind(err error) string {
 	var lim ghtoken.Limited

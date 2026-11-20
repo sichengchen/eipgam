@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // linkaww on Discord (11-06): Usage › Context put Claude Code's cache at
@@ -50,10 +50,10 @@ func TestTuneKeepsWhatItPutIn(t *testing.T) {
 			t.Fatalf("%s: kept %+v; want the cache and the window", name, got)
 		}
 		if c := got[0]; c.Knob != agent.TuneCache || c.Setting.Value != "1h" || !c.Setting.Ours || c.TTL != nil {
-			t.Errorf("%s: cache row %+v; want cache_ttl at 1h, magpie's", name, c)
+			t.Errorf("%s: cache row %+v; want cache_ttl at 1h, eipgam's", name, c)
 		}
 		if w := got[1]; w.Knob != agent.TuneCompact || w.Model != "claude-opus-4-5" || w.Setting.Value != "300000" || !w.Setting.Ours {
-			t.Errorf("%s: window row %+v; want claude-opus-4-5's 300000, magpie's", name, w)
+			t.Errorf("%s: window row %+v; want claude-opus-4-5's 300000, eipgam's", name, w)
 		}
 	}
 	// with enough calls the cache has its advice, and no second row
@@ -85,7 +85,7 @@ func TestTuneKeepsWhatItPutIn(t *testing.T) {
 }
 
 // linkaww on Discord (11-06), again: Claude Code here, through a Remote
-// magpie, with too few calls read on this computer, and "这里什么都没有".
+// eipgam, with too few calls read on this computer, and "这里什么都没有".
 // The cache this computer's Claude Code keeps is on the card whoever set
 // it, with no calls at all: the user's own 1h too, which Use 5 min puts
 // at 5m and Undo puts back. No Claude Code folder here, no card.
@@ -117,7 +117,7 @@ func TestTuneTellsTheCacheHere(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := rows(); len(got) != 1 || got[0].Setting.Value != "5m" || !got[0].Setting.Ours {
-		t.Fatalf("after 5m: rows %+v; want 5m, magpie's", got)
+		t.Fatalf("after 5m: rows %+v; want 5m, eipgam's", got)
 	}
 	if err := agent.TuneUndo(home, "claude", agent.TuneCache, ""); err != nil {
 		t.Fatal(err)

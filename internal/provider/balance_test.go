@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 func TestBalanceReaders(t *testing.T) {
@@ -169,7 +169,7 @@ func TestBalanceSourceByHost(t *testing.T) {
 		"http://localhost:11434/v1":              "",
 		"https://relay.example.com/v1":           "",
 		"https://api.moonshot.ai.evil/":          "",
-		// the vendors' mainland China sites, which magpie leaves out, are
+		// the vendors' mainland China sites, which eipgam leaves out, are
 		// asked nothing
 		"https://api.moonshot.cn/v1":           "",
 		"https://api.siliconflow.cn/v1":        "",
@@ -276,7 +276,7 @@ func TestNamedBalanceWithAccessToken(t *testing.T) {
 }
 
 // zxc56823 on Discord typed their new-api user id into a header's name
-// box, value left empty, after magpie asked for "New-Api-User = your user
+// box, value left empty, after eipgam asked for "New-Api-User = your user
 // ID" in Headers. A relay answering as new-api v0.9's authHelper does (no
 // New-Api-User: 401 未提供) is asked with the digits as New-Api-User, on
 // the editor's check (the form's headers as they are) and once saved
@@ -533,7 +533,7 @@ func TestBalanceURLNamesTheKey(t *testing.T) {
 
 // A known balance query read with its field left empty (#881): new-api's
 // for a key and for the account, OpenAI's old credit grants, a sub2api
-// panel's profile and its query for a key; a query magpie doesn't know
+// panel's profile and its query for a key; a query eipgam doesn't know
 // still asks for the field.
 func TestKnownBalanceFieldLeftEmpty(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

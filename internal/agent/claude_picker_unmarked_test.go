@@ -7,15 +7,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // cjyrainbow (#2046): a WSL Claude Code's settings.json held a modelPicker
-// magpie had written, but stash.json had no claude@wsl:Ubuntu.model_picker
+// eipgam had written, but stash.json had no claude@wsl:Ubuntu.model_picker
 // mark for it, so writePicker took it for the user's and never touched it
-// again: a model added in magpie since was in the gateway's /v1/models and
-// not in /model. A picker whose every row is magpie's ("… · via magpie") is
+// again: a model added in eipgam since was in the gateway's /v1/models and
+// not in /model. A picker whose every row is eipgam's ("… · via eipgam") is
 // kept up to date though its mark is gone; one the user wrote stays as it is.
 func TestClaudePickerMagpieWroteIsKeptUpToDateWithoutItsMark(t *testing.T) {
 	home := t.TempDir()
@@ -64,7 +64,7 @@ func TestClaudePickerMagpieWroteIsKeptUpToDateWithoutItsMark(t *testing.T) {
 				t.Fatalf("picker after connecting: %v", listed())
 			}
 
-			// the reporter's state: the picker magpie wrote, its mark gone
+			// the reporter's state: the picker eipgam wrote, its mark gone
 			forget(c.mark)
 			if err := provider.Save(provider.Provider{ID: "cpa", Name: "CPA", Chat: "http://127.0.0.1:1/v1", Key: "k", Models: []string{"gpt-6-luna", "claude-sonnet-4-6", "gpt-6.1-sol"}}); err != nil {
 				t.Fatal(err)
@@ -73,10 +73,10 @@ func TestClaudePickerMagpieWroteIsKeptUpToDateWithoutItsMark(t *testing.T) {
 				t.Fatal(err)
 			}
 			if !slices.Contains(listed(), "cpa/gpt-6.1-sol") {
-				t.Fatalf("a model added in magpie isn't in /model: %v\n%s", listed(), readFile(path))
+				t.Fatalf("a model added in eipgam isn't in /model: %v\n%s", listed(), readFile(path))
 			}
 			if stashLoad()[c.mark] == "" {
-				t.Fatalf("the picker magpie keeps up to date has no %s mark", c.mark)
+				t.Fatalf("the picker eipgam keeps up to date has no %s mark", c.mark)
 			}
 
 			// a picker the user wrote stays theirs

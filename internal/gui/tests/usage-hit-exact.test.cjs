@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", serve(lang));
-          await p.goto("http://magpie.test/?view=usage&tab=requests");
+          await p.goto("http://eipgam.test/?view=usage&tab=requests");
           const say = (s, v) => p.evaluate(([s, v]) => t(s, v), [s, v]);
           const num = (n) => p.evaluate((n) => ledNum(n), n);
           const tip = async (read, prompt, pct) => say(TIP, { a: await num(read), b: await num(prompt), p: pct });

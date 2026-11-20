@@ -12,7 +12,7 @@ import (
 // gone away, an autofs path whose server is down) holds every stat and
 // open in it until the mount comes back, which can be never. Looking a
 // command up walks PATH in order, so a command not found before such a
-// folder blocked whoever asked: magpie's start-up asks for every agent's
+// folder blocked whoever asked: eipgam's start-up asks for every agent's
 // command (agent.RenameLegacy → vscodePortableData → code-insiders), and
 // `open -a` took over a minute to start while the same binary run from a
 // shell, with another PATH, took one second (ifccod7391564 on X). A PATH

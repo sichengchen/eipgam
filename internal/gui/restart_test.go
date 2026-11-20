@@ -18,10 +18,10 @@ type quitSays struct {
 func (q quitSays) Quit() { q.quit <- struct{}{} }
 
 // TestRestartStartsMagpieAgain (yansheng1003 on X: "请在刷新旁边增加一个重启
-// 按钮"): Settings' Restart starts this magpie again with no update
+// 按钮"): Settings' Restart starts this eipgam again with no update
 // waiting, as it is, back on the tab the window was on, and the app quits
 // for it. A relaunch that can't be arranged leaves it running and says so.
-// magpie web runs again in its own place; a browser on the app's page
+// eipgam web runs again in its own place; a browser on the app's page
 // restarts the app.
 func TestRestartStartsMagpieAgain(t *testing.T) {
 	sandboxHome(t)
@@ -31,7 +31,7 @@ func TestRestartStartsMagpieAgain(t *testing.T) {
 		webReexec.Store(false)
 	})
 	bundleOf = func() string { return "" }
-	executable = func() (string, error) { return "/opt/magpie/magpie", nil }
+	executable = func() (string, error) { return "/opt/eipgam/eipgam", nil }
 	handsOver = func() bool { return false } // Windows': opened once this one has exited
 	if s := updates.json().State; s == "ready" {
 		t.Fatalf("an update is staged in the test: %q", s)
@@ -67,7 +67,7 @@ func TestRestartStartsMagpieAgain(t *testing.T) {
 	if rec := post(app, `{"view":"settings"}`); rec.Code != http.StatusNoContent {
 		t.Fatalf("restart: %d %s", rec.Code, rec.Body)
 	}
-	if len(got) != 1 || got[0] != (relaunch{"/opt/magpie/magpie", "", "settings", true}) {
+	if len(got) != 1 || got[0] != (relaunch{"/opt/eipgam/eipgam", "", "settings", true}) {
 		t.Fatalf("relaunched %+v, want this binary again on Settings", got)
 	}
 	if !quits(app) {
@@ -96,23 +96,23 @@ func TestRestartStartsMagpieAgain(t *testing.T) {
 		t.Fatal("the app didn't quit for a browser's restart")
 	}
 
-	// magpie web: run again in its place, nothing relaunched
+	// eipgam web: run again in its place, nothing relaunched
 	got = nil
 	quit := make(chan struct{}, 1)
 	if rec := post(webHost{quit: func() { quit <- struct{}{} }}, `{}`); rec.Code != http.StatusNoContent {
-		t.Fatalf("magpie web: %d %s", rec.Code, rec.Body)
+		t.Fatalf("eipgam web: %d %s", rec.Code, rec.Body)
 	}
 	if len(got) != 0 || !webReexec.Load() {
-		t.Fatalf("magpie web relaunched %+v, re-exec %v", got, webReexec.Load())
+		t.Fatalf("eipgam web relaunched %+v, re-exec %v", got, webReexec.Load())
 	}
 	select {
 	case <-quit:
 	case <-time.After(2 * time.Second):
-		t.Fatal("magpie web didn't end for its re-exec")
+		t.Fatal("eipgam web didn't end for its re-exec")
 	}
 }
 
-// TestUpdateSaysItsRun: a page that restarted magpie with no update
+// TestUpdateSaysItsRun: a page that restarted eipgam with no update
 // reloads once another run answers; /api/update says which run it is.
 func TestUpdateSaysItsRun(t *testing.T) {
 	if j := updates.json(); j.Run == 0 || j.Run != runStarted {

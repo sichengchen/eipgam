@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // clsUp is a Chat vendor that classifies: it answers what answer says,
@@ -157,16 +157,16 @@ func TestIntentRoutesATurn(t *testing.T) {
 	if r.Rule.Classified == nil || r.Rule.Classified.After != "" || strings.Contains(c.last(), "was of kind") || c.n() != 3 {
 		t.Fatalf("turn 3: %+v %s", r.Rule.Classified, c.last())
 	}
-	// the classifier's call is magpie's own, in the usage, marked as the
+	// the classifier's call is eipgam's own, in the usage, marked as the
 	// routing classifier's (#1839)
 	var seen bool
 	for _, call := range s.Recent() {
-		if call.Model == "c/cls" && call.Agent == "magpie-router" && call.Kind == "routing" {
+		if call.Model == "c/cls" && call.Agent == "eipgam-router" && call.Kind == "routing" {
 			seen = true
 		}
 	}
 	if !seen {
-		t.Fatal("the classifier's call isn't recorded as magpie-router's routing")
+		t.Fatal("the classifier's call isn't recorded as eipgam-router's routing")
 	}
 	var recs, agents int
 	for _, r := range usage.Load(time.Time{}) {
@@ -177,7 +177,7 @@ func TestIntentRoutesATurn(t *testing.T) {
 			}
 			recs++
 		case r.ByMagpie() || r.Kind == "routing":
-			t.Fatalf("an agent's record marked magpie's or routing: %+v", r)
+			t.Fatalf("an agent's record marked eipgam's or routing: %+v", r)
 		default:
 			agents++
 		}
@@ -343,7 +343,7 @@ func TestClassifierTimeoutSetting(t *testing.T) {
 // the 8 a classifier was given unset, and every such call was logged 499
 // "the agent canceled the request", though no agent had. Unset, a
 // classifier that answers in 10 seconds now routes the turn, and one past
-// the wait is logged as magpie stopping, a failure.
+// the wait is logged as eipgam stopping, a failure.
 func TestReasoningClassifierAnswersInTheWaitUnset(t *testing.T) {
 	was := classifyUnit
 	classifyUnit = 50 * time.Millisecond // 10 seconds are 500ms
@@ -357,7 +357,7 @@ func TestReasoningClassifierAnswersInTheWaitUnset(t *testing.T) {
 	if cl := r.Rule.Classified; !strings.Contains(out, "from kb") || r.Rule.N != 1 || cl.Intent != "refactoring" || cl.Error != "" {
 		t.Fatalf("a classifier answering in 10s, unset: %s %+v %+v", out, r.Rule, cl)
 	}
-	// past the whole wait it is no answer, and the call magpie stopped is
+	// past the whole wait it is no answer, and the call eipgam stopped is
 	// its failure, not an agent canceling
 	c.mu.Lock()
 	c.wait = time.Duration(settings.ClassifyTimeoutMost) * classifyUnit
@@ -381,7 +381,7 @@ func TestReasoningClassifierAnswersInTheWaitUnset(t *testing.T) {
 		t.Fatalf("the classifier's cut call in the usage log: %+v", cut)
 	}
 	rec := cut[0]
-	if !strings.Contains(rec.Error, "magpie stopped waiting") || !strings.Contains(rec.Error, "decision model") || usage.CanceledBy(rec.Status, rec.Error) || !rec.Failed() {
+	if !strings.Contains(rec.Error, "eipgam stopped waiting") || !strings.Contains(rec.Error, "decision model") || usage.CanceledBy(rec.Status, rec.Error) || !rec.Failed() {
 		t.Fatalf("the classifier's cut call: %d %q", rec.Status, rec.Error)
 	}
 }

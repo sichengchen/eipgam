@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A model the user names, or keeps some reasoning levels of, is named so
-// and offered only those in the lists magpie wrote into the agents' files,
+// and offered only those in the lists eipgam wrote into the agents' files,
 // rewritten as soon as it is changed; a reset gives the model's own back.
 func TestModelNameAndLevelsReachAgentFiles(t *testing.T) {
 	home := syncHome(t)
@@ -23,13 +23,13 @@ func TestModelNameAndLevelsReachAgentFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	writeFile(t, piModels, `{"providers":{"magpie":{"name":"magpie","models":[]}}}`)
-	// Pi runs a model of magpie's: connected, so its list follows
-	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"magpie","defaultModel":"relay/glm-4.6"}`)
+	writeFile(t, piModels, `{"providers":{"eipgam":{"name":"eipgam","models":[]}}}`)
+	// Pi runs a model of eipgam's: connected, so its list follows
+	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"eipgam","defaultModel":"relay/glm-4.6"}`)
 	setUpInMagpie("pi")
 	codexDir := filepath.Join(home, ".codex")
-	codexCat := filepath.Join(codexDir, "magpie-models.json")
-	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"magpie\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(codexDir, "eipgam-models.json")
+	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"eipgam\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	catalog.Changed = SyncCatalog
 	t.Cleanup(func() { catalog.Changed = nil })
@@ -48,7 +48,7 @@ func TestModelNameAndLevelsReachAgentFiles(t *testing.T) {
 	if err := json.Unmarshal([]byte(readFile(piModels)), &pi); err != nil {
 		t.Fatal(err)
 	}
-	ms := pi.Providers["magpie"].Models
+	ms := pi.Providers["eipgam"].Models
 	// a custom name still carries its provider, the same as GLM-4.6's own
 	// name would, so a picker full of renamed models can still be told
 	// apart by vendor

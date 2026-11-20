@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Sign-ins in sync (qianxunji and curtinp118 on Discord): with the switch
@@ -71,7 +71,7 @@ func TestSyncSignIns(t *testing.T) {
 	onServer := func() string {
 		fake.mu.Lock()
 		defer fake.mu.Unlock()
-		return string(fake.files["/dav/magpie/magpie.magpie-backup"])
+		return string(fake.files["/dav/eipgam/eipgam.eipgam-backup"])
 	}
 
 	a, b := newComputer(t), newComputer(t)

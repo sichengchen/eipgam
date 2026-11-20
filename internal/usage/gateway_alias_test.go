@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
 // CrazyJal on X: Claude Desktop's Code tab writes the id the gateway listed
-// the model by (magpie-<number>.anthropic.<Claude model>) as the model of
+// the model by (eipgam-<number>.anthropic.<Claude model>) as the model of
 // each turn, and the gateway's own log counts the turn under the model that
 // served it. The file's call is the same call: it showed again under the
 // alias, a row for a model that is none, its cost counted twice. A call under
@@ -17,11 +17,11 @@ func TestAliasCallsAreTheGatewaysNotDirect(t *testing.T) {
 	now := holdClock(t, time.Date(2026, 9, 30, 12, 0, 0, 0, time.Local)) // midnight never falls between a call and Today (#6486)
 	tk := sessions.Tokens{Input: 120, Output: 40}
 	logs := []sessions.Call{
-		{Time: now.Add(-1 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "magpie-7416897221.anthropic.claude-opus-5-5", Tokens: tk},
-		{Time: now.Add(-2 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "magpie-7416897221.anthropic.claude-opus-5-5[1m]", Tokens: tk},
-		{Time: now.Add(-3 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "mythos-magpie-0123456789", Tokens: tk},
-		{Time: now.Add(-4 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "anthropic/magpie-0123456789", Tokens: tk},
-		{Time: now.Add(-5 * time.Minute), Agent: "claude", Session: "s2", Model: "claude-sonnet-5-5", Requested: "claude-magpie-0123456789", Tokens: tk},
+		{Time: now.Add(-1 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "eipgam-7416897221.anthropic.claude-opus-5-5", Tokens: tk},
+		{Time: now.Add(-2 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "eipgam-7416897221.anthropic.claude-opus-5-5[1m]", Tokens: tk},
+		{Time: now.Add(-3 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "mythos-eipgam-0123456789", Tokens: tk},
+		{Time: now.Add(-4 * time.Minute), Agent: "claude-desktop", Session: "s1", Model: "anthropic/eipgam-0123456789", Tokens: tk},
+		{Time: now.Add(-5 * time.Minute), Agent: "claude", Session: "s2", Model: "claude-sonnet-5-5", Requested: "claude-eipgam-0123456789", Tokens: tk},
 		{Time: now.Add(-6 * time.Minute), Agent: "claude", Session: "s3", Model: "claude-opus-5-5", Tokens: tk}, // direct, never through the gateway
 	}
 	recs := []Record{{Time: now.Add(-time.Minute), Agent: "claude-desktop", Provider: "relay", Model: "claude-opus-5-5", Input: 120, Output: 40}}
@@ -50,15 +50,15 @@ func TestAliasCallsAreTheGatewaysNotDirect(t *testing.T) {
 
 func TestMagpieAliasForms(t *testing.T) {
 	for id, want := range map[string]bool{
-		"magpie-7416897221.anthropic.claude-opus-5-5":   true,
-		"magpie-7416897221.anthropic.claude-opus-5[1m]": true,
-		"mythos-magpie-0123456789":                      true,
-		"anthropic/magpie-0123456789":                   true,
-		"claude-magpie-0123456789[1m]":                  true,
-		"magpie":                                        false,
-		"magpie-123.anthropic.claude-opus-5-5":          false, // not ten digits
+		"eipgam-7416897221.anthropic.claude-opus-5-5":   true,
+		"eipgam-7416897221.anthropic.claude-opus-5[1m]": true,
+		"mythos-eipgam-0123456789":                      true,
+		"anthropic/eipgam-0123456789":                   true,
+		"claude-eipgam-0123456789[1m]":                  true,
+		"eipgam":                                        false,
+		"eipgam-123.anthropic.claude-opus-5-5":          false, // not ten digits
 		"claude-opus-5-5":                               false,
-		"magpie-agent/claude-opus-5-5":                  false,
+		"eipgam-agent/claude-opus-5-5":                  false,
 		"":                                              false,
 	} {
 		if got := MagpieAlias(id); got != want {

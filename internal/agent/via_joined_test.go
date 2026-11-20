@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A model field's list is its own models then the catalog's: the append
@@ -108,7 +108,7 @@ func TestClaudeModelFieldKeepsTheJoinedList(t *testing.T) {
 		t.Fatal("the model field doesn't offer oa's models")
 	}
 	if again := field.Options(map[string]string{}); &again[0] != &first[0] {
-		t.Fatal("Claude Code's own models joined its list from magpie again")
+		t.Fatal("Claude Code's own models joined its list from eipgam again")
 	}
 	if err := provider.Save(provider.Provider{ID: "nb", Name: "NB", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"y"}}); err != nil {
 		t.Fatal(err)

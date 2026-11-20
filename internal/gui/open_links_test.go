@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/autostart"
+	"github.com/sichengchen/eipgam/internal/autostart"
 )
 
 // /api/open opens web pages and System Settings' Login Items, and no

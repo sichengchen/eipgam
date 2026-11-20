@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// #5781: a provider's Socket, set with `magpie provider set <id>
+// #5781: a provider's Socket, set with `eipgam provider set <id>
 // socket=on`, opens in the editor as set, a Save that leaves it out keeps
 // it, and the editor's tick saves it either way.
 func TestProviderSaveSocket(t *testing.T) {

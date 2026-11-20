@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // OpenCode Zen's free tier serves OpenCode alone, and knows it by its
 // connection, not its request: the same bytes OpenCode 2.3.0 sent, sent
 // again from the same computer a minute apart, were answered 200 by Bun's
-// fetch (1.4.2, magpie's, and 1.4.4, OpenCode's own) and 429
+// fetch (1.4.2, eipgam's, and 1.4.4, OpenCode's own) and 429
 // FreeUsageLimitError ("Free usage limit reached. Free models work in
 // OpenCode") by Go's net/http and by curl, over HTTP/1.1 and HTTP/2, with
 // the public key or a user's (biubiubiuzone on X: "opencode zen 配置官方的key
@@ -33,7 +33,7 @@ var hasBun = plugin.HasBun
 
 // zenBunProvider is the provider the host is told the request is for: no
 // plugin's, so no plugin's sign-in or fetch takes it over.
-const zenBunProvider = "magpie-opencode-free"
+const zenBunProvider = "eipgam-opencode-free"
 
 // zenFreeTier says req goes to Zen's free tier: an OpenCode host's
 // /inference paths, where OpenCodeFreeURL sends its free models.

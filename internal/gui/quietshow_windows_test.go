@@ -22,7 +22,7 @@ import (
 
 // shangyuan0818 on X: with Settings' AutoRestart, the window a restart by
 // itself brings back flashed on the taskbar, asking for attention, while
-// the user was in another app. The new magpie, started by the old one in
+// the user was in another app. The new eipgam, started by the old one in
 // the background, has no right to the foreground; Wails' Show (SW_SHOW)
 // and Focus (SetForegroundWindow) ask for it all the same, and Windows
 // answers a refused ask by flashing the window's taskbar button until it
@@ -33,7 +33,7 @@ import (
 //
 // The windows are real, so this runs where Windows has a desktop the user
 // sees: on the Windows box's signed-in session, not over ssh (session 0).
-const testQuietShowEnv = "MAGPIE_TEST_QUIET_SHOW"
+const testQuietShowEnv = "EIPGAM_TEST_QUIET_SHOW"
 
 func TestRestartBySelfAsksNoAttention(t *testing.T) {
 	var session uint32
@@ -125,7 +125,7 @@ func init() {
 	}
 	seen := make(chan string, 1024)
 	app := application.New(application.Options{
-		Name:    "magpie quiet show regression",
+		Name:    "eipgam quiet show regression",
 		Windows: windowsOptions(),
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/vis" {
@@ -136,7 +136,7 @@ func init() {
 				return
 			}
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<html><body style="margin:0;background:#2a6f97;height:100vh">magpie<script>setInterval(() => fetch("/vis?s=" + document.visibilityState), 50)</script></body></html>`)
+			fmt.Fprint(w, `<html><body style="margin:0;background:#2a6f97;height:100vh">eipgam<script>setInterval(() => fetch("/vis?s=" + document.visibilityState), 50)</script></body></html>`)
 		})},
 	})
 	h := &host{app: app, ready: make(chan struct{})}
@@ -151,7 +151,7 @@ func init() {
 			}
 		}
 	}
-	// the app the user is in, in front before the new magpie makes its
+	// the app the user is in, in front before the new eipgam makes its
 	// windows, as the old one's restart leaves it
 	var other uintptr
 	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
@@ -164,7 +164,7 @@ func init() {
 				other, front = otherForeground()
 				fmt.Printf("quiet: the other window has the foreground: %v\n", front)
 			})
-			// what the old magpie left as it restarted by itself, read as a
+			// what the old eipgam left as it restarted by itself, read as a
 			// start reads it (app.go)
 			markQuietRestart()
 			quiet, _ := takeQuietRestart()
@@ -193,7 +193,7 @@ func init() {
 			time.Sleep(3 * time.Second)
 			hwnd := w32.HWND(uintptr(h.main.NativeWindow()))
 			fmt.Printf("quiet: other %#x, main %#x, panel %#x\n", other, uintptr(hwnd), uintptr(h.panel.NativeWindow()))
-			// what the shell heard of magpie's windows, the other one left out
+			// what the shell heard of eipgam's windows, the other one left out
 			var asked []string
 			mu.Lock()
 			for _, n := range told {
@@ -206,7 +206,7 @@ func init() {
 				fail("%s: the shell was asked for attention: %v", mode, asked)
 			}
 			if fg := w32.GetForegroundWindow(); fg == hwnd || fg == w32.HWND(uintptr(h.panel.NativeWindow())) {
-				fail("%s: magpie's window took the foreground", mode)
+				fail("%s: eipgam's window took the foreground", mode)
 			}
 			if showMain {
 				if up, min := h.mainUp(); !up || min {

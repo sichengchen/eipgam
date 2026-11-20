@@ -3,7 +3,7 @@ package backup
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
 // A backup file carries the library's hooks, and restoring it on another
@@ -21,7 +21,7 @@ func TestBackupFileCarriesHooks(t *testing.T) {
 	data, _ := Seal(b, "pw")
 	old := b
 	lib := *b.Library
-	lib.Hooks = nil // as a magpie before them sealed it
+	lib.Hooks = nil // as a eipgam before them sealed it
 	old.Library = &lib
 	older, _ := Seal(old, "pw")
 

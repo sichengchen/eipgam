@@ -11,7 +11,7 @@ import (
 )
 
 // fwxkogaia on X: Serena installed from the market showed "已退出 (2)".
-// magpie ran `uvx serena-agent`, which prints its help and exits 2: the
+// eipgam ran `uvx serena-agent`, which prints its help and exits 2: the
 // registry has uvx run it with start-mcp-server, among its
 // runtimeArguments. Each entry is the registry's own, as it lists it; a
 // package's executables (bins) are the market crawl's.
@@ -74,7 +74,7 @@ func TestRegistryLaunchLines(t *testing.T) {
 		{"MARM: docker's own, the entrypoint too, before the image",
 			`{"name": "io.github.Lyellr88/marm-mcp-server", "packages": [{"registryType": "oci", "identifier": "lyellr88/marm-mcp-server:2.60.1", "runtimeHint": "docker", "transport": {"type": "stdio"}, "runtimeArguments": [{"type": "named", "name": "-i"}, {"type": "named", "name": "--rm"}, {"type": "named", "name": "--mount", "value": "type=volume,src=marm-data,dst=/home/marm/.marm"}, {"type": "named", "name": "-e", "value": "HOME=/home/marm"}, {"type": "named", "name": "--entrypoint", "value": "marm-mcp-stdio"}]}]}`,
 			"docker run -i --rm --mount type=volume,src=marm-data,dst=/home/marm/.marm -e HOME=/home/marm --entrypoint marm-mcp-stdio lyellr88/marm-mcp-server:2.60.1"},
-		{"a docker option magpie can't fill",
+		{"a docker option eipgam can't fill",
 			`{"name": "io.github.kOlapsis/maintenant", "packages": [{"registryType": "oci", "identifier": "ghcr.io/kolapsis/maintenant:1.11.0", "transport": {"type": "stdio"}, "runtimeArguments": [{"type": "named", "name": "--volume", "value": "{data_volume}:/data", "isRequired": true}]}]}`,
 			""},
 	} {
@@ -94,7 +94,7 @@ func TestRegistryLaunchLines(t *testing.T) {
 	}
 }
 
-// The market's own Serena, from the crawl shipped with magpie, starts the
+// The market's own Serena, from the crawl shipped with eipgam, starts the
 // MCP server, and is the same server as the one it offered before.
 func TestPopularSerenaStarts(t *testing.T) {
 	i := slices.IndexFunc(popularServers(), func(m MarketServer) bool { return m.ID == "io.github.oraios/serena" })

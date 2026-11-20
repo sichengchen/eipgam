@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// magpie update tells the magpie running what it put in, and says what
-// came of it: a restart, a wait, magpie serve, an older magpie (404), or
+// eipgam update tells the eipgam running what it put in, and says what
+// came of it: a restart, a wait, eipgam serve, an older eipgam (404), or
 // none running.
 func TestUpdateAsksTheRunningMagpieToRestart(t *testing.T) {
 	var reply gateway.RestartReply
@@ -33,7 +33,7 @@ func TestUpdateAsksTheRunningMagpieToRestart(t *testing.T) {
 	}{
 		{gateway.RestartReply{State: "restarting", Version: "v0.1.1", Handover: true}, "restarts into v0.1.2 now, handing its gateway over"},
 		{gateway.RestartReply{State: "waiting", Version: "v0.1.1", Busy: &gateway.Busy{Requests: 2}}, "once the 2 request(s)"},
-		{gateway.RestartReply{State: "unsupported", Version: "v0.1.1"}, "magpie serve"},
+		{gateway.RestartReply{State: "unsupported", Version: "v0.1.1"}, "eipgam serve"},
 		{gateway.RestartReply{State: "current", Version: "v0.1.1"}, "another copy"},
 	} {
 		reply = c.reply
@@ -47,7 +47,7 @@ func TestUpdateAsksTheRunningMagpieToRestart(t *testing.T) {
 	old := httptest.NewServer(http.NotFoundHandler())
 	defer old.Close()
 	if got := restartRunning(old.URL, "v0.1.2"); !strings.Contains(got, "quit and reopen") {
-		t.Errorf("an older magpie: %q", got)
+		t.Errorf("an older eipgam: %q", got)
 	}
 	old.Close()
 	if got := restartRunning(old.URL, "v0.1.2"); !strings.Contains(got, "isn't running") {

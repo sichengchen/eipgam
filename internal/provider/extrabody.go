@@ -1,19 +1,19 @@
 package provider
 
 // A provider's extraBody (Luc-xz, #1604): JSON fields the user adds to the
-// body of every request magpie sends the provider — a relay that turns a
+// body of every request eipgam sends the provider — a relay that turns a
 // Responses request away without a prompt_cache_key, say — as Headers adds
 // headers. They are merged at the top level of the body as it goes out,
 // whichever API it is on (Chat, Responses, Messages, Gemini) and whether it
 // was relayed or translated (gateway.forwardOnce):
 //
-//   - A field the body has already — the client's own, or what magpie put
+//   - A field the body has already — the client's own, or what eipgam put
 //     there for it — is kept: the user's value fills in what is missing.
 //   - A name written with a "!" before it ("!prompt_cache_key") is forced:
 //     it replaces the body's own.
 //   - ${sessionId} in a string value, at any depth, is the conversation's
 //     id: the session the agent names (its session header), else one
-//     magpie derives from how the conversation opens (the gateway's
+//     eipgam derives from how the conversation opens (the gateway's
 //     conversationID), the same for every turn of it. A fixed string would put every session on one
 //     cache key. ${threadId} is the thread's (conversation.go); Headers
 //     take both too.
@@ -23,7 +23,7 @@ package provider
 //     gives a relay one prompt_cache_key per subagent, where ${sessionId}
 //     alone carries every subagent's turns on one key (yetone/magpie#2937).
 //     Headers take it too.
-//   - The fields that carry the conversation, or that magpie must decide
+//   - The fields that carry the conversation, or that eipgam must decide
 //     for routing and streaming to work (ExtraBodyReserved), can't be set:
 //     a save naming one is refused, and one written into the file by hand
 //     is left out.
@@ -34,9 +34,9 @@ package provider
 // nor one to another API (embeddings, images, video, a decision API's):
 // the fields are for asking the model for a reply. Neither does a
 // signed-in account's: its body is the agent's own, as its headers are —
-// except a ChatGPT (Codex) account's, whose requests magpie builds as Codex
+// except a ChatGPT (Codex) account's, whose requests eipgam builds as Codex
 // CLI would (codexBody), and which take fields Codex CLI adds by choice
-// (access_programs, OpenAI's Daybreak, magpie-releases#18). On it the
+// (access_programs, OpenAI's Daybreak, eipgam-releases#18). On it the
 // fields codexBody decides for the backend to answer at all — not stored,
 // tool_choice auto, its reasoning carried — can't be set either
 // (codexOwned).
@@ -68,7 +68,7 @@ func (e *ExtraBody) UnmarshalJSON(b []byte) error {
 }
 
 // ExtraBodyReserved are the fields extraBody can't set: the model and
-// whether to stream, which magpie decides for routing and reads the reply
+// whether to stream, which eipgam decides for routing and reads the reply
 // by, and the conversation itself — its messages, input or contents, its
 // system prompt and instructions, its tools.
 var ExtraBodyReserved = []string{"model", "stream", "messages", "input", "contents", "system", "systemInstruction", "system_instruction", "instructions", "tools"}
@@ -110,7 +110,7 @@ func ExtraBodyOK(e ExtraBody) string {
 		case n == "":
 			return "an extra body field needs a name"
 		case slices.Contains(ExtraBodyReserved, n):
-			return fmt.Sprintf("extra body can't set %q: magpie sets the model, stream and the conversation itself", n)
+			return fmt.Sprintf("extra body can't set %q: eipgam sets the model, stream and the conversation itself", n)
 		case seen[n]:
 			return fmt.Sprintf("extra body names %q twice", n)
 		case !json.Valid(e[k]):
@@ -236,7 +236,7 @@ func withSession(v any, c Conversation) any {
 // extra body value goes out filled with "". A body for an embeddings or
 // rerank url (tinyRetrieval) goes as it is, as the gateway sends one.
 func (p Provider) tested(ctx context.Context, url, body string) (context.Context, []byte) {
-	c := OwnConversation("magpie-test-")
+	c := OwnConversation("eipgam-test-")
 	ctx = WithConversation(ctx, c)
 	if strings.HasSuffix(url, "/embeddings") || strings.HasSuffix(url, "/rerank") {
 		return ctx, []byte(body)

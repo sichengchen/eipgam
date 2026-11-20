@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// inBox has magpie run in a container, on Linux, with Chrome there or not.
+// inBox has eipgam run in a container, on Linux, with Chrome there or not.
 func inBox(t *testing.T, box, chrome bool) {
 	t.Helper()
 	wb, wg, wc := runsInBox, browserGOOS, chromeExists
@@ -18,7 +18,7 @@ func inBox(t *testing.T, box, chrome bool) {
 	t.Cleanup(func() { runsInBox, browserGOOS, chromeExists = wb, wg, wc })
 }
 
-// Passings_z on X: Chrome DevTools' server in magpie's image listed its
+// Passings_z on X: Chrome DevTools' server in eipgam's image listed its
 // tools, and each failed with "Could not find Google Chrome executable".
 func TestNoBrowser(t *testing.T) {
 	npx := func(args ...string) *Server { return &Server{Transport: "stdio", Command: "npx", Args: args} }
@@ -97,7 +97,7 @@ func TestCheckSaysNoBrowser(t *testing.T) {
 	if h.State != "error" || h.Why != "nobrowser" || h.Detail != "--browserUrl" || h.Tools != 3 {
 		t.Fatalf("got %+v, want nobrowser with --browserUrl and its 3 tools", h)
 	}
-	if err := healthErr(h); err == nil || err.Error() != "it starts a Chrome, and there is none where magpie runs: use Magpie Browser, or give it --browserUrl for a Chrome it can reach" {
+	if err := healthErr(h); err == nil || err.Error() != "it starts a Chrome, and there is none where eipgam runs: use eipgam Browser, or give it --browserUrl for a Chrome it can reach" {
 		t.Errorf("healthErr = %v", err)
 	}
 

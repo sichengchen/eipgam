@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const page = await (await browser.newContext()).newPage();
     await page.route("**/*", serve("en", []));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     await page.waitForFunction(() => typeof envOf === "function");
     for (const [name, text] of Object.entries(forms)) {
       const c = await page.evaluate((s) => envOf(s), text);
@@ -144,7 +144,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         return e.defaultPrevented;
       }, text);
 
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator("#addProvider").click();
       // the box says it takes a pasted URL and key; where its row has no
       // room for that whole, it says the shorter hint (app.js wholeHint)
@@ -196,7 +196,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         i.dispatchEvent(e);
         return e.defaultPrevented;
       }, text);
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.waitForFunction(() => typeof pastedProvider === "function");
       // the box in sight once there are providers, not the Add sheet's
       assert.equal(await page.locator("#addSheet").isHidden(), true);
@@ -231,7 +231,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.route("**/*", serve(lang, []));
       const w = words[lang];
       const ed = page.locator(".editor");
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator("#addProvider").click();
       await page.waitForFunction(() => typeof pastedProvider === "function");
       // a one-line box runs the lines together; no paste event text to read
@@ -245,7 +245,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await ed.locator(".base-url").inputValue(), "https://api.moonshot.cn/anthropic");
       assert.equal(await ed.locator(".pair input[type=password]").first().inputValue(), own);
       // the tweet's own example has no address: it opens, saying so
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator("#addProvider").click();
       await page.waitForFunction(() => typeof pastedProvider === "function");
       const took = await page.locator("#addSheet .find").evaluate((i, s) => {
@@ -283,7 +283,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         i.dispatchEvent(e);
         return e.defaultPrevented;
       }, text);
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator("#addProvider").click();
       await page.locator("#addSheet .row-head .custom").click();
       await ed.locator(".base-url").waitFor();

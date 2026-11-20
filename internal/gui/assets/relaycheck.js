@@ -64,13 +64,13 @@ function relayTally(r) {
 // columns, and has the card drawn again
 function relayKeep(provider, model, r) {
   try {
-    const all = JSON.parse(localStorage.getItem("magpie.relayChecks") || "{}");
+    const all = JSON.parse(localStorage.getItem("eipgam.relayChecks") || "{}");
     all[provider + "\u0000" + model] = { ...relayTally(r), at: Date.now() };
     const keys = Object.keys(all).sort((a, b) => all[b].at - all[a].at);
     for (const k of keys.slice(200)) delete all[k];
-    localStorage.setItem("magpie.relayChecks", JSON.stringify(all));
+    localStorage.setItem("eipgam.relayChecks", JSON.stringify(all));
   } catch {}
-  window.dispatchEvent(new CustomEvent("magpie-relay-checked"));
+  window.dispatchEvent(new CustomEvent("eipgam-relay-checked"));
 }
 
 // the exact items by the id the gateway gives them

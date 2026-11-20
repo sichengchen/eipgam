@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Codex kept signed in to acct-1 (KeepLoginAs) while the pool puts the
@@ -64,7 +64,7 @@ func drawingFollowsThePool(t *testing.T, path string) {
 		mu.Lock()
 		tried = nil
 		mu.Unlock()
-		r := httptest.NewRequest("POST", path, strings.NewReader(`{"model":"gpt-image-2","prompt":"a magpie"}`))
+		r := httptest.NewRequest("POST", path, strings.NewReader(`{"model":"gpt-image-2","prompt":"a eipgam"}`))
 		r.Header.Set("Content-Type", "application/json")
 		r.Header.Set("User-Agent", "codex_cli_rs/0.130.0")
 		if strings.HasPrefix(path, CodexPath) {
@@ -100,7 +100,7 @@ func TestCodexImagesRelayedWithTheSignInAlone(t *testing.T) {
 	was := provider.CodexBase
 	provider.CodexBase = up.URL + "/backend-api/codex"
 	defer func() { provider.CodexBase = was }()
-	r := httptest.NewRequest("POST", CodexPath+"/images/generations", strings.NewReader(`{"model":"gpt-image-2","prompt":"a magpie"}`))
+	r := httptest.NewRequest("POST", CodexPath+"/images/generations", strings.NewReader(`{"model":"gpt-image-2","prompt":"a eipgam"}`))
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Set("User-Agent", "codex_cli_rs/0.130.0")
 	tok, _, _ := codexSignInToken()

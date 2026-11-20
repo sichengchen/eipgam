@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // OpenAI's Decisions API (/v1/decisions) and System One (/v1/systemone)
@@ -70,7 +70,7 @@ type systemOneTarget struct {
 
 // takesImages is whether the model takes a System One request's images:
 // a Clef on Workers AI does, Google's gemini-decision-1 does (as image
-// blocks of its input), and another magpie passes them on.
+// blocks of its input), and another eipgam passes them on.
 func (t systemOneTarget) takesImages() bool {
 	if t.p.IsRemoteMagpie() || t.p.DecideVia() == provider.ViaGoogle {
 		return true

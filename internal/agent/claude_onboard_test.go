@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// KoiLx0 on X: a Claude Code connected to magpie on a computer it had never
+// KoiLx0 on X: a Claude Code connected to eipgam on a computer it had never
 // run on still opened on the theme picker and the sign-in choice, because
 // its first run is marked done in its global config (~/.claude.json,
 // hasCompletedOnboarding), which nothing had written. Connecting it writes
 // the mark beside the user's other keys, a Sync marks one connected before,
-// and a disconnect takes out the mark magpie wrote, back to Claude Code as
+// and a disconnect takes out the mark eipgam wrote, back to Claude Code as
 // installed. A Claude Code that ran its own first run keeps its mark.
 func TestClaudeConnectMarksFirstRunDone(t *testing.T) {
 	setup := func(t *testing.T) (home, path, global string) {
@@ -52,7 +52,7 @@ func TestClaudeConnectMarksFirstRunDone(t *testing.T) {
 			t.Fatal(err)
 		}
 		if mark(global) != "" {
-			t.Fatal("disconnecting kept the mark magpie wrote")
+			t.Fatal("disconnecting kept the mark eipgam wrote")
 		}
 	})
 
@@ -62,7 +62,7 @@ func TestClaudeConnectMarksFirstRunDone(t *testing.T) {
 		if err := a.Field("model").Set("deepseek/pro"); err != nil {
 			t.Fatal(err)
 		}
-		// as an older magpie left it: wired, the first run not marked
+		// as an older eipgam left it: wired, the first run not marked
 		if err := os.Remove(global); err != nil && !os.IsNotExist(err) {
 			t.Fatal(err)
 		}
@@ -115,7 +115,7 @@ func TestClaudeConnectMarksFirstRunDone(t *testing.T) {
 			t.Fatal(err)
 		}
 		if err := claude(home).Field("model").Set("deepseek/pro"); err != nil {
-			t.Fatalf("a global config magpie can't read failed the connect: %v", err)
+			t.Fatalf("a global config eipgam can't read failed the connect: %v", err)
 		}
 		if b, _ := os.ReadFile(global); string(b) != bad {
 			t.Fatalf("an unparseable global config was written:\n%s", b)

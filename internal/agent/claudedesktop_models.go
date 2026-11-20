@@ -7,26 +7,26 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// While a model is picked for one of Claude Desktop's tiers, magpie's
+// While a model is picked for one of Claude Desktop's tiers, eipgam's
 // profile carries inferenceModels (gateway.DesktopInferenceModels): the
 // list Desktop's Code tab hands Claude Code each pick's behavesAs from,
 // so a pick runs with the prompt of the Claude model of its tier
 // (moer2831), and while two rows Desktop names after one Claude model of
 // its catalog would read alike (labelOverride, onkashiko on X). Without
-// either there is none, and Desktop finds magpie's
-// models on its own as before. The list is magpie's only while it is what
-// magpie wrote: desktopModelsMark keeps the hash of each list magpie
+// either there is none, and Desktop finds eipgam's
+// models on its own as before. The list is eipgam's only while it is what
+// eipgam wrote: desktopModelsMark keeps the hash of each list eipgam
 // wrote (the one before a write too, until the write is done), and a list
-// with any other hash is the user's, which magpie never writes over or
+// with any other hash is the user's, which eipgam never writes over or
 // takes away. Desktop reads its profile at start-up only.
 const desktopModelsMark = "claude-desktop.models"
 
-// desktopDiscoveryMark says magpie wrote the profile's
-// modelDiscoveryEnabled (gateway.DesktopDiscovers): magpie takes it away
+// desktopDiscoveryMark says eipgam wrote the profile's
+// modelDiscoveryEnabled (gateway.DesktopDiscovers): eipgam takes it away
 // only then, and only while it is still true. One the user wrote, either
 // way, stays as they wrote it.
 const desktopDiscoveryMark = "claude-desktop.discovery"
@@ -42,8 +42,8 @@ func desktopModelsHash(raw []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// desktopSyncModels writes p's inferenceModels as magpie lists them now,
-// takes away the one magpie wrote when nothing is picked, and leaves the
+// desktopSyncModels writes p's inferenceModels as eipgam lists them now,
+// takes away the one eipgam wrote when nothing is picked, and leaves the
 // user's own alone.
 func desktopSyncModels(p desktopPaths) error {
 	if !desktopWired(p) {
@@ -85,7 +85,7 @@ func desktopSyncModels(p desktopPaths) error {
 		stash(map[string]string{key: h})
 		return nil
 	}
-	// marked before it is written: a write cut short leaves a list magpie
+	// marked before it is written: a write cut short leaves a list eipgam
 	// still knows for its own
 	stash(map[string]string{key: strings.Join(append(marks, h), " ")})
 	if err := edit.SetJSON(p.prof, edit.KV{Path: "inferenceModels", Value: json.RawMessage(next)}); err != nil {
@@ -95,10 +95,10 @@ func desktopSyncModels(p desktopPaths) error {
 	return nil
 }
 
-// desktopSyncDiscovery has Desktop read /v1/models beside magpie's
+// desktopSyncDiscovery has Desktop read /v1/models beside eipgam's
 // inferenceModels while on, where Desktop's Code tab finds a later tier of
 // a model picked for two (gateway.DesktopDiscovers), and takes back the
-// modelDiscoveryEnabled magpie wrote once off. Unset, Desktop skips
+// modelDiscoveryEnabled eipgam wrote once off. Unset, Desktop skips
 // /v1/models while the list names no bare tier word.
 func desktopSyncDiscovery(p desktopPaths, on bool) error {
 	key := desktopDiscoveryMark + p.key

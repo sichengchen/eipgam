@@ -10,7 +10,7 @@ import (
 // after a ChatGPT account was added in Providers. With Codex signed in to
 // nothing, that sign-in is written to ~/.codex/auth.json for Codex, and
 // the folder it made was taken for Codex. A folder holding only the file
-// magpie's sign-in writes (Claude Code's .credentials.json off the Mac
+// eipgam's sign-in writes (Claude Code's .credentials.json off the Mac
 // too) is no sign of the agent; anything the agent writes beside it is.
 func TestSignInFileAloneIsNoAgent(t *testing.T) {
 	for _, tc := range []struct {
@@ -42,7 +42,7 @@ func TestSignInFileAloneIsNoAgent(t *testing.T) {
 			}
 			home, _ := fresh()
 			if tc.mk(home).Detected() {
-				t.Fatalf("~/%s holding only magpie's %s taken for the agent", tc.dir, tc.file)
+				t.Fatalf("~/%s holding only eipgam's %s taken for the agent", tc.dir, tc.file)
 			}
 			for _, o := range tc.other {
 				home, dir := fresh()

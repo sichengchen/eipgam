@@ -16,7 +16,7 @@ const HOME = "/Users/mem";
 const at = (d) => `2026-11-0${d}T10:00:00Z`;
 function library() {
   return {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents: [{ id: "codex", name: "Codex", icon: "", instructions: `${HOME}/.codex/AGENTS.md`, skills: `${HOME}/.codex/skills` }],
     instructions: { shared: "", sets: [{ id: "default", name: "", active: true, text: "" }], agents: ["codex"] },
     foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
@@ -31,7 +31,7 @@ function memories() {
       { id: "m4", text: "Dates are ISO 8601", kind: "rule", scope: "project:a", origin: "inferred", status: "active", created: at(1), updated: at(1) },
       { id: "m5", text: "Dates are ISO 8601", kind: "rule", scope: "project:b", origin: "inferred", status: "active", created: at(1), updated: at(1) },
     ],
-    projects: { a: { key: "a", name: "magpie", roots: [`${HOME}/magpie`] }, b: { key: "b", name: "site", roots: [`${HOME}/site`] } },
+    projects: { a: { key: "a", name: "eipgam", roots: [`${HOME}/eipgam`] }, b: { key: "b", name: "site", roots: [`${HOME}/site`] } },
     digest: true, agents: ["codex"],
     suggestions: [
       { key: "global:m1,m2", to: "global", ids: ["m1", "m2"], text: "Use pnpm, not npm", projects: ["a", "b"] },
@@ -84,10 +84,10 @@ function server(lang, state, lib, sent) {
 const view = "#view-library";
 const words = {
   en: { learned: "Learned in", everywhere: "Use everywhere", skill: "Make a skill", searched: /Searched 7 times/, later: "Not now" },
-  zh: { learned: "在 magpie, site 中学到", everywhere: "在所有项目中使用", skill: "做成 Skill", searched: /被搜索 7 次/, later: "暂不" },
-  "zh-TW": { learned: "magpie, site", everywhere: null, skill: null, searched: /7/, later: "暫不" },
-  ja: { learned: "magpie, site", everywhere: null, skill: null, searched: /7/, later: "後で" },
-  de: { learned: "magpie, site", everywhere: null, skill: null, searched: /7/, later: null },
+  zh: { learned: "在 eipgam, site 中学到", everywhere: "在所有项目中使用", skill: "做成 Skill", searched: /被搜索 7 次/, later: "暂不" },
+  "zh-TW": { learned: "eipgam, site", everywhere: null, skill: null, searched: /7/, later: "暫不" },
+  ja: { learned: "eipgam, site", everywhere: null, skill: null, searched: /7/, later: "後で" },
+  de: { learned: "eipgam, site", everywhere: null, skill: null, searched: /7/, later: null },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -103,7 +103,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang} ${width}`, async () => {
         const w = words[lang];
         const ctx = await browser.newContext({ viewport: { width, height: 860 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "memory"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "memory"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -114,14 +114,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let libGets = 0;
         await page.route("**/*", server(lang, state, lib, sent));
         page.on("request", (r) => { if (new URL(r.url()).pathname === "/api/library") libGets++; });
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const sugg = page.locator(`${view} .lib-memsugg [data-sugg]`);
         await sugg.first().waitFor();
         assert.equal(await sugg.count(), 3);
         // above the list, named by the projects it was learned in, in the reader's language
         const pnpm = page.locator(`${view} [data-sugg="global:m1,m2"]`);
-        assert.ok(lang === "en" ? (await pnpm.locator(".sub").textContent()).includes("Learned in magpie, site") : (await pnpm.locator(".sub").textContent()).includes(w.learned));
+        assert.ok(lang === "en" ? (await pnpm.locator(".sub").textContent()).includes("Learned in eipgam, site") : (await pnpm.locator(".sub").textContent()).includes(w.learned));
         if (lang !== "en") assert.doesNotMatch(await pnpm.locator(".sub").textContent(), /Learned in/);
         const rel = page.locator(`${view} [data-sugg="skill:m3"]`);
         assert.match(await rel.locator(".sub").textContent(), w.searched);
@@ -167,11 +167,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const ctx = await browser.newContext({ viewport: { width: 980, height: 860 }, reducedMotion: "reduce" });
-    await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "memory"); } catch {} });
+    await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "memory"); } catch {} });
     const page = await ctx.newPage();
     page.setDefaultTimeout(5000);
     await page.route("**/*", server("en", memories(), library(), []));
-    await page.goto("http://magpie.test/");
+    await page.goto("http://eipgam.test/");
     await page.locator('button[data-view="library"]').click();
     await page.locator(`${view} .lib-memsugg`).waitFor();
     await page.locator(`${view} .lib-memstatus .opt`, { hasText: "Archived" }).click();

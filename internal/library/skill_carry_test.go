@@ -94,9 +94,9 @@ func TestSkillCarriedBySource(t *testing.T) {
 	if !pdf.Fetch || pdf.Hash == "" || pdf.Hash != librarySkill(t, "pdf").Hash {
 		t.Fatalf("pdf isn't carried as its source: %s", mustJSON(t, pdf))
 	}
-	// for a magpie before this, its files as they fit
+	// for a eipgam before this, its files as they fit
 	if len(pdf.Files) != 2 {
-		t.Errorf("pdf's files aren't carried for an older magpie: %v", pdf.Files)
+		t.Errorf("pdf's files aren't carried for an older eipgam: %v", pdf.Files)
 	}
 	if mine.Fetch || mine.Hash != "" || len(mine.Files) == 0 {
 		t.Errorf("a skill of the user's own isn't carried as its files: %s", mustJSON(t, mine))
@@ -236,7 +236,7 @@ func TestSkillCarriedBySourceNewerThere(t *testing.T) {
 	}
 }
 
-// A bundle from a magpie before this carries no Fetch: the same files are
+// A bundle from a eipgam before this carries no Fetch: the same files are
 // kept, and so is the hash of what was fetched, so the skill still goes as
 // its source from here.
 func TestSkillOldBundleKeepsHash(t *testing.T) {
@@ -249,7 +249,7 @@ func TestSkillOldBundleKeepsHash(t *testing.T) {
 	c := carriedSkill(t, b, "pdf")
 	c.Fetch, c.Hash, c.Commit = false, "", ""
 	if j := mustJSON(t, c); strings.Contains(j, "fetch") || strings.Contains(j, "hash") {
-		t.Fatalf("not as an older magpie carries it: %s", j)
+		t.Fatalf("not as an older eipgam carries it: %s", j)
 	}
 	putJSON(t, mustJSON(t, b))
 	if s := librarySkill(t, "pdf"); s.Hash != hash {

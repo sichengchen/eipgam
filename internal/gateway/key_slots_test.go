@@ -13,24 +13,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // keySlotFree are the routes, other than a GET's or an OPTIONS' (never
-// held), that a key's MaxConcurrency doesn't hold: magpie's own, MCP (a
+// held), that a key's MaxConcurrency doesn't hold: eipgam's own, MCP (a
 // tool call of a turn already held) and count_tokens. A route in neither
 // this nor keySlotRoutes fails TestKeySlotEveryRoute, so a new one is
 // judged.
 var keySlotFree = []string{
-	"POST /api/show", "POST /v1/magpie/usage/requests", "POST " + provider.RemoteRefreshPath,
+	"POST /api/show", "POST /v1/eipgam/usage/requests", "POST " + provider.RemoteRefreshPath,
 	"POST " + provider.RemoteCodexResetPath, "POST " + StatuslinePath, "POST " + KeysPath,
 	"DELETE " + KeysPath + "/{id}", "POST " + OIDCKeysPath, "POST " + provider.RemoteProvePath,
 	"POST " + RestartPath, "POST " + provider.RemoteUpdatePath, "POST /v1/messages/count_tokens",
 	"POST " + claudeMCPPath + "{token}", "/mcp/{name}", "/mcp/run/{name}", SearchMCPPath, VisionMCPPath,
 	ImageMCPPath, BrowserMCPPath, MemoryMCPPath, SessionsMCPPath, ImageMCPFiles + "{name}", ToolsMCPPath, ToolsMCPOne + "{plugin}",
 	HubMCPPath + "{agent}", HubMCPAll, "/", "POST " + joinData, AdminPath,
-	// the chat page's files are kept in magpie, never sent to a model
+	// the chat page's files are kept in eipgam, never sent to a model
 	"POST " + ChatPagePath + "/anthropic/v1/files", "DELETE " + ChatPagePath + "/anthropic/v1/files/{id}",
 }
 

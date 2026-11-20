@@ -3,7 +3,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
-// magpie draws both themes itself, and says so: a browser that repaints
+// eipgam draws both themes itself, and says so: a browser that repaints
 // light pages dark (Chrome's Auto Dark Theme, Safari's Adaptive Dark Mode)
 // skips a page whose root takes dark too, and leaves an element that is
 // light only alone (xjp on X). The page under the root takes the theme
@@ -23,7 +23,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", fixture("en", theme, []));
-      await page.goto("http://magpie.test/?view=gateway" + (theme === "system" ? "" : "&theme=" + theme));
+      await page.goto("http://eipgam.test/?view=gateway" + (theme === "system" ? "" : "&theme=" + theme));
       await page.locator("#gatewayKeys").waitFor({ state: "attached" });
       const got = await page.evaluate(() => ({
         meta: document.querySelector('meta[name="color-scheme"]')?.content || "",

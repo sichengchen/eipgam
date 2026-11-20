@@ -9,7 +9,7 @@ import (
 )
 
 // MiniMaxDir is the data folder MiniMax Code keeps config.yaml, its
-// sessions and its skills in. Every place magpie reads or writes MiniMax
+// sessions and its skills in. Every place eipgam reads or writes MiniMax
 // Code's files goes through here.
 func MiniMaxDir() string {
 	home, _ := os.UserHomeDir()
@@ -24,7 +24,7 @@ func MiniMaxDir() string {
 // data folder, which moves the folder to <parent>/.minimax and keeps the
 // parent as config.localRuntimeDataParentDir in its electron-store file —
 // else ~/.minimax. YujunT46308 on X (MiniMax Code 3.1.13 CN): with the
-// folder moved, magpie wrote ~/.minimax/config.yaml, which the app no
+// folder moved, eipgam wrote ~/.minimax/config.yaml, which the app no
 // longer read. A desktop file that is missing, can't be read or doesn't
 // parse is the default folder, as electron-store reads one it can't parse
 // as its defaults.
@@ -82,7 +82,7 @@ func miniMaxDesktopParent(home, goos string) string {
 		}
 		// the app takes only a string, trimmed, made absolute
 		// (setConfiguredLocalRuntimeDataParentDir); a relative one would
-		// be its working folder's, which isn't magpie's
+		// be its working folder's, which isn't eipgam's
 		p, _ := st.Config.Parent.(string)
 		if p = strings.TrimSpace(p); p != "" && filepath.IsAbs(p) {
 			return filepath.Clean(p)

@@ -14,11 +14,11 @@ import (
 	"github.com/coder/websocket"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // rtUp is a realtime vendor: DashScope's /api-ws/v1/realtime and OpenAI's
@@ -254,8 +254,8 @@ func TestRealtimeOpenAIStyleAndClientClose(t *testing.T) {
 // its status. None reaches the vendor but the last.
 func TestRealtimeGuards(t *testing.T) {
 	u, _, ts := rtServe(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	budget.Forget()
 	keys, secrets := newCaller(t, "Laptop", "Held")
 	if _, err := access.Update("models-key", access.Change{Key: keys[1].ID, Models: []string{"oa/*"}}); err != nil {
@@ -363,8 +363,8 @@ func TestRealtimeMasked(t *testing.T) {
 // a limited key opens none (503).
 func TestRealtimeHeldToKeyLimit(t *testing.T) {
 	u, _, ts := rtServe(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	budget.Forget()
 	pinLimitClock(t)
 	was := realtimeKeyCheck
@@ -417,8 +417,8 @@ func TestRealtimeHeldToKeyLimit(t *testing.T) {
 // realtime session lasts: a second session waits until the first ends.
 func TestRealtimeHoldsKeySlot(t *testing.T) {
 	u, _, ts := rtServe(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	keys, secrets := newCaller(t, "One")
 	if _, err := access.Update("concurrency-key", access.Change{Key: keys[0].ID, MaxConcurrency: 1}); err != nil {
 		t.Fatal(err)

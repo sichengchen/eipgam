@@ -12,15 +12,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/desktopdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/desktopdir"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Claude Code reads its endpoint from the `env` block of settings.json.
@@ -28,8 +28,8 @@ import (
 // its model (and in the variables the aliases opus/sonnet/haiku resolve
 // through) is all it takes to run it on any provider.
 
-// env vars magpie sets while routing through the gateway. ANTHROPIC_MODEL
-// only an older magpie set: it outranks settings.json's model, so a model
+// env vars eipgam sets while routing through the gateway. ANTHROPIC_MODEL
+// only an older eipgam set: it outranks settings.json's model, so a model
 // picked in Claude Code's /model lasted only the session; it is taken out.
 var claudeEnv = append([]string{
 	"ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_MODEL",
@@ -43,7 +43,7 @@ var claudeEnv = append([]string{
 // description /model shows for the tier, and _SUPPORTED_CAPABILITIES, what
 // it takes the model to do (2.1.293). Each is about the model it was written
 // beside, so one written for the user's own model, or for a model of
-// magpie's the tier has left, names a model the tier no longer runs (#1227:
+// eipgam's the tier has left, names a model the tier no longer runs (#1227:
 // every tier on deepseek-flash, shown as grok-4.5).
 var claudeAbout = []string{"_NAME", "_DESCRIPTION", "_SUPPORTED_CAPABILITIES"}
 
@@ -59,12 +59,12 @@ var claudeAboutEnv = func() []string {
 }()
 
 // claudeOwnEnv are the models of claudeEnv a user may have set for their
-// own endpoint, which magpie's take the place of while it is wired in and
+// own endpoint, which eipgam's take the place of while it is wired in and
 // gives back when it steps out, with what the user's env says about each
-// tier's model. ANTHROPIC_MODEL, their main model, too: magpie takes it
+// tier's model. ANTHROPIC_MODEL, their main model, too: eipgam takes it
 // out while wired in (writeTiers), and it was lost for good. So is their
 // auto mode classifier's model (claudeAutoModeEnv), which isn't in
-// claudeEnv: one set while magpie is wired in is left to the user.
+// claudeEnv: one set while eipgam is wired in is left to the user.
 var claudeOwnEnv = append([]string{
 	"ANTHROPIC_MODEL",
 	"ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL",
@@ -84,7 +84,7 @@ const claudeAutoModeEnv = "CLAUDE_CODE_AUTO_MODE_MODEL"
 // claudeAdvisorEnv turns Claude Code's advisor (/advisor, settings.json's
 // advisorModel) on for any model (2.1.316): without it, Claude Code sends
 // the advisor only for Anthropic's own models by their public names, and
-// a model on magpie gets none. The advisor field writes it, and magpie's
+// a model on eipgam gets none. The advisor field writes it, and eipgam's
 // gateway runs the advisor for a model whose upstream can't
 // (internal/gateway/advisor_serve.go).
 const claudeAdvisorEnv = "CLAUDE_CODE_ENABLE_EXPERIMENTAL_ADVISOR_TOOL"
@@ -99,8 +99,8 @@ var claudeNoClassifier = []string{"claude-sonnet-5-5", "claude-opus-5-5", "claud
 // (agentenv.ClaudeProviders) send its requests to, named as Claude Code
 // 2.1.300 names them. Each has an endpoint variable of its own
 // (ANTHROPIC_BEDROCK_BASE_URL, …), and ANTHROPIC_BASE_URL is passed over,
-// so a Claude Code with one on never reaches magpie: Bedrock refused
-// magpie's model ids (jw1dev on X).
+// so a Claude Code with one on never reaches eipgam: Bedrock refused
+// eipgam's model ids (jw1dev on X).
 var claudeClouds = map[string]string{
 	"CLAUDE_CODE_USE_BEDROCK":                "Amazon Bedrock",
 	"CLAUDE_CODE_USE_VERTEX":                 "Google Vertex AI",
@@ -122,7 +122,7 @@ func claudeSwitchOn(v string) bool {
 }
 
 // claudeShellEnv is a variable as a Claude Code started in a terminal has
-// it: the login shell's, else magpie's own; a var so tests can say.
+// it: the login shell's, else eipgam's own; a var so tests can say.
 var claudeShellEnv = func(k string) string {
 	if v := loginEnv(k); v != "" {
 		return v
@@ -131,12 +131,12 @@ var claudeShellEnv = func(k string) string {
 }
 
 // claudeCloud says which provider switch (claudeClouds) takes the Claude
-// Code whose settings.json is at path onto a cloud, past magpie, and where
+// Code whose settings.json is at path onto a cloud, past eipgam, and where
 // it is set; "" when none is on. Claude Code puts the env of .claude.json,
 // then of the user's settings, then of an administrator's managed settings
 // over the environment it was started in, so the last of those that has
 // the variable is the one it goes by. A project's .claude/settings.json is
-// not looked at: magpie doesn't know which folders Claude Code runs in.
+// not looked at: eipgam doesn't know which folders Claude Code runs in.
 func claudeCloud(at place, path string) string {
 	managed := claudeManaged()
 	if at.sys != nil {
@@ -156,7 +156,7 @@ func claudeCloud(at place, path string) string {
 			set = true
 			break
 		}
-		// a distro's environment magpie can't read
+		// a distro's environment eipgam can't read
 		if !set && at.spell == nil && claudeSwitchOn(claudeShellEnv(k)) {
 			return noticeClaudeCloudShell.say("var", k, "cloud", claudeClouds[k])
 		}
@@ -181,7 +181,7 @@ func claudeGlobal(at place, dir string) string {
 // claudeOnboardMark is what Claude Code keeps in its global config once
 // its first run is done: until then each start opens on the theme picker,
 // then, signed in nowhere, the choice of a sign-in (KoiLx0 on X: Claude
-// Code through magpie still asked for both on a computer it hadn't run on).
+// Code through eipgam still asked for both on a computer it hadn't run on).
 const claudeOnboardMark = "hasCompletedOnboarding"
 
 // claudeOnboard marks Claude Code's first run done in its global config at
@@ -248,7 +248,7 @@ func claudeName(model string) string {
 // claudeEffortsFor is the levels Claude Code sends a model at, as 2.1.285
 // sends them: Opus 4.5 takes up to high, Opus and Sonnet 4.6 skip xhigh, the
 // Haiku and older Claude models none; any higher level runs as the highest
-// below it. A model it doesn't know (another vendor's through magpie, a Claude
+// below it. A model it doesn't know (another vendor's through eipgam, a Claude
 // newer than it) gets the level as set.
 func claudeEffortsFor(model string) []string {
 	switch claudeName(model) {
@@ -319,7 +319,7 @@ var claudeAliases = []string{"default", "best", "opus", "sonnet", "haiku", "fabl
 const claudeContextEnv = "CLAUDE_CODE_MAX_CONTEXT_TOKENS"
 
 // claudeCompactEnv is where Claude Code compacts a conversation, the smaller
-// of it and the model's window, a [1m] one's too. magpie sets it to
+// of it and the model's window, a [1m] one's too. eipgam sets it to
 // settings.WorkingWindow, so a 1M model isn't run to 1M with every turn
 // sending all of it (X: Chen, turns of ~550K tokens waiting 70–90s for a
 // first token); settings.FullContext leaves it out, and so does a Claude
@@ -343,9 +343,9 @@ const claudeUnknownOutput = 32000
 // "<model>=effort,xhigh_effort;<model>=…" (a trailing * a prefix, [1m]
 // taken off the model first, the model lowercased, the pattern not). Run on
 // a gateway (CLAUDE_CODE_USE_GATEWAY, as Claude Desktop's Code tab runs it)
-// it otherwise takes no model of magpie's for one with effort, xhigh or max,
-// so "ultracode": true, which needs xhigh, did nothing (#430). Each magpie
-// model is said to have only the levels magpie knows it has, and xhigh
+// it otherwise takes no model of eipgam's for one with effort, xhigh or max,
+// so "ultracode": true, which needs xhigh, did nothing (#430). Each eipgam
+// model is said to have only the levels eipgam knows it has, and xhigh
 // with max: the gateway runs xhigh at max for one without it, and without
 // xhigh_effort Claude Code turns Ultracode down (leesunrise2364 on Discord).
 const claudeCapsEnv = "CLAUDE_CODE_MODEL_CAPABILITIES"
@@ -360,7 +360,7 @@ const claudeCapsEnv = "CLAUDE_CODE_MODEL_CAPABILITIES"
 // ("Auto mode can't check actions in this session", JoyYoung2Lucky on X),
 // a Claude model's on a relay too, unless this is "0"
 // (gateway/automode.go). Anthropic's page on it says to set it to 0 for a
-// gateway that can't run the checks: magpie does unless every model Claude
+// gateway that can't run the checks: eipgam does unless every model Claude
 // Code can reach through it surely answers the review (claudeReviewed),
 // and leaves it unset while each does. One the user set is theirs.
 const claudeReviewEnv = "CLAUDE_CODE_AUTO_MODE_SERVER"
@@ -368,7 +368,7 @@ const claudeReviewEnv = "CLAUDE_CODE_AUTO_MODE_SERVER"
 // claudeSearchEnv turns Claude Code's tool search on: MCP tools are named
 // in a reminder and loaded by ToolSearch when the model needs them, not
 // sent whole on every request. Before 2.1.304 Claude Code kept it off
-// behind an ANTHROPIC_BASE_URL other than Anthropic's, so magpie's MCP
+// behind an ANTHROPIC_BASE_URL other than Anthropic's, so eipgam's MCP
 // router sent its 245 tools' definitions, 124K tokens, on every request
 // (cybercaius on Discord). 2.1.304 and later turn it on there themselves;
 // "true" also keeps it on in a conversation begun without it, which
@@ -378,12 +378,12 @@ const claudeReviewEnv = "CLAUDE_CODE_AUTO_MODE_SERVER"
 const claudeSearchEnv = "ENABLE_TOOL_SEARCH"
 
 // Claude Code 2.1.295's Explore inherit cap can replace Desktop's
-// mythos-magpie compatibility alias with Opus. Disable that cap while
-// Desktop is on magpie, without forcing other subagents onto a model.
+// mythos-eipgam compatibility alias with Opus. Disable that cap while
+// Desktop is on eipgam, without forcing other subagents onto a model.
 const claudeExploreEnv = "CLAUDE_CODE_DISABLE_EXPLORE_INHERIT_CAP"
 
 // claudeReviewed reports whether every model Claude Code can reach
-// through magpie has its actions reviewed, the results coming back
+// through eipgam has its actions reviewed, the results coming back
 // (gateway.AutoModeAnswered: a Claude model on Anthropic's own API or the
 // Claude subscription): each one shown to the agents in catalogs (Claude
 // Code, Claude Desktop whose Code tab is Claude Code, T3 Code's instance of
@@ -439,7 +439,7 @@ func claudeReviewed(catalogs []string, models ...string) bool {
 			}
 			continue
 		}
-		// Not one magpie knows: judged by its name, as the gateway would
+		// Not one eipgam knows: judged by its name, as the gateway would
 		// judge a request for it.
 		if !gateway.AutoModeReviewed(provider.Provider{}, id) {
 			return false
@@ -469,11 +469,11 @@ func claudeCaps(levels []string) string {
 	return strings.Join(caps, ",")
 }
 
-// claudeCapabilities is claudeCapsEnv's value for magpie's models as Claude
+// claudeCapabilities is claudeCapsEnv's value for eipgam's models as Claude
 // Code is shown them, and with desktop, as Claude Desktop hands them to it
-// (mythos-magpie-<number>); first are the models it is set to, which go in
+// (mythos-eipgam-<number>); first are the models it is set to, which go in
 // before the rest. own leaves out the models Claude Code itself is shown,
-// for when only Desktop runs on magpie. A model of Claude's it knows is
+// for when only Desktop runs on eipgam. A model of Claude's it knows is
 // said to have no more than it gives it, one with no levels isn't named.
 func claudeCapabilities(first []string, own, desktop bool) string {
 	type seg struct{ id, caps string }
@@ -542,7 +542,7 @@ func claudeCapabilities(first []string, own, desktop bool) string {
 // Claude Code runs its own small asks on the haiku tier — a session's
 // title, Explore subagents, WebFetch's reading — on Haiku, which on a Claude
 // subscription costs a fraction of Opus's limits (X, AncientTwo: the limits
-// went much faster through magpie than in Claude Code itself).
+// went much faster through eipgam than in Claude Code itself).
 //
 // For fable, on any model that is no Fable, it is none: the fable tier is
 // left unset. Claude Code takes the model ANTHROPIC_DEFAULT_FABLE_MODEL
@@ -622,7 +622,7 @@ var claudeModelEnv = []string{
 }
 
 // claudeMagpieModel says a model in Claude Code's env or its model, as
-// written there, is one of magpie's: a provider/model name only magpie's
+// written there, is one of eipgam's: a provider/model name only eipgam's
 // gateway serves, at an effort or marked 1M or not. On Anthropic's own
 // endpoint it is a 404, "There's an issue with the selected model"
 // (roswellcsy on X).
@@ -642,7 +642,7 @@ func claudeSameModel(a, b string) bool {
 
 // A tier (and the subagents' model) may run at an effort of its own (#536):
 // the model it is on, as Claude Code is given it, is "<model>:<level>"
-// (before a [1m] mark, which Claude Code takes off), and magpie's gateway
+// (before a [1m] mark, which Claude Code takes off), and eipgam's gateway
 // asks that model for that level whatever Claude Code asked, as it does a
 // routing group's member fixed at one (#189). Claude Code has one effort for
 // a session, the main model's; the tier's model at that level is a model id
@@ -678,7 +678,7 @@ func tierWith(model, effort string) string {
 }
 
 // tierEfforts are the levels a tier on model can be fixed at: the ones
-// magpie knows the model has, else those Claude Code sends it.
+// eipgam knows the model has, else those Claude Code sends it.
 func tierEfforts(model string) []string {
 	id := strings.TrimSuffix(model, "[1m]")
 	for _, m := range sharedModels("claude") {
@@ -692,9 +692,9 @@ func tierEfforts(model string) []string {
 func claude(home string) *Agent { return claudeIn(here(home)) }
 
 // claudeRouted says the Claude Code at a place, its settings.json at path,
-// sends its requests to magpie's gateway: its ANTHROPIC_BASE_URL is the
-// gateway, or a proxy to it where magpie has answered (#1985,
-// claudeProxied). Whatever its model and however it signs in to magpie.
+// sends its requests to eipgam's gateway: its ANTHROPIC_BASE_URL is the
+// gateway, or a proxy to it where eipgam has answered (#1985,
+// claudeProxied). Whatever its model and however it signs in to eipgam.
 func claudeRouted(at place, path string) bool {
 	u, _ := edit.GetJSON(path, "env.ANTHROPIC_BASE_URL")
 	return u == at.gw() || claudeProxied(at, path, u)
@@ -705,7 +705,7 @@ func claudeRouted(at place, path string) bool {
 // reaches it from there.
 func claudeIn(at place) *Agent {
 	path := filepath.Join(at.claudeDir(), "settings.json")
-	// a model in the env is read as magpie serves it, its dashed spelling
+	// a model in the env is read as eipgam serves it, its dashed spelling
 	// taken back (claudeModelEnv)
 	rawEnv := func(k string) string { v, _ := edit.GetJSON(path, "env."+k); return v }
 	env := func(k string) string {
@@ -715,7 +715,7 @@ func claudeIn(at place) *Agent {
 		}
 		return v
 	}
-	// spell is a model of magpie's as Claude Code is given it: a dotted
+	// spell is a model of eipgam's as Claude Code is given it: a dotted
 	// Claude version dashed, which it would read as Claude Opus 4
 	// and on this computer's own file a Claude model of Claude Code's own
 	// subscription is Anthropic's bare id (ClaudeBare), which Desktop's Code
@@ -727,7 +727,7 @@ func claudeIn(at place) *Agent {
 		return provider.ClaudeSpelled(ref)
 	}
 	model := jsonGet(path, "model")
-	// routed: on magpie's gateway, or on a proxy to it where magpie has
+	// routed: on eipgam's gateway, or on a proxy to it where eipgam has
 	// answered (#1985, claudeProxied), which a pick keeps (gwAt)
 	routed := func() bool { return claudeRouted(at, path) }
 	gwAt := func() string {
@@ -740,18 +740,18 @@ func claudeIn(at place) *Agent {
 	// Code's /model saves, so a model picked there holds for its next
 	// sessions too (the owner: 去掉 ANTHROPIC_MODEL，让 /model 的选择对新会话也生效)
 	mainModel := func() string { return claudeMain(path) }
-	// the main model magpie last wrote: a tier or the subagents on it follow
+	// the main model eipgam last wrote: a tier or the subagents on it follow
 	// the main model, as they do on none; on another they have one of their
 	// own. A pick in /model moves the main model alone, and those following
-	// it go with it when magpie next looks (Follow).
+	// it go with it when eipgam next looks (Follow).
 	mainKey := at.key("claude.main")
 	wroteMain := func() string { return cmp.Or(stashShared()[mainKey], env("ANTHROPIC_MODEL")) }
-	// how Claude Code signs in to magpie (its sign-in field): with magpie's
+	// how Claude Code signs in to eipgam (its sign-in field): with eipgam's
 	// key, or ("claudeai") with its own claude.ai sign-in, which it keeps
 	// so: an empty ANTHROPIC_AUTH_TOKEN leaves it signed in, where a key
 	// signs it out of claude.ai, and the gateway never passes the sign-in
 	// on. Only where the gateway takes any key: from another machine,
-	// magpie shared, it takes its sharing key alone. Kept in the stash,
+	// eipgam shared, it takes its sharing key alone. Kept in the stash,
 	// where set("") and Unwire leave it for the next time it is routed.
 	loginKey := at.key("claude.login")
 	signInHere := func() bool { return at.gwKey() == gateway.Token }
@@ -762,12 +762,12 @@ func claudeIn(at place) *Agent {
 		}
 		return at.gwKey()
 	}
-	// the gateway address magpie last wrote as Claude Code's base URL
+	// the gateway address eipgam last wrote as Claude Code's base URL
 	wroteAt := at.key("claude" + wiredAt)
-	// the key in env is one magpie wrote, at this gateway address or an
+	// the key in env is one eipgam wrote, at this gateway address or an
 	// older one: its own, or the empty one of the claude.ai sign-in kept,
-	// beside the address magpie wrote with it. An empty key at an endpoint
-	// of the user's own is theirs, though magpie once kept the sign-in.
+	// beside the address eipgam wrote with it. An empty key at an endpoint
+	// of the user's own is theirs, though eipgam once kept the sign-in.
 	keyOurs := func() bool {
 		tok, has := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN")
 		if ourKey(tok) {
@@ -777,10 +777,10 @@ func claudeIn(at place) *Agent {
 		u := env("ANTHROPIC_BASE_URL")
 		return has && tok == "" && st[loginKey] == "claudeai" && u != "" && u == st[wroteAt]
 	}
-	// Claude Code's first run, marked done where magpie wires its key in,
-	// so it starts straight into a session (claudeOnboard); claude-magpie's
+	// Claude Code's first run, marked done where eipgam wires its key in,
+	// so it starts straight into a session (claudeOnboard); claude-eipgam's
 	// launch folder is no config folder of Claude Code's. The stash says
-	// magpie wrote the mark, for Unwire to take it out again.
+	// eipgam wrote the mark, for Unwire to take it out again.
 	onboardKey := at.key("claude.onboarded")
 	onboard := func() {
 		if at.id == ClaudeLaunchID || wiredKey() == "" {
@@ -802,31 +802,31 @@ func claudeIn(at place) *Agent {
 	// model changes
 	ownKey := func(t string) string { return at.key("claude.tier_own." + t) }
 	own := func(t string) bool { return stashShared()[ownKey(t)] != "" }
-	// the auto mode classifier's model as magpie last wrote it (the auto
-	// mode field); autoOurs: the env's is that one or another of magpie's
-	// models, which goes when magpie steps out. Any other is the user's.
+	// the auto mode classifier's model as eipgam last wrote it (the auto
+	// mode field); autoOurs: the env's is that one or another of eipgam's
+	// models, which goes when eipgam steps out. Any other is the user's.
 	autoKey := at.key("claude.auto_mode_model")
 	autoOurs := func() bool {
 		v := rawEnv(claudeAutoModeEnv)
 		return v != "" && (v == stashShared()[autoKey] || isMagpie(env(claudeAutoModeEnv)))
 	}
-	// the advisor's switch as magpie wrote it (the advisor field), which
-	// goes when the advisor does or magpie steps out; one the user wrote
+	// the advisor's switch as eipgam wrote it (the advisor field), which
+	// goes when the advisor does or eipgam steps out; one the user wrote
 	// is theirs
 	advisorKey := at.key("claude.advisor_env")
 	advisorOurs := func() bool {
 		v := rawEnv(claudeAdvisorEnv)
 		return v != "" && v == stashShared()[advisorKey]
 	}
-	// set once magpie has taken what the env said about each tier's model
+	// set once eipgam has taken what the env said about each tier's model
 	// from before it routed Claude Code (claudeAbout): what is there after
-	// that the user wrote about magpie's model, and stays while the tier
+	// that the user wrote about eipgam's model, and stays while the tier
 	// is on it
 	aboutKey := at.key("claude.tier_about")
 	// staleAbout is what the env says about a tier's model that the model
 	// it goes on (tiers, nil for each staying) isn't: all of it before
-	// magpie has looked, kept to give back when magpie steps out (an older
-	// magpie routed Claude Code without taking it), else a tier's whose
+	// eipgam has looked, kept to give back when eipgam steps out (an older
+	// eipgam routed Claude Code without taking it), else a tier's whose
 	// model changes
 	staleAbout := func(tiers map[string]string) []string {
 		before := stashShared()[aboutKey] == ""
@@ -863,7 +863,7 @@ func claudeIn(at place) *Agent {
 		return nil
 	}
 	// follows says a tier on model m (its effort apart) follows the main
-	// model: on none, on the main model magpie last wrote, or on the model
+	// model: on none, on the main model eipgam last wrote, or on the model
 	// it takes after that one (follow)
 	follows := func(t, m string) bool {
 		if own(t) {
@@ -874,9 +874,9 @@ func claudeIn(at place) *Agent {
 		return m == "" || m == was || m == follow(t, was)
 	}
 
-	// wroteAlias says "model" is the alias magpie wrote for the main model
+	// wroteAlias says "model" is the alias eipgam wrote for the main model
 	// it last wrote (mainWord), still on that model: a tier alias the user
-	// picked since stands for another model, or none of magpie's
+	// picked since stands for another model, or none of eipgam's
 	wroteAlias := func() bool {
 		m, _ := edit.GetJSON(path, "model")
 		if at.id != "" || !contains(claudeTiers, strings.TrimSuffix(m, "[1m]")) {
@@ -895,18 +895,18 @@ func claudeIn(at place) *Agent {
 		}
 		return model()
 	}
-	// the context window magpie last wrote, so a value the user wrote is
-	// never taken for magpie's: that one is left as it is
+	// the context window eipgam last wrote, so a value the user wrote is
+	// never taken for eipgam's: that one is left as it is
 	windowKey := at.key("claude.context_tokens")
 	windowOurs := func() bool {
 		cur := env(claudeContextEnv)
 		return cur != "" && cur == stashShared()[windowKey]
 	}
-	// the modelSettings windows magpie last wrote while Claude Desktop is
-	// on magpie (claudePlan, #2025), as JSON {id: window}, and the
-	// top-level autoCompactWindow it wrote beside them: each is magpie's
-	// only while it still says what magpie wrote, so the user's own, an
-	// /autocompact among them, is never taken for magpie's
+	// the modelSettings windows eipgam last wrote while Claude Desktop is
+	// on eipgam (claudePlan, #2025), as JSON {id: window}, and the
+	// top-level autoCompactWindow it wrote beside them: each is eipgam's
+	// only while it still says what eipgam wrote, so the user's own, an
+	// /autocompact among them, is never taken for eipgam's
 	budgetsKey := at.key("claude.model_budgets")
 	defaultKey := at.key("claude.compact_default")
 	budgetsOurs := func() map[string]int {
@@ -919,7 +919,7 @@ func claudeIn(at place) *Agent {
 		return ok && cur != "" && cur == stashShared()[defaultKey]
 	}
 	// writeBudgets puts in entries and the default (0 for none), and takes
-	// out what magpie wrote before that they no longer have
+	// out what eipgam wrote before that they no longer have
 	writeBudgets := func(def int, entries map[string]int) error {
 		raw, _ := edit.GetJSON(path, "modelSettings")
 		cur := budgetsRead(raw)
@@ -934,7 +934,7 @@ func claudeIn(at place) *Agent {
 			if err := edit.DelJSON(path, del...); err != nil {
 				return err
 			}
-			// an id's object magpie emptied goes too
+			// an id's object eipgam emptied goes too
 			raw, _ = edit.GetJSON(path, "modelSettings")
 			var per map[string]map[string]json.RawMessage
 			if json.Unmarshal([]byte(raw), &per) == nil {
@@ -1000,7 +1000,7 @@ func claudeIn(at place) *Agent {
 		}
 		return nil
 	}
-	// the reply length magpie last wrote, kept apart from the user's own
+	// the reply length eipgam last wrote, kept apart from the user's own
 	// in the same way
 	outputKey := at.key("claude.output_tokens")
 	outputOurs := func() bool {
@@ -1014,8 +1014,8 @@ func claudeIn(at place) *Agent {
 		}
 		return nil
 	}
-	// the capabilities magpie last wrote, kept apart from the user's own in
-	// the same way: theirs is left as it is, magpie's adds to nothing
+	// the capabilities eipgam last wrote, kept apart from the user's own in
+	// the same way: theirs is left as it is, eipgam's adds to nothing
 	capsKey := at.key("claude.capabilities")
 	capsOurs := func() bool {
 		cur := env(claudeCapsEnv)
@@ -1028,14 +1028,14 @@ func claudeIn(at place) *Agent {
 		}
 		return nil
 	}
-	// the auto-compact window magpie last wrote, kept apart from the
+	// the auto-compact window eipgam last wrote, kept apart from the
 	// user's own in the same way
 	compactKey := at.key("claude.compact_window")
 	compactOurs := func() bool {
 		cur := env(claudeCompactEnv)
 		return cur != "" && cur == stashShared()[compactKey]
 	}
-	// set while the window magpie wrote is Long conversations' (not a
+	// set while the window eipgam wrote is Long conversations' (not a
 	// provider's Compact at): tune's card reads it as that one value
 	compactLongKey := at.key("claude.compact_long")
 	dropCompact := func() error {
@@ -1050,7 +1050,7 @@ func claudeIn(at place) *Agent {
 	// the variable would take precedence over them, so it goes
 	budgeted := false
 	// writeCompact has Claude Code compact at the working window
-	// (settings.WorkingWindow) on magpie, unless settings.FullContext or the
+	// (settings.WorkingWindow) on eipgam, unless settings.FullContext or the
 	// main model is one of Anthropic's Claude models: Anthropic runs a [1m]
 	// one to its whole 1M, so it gets its own window (Max on Discord: a
 	// [1m] model stopped at 272K), or a routing group made only of
@@ -1071,9 +1071,9 @@ func claudeIn(at place) *Agent {
 		long := false
 		if s := settings.Load().ForAgent("claude"); n == 0 && !claudeModel(main) && !provider.ClaudeGroup(main) {
 			n, long = s.Compact(), true
-			// magpie's default gives way to an autoCompactWindow the user
+			// eipgam's default gives way to an autoCompactWindow the user
 			// set in Claude Code (/autocompact, its settings), which the env
-			// would take precedence over; one typed in magpie doesn't (#876).
+			// would take precedence over; one typed in eipgam doesn't (#876).
 			// So does it to a window the user typed for the main model, on
 			// its group or its provider: Claude Code then runs to the window
 			// it is told (claudeContextEnv), as Codex is (provider.CompactFor,
@@ -1100,12 +1100,12 @@ func claudeIn(at place) *Agent {
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeCompactEnv, Value: w})
 	}
 	// Claude Code's /model lists what modelPicker says (2.1.287): while it
-	// runs on magpie, that is every one of magpie's models, the routing
+	// runs on eipgam, that is every one of eipgam's models, the routing
 	// groups first as viaMagpie lists them, so the user picks among them
-	// in Claude Code itself. Groups were left out, so one magpie had just
+	// in Claude Code itself. Groups were left out, so one eipgam had just
 	// made the main model and every tier wasn't in /model (#1575). One the
-	// user wrote is theirs. One whose every row says "via magpie" is
-	// magpie's though its mark is gone (an older magpie's stash lost it),
+	// user wrote is theirs. One whose every row says "via eipgam" is
+	// eipgam's though its mark is gone (an older eipgam's stash lost it),
 	// so it is kept up to date rather than left as the user's: a WSL
 	// Claude Code's /model kept a list without the models added since
 	// (#2046, cjyrainbow).
@@ -1133,8 +1133,8 @@ func claudeIn(at place) *Agent {
 		// keeps only the Default row and the picker's own), so a tier's
 		// model keeps its row then, or it would be in /model nowhere.
 		//
-		// A list narrowed in magpie (only the picked models, or some taken
-		// out) asks the same: the built-in lineup's rows go to magpie too
+		// A list narrowed in eipgam (only the picked models, or some taken
+		// out) asks the same: the built-in lineup's rows go to eipgam too
 		// while Claude Code runs on it, and the one no tier names (Fable,
 		// left unset for a main of no Fable) listed a model the user had
 		// not picked beside the routing groups they had (yyhhyyyyyy on
@@ -1143,7 +1143,7 @@ func claudeIn(at place) *Agent {
 		// the lineup.
 		// ownOption: the user's custom row, in settings.json's env or, for
 		// this computer's Claude Code, the login shell's (a distro's
-		// environment magpie can't read)
+		// environment eipgam can't read)
 		ownOption := func() bool {
 			return env(claudeCustomOptionEnv) != "" || at.spell == nil && claudeShellEnv(claudeCustomOptionEnv) != ""
 		}
@@ -1163,7 +1163,7 @@ func claudeIn(at place) *Agent {
 		// it, by the Provider in model names setting (provider.Labels): the
 		// picker took the name alone, so none of the setting's three ways
 		// changed /model (love1sbug on X). A description that would say the
-		// provider the label already says is left "via magpie".
+		// provider the label already says is left "via eipgam".
 		labels := listLabels("claude")
 		rows := []any{}
 		for _, o := range viaMagpieShared("claude", "") {
@@ -1175,10 +1175,10 @@ func claudeIn(at place) *Agent {
 			// without its provider (Off, or a name the user gave) named
 			// neither in /model; the provider goes before the account then,
 			// as an API key's note says it (#1136, cjyrainbow)
-			if by, ok := strings.CutSuffix(note, " · via magpie"); ok {
+			if by, ok := strings.CutSuffix(note, " · via eipgam"); ok {
 				switch {
 				case label != o.Label && strings.HasSuffix(label, " · "+by):
-					note = "via magpie"
+					note = "via eipgam"
 				case o.Group != "" && o.Group != RoutingGroups && by != o.Group && !strings.HasSuffix(label, " · "+o.Group):
 					note = o.Group + " · " + note
 				}
@@ -1189,7 +1189,7 @@ func claudeIn(at place) *Agent {
 			return dropPicker()
 		}
 		// the switch that leaves a picker's own models out (#1642) reaches
-		// here too (#4548, raclen): /model is fed by magpie all the same, so
+		// here too (#4548, raclen): /model is fed by eipgam all the same, so
 		// with the switch off it says replaceBuiltInOptions, which takes
 		// Claude Code's built-in lineup rows back out of /model — the Default
 		// row stays, Claude Code keeping it as its own fallback. The flag
@@ -1218,15 +1218,15 @@ func claudeIn(at place) *Agent {
 		}
 		return refs
 	}
-	// writeCaps says what magpie's models can do, the ones in models first;
-	// Claude Desktop's ids too while it runs on magpie, its Code tab being
+	// writeCaps says what eipgam's models can do, the ones in models first;
+	// Claude Desktop's ids too while it runs on eipgam, its Code tab being
 	// Claude Code on this settings.json
 	desktopOn := func() bool {
 		// a distro's: Claude Desktop on Windows runs a Code tab session
 		// whose host is WSL on the distro's Claude Code, which reads
 		// ${CLAUDE_CONFIG_DIR:-$HOME/.claude} there (4.29.0's remote
 		// probe), not Windows' settings.json, and is handed the same
-		// mythos-magpie id and no window; only Windows' Desktop wired
+		// mythos-eipgam id and no window; only Windows' Desktop wired
 		// tells (young02036 on Discord: 500K group at "/ 200k" in WSL)
 		if at.sys != nil {
 			return desktopWiredAny(desktopSetsHere())
@@ -1239,7 +1239,7 @@ func claudeIn(at place) *Agent {
 		return at.id == "" && desktopWiredAny(desktopSets(desktopdir.OS, at.home, os.Getenv))
 	}
 	// Desktop's Explore compatibility flag has its own ownership: taking
-	// Claude Code off magpie must leave it while Desktop still needs it.
+	// Claude Code off eipgam must leave it while Desktop still needs it.
 	exploreKey := at.key("claude.explore_inherit_cap")
 	writeExplore := func() error {
 		cur, has := edit.GetJSON(path, "env."+claudeExploreEnv)
@@ -1269,7 +1269,7 @@ func claudeIn(at place) *Agent {
 		return nil
 	}
 	// putCaps is writeCaps with own saying whether Claude Code's own
-	// models are among them, as they are while it runs on magpie
+	// models are among them, as they are while it runs on eipgam
 	putCaps := func(own bool, models ...string) error {
 		if env(claudeCapsEnv) != "" && !capsOurs() {
 			forget(capsKey)
@@ -1286,7 +1286,7 @@ func claudeIn(at place) *Agent {
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeCapsEnv, Value: v})
 	}
 	writeCaps := func(models ...string) error { return putCaps(true, models...) }
-	// the auto mode review magpie turned off (claudeReviewEnv), kept apart
+	// the auto mode review eipgam turned off (claudeReviewEnv), kept apart
 	// from the user's own in the same way
 	reviewKey := at.key("claude.auto_mode_server")
 	reviewOurs := func() bool {
@@ -1301,7 +1301,7 @@ func claudeIn(at place) *Agent {
 		return nil
 	}
 	// writeReview turns the review off while a model Claude Code can reach
-	// through magpie doesn't answer it, and back on (unset) once each does
+	// through eipgam doesn't answer it, and back on (unset) once each does
 	writeReview := func(models ...string) error {
 		if rawEnv(claudeReviewEnv) != "" && !reviewOurs() {
 			forget(reviewKey)
@@ -1320,9 +1320,9 @@ func claudeIn(at place) *Agent {
 		}
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeReviewEnv, Value: "0"})
 	}
-	// tool search magpie turned on (claudeSearchEnv) while Claude Code is
-	// on magpie, kept apart from the user's own as the review is: a value
-	// there that isn't the one magpie wrote, an empty one too, is theirs
+	// tool search eipgam turned on (claudeSearchEnv) while Claude Code is
+	// on eipgam, kept apart from the user's own as the review is: a value
+	// there that isn't the one eipgam wrote, an empty one too, is theirs
 	searchKey := at.key("claude.tool_search")
 	searchOurs := func() bool {
 		cur, has := edit.GetJSON(path, "env."+claudeSearchEnv)
@@ -1347,8 +1347,8 @@ func claudeIn(at place) *Agent {
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeSearchEnv, Value: "true"})
 	}
 	// desktopPlan is what writeWindow writes while Claude Desktop is on
-	// magpie (claudePlan, #2025): the models its Code tab runs Claude Code
-	// on, and while Claude Code itself is on magpie (main set) its main
+	// eipgam (claudePlan, #2025): the models its Code tab runs Claude Code
+	// on, and while Claude Code itself is on eipgam (main set) its main
 	// model's, tiers' and those /model offers (pickerRefs), each with its
 	// own window under the largest. A model Claude Code knows as Claude's has its own window.
 	desktopPlan := func(main string, tiers map[string]string) (top, def int, entries map[string]int) {
@@ -1356,14 +1356,14 @@ func claudeIn(at place) *Agent {
 		// the user's own top-level autoCompactWindow
 		cur, userTop := edit.GetJSON(path, "autoCompactWindow")
 		userTop = userTop && !defaultOurs()
-		// the window each model of magpie's compacts at (claudeBudget's
+		// the window each model of eipgam's compacts at (claudeBudget's
 		// compact), as writeCompact gives the main model: the user's
 		// threshold for it first (#876); a Claude model, or a group of them,
 		// runs to its own (#1741), as does one whose window the user typed
-		// (#1809); the user's autoCompactWindow, unless they gave magpie a
+		// (#1809); the user's autoCompactWindow, unless they gave eipgam a
 		// threshold for every model; then that one, the working window
 		// unless Full window. It is the model's own entry, so Desktop's
-		// models have it with Claude Code itself off magpie too, where
+		// models have it with Claude Code itself off eipgam too, where
 		// Claude's own models compact as they did
 		work := func(ref string, listed1M bool) int {
 			if n := provider.CompactSet(ref); n > 0 {
@@ -1430,7 +1430,7 @@ func claudeIn(at place) *Agent {
 		}
 		// the user's own top-level window is the one a model without an
 		// entry runs at ("auto": the one Claude Code is told), in place of
-		// magpie's
+		// eipgam's
 		base := def
 		if userTop {
 			def = 0
@@ -1449,9 +1449,9 @@ func claudeIn(at place) *Agent {
 		return top, def, entries
 	}
 	// pickerApart says the main is one of Claude's own models (or a group
-	// of them), which Anthropic runs to its own window, magpie tells
+	// of them), which Anthropic runs to its own window, eipgam tells
 	// Claude Code no window for the rest (claudeWindow 0), and /model
-	// offers a model of magpie's whose window is known: picked there, it
+	// offers a model of eipgam's whose window is known: picked there, it
 	// would run at Claude Code's own 200K, so each gets its own through
 	// desktopPlan. A model Claude Code takes for 1M by its "[1m]", or
 	// knows as Claude's, has its own already. Any other main is as
@@ -1479,7 +1479,7 @@ func claudeIn(at place) *Agent {
 		return false
 	}
 	// writeWindow tells Claude Code the window of the models it runs on
-	// (claudeWindow). While Claude Desktop runs on magpie too, it is the
+	// (claudeWindow). While Claude Desktop runs on eipgam too, it is the
 	// largest of theirs and each model below it gets its own
 	// (desktopPlan), and so while the main model is a [1m] one beside a
 	// tier that isn't: the main's own window, with each tier below it held
@@ -1531,11 +1531,11 @@ func claudeIn(at place) *Agent {
 		}
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeContextEnv, Value: v})
 	}
-	// dropStray takes magpie's model names out of a Claude Code on
+	// dropStray takes eipgam's model names out of a Claude Code on
 	// Anthropic's own endpoint, where each is a 404 ("There's an issue
 	// with the selected model (claude/claude-opus-5-5)", roswellcsy on X):
 	// left in its env, ANTHROPIC_MODEL over settings.json's model, by an
-	// older magpie that gave one back from the stash as the user's own on
+	// older eipgam that gave one back from the stash as the user's own on
 	// every Disconnect. The user's own models, and any at an endpoint of
 	// theirs, which may name its models so, are left as they are.
 	dropStray := func() error {
@@ -1557,7 +1557,7 @@ func claudeIn(at place) *Agent {
 		return edit.DelJSON(path, keys...)
 	}
 	// desktopOnly is what is written while Claude Code itself isn't on
-	// magpie: Claude Desktop's Code tab still runs Claude Code on this
+	// eipgam: Claude Desktop's Code tab still runs Claude Code on this
 	// settings.json while Desktop is, so the window and capabilities of
 	// Desktop's models alone; none at all when Desktop isn't either. Only
 	// Claude Code's being wired in wrote them before, so a user who wired
@@ -1567,7 +1567,7 @@ func claudeIn(at place) *Agent {
 			return err
 		}
 		// the review is turned off only for Claude Code's own requests to
-		// magpie
+		// eipgam
 		if err := dropReview(); err != nil {
 			return err
 		}
@@ -1592,7 +1592,7 @@ func claudeIn(at place) *Agent {
 	// call names one, if the user gave it one of its own: Claude Code
 	// takes the Agent call's model, then the agent's frontmatter, then
 	// CLAUDE_CODE_SUBAGENT_MODEL, then the session's (2.1.287). Empty
-	// while it follows the main model, as magpie writes it by itself.
+	// while it follows the main model, as eipgam writes it by itself.
 	// An effort with no model of their own is never written: the main
 	// model at that effort in CLAUDE_CODE_SUBAGENT_MODEL pins every
 	// subagent to the main model (KorenKrita on Discord).
@@ -1603,7 +1603,7 @@ func claudeIn(at place) *Agent {
 		}
 		return ""
 	}
-	// the effort an older magpie wrote for subagents that follow the main
+	// the effort an older eipgam wrote for subagents that follow the main
 	// model, as the main model at that effort: "" for none
 	subagentFollowing := func() string {
 		m, e := tierAt(env("CLAUDE_CODE_SUBAGENT_MODEL"))
@@ -1642,11 +1642,11 @@ func claudeIn(at place) *Agent {
 		return main, tiers
 	}
 	// a provider switch the env has on (claudeClouds) sends Claude Code to
-	// that cloud, past ANTHROPIC_BASE_URL, so routing it through magpie
+	// that cloud, past ANTHROPIC_BASE_URL, so routing it through eipgam
 	// takes the switch out, its value kept in the stash as the user wrote
-	// it (a string or JSON's true), and magpie stepping out puts it back
-	// (jw1dev on X: CLAUDE_CODE_USE_BEDROCK=1 beside magpie's wiring, and
-	// Bedrock refused magpie's model). The cloud's own variables (AWS_*,
+	// it (a string or JSON's true), and eipgam stepping out puts it back
+	// (jw1dev on X: CLAUDE_CODE_USE_BEDROCK=1 beside eipgam's wiring, and
+	// Bedrock refused eipgam's model). The cloud's own variables (AWS_*,
 	// ANTHROPIC_VERTEX_PROJECT_ID, …) stay: without the switch Claude Code
 	// doesn't read them. One that is off stays as it is.
 	cloudKey := func(k string) string { return at.key("claude.cloud." + k) }
@@ -1700,8 +1700,8 @@ func claudeIn(at place) *Agent {
 		forgetValues(peeked)
 		return nil
 	}
-	// unroute takes magpie's endpoint and models out of Claude Code's env
-	// and puts back the endpoint and token the stash kept from before magpie
+	// unroute takes eipgam's endpoint and models out of Claude Code's env
+	// and puts back the endpoint and token the stash kept from before eipgam
 	// was wired in; it answers the model Claude Code was on then, for
 	// Unwire to go back to
 	unroute := func() (string, error) {
@@ -1713,7 +1713,7 @@ func claudeIn(at place) *Agent {
 			return "", err
 		}
 		// the window and capabilities stay as Claude Desktop's Code tab
-		// needs them while Desktop is on magpie (#1458)
+		// needs them while Desktop is on eipgam (#1458)
 		if err := desktopOnly(); err != nil {
 			return "", err
 		}
@@ -1724,7 +1724,7 @@ func claudeIn(at place) *Agent {
 			return "", err
 		}
 		if !routed() {
-			// magpie's, left at a gateway address since changed: its
+			// eipgam's, left at a gateway address since changed: its
 			// endpoint, key and models all go, as set("") takes them
 			if keyOurs() {
 				keys := make([]string, len(claudeEnv))
@@ -1737,7 +1737,7 @@ func claudeIn(at place) *Agent {
 			}
 			return "", dropStray()
 		}
-		// the alias magpie wrote for its main model (mainWord) means a tier
+		// the alias eipgam wrote for its main model (mainWord) means a tier
 		// of Anthropic's again once the tiers go, so it goes with them
 		aliased := wroteAlias()
 		keys := make([]string, len(claudeEnv))
@@ -1753,15 +1753,15 @@ func claudeIn(at place) *Agent {
 			}
 		}
 		forget(aboutKey)
-		// the auto mode classifier's model goes only where it is magpie's
+		// the auto mode classifier's model goes only where it is eipgam's
 		if autoOurs() {
 			if err := edit.DelJSON(path, "env."+claudeAutoModeEnv); err != nil {
 				return "", err
 			}
 		}
 		forget(autoKey)
-		// the advisor goes where it is on magpie's model, and its switch
-		// where magpie wrote it
+		// the advisor goes where it is on eipgam's model, and its switch
+		// where eipgam wrote it
 		if isMagpie(strings.TrimSuffix(claudeReadOwn(jsonGet(path, "advisorModel")()), "[1m]")) {
 			if err := edit.DelJSON(path, "advisorModel"); err != nil {
 				return "", err
@@ -1787,7 +1787,7 @@ func claudeIn(at place) *Agent {
 		var back []edit.KV
 		for _, k := range claudeOwnEnv {
 			// one the user set again since is theirs as it is
-			// one of magpie's kept by an older magpie as the user's is no
+			// one of eipgam's kept by an older eipgam as the user's is no
 			// model of their endpoint's (roswellcsy on X)
 			if v := peeked[at.key("claude.env."+k)]; v != "" && rawEnv(k) == "" && !(contains(claudeModelEnv, k) && claudeMagpieModel(v)) {
 				back = append(back, edit.KV{Path: "env." + k, Value: v})
@@ -1819,17 +1819,17 @@ func claudeIn(at place) *Agent {
 	set := func(v string) error {
 		if v == "" {
 			// Claude Code's own model, on the endpoint the user had before
-			// magpie: magpie steps out, putting back their endpoint and
-			// token, which stay theirs (__jingling on X: magpie claude
+			// eipgam: eipgam steps out, putting back their endpoint and
+			// token, which stay theirs (__jingling on X: eipgam claude
 			// model default took their ANTHROPIC_BASE_URL and token away
 			// for good)
 			if _, err := unroute(); err != nil {
 				return err
 			}
 			keys := []string{"model"}
-			// magpie's, left at a gateway address since changed: its key,
+			// eipgam's, left at a gateway address since changed: its key,
 			// or, where Claude Code kept its claude.ai sign-in, an empty
-			// one beside magpie's model
+			// one beside eipgam's model
 			if keyOurs() {
 				for _, k := range claudeEnv {
 					keys = append(keys, "env."+k)
@@ -1838,7 +1838,7 @@ func claudeIn(at place) *Agent {
 			if err := edit.DelJSON(path, keys...); err != nil {
 				return err
 			}
-			// the stashed values go once the write that takes magpie's out
+			// the stashed values go once the write that takes eipgam's out
 			// has gone through (#4258): the model the user had is given up
 			// for Claude Code's own default here, and the endpoint and token
 			// unroute put back are already out of the stash
@@ -1851,9 +1851,9 @@ func claudeIn(at place) *Agent {
 		if isMagpie(v) {
 			if !routed() {
 				// the user's own model, endpoint, token, tiers and
-				// subagent model: back with it when magpie steps out
+				// subagent model: back with it when eipgam steps out
 				// (#1050). At an older gateway address they're all
-				// magpie's, and what was kept when magpie was wired in
+				// eipgam's, and what was kept when eipgam was wired in
 				// stays kept.
 				if !keyOurs() {
 					kept := map[string]string{
@@ -1863,7 +1863,7 @@ func claudeIn(at place) *Agent {
 					}
 					for _, k := range claudeOwnEnv {
 						// as the user wrote it, never respelled; one of
-						// magpie's own left there is not theirs to get back
+						// eipgam's own left there is not theirs to get back
 						// (roswellcsy on X: it came back as their
 						// ANTHROPIC_MODEL with every Disconnect)
 						v := rawEnv(k)
@@ -1874,7 +1874,7 @@ func claudeIn(at place) *Agent {
 					}
 					// the auto mode classifier's model of their own
 					// endpoint waits in the stash, out of the env, as
-					// their tiers' do; one of magpie's stays as it is
+					// their tiers' do; one of eipgam's stays as it is
 					theirs := rawEnv(claudeAutoModeEnv) != "" && !autoOurs()
 					if !theirs {
 						kept[at.key("claude.env."+claudeAutoModeEnv)] = ""
@@ -1913,7 +1913,7 @@ func claudeIn(at place) *Agent {
 				}
 				if w := env(tierEnv(t)); routed() && w != "" {
 					// at an effort of its own, it keeps that on the new model
-					// one not magpie's on a tier that follows none (fable on a
+					// one not eipgam's on a tier that follows none (fable on a
 					// Claude model) is the user's own, left as written
 					if m, e := tierAt(w); !follows(t, m) && (isMagpie(m) || follow(t, v) == "") {
 						tiers[t] = w
@@ -1928,7 +1928,7 @@ func claudeIn(at place) *Agent {
 			return writeTiers(v, tiers)
 		}
 		// a word that is no model: an effort level the model doesn't take,
-		// ultracode (magpie claude ultra), a typo. Another endpoint's
+		// ultracode (eipgam claude ultra), a typo. Another endpoint's
 		// names are its own.
 		if u := env("ANTHROPIC_BASE_URL"); u == "" || routed() {
 			if err := claudeModelWord(v, get()); err != nil {
@@ -1948,16 +1948,16 @@ func claudeIn(at place) *Agent {
 	}
 
 	// mainWord is the main model as settings.json's "model" says it. A
-	// Claude Code that doesn't go through magpie but reads this file
+	// Claude Code that doesn't go through eipgam but reads this file
 	// anyway — Claude Desktop's Code tab on the user's own subscription
 	// drops the env, the gateway's address and the tiers with it, and still
 	// takes "model" — would send a provider-prefixed id to Anthropic, which
 	// refuses it (iryan_sun on X: WebFetch failed everywhere). So on this
 	// computer's own file the model is said as the alias of a tier that
-	// carries it: magpie's env gives the alias magpie's model, and
+	// carries it: eipgam's env gives the alias eipgam's model, and
 	// Anthropic's own tier is what it means anywhere else. A model on no
 	// tier, another machine's Claude Code (a distro's file, which Desktop
-	// doesn't read) and the claude-magpie launch file keep the id.
+	// doesn't read) and the claude-eipgam launch file keep the id.
 	mainWord := func(main string, tiers map[string]string) string {
 		id := spell(main)
 		if at.id != "" {
@@ -1994,7 +1994,7 @@ func claudeIn(at place) *Agent {
 		}
 		// subagents given a model of their own keep it; the others run on
 		// the session's, whatever /model picked, or on the tier they ask for.
-		// An older magpie's effort on the main model goes out, kept unwritten.
+		// An older eipgam's effort on the main model goes out, kept unwritten.
 		if e := subagentFollowing(); e != "" && stashShared()[subEffortKey] == "" {
 			stash(map[string]string{subEffortKey: e})
 		}
@@ -2008,10 +2008,10 @@ func claudeIn(at place) *Agent {
 		}
 		gw := gwAt()
 		tok := wiredKey()
-		// a caller key of the gateway's own where magpie's token goes goes
-		// through magpie all the same: theirs stays, as a sync keeps one
+		// a caller key of the gateway's own where eipgam's token goes goes
+		// through eipgam all the same: theirs stays, as a sync keeps one
 		// (mergeKept, keyHolds); only a value the gateway would refuse is
-		// wired over (#2545). The sharing key magpie made is magpie's own,
+		// wired over (#2545). The sharing key eipgam made is eipgam's own,
 		// however much Authenticate takes it, so it never counts as theirs
 		// (Default): sharing going off brings gateway.Token back
 		if v, _ := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN"); v != tok && keyHolds(v, tok) && !access.Default(v) {
@@ -2044,7 +2044,7 @@ func claudeIn(at place) *Agent {
 			return err
 		}
 		stash(map[string]string{mainKey: main, wroteAt: gw})
-		// the new model's window replaces the old one's, when magpie knows
+		// the new model's window replaces the old one's, when eipgam knows
 		// it; one the user set is theirs
 		if err := writeWindow(main, tiers); err != nil {
 			return err
@@ -2104,7 +2104,7 @@ func claudeIn(at place) *Agent {
 				direct = hostOf(u)
 			}
 			// an alias names the model the user's own env gives its tier,
-			// as Claude Code reads it; magpie's, while routed, isn't theirs
+			// as Claude Code reads it; eipgam's, while routed, isn't theirs
 			tier := func(t string) string {
 				if routed() {
 					return ""
@@ -2115,10 +2115,10 @@ func claudeIn(at place) *Agent {
 			for i := range own {
 				own[i].Direct = direct
 			}
-			// magpie's Claude Code account is the one Claude Code asks on
+			// eipgam's Claude Code account is the one Claude Code asks on
 			// its own while that is Anthropic: the same models a second
 			// time, folded in the picker (#496). Only this machine's: a
-			// distro's Claude Code has a sign-in of its own, which magpie
+			// distro's Claude Code has a sign-in of its own, which eipgam
 			// doesn't read
 			fold, key := name == "Claude Code" && at.id == "", "\x00claude-via"
 			if fold {
@@ -2154,7 +2154,7 @@ func claudeIn(at place) *Agent {
 			m := get()
 			if v != "" && !contains(claudeEfforts, v) {
 				if v == "ultra" || v == "ultracode" {
-					return fmt.Errorf("ultracode is a switch of Claude Code's beside its effort: magpie claude ultracode on")
+					return fmt.Errorf("ultracode is a switch of Claude Code's beside its effort: eipgam claude ultracode on")
 				}
 				return fmt.Errorf("Claude Code keeps an effort of %s, not %q", strings.Join(claudeEfforts, ", "), v)
 			}
@@ -2253,10 +2253,10 @@ func claudeIn(at place) *Agent {
 					if v == "" {
 						return nil
 					}
-					return fmt.Errorf("pick a model through magpie for Claude Code first; %s can then have its own", tier)
+					return fmt.Errorf("pick a model through eipgam for Claude Code first; %s can then have its own", tier)
 				}
 				if v != "" && !isMagpie(v) {
-					return fmt.Errorf("%s: %q is not a model magpie serves", tier, v)
+					return fmt.Errorf("%s: %q is not a model eipgam serves", tier, v)
 				}
 				main, tiers := curTiers()
 				// its effort, if it has one, goes with it to the new model
@@ -2315,10 +2315,10 @@ func claudeIn(at place) *Agent {
 				if v == "" {
 					return nil
 				}
-				return fmt.Errorf("pick a model through magpie for Claude Code first; its subagents can then have one of their own")
+				return fmt.Errorf("pick a model through eipgam for Claude Code first; its subagents can then have one of their own")
 			}
 			if v != "" && !isMagpie(v) {
-				return fmt.Errorf("subagents: %q is not a model magpie serves", v)
+				return fmt.Errorf("subagents: %q is not a model eipgam serves", v)
 			}
 			m, e := subagentAt()
 			if m == "" {
@@ -2343,7 +2343,7 @@ func claudeIn(at place) *Agent {
 		},
 	})
 
-	// each tier's effort, and the subagents', fixed by magpie's gateway on
+	// each tier's effort, and the subagents', fixed by eipgam's gateway on
 	// the model it is on (#536); empty, the session's effort as before
 	effortField := func(key, label, who string, at func() (string, string), put func(model, effort string) error) Field {
 		return Field{
@@ -2361,7 +2361,7 @@ func claudeIn(at place) *Agent {
 					if v == "" {
 						return nil
 					}
-					return fmt.Errorf("pick a model through magpie for Claude Code first; %s can then have an effort of its own", who)
+					return fmt.Errorf("pick a model through eipgam for Claude Code first; %s can then have an effort of its own", who)
 				}
 				if v != "" && !contains(provider.MemberEfforts, v) {
 					return fmt.Errorf("%s: an effort is one of %s, not %q", label, strings.Join(provider.MemberEfforts, ", "), v)
@@ -2416,10 +2416,10 @@ func claudeIn(at place) *Agent {
 				if v == "" {
 					return nil
 				}
-				return fmt.Errorf("pick a model through magpie for Claude Code first; its auto mode can then have a model of its own")
+				return fmt.Errorf("pick a model through eipgam for Claude Code first; its auto mode can then have a model of its own")
 			}
 			if v != "" && !isMagpie(v) {
-				return fmt.Errorf("auto mode: %q is not a model magpie serves", v)
+				return fmt.Errorf("auto mode: %q is not a model eipgam serves", v)
 			}
 			if contains(claudeNoClassifier, claudeName(v)) {
 				return fmt.Errorf("auto mode: Claude Code doesn't run its classifier on %s, and would take its own pick instead", v)
@@ -2442,7 +2442,7 @@ func claudeIn(at place) *Agent {
 		},
 	})
 	// advisor: the model Claude Code's advisor runs on (settings.json's
-	// advisorModel, as /advisor writes it), turned on for magpie's models
+	// advisorModel, as /advisor writes it), turned on for eipgam's models
 	// (claudeAdvisorEnv). Unset, no advisor. The gateway runs it for a
 	// model whose upstream can't. Claude Code reads both as it starts.
 	fields = append(fields, Field{
@@ -2459,10 +2459,10 @@ func claudeIn(at place) *Agent {
 				if v == "" {
 					return nil
 				}
-				return fmt.Errorf("pick a model through magpie for Claude Code first; its advisor can then have a model")
+				return fmt.Errorf("pick a model through eipgam for Claude Code first; its advisor can then have a model")
 			}
 			if v != "" && !isMagpie(strings.TrimSuffix(v, "[1m]")) {
-				return fmt.Errorf("advisor: %q is not a model magpie serves", v)
+				return fmt.Errorf("advisor: %q is not a model eipgam serves", v)
 			}
 			if v == "" {
 				keys := []string{"advisorModel"}
@@ -2488,10 +2488,10 @@ func claudeIn(at place) *Agent {
 	})
 	// permission mode: the mode a new session starts in, Claude Code's own
 	// permissions.defaultMode (EricChenChannel on X). The user's setting,
-	// not magpie's wiring (Own): written only when picked here, and
-	// nothing magpie does takes it out or puts it back.
+	// not eipgam's wiring (Own): written only when picked here, and
+	// nothing eipgam does takes it out or puts it back.
 	fields = append(fields, claudePermissionField(path))
-	// its sign-in while it runs through magpie: magpie's key, or its own
+	// its sign-in while it runs through eipgam: eipgam's key, or its own
 	// claude.ai sign-in kept (loginKey), where the gateway takes any key
 	fields = append(fields, Field{
 		Key: "login", Label: "sign-in", Quiet: true,
@@ -2503,18 +2503,18 @@ func claudeIn(at place) *Agent {
 		},
 		Set: func(v string) error {
 			if v != "" && v != "claudeai" {
-				return fmt.Errorf("sign-in is claudeai or empty (magpie's key), not %q", v)
+				return fmt.Errorf("sign-in is claudeai or empty (eipgam's key), not %q", v)
 			}
 			if !routed() {
 				if v == "" {
 					stash(map[string]string{loginKey: ""})
 					return nil
 				}
-				return fmt.Errorf("pick a model through magpie for Claude Code first; it can then keep its claude.ai sign-in")
+				return fmt.Errorf("pick a model through eipgam for Claude Code first; it can then keep its claude.ai sign-in")
 			}
 			// one kept before stays so, taking effect where it can again
 			if v != "" && !signInHere() && stashShared()[loginKey] != v {
-				return fmt.Errorf("Claude Code reaches magpie from another machine (%s), where magpie, shared, takes only its sharing key, so it can't keep its claude.ai sign-in there", at.gw())
+				return fmt.Errorf("Claude Code reaches eipgam from another machine (%s), where eipgam, shared, takes only its sharing key, so it can't keep its claude.ai sign-in there", at.gw())
 			}
 			stash(map[string]string{loginKey: v, wroteAt: at.gw()})
 			return edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_AUTH_TOKEN", Value: wiredKey()})
@@ -2526,10 +2526,10 @@ func claudeIn(at place) *Agent {
 			return claudeSignIns()
 		},
 	})
-	// magpie's status line, offered where the user has none (claude_statusline.go)
+	// eipgam's status line, offered where the user has none (claude_statusline.go)
 	statusField := claudeStatusField(at, path, func() { stale = "" })
 	fields = append(fields, statusField)
-	// a write asks a proxy in front of magpie first (claudeAsk): each
+	// a write asks a proxy in front of eipgam first (claudeAsk): each
 	// field's Set, Sync and Unwire. Follow writes only once routed, so a
 	// first look there leaves it for the next one, as reads do.
 	ask := func() { claudeAsk(at, path, env("ANTHROPIC_BASE_URL")) }
@@ -2546,7 +2546,7 @@ func claudeIn(at place) *Agent {
 		Fields:       fields,
 		ModelAliases: claudeAliases,
 		Telemetry:    claudeTelemetry(at, path),
-		// Claude Code as it was before magpie: its default puts it back as
+		// Claude Code as it was before eipgam: its default puts it back as
 		// installed, on Anthropic's endpoint, where this brings back the
 		// endpoint, token and model the user had
 		Unwire: func() error {
@@ -2562,18 +2562,18 @@ func claudeIn(at place) *Agent {
 			for _, k := range claudeOwnEnv {
 				forget(at.key("claude.env." + k))
 			}
-			// magpie's status line goes with it; one of the user's own stays
+			// eipgam's status line goes with it; one of the user's own stays
 			if err := statusField.Set(""); err != nil {
 				return err
 			}
-			// magpie's level in the env goes alone: the effortLevel under
+			// eipgam's level in the env goes alone: the effortLevel under
 			// it is the user's own, which Claude Code is back on
 			if e := env(claudeEffortEnv); e != "" && appliedOf(self.ID).Fields["effort"] == e {
 				if err := edit.DelJSON(path, "env."+claudeEffortEnv); err != nil {
 					return err
 				}
 			}
-			// the model left alone where magpie had none to take over
+			// the model left alone where eipgam had none to take over
 			switch {
 			case was != "" && !isMagpie(was):
 				if err := edit.SetJSON(path, edit.KV{Path: "model", Value: was}); err != nil {
@@ -2590,7 +2590,7 @@ func claudeIn(at place) *Agent {
 			return nil
 		},
 		// the catalog's models, with their levels, as Claude Code is told
-		// them, while magpie's are the ones it has
+		// them, while eipgam's are the ones it has
 		Sync: func() error {
 			ask()
 			if !routed() {
@@ -2599,25 +2599,25 @@ func claudeIn(at place) *Agent {
 				}
 				return desktopOnly()
 			}
-			// connected before magpie marked the first run done
+			// connected before eipgam marked the first run done
 			onboard()
-			// a switch turned on since, or left by an older magpie
+			// a switch turned on since, or left by an older eipgam
 			if err := dropClouds(); err != nil {
 				return err
 			}
-			// routed by an older magpie: what was said about the models
-			// before it is taken out as it is now when magpie is wired in
+			// routed by an older eipgam: what was said about the models
+			// before it is taken out as it is now when eipgam is wired in
 			if stashShared()[aboutKey] == "" {
 				if err := dropAbout(nil); err != nil {
 					return err
 				}
 			}
-			// subagents an older magpie pinned to the main model at an
+			// subagents an older eipgam pinned to the main model at an
 			// effort of theirs follow it again, the effort kept unwritten
 			if subagentFollowing() != "" {
 				return writeTiers(curTiers())
 			}
-			// a model of magpie's an older magpie wrote with a dotted Claude
+			// a model of eipgam's an older eipgam wrote with a dotted Claude
 			// version goes in as Claude Code is given it now (spell)
 			raw := []string{jsonGet(path, "model")()}
 			for _, k := range claudeModelEnv {
@@ -2629,7 +2629,7 @@ func claudeIn(at place) *Agent {
 			}) {
 				return writeTiers(curTiers())
 			}
-			// the model an older magpie wrote as an id of magpie's goes in
+			// the model an older eipgam wrote as an id of eipgam's goes in
 			// as the alias of its tier (mainWord)
 			if m, ts := curTiers(); m != "" {
 				word, cur := mainWord(m, ts), jsonGet(path, "model")()
@@ -2669,7 +2669,7 @@ func claudeIn(at place) *Agent {
 		},
 		// a model picked in Claude Code's /model is its main model: the tiers
 		// and subagents that followed the one before go with it, and an
-		// older magpie's ANTHROPIC_MODEL, which held every session to that
+		// older eipgam's ANTHROPIC_MODEL, which held every session to that
 		// one, comes out
 		Follow: func() error {
 			main := mainModel()
@@ -2677,7 +2677,7 @@ func claudeIn(at place) *Agent {
 			if !routed() || !isMagpie(bare) {
 				return nil
 			}
-			// a haiku tier an older magpie left on the main model, where it
+			// a haiku tier an older eipgam left on the main model, where it
 			// now follows on that model's Haiku, moves too
 			m, _ := tierAt(env(tierEnv("haiku")))
 			light := follow("haiku", bare)
@@ -2697,8 +2697,8 @@ func claudeIn(at place) *Agent {
 			}
 			getEnv := func(k string) (string, bool) { return edit.GetJSON(path, "env."+k) }
 			// an address that isn't the gateway's is asked whether it is
-			// magpie behind a proxy (#1985) only while what Claude Code
-			// sends is for magpie (claudeKeyed): with a key of the user's
+			// eipgam behind a proxy (#1985) only while what Claude Code
+			// sends is for eipgam (claudeKeyed): with a key of the user's
 			// own it is their endpoint, told as it is, never asked (#3480)
 			keyed := claudeKeyed(at, path)
 			// an administrator's settings win over the user's
@@ -2707,7 +2707,7 @@ func claudeIn(at place) *Agent {
 				managed = at.sys("/etc/claude-code/managed-settings.json")
 			}
 			if u, _ := edit.GetJSON(managed, "env.ANTHROPIC_BASE_URL"); u != "" && u != at.gw() && !(keyed && reachesMagpie(u, at.gw())) {
-				return "Claude Code's managed settings (" + at.native(managed) + ") set ANTHROPIC_BASE_URL to " + u + ", which wins over magpie's"
+				return "Claude Code's managed settings (" + at.native(managed) + ") set ANTHROPIC_BASE_URL to " + u + ", which wins over eipgam's"
 			}
 			if keyed {
 				if off := wiringOff("Claude Code", path, getEnv, "ANTHROPIC_BASE_URL", at.gw()); off != "" {
@@ -2720,13 +2720,13 @@ func claudeIn(at place) *Agent {
 				return why
 			}
 			// the key it sends: none where it keeps its claude.ai sign-in,
-			// which a key there would take the place of; magpie's otherwise,
+			// which a key there would take the place of; eipgam's otherwise,
 			// one gone sending that sign-in instead, if it has one
 			tok, has := getEnv("ANTHROPIC_AUTH_TOKEN")
 			where := "Claude Code's ANTHROPIC_AUTH_TOKEN (" + filepath.Base(path) + ")"
 			switch {
 			case keepSignIn() && tok != "":
-				return where + " is set, so Claude Code sends magpie that key, not its claude.ai sign-in as magpie set it"
+				return where + " is set, so Claude Code sends eipgam that key, not its claude.ai sign-in as eipgam set it"
 			case keepSignIn():
 				return ""
 			case tok == "" && signInHere():
@@ -2734,13 +2734,13 @@ func claudeIn(at place) *Agent {
 				if has {
 					how = "is empty"
 				}
-				return where + " " + how + ", so Claude Code sends magpie its claude.ai sign-in, if it has one, not magpie's key — to keep it so, set its sign-in to claude.ai"
+				return where + " " + how + ", so Claude Code sends eipgam its claude.ai sign-in, if it has one, not eipgam's key — to keep it so, set its sign-in to claude.ai"
 			}
 			return wiringOff("Claude Code", path, getEnv, "ANTHROPIC_AUTH_TOKEN", at.gwKey())
 		},
 		// every prompt typed into Claude Code goes into history.jsonl, and
-		// so does every one magpie's bridge gives it in magpie's own work
-		// folder, which went through magpie (ifccod7391564 on X)
+		// so does every one eipgam's bridge gives it in eipgam's own work
+		// folder, which went through eipgam (ifccod7391564 on X)
 		LastUsed: func() time.Time {
 			return lastJSONLTime(filepath.Join(filepath.Dir(path), "history.jsonl"), "timestamp", "display", inMagpieWork)
 		},
@@ -2761,14 +2761,14 @@ func claudeIn(at place) *Agent {
 	return self
 }
 
-// claudeSignIns are the ways Claude Code signs in to magpie, its sign-in
+// claudeSignIns are the ways Claude Code signs in to eipgam, its sign-in
 // field's options: what its claude.ai sign-in gives it is off under a key
 // (ANTHROPIC_AUTH_TOKEN), and Remote Control and ultrareview are off on any
 // address but Anthropic's own (2.1.290).
 func claudeSignIns() []Option {
 	return []Option{
-		{Value: "", Label: "magpie's key", Note: "Claude Code sends magpie its key and is signed out of claude.ai while it runs through magpie: claude.ai's plan limits in /usage, its connectors, voice and /teleport are off"},
-		{Value: "claudeai", Label: "claude.ai", Note: "Claude Code keeps its claude.ai sign-in (/login), so those work; it sends that sign-in to magpie, which never passes it on. Remote Control and ultrareview stay off: Claude Code has them only on Anthropic's own address"},
+		{Value: "", Label: "eipgam's key", Note: "Claude Code sends eipgam its key and is signed out of claude.ai while it runs through eipgam: claude.ai's plan limits in /usage, its connectors, voice and /teleport are off"},
+		{Value: "claudeai", Label: "claude.ai", Note: "Claude Code keeps its claude.ai sign-in (/login), so those work; it sends that sign-in to eipgam, which never passes it on. Remote Control and ultrareview stay off: Claude Code has them only on Anthropic's own address"},
 	}
 }
 
@@ -2789,7 +2789,7 @@ func claudeTakes(model, v string) error {
 }
 
 // claudeModelWord refuses a value given for Claude Code's model that is a
-// bare word and not one of its aliases: `magpie claude ultra` wrote
+// bare word and not one of its aliases: `eipgam claude ultra` wrote
 // "model": "ultra" over the model.
 func claudeModelWord(v, model string) error {
 	w := strings.TrimSuffix(v, "[1m]")
@@ -2798,13 +2798,13 @@ func claudeModelWord(v, model string) error {
 	}
 	switch {
 	case w == "ultra" || w == "ultracode":
-		return fmt.Errorf("ultracode is a switch of Claude Code's, not a model: magpie claude ultracode on")
+		return fmt.Errorf("ultracode is a switch of Claude Code's, not a model: eipgam claude ultracode on")
 	case contains(claudeEfforts, w):
 		if err := claudeTakes(model, w); err != nil {
 			return err
 		}
 	}
-	return fmt.Errorf("%q is no model of Claude Code's: give a model id (claude-…), one of its aliases (%s) or a model magpie serves", v, strings.Join(claudeAliases, ", "))
+	return fmt.Errorf("%q is no model of Claude Code's: give a model id (claude-…), one of its aliases (%s) or a model eipgam serves", v, strings.Join(claudeAliases, ", "))
 }
 
 // claudeDropModelEffort takes the effort saved for model n out of
@@ -2885,7 +2885,7 @@ func claudeDated(opts []Option) []Option {
 // claude-sonnet-…, or the model ANTHROPIC_DEFAULT_SONNET_MODEL gives), best
 // the newest Opus, [1m] the same at 1M, opusplan Opus in plan mode and
 // Sonnet otherwise. default is the one Claude Code picks by the account's
-// plan, which magpie doesn't say. ok is false for a value that is no alias.
+// plan, which eipgam doesn't say. ok is false for a value that is no alias.
 func claudeAliasOption(v string, ms []catalog.Model, tier func(string) string) (Option, bool) {
 	const mark = "[1m]"
 	w := strings.TrimSuffix(v, mark)
@@ -2937,7 +2937,7 @@ func claudeAliasOption(v string, ms []catalog.Model, tier func(string) string) (
 	return o, true
 }
 
-// claudeViaMagpie is what magpie serves Claude Code, a model with a window
+// claudeViaMagpie is what eipgam serves Claude Code, a model with a window
 // of 1M or more marked [1m]: Claude Code takes any other for 200K, and
 // compacts long before a 1M model needs it. It drops the mark before asking.
 // fold marks Same those on the account Claude Code is signed in to, for a
@@ -2977,8 +2977,8 @@ func buildClaudeVia(fold bool) []Option {
 	return claudeDated(opts)
 }
 
-// claude1M marks [1m] a magpie model whose window is 1M or more, as
-// magpie's list or models.dev gives it. Claude Code (2.1.284 and before)
+// claude1M marks [1m] a eipgam model whose window is 1M or more, as
+// eipgam's list or models.dev gives it. Claude Code (2.1.284 and before)
 // takes any Claude model not so marked for 200K, CLAUDE_CODE_MAX_CONTEXT_TOKENS
 // or not, and compacts it, over and over, long before it runs out; a ref
 // written in bare (typed, or picked while the window wasn't known) was left
@@ -2986,7 +2986,7 @@ func buildClaudeVia(fold bool) []Option {
 func claude1M() func(ref string) string { return claude1MFor("claude") }
 
 // claude1MFor is claude1M for a Claude Code run by another agent, by the
-// models magpie shows that one (T3 Code's, t3code.go).
+// models eipgam shows that one (T3 Code's, t3code.go).
 func claude1MFor(agent string) func(ref string) string {
 	const mark = "[1m]"
 	window := map[string]int{}
@@ -3004,7 +3004,7 @@ func claude1MFor(agent string) func(ref string) string {
 	}
 }
 
-// claudeModel says a model ref (magpie/v/claude-opus-5-5[1m], or Claude
+// claudeModel says a model ref (eipgam/v/claude-opus-5-5[1m], or Claude
 // Code's own claude-opus-5-5) is one of Anthropic's Claude models, by
 // whichever provider it comes and by whatever name it gives it: Amazon
 // Bedrock's us.anthropic.claude-opus-… too, which Claude Code knows by the
@@ -3034,7 +3034,7 @@ func claudeOwnCompact(path, model string) bool {
 		return false
 	}
 	// Claude Code keys it by the model as it was given it (ClaudeSpelled)
-	model = strings.ToLower(provider.ClaudeDashed(strings.TrimSuffix(strings.TrimPrefix(model, "magpie/"), "[1m]")))
+	model = strings.ToLower(provider.ClaudeDashed(strings.TrimSuffix(strings.TrimPrefix(model, "eipgam/"), "[1m]")))
 	for k, v := range per {
 		if v.Window != nil && strings.ToLower(provider.ClaudeDashed(strings.TrimSuffix(k, "[1m]"))) == model {
 			return true
@@ -3043,7 +3043,7 @@ func claudeOwnCompact(path, model string) bool {
 	return false
 }
 
-// claudeLongMain says main is a model of magpie's Claude Code takes for 1M
+// claudeLongMain says main is a model of eipgam's Claude Code takes for 1M
 // by its "[1m]", not one of Claude's own, which Anthropic runs to its own.
 func claudeLongMain(main string) bool {
 	m, _ := tierAt(main)
@@ -3052,7 +3052,7 @@ func claudeLongMain(main string) bool {
 }
 
 // claudeWindow is the context window to tell Claude Code for the models it
-// runs on, 0 when magpie doesn't know it. One value serves every model not
+// runs on, 0 when eipgam doesn't know it. One value serves every model not
 // marked [1m]: the main model's, or when that one is marked, the smallest of
 // the tiers' that aren't, so none of them outgrows its own.
 func claudeWindow(main string, tiers map[string]string) int {
@@ -3082,7 +3082,7 @@ func claudeWindow(main string, tiers map[string]string) int {
 // max_input_tokens only to offer a 1M entry (2.31226.1), and Claude Code
 // takes no window from a gateway's /v1/models (its model catalog is
 // Anthropic's alone, and even there one past 200K counts as 200K for a
-// model it doesn't know). So a mythos-magpie id of a 272K model ran as
+// model it doesn't know). So a mythos-eipgam id of a 272K model ran as
 // 200K, and with the auto-compact window shown in its place, a 1M one as
 // that (#1458). Left out are a model listed by its "[1m]" id, which is 1M
 // whatever this says, and one named as a Claude model Claude Code knows,
@@ -3148,11 +3148,11 @@ var claudeManaged = func() string {
 }
 
 // StandIn is the model Claude Code is set to use in place of one it named
-// that magpie doesn't serve: claude-haiku-4-5-… for a title or a small
+// that eipgam doesn't serve: claude-haiku-4-5-… for a title or a small
 // task goes to its haiku tier's model, and a name of no tier to its main
 // model. For Codex, the model it is set to (codexStandIn), in a WSL
 // distro the distro's config names (wslCodexStandIn). "" when the
-// agent isn't routed through magpie or is neither. For gateway.StandIn.
+// agent isn't routed through eipgam or is neither. For gateway.StandIn.
 func StandIn(agent, model string) string {
 	if agent != "claude" && agent != "codex" {
 		return ""
@@ -3171,7 +3171,7 @@ func StandIn(agent, model string) string {
 	if m := claudeStandIn(filepath.Join(here(home).claudeDir(), "settings.json"), model); m != "" {
 		return m
 	}
-	// a claude-magpie session, its settings.json not on magpie, is on
+	// a claude-eipgam session, its settings.json not on eipgam, is on
 	// the launch file's models (claude_launch.go)
 	if m := claudeLaunchStandIn(model); m != "" || runtime.GOOS != "windows" {
 		return m
@@ -3182,11 +3182,11 @@ func StandIn(agent, model string) string {
 
 // ClassifierStandIn is the model Claude Code's auto mode classifier goes
 // to in place of the one it named, while the sonnet tier it named follows
-// a main model that /model has moved since magpie last wrote the tiers.
+// a main model that /model has moved since eipgam last wrote the tiers.
 // Claude Code 2.1.310 runs the classifier, with CLAUDE_CODE_AUTO_MODE_MODEL
 // unset, on ANTHROPIC_DEFAULT_SONNET_MODEL ($Xe, BB in its bundle), not on
 // the session's model. A pick in /model saves the main model alone, and
-// the tiers following it move only when magpie next looks (Follow), so
+// the tiers following it move only when eipgam next looks (Follow), so
 // the first classifier request after a switch named the model before it
 // (CyberCaius on Discord). "" leaves the model as asked. For
 // gateway.ClassifierStandIn.
@@ -3206,7 +3206,7 @@ func ClassifierStandIn(agent, model string) string {
 
 // claudeClassifierIn is ClassifierStandIn for the Claude Code at a place:
 // the main model the sonnet tier follows, at the tier's effort, when the
-// classifier named that tier as magpie last wrote it and the main model
+// classifier named that tier as eipgam last wrote it and the main model
 // has moved on. A tier the user put on a model of its own, or an auto
 // mode model set for the classifier, is left as it is.
 func claudeClassifierIn(at place, model string) string {
@@ -3272,9 +3272,9 @@ func claudeStandInAt(at place, path, model string) string {
 }
 
 // claudeKeyed says what the Claude Code at a place (its settings at path)
-// sends is for magpie: a key the gateway takes (keyHolds, as Check asks of
-// it), or none where it keeps its claude.ai sign-in through magpie, which
-// magpie set (claude.login) on a Claude Code it wired (wired_at, which
+// sends is for eipgam: a key the gateway takes (keyHolds, as Check asks of
+// it), or none where it keeps its claude.ai sign-in through eipgam, which
+// eipgam set (claude.login) on a Claude Code it wired (wired_at, which
 // Disconnect forgets) where the gateway takes any key (signInHere).
 func claudeKeyed(at place, path string) bool {
 	if tok, _ := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN"); tok != "" {
@@ -3286,9 +3286,9 @@ func claudeKeyed(at place, path string) bool {
 
 // claudeProxied says u, the base URL the Claude Code at a place (its
 // settings at path) has in place of the gateway's, is a proxy to it where
-// magpie has answered (#1985, surelyMagpie). It is asked only where it can
-// be another way to magpie (proxyBase), and only while Claude Code sends
-// it what is for magpie (claudeKeyed): with a key of the user's own, u is
+// eipgam has answered (#1985, surelyMagpie). It is asked only where it can
+// be another way to eipgam (proxyBase), and only while Claude Code sends
+// it what is for eipgam (claudeKeyed): with a key of the user's own, u is
 // their endpoint. zhangt2333 (#3480) never connected Claude Code, and the
 // Agents page's reads of it sent GET / about every 30s to the endpoint in
 // its settings.
@@ -3297,8 +3297,8 @@ func claudeProxied(at place, path, u string) bool {
 	return ok && surelyMagpie(u, at.gw())
 }
 
-// claudeProxyBase is where claudeProxied asks whether magpie answers: u's
-// proxyBase, while Claude Code sends it what is for magpie (claudeKeyed).
+// claudeProxyBase is where claudeProxied asks whether eipgam answers: u's
+// proxyBase, while Claude Code sends it what is for eipgam (claudeKeyed).
 func claudeProxyBase(at place, path, u string) (string, bool) {
 	base, ok := proxyBase(u, at.gw())
 	if !ok || u == at.gw() {
@@ -3308,11 +3308,11 @@ func claudeProxyBase(at place, path, u string) (string, bool) {
 }
 
 // claudeAsk is what each write to the Claude Code at a place does first:
-// the proxy claudeProxied would ask about is asked now where magpie hasn't
+// the proxy claudeProxied would ask about is asked now where eipgam hasn't
 // answered there yet (magpieAsked). Every write reads routed, and the first
-// one in a magpie just started, the CLI's, read a proxy not asked yet as
+// one in a eipgam just started, the CLI's, read a proxy not asked yet as
 // no: a pick wrote 127.0.0.1 over it, the sync a provider added runs
-// turned the auto mode review back on, Disconnect left magpie in and
+// turned the auto mode review back on, Disconnect left eipgam in and
 // forgot the endpoint the user had (#1985).
 func claudeAsk(at place, path, u string) {
 	if base, ok := claudeProxyBase(at, path, u); ok {
@@ -3320,10 +3320,10 @@ func claudeAsk(at place, path, u string) {
 	}
 }
 
-// claudeMain is the model a Claude Code routed through magpie runs on, as
+// claudeMain is the model a Claude Code routed through eipgam runs on, as
 // settings.json names it: its model, which /model saves, an alias there
 // resolved through its tier. With none, the ANTHROPIC_MODEL an older
-// magpie wrote, else the sonnet tier's, as Claude Code on an API key
+// eipgam wrote, else the sonnet tier's, as Claude Code on an API key
 // starts with.
 func claudeMain(path string) string {
 	env := func(k string) string { v, _ := edit.GetJSON(path, "env."+k); return v }
@@ -3341,11 +3341,11 @@ func claudeMain(path string) string {
 	return m
 }
 
-// claudeReadOwn is a model as settings.json says it, read as magpie serves
+// claudeReadOwn is a model as settings.json says it, read as eipgam serves
 // it: a dashed spelling taken back (ClaudeRead), a Claude model by its bare
 // id taken to Claude Code's own subscription (ClaudeBare). Only where
-// Claude Code goes through magpie: on Anthropic's own endpoint a bare id is
-// Anthropic's, not magpie's (claudeMagpieModel).
+// Claude Code goes through eipgam: on Anthropic's own endpoint a bare id is
+// Anthropic's, not eipgam's (claudeMagpieModel).
 func claudeReadOwn(v string) string { return provider.ClaudeRead(provider.ClaudeUnbare(v)) }
 
 // what an open Claude Code session keeps (notice.go)
@@ -3354,15 +3354,15 @@ var (
 	noticeClaudeUltracode = newNotice("an open Claude Code session keeps the ultracode it started with — restart it to use this.")
 )
 
-// why a Claude Code wired to magpie goes to a cloud instead (claudeCloud)
+// why a Claude Code wired to eipgam goes to a cloud instead (claudeCloud)
 var (
-	noticeClaudeCloudFile  = newNotice("{file} sets {var}, so Claude Code sends its requests to {cloud}, not to magpie: take it out there to go through magpie.")
-	noticeClaudeCloudShell = newNotice("{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to magpie: take it out of your shell's profile to go through magpie.")
+	noticeClaudeCloudFile  = newNotice("{file} sets {var}, so Claude Code sends its requests to {cloud}, not to eipgam: take it out there to go through eipgam.")
+	noticeClaudeCloudShell = newNotice("{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to eipgam: take it out of your shell's profile to go through eipgam.")
 )
 
-// magpiesPicker says whether settings.json's modelPicker is one magpie
-// wrote: it has rows, and each one's description is magpie's, which ends
-// "via magpie" (writePicker in claudeIn).
+// magpiesPicker says whether settings.json's modelPicker is one eipgam
+// wrote: it has rows, and each one's description is eipgam's, which ends
+// "via eipgam" (writePicker in claudeIn).
 func magpiesPicker(path string) bool {
 	raw, has := edit.GetJSON(path, "modelPicker")
 	if !has {
@@ -3378,7 +3378,7 @@ func magpiesPicker(path string) bool {
 		return false
 	}
 	for _, o := range p.Options {
-		if o.Model == "" || !strings.HasSuffix(o.Description, "via magpie") {
+		if o.Model == "" || !strings.HasSuffix(o.Description, "via eipgam") {
 			return false
 		}
 	}
@@ -3391,16 +3391,16 @@ func magpiesPicker(path string) bool {
 const claudeCustomOptionEnv = "ANTHROPIC_CUSTOM_MODEL_OPTION"
 
 // claudeNarrowed says whether Claude Code's list leaves out some of
-// magpie's catalog: only the models picked for it, some taken out one by
+// eipgam's catalog: only the models picked for it, some taken out one by
 // one, or a visibility of families (provider.CatalogFor's kept list).
 func claudeNarrowed() bool {
 	_, hidden := provider.CatalogFor("claude")
 	return len(hidden) > 0
 }
 
-// inMagpieWork: a line of Claude Code's history.jsonl is a prompt magpie's
-// bridge gave it, in magpie's own work folder (os.TempDir()'s
-// magpie-claude-work, magpie-claude-work-<uid> off Windows), whatever the
+// inMagpieWork: a line of Claude Code's history.jsonl is a prompt eipgam's
+// bridge gave it, in eipgam's own work folder (os.TempDir()'s
+// eipgam-claude-work, eipgam-claude-work-<uid> off Windows), whatever the
 // path to it (/private/var/… on a Mac, C:/… or a WSL mount on Windows).
 func inMagpieWork(m map[string]json.RawMessage) bool {
 	var project string
@@ -3409,7 +3409,7 @@ func inMagpieWork(m map[string]json.RawMessage) bool {
 	}
 	base := strings.TrimRight(project, `/\`)
 	base = base[strings.LastIndexAny(base, `/\`)+1:]
-	return base == "magpie-claude-work" || strings.HasPrefix(base, "magpie-claude-work-")
+	return base == "eipgam-claude-work" || strings.HasPrefix(base, "eipgam-claude-work-")
 }
 
 // claudePermissionModes are the modes Claude Code's permissions.defaultMode

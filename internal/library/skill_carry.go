@@ -14,7 +14,7 @@ import (
 // computer fetches it itself, so a skill's size never counts against a
 // sync's (a sync reads at most 64 MiB, maxCarriedAll). It still carries
 // what of its files fit in the room the skills carried as files leave, so
-// a magpie from before this, which knows nothing of Fetch, writes the
+// a eipgam from before this, which knows nothing of Fetch, writes the
 // skill as it did; on this one they only stand in until it is fetched.
 //
 // A skill changed here since it was fetched, one from a folder, and one

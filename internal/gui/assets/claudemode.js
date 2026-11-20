@@ -34,7 +34,7 @@ function ccTip(anchor, tui) {
   };
   tip.append(
     mode(tui, t("Interactive mode (TUI)"),
-      t("magpie opens Claude Code as a person does, in a terminal of its own that you don't see, types each request in and reads the reply from its transcript."),
+      t("eipgam opens Claude Code as a person does, in a terminal of its own that you don't see, types each request in and reads the reply from its transcript."),
       t("Your plan counts these requests as Claude Code's own use, at about half of the 5-hour allowance that -p uses for the same work.")),
     mode(!tui, "claude -p",
       t("Claude Code's print mode, the one scripts and the Agent SDK use: a request in, its reply out."),

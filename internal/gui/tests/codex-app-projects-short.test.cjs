@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A switch while the Codex app runs shows the new account's projects from
 // the app's memory, and none when they were never shared (linsm66 on X).
-// magpie never quits the app unasked: Codex's accounts say the app shows
+// eipgam never quits the app unasked: Codex's accounts say the app shows
 // fewer projects than there are, and that quitting and opening it again
 // brings them back, until "Got it" is clicked. In every language,
 // Chromium and WebKit, wide and narrow.
@@ -47,7 +47,7 @@ function serve(lang, posted) {
 
 const keys = [
   "The Codex app shows fewer projects than you have",
-  "Quit the Codex app and open it again to get your projects back. magpie shares them between your accounts while it is closed.",
+  "Quit the Codex app and open it again to get your projects back. eipgam shares them between your accounts while it is closed.",
   "Got it",
 ];
 
@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posted = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posted));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         const box = page.locator(".editor .signing.daemon");
         await box.waitFor();
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.deepEqual(missing, [], `every string has its ${lang}`);
           assert.doesNotMatch(text, /Quit the Codex app/);
         }
-        assert.equal(await box.locator("button").count(), 1, "only Got it: magpie quits nothing");
+        assert.equal(await box.locator("button").count(), 1, "only Got it: eipgam quits nothing");
         const fits = await box.evaluate((b) => [...b.querySelectorAll("*")].every((e) => e.getBoundingClientRect().right <= b.getBoundingClientRect().right + 0.5));
         assert.ok(fits, "nothing in the notice runs past it");
         assert.equal(await page.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth), true, "no sideways scroll");

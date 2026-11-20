@@ -9,20 +9,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
-// endProbesOnSignal: the probes magpie asks a CLI with lead a session of
+// endProbesOnSignal: the probes eipgam asks a CLI with lead a session of
 // their own (proc.ProbeContext), so Ctrl+C in the terminal, the terminal
-// closing or a service manager's SIGTERM reach magpie and not them, and
-// magpie ending on the signal left them to init. An owned gateway drains
-// and saves its sessions, probes end, and magpie then dies of the signal. A command that waits on Ctrl+C itself
+// closing or a service manager's SIGTERM reach eipgam and not them, and
+// eipgam ending on the signal left them to init. An owned gateway drains
+// and saves its sessions, probes end, and eipgam then dies of the signal. A command that waits on Ctrl+C itself
 // (interruptContext) is left to finish its own way, its probes ended all the
 // same; the app and the TUI, which quit on SIGINT and SIGTERM their own way,
-// take those back (ownSignals). A signal magpie was started ignoring (nohup,
+// take those back (ownSignals). A signal eipgam was started ignoring (nohup,
 // a background job) stays ignored: asking for it would undo that.
 func endProbesOnSignal() {
 	caught = nil
@@ -67,7 +67,7 @@ func finishSignalGateway(s os.Signal) {
 
 // saveOnSignal bounds how long a signal waits for the session index to be
 // written: a long history's takes a second or two, and a signal is asked to
-// end magpie now.
+// end eipgam now.
 var saveOnSignal = 5 * time.Second
 
 // sessionsSaved is sessions.Saved; a var so tests can hold it.
@@ -90,8 +90,8 @@ var (
 	onSignal chan os.Signal
 )
 
-// die ends magpie of s, as s would have had there been no handler: the
-// shell that ran it sees a process a signal ended (a loop running magpie
+// die ends eipgam of s, as s would have had there been no handler: the
+// shell that ran it sees a process a signal ended (a loop running eipgam
 // stops on Ctrl+C), not one that exited. Where a signal can't be sent to
 // oneself (Windows), it exits as a shell reports such a process. A var so
 // tests can see what a signal would do.
@@ -109,7 +109,7 @@ var die = func(s os.Signal) {
 // probes, and installs a downloaded update), bubbletea leaves the TUI's
 // screen as it found it, and each comes back to main, where the probes are
 // ended too. Exiting first skipped all of that. SIGHUP stays: neither
-// handles it, and the terminal closing would end magpie there and then,
+// handles it, and the terminal closing would end eipgam there and then,
 // with its probes, out of the terminal's reach, left running.
 func ownSignals() {
 	if onSignal == nil {

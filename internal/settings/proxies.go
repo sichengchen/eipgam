@@ -19,7 +19,7 @@ import (
 // own (KeepOwn), left out of a backup, as Proxy is.
 //
 // An ssh:// one is a server the user logs in to (a VPS that offers only
-// SSH, @laiuuui on X): magpie logs in itself and carries requests through
+// SSH, @laiuuui on X): eipgam logs in itself and carries requests through
 // it as `ssh -D` would (netproxy's SSH tunnel). User is its login, Pass
 // its password or, with Key, the key's passphrase; Key is a private key,
 // kept as Pass is. HostKey is the server's key in authorized_keys form,
@@ -36,7 +36,7 @@ type NamedProxy struct {
 	HostKey string `json:"hostKey,omitempty"`
 }
 
-// IsSSH is whether the proxy is an SSH server magpie tunnels through.
+// IsSSH is whether the proxy is an SSH server eipgam tunnels through.
 func (p NamedProxy) IsSSH() bool { return IsSSHAddress(p.URL) }
 
 // IsSSHAddress is whether a proxy address is an ssh:// one.
@@ -184,7 +184,7 @@ func checkProxies(ps []NamedProxy) error {
 	return nil
 }
 
-// CheckSSHProxy refuses an SSH proxy magpie couldn't log in to: no host, a
+// CheckSSHProxy refuses an SSH proxy eipgam couldn't log in to: no host, a
 // port that isn't one, or no user.
 func CheckSSHProxy(p NamedProxy) error {
 	u, err := url.Parse(strings.TrimSpace(p.URL))

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/browserext"
+	"github.com/sichengchen/eipgam/internal/browserext"
 )
 
 // Every action is one of the extension's tools, and the one schema names

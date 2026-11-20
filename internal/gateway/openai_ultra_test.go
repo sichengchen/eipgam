@@ -3,7 +3,7 @@ package gateway
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // OoopsHh on X: an OpenAI key's GPT-6 Astra had Fast and no Ultrafast. OpenAI's

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A Claude refusal that names a model's own limit ("You've reached your

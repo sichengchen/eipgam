@@ -14,22 +14,22 @@ import (
 	"unicode/utf8"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Slash commands the user already made in their agents, taken into the
 // library (miantiao_me on X: "can the ones I defined in Pi be
 // imported?"). Each agent the Slash commands tab gives commands to is
-// read in the folder magpie writes them to (commandSpecOf), at its top
+// read in the folder eipgam writes them to (commandSpecOf), at its top
 // only, as the agent reads it: Pi's prompts/*.md, Claude Code's
 // commands/*.md, OpenCode's commands/*.md and command/*.md, Gemini CLI's
 // commands/*.toml, Qwen Code's commands/*.md and *.toml, Droid's
 // commands/*.md. The file's name is the command's; the description is
 // the front matter's (Gemini's TOML description), the prompt the body
 // (Gemini's prompt), with the agent's way of saying the words typed in
-// put back as magpie's: Claude Code's $ARGUMENTS[n] and $n (counted from
+// put back as eipgam's: Claude Code's $ARGUMENTS[n] and $n (counted from
 // 0) as $n+1, Pi's $@ and Gemini's and Qwen's {{args}} as $ARGUMENTS. A
-// file magpie wrote, still as it wrote it, is not one.
+// file eipgam wrote, still as it wrote it, is not one.
 //
 // Files of one name saying the same in several agents are one command
 // for all of them; saying different things, they are listed apart, one
@@ -38,9 +38,9 @@ import (
 // the user's file stays, and the library's isn't written over it.
 //
 // An imported command keeps each file it came from as it was (Taken):
-// while the command says what it did then, that file is what magpie
+// while the command says what it did then, that file is what eipgam
 // writes for that agent, byte for byte, so the sync takes the user's own
-// file as magpie's (syncOwnFiles) and nothing is written or doubled. An
+// file as eipgam's (syncOwnFiles) and nothing is written or doubled. An
 // edit here writes the command in the agent's shape at the same place.
 
 // TakenFile is an agent's own file a command was imported from.
@@ -94,7 +94,7 @@ func commandHash(description, prompt string) string {
 }
 
 // commandReads are the folders and extensions an agent reads its commands
-// from, beyond the one magpie writes to.
+// from, beyond the one eipgam writes to.
 func commandReads(id string, sp *commandSpec) [][2]string {
 	r := [][2]string{{sp.dir, sp.ext}}
 	switch id {
@@ -109,7 +109,7 @@ func commandReads(id string, sp *commandSpec) [][2]string {
 	return r
 }
 
-// takenFor is the file c was imported from that magpie keeps for this
+// takenFor is the file c was imported from that eipgam keeps for this
 // agent: its place, and its bytes while c says what it did then.
 func takenFor(c *Command, id string, sp *commandSpec) (path string, body []byte, ok bool) {
 	k := c.Taken[id]
@@ -138,7 +138,7 @@ func takenFor(c *Command, id string, sp *commandSpec) (path string, body []byte,
 // claudeBackRe is a word typed in as Claude Code says it.
 var claudeBackRe = lazyre.New(`\\\$([0-9]+)|\$ARGUMENTS\[([0-9]+)\]|\$([0-9]+)`)
 
-// claudeBack is a Claude Code prompt as magpie's: $ARGUMENTS[n] and $n,
+// claudeBack is a Claude Code prompt as eipgam's: $ARGUMENTS[n] and $n,
 // counted from 0, are $n+1, and the \$0 claudeArgs writes is $0.
 func claudeBack(p string) string {
 	return claudeBackRe.ReplaceAllStringFunc(p, func(m string) string {
@@ -160,7 +160,7 @@ func claudeBack(p string) string {
 // piAllRe is Pi's $@, every word typed in; ${@:…} is left as Pi's own
 var piAllRe = lazyre.New(`\$@`)
 
-// commandBack is a prompt read from an agent's file, as magpie says it.
+// commandBack is a prompt read from an agent's file, as eipgam says it.
 func commandBack(id, p string) string {
 	switch id {
 	case "claude":
@@ -189,7 +189,7 @@ func readCommandAt(id, f, ext string) (*Command, string, []byte) {
 	}
 	name := strings.TrimSuffix(filepath.Base(f), ext)
 	if !commandNameRe.MatchString(name) {
-		return nil, "magpie names a command with lowercase letters, digits, - and _ only", nil
+		return nil, "eipgam names a command with lowercase letters, digits, - and _ only", nil
 	}
 	var desc, prompt string
 	if ext == ".toml" {
@@ -198,7 +198,7 @@ func readCommandAt(id, f, ext string) (*Command, string, []byte) {
 			Prompt      string `toml:"prompt"`
 		}
 		if err := toml.Unmarshal(b, &t); err != nil {
-			return nil, "it isn't TOML magpie can read", nil
+			return nil, "it isn't TOML eipgam can read", nil
 		}
 		desc, prompt = t.Description, t.Prompt
 	} else {
@@ -241,7 +241,7 @@ func (l *Library) findCommands(targets []*Target) *CommandProbe {
 		}
 		var mine []SubagentFile
 		if a := l.Applied[id]; a != nil {
-			// the skill router's stubs (routerCommands) are magpie's too
+			// the skill router's stubs (routerCommands) are eipgam's too
 			mine = slices.Concat(a.Commands, a.RouterCommands)
 		}
 		for _, r := range commandReads(id, sp) {
@@ -266,7 +266,7 @@ func (l *Library) findCommands(targets []*Target) *CommandProbe {
 					continue
 				}
 				if slices.ContainsFunc(mine, func(m SubagentFile) bool { return m.Path == f && m.Hash == subagentHash(b) }) {
-					continue // magpie's own, as it wrote it
+					continue // eipgam's own, as it wrote it
 				}
 				all = append(all, found{c, id, f, b})
 			}

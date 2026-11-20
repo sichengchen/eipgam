@@ -20,7 +20,7 @@ func authFile(t *testing.T) map[string]map[string]any {
 	return all
 }
 
-// A host stopped (magpie quitting, a plugin updated) while it renews a
+// A host stopped (eipgam quitting, a plugin updated) while it renews a
 // sign-in lets the renewal end and its new token be saved: the vendor
 // has spent the old refresh token, so a host killed 2 seconds in left
 // the account signed out.
@@ -70,11 +70,11 @@ func TestStopLetsARenewalEnd(t *testing.T) {
 	if h == nil {
 		t.Fatal("no host runs")
 	}
-	// the plugin has started renewing; magpie hears it from the host's
+	// the plugin has started renewing; eipgam hears it from the host's
 	// output, which a busy machine reads late
 	for h.renewing.Load() == 0 {
 		if ctx.Err() != nil {
-			t.Fatal("magpie never heard the host is renewing")
+			t.Fatal("eipgam never heard the host is renewing")
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
@@ -130,7 +130,7 @@ func TestTwoHostsKeepEachOthersSignIns(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h2, _, err := startOn(ctx, os.Getenv("MAGPIE_BUN"))
+	h2, _, err := startOn(ctx, os.Getenv("EIPGAM_BUN"))
 	if err != nil {
 		t.Fatal(err)
 	}

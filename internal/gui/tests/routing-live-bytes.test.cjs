@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const cells = () => page.evaluate(() => [...document.querySelectorAll(".rt-req .rt-metric.recv")].map((c) => c.textContent.trim()));
         const account = page.locator(".rt-accts li", { has: page.locator(".who", { hasText: /^solo-1$/ }) });
 
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-req .rt-metric.recv").first().waitFor();
 
         // 2 KiB in, content a second ago, no rate learned: no tokens said

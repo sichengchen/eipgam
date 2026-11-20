@@ -223,7 +223,7 @@ func TestSkillBesideAnotherStays(t *testing.T) {
 	}
 }
 
-// A copy an earlier magpie left beside itself (review-team) is folded
+// A copy an earlier eipgam left beside itself (review-team) is folded
 // back on the next read of the library, with no change made: upgrading
 // alone had left it there (Refeccd on X, "并没有修好").
 func TestSkillBesideItselfFoldsOnRead(t *testing.T) {

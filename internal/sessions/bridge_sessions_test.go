@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/bridgesid"
+	"github.com/sichengchen/eipgam/internal/bridgesid"
 )
 
 // A session the Claude subscription bridge's Claude Code saved, in the
@@ -21,7 +21,7 @@ func TestBridgeSessionsAreNotLocal(t *testing.T) {
 	config := filepath.Join(t.TempDir(), "config")
 	t.Setenv("XDG_CONFIG_HOME", config)
 	own, other := bridgesid.New(), bridgesid.New()
-	saved := filepath.Join(config, "magpie", "claude-accounts", "a1")
+	saved := filepath.Join(config, "eipgam", "claude-accounts", "a1")
 	user := func(id string) string {
 		return `{"type":"user","timestamp":"` + stamp(0) + `","message":{"role":"user","content":"hello"},"cwd":"/work/app","sessionId":"` + id + `"}`
 	}

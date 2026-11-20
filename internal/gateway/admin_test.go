@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 // adminCall sends one request to the gateway as lanGuard serves it.
@@ -30,7 +30,7 @@ func adminCall(h http.Handler, method, path, from, host, key string, hdr map[str
 
 func TestAdminAPIGuards(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	var seen *http.Request
 	SetAdminHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		seen = r
@@ -56,7 +56,7 @@ func TestAdminAPIGuards(t *testing.T) {
 			t.Errorf("from this computer with no key: %d, want 401", w.Code)
 		}
 		if w := adminCall(h, "GET", path, loop, "", "not-a-key", nil); w.Code != 401 {
-			t.Errorf("with a key magpie doesn't know: %d, want 401", w.Code)
+			t.Errorf("with a key eipgam doesn't know: %d, want 401", w.Code)
 		}
 		if w := adminCall(h, "GET", path, lan, "", "", nil); w.Code != 401 {
 			t.Errorf("from the network with no key: %d, want 401", w.Code)

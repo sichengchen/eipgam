@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // chatgptSystem400 is what the ChatGPT backend answers a request carrying
@@ -125,7 +125,7 @@ func TestCodexCompactSystemRefusedAsksAgainDeveloper(t *testing.T) {
 	}
 }
 
-// Refused as sent too, the summary is asked as text, and made by magpie
+// Refused as sent too, the summary is asked as text, and made by eipgam
 // when that is refused as well: compaction after compaction goes on, and
 // the conversation is never held (compactFails). An error event after a
 // 200 the same.

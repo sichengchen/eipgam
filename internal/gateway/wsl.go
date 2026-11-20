@@ -17,21 +17,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
 // A WSL distro in NAT networking (WSL's default) reaches Windows at the
 // address Windows has on the WSL network (vEthernet (WSL), 172.17.32.1 for
-// a distro at 172.17.38.240), not at 127.0.0.1. magpie wrote that address
+// a distro at 172.17.38.240), not at 127.0.0.1. eipgam wrote that address
 // into the distro's agents, but the gateway listened on 127.0.0.1 alone, so
 // Codex and the other CLIs there were refused or timed out until the user
-// shared magpie on the local network (zaidu259434 on X: "启动codex这些cli连接
-// 会失败，没自动启动magpie的网关"). Now, while the gateway is on loopback, it
+// shared eipgam on the local network (zaidu259434 on X: "启动codex这些cli连接
+// 会失败，没自动启动eipgam的网关"). Now, while the gateway is on loopback, it
 // also listens on each address Windows has on a WSL network, and a request
 // that arrives there from that network with the WSL key (WSLKey, which
-// magpie writes into those agents only) is this computer's, as it is from a
+// eipgam writes into those agents only) is this computer's, as it is from a
 // distro in mirrored networking, whose 127.0.0.1 is Windows'. Anything else
 // arriving there is judged as a request from another machine: a container
 // of Docker Desktop's, which shares that network, has no key.
@@ -69,7 +69,7 @@ func OnWSLNet(base string) bool {
 // the LAN all the same. A distro under NAT whose way to the gateway on the
 // WSL network is found shut is pointed at such an address of Windows'
 // (agent.wslFindVia), which the gateway, on loopback, then listens at too:
-// the WSL vias, kept in magpie's folder (wsl-via), one address a line.
+// the WSL vias, kept in eipgam's folder (wsl-via), one address a line.
 // Under NAT a distro's connection to that address comes from the address
 // itself (Windows NATs it, tried on Windows 11 with WSL 2), and nothing
 // else is let in there: a connection from anywhere else (the LAN) is
@@ -155,8 +155,8 @@ var ownIP = func(ip net.IP) bool {
 	})
 }
 
-// wslKeyPrefix starts the WSL key. Neither sk-magpie- (a named gateway
-// key's, looked up among the keys) nor magpie- (the token with an agent's
+// wslKeyPrefix starts the WSL key. Neither sk-eipgam- (a named gateway
+// key's, looked up among the keys) nor eipgam- (the token with an agent's
 // id after it, agentOf).
 const wslKeyPrefix = "wsl-"
 
@@ -167,8 +167,8 @@ var wslKey struct {
 
 func wslKeyPath() string { return filepath.Join(settings.Dir(), "wsl-key") }
 
-// WSLKey is the key magpie gives the agents of a WSL distro that reaches
-// the gateway on the WSL network (OnWSLNet): made once, kept in magpie's
+// WSLKey is the key eipgam gives the agents of a WSL distro that reaches
+// the gateway on the WSL network (OnWSLNet): made once, kept in eipgam's
 // folder, readable by this user only. "" when it can't be read or made, and
 // the agent is given the gateway's token as before.
 func WSLKey() string {
@@ -212,8 +212,8 @@ func WSLKey() string {
 // whether a key is it without making one.
 func WSLKeyMade() string { return wslKeyHeld() }
 
-// wslKeyHeld is the WSL key as the gateway takes it: the one in magpie's
-// folder, read again when the cache is empty (another magpie made it).
+// wslKeyHeld is the WSL key as the gateway takes it: the one in eipgam's
+// folder, read again when the cache is empty (another eipgam made it).
 func wslKeyHeld() string {
 	path := wslKeyPath()
 	wslKey.Lock()
@@ -283,9 +283,9 @@ type wslPathKeyCtx struct{}
 // takeWSLPathKey is r without the WSL key its path begins with, which is
 // kept for fromWSL: /wsl-…/v1/messages is /v1/messages. A client that
 // can't send the key as its own is given it in the address: Claude Science
-// takes only ANTHROPIC_BASE_URL, with no key of magpie's (it sends its
+// takes only ANTHROPIC_BASE_URL, with no key of eipgam's (it sends its
 // Claude sign-in as its bearer), and http there only to a loopback
-// address, so in a distro under NAT it is given the relay magpie runs
+// address, so in a distro under NAT it is given the relay eipgam runs
 // there (agent/claudescience_wsl.go), http://127.0.0.1:<port>/wsl-…, to
 // this address on the WSL network. A path whose first segment isn't the
 // key is left as it is.
@@ -405,7 +405,7 @@ func (s *Server) serveWSL(ctx context.Context, srv *http.Server) {
 var wslServeEverywhere = false
 
 // onLoopback: the gateway listens on loopback alone now — not shared on
-// every address, nor at an address MAGPIE_ADDR pins beyond loopback.
+// every address, nor at an address EIPGAM_ADDR pins beyond loopback.
 func (s *Server) onLoopback() bool {
 	s.lnMu.Lock()
 	ln := s.ln

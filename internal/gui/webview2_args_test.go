@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/webview2env"
 	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/yetone/magpie/internal/webview2env"
 )
 
 // wailsBrowserArgs is the command line Wails v3.0.0-beta.24 makes from the
@@ -32,10 +32,10 @@ func wailsBrowserArgs(o application.WindowsOptions) []string {
 	return append(args, o.AdditionalBrowserArgs...)
 }
 
-// #2753 (LuYquan): magpie's own --disable-features made WebView2 skip the
+// #2753 (LuYquan): eipgam's own --disable-features made WebView2 skip the
 // user's WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS, so RendererCodeIntegrity
 // stayed on and an injected DLL got the renderer killed. Now the user's
-// arguments are merged into magpie's: one --disable-features holding both
+// arguments are merged into eipgam's: one --disable-features holding both
 // lists (Chromium keeps only the last of two), one --enable-features, and
 // every other argument as written.
 func TestWebView2ArgsMergeTheUsers(t *testing.T) {
@@ -46,7 +46,7 @@ func TestWebView2ArgsMergeTheUsers(t *testing.T) {
 		{"none set", "", []string{"--disable-features=msSmartScreenProtection,IsolateSandboxedIframes,CalculateNativeWinOcclusion"}},
 		{"the reporter's", "--disable-features=RendererCodeIntegrity",
 			[]string{"--disable-features=msSmartScreenProtection,IsolateSandboxedIframes,RendererCodeIntegrity,CalculateNativeWinOcclusion"}},
-		{"twice, with magpie's own and a repeat", `--disable-features=A,msSmartScreenProtection --disable-features="B, A"`,
+		{"twice, with eipgam's own and a repeat", `--disable-features=A,msSmartScreenProtection --disable-features="B, A"`,
 			[]string{"--disable-features=msSmartScreenProtection,IsolateSandboxedIframes,A,B,CalculateNativeWinOcclusion"}},
 		{"enable and others kept", "  --enable-features=X,Y\t--remote-debugging-port=9333 --proxy-server=\"http://h:1 x\" --enable-features=Y,Z --lang=de ",
 			[]string{"--disable-features=msSmartScreenProtection,IsolateSandboxedIframes,CalculateNativeWinOcclusion", "--enable-features=X,Y,Z", "--remote-debugging-port=9333", `--proxy-server="http://h:1 x"`, "--lang=de"}},
@@ -77,7 +77,7 @@ func TestWebView2ArgsMergeTheUsers(t *testing.T) {
 // stopped working". WebView2 157 runs a sandboxed frame in a process of
 // its own, and Wails' WebResourceRequested isn't raised for that
 // process's requests, so the page's bridge.js and scripts were refused
-// (ERR_CONNECTION_REFUSED) and it never said hello. magpie's WebView2
+// (ERR_CONNECTION_REFUSED) and it never said hello. eipgam's WebView2
 // starts with the frame isolation off, beside the user's own features
 // and once only; a user who turns it on keeps it.
 func TestWebView2KeepsPluginFramesInTheWindowProcess(t *testing.T) {
@@ -128,7 +128,7 @@ func TestWebView2KeepsPluginFramesInTheWindowProcess(t *testing.T) {
 
 // aquaarboraurum on X: a window shown while the screen is locked can stay
 // white once Chromium's occlusion tracking has taken it as covered.
-// magpie's WebView2 starts with the tracking off, once only; a user who
+// eipgam's WebView2 starts with the tracking off, once only; a user who
 // turns it on keeps it.
 func TestWebView2OcclusionTrackingOff(t *testing.T) {
 	was := webview2env.Args
@@ -173,12 +173,12 @@ func TestWebView2KeepsCodeIntegrityByDefault(t *testing.T) {
 }
 
 // On Windows Wails' WebView2 loader blanks the variable in its init, which
-// runs before magpie's code (#2753: the reporter's flag never arrived).
-// The value magpie was started with still reaches the options: this test
+// runs before eipgam's code (#2753: the reporter's flag never arrived).
+// The value eipgam was started with still reaches the options: this test
 // starts its own binary with the variable set, where the loader's init has
 // run as in the app.
 func TestWebView2ArgsSurviveWailsInit(t *testing.T) {
-	if os.Getenv("MAGPIE_TEST_WEBVIEW2_CHILD") == "1" {
+	if os.Getenv("EIPGAM_TEST_WEBVIEW2_CHILD") == "1" {
 		fmt.Printf("os=%q disabled=%q\n", os.Getenv(webview2env.Name), windowsOptions().DisabledFeatures)
 		return
 	}
@@ -187,7 +187,7 @@ func TestWebView2ArgsSurviveWailsInit(t *testing.T) {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(exe, "-test.run=^TestWebView2ArgsSurviveWailsInit$", "-test.count=1")
-	cmd.Env = append(os.Environ(), "MAGPIE_TEST_WEBVIEW2_CHILD=1", webview2env.Name+"=--disable-features=RendererCodeIntegrity")
+	cmd.Env = append(os.Environ(), "EIPGAM_TEST_WEBVIEW2_CHILD=1", webview2env.Name+"=--disable-features=RendererCodeIntegrity")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("child: %v\n%s", err, out)

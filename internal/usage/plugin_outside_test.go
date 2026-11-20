@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // fakeOutside stands in for the plugin host: one plugin that lists its
@@ -34,7 +34,7 @@ func fakeOutside(t *testing.T, now time.Time, calls func(since time.Time) ([]plu
 	return &asked
 }
 
-// Calls a plugin says were made outside magpie (Cursor's editor and
+// Calls a plugin says were made outside eipgam (Cursor's editor and
 // cursor-agent, WaiooT on X) are counted on the Usage page as reported
 // calls: by the plugin's agent and provider, tokens and the vendor's cost
 // as given, each once however often it is read again.

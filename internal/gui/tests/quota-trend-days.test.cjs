@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The allowances' trend range takes any number of days back, not only the
 // presets (shangyuan0818 on X): "Other number of days…" in the app's menu
-// opens a small field in the head, 1 to 45 (what magpie keeps), Enter saves
+// opens a small field in the head, 1 to 45 (what eipgam keeps), Enter saves
 // it, the head and every card name it, and it is remembered across a
 // reload; a number out of range says so and keeps the range. Hovering a
 // curve shows the exact reading nearest the pointer, every line's, with its
@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const H = 3600e3;
 const iso = (ms) => new Date(ms).toISOString();
 // the pointer on (x, y) until the tip shows: a card drawn again under a
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const data = fixtures(Date.now());
       await page.route("**/*", serve(lang, data));
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://eipgam.test/?view=usage");
       const curve = page.locator('.subscription-card[data-key="codex"] .quota-curve').first();
       await curve.waitFor();
       const pick = page.locator("#quotaHead #quotaTrend");
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await field.press("Enter");
       await page.waitForFunction((s) => document.querySelector("#quotaTrend")?.textContent === s, w.trend + w.days(12));
       assert.equal(await field.count(), 0);
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.quotaRange")), "12d");
+      assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.quotaRange")), "12d");
       assert.equal(await curve.locator(".qc-range").textContent(), w.days(12), "the card names the range too");
       const axis12 = await curve.locator(".qc-axis span").first().textContent();
 
@@ -115,13 +115,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await field.fill("99");
       await field.press("Enter");
       await page.waitForFunction((s) => document.querySelector("#status")?.textContent === s, w.bad);
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.quotaRange")), "12d", "a number out of range changes nothing");
+      assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.quotaRange")), "12d", "a number out of range changes nothing");
       // Escape leaves it as it was
       await pick.click();
       await items.filter({ hasText: w.other }).click();
       await field.fill("3");
       await field.press("Escape");
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.quotaRange")), "12d");
+      assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.quotaRange")), "12d");
       assert.equal(await pick.textContent(), w.trend + w.days(12));
 
       // a preset's span differs from 12 days'

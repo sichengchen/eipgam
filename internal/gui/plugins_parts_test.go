@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // The Plugins page is drawn in parts (#488): the plugins suggested come at
@@ -21,7 +21,7 @@ func TestPluginMarketInParts(t *testing.T) {
 	cache := t.TempDir()
 	t.Setenv("XDG_CACHE_HOME", cache)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("EIPGAM_PLUGIN_MARKET", "off")
 	const pkg = "@magpie-community/opencode-zcode-auth"
 	// a listing the market gives no icon (yetone: 这里的 agent plugin 为什么
 	// 没有 logo): the picture its package gives (magpie.icon) is kept here,
@@ -34,10 +34,10 @@ func TestPluginMarketInParts(t *testing.T) {
 		agent: map[string]any{"info": map[string]any{"version": "0.1.1", "icon": data}, "at": time.Now()},
 	}
 	b, _ := json.Marshal(kept)
-	if err := os.MkdirAll(filepath.Join(cache, "magpie"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(cache, "eipgam"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(cache, "magpie", "plugin-npm.json"), b, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(cache, "eipgam", "plugin-npm.json"), b, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	plugin.ReloadInfo()

@@ -80,7 +80,7 @@ for (const engine of engines) {
           await browser.close();
         });
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://eipgam.test/?view=agents");
         await openAgentSettings(page);
         const row = page.locator('.row.agent[data-id="codex"] #codexServiceTierRow');
         const pick = page.locator("#codexServiceTierPick button");

@@ -10,7 +10,7 @@ package gui
 #include <stdlib.h>
 
 // The Dock tile flaps as the header logo does: the icon the system draws
-// for magpie (its glass tile and glossy bird, light) is cut into body, tail
+// for eipgam (its glass tile and glossy bird, light) is cut into body, tail
 // and wing by the logo's clip paths, and each frame turns the pieces over
 // the tile with the bird taken out. Drawn at mpDockPx; the tile's view
 // scales it to the Dock's size.
@@ -216,7 +216,7 @@ static int mpDockPNG(const char *file, double bob, double tail, double wing, con
 // thread, which has no autorelease pool: without one of its own, what
 // AppKit autoreleases in making it (its NSCGImageSnapshotRep, holding the
 // frame's 1 MB of pixels) was never let go, 29 frames a flap, for as long
-// as magpie ran (#4162).
+// as eipgam ran (#4162).
 static NSImage *mpDockFrameNS(CGImageRef im) {
 	@autoreleasepool {
 		return [[NSImage alloc] initWithCGImage:im size:NSMakeSize(mpDockPx, mpDockPx)];
@@ -312,7 +312,7 @@ var (
 	dockFlapping atomic.Bool
 )
 
-// dockReady cuts the icon of app (magpie's own bundle when "") up the first
+// dockReady cuts the icon of app (eipgam's own bundle when "") up the first
 // time the tile flaps, by the header logo's paths; false when it can't, or
 // the Dock shows icons another way.
 func dockReady(app string) bool {

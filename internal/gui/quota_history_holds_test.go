@@ -3,9 +3,9 @@ package gui
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 	"net/http"
 	"net/http/httptest"
 	"os"

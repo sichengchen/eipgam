@@ -1,19 +1,19 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Share on local network in a container (莫 on Discord: magpie in Docker on
+// Share on local network in a container (莫 on Discord: eipgam in Docker on
 // a NAS showed the container's own 172.17.x address; jiezhengj on Discord:
 // other devices used the host's 192.168.31.218:3425 well, and other
 // containers on the NAS needed the host's Docker bridge address,
-// http://172.17.0.1:3425): the addresses magpie finds for itself there are
-// the container's, which neither reach. Served over the network (magpie
+// http://172.17.0.1:3425): the addresses eipgam finds for itself there are
+// the container's, which neither reach. Served over the network (eipgam
 // web), the page offers the host it was opened at first, on the gateway's
 // port, and after it the host's bridge address, named other containers';
 // opened at localhost it offers the bridge address and says the host's
-// own is MAGPIE_PUBLIC_URL's. With no default route known it keeps the
+// own is EIPGAM_PUBLIC_URL's. With no default route known it keeps the
 // container's addresses, said to be its own. Outside a container nothing
 // changes. The OpenAI/Anthropic switch keeps the host and moves nothing.
 // The Gateway page's list, the key page's address and the sidebar's line
 // say the same, whether Share on local network is on or not (the image's
-// MAGPIE_ADDR puts the gateway on the network either way). No backend,
+// EIPGAM_ADDR puts the gateway on the network either way). No backend,
 // the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -31,10 +31,10 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "/config/magpie", gateway: "http://0.0.0.0:3425",
+    version: "0.1.400", dir: "/config/eipgam", gateway: "http://0.0.0.0:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [],
-    lan: true, lanKey: "sk-magpie-0123456789abcdef", lanURLs: ["http://172.17.0.2:3425"],
+    lan: true, lanKey: "sk-eipgam-0123456789abcdef", lanURLs: ["http://172.17.0.2:3425"],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     ...over,
   };
@@ -62,16 +62,16 @@ function server(lang, web, over) {
 const words = {
   en: {
     container: "In a container",
-    opened: "Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; MAGPIE_PUBLIC_URL sets another",
-    bridge: "Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which MAGPIE_PUBLIC_URL puts here",
-    own: "The container’s own addresses, which other devices can’t reach: set MAGPIE_PUBLIC_URL to the host’s",
+    opened: "Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; EIPGAM_PUBLIC_URL sets another",
+    bridge: "Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which EIPGAM_PUBLIC_URL puts here",
+    own: "The container’s own addresses, which other devices can’t reach: set EIPGAM_PUBLIC_URL to the host’s",
     others: "Other containers on this host", lan: "Local network", here: "This computer",
   },
   zh: {
     container: "在容器中运行",
-    opened: "其他设备用打开这个页面所用的宿主机地址，本机上的其他容器用宿主机的 Docker bridge 地址，端口都是网关的端口；MAGPIE_PUBLIC_URL 可另设",
-    bridge: "本机上的其他容器用宿主机的 Docker bridge 地址，端口是网关的端口；其他设备用宿主机自己的地址，用 MAGPIE_PUBLIC_URL 把它设在这里",
-    own: "容器自身的地址，其他设备无法访问：请将 MAGPIE_PUBLIC_URL 设为宿主机地址",
+    opened: "其他设备用打开这个页面所用的宿主机地址，本机上的其他容器用宿主机的 Docker bridge 地址，端口都是网关的端口；EIPGAM_PUBLIC_URL 可另设",
+    bridge: "本机上的其他容器用宿主机的 Docker bridge 地址，端口是网关的端口；其他设备用宿主机自己的地址，用 EIPGAM_PUBLIC_URL 把它设在这里",
+    own: "容器自身的地址，其他设备无法访问：请将 EIPGAM_PUBLIC_URL 设为宿主机地址",
     others: "同一主机上的其他容器", lan: "局域网", here: "本机",
   },
   "zh-TW": { others: "同一主機上的其他容器", lan: "區域網", here: "本機" },
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of ["en", "zh"]) {
       const w = words[lang];
       await t.test(lang, async () => {
-        // magpie web, opened at the NAS's address: the gateway there
+        // eipgam web, opened at the NAS's address: the gateway there
         {
           const { page, errors } = await open(lang, "http://192.168.1.20:3430", true, { lanContainer: true, lanContainerHost: BRIDGE });
           assert.equal(await address(page), "http://192.168.1.20:3425/v1");
@@ -149,7 +149,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         // opened at localhost (a tunnel, or on the NAS itself): the host's
         // bridge address, for other containers, and the host's own is
-        // MAGPIE_PUBLIC_URL's
+        // EIPGAM_PUBLIC_URL's
         {
           const { page, errors } = await open(lang, "http://localhost:3430", true, { lanContainer: true, lanContainerHost: BRIDGE });
           assert.equal(await address(page), BRIDGE + "/v1");
@@ -163,7 +163,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal((await note(page).locator(".sub").textContent()).trim(), w.own);
           assert.deepEqual(errors, []);
         }
-        // not in a container (or MAGPIE_PUBLIC_URL set): as it was
+        // not in a container (or EIPGAM_PUBLIC_URL set): as it was
         {
           const { page, errors } = await open(lang, "http://192.168.1.20:3430", true, { lanURLs: ["http://192.168.1.5:3425"] });
           assert.equal(await address(page), "http://192.168.1.5:3425/v1");
@@ -238,7 +238,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   }
 }
 
-// jiezhengj on Discord: magpie in Docker on a NAS, MAGPIE_PUBLIC_URL at the
+// jiezhengj on Discord: eipgam in Docker on a NAS, EIPGAM_PUBLIC_URL at the
 // NAS's own 192.168.31.218. The list on the Gateway page called it "Public
 // address" (公网地址), as if anyone online reached it, and Connect's menu
 // called the Docker bridge's 172.17.0.1 "Local network" while the list
@@ -249,18 +249,18 @@ const NAS = "http://192.168.31.218:3999";
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
     for (const width of [1100, 420]) {
-      test(`${engine} ${lang} ${width}: MAGPIE_PUBLIC_URL at a private address is the local network's, the bridge other containers'`, async (t) => {
+      test(`${engine} ${lang} ${width}: EIPGAM_PUBLIC_URL at a private address is the local network's, the bridge other containers'`, async (t) => {
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
         const w = words[lang];
         const open = async (at, web, over = {}) => {
           const page = await (await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" })).newPage();
-          await page.addInitScript(() => { try { localStorage.setItem("magpie.gwConnectFolded", "0"); } catch {} });
+          await page.addInitScript(() => { try { localStorage.setItem("eipgam.gwConnectFolded", "0"); } catch {} });
           page.setDefaultTimeout(6000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
-          await page.route("**/*", fixture(lang, "light", [], { lan: true, web, containerHost: HOSTBR, // MAGPIE_PUBLIC_URL says the host's: no container's own addresses
+          await page.route("**/*", fixture(lang, "light", [], { lan: true, web, containerHost: HOSTBR, // EIPGAM_PUBLIC_URL says the host's: no container's own addresses
             lanURLs: [NAS], publicURL: NAS, publicKind: "local", ...over }));
           await page.goto(at + "/?view=gateway");
           await page.locator("#gatewayLan .gw-url").first().waitFor();
@@ -284,7 +284,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         const fits = async (page) => assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "wider than the window");
 
-        // magpie web, opened at the NAS: the list and Connect's menu name
+        // eipgam web, opened at the NAS: the list and Connect's menu name
         // each address the same way
         {
           const { page, errors } = await open("http://192.168.31.218:3430", true);
@@ -295,7 +295,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         // the app on the NAS: About names it as the Gateway page does
         {
-          const { page, errors } = await open("http://magpie.test", false);
+          const { page, errors } = await open("http://eipgam.test", false);
           assert.deepEqual(await list(page), [[w.here, "http://127.0.0.1:3999"], [w.lan, NAS], [w.others, HOSTBR]]);
           await page.keyboard.press("Escape");
           await page.locator("#prefs").click();

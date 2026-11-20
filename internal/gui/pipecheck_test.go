@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// POST /api/pipelines/check takes only a pipeline magpie serves, and with
-// no gateway of its own (another magpie serves it) says where to check.
+// POST /api/pipelines/check takes only a pipeline eipgam serves, and with
+// no gateway of its own (another eipgam serves it) says where to check.
 func TestPipelineCheckRoute(t *testing.T) {
 	onePortHome(t)
 	prev := served.Swap(nil)
@@ -23,7 +23,7 @@ func TestPipelineCheckRoute(t *testing.T) {
 	if code, body := post(`{"kind":"chat"}`); code < 400 || !strings.Contains(body, "no such pipeline") {
 		t.Fatalf("an unknown kind: %d %s", code, body)
 	}
-	if code, body := post(`{"kind":"speech"}`); code < 400 || !strings.Contains(body, "Another magpie serves the gateway") {
+	if code, body := post(`{"kind":"speech"}`); code < 400 || !strings.Contains(body, "Another eipgam serves the gateway") {
 		t.Fatalf("no gateway here: %d %s", code, body)
 	}
 	served.Store(gateway.New())

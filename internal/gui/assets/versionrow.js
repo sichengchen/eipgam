@@ -1,6 +1,6 @@
 // Settings › Version's rarer buttons, imported from renderUpdate (app.js)
 // when one is pressed, so they weigh nothing on the core: Restart
-// (yansheng1003 on X: "请在刷新旁边增加一个重启按钮"), magpie started again
+// (yansheng1003 on X: "请在刷新旁边增加一个重启按钮"), eipgam started again
 // as it is (restart.go), and a failing mirror's Download from GitHub (#893).
 
 // the row's parts, as renderUpdate drew them
@@ -12,7 +12,7 @@ const parts = (r) => {
 
 // restartSelf asks for the restart, and says in the row what came of it.
 // The app's window closes with the app, and the new one opens its own; a
-// browser's page (magpie web, or a browser on the app's page) reloads once
+// browser's page (eipgam web, or a browser on the app's page) reloads once
 // another run, of the same version, answers /api/update (its run).
 window.restartSelf = async function (r, u) {
   const { val, sub, dim } = parts(r);
@@ -23,7 +23,7 @@ window.restartSelf = async function (r, u) {
     await api("restart", installFrom());
   } catch (e) {
     if (!r.isConnected || seqOf(r) !== mine) return;
-    sub.textContent = t("Couldn't restart magpie") + (e.message ? " · " + e.message : "");
+    sub.textContent = t("Couldn't restart eipgam") + (e.message ? " · " + e.message : "");
     sub.classList.add("wraps");
     for (const b of val.querySelectorAll("button")) { b.disabled = false; b.classList.remove("busy"); }
     return;

@@ -17,7 +17,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const now = Date.now();
 const iso = (ms) => new Date(ms).toISOString();
 const H = 3600e3;
@@ -112,14 +112,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const ctx = await browser.newContext({ viewport: { width: 1200, height: 2400 }, reducedMotion: "reduce" });
         try {
           // every account in sight: the list whole, and Codex's opened
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.routingActsAll", "1"); localStorage.setItem("magpie.routingKeysOpen", JSON.stringify(["codex/@"])); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.routingActsAll", "1"); localStorage.setItem("eipgam.routingKeysOpen", JSON.stringify(["codex/@"])); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, fx));
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://eipgam.test/?view=routing");
           await page.waitForFunction((n) => document.querySelectorAll(".rt-act .wq").length === n, fx.cards.length);
           for (const width of [420, 560, 700, 765, 840, 960, 1100, 1300, 1600]) {
             await page.setViewportSize({ width, height: 2400 });

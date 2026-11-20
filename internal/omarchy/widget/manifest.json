@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "id": "usemagpie.magpie",
-  "name": "magpie",
+  "id": "com.sichengchen.eipgam",
+  "name": "eipgam",
   "version": "1.0.0",
-  "author": "magpie",
+  "author": "eipgam",
   "license": "MIT",
-  "description": "magpie's icon in the bar: a click drops down its panel, a right click opens its window.",
+  "description": "eipgam's icon in the bar: a click drops down its panel, a right click opens its window.",
   "kinds": ["bar-widget"],
   "entryPoints": {
     "barWidget": "Widget.qml"
   },
   "barWidget": {
-    "displayName": "magpie",
-    "description": "Pick every agent's model from the bar: a click drops down magpie's panel, a right click opens its window.",
+    "displayName": "eipgam",
+    "description": "Pick every agent's model from the bar: a click drops down eipgam's panel, a right click opens its window.",
     "category": "AI",
-    "aliases": ["magpie"],
+    "aliases": ["eipgam"],
     "allowMultiple": false,
     "defaultSection": "right"
   }

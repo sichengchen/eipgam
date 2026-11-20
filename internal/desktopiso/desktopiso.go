@@ -1,9 +1,9 @@
 // Package desktopiso makes the app that starts Claude Desktop in a folder
-// of its own (#5671): ~/Applications/Claude Magpie.app, whose executable is
+// of its own (#5671): ~/Applications/Claude eipgam.app, whose executable is
 // a script that runs the user's Claude.app with --user-data-dir set to
 // desktopdir.Isolated. Desktop's 3p folder is its userData with "-3p"
 // added unless it ends so already (GY in Desktop 2.7032's and 4.4212's
-// index.pre.js), so that folder holds magpie's whole 3p mode, and the
+// index.pre.js), so that folder holds eipgam's whole 3p mode, and the
 // user's own Desktop, signed in with Anthropic in
 // ~/Library/Application Support/Claude, runs beside it untouched. The
 // packaged Desktop drops CLAUDE_USER_DATA_DIR from its environment, so
@@ -32,38 +32,38 @@ import (
 
 	xdraw "golang.org/x/image/draw"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // Name is the app's name, and its bundle's without ".app".
-const Name = "Claude Magpie"
+const Name = "Claude eipgam"
 
 // BundleID is its CFBundleIdentifier, which says a bundle by that name is
-// magpie's: one without it is the user's and is never written over.
-const BundleID = "ai.usemagpie.claude-desktop"
+// eipgam's: one without it is the user's and is never written over.
+const BundleID = "com.sichengchen.eipgam.claude-desktop"
 
 // exeName is the script's name in Contents/MacOS.
-const exeName = "claude-magpie"
+const exeName = "claude-eipgam"
 
-// mark is in every script magpie writes.
-const mark = "made by magpie (#5671)"
+// mark is in every script eipgam writes.
+const mark = "made by eipgam (#5671)"
 
-//go:embed magpie.png
+//go:embed eipgam.png
 var badgePNG []byte
 
-// Path is where the app goes for home: ~/Applications/Claude Magpie.app.
+// Path is where the app goes for home: ~/Applications/Claude eipgam.app.
 func Path(home string) string {
 	return filepath.Join(home, "Applications", Name+".app")
 }
 
-// Mine says the bundle at p is one magpie made.
+// Mine says the bundle at p is one eipgam made.
 func Mine(p string) bool {
 	info, err := os.ReadFile(filepath.Join(p, "Contents", "Info.plist"))
 	return err == nil && bytes.Contains(info, []byte("<string>"+BundleID+"</string>"))
 }
 
-// Here is the app for home when magpie made it, "" when there is none.
+// Here is the app for home when eipgam made it, "" when there is none.
 func Here(home string) string {
 	if p := Path(home); Mine(p) {
 		return p
@@ -88,8 +88,8 @@ func Script(claudeApp, exe, dir, claudeDir string) string {
 		env = "export CLAUDE_CONFIG_DIR=" + q(claudeDir) + "\n"
 	}
 	return "#!/bin/sh\n" +
-		"# Claude Desktop on magpie, in a folder of its own; " + mark + ".\n" +
-		"# magpie's Claude Desktop settings take it away again.\n" +
+		"# Claude Desktop on eipgam, in a folder of its own; " + mark + ".\n" +
+		"# eipgam's Claude Desktop settings take it away again.\n" +
 		"dir=" + q(dir) + "\n" +
 		env +
 		"exe=" + q(exe) + "\n" +
@@ -161,13 +161,13 @@ var register = func(p string) {
 	_ = proc.Command("/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister", "-f", p).Run()
 }
 
-// ErrTheirs: a bundle by the app's name is there and isn't magpie's.
-var ErrTheirs = errors.New(Name + ".app is there already and isn't magpie's")
+// ErrTheirs: a bundle by the app's name is there and isn't eipgam's.
+var ErrTheirs = errors.New(Name + ".app is there already and isn't eipgam's")
 
 // Add makes the app for home, starting the Desktop at claudeApp on dir,
 // its Code tab's Claude Code on claudeDir when one is given (Script), and
-// gives its path. One of magpie's there already is made again; one that
-// isn't magpie's stays, and Add fails (ErrTheirs).
+// gives its path. One of eipgam's there already is made again; one that
+// isn't eipgam's stays, and Add fails (ErrTheirs).
 func Add(home, claudeApp, dir, claudeDir string) (string, error) {
 	p := Path(home)
 	if _, err := os.Lstat(p); err == nil && !Mine(p) {
@@ -196,7 +196,7 @@ func Add(home, claudeApp, dir, claudeDir string) (string, error) {
 	if err := os.WriteFile(filepath.Join(tmp, "Contents", "MacOS", exeName), []byte(Script(claudeApp, exe, dir, claudeDir)), 0o755); err != nil {
 		return "", err
 	}
-	// the icon: Claude's with magpie's badge, or none when Claude's can't
+	// the icon: Claude's with eipgam's badge, or none when Claude's can't
 	// be read (the app still starts Desktop)
 	if icns, err := Icon(claudeApp); err == nil {
 		if err := os.WriteFile(filepath.Join(tmp, "Contents", "Resources", exeName+".icns"), icns, 0o644); err != nil {
@@ -213,8 +213,8 @@ func Add(home, claudeApp, dir, claudeDir string) (string, error) {
 	return p, nil
 }
 
-// Remove takes the app away when magpie made it, and gives the path it
-// was at, "" when there was none of magpie's.
+// Remove takes the app away when eipgam made it, and gives the path it
+// was at, "" when there was none of eipgam's.
 func Remove(home string) (string, error) {
 	p := Here(home)
 	if p == "" {
@@ -228,7 +228,7 @@ func Remove(home string) (string, error) {
 
 // Icon is the app's icon, as an .icns: Claude.app's own (its
 // CFBundleIconFile, electron.icns in 2.7032 and 4.4212), its largest
-// picture with magpie's badge at the bottom right, at 1024, 512, 256 and
+// picture with eipgam's badge at the bottom right, at 1024, 512, 256 and
 // 128 pixels.
 func Icon(claudeApp string) ([]byte, error) {
 	name := plistString(filepath.Join(claudeApp, "Contents", "Info.plist"), "CFBundleIconFile")
@@ -305,8 +305,8 @@ func scaled(src image.Image, size int) *image.NRGBA {
 	return dst
 }
 
-// Badged is base at size pixels with magpie's badge over its bottom
-// right: a white disc with a hairline rim and magpie's bird in it, a
+// Badged is base at size pixels with eipgam's badge over its bottom
+// right: a white disc with a hairline rim and eipgam's bird in it, a
 // little over a third of the icon across. macOS's icon grid keeps the
 // picture inside ~80% of the canvas, so the disc sits on the artwork's
 // corner, not the canvas's.

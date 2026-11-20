@@ -87,7 +87,7 @@ func TestProjectSubagentsEachAgentsFolder(t *testing.T) {
 			t.Errorf("%s: %s present=%v", id, rel, err == nil)
 		}
 	}
-	// none: everything magpie made goes, folders and exclude lines too
+	// none: everything eipgam made goes, folders and exclude lines too
 	ok(t)(ProjectSubagents(a, []string{"reviewer"}, nil))
 	for _, d := range []string{".claude", ".github", ".codex"} {
 		if _, err := os.Stat(filepath.Join(a, d)); err == nil {
@@ -131,7 +131,7 @@ func TestProjectSubagentsLeaveTheUsersFiles(t *testing.T) {
 }
 
 // Taking the library's subagent out, or renaming it, follows in projects;
-// removing the project takes its files; an agent magpie knows no folder
+// removing the project takes its files; an agent eipgam knows no folder
 // of is refused.
 func TestProjectSubagentsFollowTheLibrary(t *testing.T) {
 	_, a, _ := subagentProjects(t)

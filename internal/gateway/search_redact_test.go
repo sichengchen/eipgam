@@ -9,11 +9,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// A search query that leaves magpie for a search service that isn't a
+// A search query that leaves eipgam for a search service that isn't a
 // model's endpoint is masked as the settings say: an agent's search MCP
 // call carries it as the agent's model wrote it, the values put back, and
 // it went to the search API, a Kimi Code plan's or WorkBuddy's search as

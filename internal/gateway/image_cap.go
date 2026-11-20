@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A model's cap on the images of one request.
@@ -60,7 +60,7 @@ var imageCapWords = []imageCapRefusal{
 }
 
 // imageOverCap stands where an image over the cap was left out. It goes
-// to the vendor, so it names neither magpie nor the vendor.
+// to the vendor, so it names neither eipgam nor the vendor.
 const imageOverCap = "[An earlier image was omitted here to keep this request within the model's image limit.]"
 
 // copilotAccount is whether p is a Copilot account, whose refusal of too
@@ -105,7 +105,7 @@ func imageCapKey(p provider.Provider, body []byte) string {
 
 // userImageCap is the cap the user set on p for the model body asks
 // for, 0 for none. The body names the vendor's id for it, and the user
-// set it by the id magpie lists it under, which a model's own upstream
+// set it by the id eipgam lists it under, which a model's own upstream
 // name (SetModelID) can tell apart.
 func userImageCap(p provider.Provider, body []byte) int {
 	if len(p.MaxImages) == 0 {

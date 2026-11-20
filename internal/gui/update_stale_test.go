@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // "Up to date" is about the moment the feed was asked. RickyWei's Version
@@ -27,7 +27,7 @@ func TestStaleLatestIsNotUpToDate(t *testing.T) {
 		json.NewEncoder(w).Encode(update.Release{Version: newest.Load().(string)})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.1402"
 	defer func() { Version = oldV }()

@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/mcpauth/mcpauthtest"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // On Windows, a read-only sign-in file can't be replaced, while the

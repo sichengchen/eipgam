@@ -8,18 +8,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 func TestOTelSessionDiscoveredDuringFirstRequest(t *testing.T) {
 	t.Setenv("PI_CODING_AGENT_DIR", t.TempDir())
 	t.Setenv("PI_CODING_AGENT_SESSION_DIR", "")
 	t.Setenv("CODEX_HOME", t.TempDir())
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", "http://127.0.0.1:1")
-	t.Setenv("MAGPIE_OTEL_HEADERS", "")
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
+	t.Setenv("EIPGAM_OTEL_ENABLED", "true")
+	t.Setenv("EIPGAM_OTEL_ENDPOINT", "http://127.0.0.1:1")
+	t.Setenv("EIPGAM_OTEL_HEADERS", "")
+	t.Setenv("EIPGAM_OTEL_SESSIONS", "true")
 	fastOTel(t)
 	// Begin's cached miss must outlast the test however slow the machine
 	// is (#1811): neither the transcript watcher's poll nor the end of the

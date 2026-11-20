@@ -31,7 +31,7 @@ func TestIsolateDropsWindowsPath(t *testing.T) {
 	if runtime.GOOS != "linux" {
 		t.Skip("WSL is Linux")
 	}
-	t.Setenv("WSL_DISTRO_NAME", "magpie-test")
+	t.Setenv("WSL_DISTRO_NAME", "eipgam-test")
 	t.Setenv("PATH", "/usr/bin:/mnt/c/Windows/System32:/mnt/wslg/x:/bin:/mnt/d")
 	if err := dropWindowsPath(); err != nil {
 		t.Fatal(err)

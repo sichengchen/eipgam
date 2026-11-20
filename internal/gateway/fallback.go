@@ -33,18 +33,18 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 const fallbackCooldown = time.Minute
 
 // groupBudget is how long a group's serial walk may wait on members that
 // are slow to start, in all: below the 600s a client gives up at, so the
-// error comes from magpie and names the budget, and no member is blamed
+// error comes from eipgam and names the budget, and no member is blamed
 // for the client hanging up first (#5113). A var for tests.
 var groupBudget = 540 * time.Second
 
@@ -133,7 +133,7 @@ type capHold struct {
 	spend *spendHold
 }
 
-// spendHold is how a key is held at its spend cap: the cap, what magpie
+// spendHold is how a key is held at its spend cap: the cap, what eipgam
 // counted spent in its period, and the period (its start for one in all).
 type spendHold struct {
 	usd, spent float64
@@ -184,7 +184,7 @@ func (c candidate) label() string {
 }
 
 // restKey is what a candidate rests by: an account by its user, whether
-// or not the agent is signed in to it — magpie can sign Codex in to the
+// or not the agent is signed in to it — eipgam can sign Codex in to the
 // next account when the one it is on is out, and the one out stays out.
 func (c candidate) restKey() string {
 	if a := c.p.Account; a != nil && a.User != "" {
@@ -234,10 +234,10 @@ func (c candidate) who() string {
 	return c.restKey()
 }
 
-// remoteUpstream is, for a remote magpie's model, the provider there that
+// remoteUpstream is, for a remote eipgam's model, the provider there that
 // serves it, its id's first part (anthropic of anthropic/claude-…), or a
 // group of the remote's, its whole id; "" for any other provider's model,
-// and for a remote's model named without one. The remote magpie is one
+// and for a remote's model named without one. The remote eipgam is one
 // key here, but each of its providers is a vendor of its own, with its
 // own cache and its own seals (fremontdango on Discord: a group of one
 // model from two of the remote's providers kept a conversation on the
@@ -258,7 +258,7 @@ func remoteUpstream(p provider.Provider, model string) string {
 }
 
 // vendor is who as the vendor a conversation is with knows it: the key or
-// account, and behind a remote magpie the provider there (remoteUpstream).
+// account, and behind a remote eipgam the provider there (remoteUpstream).
 // What a vendor keeps of a conversation — its cache, the reasoning and
 // compactions it sealed — goes by it; what the user limits on the key
 // here — its lanes, requests a minute — still goes by who.
@@ -270,7 +270,7 @@ func (c candidate) vendor() string {
 }
 
 // sameVendor says whether c is with the vendor that who, asked for model,
-// was: the same key or account, and behind a remote magpie the same
+// was: the same key or account, and behind a remote eipgam the same
 // provider there. With no model known (an answer the usage log has) it
 // is the key or account alone.
 func (c candidate) sameVendor(who, model string) bool {
@@ -1038,7 +1038,7 @@ func cappedError(model string, ws []Weighed, now time.Time) (string, time.Time) 
 		if soonest.IsZero() {
 			again = "once its cap is raised"
 		}
-		return fmt.Sprintf("spend cap reached: every key that serves %q has spent the spend cap set on it in magpie — %s. magpie uses it again %s; %s", model, strings.Join(held, "; "), again, spendAdvice), soonest
+		return fmt.Sprintf("spend cap reached: every key that serves %q has spent the spend cap set on it in eipgam — %s. eipgam uses it again %s; %s", model, strings.Join(held, "; "), again, spendAdvice), soonest
 	}
 	capped, noCredits := heldBy(ws)
 	if slices.ContainsFunc(ws, func(w Weighed) bool { return w.SpendCap > 0 }) {
@@ -1053,15 +1053,15 @@ func cappedError(model string, ws []Weighed, now time.Time) (string, time.Time) 
 		return msg + "; and " + strings.Join(spends, "; ") + " (to use it, " + spendAdvice + ")", soonest
 	}
 	if unread(ws) {
-		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in magpie, or held as its usage can't be told right now — %s. magpie reads it again at the next request and uses it once it is under its cap; %s, or turn off Check usage near the cap (Providers → the provider's accounts, or magpie provider pool <id> --careful off)", model, strings.Join(held, "; "), heldAdvice(ws)), soonest
+		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in eipgam, or held as its usage can't be told right now — %s. eipgam reads it again at the next request and uses it once it is under its cap; %s, or turn off Check usage near the cap (Providers → the provider's accounts, or eipgam provider pool <id> --careful off)", model, strings.Join(held, "; "), heldAdvice(ws)), soonest
 	}
 	switch {
 	case !noCredits:
-		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in magpie — %s. magpie uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(ws)), soonest
+		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in eipgam — %s. eipgam uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(ws)), soonest
 	case !capped:
-		return fmt.Sprintf("usage limit reached: every account that serves %q has used up its allowance and is set in magpie not to spend %s — %s. magpie uses it again once that window renews; %s", model, notSpent(ws), strings.Join(held, "; "), heldAdvice(ws)), soonest
+		return fmt.Sprintf("usage limit reached: every account that serves %q has used up its allowance and is set in eipgam not to spend %s — %s. eipgam uses it again once that window renews; %s", model, notSpent(ws), strings.Join(held, "; "), heldAdvice(ws)), soonest
 	}
-	return fmt.Sprintf("usage limit reached: every account that serves %q is held by magpie — %s. magpie uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(ws)), soonest
+	return fmt.Sprintf("usage limit reached: every account that serves %q is held by eipgam — %s. eipgam uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(ws)), soonest
 }
 
 // checkpointCappedError is cappedError for a request whose native
@@ -1070,7 +1070,7 @@ func cappedError(model string, ws []Weighed, now time.Time) (string, time.Time) 
 // not because they are held too (#2517).
 func checkpointCappedError(model string, cp checkpointWriter, ws []Weighed, now time.Time) (string, time.Time) {
 	held, soonest := heldReasons(ws, now)
-	return fmt.Sprintf("usage limit reached on the one account this conversation can go to — %s. The conversation was compacted natively by %s, and only that key or account can read the compaction it sealed, so magpie doesn't send it to another account that serves %q, which would refuse it; the routing mode and how conversations stay don't change that. magpie uses it again once that window renews; %s, or start a new conversation", strings.Join(held, "; "), cp.Who, model, heldAdvice(ws)), soonest
+	return fmt.Sprintf("usage limit reached on the one account this conversation can go to — %s. The conversation was compacted natively by %s, and only that key or account can read the compaction it sealed, so eipgam doesn't send it to another account that serves %q, which would refuse it; the routing mode and how conversations stay don't change that. eipgam uses it again once that window renews; %s, or start a new conversation", strings.Join(held, "; "), cp.Who, model, heldAdvice(ws)), soonest
 }
 
 // heldReasons is what holds each account of ws held at a share, and the
@@ -1087,7 +1087,7 @@ func heldReasons(ws []Weighed, now time.Time) ([]string, time.Time) {
 			s = fmt.Sprintf("%s (%s) has used %s %s of a usage window, past its cap of %s", w.Name, w.Who, amountText(w.CapCount), w.CapUnit, amountText(w.CapAmount))
 		}
 		if w.SpendCap > 0 {
-			s = fmt.Sprintf("%s (%s) has spent %s of the %s spend cap set on it %s, as magpie's usage prices its calls", w.Name, w.Who, usd(w.Spent), usd(w.SpendCap), spendPeriod(w.SpendPeriod, w.SpendSince, now))
+			s = fmt.Sprintf("%s (%s) has spent %s of the %s spend cap set on it %s, as eipgam's usage prices its calls", w.Name, w.Who, usd(w.Spent), usd(w.SpendCap), spendPeriod(w.SpendPeriod, w.SpendSince, now))
 		}
 		if w.NoCredits {
 			s = fmt.Sprintf("%s (%s) has used up a usage window and is set not to spend its credits", w.Name, w.Who)
@@ -1110,7 +1110,7 @@ func heldReasons(ws []Weighed, now time.Time) ([]string, time.Time) {
 }
 
 // spendAdvice is how to go on past a key's spend cap.
-const spendAdvice = "raise or lift the key's spend cap in magpie (Providers → the key's spend cap, or magpie provider spend-cap), or add a fallback"
+const spendAdvice = "raise or lift the key's spend cap in eipgam (Providers → the key's spend cap, or eipgam provider spend-cap), or add a fallback"
 
 // spendOnly says whether every one of ws held is held at a key's spend
 // cap.
@@ -1159,20 +1159,20 @@ func spendPeriod(period string, since *time.Time, now time.Time) string {
 func heldAdvice(ws []Weighed) string {
 	capped, noCredits := heldBy(ws)
 	if !noCredits {
-		return "raise or lift the cap in magpie (Providers → the account's cap, or magpie provider account-cap)"
+		return "raise or lift the cap in eipgam (Providers → the account's cap, or eipgam provider account-cap)"
 	}
 	credits, extra := heldSpends(ws)
 	var let []string
 	if credits {
-		let = append(let, "if an account holds credits, let it spend them (Usage → the account's Use credits, or magpie quota credits <account> on)")
+		let = append(let, "if an account holds credits, let it spend them (Usage → the account's Use credits, or eipgam quota credits <account> on)")
 	}
 	if extra {
-		let = append(let, "let a Claude account spend extra usage (Providers → Claude → Advanced → Spend extra usage on, or magpie settings set claudeNoExtraUsage off) or lift the cap on its Usage credits")
+		let = append(let, "let a Claude account spend extra usage (Providers → Claude → Advanced → Spend extra usage on, or eipgam settings set claudeNoExtraUsage off) or lift the cap on its Usage credits")
 	}
 	if !capped {
 		return "to go on now, " + strings.Join(let, ", or ")
 	}
-	return "to go on now, raise or lift a cap (Providers → the account's cap, or magpie provider account-cap) or " + strings.Join(let, ", or ")
+	return "to go on now, raise or lift a cap (Providers → the account's cap, or eipgam provider account-cap) or " + strings.Join(let, ", or ")
 }
 
 // heldSpends says what the accounts of ws held at 100% are held from
@@ -1312,7 +1312,7 @@ func barredError(model string, ws []Weighed) string {
 			names = append(names, w.Name)
 		}
 	}
-	return fmt.Sprintf("model %q is set not to be served by any account or key of %s: each one's own list of models leaves it out. Add it to an account's models in magpie (Providers → the account's Models), or pick another model", model, strings.Join(names, ", "))
+	return fmt.Sprintf("model %q is set not to be served by any account or key of %s: each one's own list of models leaves it out. Add it to an account's models in eipgam (Providers → the account's Models), or pick another model", model, strings.Join(names, ", "))
 }
 
 // asideOf is how the trace tells the keys made for another protocol than
@@ -1448,14 +1448,14 @@ func restingOf(c candidate) (Rest, bool) {
 // allowance or its credit — refused with a 429 or a 402 for it, the
 // vendor's words kept — the rest of the first, and when the first of them
 // is asked again: asked before then, each would be refused the same
-// (#1772). A key whose rest magpie guessed the length of, the vendor and
+// (#1772). A key whose rest eipgam guessed the length of, the vendor and
 // the user naming no time, is asked again all the same after its first
 // refusal, and a minute on after the next (Rest.asksAt): zoecats on Discord, a local aggregator said "quota
 // exhausted" for the moment it switched upstreams, and every request,
 // the agent's retry first, was answered from its 15-minute rest. A
 // subscription account isn't held so: its resets may be spent for it
 // (autoReset), and its windows are read again as it is planned. Nor is a
-// model of another computer's magpie (Rest.there): that magpie holds its
+// model of another computer's eipgam (Rest.there): that eipgam holds its
 // own rests, and the user may have changed what it serves since
 // (zaidu259434 on X: a group there moved off a spent vendor, and its
 // refusal was still given here until the time it named).
@@ -1489,7 +1489,7 @@ func quotaHeld(cs []candidate) (Rest, time.Time, bool) {
 // on X, two accounts each limited for 300 seconds were asked again about
 // every half a second, as the agent retried, until the vendor flagged them
 // both. A key or an account alike, out of its rate or its allowance: the
-// time is the vendor's own, not one magpie guessed (quotaHeld's first
+// time is the vendor's own, not one eipgam guessed (quotaHeld's first
 // refusal asked again). Not a subscription account that spends its resets
 // by itself (autoReset), nor another computer's model (Rest.there).
 func timedHeld(cs []candidate) (Rest, time.Time, bool) {
@@ -1574,7 +1574,7 @@ func spentAfter(cs []candidate) bool {
 // resting after the vendor said it is out of quota or credit (the
 // account's, or its model's own pool), or with a window that counts the
 // model used up. back is when the first of them is, zero when none says.
-// A model magpie picks for a call of its own (AutoVision, autoSearcher)
+// A model eipgam picks for a call of its own (AutoVision, autoSearcher)
 // is one routing would still try: a turn's own model goes to the one
 // candidate it has all the same, but the describer or searcher picked in
 // its place can be another (#1801). Unknown allowance, or a rest for a
@@ -1774,7 +1774,7 @@ func modelRetired(status int, body []byte) bool {
 // as it answered glm-5-free and kimi-k2.5-free on 2026-10-10 once they
 // left its free list: {"type":"error","error":{"type":"ModelError",
 // "message":"Model glm-5-free is not supported"}}. Read in the vendor's
-// body, or in the message magpie put it into ("OpenCode Zen Free: Model
+// body, or in the message eipgam put it into ("OpenCode Zen Free: Model
 // glm-5-free is not supported"). Not its "is not supported for format
 // anthropic", a model served on another API (wrongEndpoint), and not its
 // AuthError "Invalid API key." for a key it doesn't take.
@@ -1842,7 +1842,7 @@ var shapeWords = lazyre.New(`(?i)failed to deserialize|unknown (item |content |i
 // once, as for shapeWords, and Command Code doesn't rest. Its overflow
 // that says so names the model's context length before the trace id, and
 // isn't one. The message may come after a provider's name ("Command Code:
-// "), as magpie tells it on.
+// "), as eipgam tells it on.
 var unsaidWords = lazyre.New(`(?i)(^|"|\\"|: )invalid request error trace_id: [0-9a-f]{16,}(\\?"|\s*$)`)
 
 // shapeRefused says a request failed over its shape alone: the next
@@ -2004,7 +2004,7 @@ func elsewhere(left []candidate, c candidate) []candidate {
 // provider.WBRestrictedHint or provider.ZCodeRestrictedHint) — rather
 // than for quota or a passing fault. A vendor's risk control reads the
 // request as well as the account, so the same request sent on to another
-// of its accounts trips it there too. Another computer's magpie that
+// of its accounts trips it there too. Another computer's eipgam that
 // says so (remoteModelRest) speaks for one account of its own, and its
 // other models may be other vendors: it walls off nothing here. Nor does
 // Google's suspension of an account for its terms (googleSuspended): it
@@ -2098,7 +2098,7 @@ func retryable(status int, body []byte) bool {
 // quota. A conversation grown too long for the model, or a request the
 // vendor turned away as it reads, would fail the same at the next asked:
 // nobody rests for it. Nor does an account rest when a model generated
-// empty output (#1221), nor for any error in magpie's own words, a LAN
+// empty output (#1221), nor for any error in eipgam's own words, a LAN
 // peer's loop guard among them (magpieSaid).
 func lateRests(msg string) bool {
 	return !tooLong(http.StatusBadRequest, msg) && !refusedWords.MatchString(msg) && !protectionWords.MatchString(msg) && !magpieSaid(msg)
@@ -2155,7 +2155,7 @@ func saysLength(status int, body []byte) bool {
 // Every other provider's failure reaches the agent as the vendor said it,
 // its status, code and body, however long the request: a custom
 // Responses relay's plain 502, and the 400 or 413 any relay, OpenAI or
-// Anthropic may give for something else entirely, aren't magpie's to
+// Anthropic may give for something else entirely, aren't eipgam's to
 // read as an overflow (#5486, NEKO-CwC: ne9ko9's relay had a 502 at 385K
 // told to Codex as more than gpt-6-astra's 272K, and Codex ended the
 // turn). The one exception is a request error whose own words say the
@@ -2163,7 +2163,7 @@ func saysLength(status int, body []byte) bool {
 // the cause, and lengthMargin of the window rules out the other things
 // such words are said of. Nor is a failure that is no answer at all
 // (transportFailed): a dial or read that timed out, a connection reset, a
-// stream cut short, each in magpie's own words. held is the most the
+// stream cut short, each in eipgam's own words. held is the most the
 // model was seen to answer for this provider (Server.heldOf), and the
 // window is never less than it, nor than the most the provider's list
 // says the model may be asked for (windowMost).
@@ -2240,12 +2240,12 @@ func unsaidOverflows(p provider.Provider, status int) bool {
 }
 
 // transportWords are a failure that never reached a vendor's answer, as Go,
-// Bun or Windows say it, or magpie's own words for a reply that broke off:
+// Bun or Windows say it, or eipgam's own words for a reply that broke off:
 // a request that met one may well fit, and is asked again.
 var transportWords = lazyre.New(`(?i)dial (tcp|udp)|connectex|wsarecv|wsasend|i/o timeout|TLS handshake timeout|context deadline exceeded|Client\.Timeout|timeout awaiting response headers|connection (was )?(reset|refused|aborted|closed)|forcibly closed|broken pipe|unexpected EOF|no such host|network is unreachable|no route to host|server closed idle connection|Unable to connect|ConnectionRefused|ConnectionClosed|FailedToOpenSocket|ETIMEDOUT|ECONNRESET|ECONNREFUSED|ECONNABORTED|ENOTFOUND|EAI_AGAIN|ENETUNREACH|EHOSTUNREACH|EPIPE`)
 
 // transportFailed says an error body is a transport failure rather than a
-// vendor's answer (transportWords), or one magpie made of a reply that
+// vendor's answer (transportWords), or one eipgam made of a reply that
 // broke off or said nothing.
 func transportFailed(body []byte) bool {
 	return transportWords.Match(body) || bytes.Contains(body, []byte(errEndedShort.Error())) ||
@@ -2276,7 +2276,7 @@ func (s *Server) noteHeld(id, model string, n int) {
 }
 
 // heldOf is the most prompt tokens the provider's model has answered since
-// magpie started (noteHeld), 0 when none.
+// eipgam started (noteHeld), 0 when none.
 func (s *Server) heldOf(id, model string) int {
 	if v, ok := s.held.Load(id + "\x00" + model); ok {
 		return v.(int)
@@ -2401,7 +2401,7 @@ var wallCodes = map[string]bool{"user_model_rate_limited": true}
 
 // zcodeRateWall is ZCode's account-wide 429, the same bucket as
 // wallCodes' (#5406, erlinerd): rested and retried, the 429 came back, and
-// two further accounts sat there while magpie kept asking (yetone on two
+// two further accounts sat there while eipgam kept asking (yetone on two
 // Discord reports, v0.1.3216). It is matched by the ZCode plugin's own
 // naming of the refusal, the vendor's three-part label `[1302][<its
 // words>][<its request id>]`, its words whole — the shape the two log
@@ -2696,7 +2696,7 @@ type holdWriter struct {
 	// reasoning keeps the agent from its idle timeout with SSE comments
 	// meanwhile (#751)
 	alive *keptAlive
-	// notes are the headers magpie says of the try (noteMember), set
+	// notes are the headers eipgam says of the try (noteMember), set
 	// under mu: all keepAlive sends of the try's before it has its status,
 	// as until then the try is still writing header, with no lock
 	notes http.Header
@@ -2769,7 +2769,7 @@ type holdWriter struct {
 	// upstreamKeys are the headers of the vendor's reply heardUpstream put
 	// in header (#4145)
 	upstreamKeys []string
-	// tierStamp, on a try for another magpie, says on the reply's header
+	// tierStamp, on a try for another eipgam, says on the reply's header
 	// the tier the request went out at (stampTier), once it has a status
 	tierStamp func(http.Header)
 
@@ -2809,7 +2809,7 @@ func newHoldWriter(w http.ResponseWriter, hold bool) *holdWriter {
 
 func (h *holdWriter) Header() http.Header { return h.header }
 
-// note sets a header magpie says of the try, which keepAlive may send
+// note sets a header eipgam says of the try, which keepAlive may send
 // from watch's goroutine before the try has its status.
 func (h *holdWriter) note(k, v string) {
 	h.mu.Lock()
@@ -2865,7 +2865,7 @@ func (h *holdWriter) pass() {
 	}
 	dst := h.w.Header()
 	for k, v := range h.header {
-		if k != resetsHeader && k != refusedHeader && k != zdrHeader && k != answeredThereHeader && k != keyLimitThereHeader && k != namedStatusHeader { // magpie's own notes, for restAfter and settle
+		if k != resetsHeader && k != refusedHeader && k != zdrHeader && k != answeredThereHeader && k != keyLimitThereHeader && k != namedStatusHeader { // eipgam's own notes, for restAfter and settle
 			dst[k] = v
 		}
 	}
@@ -3307,7 +3307,7 @@ func (h *holdWriter) scan() {
 // kept alive (keepAlive): the stream's 200, then a comment every
 // keepHeldEvery. A refusal after it still goes to another account, whose
 // stream follows the comments in the same response. It was holdLongest,
-// 15s, and a proxy between the agent and magpie that hangs up on a
+// 15s, and a proxy between the agent and eipgam that hangs up on a
 // request with nothing back for about 10s ended every turn whose vendor
 // took longer to its first event: Codex on Windows sends its requests for
 // 127.0.0.1 through the system proxy a Clash-style app sets, "127.*" in
@@ -3370,7 +3370,7 @@ var agentQuietMost = 4 * time.Minute
 // a 413 for an unexpected status and a 400 context_length_exceeded for an
 // invalid request, and either ends the turn with nothing compacted, a
 // compaction refused the same way failing outright (codex-rs codex-api
-// api_bridge.rs). Another client keeps the status, and so does magpie's
+// api_bridge.rs). Another client keeps the status, and so does eipgam's
 // own summary ask (whole), whose 413 codexCompact reads as its cue to ask
 // the conversation as text and then compact without a model.
 func (a *keptAlive) compactsInStream(status int, msg string) bool {
@@ -3389,7 +3389,7 @@ func (a *keptAlive) tooQuiet(d time.Duration) bool {
 const clientRoom = 10 * time.Second
 
 // clientEnd is when a request's client stops waiting, from the seconds
-// it named in provider.WaitHeader (a model test asking a remote magpie),
+// it named in provider.WaitHeader (a model test asking a remote eipgam),
 // counted from start; zero when it named none, or nothing readable.
 func clientEnd(h http.Header, start time.Time) time.Time {
 	n, err := strconv.Atoi(strings.TrimSpace(h.Get(provider.WaitHeader)))
@@ -3402,7 +3402,7 @@ func clientEnd(h http.Header, start time.Time) time.Time {
 // outlives says whether a pause of d, with clientRoom after it, would end
 // past the time the client said it waits: its pause isn't taken, and the
 // client has the error while it still waits for one (plugins#827: a
-// remote magpie's model test waited 20s while the server kept its 502
+// remote eipgam's model test waited 20s while the server kept its 502
 // through the provider's patience, 45s and more, and the test said only
 // that no answer came).
 func (a *keptAlive) outlives(d time.Duration) bool {
@@ -3434,7 +3434,7 @@ func (h *holdWriter) keepAlive() {
 		}
 		// the try's header is whole once it has its status (WriteHeader,
 		// under mu); before, the vendor's are still being copied into it
-		// from the try's goroutine, and only magpie's notes are read
+		// from the try's goroutine, and only eipgam's notes are read
 		src := h.header
 		if h.status == 0 {
 			src = h.notes
@@ -3874,7 +3874,7 @@ func (h *holdWriter) watch() func() {
 // headers, or quiet mid-reply, had pi's 300s idle timeout end the request
 // with no word of why (Wing8Aqua on X). A vendor that sent its 200 and response.created, then
 // nothing while it reasoned, had the stream held with none of it sent,
-// and Cloudflare in front of a remote magpie ended the request at 125s
+// and Cloudflare in front of a remote eipgam ended the request at 125s
 // (524) with the agent sent nothing at all; one quiet mid-reply was reset
 // by it as well (#947). Held, the agent is sent the stream's headers and
 // comments only (keepAlive), none of the try, which another account may
@@ -4026,7 +4026,7 @@ const (
 // no text, no reasoning, no call — fails with while a routing group's
 // next member stands behind it (holdWriter.emptyFails, #6712): the
 // empty reply's error, which the group answers with its next member and
-// rests nobody for (#1221). aistudio2api, behind the magpie-gemini-web
+// rests nobody for (#1221). aistudio2api, behind the eipgam-gemini-web
 // plugin, ended a 200 stream with only its role chunk and finish_reason
 // "stop" when Google's every regeneration came back malformed, and the
 // try stood as answered, the agent's turn ending with no reply and the
@@ -4071,7 +4071,7 @@ var filterReasons = map[string]string{
 	"content_policy_violation": "content_filter",
 	// Factory's usage policy check, a 403 whose code droid 0.245.0 tells
 	// apart from an account's 403 the same way (the Factory plugin keeps
-	// the code on the error it hands magpie): handed on as its 403, the
+	// the code on the error it hands eipgam): handed on as its 403, the
 	// agent took it for a failed sign-in (sweanng on Discord, ZCode:
 	// "Provider authentication failed", reason=auth_failed status=403)
 	"content_policy_rejected": "content_policy_rejected",
@@ -4848,8 +4848,8 @@ func namedStatus(body []byte) int {
 // then code as Gemini's relays carry it (a string code is not a status);
 // else the status its message names in words (textStatus). 0 when it
 // names none, when its words say the request is too long (its overflow is
-// read from the words, wherever it is said), and for magpie's own words,
-// which a magpie relayed to says too (magpieSaid).
+// read from the words, wherever it is said), and for eipgam's own words,
+// which a eipgam relayed to says too (magpieSaid).
 func namedStatusOf(errRaw []byte) int {
 	if !carries(errRaw) {
 		return 0
@@ -4896,7 +4896,7 @@ func namedStatusOf(errRaw []byte) int {
 var httpSaid = lazyre.New(`[(（]\s*HTTP\s*(429|5\d\d)\s*[)）]`)
 
 // textStatus is the status an error's words name (httpSaid), 0 when they
-// name none, or say the request is too long, or are magpie's own. Only a
+// name none, or say the request is too long, or are eipgam's own. Only a
 // rate limit or a server's failure is read so: a 4xx a message quotes may
 // be about anything it fetched, not the request.
 func textStatus(msg string) int {
@@ -4911,9 +4911,9 @@ func textStatus(msg string) int {
 	return n
 }
 
-// magpieSaid says an error is in magpie's own words, not an upstream's:
+// magpieSaid says an error is in eipgam's own words, not an upstream's:
 // its loop guard ending a reply, an empty reply, a reasoning loop asked
-// again. Said by a magpie this one relays to (a LAN peer) too, they are
+// again. Said by a eipgam this one relays to (a LAN peer) too, they are
 // no failure of the account that answered (#4855).
 func magpieSaid(msg string) bool {
 	return strings.Contains(msg, loopGuardSaid) || strings.Contains(msg, emptyReply) || strings.Contains(msg, reloopedError)

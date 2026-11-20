@@ -4,7 +4,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/yetone/magpie/internal/dirent"
+	"github.com/sichengchen/eipgam/internal/dirent"
 )
 
 // held is the session folders' listings kept while a request that reads

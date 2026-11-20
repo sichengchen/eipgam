@@ -10,7 +10,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const alternateAppJS = process.env.MAGPIE_APP_JS;
+const alternateAppJS = process.env.EIPGAM_APP_JS;
 
 function serve() {
   const state = { agents: [], profiles: [], settings: { lang: "en", theme: "light" } };
@@ -40,12 +40,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultNavigationTimeout(60000);
     await page.clock.install();
     await page.route("**/*", serve());
-    await page.goto(`http://magpie.test/?view=providers${mode ? "&mode=" + mode : ""}`);
+    await page.goto(`http://eipgam.test/?view=providers${mode ? "&mode=" + mode : ""}`);
     await page.waitForFunction(() => typeof window.magpieWindowVisibility === "function");
     return page;
   }
   const look = (page) => page.evaluate(() => ({
-    asleep: document.documentElement.classList.contains("magpie-asleep"),
+    asleep: document.documentElement.classList.contains("eipgam-asleep"),
     drawn: getComputedStyle(document.body).contentVisibility !== "hidden",
     scrolled: document.querySelector("#sleepProbe")?.scrollTop,
   }));

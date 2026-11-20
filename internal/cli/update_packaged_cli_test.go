@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// `magpie update` from the AUR's magpie-bin (/usr/bin/magpie) asked for the
+// `eipgam update` from the AUR's eipgam-bin (/usr/bin/eipgam) asked for the
 // password and replaced the package's file under pacman (shuhai on
 // Discord). It now says the version is out and the command that updates
 // the package, and replaces nothing.
@@ -25,9 +25,9 @@ func TestUpdatePackagedSaysTheManager(t *testing.T) {
 			Assets: map[string]update.Asset{update.BinaryAsset(): {URL: "http://" + r.Host + "/asset"}}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
-	exe := filepath.Join(t.TempDir(), "magpie")
-	if err := os.WriteFile(exe, []byte("magpie"), 0o755); err != nil {
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
+	exe := filepath.Join(t.TempDir(), "eipgam")
+	if err := os.WriteFile(exe, []byte("eipgam"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	wasV, wasX, wasE, wasP := version, updateExecutable, updateCanElevate, updatePackagedBy
@@ -35,13 +35,13 @@ func TestUpdatePackagedSaysTheManager(t *testing.T) {
 	version = "0.1.10"
 	updateExecutable = func() (string, error) { return exe, nil }
 	updateCanElevate = func() bool { return true }
-	updatePackagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "magpie-bin"} }
+	updatePackagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "eipgam-bin"} }
 
 	err := updateCmd([]string{"update"})
-	if err == nil || !strings.Contains(err.Error(), "pacman") || !strings.Contains(err.Error(), "yay -S magpie-bin") {
+	if err == nil || !strings.Contains(err.Error(), "pacman") || !strings.Contains(err.Error(), "yay -S eipgam-bin") {
 		t.Fatalf("%v", err)
 	}
-	if b, _ := os.ReadFile(exe); string(b) != "magpie" {
+	if b, _ := os.ReadFile(exe); string(b) != "eipgam" {
 		t.Fatalf("the package's file was changed: %q", b)
 	}
 }

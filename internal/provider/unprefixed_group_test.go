@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // unprefixedHome is a sandbox HOME with models.dev's Kimi entries
@@ -60,7 +60,7 @@ func membersOf(t *testing.T, id string) []string {
 }
 
 // Kimi Code lists Kimi K3.1 Pro as k3.1-pro, and OpenCode Go and Devin
-// serve it as kimi-k3.1-pro: the group magpie found for the model left
+// serve it as kimi-k3.1-pro: the group eipgam found for the model left
 // Kimi Code out until it was added by hand (tmr11235 on X, v0.1.4334).
 // models.dev's entry for Kimi Code's k3.1-pro names moonshotai/kimi-k3.1-pro
 // as the model, so it is the group's. Its other entries name a model that
@@ -135,7 +135,7 @@ func TestFoundGroupOfUnprefixedIDsAloneIsTheModels(t *testing.T) {
 	}
 }
 
-// The same with Kimi Code as magpie adds it, from its preset.
+// The same with Kimi Code as eipgam adds it, from its preset.
 func TestFoundGroupTakesKimiCodesPreset(t *testing.T) {
 	for _, preset := range []string{"kimi-code"} {
 		t.Run(preset, func(t *testing.T) {

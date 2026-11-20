@@ -12,7 +12,7 @@ import (
 // to itself left out, a member fixed at an effort, a group in the group
 // and one not in the group dropped, and a word that isn't a level
 // refused. The map follows its member when it is renamed, its provider
-// is, and when the group is shared to another magpie; the member it
+// is, and when the group is shared to another eipgam; the member it
 // resolves to carries it.
 func TestSaveGroupEffortMaps(t *testing.T) {
 	fastHome(t)
@@ -85,7 +85,7 @@ func TestSaveGroupEffortMaps(t *testing.T) {
 		t.Fatalf("after RenameMember %v", moved.EffortMaps)
 	}
 
-	// shared to another magpie, which has OpenAI's and Anthropic's
+	// shared to another eipgam, which has OpenAI's and Anthropic's
 	// models only on the relay: Anthropic's member's map goes to the
 	// relay's model; the relay's own map is kept where OpenAI's member
 	// is one with it

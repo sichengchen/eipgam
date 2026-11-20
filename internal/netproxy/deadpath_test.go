@@ -22,7 +22,7 @@ import (
 // tunnel whose far side a NAT or a relay dropped — is discovered only by
 // the connection's health check, which goes out PingAfter after the last
 // frame the connection received (#4936: a first try read EOF ~20.5s after
-// it was written, then magpie's own retry succeeded at once on a new
+// it was written, then eipgam's own retry succeeded at once on a new
 // connection). The test watches the bound with the timings scaled down: a
 // holed connection is pinged at PingAfter, dropped at PingAfter+PingWait,
 // and the try on it fails with the connection, while the next one dials
@@ -170,7 +170,7 @@ func holedTry(t *testing.T, pingAfter, pingWait time.Duration, tr *http.Transpor
 	if !containsAny(said, "connection lost", "EOF", "unexpected EOF", "closed") {
 		t.Fatalf("the turn failed with %q; want the connection's own end", said)
 	}
-	// magpie's own retry: a new connection, the turn served.
+	// eipgam's own retry: a new connection, the turn served.
 	took, code, err = post()
 	if err != nil || code != 200 {
 		t.Fatalf("the retry: %d in %v, %v", code, took, err)

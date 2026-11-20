@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // Desktop's SSH remote sessions are handed the profile's address and key
@@ -14,12 +14,12 @@ import (
 // takes from another machine.
 func TestDesktopPointedAtLANHTTPS(t *testing.T) {
 	home, p := desktopSandbox(t)
-	t.Setenv("MAGPIE_PUBLIC_URL", "https://magpie.example.test")
+	t.Setenv("EIPGAM_PUBLIC_URL", "https://eipgam.example.test")
 	if err := access.ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { access.ConfigureLAN(false, false) })
-	lan := "https://magpie.example.test"
+	lan := "https://eipgam.example.test"
 	if len(desktopLANURLs()) == 0 {
 		t.Fatalf("no https address offered: %v (LANURLs %v)", desktopLANURLs(), gateway.LANURLs())
 	}
@@ -29,9 +29,9 @@ func TestDesktopPointedAtLANHTTPS(t *testing.T) {
 		t.Fatal("no gateway field")
 	}
 	if len(f.Options(nil)) != 0 {
-		t.Fatal("offered while Desktop is off magpie")
+		t.Fatal("offered while Desktop is off eipgam")
 	}
-	if err := a.Field("provider").Set("magpie"); err != nil {
+	if err := a.Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	prof := p.prof

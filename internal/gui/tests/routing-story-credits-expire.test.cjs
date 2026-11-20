@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ROUTING_ASSETS || path.resolve(__dirname, "../assets"));
 const now = Date.now();
 const iso = (ms) => new Date(ms).toISOString();
 const H = 3600e3, D = 24 * H;
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               const errors = [];
               page.on("pageerror", (e) => errors.push(e.message));
               await page.route("**/*", serve(lang, routeOf(kind)));
-              await page.goto("http://magpie.test/?view=routing");
+              await page.goto("http://eipgam.test/?view=routing");
               const why = page.locator(".rt-steps li.why").first();
               await why.waitFor();
               const said = (await why.textContent()).trim();

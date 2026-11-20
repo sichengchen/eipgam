@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The rewrites a Codex request goes through on its way (#1532, #2354):
@@ -64,11 +64,11 @@ var codexRewrites = func() []codexRewrite {
 		}},
 		{"forVendor", func(b []byte) []byte { return forVendor(relay, b, false) }, func(b []byte) []byte { return wasForVendor(relay, b) }},
 	}
-	for _, magpie := range []bool{false, true} {
+	for _, eipgam := range []bool{false, true} {
 		for _, native := range []bool{false, true} {
-			rs = append(rs, codexRewrite{fmt.Sprintf("codexInputAs(%v,%v)", magpie, native),
-				func(b []byte) []byte { b, c := codexInputAs(b, magpie, native); return append(b, fmt.Sprint(c)...) },
-				func(b []byte) []byte { b, c := wasCodexInputAs(b, magpie, native); return append(b, fmt.Sprint(c)...) }})
+			rs = append(rs, codexRewrite{fmt.Sprintf("codexInputAs(%v,%v)", eipgam, native),
+				func(b []byte) []byte { b, c := codexInputAs(b, eipgam, native); return append(b, fmt.Sprint(c)...) },
+				func(b []byte) []byte { b, c := wasCodexInputAs(b, eipgam, native); return append(b, fmt.Sprint(c)...) }})
 		}
 	}
 	return rs

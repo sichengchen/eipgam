@@ -14,14 +14,14 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Antigravity CLI (agy) has no effort magpie can set: its --effort is for
-// one session, turned away for magpie's models, and settings.json has no
+// Antigravity CLI (agy) has no effort eipgam can set: its --effort is for
+// one session, turned away for eipgam's models, and settings.json has no
 // key for it (xyenon on Discord). Its requests ask thinkingBudget -1, the
-// model's own choice. With an effort picked for it in magpie, its requests
+// model's own choice. With an effort picked for it in eipgam, its requests
 // to a Gemini API go out at that effort in the words the model takes: a
 // Gemini 2.5 a budget in its range (it turns a level away), a Gemini 3 a
 // level of its own. With none picked they go as agy sent them, and another

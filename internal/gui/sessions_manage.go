@@ -17,15 +17,15 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // The Sessions page: every session of an agent, by folder, to pick up again
-// or delete. A delete moves the session's files into magpie's trash, and a
+// or delete. A delete moves the session's files into eipgam's trash, and a
 // restore moves them back. Only the reader's Delete forever or Empty trash
 // erases what is in the trash; nothing is erased by itself.
 
@@ -37,7 +37,7 @@ type manageAgentJSON struct {
 
 // managedJSON is a session as the Sessions page lists it: its files, and
 // what it spent (tokens, cost and models, which the Usage page's list shows
-// too, #752) with where magpie's gateway sent its calls
+// too, #752) with where eipgam's gateway sent its calls
 type managedJSON struct {
 	sessions.Managed
 	Via []usage.Via `json:"via,omitempty"`
@@ -162,7 +162,7 @@ func sessionManageRoutes(mux *http.ServeMux, w Windows) {
 			Recording bool   `json:"recording"`
 			// Recorded: some gateway conversation text is kept, to delete
 			Recorded bool `json:"recorded"`
-			// Reads: which agents' own sessions magpie may read; the page
+			// Reads: which agents' own sessions eipgam may read; the page
 			// asks first when nothing is decided (asked false)
 			Reads readsJSON `json:"reads"`
 		}{Reads: readsNow(), Agents: []manageAgentJSON{}, Sessions: []managedJSON{}, Terminal: runtime.GOOS == "darwin" && !isWeb(w),
@@ -202,7 +202,7 @@ func sessionManageRoutes(mux *http.ServeMux, w Windows) {
 					counts[s.Agent] = j
 				}
 				j.Count++
-				// what magpie keeps of it can be deleted, whatever the agent
+				// what eipgam keeps of it can be deleted, whatever the agent
 				j.Deletable = true
 			}
 			for _, j := range counts {
@@ -274,7 +274,7 @@ func sessionManageRoutes(mux *http.ServeMux, w Windows) {
 				}
 				s := gatewaySession(g)
 				addCodexModelEffort(&s, modelEffort)
-				// its size is the conversation text magpie recorded of it
+				// its size is the conversation text eipgam recorded of it
 				m := sessions.Managed{Session: s, Deletable: true, Size: sizes(s.Agent, s.ID)}
 				out.Sessions = append(out.Sessions, managedJSON{Managed: m, Via: vias.Of(s.Agent + "|" + s.ID)})
 			}
@@ -311,9 +311,9 @@ func sessionManageRoutes(mux *http.ServeMux, w Windows) {
 		}
 		writeJSON(rw, saidJSONOf(found))
 	})
-	// delete moves the sessions named to magpie's trash, one by one; one
+	// delete moves the sessions named to eipgam's trash, one by one; one
 	// still being written is left, and said so. One seen only through the
-	// gateway, of any agent, has what magpie keeps of it moved there.
+	// gateway, of any agent, has what eipgam keeps of it moved there.
 	mux.HandleFunc("POST /api/sessions/delete", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
 			Agent string   `json:"agent"`
@@ -345,11 +345,11 @@ func sessionManageRoutes(mux *http.ServeMux, w Windows) {
 			if g, ok := listed[id]; ok {
 				_, err = sessions.DeleteGateway(g.Agent, g.ID, g.ID, g.Last)
 			} else if sessions.Forgettable(in.Agent) {
-				// an uninstalled agent's rows of a database magpie only
+				// an uninstalled agent's rows of a database eipgam only
 				// reads: they leave the list, its files are not touched
 				_, err = sessions.Forget(in.Agent, id)
 			} else if !sessions.Deletable(in.Agent) {
-				err = errors.New("magpie can't delete this agent's sessions")
+				err = errors.New("eipgam can't delete this agent's sessions")
 			} else {
 				_, err = sessions.Delete(in.Agent, id)
 			}
@@ -424,7 +424,7 @@ func sessionManageRoutes(mux *http.ServeMux, w Windows) {
 	})
 	// purge erases trashed sessions for good: the keys named, or every one
 	// the trash lists with all. Each key is checked by sessions.Purge, which
-	// removes only a session's folder in magpie's trash.
+	// removes only a session's folder in eipgam's trash.
 	mux.HandleFunc("POST /api/sessions/purge", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
 			Keys []string `json:"keys"`
@@ -487,7 +487,7 @@ type searchJSON struct {
 	// out of time
 	Cut bool `json:"cut,omitempty"`
 	// Unread: the agent's own sessions can't be read here (a database),
-	// only those magpie recorded through the gateway are searched
+	// only those eipgam recorded through the gateway are searched
 	Unread bool `json:"unread,omitempty"`
 }
 
@@ -518,7 +518,7 @@ func searchSessions(ctx context.Context, agentID, query string, budget time.Dura
 			jobs = append(jobs, job{m.Session, m.Last})
 		}
 	} else {
-		// what magpie recorded of them through the gateway is still read
+		// what eipgam recorded of them through the gateway is still read
 		out.Unread = true
 		for _, m := range sessions.ListAgent(agentID) {
 			native[m.ID] = true

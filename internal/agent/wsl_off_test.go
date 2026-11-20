@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// #1264 (Etsuya233): with Settings' Detect agents in WSL off, magpie asks
+// #1264 (Etsuya233): with Settings' Detect agents in WSL off, eipgam asks
 // wsl.exe nothing on its own: no distro is listed or probed, no agent of
 // one is shown, and the Sessions page lists none of a distro's sessions,
 // even one it listed while the setting was on. Turned on again, the

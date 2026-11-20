@@ -28,14 +28,14 @@ func problemAbout(r *Result, what string) bool {
 
 // A project is often a repository someone else wrote. A link in it that
 // leads out of the project (CLAUDE.md to the user's ~/.zshrc) never has
-// magpie write the user's instructions where it points, and a link to
-// nothing never has magpie make the file it names.
+// eipgam write the user's instructions where it points, and a link to
+// nothing never has eipgam make the file it names.
 func TestProjectInstructionsStayInTheProject(t *testing.T) {
 	h, dir := instrProject(t)
 	rc := filepath.Join(h, ".zshrc")
 	write(t, rc, "export A=1\n")
 	symlinkAt(t, rc, filepath.Join(dir, "CLAUDE.md"))
-	nothing := filepath.Join(h, "made-by-magpie")
+	nothing := filepath.Join(h, "made-by-eipgam")
 	symlinkAt(t, nothing, filepath.Join(dir, "AGENTS.md"))
 	text := "Run `make` first."
 	r, err := ProjectInstructions(dir, ProjectInstr{Text: &text, Agents: &[]string{"claude", "codex"}})

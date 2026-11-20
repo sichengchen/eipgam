@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 var machO = []byte{0xcf, 0xfa, 0xed, 0xfe, 0, 0, 0, 0}
@@ -220,8 +220,8 @@ func (f *fakeRex) use(t *testing.T) {
 	rexRun, rexShow = f.run, func() {}
 }
 
-// A session opens in a tab of a Rex session of magpie's own, labelled
-// magpie, whether Rex has no session, one or several (StringKe, #4565: run
+// A session opens in a tab of a Rex session of eipgam's own, labelled
+// eipgam, whether Rex has no session, one or several (StringKe, #4565: run
 // with no -s exits 3 for none and for several alike, and `rex new` has no
 // --label). The tab is named for the session; the label and the script
 // stay arguments of their own, never parsed by a shell on the way. With
@@ -238,8 +238,8 @@ func TestOpenInRex(t *testing.T) {
 		{"no session", nil},
 		{"one session", []fakeRexSession{{id: "session:a1", label: "work"}}},
 		{"two sessions", []fakeRexSession{{id: "session:a1", label: "okcall"}, {id: "session:a2", label: "cswap"}}},
-		{"magpie's and two more", []fakeRexSession{{id: "session:a1", label: "okcall"}, {id: "session:a2", label: "Magpie"}, {id: "session:a3", label: "cswap"}}},
-		{"two named magpie", []fakeRexSession{{id: "session:a1", label: "MAGPIE"}, {id: "session:a2", label: "magpie"}}},
+		{"eipgam's and two more", []fakeRexSession{{id: "session:a1", label: "okcall"}, {id: "session:a2", label: "eipgam"}, {id: "session:a3", label: "cswap"}}},
+		{"two named eipgam", []fakeRexSession{{id: "session:a1", label: "EIPGAM"}, {id: "session:a2", label: "eipgam"}}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f := &fakeRex{t: t, sessions: slices.Clone(tc.sessions)}
@@ -251,21 +251,21 @@ func TestOpenInRex(t *testing.T) {
 			}
 			var mine []fakeRexSession
 			for _, s := range f.sessions {
-				if strings.EqualFold(s.label, "magpie") {
+				if strings.EqualFold(s.label, "eipgam") {
 					mine = append(mine, s)
 				}
 			}
 			own := 0
 			for _, s := range tc.sessions {
-				if strings.EqualFold(s.label, "magpie") {
+				if strings.EqualFold(s.label, "eipgam") {
 					own++
 				}
 			}
-			if own == 0 && (len(mine) != 1 || mine[0].label != "magpie") {
-				t.Fatalf("sessions %+v, want one session labelled magpie made", f.sessions)
+			if own == 0 && (len(mine) != 1 || mine[0].label != "eipgam") {
+				t.Fatalf("sessions %+v, want one session labelled eipgam made", f.sessions)
 			}
 			if want := len(tc.sessions) + max(0, 1-own); len(f.sessions) != want {
-				t.Fatalf("sessions %+v, want %d: magpie's made once, then used", f.sessions, want)
+				t.Fatalf("sessions %+v, want %d: eipgam's made once, then used", f.sessions, want)
 			}
 			tabs := 0
 			for _, s := range f.sessions {
@@ -290,7 +290,7 @@ func TestOpenInRex(t *testing.T) {
 	}
 
 	// the session ended between the list and the run: a new one
-	f := &fakeRex{t: t, sessions: []fakeRexSession{{id: "session:a1", label: "magpie"}}}
+	f := &fakeRex{t: t, sessions: []fakeRexSession{{id: "session:a1", label: "eipgam"}}}
 	f.use(t)
 	wasRun := rexRun
 	rexRun = func(ctx context.Context, bin string, args ...string) ([]byte, error) {
@@ -303,7 +303,7 @@ func TestOpenInRex(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(f.sessions) != 1 || f.sessions[0].windows[0] != "Claude Code" {
-		t.Fatalf("sessions %+v, want a new magpie session", f.sessions)
+		t.Fatalf("sessions %+v, want a new eipgam session", f.sessions)
 	}
 
 	f = &fakeRex{t: t, down: true}
@@ -328,18 +328,18 @@ func TestOpenInRex(t *testing.T) {
 	if b, _ := os.ReadFile(filepath.Join(dir, "out")); string(b) != "ran\n" {
 		t.Fatalf("the command didn't run in its folder: %q", b)
 	}
-	if got := rexLabel("  a\nlong  " + strings.Repeat("x", 80)); !strings.HasPrefix(got, "a long x") || len([]rune(got)) != 60 || rexLabel("") != "magpie" {
+	if got := rexLabel("  a\nlong  " + strings.Repeat("x", 80)); !strings.HasPrefix(got, "a long x") || len([]rune(got)) != 60 || rexLabel("") != "eipgam" {
 		t.Fatalf("rexLabel: %q", got)
 	}
 }
 
-// The same against the real rex, when MAGPIE_TEST_REX names one: a server
+// The same against the real rex, when EIPGAM_TEST_REX names one: a server
 // of the test's own (rex starts one for the socket in XDG_RUNTIME_DIR),
-// with no session, one and two of others, then magpie's among them.
+// with no session, one and two of others, then eipgam's among them.
 func TestOpenInRexReal(t *testing.T) {
-	bin := os.Getenv("MAGPIE_TEST_REX")
+	bin := os.Getenv("EIPGAM_TEST_REX")
 	if bin == "" {
-		t.Skip("MAGPIE_TEST_REX names no rex program")
+		t.Skip("EIPGAM_TEST_REX names no rex program")
 	}
 	run, err := os.MkdirTemp("/tmp", "rx") // a socket path's room is short
 	if err != nil {
@@ -399,15 +399,15 @@ func TestOpenInRexReal(t *testing.T) {
 		t.Helper()
 		id := ""
 		for _, s := range list() {
-			if s.Label == "magpie" {
+			if s.Label == "eipgam" {
 				if id != "" {
-					t.Fatalf("two magpie sessions: %+v", list())
+					t.Fatalf("two eipgam sessions: %+v", list())
 				}
 				id = s.ID
 			}
 		}
 		if id == "" {
-			t.Fatalf("no magpie session: %+v", list())
+			t.Fatalf("no eipgam session: %+v", list())
 		}
 		return id
 	}
@@ -434,9 +434,9 @@ func TestOpenInRexReal(t *testing.T) {
 	if got := tabs(mine()); !slices.Equal(got, []string{"two"}) {
 		t.Fatalf("two sessions: tabs %q", got)
 	}
-	open("-three") // magpie's among them: a tab added to it
+	open("-three") // eipgam's among them: a tab added to it
 	if got := tabs(mine()); !slices.Equal(got, []string{"two", "-three"}) || len(list()) != 3 {
-		t.Fatalf("magpie's and two: tabs %q, sessions %+v", got, list())
+		t.Fatalf("eipgam's and two: tabs %q, sessions %+v", got, list())
 	}
 }
 
@@ -473,10 +473,10 @@ esac
 	return bin
 }
 
-// After opening the tab, magpie asks the Rex app to go to it: a tab added
+// After opening the tab, eipgam asks the Rex app to go to it: a tab added
 // from outside only shows in the app's sidebar, and `open -b` only brings
 // the window forward (StringKe, #4565). The app client is the one of kind
-// app attached to magpie's session, else the last app connected, never a
+// app attached to eipgam's session, else the last app connected, never a
 // lost one; it is asked with `rex -C <client> do session.select`, with the
 // session and the new tab, for a new session and an added tab alike. Remote
 // Control off (a refused do), no app, a failed client list or an app that
@@ -493,7 +493,7 @@ func TestOpenInRexSelectsTheTab(t *testing.T) {
 
 	const (
 		none    = `{"sessions":[{"session_id":"session:w","label":"work"}]}`
-		mine    = `{"sessions":[{"session_id":"session:w","label":"work"},{"session_id":"session:m","label":"magpie"}]}`
+		mine    = `{"sessions":[{"session_id":"session:w","label":"work"},{"session_id":"session:m","label":"eipgam"}]}`
 		cli     = `{"client_id":"client:cli","info":{"kind":"cli","name":"rex"},"principal":{"kind":"peer","transport":"unix","display":"uid 501"},"connected_at":"2026-10-31T23:24:11Z","connection_state":"connected"}`
 		appW    = `{"client_id":"client:appW","info":{"kind":"app","name":"Rex.app","platform":"macos"},"principal":{"kind":"peer","transport":"unix","display":"uid 501"},"connected_at":"2026-10-31T20:00:00Z","connection_state":"connected","session_ids":["session:w"]}`
 		appM    = `{"client_id":"client:appM","info":{"kind":"app","name":"Rex.app","platform":"ios"},"principal":{"kind":"tailscale","transport":"tailscale","display":"me"},"connected_at":"2026-10-31T19:00:00Z","connection_state":"connected","session_ids":["session:m","session:w"]}`
@@ -507,7 +507,7 @@ func TestOpenInRexSelectsTheTab(t *testing.T) {
 	}{
 		{"new session, an app on another", none, clients(appM, cli, appW, appLost), nil,
 			[]string{"-C", "client:appW", "do", "session.select", "session_id=session:new1", "window_id=window:new1"}},
-		{"magpie's session, the app attached to it", mine, clients(appM, cli, appW, appLost), nil,
+		{"eipgam's session, the app attached to it", mine, clients(appM, cli, appW, appLost), nil,
 			[]string{"-C", "client:appM", "do", "session.select", "session_id=session:m", "window_id=window:run1"}},
 		{"only a lost app", mine, clients(cli, appLost), nil, nil},
 		{"no app", none, clients(cli), nil, nil},

@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The window an agent is told for a model, when it is not the model's own
@@ -78,7 +78,7 @@ func SetAgentContexts(agent string, cs map[string]int) error {
 	}
 	clean := map[string]int{}
 	for k, n := range cs {
-		k = strings.TrimPrefix(strings.TrimSpace(k), "magpie/")
+		k = strings.TrimPrefix(strings.TrimSpace(k), "eipgam/")
 		switch {
 		case n < 0:
 			return errorf("a context window is a number of tokens, not %d", n)

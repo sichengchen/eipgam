@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The Routing groups page's Settings card sets what every group follows
@@ -65,7 +65,7 @@ func TestGroupDefaultsSaved(t *testing.T) {
 	if s := settings.Load(); s.GroupPatience != -1 {
 		t.Fatalf("after a refusal: %d", s.GroupPatience)
 	}
-	// back to magpie's own
+	// back to eipgam's own
 	if code, got := post(`{}`); code != 200 || got.Defaults != (groupDefaultsJSON{}) {
 		t.Fatalf("cleared: %d %+v", code, got.Defaults)
 	}

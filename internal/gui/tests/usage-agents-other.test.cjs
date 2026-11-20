@@ -8,7 +8,7 @@
 // sight. The Other row's numbers are the folded ones' sum, so the totals
 // are exact. It opens and closes with a click or Enter, the page left
 // where it is, and shows its rows 100 at a time. Every language, a wide
-// window, a narrow one and magpie web on a phone; no backend, the API is
+// window, a narrow one and eipgam web on a phone; no backend, the API is
 // faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -43,7 +43,7 @@ const TOTAL = AGENTS.reduce((n, g) => n + g.input + g.output, 0);
 const USAGE = {
   calls: 10 * AGENTS.length, errors: 0, input: TOTAL - 1000, output: 1000, reasoning: 0, cache_read: 0, cache_write: 0, unpriced: 0, cost: 0.01 * AGENTS.length, bucket: "day",
   series: [],
-  path: "~/.config/magpie/usage.jsonl",
+  path: "~/.config/eipgam/usage.jsonl",
   agents: AGENTS,
   models: [{ ...G("m", "glm-5", TOTAL), model: "glm-5" }],
 };
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", server(lang, web));
-          await p.goto("http://magpie.test/");
+          await p.goto("http://eipgam.test/");
           const nav = p.locator('[data-view="usage"]:visible').first();
           if (await nav.count()) await nav.click();
           else await p.evaluate(() => show("usage"));
@@ -211,7 +211,7 @@ test("the fold rule", async (t) => {
   const ctx = await browser.newContext();
   const p = await ctx.newPage();
   await p.route("**/*", server("en", false));
-  await p.goto("http://magpie.test/");
+  await p.goto("http://eipgam.test/");
   await p.waitForFunction(() => typeof usageFoldAgents === "function");
   const fold = (groups) => p.evaluate(([groups, now]) => {
     const total = groups.reduce((n, g) => n + usageTokens(g), 0);

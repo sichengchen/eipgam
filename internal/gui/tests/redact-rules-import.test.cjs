@@ -7,7 +7,7 @@
 // the box's own choice says, is listed as it was read and added after the
 // rules the list has, one it has or pasted twice passed over, in one save.
 // A redraw keeps the box, what it holds and its choice; Escape and Cancel
-// save nothing; a list magpie refuses is said in the box and the paste is
+// save nothing; a list eipgam refuses is said in the box and the paste is
 // kept. Copy writes the rules as JSON, which Import takes back as they
 // were. Every language, Chromium and WebKit, narrow.
 const assert = require("node:assert/strict");
@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, box));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=privacy");
+      await page.goto("http://eipgam.test/?view=settings&tab=privacy");
       await page.locator(ROW).waitFor();
       await settingsDrawn(page);
 
@@ -162,7 +162,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await page.locator(`${ROW} textarea`).count(), 0);
       assert.equal(box.saved.length, 1, "closing saves nothing");
 
-      // a list magpie refuses: said in the box, the paste kept, the rules as they were
+      // a list eipgam refuses: said in the box, the paste kept, the rules as they were
       box.fail = "the masking rule BAD has a regular expression that doesn't work: missing closing )";
       await open.click();
       await area.fill("BAD=ns-(x");
@@ -183,7 +183,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await area.fill(box.copied[0]);
       assert.equal(await count.textContent(), await said(page, "No new rules: each is in the list already"));
       assert.equal(await go.isDisabled(), true);
-      // and a copy from another magpie, a prefix rule among regexes, comes in as it was
+      // and a copy from another eipgam, a prefix rule among regexes, comes in as it was
       await area.fill(JSON.stringify([{ kind: "SHOP", prefix: "shpat_" }, { kind: "GW_TOKEN", regex: "gw-[0-9a-f]{32}" }]));
       assert.deepEqual(await preview(page), [["SHOP", "shpat_…"]]);
       await go.click();

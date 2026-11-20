@@ -1,20 +1,20 @@
-// magpie's addition to DeepSeek's chat page: the key on this computer,
-// and which of magpie's models answers. The page asks for one model of
-// DeepSeek's; magpie answers with the one picked here, which it reads
-// from the magpie_chat_model cookie.
+// eipgam's addition to DeepSeek's chat page: the key on this computer,
+// and which of eipgam's models answers. The page asks for one model of
+// DeepSeek's; eipgam answers with the one picked here, which it reads
+// from the eipgam_chat_model cookie.
 (function () {
   "use strict";
   var KEY = "chat-demo:api-key";
-  var COOKIE = "magpie_chat_model";
-  var PICKED = "magpie:chat-model";
+  var COOKIE = "eipgam_chat_model";
+  var PICKED = "eipgam:chat-model";
   var local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   var store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   };
-  // on this computer the page needs no key of the user's: magpie takes
+  // on this computer the page needs no key of the user's: eipgam takes
   // its own agent's
-  if (local && !store.get(KEY)) store.set(KEY, "magpie-deepseek-chat");
+  if (local && !store.get(KEY)) store.set(KEY, "eipgam-deepseek-chat");
 
   function setCookie(id) {
     document.cookie = COOKIE + "=" + encodeURIComponent(id) + "; Path=/deepseek-chat; SameSite=Strict; Max-Age=31536000";
@@ -23,22 +23,22 @@
   if (picked) setCookie(picked);
 
   var css = [
-    "#magpie-model{position:fixed;top:12px;right:64px;z-index:2147483000;font:13px/1.2 system-ui,-apple-system,sans-serif;color-scheme:inherit}",
-    "#magpie-model button{all:unset;box-sizing:border-box;cursor:pointer}",
-    "#magpie-model .mm-btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:8px;max-width:260px;color:#3a3a3c;color:light-dark(#3a3a3c,#e5e5ea);background:transparent;transition:background-color .15s ease}",
-    "#magpie-model .mm-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
-    "#magpie-model .mm-btn svg{flex:none;opacity:.6}",
-    "@media (hover:hover) and (pointer:fine){#magpie-model .mm-btn:hover{background:rgba(127,127,127,.12)}}",
-    "#magpie-model .mm-btn:active{transform:scale(.97)}",
-    "#magpie-model .mm-menu{position:absolute;top:36px;right:0;min-width:220px;max-width:min(360px,calc(100vw - 24px));max-height:min(420px,calc(100vh - 72px));overflow:auto;padding:4px;border-radius:10px;background:#fff;background:light-dark(#fff,#2c2c2e);box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 8px 28px rgba(0,0,0,.16);transform-origin:top right;opacity:0;transform:scale(.95);transition:opacity .15s cubic-bezier(.23,1,.32,1),transform .15s cubic-bezier(.23,1,.32,1);pointer-events:none}",
-    "#magpie-model.open .mm-menu{opacity:1;transform:none;pointer-events:auto;transition-duration:.2s}",
-    "#magpie-model .mm-item{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:6px;color:#1c1c1e;color:light-dark(#1c1c1e,#f2f2f7)}",
-    "#magpie-model .mm-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
-    "#magpie-model .mm-item:hover,#magpie-model .mm-item:focus-visible{background:rgba(127,127,127,.14)}",
-    "#magpie-model .mm-item .mm-on{visibility:hidden}",
-    "#magpie-model .mm-item[aria-checked=true] .mm-on{visibility:visible}",
-    "@media (max-width:640px){#magpie-model{right:56px}}",
-    "@media (prefers-reduced-motion:reduce){#magpie-model .mm-menu{transform:none}}",
+    "#eipgam-model{position:fixed;top:12px;right:64px;z-index:2147483000;font:13px/1.2 system-ui,-apple-system,sans-serif;color-scheme:inherit}",
+    "#eipgam-model button{all:unset;box-sizing:border-box;cursor:pointer}",
+    "#eipgam-model .mm-btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:8px;max-width:260px;color:#3a3a3c;color:light-dark(#3a3a3c,#e5e5ea);background:transparent;transition:background-color .15s ease}",
+    "#eipgam-model .mm-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+    "#eipgam-model .mm-btn svg{flex:none;opacity:.6}",
+    "@media (hover:hover) and (pointer:fine){#eipgam-model .mm-btn:hover{background:rgba(127,127,127,.12)}}",
+    "#eipgam-model .mm-btn:active{transform:scale(.97)}",
+    "#eipgam-model .mm-menu{position:absolute;top:36px;right:0;min-width:220px;max-width:min(360px,calc(100vw - 24px));max-height:min(420px,calc(100vh - 72px));overflow:auto;padding:4px;border-radius:10px;background:#fff;background:light-dark(#fff,#2c2c2e);box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 8px 28px rgba(0,0,0,.16);transform-origin:top right;opacity:0;transform:scale(.95);transition:opacity .15s cubic-bezier(.23,1,.32,1),transform .15s cubic-bezier(.23,1,.32,1);pointer-events:none}",
+    "#eipgam-model.open .mm-menu{opacity:1;transform:none;pointer-events:auto;transition-duration:.2s}",
+    "#eipgam-model .mm-item{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:6px;color:#1c1c1e;color:light-dark(#1c1c1e,#f2f2f7)}",
+    "#eipgam-model .mm-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+    "#eipgam-model .mm-item:hover,#eipgam-model .mm-item:focus-visible{background:rgba(127,127,127,.14)}",
+    "#eipgam-model .mm-item .mm-on{visibility:hidden}",
+    "#eipgam-model .mm-item[aria-checked=true] .mm-on{visibility:visible}",
+    "@media (max-width:640px){#eipgam-model{right:56px}}",
+    "@media (prefers-reduced-motion:reduce){#eipgam-model .mm-menu{transform:none}}",
   ].join("\n");
 
   var chevron = '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -52,13 +52,13 @@
   }
 
   function mount(list) {
-    if (!list.data || !list.data.length || document.getElementById("magpie-model")) return;
+    if (!list.data || !list.data.length || document.getElementById("eipgam-model")) return;
     var current = list.data.some(function (m) { return m.id === picked; }) ? picked : list["default"];
     var style = el("style");
     style.textContent = css;
     document.head.appendChild(style);
     var box = el("div");
-    box.id = "magpie-model";
+    box.id = "eipgam-model";
     var btn = el("button", "mm-btn");
     btn.setAttribute("aria-haspopup", "menu");
     btn.setAttribute("aria-expanded", "false");

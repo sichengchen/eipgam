@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/claudecode"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudecode"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // npmClaude installs a Claude Code of version v as npm does in a Node
@@ -42,7 +42,7 @@ const oldClaude = "#!/bin/sh\n[ \"$1\" = --version ] && { echo '2.1.38 (Claude C
 
 // claudeOnPath makes PATH these Claude Codes, first to last, and the
 // system's own folders (none of the machine's own claude), and has the
-// sign-in look Claude Code up as magpie does (claudecode.Find).
+// sign-in look Claude Code up as eipgam does (claudecode.Find).
 func claudeOnPath(t *testing.T, bins ...string) {
 	t.Helper()
 	t.Setenv("PATH", strings.Join(append(bins, "/usr/bin", "/bin"), string(os.PathListSeparator)))

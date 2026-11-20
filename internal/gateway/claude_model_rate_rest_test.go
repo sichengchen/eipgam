@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A Claude account's plain 429 rate_limit_error for one model rests that

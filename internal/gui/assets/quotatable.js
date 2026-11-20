@@ -19,7 +19,7 @@
 // A provider with several accounts is one row (jay68xu on X, #6740): its
 // name and how many, and each column's share averaged over its accounts
 // (the pool as a whole). Its accounts are rows under it, folded until it
-// is clicked, and what is open is remembered (magpie.quotaTableOpen, by
+// is clicked, and what is open is remembered (eipgam.quotaTableOpen, by
 // provider), as the cards remember theirs. A column with nothing in any
 // row (Account, when no row names one) is left out.
 const TABLE_WINDOWS = 4;

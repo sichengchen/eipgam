@@ -1,14 +1,14 @@
-// magpie's tap on Claude Code's stream (internal/claudetui/tap.go). Claude
+// eipgam's tap on Claude Code's stream (internal/claudetui/tap.go). Claude
 // Code, a Bun program, loads this before itself (BUN_OPTIONS --preload).
 // Its requests to Anthropic go through Bun.FetchSession: this makes that
 // a FetchSession whose fetch is the real one's, the request, connection
 // and TLS untouched, and copies the reply of each of the main turn's
 // requests (x-claude-code-request-class: main), as it streams, to the
-// file MAGPIE_CLAUDE_TAP names: a JSON line an event, and the reply's
+// file EIPGAM_CLAUDE_TAP names: a JSON line an event, and the reply's
 // anthropic-ratelimit-unified-* headers as it opens. Claude Code reads
 // its own copy of the stream as before.
 //
-// MAGPIE_CLAUDE_GUARD names a file of the bridge's holding the
+// EIPGAM_CLAUDE_GUARD names a file of the bridge's holding the
 // CLAUDE_CODE_EXTRA_BODY a turn of the client's gave (its safeguards).
 // Claude Code reads that variable as it builds each request, but only
 // from its own environment, which nothing outside can change once it
@@ -24,19 +24,19 @@
 // typing /effort, which saves it as the user's default for new sessions;
 // a --settings file is read once, as Claude Code starts.
 (() => {
-  const file = process.env.MAGPIE_CLAUDE_TAP;
-  const guard = process.env.MAGPIE_CLAUDE_GUARD;
-  delete process.env.MAGPIE_CLAUDE_GUARD;
+  const file = process.env.EIPGAM_CLAUDE_TAP;
+  const guard = process.env.EIPGAM_CLAUDE_GUARD;
+  delete process.env.EIPGAM_CLAUDE_GUARD;
   if (!file) return;
   // none of it is handed on to what Claude Code runs, nor says it is here
-  delete process.env.MAGPIE_CLAUDE_TAP;
-  const ours = /(^|\s)--preload(=|\s+)\S*magpie-claude-tap-\S*/;
+  delete process.env.EIPGAM_CLAUDE_TAP;
+  const ours = /(^|\s)--preload(=|\s+)\S*eipgam-claude-tap-\S*/;
   const opts = (process.env.BUN_OPTIONS || "").replace(ours, "").trim();
   if (opts) process.env.BUN_OPTIONS = opts;
   else delete process.env.BUN_OPTIONS;
   const argv = process.execArgv;
   for (let i = argv.length - 1; i >= 0; i--) {
-    if (!/magpie-claude-tap-/.test(argv[i])) continue;
+    if (!/eipgam-claude-tap-/.test(argv[i])) continue;
     if (argv[i].startsWith("--preload=")) argv.splice(i, 1);
     else if (argv[i - 1] === "--preload") argv.splice(--i, 2);
   }

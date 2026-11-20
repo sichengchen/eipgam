@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/gwtool"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }
@@ -34,7 +34,7 @@ func sandbox(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, "cache"))
 }
 
-// In a process serving the gateway, on serves magpie's web search, off
+// In a process serving the gateway, on serves eipgam's web search, off
 // doesn't, on again does; a process not serving it has it either way.
 func TestOnServesOffDoesNot(t *testing.T) {
 	sandbox(t)
@@ -60,7 +60,7 @@ func TestOnServesOffDoesNot(t *testing.T) {
 	served(true)
 }
 
-// In use while a search API is set up or a searcher is picked; magpie's
+// In use while a search API is set up or a searcher is picked; eipgam's
 // pick or off: none; files that can't be read: not known.
 func TestInUse(t *testing.T) {
 	sandbox(t)

@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // fakeHub is the library's servers, as the gateway asks for them.
@@ -115,7 +115,7 @@ func TestHubMCPListsAndRoutes(t *testing.T) {
 	h := lanGuard(New().Handler())
 
 	init := readMCP(t, hubPost(h, "claude", here, `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}`))
-	if init.Error != nil || init.Result.ServerInfo.Name != "magpie" || init.Result.ProtocolVersion != "2025-06-18" {
+	if init.Error != nil || init.Result.ServerInfo.Name != "eipgam" || init.Result.ProtocolVersion != "2025-06-18" {
 		t.Fatalf("initialize: %+v", init)
 	}
 	m := readMCP(t, hubPost(h, "claude", here, toolsList))
@@ -162,7 +162,7 @@ func TestHubMCPListsAndRoutes(t *testing.T) {
 	}
 }
 
-// A tool name the agent listed before its server's list changed (Magpie
+// A tool name the agent listed before its server's list changed (eipgam
 // Browser's browser_tabs, now the browser tool's tabs action) or while
 // the server's list failed still goes to that server when it is switched
 // on for the agent, for the server to run or refuse; another agent's
@@ -171,18 +171,18 @@ func TestHubMCPCallsAToolNoLongerListed(t *testing.T) {
 	fresh(t)
 	f := &fakeHub{on: true,
 		tools: map[string][]HubTool{
-			"claude": {{Server: "magpie-browser", Tool: "browser", Spec: hubSpec("browser")}},
+			"claude": {{Server: "eipgam-browser", Tool: "browser", Spec: hubSpec("browser")}},
 		},
 		servers: map[string][]HubServer{
-			"claude": {{Name: "magpie-browser"}, {Name: "my.fs"}},
+			"claude": {{Name: "eipgam-browser"}, {Name: "my.fs"}},
 			"codex":  {{Name: "github"}},
 		},
 	}
 	withHub(t, f)
 	h := lanGuard(New().Handler())
 	for _, c := range []struct{ name, ran string }{
-		{"magpie-browser__browser_tabs", "ran magpie-browser browser_tabs"},
-		{"magpie-browser__browser", "ran magpie-browser browser"},
+		{"eipgam-browser__browser_tabs", "ran eipgam-browser browser_tabs"},
+		{"eipgam-browser__browser", "ran eipgam-browser browser"},
 		// listed nothing just now, and its name in the hub's characters
 		{"my-fs__read", "ran my.fs read"},
 	} {
@@ -191,13 +191,13 @@ func TestHubMCPCallsAToolNoLongerListed(t *testing.T) {
 			t.Errorf("%s: %+v", c.name, m)
 		}
 	}
-	for _, c := range []struct{ agent, name string }{{"claude", "github__create_issue"}, {"claude", "magpie-browser__"}, {"codex", "magpie-browser__browser_tabs"}, {"claude", "nope__x"}} {
+	for _, c := range []struct{ agent, name string }{{"claude", "github__create_issue"}, {"claude", "eipgam-browser__"}, {"codex", "eipgam-browser__browser_tabs"}, {"claude", "nope__x"}} {
 		m := readMCP(t, hubPost(h, c.agent, here, toolsCall(c.name, `{}`)))
 		if m.Error == nil || m.Error.Code != -32602 || !strings.Contains(m.Error.Message, "unknown tool "+c.name) {
 			t.Errorf("%s's %s: %+v", c.agent, c.name, m)
 		}
 	}
-	want := `claude magpie-browser browser_tabs {"action":"tabs"}|claude magpie-browser browser {"action":"tabs"}|claude my.fs read {"action":"tabs"}`
+	want := `claude eipgam-browser browser_tabs {"action":"tabs"}|claude eipgam-browser browser {"action":"tabs"}|claude my.fs read {"action":"tabs"}`
 	if got := strings.Join(f.ran(), "|"); got != want {
 		t.Errorf("ran %q, want %q", got, want)
 	}
@@ -208,8 +208,8 @@ func TestHubMCPCallsAToolNoLongerListed(t *testing.T) {
 // word for a tool it doesn't have; an agent's path still lists only its own.
 func TestHubMCPForAnyApp(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	f := &fakeHub{on: true, tools: map[string][]HubTool{
 		"":       {{Server: "github", Tool: "create_issue", Spec: hubSpec("create_issue")}, {Server: "notes", Tool: "find", Spec: hubSpec("find")}},
 		"claude": {{Server: "github", Tool: "create_issue", Spec: hubSpec("create_issue")}},
@@ -218,10 +218,10 @@ func TestHubMCPForAnyApp(t *testing.T) {
 	h := lanGuard(New().Handler())
 
 	w := hubPostAt(h, HubMCPAll, here, `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}`)
-	if init := readMCP(t, w); init.Error != nil || init.Result.ServerInfo.Name != "magpie" {
+	if init := readMCP(t, w); init.Error != nil || init.Result.ServerInfo.Name != "eipgam" {
 		t.Fatalf("initialize: %+v", init)
 	}
-	if !strings.Contains(w.Body.String(), "The tools of every MCP server in magpie's Library") {
+	if !strings.Contains(w.Body.String(), "The tools of every MCP server in eipgam's Library") {
 		t.Errorf("another app's instructions: %s", w.Body)
 	}
 	var names []string
@@ -236,7 +236,7 @@ func TestHubMCPForAnyApp(t *testing.T) {
 		t.Fatalf("another app's call: %+v", m)
 	}
 	m = readMCP(t, hubPostAt(h, HubMCPAll, here, toolsCall("nope__x", `{}`)))
-	if m.Error == nil || m.Error.Code != -32602 || m.Error.Message != "unknown tool nope__x: no MCP server in magpie's Library gives it" {
+	if m.Error == nil || m.Error.Code != -32602 || m.Error.Message != "unknown tool nope__x: no MCP server in eipgam's Library gives it" {
 		t.Errorf("another app's unknown tool: %+v", m)
 	}
 	// claude's own path doesn't reach a server it isn't given
@@ -248,7 +248,7 @@ func TestHubMCPForAnyApp(t *testing.T) {
 		t.Errorf("ran %q", got)
 	}
 	// guarded as the agents' paths are: no web page, and no other computer
-	// while magpie isn't shared
+	// while eipgam isn't shared
 	if w := hubPostAt(h, HubMCPAll, here, toolsList, "Origin", "https://evil.example", "Sec-Fetch-Site", "cross-site", "Sec-Fetch-Mode", "cors"); w.Code != http.StatusForbidden {
 		t.Errorf("a foreign page's tools/list: %d %s", w.Code, w.Body)
 	}
@@ -316,14 +316,14 @@ func TestHubMCPOff(t *testing.T) {
 	}
 }
 
-// The hub is guarded as magpie's other MCP servers are: another computer
+// The hub is guarded as eipgam's other MCP servers are: another computer
 // only while shared and with a key, and no web page — a sandboxed frame's
 // null Origin, another site's, one on this computer, one rebound to
 // 127.0.0.1 — even from this computer. No tool runs for one turned away.
 func TestHubMCPGuarded(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	f := &fakeHub{on: true, tools: map[string][]HubTool{"claude": {{Server: "fs", Tool: "read", Spec: hubSpec("read")}}}}
 	withHub(t, f)
 	h := lanGuard(New().Handler())
@@ -332,11 +332,11 @@ func TestHubMCPGuarded(t *testing.T) {
 	if w := hubPost(h, "claude", there, call); w.Code != http.StatusForbidden {
 		t.Fatalf("not shared: %d %s", w.Code, w.Body)
 	}
-	_, secrets := newCaller(t, "Laptop") // shares magpie
+	_, secrets := newCaller(t, "Laptop") // shares eipgam
 	if w := hubPost(h, "claude", there, call); w.Code != http.StatusUnauthorized {
 		t.Fatalf("shared, no key: %d %s", w.Code, w.Body)
 	}
-	if w := hubPost(h, "claude", there, call, "Authorization", "Bearer sk-magpie-wrong"); w.Code != http.StatusUnauthorized {
+	if w := hubPost(h, "claude", there, call, "Authorization", "Bearer sk-eipgam-wrong"); w.Code != http.StatusUnauthorized {
 		t.Fatalf("shared, a wrong key: %d %s", w.Code, w.Body)
 	}
 	for _, hdr := range [][]string{
@@ -402,12 +402,12 @@ func TestHubMCPHeldToKeyLimit(t *testing.T) {
 // cut at 250 characters) learns from that line which servers are behind
 // it and what each is for: a Pi asked about a GitHub repository cloned
 // it rather than ask the DeepWiki behind the router, told only "The tools
-// of the MCP servers in magpie's Library" (11-01). Every server is named
+// of the MCP servers in eipgam's Library" (11-01). Every server is named
 // and what it is for cut to fit, then said whole below.
 func TestHubMCPNamesItsServers(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	five := []HubServer{
 		{Name: "context7", About: "Up-to-date documentation and code examples for any library, straight into the prompt."},
 		{Name: "deepwiki", About: "Ask questions about any public GitHub repository and read its generated wiki."},
@@ -493,15 +493,15 @@ func whereReply(t *testing.T, h http.Handler, addr string, hdr ...string) (instr
 }
 
 // Two routers serving the same tools (packinggoodsllc_07668 on Discord:
-// one magpie in China, one in Los Angeles) are told apart by what each
+// one eipgam in China, one in Los Angeles) are told apart by what each
 // says of itself: the user's words (RouterNote) in initialize's
 // instructions and title and before each tool's description, to every
 // caller; with none, this computer's name to an agent on another
 // computer, and nothing to one on this computer.
 func TestHubMCPSaysWhere(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	old := hostName
 	hostName = func() string { return "la-box" }
 	t.Cleanup(func() { hostName = old })
@@ -517,12 +517,12 @@ func TestHubMCPSaysWhere(t *testing.T) {
 
 	// nothing set, this computer: as before
 	say, title, descs := whereReply(t, h, here)
-	if strings.Contains(say, "la-box") || title != "Magpie MCP hub" || strings.Join(descs, "|") != "Does fetch.|" {
+	if strings.Contains(say, "la-box") || title != "eipgam MCP hub" || strings.Join(descs, "|") != "Does fetch.|" {
 		t.Fatalf("this computer, nothing set: %q %q %q", say, title, descs)
 	}
 	// nothing set, another computer: this computer's name
 	say, title, descs = whereReply(t, h, there, auth...)
-	if !strings.Contains(say, "This router: la-box.") || title != "Magpie MCP hub · la-box" || strings.Join(descs, "|") != "[la-box] Does fetch.|[la-box]" {
+	if !strings.Contains(say, "This router: la-box.") || title != "eipgam MCP hub · la-box" || strings.Join(descs, "|") != "[la-box] Does fetch.|[la-box]" {
 		t.Fatalf("another computer, nothing set: %q %q %q", say, title, descs)
 	}
 	// the user's words, to every caller, one line and once
@@ -534,11 +534,11 @@ func TestHubMCPSaysWhere(t *testing.T) {
 		hdr  []string
 	}{{here, nil}, {there, auth}} {
 		say, title, descs = whereReply(t, h, c.addr, c.hdr...)
-		if !strings.Contains(say, "This router: Los Angeles (US).") || title != "Magpie MCP hub · Los Angeles (US)" || strings.Join(descs, "|") != "[Los Angeles (US)] Does fetch.|[Los Angeles (US)]" {
+		if !strings.Contains(say, "This router: Los Angeles (US).") || title != "eipgam MCP hub · Los Angeles (US)" || strings.Join(descs, "|") != "[Los Angeles (US)] Does fetch.|[Los Angeles (US)]" {
 			t.Fatalf("%s, set: %q %q %q", c.addr, say, title, descs)
 		}
 	}
-	// a server whose descriptions say it already (another magpie's router
+	// a server whose descriptions say it already (another eipgam's router
 	// in this one's Library) isn't said twice
 	f.mu.Lock()
 	f.tools["claude"][0].Spec["description"] = json.RawMessage(`"[Los Angeles (US)] Does fetch."`)
@@ -557,8 +557,8 @@ func TestHubMCPSaysWhere(t *testing.T) {
 
 // Each client that initializes is given a session id, and each call the
 // hub runs is made with its caller's session (HubCaller.Session), so a
-// server that keeps something per caller (Magpie Browser's tab) keeps it
-// apart for two agents behind one router: the session another magpie's
+// server that keeps something per caller (eipgam Browser's tab) keeps it
+// apart for two agents behind one router: the session another eipgam's
 // router names in _meta, which is its caller's, else the client's own; a
 // client that sends none is told apart from no one, as before.
 func TestHubMCPTellsCallersApart(t *testing.T) {
@@ -566,7 +566,7 @@ func TestHubMCPTellsCallersApart(t *testing.T) {
 	var mu sync.Mutex
 	var got []string
 	f := &fakeHub{on: true, tools: map[string][]HubTool{
-		"claude": {{Server: "magpie-browser", Tool: "browser_tabs", Spec: hubSpec("browser_tabs")}},
+		"claude": {{Server: "eipgam-browser", Tool: "browser_tabs", Spec: hubSpec("browser_tabs")}},
 	}, call: func(ctx context.Context, server, tool string) (json.RawMessage, error) {
 		mu.Lock()
 		got = append(got, HubCallerOf(ctx).Session)
@@ -585,10 +585,10 @@ func TestHubMCPTellsCallersApart(t *testing.T) {
 	if again := hubPost(h, "claude", here, initialize, "Mcp-Session-Id", a).Header().Get("Mcp-Session-Id"); again != "" {
 		t.Errorf("a client with a session was given another: %q", again)
 	}
-	call := toolsCall("magpie-browser__browser_tabs", `{}`)
+	call := toolsCall("eipgam-browser__browser_tabs", `{}`)
 	hubPost(h, "claude", here, call, "Mcp-Session-Id", a)
 	hubPost(h, "claude", here, call, "Mcp-Session-Id", b)
-	hubPost(h, "claude", here, `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"magpie-browser__browser_tabs","arguments":{},"_meta":{"magpie/session":"hub-claude-far"}}}`, "Mcp-Session-Id", a)
+	hubPost(h, "claude", here, `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"eipgam-browser__browser_tabs","arguments":{},"_meta":{"eipgam/session":"hub-claude-far"}}}`, "Mcp-Session-Id", a)
 	hubPost(h, "claude", here, call)
 	mu.Lock()
 	defer mu.Unlock()
@@ -598,18 +598,18 @@ func TestHubMCPTellsCallersApart(t *testing.T) {
 	}
 }
 
-// The router's one address is what a headless magpie gives remote MCP
+// The router's one address is what a headless eipgam gives remote MCP
 // clients (treeman_26897 on Discord: a server with no agents, the router
 // turned on for other computers' apps). From another computer it takes a
 // gateway key, as /v1 does, and nothing without one gets a tool run:
-// not while magpie isn't shared, not with no Origin, a null one, another
+// not while eipgam isn't shared, not with no Origin, a null one, another
 // scheme's or a foreign site's, not under a rebound Host, and not through
 // a proxy on this computer.
 func TestHubMCPRemoteEntryNeedsKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	f := &fakeHub{on: true, tools: map[string][]HubTool{"": {{Server: "notes", Tool: "find", Spec: hubSpec("find")}}}}
 	withHub(t, f)
 	h := lanGuard(New().Handler())
@@ -626,10 +626,10 @@ func TestHubMCPRemoteEntryNeedsKey(t *testing.T) {
 	}
 	refused("not shared", hubPostAt(h, HubMCPAll, there, call), http.StatusForbidden)
 	refused("not shared, a tools/list", hubPostAt(h, HubMCPAll, there, toolsList), http.StatusForbidden)
-	_, secrets := newCaller(t, "Remote client") // shares magpie
+	_, secrets := newCaller(t, "Remote client") // shares eipgam
 	refused("no key, no Origin", hubPostAt(h, HubMCPAll, there, call), http.StatusUnauthorized)
 	refused("no key, a tools/list", hubPostAt(h, HubMCPAll, there, toolsList), http.StatusUnauthorized)
-	refused("a wrong key", hubPostAt(h, HubMCPAll, there, call, "Authorization", "Bearer sk-magpie-wrong"), http.StatusUnauthorized)
+	refused("a wrong key", hubPostAt(h, HubMCPAll, there, call, "Authorization", "Bearer sk-eipgam-wrong"), http.StatusUnauthorized)
 	for _, origin := range []string{"null", "chrome-extension://abcdefghijklmnop", "file://", "moz-extension://1234", "https://evil.example", "http://192.0.2.7:3425"} {
 		hdr := []string{"Origin", origin, "Sec-Fetch-Site", "cross-site", "Sec-Fetch-Mode", "cors"}
 		refused("no key, Origin "+origin+" from there", hubPostAt(h, HubMCPAll, there, call, hdr...), http.StatusUnauthorized, http.StatusForbidden)

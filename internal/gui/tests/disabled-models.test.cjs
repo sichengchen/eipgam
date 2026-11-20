@@ -2,7 +2,7 @@
 // Settings › Models › Disabled models (#1867, oxsean: a model the user
 // never wants, claude-fable-5, kept being reached through a group, a
 // fallback and an old session): the list says what it covers — only
-// requests through magpie, on hover, as Settings' explanations are (the
+// requests through eipgam, on hover, as Settings' explanations are (the
 // owner, 11-02) — each pattern with the models it turns off
 // now and Enable; Disable… takes models from a picker that stays open,
 // ticked to disable and clicked again to enable, or a glob typed into it,
@@ -17,10 +17,10 @@ const { watchSettingsReads, settingsDrawn, reach } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const words = {
-  en: { head: "Disabled models", name: "Disable a model", add: "Disable…", enable: "Enable", scope: "Only requests through magpie are covered", hits: "Matches 1: anthropic/claude-fable-5", all: "Enable all" },
-  zh: { head: "已停用的模型", name: "停用模型", add: "停用…", enable: "启用", scope: "只管经过 magpie 的请求", hits: "匹配 1 个：anthropic/claude-fable-5", all: "全部启用" },
-  ja: { head: "無効にしたモデル", name: "モデルを無効にする", add: "無効にする…", enable: "有効にする", scope: "対象は magpie を通るリクエストだけです", hits: "1 件に一致：anthropic/claude-fable-5", all: "すべて有効にする" },
-  de: { head: "Deaktivierte Modelle", name: "Modell deaktivieren", add: "Deaktivieren …", enable: "Aktivieren", scope: "Nur Anfragen über magpie sind abgedeckt", hits: "Passt auf 1: anthropic/claude-fable-5", all: "Alle aktivieren" },
+  en: { head: "Disabled models", name: "Disable a model", add: "Disable…", enable: "Enable", scope: "Only requests through eipgam are covered", hits: "Matches 1: anthropic/claude-fable-5", all: "Enable all" },
+  zh: { head: "已停用的模型", name: "停用模型", add: "停用…", enable: "启用", scope: "只管经过 eipgam 的请求", hits: "匹配 1 个：anthropic/claude-fable-5", all: "全部启用" },
+  ja: { head: "無効にしたモデル", name: "モデルを無効にする", add: "無効にする…", enable: "有効にする", scope: "対象は eipgam を通るリクエストだけです", hits: "1 件に一致：anthropic/claude-fable-5", all: "すべて有効にする" },
+  de: { head: "Deaktivierte Modelle", name: "Modell deaktivieren", add: "Deaktivieren …", enable: "Aktivieren", scope: "Nur Anfragen über eipgam sind abgedeckt", hits: "Passt auf 1: anthropic/claude-fable-5", all: "Alle aktivieren" },
 };
 
 function serve(lang, posts) {
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const posts = [];
       await page.route("**/*", serve(lang, posts));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=models");
+      await page.goto("http://eipgam.test/?view=settings&tab=models");
       await settingsDrawn(page);
       const add = page.locator("#disabledModelsList #disabledAddRow");
       const fable = page.locator('#disabledModelsList .disabled-model[data-pattern="*fable*"]');

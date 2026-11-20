@@ -6,7 +6,7 @@
 // and group (POST /api/usage/arrange, windowsHidden), still hidden when the
 // page is opened again, listed under the cards with the hidden cards, each
 // with Unhide. A card is never left with no row. Every language, a wide
-// window, a narrow one and magpie web on a phone; the API is faked.
+// window, a narrow one and eipgam web on a phone; the API is faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -44,7 +44,7 @@ function server(lang, web, saved, posts) {
     }
     if (url.pathname === "/api/settings") return json(settings());
     if (url.pathname === "/api/usage/quotas") return json(QUOTAS);
-    if (url.pathname === "/api/usage") return json({ calls: 0, errors: 0, input: 0, output: 0, reasoning: 0, cache_read: 0, cache_write: 0, unpriced: 0, cost: 0, bucket: "day", series: [], path: "~/.config/magpie/usage.jsonl", agents: [], models: [] });
+    if (url.pathname === "/api/usage") return json({ calls: 0, errors: 0, input: 0, output: 0, reasoning: 0, cache_read: 0, cache_write: 0, unpriced: 0, cost: 0, bucket: "day", series: [], path: "~/.config/eipgam/usage.jsonl", agents: [], models: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], models: [], gateway: { running: false } });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             p.setDefaultNavigationTimeout(60000);
             p.on("pageerror", (e) => errors.push(e.message));
             await p.route("**/*", server(lang, web, saved, posts));
-            await p.goto("http://magpie.test/?view=usage");
+            await p.goto("http://eipgam.test/?view=usage");
             await p.locator("#subscriptionUsage .subscription-card").first().waitFor({ timeout: 20000 });
             return p;
           };

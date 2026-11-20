@@ -1,12 +1,12 @@
 name: Bug report
-description: Something in magpie doesn't work as expected
+description: Something in eipgam doesn't work as expected
 labels: [bug]
 body:
   - type: input
     id: version
     attributes:
-      label: magpie version
-      description: Settings → About, or `magpie version`.
+      label: eipgam version
+      description: Settings → About, or `eipgam version`.
       placeholder: v0.1.3471
     validations:
       required: true

@@ -11,12 +11,12 @@ import (
 	"github.com/coder/websocket"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // faithleysath (#5781, from matrix0487 on Discord): a Responses API
 // provider, a relay that speaks the Responses WebSocket as chatgpt.com
-// does, can have its turns go over that socket with `magpie provider set
+// does, can have its turns go over that socket with `eipgam provider set
 // <id> socket=auto|on`. These tests are those turns against a fake
 // upstream on this computer.
 
@@ -244,7 +244,7 @@ func openAIAt(t *testing.T, f *fakeSocketBackend, sock string) *atomic.Int32 {
 // KawaiiZapic on X: Codex on an OpenAI API key sent the whole
 // conversation up every turn, since Codex says store false and only the
 // Responses WebSocket keeps a turn for the next one then. Codex's own
-// OpenAI provider speaks that socket to api.openai.com, and so does magpie
+// OpenAI provider speaks that socket to api.openai.com, and so does eipgam
 // now with Socket unset: the second turn is the new input alone after
 // previous_response_id, on the first turn's socket.
 func TestOpenAIProviderTurnsGoOverWebSocketByDefault(t *testing.T) {

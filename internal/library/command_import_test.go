@@ -58,7 +58,7 @@ func candidatePaths(p *CommandProbe) []string {
 }
 
 // The prompts the user made in Pi are taken into the library as they
-// are: Pi keeps its files byte for byte, magpie takes them as its own,
+// are: Pi keeps its files byte for byte, eipgam takes them as its own,
 // nothing is doubled, and Pi's $@ reads as $ARGUMENTS.
 func TestCommandImportPiPrompts(t *testing.T) {
 	h := sandbox(t)
@@ -104,9 +104,9 @@ func TestCommandImportPiPrompts(t *testing.T) {
 		t.Fatalf("library's pr: %+v", c)
 	}
 	if !slices.ContainsFunc(l.Applied["pi"].Commands, func(f SubagentFile) bool { return f.Name == "pr" && f.Path == files["pi"] }) {
-		t.Errorf("Pi's pr isn't magpie's: %+v", l.Applied["pi"].Commands)
+		t.Errorf("Pi's pr isn't eipgam's: %+v", l.Applied["pi"].Commands)
 	}
-	// found again: they are magpie's now
+	// found again: they are eipgam's now
 	if p := probeCommands(t); len(p.Candidates) != 0 {
 		t.Errorf("found again: %+v", p.Candidates)
 	}
@@ -146,7 +146,7 @@ func TestCommandImportPiPrompts(t *testing.T) {
 	}
 }
 
-// Each agent's way of saying the words typed in reads back as magpie's.
+// Each agent's way of saying the words typed in reads back as eipgam's.
 func TestCommandImportArgs(t *testing.T) {
 	h := sandbox(t)
 	commandAgents(t, h, "x")

@@ -10,21 +10,21 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The management API (gateway.AdminPath, ljayic on X) serves the app's own
 // handlers for providers, accounts and gateway keys, so that what a script
 // does and what the pages do can't drift. adminRoutes lists, by the path
-// under /v1/magpie/admin/, what is served and which of the app's /api route
+// under /v1/eipgam/admin/, what is served and which of the app's /api route
 // answers it; a route not listed is a 404, whatever the app has, and
 // TestAdminRoutesEveryAPIRoute fails when the list holds a route that is
 // not the app's.
 //
 // Left out on purpose, because they tell a secret or act on this
-// computer's apps and not on magpie's own objects: a provider's saved key
+// computer's apps and not on eipgam's own objects: a provider's saved key
 // ("key"), a gateway key's secret ("copy-key"), exporting sign-ins, and
 // the actions that move, restart or rewrite an agent. Setting a key's
 // Admin ("admin-key") is left out so that a key can't give another more
@@ -61,7 +61,7 @@ var adminRoutes = []adminRoute{
 // among them), removing, copying, switching, ordering, picking a Manual
 // group's member, the defaults every group follows, a template, and a
 // group shared as text or imported from it. Not "found" and "skip": they
-// are the page's switch for groups magpie finds, and moving the agents
+// are the page's switch for groups eipgam finds, and moving the agents
 // set to one rewrites this computer's agents. "create" and "update" are
 // the API's own, served by adminGroupWrite before they reach "save".
 var adminGroupActions = []string{
@@ -131,7 +131,7 @@ func adminAPI() http.Handler {
 	mux.HandleFunc("GET /routing-groups/{id...}", func(w http.ResponseWriter, r *http.Request) {
 		g, ok := adminGroup(r.PathValue("id"))
 		if !ok {
-			adminError(w, http.StatusNotFound, "magpie has no routing group "+strconv.Quote(r.PathValue("id")))
+			adminError(w, http.StatusNotFound, "eipgam has no routing group "+strconv.Quote(r.PathValue("id")))
 			return
 		}
 		writeJSON(w, g)
@@ -162,11 +162,11 @@ func adminAPI() http.Handler {
 }
 
 // adminMayChangeKey refuses, with 403, a key action through the API on
-// another key that may manage magpie. Rotating one hands the caller its
+// another key that may manage eipgam. Rotating one hands the caller its
 // new secret (or sets one the caller chose), so a key allowed from this
 // computer only would become one allowed from anywhere, or take over a
 // peer's; and turning one off or removing it locks its owner out. A key
-// that manages magpie is changed by the command line and the app, as its
+// that manages eipgam is changed by the command line and the app, as its
 // Admin is set there (admin-key is left out above). The caller's own key
 // stays its to change. The body is read and put back for the handler.
 func adminMayChangeKey(w http.ResponseWriter, r *http.Request) bool {
@@ -193,7 +193,7 @@ func adminMayChangeKey(w http.ResponseWriter, r *http.Request) bool {
 	}
 	for _, k := range keys {
 		if k.ID == in.Key && k.Admin != "" {
-			adminError(w, http.StatusForbidden, "this key may manage magpie, so the management API doesn't change it: use `magpie gateway-key` or the app")
+			adminError(w, http.StatusForbidden, "this key may manage eipgam, so the management API doesn't change it: use `eipgam gateway-key` or the app")
 			return false
 		}
 	}
@@ -204,7 +204,7 @@ func adminMayChangeKey(w http.ResponseWriter, r *http.Request) bool {
 // (groupsState), by its id or by the ref agents pick it by (group/<id>,
 // auto/<model>).
 func adminGroup(id string) (groupJSON, bool) {
-	id = strings.ToLower(strings.TrimSpace(strings.TrimPrefix(id, "magpie/")))
+	id = strings.ToLower(strings.TrimSpace(strings.TrimPrefix(id, "eipgam/")))
 	for _, g := range groupsState().Groups {
 		if g.ID == id || g.Ref == id {
 			return g, true
@@ -217,7 +217,7 @@ func adminGroup(id string) (groupJSON, bool) {
 // app's own save (POST /api/groups/save), so a group is checked exactly
 // as the Routing page's editor has it checked. Create refuses, with 409,
 // an id a group has already, where save would write over it; update
-// refuses one magpie has no group for (404), and takes the group as it is
+// refuses one eipgam has no group for (404), and takes the group as it is
 // with the fields the body sends put over it, so a script changes one
 // field without sending the rest. Its "from" names the group to change
 // when "id" gives it a new one (a rename, which moves the agents set to
@@ -248,7 +248,7 @@ func adminGroupWrite(app http.Handler, w http.ResponseWriter, r *http.Request, c
 			return
 		}
 		if _, ok := adminGroup(id); ok && id != "" {
-			adminError(w, http.StatusConflict, "magpie has a routing group "+strconv.Quote(id)+" already: change it with update")
+			adminError(w, http.StatusConflict, "eipgam has a routing group "+strconv.Quote(id)+" already: change it with update")
 			return
 		}
 	} else {
@@ -257,12 +257,12 @@ func adminGroupWrite(app http.Handler, w http.ResponseWriter, r *http.Request, c
 		}
 		cur, ok := adminGroup(from)
 		if !ok || from == "" {
-			adminError(w, http.StatusNotFound, "magpie has no routing group "+strconv.Quote(from))
+			adminError(w, http.StatusNotFound, "eipgam has no routing group "+strconv.Quote(from))
 			return
 		}
 		if from != id && id != "" {
 			if _, taken := adminGroup(id); taken {
-				adminError(w, http.StatusConflict, "magpie has a routing group "+strconv.Quote(id)+" already")
+				adminError(w, http.StatusConflict, "eipgam has a routing group "+strconv.Quote(id)+" already")
 				return
 			}
 		}

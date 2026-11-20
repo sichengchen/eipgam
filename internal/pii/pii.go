@@ -10,7 +10,7 @@
 //
 // Privacy Filter is OpenAI's (Apache-2.0), 1.6 GB as the q8 GGUF
 // LocalAI made of it, run by pf-serve (native/privacy-filter), a program
-// built from privacy-filter.cpp on ggml. Neither ships with magpie: both
+// built from privacy-filter.cpp on ggml. Neither ships with eipgam: both
 // are downloaded when the user turns the model on, each checked against
 // the sha256 pinned here, and the setting (settings.RedactModel) is saved
 // only once both are. pf-serve is started on the first request that needs
@@ -28,7 +28,7 @@
 // the GPU (device lost) is got past by a load there. One that dies or hangs
 // on the GPU twice in a row, or doesn't load there in gpuLoadTimeout, is
 // started on the CPU until the GPU is tried again (gpuRetryAfter), with
-// no restart of magpie. One that keeps failing holds requests back at
+// no restart of eipgam. One that keeps failing holds requests back at
 // once, not after a load each, until it is tried again (retryAfter).
 package pii
 
@@ -40,9 +40,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/pii/guard"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/pii/guard"
+	"github.com/sichengchen/eipgam/internal/redact"
 )
 
 // The model, at a revision of LocalAI's repo, so the file is always the
@@ -53,30 +53,23 @@ var (
 	modelSHA  = "80efc1803eda7c095a79741d2008c07e2e0a57b01bac8825fbeb448fd097998c"
 )
 
-// pf-serve, as the privacy-filter workflow built it at serveTag: a zip for
-// each system, by its sha256. A system with none can't run the model.
-// oldTags are the tags pinned before, newest first: one of theirs on disk
-// is run until serveTag's is downloaded (upgrade).
+// pf-serve is published by this repository's privacy-filter workflow.
 var (
-	serveTag  = "pf-v4"
-	oldTags   = []string{"pf-v3", "pf-v2", "pf-v1"}
-	serveBase = "https://github.com/yetone/magpie/releases/download/"
-	serveSHA  = map[string]string{
-		"darwin-amd64":  "dc287579abeafe0be0add35305bde05f9cb06405f6b98dda5d71c9bf2c53c2a0",
-		"darwin-arm64":  "da4c89248937221a880996964e76a3dec18a9f8f80f2ee39e1cf26ef0933ac69",
-		"linux-amd64":   "8a7e61e6deebde68b13fc17009c84aef9da2230ea9e696c9e62b32e79c30db00",
-		"linux-arm64":   "0c29b9fdd1452f75414ee5fc623cfec70f4180af5046a9e669a289db7bf3da08",
-		"windows-amd64": "4457116e76d5861b28f26fa15613a943a434d35174f30aa3b8488e76bccc6545",
+	serveTag     = "pf-v4"
+	oldTags      = []string{"pf-v3", "pf-v2", "pf-v1"}
+	serveTargets = map[string]bool{
+		"darwin-amd64": true, "darwin-arm64": true,
+		"linux-amd64": true, "linux-arm64": true, "windows-amd64": true,
 	}
 )
 
 // Supported says pf-serve is built for this system.
-func Supported() bool { return serveSHA[target()] != "" }
+func Supported() bool { return serveTargets[target()] }
 
 // Size is how much turning the model on downloads.
 func Size() int64 { return modelSize }
 
-// dir is where the model and pf-serve are kept: magpie's cache, since
+// dir is where the model and pf-serve are kept: eipgam's cache, since
 // either can be downloaded again, and never the settings' folder, which a
 // sync carries to the user's other computers.
 var dir = func() string { return filepath.Join(appdir.Cache(), "privacy-filter") }
@@ -92,7 +85,7 @@ func serveDir() string { return tagDir(serveTag) }
 func tagDir(tag string) string { return filepath.Join(dir(), tag+"-"+target()) }
 
 // tagDirs are where tag's pf-serve may be on disk: tagDir, and under
-// Rosetta also the Intel one's, which magpie fetched there before it
+// Rosetta also the Intel one's, which eipgam fetched there before it
 // fetched Apple silicon's (target).
 func tagDirs(tag string) []string {
 	ds := []string{tagDir(tag)}
@@ -136,7 +129,7 @@ func Installed() bool {
 }
 
 // ErrNotInstalled is what a request gets when the model is on in the
-// settings and isn't on disk (magpie's cache was cleared).
+// settings and isn't on disk (eipgam's cache was cleared).
 var ErrNotInstalled = errors.New("the local masking model isn't downloaded; download it again in Settings › Privacy, or turn it off")
 
 // Status is what Settings → Privacy shows of the model.
@@ -156,7 +149,7 @@ type Status struct {
 	Device  string `json:"device,omitempty"`
 	// Via is the runtime AstrLink Guard runs on, "CoreML" on a Mac where
 	// it does (Device then the one its plan puts most of the model on, or
-	// ""); "" for magpie's own Go code on the CPU
+	// ""); "" for eipgam's own Go code on the CPU
 	Via      string `json:"via,omitempty"`
 	GPU      bool   `json:"gpu,omitempty"`
 	LoadMS   int    `json:"loadMs,omitempty"`
@@ -172,11 +165,11 @@ type Status struct {
 	// (or for the one it is on)
 	Loading bool `json:"loading,omitempty"`
 	Waiting int  `json:"waiting,omitempty"`
-	// Rosetta: AstrLink Guard runs in an Intel magpie under Rosetta,
+	// Rosetta: AstrLink Guard runs in an Intel eipgam under Rosetta,
 	// in Go and translated, several times slower than in Apple silicon's
 	// build, which has CoreML too
 	Rosetta bool `json:"rosetta,omitempty"`
-	// Emulated: AstrLink Guard runs in an x64 magpie under Windows on
+	// Emulated: AstrLink Guard runs in an x64 eipgam under Windows on
 	// Arm's emulation, translated as under Rosetta
 	Emulated bool `json:"emulated,omitempty"`
 }

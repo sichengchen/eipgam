@@ -31,7 +31,7 @@ function library() {
   const project = (name) => ({ dir: `${HOME}/code/${name}`, name, copy: false, skills: { "kit-0": ["claude"], "kit-1": ["claude"] }, placed: [], servers: { fetch: ["claude"] }, subagents: { reviewer: ["claude"] }, wrote: {} });
   const ids = ["claude", "codex", "gemini", "opencode"];
   return {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents: ids.map((id, i) => agent(id, AGENTS[i], { projectSkills: `.${id}/skills`, projectMCP: `.${id}/mcp.json`, subagents: `${HOME}/.${id}/agents`, projectSubagents: `.${id}/agents` })),
     instructions: {
       shared: "Be brief.",
@@ -58,7 +58,7 @@ function server(lang) {
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -86,8 +86,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let tab = "skills";
         const open = async (id) => {
           tab = id;
-          await page.goto("http://magpie.test/");
-          await page.evaluate((id) => { localStorage.clear(); localStorage.setItem("magpie.libTab", id); }, id);
+          await page.goto("http://eipgam.test/");
+          await page.evaluate((id) => { localStorage.clear(); localStorage.setItem("eipgam.libTab", id); }, id);
           await page.reload();
           await page.locator('button[data-view="library"]').click();
         };

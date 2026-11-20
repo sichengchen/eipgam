@@ -10,16 +10,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // #2651 (demystify0137): a Claude account behind a socks5:// proxy was
 // answered 502 after minutes, Claude Code failing every try as
 // UnsupportedProxyProtocol, since Bun, which Claude Code is built with,
-// takes only http:// and https:// proxies. Every Claude Code magpie runs
-// for the subscription — a turn, a model test, /usage — is given magpie's
+// takes only http:// and https:// proxies. Every Claude Code eipgam runs
+// for the subscription — a turn, a model test, /usage — is given eipgam's
 // HTTP bridge to the SOCKS proxy instead, never socks5:// itself.
 func TestClaudeCodeGivenTheBridgeForASOCKSProxy(t *testing.T) {
 	if runtime.GOOS == "windows" {

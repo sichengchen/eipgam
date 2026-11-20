@@ -16,9 +16,9 @@ const key = { id: "deepseek", provider: "deepseek", name: "DeepSeek", kind: "pro
 const net = { own: 2.4, asks: 1, send: 0.6, wait: 900, head: 950 };
 const routes = [
   // waiting for the turn before it
-  { id: 302, seq: 302, time: at(20), agent: "pi", model: "codex/gpt-6.1-sol", provider: "magpie", phase: "queue", order: [], tries: [], done: false, status: 0 },
+  { id: 302, seq: 302, time: at(20), agent: "pi", model: "codex/gpt-6.1-sol", provider: "eipgam", phase: "queue", order: [], tries: [], done: false, status: 0 },
   // not yet routed
-  { id: 301, seq: 301, time: at(40), agent: "pi", model: "codex/gpt-6.1-sol", provider: "magpie", order: [], tries: [], done: false, status: 0 },
+  { id: 301, seq: 301, time: at(40), agent: "pi", model: "codex/gpt-6.1-sol", provider: "eipgam", order: [], tries: [], done: false, status: 0 },
 ];
 
 function serve(lang) {
@@ -39,7 +39,7 @@ function serve(lang) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/usage/requests") return json({ period: url.searchParams.get("period"), rows: [], offset: 0, total: 0, calls: 0, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, cost: 0, unpriced: 0, agents: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 0, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 0, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/eipgam/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       const rows = page.locator(".rt-req");
       await rows.nth(routes.length - 1).waitFor({ timeout: 15000 });
       const said = await rows.evaluateAll((bs) => bs.map((b) => b.textContent));

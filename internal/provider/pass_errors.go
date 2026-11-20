@@ -2,7 +2,7 @@ package provider
 
 // TakesPassErrors says PassErrors can be set for p: a provider of an API
 // key, a preset vendor's or one the user added. A signed-in account and a
-// plugin's provider never take it: magpie reads their errors to keep the
+// plugin's provider never take it: eipgam reads their errors to keep the
 // account well (a sign-in to renew, a plan's window to wait out).
 func (p Provider) TakesPassErrors() bool {
 	return p.Account == nil && hasEndpoint(p) && !subscriptionID(p.ID)

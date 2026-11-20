@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // catalogModel is one model of the synced models.dev catalog, as the model
@@ -22,7 +22,7 @@ type catalogModel struct {
 	Images  bool    `json:"images,omitempty"`
 }
 
-// catalogModels lists the models of the catalog magpie already synced
+// catalogModels lists the models of the catalog eipgam already synced
 // (nothing is fetched), one a model: the providers that serve the same
 // model (catalog.SameModel) are one entry, taken from the one that lists
 // its window and price. Sorted by name.

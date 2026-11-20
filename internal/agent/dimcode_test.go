@@ -4,10 +4,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// Yayoi_no_yume on X: DimCode (dimcode.dev) calling a Docker magpie by a
+// Yayoi_no_yume on X: DimCode (dimcode.dev) calling a Docker eipgam by a
 // gateway key read as the cube and "DimAgent". Its requests are DimCode's,
 // drawn with its mark.
 func TestDimCodeByUserAgent(t *testing.T) {

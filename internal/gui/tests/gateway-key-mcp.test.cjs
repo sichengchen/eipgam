@@ -9,7 +9,7 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
 const words = {
-  en: { item: "MCP servers", label: "MCP servers this key may use", all: "All MCP servers", two: "2 MCP servers", none: "No MCP server", only: /Only these MCP servers and tools: github, magpie-web-search\/web_fetch/ },
+  en: { item: "MCP servers", label: "MCP servers this key may use", all: "All MCP servers", two: "2 MCP servers", none: "No MCP server", only: /Only these MCP servers and tools: github, eipgam-web-search\/web_fetch/ },
   zh: { item: "MCP 服务器", label: "这个密钥可用的 MCP 服务器", all: "全部 MCP 服务器", two: "2 个 MCP 服务器", none: "无 MCP 服务器", only: /仅限这些 MCP 服务器和工具/ },
   "zh-TW": { item: "MCP 伺服器", label: "這個金鑰可用的 MCP 伺服器", all: "全部 MCP 伺服器", two: "2 個 MCP 伺服器", none: "無 MCP 伺服器", only: /僅限這些 MCP 伺服器和工具/ },
   ja: { item: "MCP サーバー", label: "このキーが使える MCP サーバー", all: "すべての MCP サーバー", two: "2 個の MCP サーバー", none: "MCP サーバーなし", only: /この MCP サーバーとツールのみ/ },
@@ -27,8 +27,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const events = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.route("**/*", fixture(lang, "light", events, { lan: true, keyHolds: { server: { mcp: ["github", "magpie-web-search/web_fetch"] } } }));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.route("**/*", fixture(lang, "light", events, { lan: true, keyHolds: { server: { mcp: ["github", "eipgam-web-search/web_fetch"] } } }));
+        await page.goto("http://eipgam.test/?view=gateway");
         await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
         const row = (id) => page.locator(`#gatewayKeys .acc[data-key="${id}"]`);
         const badge = (id) => row(id).getByRole("button", { name: w.label, exact: true });
@@ -50,12 +50,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await menu.locator(".pm-head").textContent()).trim(), w.label);
         assert.equal(await menu.locator(".pm-item.on").count(), 1, "All MCP servers is ticked for a free key");
         // a server whole, and one tool of another; sent when the menu closes
-        await menu.locator('.pm-item:has(.pm-name:text-is("Magpie Browser"))').click();
+        await menu.locator('.pm-item:has(.pm-name:text-is("eipgam Browser"))').click();
         await menu.locator('.pm-item:has(.pm-note:text-is("github/create_issue"))').click();
         assert.equal(events.filter((e) => e.action === "mcp-key").length, 0, "a pick was sent before the menu closed");
         await page.keyboard.press("Escape");
         await menu.waitFor({ state: "detached" });
-        assert.deepEqual(events.filter((e) => e.action === "mcp-key").map((e) => e.body), [{ key: "work", mcp: ["magpie-browser", "github/create_issue"] }]);
+        assert.deepEqual(events.filter((e) => e.action === "mcp-key").map((e) => e.body), [{ key: "work", mcp: ["eipgam-browser", "github/create_issue"] }]);
         await page.waitForFunction(() => document.querySelector('#gatewayKeys .acc[data-key="work"] .key-mcp.set'));
         assert.equal((await badge("work").textContent()).trim(), w.two);
         // "No MCP server" ticked beside the key's servers holds it to none

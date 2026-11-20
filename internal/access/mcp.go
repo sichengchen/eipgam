@@ -5,13 +5,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/capre"
+	"github.com/sichengchen/eipgam/internal/capre"
 )
 
 // A key's MCP list (Key.MCP, wakaka on Discord) holds it to some of the
 // MCP servers the gateway serves, and some of their tools: the Library's
-// servers (by the hub, /mcp/<name>, /mcp/run/<name>) and magpie's own
-// (web search, image recognition, image generation, Magpie Browser, the
+// servers (by the hub, /mcp/<name>, /mcp/run/<name>) and eipgam's own
+// (web search, image recognition, image generation, eipgam Browser, the
 // plugin tools). An entry is a server's name, every tool of it, or
 // "<server>/<tool>", that one tool; NoMCP alone holds the key to none.
 // An empty list is every server, as keys always were.
@@ -20,7 +20,7 @@ import (
 const NoMCP = "-"
 
 // mcpServerRe is a server's name as the Library takes one (library's
-// nameRe), and as magpie names its own servers.
+// nameRe), and as eipgam names its own servers.
 var mcpServerRe = capre.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]*$`, 64)
 
 // CleanMCP is a key's MCP list as it is kept: each entry trimmed and

@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-// A cache a magpie before digest wrote holds the whole hashes in hex. Read
+// A cache a eipgam before digest wrote holds the whole hashes in hex. Read
 // now, its files must be the same files, or every one is read again on the
 // first start after the update.
 func TestDigestReadsTheHashesWrittenBefore(t *testing.T) {

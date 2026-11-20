@@ -7,20 +7,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Every agent's model picker has two halves: the models the agent reaches
-// on its own (its sign-in, its own keys), and magpie's catalog — every model
+// on its own (its sign-in, its own keys), and eipgam's catalog — every model
 // of every provider the user added, reached through the local gateway.
 // A catalog model is spelled "provider/model"; an agent that sends that to
 // the gateway gets the vendor's reply in whichever API the agent speaks.
 
 // magpieID is the provider id agents know the gateway by.
-const magpieID = "magpie"
+const magpieID = "eipgam"
 
 // RoutingGroups is the picker's group of routing groups.
 const RoutingGroups = "Routing groups"
@@ -100,7 +100,7 @@ func sameOption(a, b Option) bool {
 // builtOptions is what viaMagpie built last, per agent and prefix. Each
 // agent's model field offers it, and the window's drift poll asked every
 // field's options of every agent each 15s: Claude Code's alone
-// (claudeViaMagpie) allocated 4.7 GB of the 33 GB a live magpie did in 53
+// (claudeViaMagpie) allocated 4.7 GB of the 33 GB a live eipgam did in 53
 // minutes.
 var builtOptions stampedLists[Option]
 
@@ -130,10 +130,10 @@ func buildVia(agent, prefix string) []Option {
 	// firstUser: the account a request for a subscription's model goes to
 	// first, which the note names. A Codex or Claude Code subscription is
 	// the account the agent is signed in to (Account.User), but its
-	// requests go to the first in magpie's order: another one when that
+	// requests go to the first in eipgam's order: another one when that
 	// one is paused, or when the agent is kept signed in to an account
 	// that isn't first (#1957, parkavenue9639: every codex/gpt-* read
-	// "A · via magpie" while each went to B). Asked once a provider.
+	// "A · via eipgam" while each went to B). Asked once a provider.
 	firsts := map[string]string{}
 	firstUser := func(p provider.Provider) string {
 		a := p.Account
@@ -152,13 +152,13 @@ func buildVia(agent, prefix string) []Option {
 	var tiered map[string]bool // provider.UltraModels, read at the first fast model
 	for _, e := range shown {
 		if e.Group != "" {
-			groups = append(groups, Option{Value: prefix + e.ID, Label: e.Name, Note: "routing group · via magpie",
+			groups = append(groups, Option{Value: prefix + e.ID, Label: e.Name, Note: "routing group · via eipgam",
 				Icon: e.Provider.Icon, Icons: e.Icons, Group: RoutingGroups, Ref: e.ID})
 			continue
 		}
-		note := e.Provider.Name + " · via magpie"
+		note := e.Provider.Name + " · via eipgam"
 		if a := e.Provider.Account; a != nil {
-			note = firstUser(*e.Provider) + " · via magpie"
+			note = firstUser(*e.Provider) + " · via eipgam"
 		}
 		o := Option{Value: prefix + e.ID, Label: e.Name, Note: note,
 			Icon: e.Provider.Icon, Group: e.Provider.Name, Ref: e.ID, Free: e.Free, Rate: e.Rate, RateWas: e.RateWas, Context: e.Context, own: own[e.Provider.ID],
@@ -184,7 +184,7 @@ func buildVia(agent, prefix string) []Option {
 
 // listLabels are the names the agent's own list calls the catalog's models
 // by, by id: provider.Labels, which follows the Provider in model names
-// setting, where an Option's Label is the name alone for magpie's picker.
+// setting, where an Option's Label is the name alone for eipgam's picker.
 func listLabels(agent string) map[string]string {
 	shown, _ := provider.CatalogFor(agent)
 	labels := provider.LabelsFor(agent, shown)
@@ -282,7 +282,7 @@ func sharedModels(agent string) []catalog.Model {
 // builtModels is what magpieModels built last, per agent. The window asks
 // /api/drift every 15s, and each agent's Drift asked for its list again
 // per field, each built whole with its prices and Vision's ranking of the
-// models that see: 14.5 GB of the 33 GB a live magpie allocated in 53
+// models that see: 14.5 GB of the 33 GB a live eipgam allocated in 53
 // minutes, the garbage its footprint peaks on.
 var builtModels stampedLists[catalog.Model]
 
@@ -368,7 +368,7 @@ func buildModels(agent string) []catalog.Model {
 	var out []catalog.Model
 	shown, _ := provider.CatalogFor(agent)
 	labels := provider.LabelsFor(agent, shown)
-	// a model magpie describes images to takes them (provider.Described)
+	// a model eipgam describes images to takes them (provider.Described)
 	seen := describedNow()
 	// the agent's own Long conversations, if it has one (ForAgent)
 	st, find := settings.Load().ForAgent(agent), provider.FoundOnce(provider.GroupFinder())
@@ -380,7 +380,7 @@ func buildModels(agent string) []catalog.Model {
 	for i, e := range shown {
 		efforts := e.Efforts
 		if agent == "codex" {
-			// the levels Codex's picker offers, a model magpie has no
+			// the levels Codex's picker offers, a model eipgam has no
 			// word on included (provider.CodexEfforts)
 			efforts = provider.CodexEfforts(e)
 		}
@@ -427,8 +427,8 @@ func buildModels(agent string) []catalog.Model {
 			m.APIs = []string{string(api)}
 		}
 		// the service tiers Codex is offered on it, as the gateway's own
-		// lists offer them: Fast in the Codex CLI magpie writes
-		// magpie-models.json for (#1530)
+		// lists offer them: Fast in the Codex CLI eipgam writes
+		// eipgam-models.json for (#1530)
 		provider.CodexTiers(&m, e, members)
 		if agent == "codex" {
 			provider.CodexSeals(&m, e, members)
@@ -444,7 +444,7 @@ func buildModels(agent string) []catalog.Model {
 		if e.Group != "" {
 			// a group's, the APIs every member relays as it is
 			// (provider.GroupEndpoints), which /v1/models leaves out: a
-			// remote magpie sends a group's request on in the client's
+			// remote eipgam sends a group's request on in the client's
 			// API, for the other side to pick per member
 			m.Endpoints = provider.GroupEndpoints(members(e.ID))
 		}
@@ -465,7 +465,7 @@ func buildModels(agent string) []catalog.Model {
 // while provider.StampNow stays the same, magpieModelsFor at most, as the
 // lists are kept: each list built asked the gateway's Vision pick again,
 // which ranks every provider's models that see, 553 MB of what a live
-// magpie allocated in 37 minutes for the same answer a dozen times over.
+// eipgam allocated in 37 minutes for the same answer a dozen times over.
 func describedNow() bool {
 	return builtSeen.shared("", func() []bool {
 		return []bool{provider.Described != nil && provider.Described()}
@@ -482,7 +482,7 @@ func maxTokens(m catalog.Model) int { return provider.OutputWithin(m.Context, m.
 
 // outputOr is the output limit an agent is handed for m: the Max output the
 // user set for it (catalog.Model.OutputSet), kept within its window, else
-// capped, the agent's own trim of the vendor's figure. A cap of magpie's
+// capped, the agent's own trim of the vendor's figure. A cap of eipgam's
 // never overrides the user's number: DeepSeek V4.1 Flash set to 384k reached
 // VS Code as 250000 and WorkBuddy as 128000 (#2064).
 func outputOr(m catalog.Model, capped int) int {
@@ -502,7 +502,7 @@ func group(name string, opts []Option) []Option {
 
 func gatewayV1() string { return gateway.URL() + "/v1" }
 
-// unknownWindow is the window an agent is told of a model whose own magpie
+// unknownWindow is the window an agent is told of a model whose own eipgam
 // doesn't know: the agent's default n, held to the longest context the user
 // set for every model (settings.ContextCap) like every window that is known
 // (ul3140773077392 on X, #6259).

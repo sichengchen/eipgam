@@ -14,8 +14,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A provider's cap on the bytes of one request.
@@ -75,7 +75,7 @@ const pageCapLeast = 4 << 20
 // an nginx or CDN "502 Bad Gateway" (or 413, 500, 503, 504, 520 to 524)
 // page or an empty body, in place of the API's answer, to a request of
 // pageCapLeast or more. chenxiang0010's relay (an OpenAI-compatible one
-// in front of DeepSeek) answered an 8.2 MB Claude Code turn so: magpie
+// in front of DeepSeek) answered an 8.2 MB Claude Code turn so: eipgam
 // passed the 502 on, Claude Code asked the same body again nine times
 // and every --resume of the session met the same page. Said as a 413 it
 // goes to the route's next member, isn't asked again unchanged, and tells
@@ -125,7 +125,7 @@ func statedCap(errBody []byte, sent int) int {
 }
 
 // bodyCaps are the caps providers refused requests over, bytes by
-// provider id (or a model's images, image_cap.go), for as long as magpie
+// provider id (or a model's images, image_cap.go), for as long as eipgam
 // runs.
 type bodyCaps struct {
 	mu sync.Mutex
@@ -291,7 +291,7 @@ func overCap(res *http.Response, errBody []byte, p provider.Provider, size, n, i
 }
 
 // imageLeftOut is what stands where an image was left out. It goes to the
-// vendor, so it names neither magpie nor the vendor.
+// vendor, so it names neither eipgam nor the vendor.
 const imageLeftOut = "[An earlier image was left out here to keep this request under its size limit.]"
 
 // capImage is one image of a request's history: where its JSON object sits

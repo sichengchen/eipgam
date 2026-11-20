@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // signed is the headers Sign puts on a chat request of p under ctx.
@@ -38,7 +38,7 @@ func once(h http.Header, name string) (string, int) {
 
 // axelburks on Discord: a model's own headers go after the provider's, a
 // name of the model's replacing the provider's in any case, on that
-// provider's requests for that model alone; magpie's own auth never
+// provider's requests for that model alone; eipgam's own auth never
 // stands over one, and the agent's header the provider passes on does.
 func TestModelHeadersGoAfterTheProvidersOnTheirModelAlone(t *testing.T) {
 	prefillHome(t)

@@ -3,12 +3,12 @@ package gateway
 import (
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // takesOriginalDetail is whether p's Responses API takes an input_image's
 // detail "original", Codex's for a screenshot: OpenAI's own API (a ChatGPT
-// account's Codex backend, Azure OpenAI), and a remote magpie, which
+// account's Codex backend, Azure OpenAI), and a remote eipgam, which
 // decides for its own upstream. A relay's Responses API may not: OpenCode
 // Go answers 400 "invalid image detail" for DeepSeek V4.1 Flash, which it
 // serves through another vendor (qiu_eth).

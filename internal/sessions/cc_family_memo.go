@@ -23,7 +23,7 @@ import (
 // read again.
 
 // ccFamilyVersion changes when a group would be judged otherwise, so what
-// an older magpie kept is judged again.
+// an older eipgam kept is judged again.
 const ccFamilyVersion = 1
 
 // ccFamilyOut is what a group of files came to: of its keys, those that

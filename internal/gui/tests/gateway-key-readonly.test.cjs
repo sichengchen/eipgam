@@ -1,7 +1,7 @@
 // A read-only gateway key (Steven on Discord: an ESP32 desk display that
 // polls quotas and usage and uses no model) is made so from its row's menu,
 // says so in its row, and is given full access the same way; the sharing
-// key, which magpie gives its own agents, can't be made read-only. Magpie
+// key, which eipgam gives its own agents, can't be made read-only. eipgam
 // Browser's key says it is the browser's and has no access to change.
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
@@ -17,11 +17,11 @@ const words = {
 };
 
 const keys = () => [
-  { id: "laptop", name: "Laptop", masked: "sk-magpie-key-…111111", readOnly: true },
-  { id: "server", name: "Server", masked: "sk-magpie-key-…222222" },
-  { id: "magpie", name: "Magpie", masked: "sk-magpie-key-…444444", lan: true },
-  // the key the Magpie Browser extension's zip was given
-  { id: "ext", name: "Magpie Browser", masked: "sk-magpie-key-…555555", readOnly: true, browser: true },
+  { id: "laptop", name: "Laptop", masked: "sk-eipgam-key-…111111", readOnly: true },
+  { id: "server", name: "Server", masked: "sk-eipgam-key-…222222" },
+  { id: "eipgam", name: "eipgam", masked: "sk-eipgam-key-…444444", lan: true },
+  // the key the eipgam Browser extension's zip was given
+  { id: "ext", name: "eipgam Browser", masked: "sk-eipgam-key-…555555", readOnly: true, browser: true },
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -36,7 +36,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const events = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", events, { lan: true, keys: keys() }));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://eipgam.test/?view=gateway");
         await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
         const row = (id) => page.locator(`#gatewayKeys .acc[data-key="${id}"]`);
         const tag = (id) => row(id).locator(".key-readonly");
@@ -72,15 +72,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await page.locator("#status").textContent()).trim(), w.given);
 
         // the sharing key: the item is there, off, and says why
-        await menu("magpie");
+        await menu("eipgam");
         const off = item(w.make);
         assert.equal(await off.isDisabled(), true);
         assert.equal((await off.locator(".rm-why").textContent()).trim(), w.why);
         await page.keyboard.press("Escape");
-        assert.equal(events.filter((e) => e.action === "access-key" && e.body.key === "magpie").length, 0);
+        assert.equal(events.filter((e) => e.action === "access-key" && e.body.key === "eipgam").length, 0);
         assert.deepEqual(await scrolled(), before, "a click moved the page");
 
-        // Magpie Browser's key says it is the browser's, not read-only,
+        // eipgam Browser's key says it is the browser's, not read-only,
         // and its access isn't changed from the menu
         assert.equal((await tag("ext").textContent()).trim(), w.browser);
         assert.ok((await tag("ext").getAttribute("title")).length > 10, "the tag says what a browser key is");

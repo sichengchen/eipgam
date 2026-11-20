@@ -14,7 +14,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // parseMemoBody is a Claude Code conversation in a folder, long enough to

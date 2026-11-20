@@ -1,5 +1,5 @@
-// Package rosetta says whether magpie runs under Rosetta: an Intel build
-// on Apple silicon. Such a magpie works, but runs its own heavy code (the
+// Package rosetta says whether eipgam runs under Rosetta: an Intel build
+// on Apple silicon. Such a eipgam works, but runs its own heavy code (the
 // local masking model) several times slower than Apple silicon's build,
 // with no CoreML, and fetches Intel builds of what it downloads unless it
 // asks this.

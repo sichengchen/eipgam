@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // groupMembers are the members of the group id as Groups reads it, nil
@@ -32,7 +32,7 @@ func saveKeyProvider(t *testing.T, id string, models ...string) {
 	}
 }
 
-// A found group the user changed follows its model as one magpie finds
+// A found group the user changed follows its model as one eipgam finds
 // does (Kxsg79bEYFP4 on X: auto/deepseek-v4.1-flash, changed, stayed at
 // the two providers it was found with when a third with the model was
 // added): a provider that serves the model since joins it, after the
@@ -103,7 +103,7 @@ func TestChangedFoundGroupTakesInANewProvider(t *testing.T) {
 	if got := groupMembers(t, "auto-deepseek-v4-1-flash"); !slices.Equal(got, append(slices.Clone(want), "e/deepseek-v4.1-flash")) {
 		t.Fatalf("e let back in: %v", got)
 	}
-	// what this magpie saw is its own: a shared group doesn't carry it
+	// what this eipgam saw is its own: a shared group doesn't carry it
 	text, err := ShareGroup("auto-deepseek-v4-1-flash")
 	if err != nil {
 		t.Fatal(err)
@@ -114,7 +114,7 @@ func TestChangedFoundGroupTakesInANewProvider(t *testing.T) {
 	}
 }
 
-// A found group changed before magpie kept what it had seen has no
+// A found group changed before eipgam kept what it had seen has no
 // record of which of its models the user took out: none joins it, as
 // before, so one taken out by hand never comes back. Its next save
 // sees what is found then, and from that on a new provider joins.
@@ -127,7 +127,7 @@ func TestChangedFoundGroupFromBeforeKeepsItsMembers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// as an older magpie stored it: c taken out, nothing seen
+	// as an older eipgam stored it: c taken out, nothing seen
 	f.Groups = append(f.Groups, Group{ID: "auto-glm-5-3", Name: "GLM", Members: []string{"a/glm-5.3", "b/glm-5.3"}, Routing: Ordered})
 	if err := store(f); err != nil {
 		t.Fatal(err)
@@ -159,7 +159,7 @@ func TestChangedFoundGroupFromBeforeKeepsItsMembers(t *testing.T) {
 func TestChangedFoundGroupTakesInAPluginProvider(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("EIPGAM_BUN", bun)
 	t.Setenv("FAKE_DEEPSEEK", "1")
 	t.Cleanup(plugin.Settle)
 	saveKeyProvider(t, "a", "deepseek-v4-pro")

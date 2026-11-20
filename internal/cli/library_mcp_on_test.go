@@ -6,10 +6,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
-// magpie library mcp off|on <name> (swang20201 on X): off takes the
+// eipgam library mcp off|on <name> (swang20201 on X): off takes the
 // server from its agents and keeps it; on gives it back to them; a flag
 // is never taken as a name.
 func TestLibraryMCPOffOn(t *testing.T) {

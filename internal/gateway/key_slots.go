@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 // A gateway key's MaxConcurrency (young02036 on Discord: providers have
@@ -22,7 +22,7 @@ import (
 // than it does. With no cap nothing is counted or waited.
 //
 // Every route that asks a model is held, whichever way the request came
-// (the LAN, a Remote magpie, a socket's turn): keySlots sits in Handler
+// (the LAN, a Remote eipgam, a socket's turn): keySlots sits in Handler
 // beside keyLimited, which each of them passes. keySlotRoutes names those
 // routes; TestKeySlotEveryRoute fails on a route judged neither way.
 // count_tokens isn't held, as a provider's MaxConcurrency doesn't count

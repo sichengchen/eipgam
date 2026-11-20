@@ -58,7 +58,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], tests = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, tests));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       const tr = (k, vars = {}) => page.evaluate(([k, vars]) => t(k, vars), [k, vars]);
       if (lang !== "en") {
         const missing = await page.evaluate(([lang, keys]) => keys.filter((k) => !I18N[lang]?.[k]), [lang,
@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForFunction(() => document.querySelector("#status")?.textContent.endsWith(" · Work"));
 
       // two ChatGPT sign-ins of the ChatGPT API offer it too
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "ChatGPT API" }).click();
       const sol = page.locator(".editor .mchips .mchip", { hasText: "gpt-6.1-sol" });
       await sol.waitFor();
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.keyboard.press("Escape");
 
       // a provider with one account has no such entry
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Plain" }).click();
       const other = page.locator(".editor .mchips .mchip", { hasText: "model-p" });
       await other.waitFor();

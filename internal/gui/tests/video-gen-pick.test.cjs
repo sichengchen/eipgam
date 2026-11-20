@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Discord #feedback: "自定义的供应商还是不能选视频模型". A custom
 // provider's model marked a video model (right-click in its Model settings,
-// Makes › Video model) made videos only when magpie happened to pick it:
-// Magpie Image's video generation had no setting, Automatic took the first
+// Makes › Video model) made videos only when eipgam happened to pick it:
+// eipgam Image's video generation had no setting, Automatic took the first
 // provider's. Settings › Models › Images now has a Video generation row,
 // beside Image generation: Automatic names its pick, the picker lists every
 // model that makes videos by provider, picking one saves videoGen, a pick
@@ -24,7 +24,7 @@ function settingsPayload(lang, over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], lanURLs: [],
     imageGenAuto: "openai/gpt-image-2",
@@ -76,7 +76,7 @@ const want = {
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Settings picks the model Magpie Image makes videos with", async (t) => {
+  test(engine + ": Settings picks the model eipgam Image makes videos with", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const shots = [];
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", server(lang, cur, posted));
-      await page.goto("http://magpie.test/?view=settings&tab=models");
+      await page.goto("http://eipgam.test/?view=settings&tab=models");
       await page.locator("#imagesList .row").nth(1).waitFor();
       return page;
     };

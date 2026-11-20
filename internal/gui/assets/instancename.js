@@ -1,6 +1,6 @@
-// Settings › Network and sharing › Advanced › Name: what this magpie is
-// called, said in its browser tab's title as "<name> · magpie" (starballl
-// on X: several deployed, all titled magpie). MAGPIE_NAME names it while
+// Settings › Network and sharing › Advanced › Name: what this eipgam is
+// called, said in its browser tab's title as "<name> · eipgam" (starballl
+// on X: several deployed, all titled eipgam). EIPGAM_NAME names it while
 // this is empty, and is the field's placeholder; a name typed here wins
 // over it. app.js imports this when Settings is drawn, so it weighs
 // nothing on the core.
@@ -11,7 +11,7 @@ window.instanceName = function instanceName(s, keep) {
   // a redraw (another setting saved) never takes the field from under
   // whoever is typing in it
   if (list.contains(document.activeElement)) return;
-  const field = input(s.name || "", s.nameEnv || "magpie");
+  const field = input(s.name || "", s.nameEnv || "eipgam");
   field.className = "words instance-name";
   field.maxLength = 60;
   field.spellcheck = false;

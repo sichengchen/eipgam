@@ -7,22 +7,22 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
-// magpie's sessions (cryingLiu on X) are an MCP server an agent the user
+// eipgam's sessions (cryingLiu on X) are an MCP server an agent the user
 // picks in Library → MCP can mount, so it can find what was said in any
 // agent's session on this computer and read it: search_sessions and
 // read_session, Streamable HTTP at SessionsMCPPath, served as
 // SearchMCPPath is (serveMCP), to the agents on this computer alone, and
-// given as `magpie mcp sessions`. It reads only the agents Settings ›
-// Sessions lets magpie read (sessions.Reads), as the Sessions page does.
+// given as `eipgam mcp sessions`. It reads only the agents Settings ›
+// Sessions lets eipgam read (sessions.Reads), as the Sessions page does.
 
 // SessionsMCPPath is where the sessions MCP server is served.
-const SessionsMCPPath = "/mcp/magpie/sessions"
+const SessionsMCPPath = "/mcp/eipgam/sessions"
 
 const (
-	sessionsServerName = "magpie-sessions"
+	sessionsServerName = "eipgam-sessions"
 	sessionsSearchTool = "search_sessions"
 	sessionsReadTool   = "read_session"
 )
@@ -32,10 +32,10 @@ func (s *Server) sessionsMCP(w http.ResponseWriter, r *http.Request) {
 	// this computer reads it. Another computer's gateway key and a web
 	// page, even one Settings lists, are turned away.
 	if !local(r) || fromBrowser(r) {
-		http.Error(w, "magpie's sessions MCP server answers the agents on this computer alone", http.StatusForbidden)
+		http.Error(w, "eipgam's sessions MCP server answers the agents on this computer alone", http.StatusForbidden)
 		return
 	}
-	serveMCP(w, r, "magpie's sessions", sessionsServerName, 1<<20, s.sessionsMCPCall)
+	serveMCP(w, r, "eipgam's sessions", sessionsServerName, 1<<20, s.sessionsMCPCall)
 }
 
 func sessionsMCPTools() []any {
@@ -43,13 +43,13 @@ func sessionsMCPTools() []any {
 		map[string]any{
 			"name":  sessionsSearchTool,
 			"title": "Search sessions",
-			"description": "Searches what was said (the user's prompts and the agents' replies) in the sessions of every coding agent on this computer: Claude Code, Codex and the others magpie reads. " +
+			"description": "Searches what was said (the user's prompts and the agents' replies) in the sessions of every coding agent on this computer: Claude Code, Codex and the others eipgam reads. " +
 				"Use it to find an earlier conversation, a decision or a fix from another session or another agent. Words match by their start; the newest sessions come first. Read one with " + sessionsReadTool + ".",
 			"inputSchema": map[string]any{
 				"type": "object",
 				"properties": map[string]any{
 					"query": map[string]any{"type": "string", "description": "The words to find, as they were said"},
-					"agent": map[string]any{"type": "string", "description": "Only this agent's sessions, by magpie's id for it (claude, codex, gemini, opencode, …)"},
+					"agent": map[string]any{"type": "string", "description": "Only this agent's sessions, by eipgam's id for it (claude, codex, gemini, opencode, …)"},
 					"limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
 				},
 				"required": []string{"query"},
@@ -92,7 +92,7 @@ func (s *Server) sessionsMCPCall(r *http.Request, m mcpMessage) (any, map[string
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": sessionsServerName, "title": "Magpie Sessions", "version": Version},
+			"serverInfo":      map[string]any{"name": sessionsServerName, "title": "eipgam Sessions", "version": Version},
 			"instructions":    "What was said in every coding agent's sessions on this computer. Search it for an earlier conversation, decision or fix, in this agent or another, and read the session it is in.",
 		}, nil
 	case "ping":

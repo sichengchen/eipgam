@@ -49,7 +49,7 @@ function server(lang, asked) {
     if (url.pathname === "/api/plugin-signin") { asked.push(["signin", body()]); return json({ id: "p1", agent: "github-copilot-plugin", state: "waiting", url: "https://github.test/login/device" }); }
     if (url.pathname === "/api/signin/p1") return json({ id: "p1", agent: "github-copilot-plugin", state: "waiting", url: "https://github.test/login/device" });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, asked));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const zed = page.locator('#view-plugins .pm-card[data-pkg="@magpie-community/opencode-zed-auth"]');
         await zed.locator(".pm-sum").click();
         await page.locator("#modal .pm-detail .pm-md").waitFor();

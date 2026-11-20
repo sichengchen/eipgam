@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [], hold = {};
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, hold));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
 
       const line = page.locator("#movable .agy-move");
       const go = line.locator("button.action");
@@ -130,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (url.pathname === "/api/providers") return route.fulfill({ json: { providers: [], presets: [], excluded: [], gateway: { running: true, window: true }, plugins: [], withdrawn, agyMove: users } });
       return serve("en", [], {})(route);
     });
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://eipgam.test/?view=providers");
     const line = page.locator("#movable .agy-move");
     await line.waitFor();
     await line.locator("button", { hasText: "Not now" }).click();

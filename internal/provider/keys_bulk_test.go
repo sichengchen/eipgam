@@ -65,7 +65,7 @@ func TestAddKeys(t *testing.T) {
 }
 
 // AllKeys gives every key a provider holds, on or off, in its list's
-// order, each once, for another magpie to take in with SplitKeys
+// order, each once, for another eipgam to take in with SplitKeys
 // (@emilochen on X); a signed-in account has none.
 func TestAllKeys(t *testing.T) {
 	h := t.TempDir()

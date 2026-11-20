@@ -9,12 +9,12 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // kimiSubagentHome is a sandbox HOME with a Kimi Code config holding the
-// user's own model, and magpie's provider "think" with three models: deep
+// user's own model, and eipgam's provider "think" with three models: deep
 // (high, max), wide (low, medium) and plain (no thinking).
 func kimiSubagentHome(t *testing.T, config string) (home, path string) {
 	t.Helper()
@@ -137,7 +137,7 @@ func kimiOptionValues(f *Field, vals map[string]string) []string {
 }
 
 // XiaoLing_Arisa on X: Kimi Code's subagent pool and its effort, picked
-// from magpie's models, written as Kimi reads them; each write is one Kimi
+// from eipgam's models, written as Kimi reads them; each write is one Kimi
 // takes, and Disconnect puts back the subagent model the user had.
 func TestKimiSubagentPool(t *testing.T) {
 	home, path := kimiSubagentHome(t, kimiOwnConfig+`
@@ -152,26 +152,26 @@ default_model = "kimi-code/kimi-for-coding"
 	if sub.Get() != "kimi-code/kimi-for-coding" || pool.Get() != "" {
 		t.Fatalf("read: %q %q", sub.Get(), pool.Get())
 	}
-	// not connected: magpie's models have no tables Kimi could resolve
-	if err := sub.Set("magpie/think/deep"); err == nil {
-		t.Fatal("a magpie model went in with magpie not connected")
+	// not connected: eipgam's models have no tables Kimi could resolve
+	if err := sub.Set("eipgam/think/deep"); err == nil {
+		t.Fatal("a eipgam model went in with eipgam not connected")
 	}
-	if slices.ContainsFunc(kimiOptionValues(sub, a.Values()), func(v string) bool { return strings.HasPrefix(v, "magpie/") }) {
-		t.Fatal("magpie's models offered before it is connected")
+	if slices.ContainsFunc(kimiOptionValues(sub, a.Values()), func(v string) bool { return strings.HasPrefix(v, "eipgam/") }) {
+		t.Fatal("eipgam's models offered before it is connected")
 	}
-	if err := a.Apply("model", "magpie/think/deep"); err != nil {
+	if err := a.Apply("model", "eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Contains(kimiOptionValues(pool, a.Values()), "magpie/think/wide") {
+	if !slices.Contains(kimiOptionValues(pool, a.Values()), "eipgam/think/wide") {
 		t.Fatalf("pool options: %v", kimiOptionValues(pool, a.Values()))
 	}
 
-	// a pool of magpie's: the user's default isn't in it, so the first is
-	if err := pool.Set("magpie/think/deep\nmagpie/think/wide"); err != nil {
+	// a pool of eipgam's: the user's default isn't in it, so the first is
+	if err := pool.Set("eipgam/think/deep\neipgam/think/wide"); err != nil {
 		t.Fatal(err)
 	}
 	s := kimiSubagentsValid(t, path)
-	if s["default_model"] != "magpie/think/deep" || pool.Get() != "magpie/think/deep\nmagpie/think/wide" {
+	if s["default_model"] != "eipgam/think/deep" || pool.Get() != "eipgam/think/deep\neipgam/think/wide" {
 		t.Fatalf("pool: %v %q", s, pool.Get())
 	}
 	// deep and wide share no level: off only
@@ -184,12 +184,12 @@ default_model = "kimi-code/kimi-for-coding"
 
 	// the user's description of an entry stays through a change
 	b, _ := os.ReadFile(path)
-	os.WriteFile(path, []byte(strings.Replace(string(b), `"magpie/think/deep" = ""`, `"magpie/think/deep" = "hard problems"`, 1)), 0o644)
-	if err := pool.Set("magpie/think/deep"); err != nil {
+	os.WriteFile(path, []byte(strings.Replace(string(b), `"eipgam/think/deep" = ""`, `"eipgam/think/deep" = "hard problems"`, 1)), 0o644)
+	if err := pool.Set("eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	s = kimiSubagentsValid(t, path)
-	if m, _ := s["models"].(map[string]any); m["magpie/think/deep"] != "hard problems" || len(m) != 1 {
+	if m, _ := s["models"].(map[string]any); m["eipgam/think/deep"] != "hard problems" || len(m) != 1 {
 		t.Fatalf("description: %v", s)
 	}
 	if got := kimiOptionValues(eff, a.Values()); !slices.Equal(got, []string{"off", "high", "max"}) {
@@ -203,7 +203,7 @@ default_model = "kimi-code/kimi-for-coding"
 	}
 	// wide joins: max is none of its, so the effort goes rather than
 	// leaving a config Kimi refuses
-	if err := pool.Set("magpie/think/deep\nmagpie/think/wide"); err != nil {
+	if err := pool.Set("eipgam/think/deep\neipgam/think/wide"); err != nil {
 		t.Fatal(err)
 	}
 	if s = kimiSubagentsValid(t, path); s["default_effort"] != nil {
@@ -211,37 +211,37 @@ default_model = "kimi-code/kimi-for-coding"
 	}
 
 	// the default picked as Kimi's own /secondary-model does: into the pool
-	if err := sub.Set("magpie/think/plain"); err != nil {
+	if err := sub.Set("eipgam/think/plain"); err != nil {
 		t.Fatal(err)
 	}
 	s = kimiSubagentsValid(t, path)
-	if m, _ := s["models"].(map[string]any); s["default_model"] != "magpie/think/plain" || len(m) != 3 {
+	if m, _ := s["models"].(map[string]any); s["default_model"] != "eipgam/think/plain" || len(m) != 3 {
 		t.Fatalf("default: %v", s)
 	}
 
-	// Disconnect: magpie's models out, the user's subagent model back
+	// Disconnect: eipgam's models out, the user's subagent model back
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
 	s = kimiSubagentsValid(t, path)
 	b, _ = os.ReadFile(path)
-	if s["default_model"] != "kimi-code/kimi-for-coding" || s["models"] != nil || strings.Contains(string(b), "magpie") {
+	if s["default_model"] != "kimi-code/kimi-for-coding" || s["models"] != nil || strings.Contains(string(b), "eipgam") {
 		t.Fatalf("disconnect:\n%s", b)
 	}
 }
 
-// A model leaving magpie's catalog leaves the pool before its table goes,
+// A model leaving eipgam's catalog leaves the pool before its table goes,
 // so Kimi never meets a pool naming a model it lacks.
 func TestKimiSubagentPoolSync(t *testing.T) {
 	home, path := kimiSubagentHome(t, kimiOwnConfig)
 	a := kimi(home)
-	if err := a.Apply("model", "magpie/think/deep"); err != nil {
+	if err := a.Apply("model", "eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("subagent_pool").Set("magpie/think/wide\nkimi-code/kimi-for-coding"); err != nil {
+	if err := a.Field("subagent_pool").Set("eipgam/think/wide\nkimi-code/kimi-for-coding"); err != nil {
 		t.Fatal(err)
 	}
-	if s := kimiSubagentsValid(t, path); s["default_model"] != "magpie/think/wide" {
+	if s := kimiSubagentsValid(t, path); s["default_model"] != "eipgam/think/wide" {
 		t.Fatalf("pool: %v", s)
 	}
 	if err := provider.Save(provider.Provider{
@@ -282,7 +282,7 @@ default_effort = "medium"
 `
 	home, path := kimiSubagentHome(t, own)
 	a := kimi(home)
-	if err := a.Apply("model", "magpie/think/deep"); err != nil {
+	if err := a.Apply("model", "eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Disconnect(); err != nil {

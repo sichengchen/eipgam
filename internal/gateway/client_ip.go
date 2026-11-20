@@ -3,7 +3,7 @@ package gateway
 import (
 	"net/http"
 
-	"github.com/yetone/magpie/internal/usageapi"
+	"github.com/sichengchen/eipgam/internal/usageapi"
 )
 
 // clientIP is the address a request came from, for its usage row: the
@@ -19,7 +19,7 @@ func clientIP(r *http.Request) string {
 
 // withoutClientIPs is a ledger page with the address each call came from
 // taken out: the gateway's usage API answers other computers (Remote
-// magpie, a shared gateway's key holders), and where this computer's
+// eipgam, a shared gateway's key holders), and where this computer's
 // clients connect from stays on it. The Usage page reads it from the GUI's
 // own /api/usage/requests.
 func withoutClientIPs(l usageapi.Ledger) usageapi.Ledger {

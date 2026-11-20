@@ -19,11 +19,11 @@ import (
 
 type clientCertKey struct{}
 
-// clientCert is a provider's own TLS identity (#5596, clxsh: a magpie at
+// clientCert is a provider's own TLS identity (#5596, clxsh: a eipgam at
 // home behind an Nginx that asks for a client certificate, reached by
-// Remote magpie from the office): the PEM certificate and key it shows
+// Remote eipgam from the office): the PEM certificate and key it shows
 // the server, and the PEM CA its server's certificate may also be signed
-// by (a magpie's own, `magpie mtls`), at the hosts of its own base URLs.
+// by (a eipgam's own, `eipgam mtls`), at the hosts of its own base URLs.
 type clientCert struct {
 	cert, key, ca, pin string
 	hosts              map[string]bool
@@ -42,7 +42,7 @@ type clientCert struct {
 // made for another provider) drops it.
 //
 // pin, the SHA-256 of a server certificate the user trusted as it is
-// (Zhangzhangi on X: a magpie at home on a domain of its own with a
+// (Zhangzhangi on X: a eipgam at home on a domain of its own with a
 // self-signed certificate), has the certificate's chain and name left
 // unchecked at those hosts, and the handshake refused unless the
 // server's own certificate is that one (pinTLS).

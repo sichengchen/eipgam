@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // Claude Code adds a Co-Authored-By trailer to the commits it makes
@@ -16,7 +16,7 @@ import (
 const (
 	AttributionOn     = "on"
 	AttributionOff    = "off"
-	AttributionCustom = "custom" // the user's own trailer text: magpie never writes over it
+	AttributionCustom = "custom" // the user's own trailer text: eipgam never writes over it
 )
 
 func attributionPath(home string) string {

@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-// onSystem runs the test as a magpie built for sys/arch, translated or
+// onSystem runs the test as a eipgam built for sys/arch, translated or
 // not.
 func onSystem(t *testing.T, sys, arch string, tr bool) {
 	t.Helper()
@@ -24,7 +24,7 @@ func onSystem(t *testing.T, sys, arch string, tr bool) {
 	emulated = func() bool { return false }
 }
 
-// An Intel magpie under Rosetta updates to Apple silicon's build, the app
+// An Intel eipgam under Rosetta updates to Apple silicon's build, the app
 // and the terminal build alike; anywhere else an update is the build's
 // own architecture.
 func TestRosettaUpdatesToAppleSilicon(t *testing.T) {
@@ -35,14 +35,14 @@ func TestRosettaUpdatesToAppleSilicon(t *testing.T) {
 		tr, gui  bool
 		app, bin string
 	}{
-		{"darwin", "amd64", true, true, "magpie-darwin-arm64.zip", "magpie-cli-darwin-arm64"},
-		{"darwin", "amd64", true, false, "magpie-darwin-arm64.zip", "magpie-cli-darwin-arm64"},
-		{"darwin", "amd64", false, true, "magpie-darwin-amd64.zip", "magpie-cli-darwin-amd64"},
-		{"darwin", "arm64", false, true, "magpie-darwin-arm64.zip", "magpie-cli-darwin-arm64"},
+		{"darwin", "amd64", true, true, "eipgam-darwin-arm64.zip", "eipgam-cli-darwin-arm64"},
+		{"darwin", "amd64", true, false, "eipgam-darwin-arm64.zip", "eipgam-cli-darwin-arm64"},
+		{"darwin", "amd64", false, true, "eipgam-darwin-amd64.zip", "eipgam-cli-darwin-amd64"},
+		{"darwin", "arm64", false, true, "eipgam-darwin-arm64.zip", "eipgam-cli-darwin-arm64"},
 		// only macOS has Rosetta: a translated answer elsewhere changes nothing
-		{"windows", "amd64", true, true, "magpie-darwin-amd64.zip", "magpie-windows-amd64.exe"},
-		{"linux", "amd64", true, false, "magpie-darwin-amd64.zip", "magpie-cli-linux-amd64"},
-		{"linux", "arm64", false, true, "magpie-darwin-arm64.zip", "magpie-linux-arm64"},
+		{"windows", "amd64", true, true, "eipgam-darwin-amd64.zip", "eipgam-windows-amd64.exe"},
+		{"linux", "amd64", true, false, "eipgam-darwin-amd64.zip", "eipgam-cli-linux-amd64"},
+		{"linux", "arm64", false, true, "eipgam-darwin-arm64.zip", "eipgam-linux-arm64"},
 	} {
 		onSystem(t, c.os, c.arch, c.tr)
 		GUI = c.gui
@@ -73,10 +73,10 @@ func TestRosettaStagesAppleSiliconsApp(t *testing.T) {
 	defer srv.Close()
 	for _, a := range []string{"amd64", "arm64"} {
 		src := filepath.Join(root, "src-"+a)
-		fakeApp(t, filepath.Join(src, "magpie.app"), "2.0-"+a)
-		name := "magpie-darwin-" + a + ".zip"
+		fakeApp(t, filepath.Join(src, "eipgam.app"), "2.0-"+a)
+		name := "eipgam-darwin-" + a + ".zip"
 		zip := filepath.Join(root, name)
-		cmd := exec.Command("ditto", "-c", "-k", "--keepParent", "magpie.app", zip)
+		cmd := exec.Command("ditto", "-c", "-k", "--keepParent", "eipgam.app", zip)
 		cmd.Dir = src
 		if b, err := cmd.CombinedOutput(); err != nil {
 			t.Fatalf("ditto: %v: %s", err, b)
@@ -89,7 +89,7 @@ func TestRosettaStagesAppleSiliconsApp(t *testing.T) {
 		zips[name] = body
 		assets[name] = Asset{URL: srv.URL + "/" + name, SHA256: hex.EncodeToString(sum[:])}
 	}
-	bundle := filepath.Join(root, "Applications", "magpie.app")
+	bundle := filepath.Join(root, "Applications", "eipgam.app")
 	fakeApp(t, bundle, "1.0-amd64")
 	staged, err := Stage(context.Background(), &Release{Version: "2.0", Assets: assets}, bundle)
 	if err != nil {

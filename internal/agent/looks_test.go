@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/agentplug"
 )
 
 // The pages that only name and draw rows by agent poll Looks, which builds

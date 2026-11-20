@@ -14,7 +14,7 @@ package provider
 // didn't before is ticked for it, one it had and has no more is taken
 // out. A model the user un-ticked for a key that its list had before and
 // still has stays un-ticked, and one the user ticked that its list never
-// had stays ticked: magpie's default never overrides what the user set.
+// had stays ticked: eipgam's default never overrides what the user set.
 //
 // A key with no models of its own yet (All models: one added before its
 // own list was asked for, the provider's first key, one whose list wasn't
@@ -32,7 +32,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // keyMarks are, by key fingerprint, the provider's own ids of the models
@@ -83,7 +83,7 @@ func refreshKeyModels(id string, before, now map[string]map[string]bool) int {
 		}
 		var list []string
 		if was == nil {
-			// a key on every model, by magpie's default and not the
+			// a key on every model, by eipgam's default and not the
 			// user's, whose list leaves some of the others' out
 			if p.AccountModelsAll[accountKey(kid)] || len(w) >= len(every) {
 				continue

@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
-// #2097: an agy step that went through magpie is counted once. agy 1.2.16,
+// #2097: an agy step that went through eipgam is counted once. agy 1.2.16,
 // run in a sandbox through a fake Gemini endpoint, sent no session header
 // (only User-Agent google-genai-sdk/…, X-Goog-Api-Key), so the gateway's
 // record names no session; its transcript's step began at 06:12:41Z, to
@@ -27,7 +27,7 @@ func TestAgyStepThroughMagpieCountedOnce(t *testing.T) {
 		t.Error("the step the gateway logged is counted again as agy's own call")
 	}
 	if m[1] {
-		t.Error("a step agy made without magpie was taken for the gateway's")
+		t.Error("a step agy made without eipgam was taken for the gateway's")
 	}
 
 	// a step the gateway's call ended before is not that call
@@ -67,9 +67,9 @@ func TestAgyStepThroughTheAppsGatewayCountedOnce(t *testing.T) {
 }
 
 // #2190: the Antigravity app's own conversation database counts every
-// call the app made, the ones it sent through magpie too, and names the
+// call the app made, the ones it sent through eipgam too, and names the
 // conversation's id, never a session the gateway was sent. A call that
-// went through magpie is the gateway's record, matched by its tokens and
+// went through eipgam is the gateway's record, matched by its tokens and
 // a time after the step began (step 11 of yygutn's rows on #2190: 4254 in,
 // 18561 read from the cache, 276 out); one made straight to Google is the
 // app's own.

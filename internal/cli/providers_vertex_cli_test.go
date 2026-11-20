@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // vertexNotAsked points Vertex AI, Google's token endpoint and IAM
@@ -49,7 +49,7 @@ func labelled(out, label string) string {
 	return ""
 }
 
-// magpie provider add google-vertex takes the project, location, credentials
+// eipgam provider add google-vertex takes the project, location, credentials
 // file and service account as pairs, set changes them (an empty one goes
 // back to the default), and none of them is taken by a provider that isn't
 // Vertex AI. A key is never taken: the error says what signs it instead.
@@ -60,7 +60,7 @@ func TestProviderAddVertexPairs(t *testing.T) {
 	for _, args := range [][]string{{"provider", "add", "google-vertex"}, {"provider", "add", "google-vertex", "location=us"}} {
 		err := providerCmd(args)
 		if err == nil || !strings.Contains(err.Error(), "needs the id of your Google Cloud project") ||
-			!strings.Contains(err.Error(), "magpie provider add google-vertex project=") {
+			!strings.Contains(err.Error(), "eipgam provider add google-vertex project=") {
 			t.Fatalf("%v: %v", args[2:], err)
 		}
 	}
@@ -170,10 +170,10 @@ func TestProviderAddVertexPairs(t *testing.T) {
 	}
 }
 
-// magpie providers and magpie provider <id> say a Vertex AI provider is
+// eipgam providers and eipgam provider <id> say a Vertex AI provider is
 // signed with Google credentials, as which service account, and which
 // project and location it asks, never that it has no key or needs none;
-// switched off still says so. magpie presets says it is added with its
+// switched off still says so. eipgam presets says it is added with its
 // project.
 func TestProvidersShowVertexCredentials(t *testing.T) {
 	groupsHome(t)
@@ -182,7 +182,7 @@ func TestProvidersShowVertexCredentials(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "magpie provider add google-vertex project=") || strings.Contains(row, "<key>") {
+	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "eipgam provider add google-vertex project=") || strings.Contains(row, "<key>") {
 		t.Fatalf("presets: %q", row)
 	}
 	key := filepath.Join(t.TempDir(), "vertex-sa.json")
@@ -238,17 +238,17 @@ func TestProvidersShowVertexCredentials(t *testing.T) {
 		t.Fatal(err)
 	}
 	out, _ = printed(t, providers)
-	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "switched off") || strings.Contains(row, "Google credentials") || !strings.Contains(row, "magpie provider on google-vertex") {
+	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "switched off") || strings.Contains(row, "Google credentials") || !strings.Contains(row, "eipgam provider on google-vertex") {
 		t.Errorf("list, off: %q", row)
 	}
-	if row := lineWith(out, "vertex-sa"); strings.Contains(row, "magpie provider on") {
+	if row := lineWith(out, "vertex-sa"); strings.Contains(row, "eipgam provider on") {
 		t.Errorf("list, on, says how to turn it on: %q", row)
 	}
 }
 
 // A Vertex AI provider with no project an address can be made of
-// (providers.json edited by hand) asks nothing: magpie providers says it
-// needs a project, as the app's row does, and magpie provider <id> says
+// (providers.json edited by hand) asks nothing: eipgam providers says it
+// needs a project, as the app's row does, and eipgam provider <id> says
 // how to give it one, never to give it a key, which it takes none of.
 func TestProvidersShowVertexWithoutProject(t *testing.T) {
 	groupsHome(t)
@@ -274,16 +274,16 @@ func TestProvidersShowVertexWithoutProject(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if row := lineWith(out, "project "); !strings.Contains(row, want) || !strings.Contains(row, "magpie provider set "+id+" project=") {
+		if row := lineWith(out, "project "); !strings.Contains(row, want) || !strings.Contains(row, "eipgam provider set "+id+" project=") {
 			t.Errorf("show, %s: project %q in\n%s", id, row, out)
 		}
-		if strings.Contains(out, "provider key") || strings.Contains(out, "not set  magpie provider key") {
+		if strings.Contains(out, "provider key") || strings.Contains(out, "not set  eipgam provider key") {
 			t.Errorf("show, %s, asks for a key:\n%s", id, out)
 		}
 	}
 }
 
-// magpie provider test asks Vertex AI with a token minted from the
+// eipgam provider test asks Vertex AI with a token minted from the
 // provider's Google credentials, with no key asked for on the way: the
 // smallest generateContent, at its project, to the first of its models.
 func TestProviderTestVertex(t *testing.T) {

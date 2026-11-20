@@ -9,14 +9,14 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // OpenRouter's /models lists only the models that answer in text, so its
 // image models were Nano Banana and GPT-5 Image alone; FLUX, Seedream,
 // Riverflow, Recraft, GPT Image and the rest answer with an image alone
 // (iwinux on Discord). /images/models listed those but no model's
-// variants, so recraft/recraft-v4.1-flash-v2:free was in no list magpie
+// variants, so recraft/recraft-v4.1-flash-v2:free was in no list eipgam
 // read (AllenH__ on X); /models?output_modalities=image, which needs no
 // key, lists both. The fixtures are what openrouter.ai answered: /models
 // (rows of it) on 2026-11-06, and /models?output_modalities=image, whole,

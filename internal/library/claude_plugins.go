@@ -13,15 +13,15 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Claude Code's own plugins, the ones installed in Claude Code through its
 // /plugin marketplaces (AXmake110 on X), go with the library: the
 // marketplaces it knows and the plugins turned on for the user, so a
 // computer that syncs ends up with the same plugins. They are not the
-// library's plugin bundles (plugin.go), which magpie keeps and gives to
+// library's plugin bundles (plugin.go), which eipgam keeps and gives to
 // every agent itself.
 //
 // Claude Code keeps them in its folder (claudeDir, CLAUDE_CONFIG_DIR too):

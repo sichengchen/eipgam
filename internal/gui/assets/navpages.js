@@ -1,9 +1,9 @@
 // Settings › General › Sidebar pages (youimark on X: a docker gateway has
 // no use for Agents or Library): which pages this browser leaves out of
-// the sidebar, kept in localStorage magpie.navHidden as this reader's own
+// the sidebar, kept in localStorage eipgam.navHidden as this reader's own
 // (navMine in app.js reads it), and the order they go in (chet030714 on
 // X: Routing, Providers and Agents first in a phone's tab bar, the rest
-// under More), kept in magpie.navOrder (navorder.js).
+// under More), kept in eipgam.navOrder (navorder.js).
 // A row is dragged to its place, or moved with Alt+↑/↓; Providers is
 // always shown. app.js imports this when Settings draws, so it weighs
 // nothing on the core.
@@ -15,8 +15,8 @@ const navPagesOf = (nav) => [...nav.querySelectorAll(":scope > button[data-view]
 
 function navPagesSave(k, list) {
   try {
-    if (list) localStorage.setItem("magpie.nav" + k, JSON.stringify(list));
-    else localStorage.removeItem("magpie.nav" + k);
+    if (list) localStorage.setItem("eipgam.nav" + k, JSON.stringify(list));
+    else localStorage.removeItem("eipgam.nav" + k);
   } catch { /* not kept */ }
   navHides();
   if (offView(view) !== view) show(offView(view));

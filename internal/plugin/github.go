@@ -153,7 +153,7 @@ func (e *TaggedMissing) Unwrap() error { return e.Why }
 // are left out, as is one whose package.json doesn't parse, which bun
 // couldn't install either. A repository whose package.json didn't come in
 // time is as the list had it last, and the list is asked again in
-// taggedRetry. MAGPIE_PLUGIN_MARKET=off keeps to none.
+// taggedRetry. EIPGAM_PLUGIN_MARKET=off keeps to none.
 //
 // The error says the list isn't GitHub's whole answer, and why: the search
 // failed (the list is what GitHub said before, empty when it never
@@ -167,10 +167,10 @@ func TaggedRepos(ctx context.Context) ([]Tagged, error) {
 	if taggedL != nil && time.Since(taggedAt) < taggedTTL {
 		return taggedL, taggedWhy
 	}
-	if os.Getenv("MAGPIE_PLUGIN_MARKET") == "off" {
+	if os.Getenv("EIPGAM_PLUGIN_MARKET") == "off" {
 		return []Tagged{}, nil
 	}
-	// a magpie started again within the ten minutes: what GitHub said then,
+	// a eipgam started again within the ten minutes: what GitHub said then,
 	// without the wait of asking (a package.json read for each)
 	if taggedL == nil {
 		if fi, err := os.Stat(taggedCache()); err == nil && time.Since(fi.ModTime()) < taggedTTL {
@@ -195,7 +195,7 @@ func TaggedRepos(ctx context.Context) ([]Tagged, error) {
 		if b, err := json.Marshal(l); err == nil {
 			_ = os.MkdirAll(filepath.Dir(taggedCache()), 0o755)
 			_ = os.WriteFile(taggedCache(), b, 0o644)
-			// a magpie started again meanwhile asks again too
+			// a eipgam started again meanwhile asks again too
 			_ = os.Chtimes(taggedCache(), taggedAt, taggedAt)
 		}
 		return l, taggedWhy
@@ -467,7 +467,7 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 			t.License = t.PkgLicense
 		}
 	}
-	// a picture, as host.js's iconOf takes one: magpie checks and
+	// a picture, as host.js's iconOf takes one: eipgam checks and
 	// keeps it before the page shows it (the GUI's /api/plugins/github)
 	t.Icon = ownIcon(pj.Magpie.Icon)
 	// and what it says of itself, shown on its card as its own words
@@ -484,7 +484,7 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 	case strings.TrimSpace(pj.Magpie.Agent) != "":
 		t.Kind = "agent"
 	// a page with a module of its own (the local service its page
-	// talks to, magpie.page.service) is a page when it says so in its
+	// talks to, eipgam.page.service) is a page when it says so in its
 	// keywords, as every page in the plugins repository does; a
 	// provider or middleware with a page of settings beside it says
 	// "magpie-page" nowhere and stays what it is (plugins#1226)

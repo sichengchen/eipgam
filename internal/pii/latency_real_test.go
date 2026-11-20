@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/pii/guard"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/sichengchen/eipgam/internal/pii/guard"
+	"github.com/sichengchen/eipgam/internal/redact"
 )
 
 // latencySession is a Messages request on turn n as Claude Code sends

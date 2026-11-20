@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // cursorLocalEnvD is the environment.d file systemd's user session reads
@@ -20,7 +20,7 @@ func cursorLocalEnvD() string {
 		home, _ := os.UserHomeDir()
 		cfg = filepath.Join(home, ".config")
 	}
-	return filepath.Join(cfg, "environment.d", "magpie-cursor-local.conf")
+	return filepath.Join(cfg, "environment.d", "eipgam-cursor-local.conf")
 }
 
 // setUserEnv writes the variables to environment.d, for the sessions from

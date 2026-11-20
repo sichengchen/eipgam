@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
 )
 
 // The sign-in page is the one the server's metadata names, and the GUI

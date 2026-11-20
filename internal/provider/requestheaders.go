@@ -12,10 +12,10 @@ import (
 	"strings"
 )
 
-// requestHeadersNever are never passed on, listed or not: magpie's own key
+// requestHeadersNever are never passed on, listed or not: eipgam's own key
 // as an agent sends it (Authorization, x-api-key, x-goog-api-key, api-key)
 // and the sign-ins and cookies beside it, the connection's own fields, and
-// what magpie writes for the body it sends (a translated body has another
+// what eipgam writes for the body it sends (a translated body has another
 // type, length and encoding, and the transport asks for compression
 // itself). The prefixes below go with them.
 var requestHeadersNever = map[string]bool{
@@ -26,9 +26,9 @@ var requestHeadersNever = map[string]bool{
 }
 
 // requestHeadersNeverPrefix: Content-Length, -Type and the rest;
-// Proxy-Authorization and the rest; Sec- fetch metadata; and magpie's own,
+// Proxy-Authorization and the rest; Sec- fetch metadata; and eipgam's own,
 // which carry who asked and the conversation to a plugin or another
-// magpie.
+// eipgam.
 var requestHeadersNeverPrefix = []string{"Content-", "Proxy-", "Sec-", "X-Magpie-"}
 
 // RequestHeaderPassable says whether a header of the agent's request may be
@@ -58,7 +58,7 @@ func RequestHeadersOK(names []string) string {
 			return "\"" + n + "\" isn't a header name"
 		}
 		if !RequestHeaderPassable(n) {
-			return n + " is never passed on: it carries a key, or magpie or the connection writes it"
+			return n + " is never passed on: it carries a key, or eipgam or the connection writes it"
 		}
 	}
 	return ""

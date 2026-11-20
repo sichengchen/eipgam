@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// fakeWSLScience is a distro's claude-science and its relay, as magpie
+// fakeWSLScience is a distro's claude-science and its relay, as eipgam
 // runs them through wsl.exe (scienceWSLRun).
 type fakeWSLScience struct {
 	*fakeScience
@@ -72,7 +72,7 @@ func fakeScienceIn(t *testing.T, d distro) *fakeWSLScience {
 
 // Claude Science in a WSL distro under NAT (shuitunlulu_ on Discord): the
 // probe finds it in ~/.local/bin, and Connect restarts its daemon there
-// through wsl.exe, given the relay magpie starts in the distro to
+// through wsl.exe, given the relay eipgam starts in the distro to
 // Windows' address on the WSL network, with the WSL key in its path, as
 // the daemon takes http only to loopback and sends its Claude sign-in as
 // its key. The keeper starts it again there; Disconnect restarts it

@@ -8,7 +8,7 @@ import (
 )
 
 // A plugin's auth.calls (Cursor's: the account's calls made outside
-// magpie) is said in its provider's Calls and read through AccountCalls:
+// eipgam) is said in its provider's Calls and read through AccountCalls:
 // since handed to the hook as epoch ms, a call without an rid or a time
 // dropped, and a count or cost that isn't a number read as none.
 func TestPluginOutsideCalls(t *testing.T) {

@@ -8,11 +8,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
-// With the provider left out of WorkBuddy's names, magpie gives it each
+// With the provider left out of WorkBuddy's names, eipgam gives it each
 // model's name as its id (buddyIDs in internal/agent), as WorkBuddy shows
 // a custom model "name:id" (elis_pina on X). WorkBuddy asks for the model
 // by that name, which reaches the model it names, before a model another

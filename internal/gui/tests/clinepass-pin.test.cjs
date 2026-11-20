@@ -69,14 +69,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       const zh = await page.evaluate(() => [
         "DeepSeek and GLM models only from their makers' own APIs", "Upstream",
-        "Since 2026-11-06 Cline refuses a pinned DeepSeek or GLM request with 403, so magpie sends them unpinned and Cline picks the host; only glm-5.3-flash still asks Z.ai",
+        "Since 2026-11-06 Cline refuses a pinned DeepSeek or GLM request with 403, so eipgam sends them unpinned and Cline picks the host; only glm-5.3-flash still asks Z.ai",
       ].map((k) => I18N.zh[k]));
       assert(zh.every(Boolean), "every string has its Chinese");
       for (const l of ["zh-TW", "ja", "de"]) {
-        const has = await page.evaluate(([l, k]) => !!I18N[l][k], [l, "Since 2026-11-06 Cline refuses a pinned DeepSeek or GLM request with 403, so magpie sends them unpinned and Cline picks the host; only glm-5.3-flash still asks Z.ai"]);
+        const has = await page.evaluate(([l, k]) => !!I18N[l][k], [l, "Since 2026-11-06 Cline refuses a pinned DeepSeek or GLM request with 403, so eipgam sends them unpinned and Cline picks the host; only glm-5.3-flash still asks Z.ai"]);
         assert(has, `the Upstream note has its ${l}`);
       }
       if (lang === "zh") w.tick = zh[0];
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await tick.locator("input").isChecked(), false, "not pinned as saved");
       // the note says what the tick does since Cline refused providerOptions (#5442)
       const note = await tick.locator("input").evaluate((i) => (i.getAttribute("aria-describedby") || "").split(" ").map((id) => document.getElementById(id)?.textContent).filter(Boolean).join(" "));
-      assert.equal(note, lang === "zh" ? zh[2] : "Since 2026-11-06 Cline refuses a pinned DeepSeek or GLM request with 403, so magpie sends them unpinned and Cline picks the host; only glm-5.3-flash still asks Z.ai");
+      assert.equal(note, lang === "zh" ? zh[2] : "Since 2026-11-06 Cline refuses a pinned DeepSeek or GLM request with 403, so eipgam sends them unpinned and Cline picks the host; only glm-5.3-flash still asks Z.ai");
       await tick.locator("input").check();
       const n = posts.length;
       await page.locator(".editor .bar").getByRole("button", { name: w.save, exact: true }).click();

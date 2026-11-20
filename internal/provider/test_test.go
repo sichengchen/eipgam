@@ -12,7 +12,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // Each endpoint is tried with a key made for it, and the Anthropic one

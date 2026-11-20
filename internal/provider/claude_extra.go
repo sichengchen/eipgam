@@ -4,14 +4,14 @@ package provider
 // window that stops a Claude account (its 5 hours, its week) is used up,
 // Anthropic goes on serving it on the account's extra usage — usage credits
 // bought beyond the plan, when the account has it turned on — and bills it.
-// magpie can't turn that off at Anthropic, so it holds back its own
+// eipgam can't turn that off at Anthropic, so it holds back its own
 // requests instead (baksili_ on X): with Settings' ClaudeNoExtraUsage on,
 // routing holds such an account at 100% of any window with no cap of its
 // own, as a Codex account set not to spend its credits is held
 // (codex_credits.go), and the user's other accounts, groups and fallbacks
-// take the request. The hold goes by magpie's latest reading, so a request
+// take the request. The hold goes by eipgam's latest reading, so a request
 // in the minute after a window fills may still reach the account; and a
-// Claude Code signed in to the account directly, not through magpie, is
+// Claude Code signed in to the account directly, not through eipgam, is
 // Anthropic's alone to bill. Claude Code's sign-in already moves off an
 // account on its overages (usedPast counts the "Extra usage" window).
 // Warm-ups (codex_warmup.go) send nothing to an account held so.
@@ -23,9 +23,9 @@ package provider
 // — but holds it as the setting would, at 100% of a plan window, so no
 // more extra usage is spent this month (Allowance.extraCapped).
 
-import "github.com/yetone/magpie/internal/settings"
+import "github.com/sichengchen/eipgam/internal/settings"
 
-// ClaudeExtraUsage says whether magpie sends a Claude account requests
+// ClaudeExtraUsage says whether eipgam sends a Claude account requests
 // once its plan is used up, for Anthropic to bill as extra usage: true
 // unless the user turned it off.
 func ClaudeExtraUsage() bool { return !settings.Shared().ClaudeNoExtraUsage }

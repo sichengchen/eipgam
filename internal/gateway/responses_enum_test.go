@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // backendLeads is a turn as the ChatGPT backend answers it: it says what it
@@ -86,10 +86,10 @@ func TestResponsesEventsOutsideTheEnumStayWithCodex(t *testing.T) {
 		want bool // the backend's own events are for this client
 		says string
 	}{
-		{"", "magpie", false, "a client with no User-Agent"},
-		{"xai-grok-shell/1.0.45", "magpie", false, "Grok Build"},
-		{"codex_cli_rs/0.166.0", "magpie", true, "Codex CLI"},
-		{"xai-grok-shell/1.0.45", "magpie-codex", true, "a key owned by the codex agent"},
+		{"", "eipgam", false, "a client with no User-Agent"},
+		{"xai-grok-shell/1.0.45", "eipgam", false, "Grok Build"},
+		{"codex_cli_rs/0.166.0", "eipgam", true, "Codex CLI"},
+		{"xai-grok-shell/1.0.45", "eipgam-codex", true, "a key owned by the codex agent"},
 	} {
 		f := &fake{t: t, ctype: "none", reply: backendLeads}
 		leadSignIn(t, f)

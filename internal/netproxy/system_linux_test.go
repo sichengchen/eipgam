@@ -12,7 +12,7 @@ func fakeGsettings(t *testing.T, out, stderr string, code int) {
 	t.Helper()
 	dir := t.TempDir()
 	if out != "" || code != 0 {
-		script := "#!/bin/sh\ncat <<'MAGPIE_EOF'\n" + out + "MAGPIE_EOF\n"
+		script := "#!/bin/sh\ncat <<'EIPGAM_EOF'\n" + out + "EIPGAM_EOF\n"
 		if code != 0 {
 			script = "#!/bin/sh\necho '" + stderr + "' >&2\nexit " + string(rune('0'+code)) + "\n"
 		}
@@ -29,7 +29,7 @@ func fakeGsettings(t *testing.T, out, stderr string, code int) {
 }
 
 // #4147: Auto reads GNOME's proxy where Clash Verge set it, with nothing in
-// magpie's environment.
+// eipgam's environment.
 func TestSystemReadsGnome(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CURRENT_DESKTOP", "ubuntu:GNOME")

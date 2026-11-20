@@ -10,7 +10,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
 const L = { en: "disabled", zh: "已停用", "zh-TW": "已停用", ja: "無効", de: "deaktiviert" };
 
 function server(lang) {
@@ -47,7 +47,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.locator('#providers .row.provider[data-id="relay"]').click();
       await page.locator("#modal .mchips .mchip").first().waitFor();
       const chips = await page.locator("#modal .mchips .mchip.pick").evaluateAll((cs) => cs.map((c) => ({

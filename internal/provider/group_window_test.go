@@ -7,7 +7,7 @@ import (
 
 // A model a plugin offers at a context window of its own (Cursor's
 // claude-haiku-5-5@1m, grok's grok-4.7@500k) is the same model: it joins
-// the group magpie finds for it, listed by the model's own id (Will on
+// the group eipgam finds for it, listed by the model's own id (Will on
 // Discord: ticking claude-haiku-5-5@1m in Cursor left it out of
 // auto/claude-haiku-5-5).
 func TestAutoGroupsJoinAModelAtItsWindow(t *testing.T) {

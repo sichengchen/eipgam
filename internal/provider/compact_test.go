@@ -4,8 +4,8 @@ import (
 	"maps"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A provider's editor sets where Codex and Claude Code compact on its
@@ -43,7 +43,7 @@ func TestModelCompactsSetFromTheEditor(t *testing.T) {
 	}
 	for id, n := range map[string]int{
 		"deepseek/deepseek-v4-flash":      272000,
-		"magpie/deepseek/deepseek-v4-pro": 500000,
+		"eipgam/deepseek/deepseek-v4-pro": 500000,
 		"deepseek/deepseek-v4-pro[1m]":    500000,
 		"other/deepseek-v4-flash":         0,
 		"other/deepseek-v4-pro":           300000,
@@ -143,8 +143,8 @@ func TestOwnModelsSwitchTellsTheAgents(t *testing.T) {
 // An agent sets its own Long conversations (molianyin4227 on Discord: one
 // size for every agent fits none when their models differ): Codex, Claude
 // Code and Grok Build take one over the one every agent has, another
-// agent has no window magpie writes and is refused, nil goes back to
-// every agent's, and the agent's 272K is kept as magpie's default.
+// agent has no window eipgam writes and is refused, nil goes back to
+// every agent's, and the agent's 272K is kept as eipgam's default.
 func TestSetAgentCompact(t *testing.T) {
 	limitsHome(t)
 	told := 0

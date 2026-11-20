@@ -83,7 +83,7 @@ func TestAddStartsDesktopOnTheFolder(t *testing.T) {
 	home := t.TempDir()
 	out := filepath.Join(home, "args")
 	claudeApp := fakeClaude(t, filepath.Join(home, "Applications"), out)
-	dir := filepath.Join(home, "Library", "Application Support", "Claude-Magpie-3p")
+	dir := filepath.Join(home, "Library", "Application Support", "Claude-eipgam-3p")
 
 	p, err := Add(home, claudeApp, dir, "")
 	if err != nil {
@@ -96,12 +96,12 @@ func TestAddStartsDesktopOnTheFolder(t *testing.T) {
 		t.Errorf("registered %v", *registered)
 	}
 	info, _ := os.ReadFile(filepath.Join(p, "Contents", "Info.plist"))
-	for _, want := range []string{"<string>" + BundleID + "</string>", "<string>claude-magpie</string>", "<string>Claude Magpie</string>", "<string>4.4212.0</string>"} {
+	for _, want := range []string{"<string>" + BundleID + "</string>", "<string>claude-eipgam</string>", "<string>Claude eipgam</string>", "<string>4.4212.0</string>"} {
 		if !bytes.Contains(info, []byte(want)) {
 			t.Errorf("Info.plist lacks %s:\n%s", want, info)
 		}
 	}
-	icns, err := os.ReadFile(filepath.Join(p, "Contents", "Resources", "claude-magpie.icns"))
+	icns, err := os.ReadFile(filepath.Join(p, "Contents", "Resources", "claude-eipgam.icns"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestAddStartsDesktopOnTheFolder(t *testing.T) {
 		t.Errorf("badge edge %v, want white", img.At(736, 560))
 	}
 
-	cmd := exec.Command(filepath.Join(p, "Contents", "MacOS", "claude-magpie"), "claude://open")
+	cmd := exec.Command(filepath.Join(p, "Contents", "MacOS", "claude-eipgam"), "claude://open")
 	if b, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("%v: %s", err, b)
 	}
@@ -126,7 +126,7 @@ func TestAddStartsDesktopOnTheFolder(t *testing.T) {
 		t.Fatalf("Claude started with %q, want %q", args, want)
 	}
 
-	// made again: still one app, magpie's
+	// made again: still one app, eipgam's
 	if _, err := Add(home, claudeApp, dir, ""); err != nil {
 		t.Fatal(err)
 	}
@@ -228,7 +228,7 @@ func TestScriptClaudeConfigDir(t *testing.T) {
 	}
 }
 
-// A Claude Magpie.app of the user's own is never written over or removed.
+// A Claude eipgam.app of the user's own is never written over or removed.
 func TestAddLeavesTheirs(t *testing.T) {
 	noRegister(t)
 	home := t.TempDir()

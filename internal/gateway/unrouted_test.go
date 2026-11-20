@@ -13,8 +13,8 @@ import (
 	"time"
 	"weak"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // unroutedLimits sets when a request held before routing shows, and when
@@ -27,7 +27,7 @@ func unroutedLimits(t *testing.T, show, most time.Duration) {
 }
 
 // unknownLimit sets how long a request may be held before routing in no
-// wait magpie knows of.
+// wait eipgam knows of.
 func unknownLimit(t *testing.T, d time.Duration) {
 	t.Helper()
 	was := unroutedUnknown
@@ -52,7 +52,7 @@ func watchedHold(t *testing.T, s *Server) *unroutedHold {
 		}
 		s.active.mu.Unlock()
 		if u != nil {
-			// a hold magpie answered writes its report after the answer,
+			// a hold eipgam answered writes its report after the answer,
 			// from its timer: the test's temp HOME stays until it has
 			t.Cleanup(func() { holdReported(t, u) })
 			return u
@@ -64,7 +64,7 @@ func watchedHold(t *testing.T, s *Server) *unroutedHold {
 	}
 }
 
-// holdReported waits for u's report when magpie answered it.
+// holdReported waits for u's report when eipgam answered it.
 func holdReported(t *testing.T, u *unroutedHold) {
 	t.Helper()
 	u.f.mu.Lock()
@@ -130,7 +130,7 @@ func postWhole(srv *httptest.Server, body io.Reader) (int, string, error) {
 const unroutedHi = `{"model":"probe/text","messages":[{"role":"user","content":"hi"}]}`
 
 // sharwowwow on X: two minutes of a spinner before the 504. A request
-// held before routing in no wait magpie knows of (here a lock routing
+// held before routing in no wait eipgam knows of (here a lock routing
 // needs, held and never let go) is answered once it has been held
 // unroutedUnknown, long before unroutedMost.
 func TestUnroutedUnknownHoldAnsweredSooner(t *testing.T) {
@@ -162,7 +162,7 @@ func TestUnroutedUnknownHoldAnsweredSooner(t *testing.T) {
 // heldSaved waits for the report of the request s answered 504 for
 // being held before routing: the 504 goes first and the report is saved
 // after it, so a test that returns on the 504 alone has its HOME removed
-// under the write ("TempDir RemoveAll cleanup: … magpie/held: directory
+// under the write ("TempDir RemoveAll cleanup: … eipgam/held: directory
 // not empty" on mote, 10-29).
 func heldSaved(t *testing.T, s *Server) {
 	t.Helper()
@@ -349,7 +349,7 @@ func routesOf(s *Server, model string) []Route {
 }
 
 // heyusaku6 on X: Codex thought for over ten minutes on a model served
-// through magpie, the Routing page showed nothing, and only restarting
+// through eipgam, the Routing page showed nothing, and only restarting
 // both ended it. A request held before any route is begun for it shows on
 // the Routing page as routing, and is answered with an error in bounded
 // time, whole, rather than left to wait with nothing said.
@@ -473,7 +473,7 @@ func TestUnroutedQuickRequestLeavesNoTrace(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	for _, r := range s.Trace(context.Background(), 0, 0).Routes {
-		if r.Provider == "magpie" && !r.Done {
+		if r.Provider == "eipgam" && !r.Done {
 			t.Fatalf("a route left showing a request that was answered: %+v", r)
 		}
 	}
@@ -518,7 +518,7 @@ func TestUnroutedMostLeavesOutMasking(t *testing.T) {
 	heldSaved(t, s)
 }
 
-// A request another magpie passed on is shown, while it waits to be
+// A request another eipgam passed on is shown, while it waits to be
 // routed, as the agent that made it there (callerFrom), read once as it
 // comes: the show's timer never reads its headers, which withCaller and
 // decodedBody change meanwhile (#3956's ubuntu race run).
@@ -533,7 +533,7 @@ func TestUnroutedShownAsItsCaller(t *testing.T) {
 	go func() {
 		req, _ := http.NewRequest(http.MethodPost, srv.URL+"/v1/chat/completions", pr)
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("User-Agent", "magpie/0.1.0")
+		req.Header.Set("User-Agent", "eipgam/0.1.0")
 		req.Header.Set(AgentHeader, "pi")
 		resp, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
 		if err != nil {
@@ -565,7 +565,7 @@ func TestUnroutedShownAsItsCaller(t *testing.T) {
 		time.Sleep(5 * time.Millisecond)
 	}
 	if agent != "pi" {
-		t.Errorf("shown as %q while held, want pi, the agent another magpie passed it on for", agent)
+		t.Errorf("shown as %q while held, want pi, the agent another eipgam passed it on for", agent)
 	}
 	if _, err := pw.Write([]byte(unroutedHi[10:])); err != nil {
 		t.Fatal(err)
@@ -577,7 +577,7 @@ func TestUnroutedShownAsItsCaller(t *testing.T) {
 }
 
 // Jason on Discord: a Codex turn on ChatGPT Pro accounts, held while it
-// was masked, showed on the Routing page as "magpie · 0 on" over "Nothing
+// was masked, showed on the Routing page as "eipgam · 0 on" over "Nothing
 // could take ." — the route that shows a held request had no model,
 // because Codex's own path never told the watch what it asked for, as
 // the Chat, Responses, Messages and Gemini paths do. It names it.
@@ -622,7 +622,7 @@ func TestUnroutedCodexPathShowsItsModel(t *testing.T) {
 		}
 		time.Sleep(5 * time.Millisecond)
 	}
-	if rs := routesOf(s, "probe/text"); len(rs) != 1 || rs[0].Done || rs[0].Provider != "magpie" {
+	if rs := routesOf(s, "probe/text"); len(rs) != 1 || rs[0].Done || rs[0].Provider != "eipgam" {
 		t.Fatalf("the held Codex request is shown without the model it asked for: %+v", s.Trace(context.Background(), 0, 0).Routes)
 	}
 	open()

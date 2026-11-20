@@ -27,7 +27,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // followMovedSkills re-points each library skill linked into a version

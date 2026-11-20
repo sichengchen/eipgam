@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // agyTurn sends one chat turn for an Antigravity model to s.
@@ -68,7 +68,7 @@ func TestSuspendedAccountsNotAskedWhileTheyRest(t *testing.T) {
 	}
 }
 
-// The same for any vendor's account restriction (here magpie's words for
+// The same for any vendor's account restriction (here eipgam's words for
 // ZCode's risk control, on a ChatGPT account): the lone account resting
 // as restricted is not asked by the next requests.
 func TestRestrictedLoneAccountNotAskedWhileItRests(t *testing.T) {

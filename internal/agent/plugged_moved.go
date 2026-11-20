@@ -7,15 +7,15 @@ package agent
 // in WSL distros, wslKind.served), its id and aliases are the plugin's,
 // and what the built-in had wired is handed over (handovers), so the
 // plugin's agent reads as connected and puts back what the user had when
-// magpie steps out. With the plugin off or removed the built-in is back.
+// eipgam steps out. With the plugin off or removed the built-in is back.
 
 import (
 	"encoding/json"
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agentplug"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // agentMovers are the built-in agents a community plugin serves, by id:
@@ -88,11 +88,11 @@ func handedOver(id string, at place, f pluggedFile, spec, key string) (pluggedSt
 }
 
 // agyHandover is the built-in agy's wiring as the agent-agy plugin's,
-// whose config is magpie's own settings file too (agyOverride). A
+// whose config is eipgam's own settings file too (agyOverride). A
 // settings.json an older built-in wired is given back first, as the
-// built-in's Sync does (migrate), its model moved into magpie's file;
-// then, while that file's model is magpie's, the file is the plugin's:
-// every key it has was magpie's, so stepping out takes the file away.
+// built-in's Sync does (migrate), its model moved into eipgam's file;
+// then, while that file's model is eipgam's, the file is the plugin's:
+// every key it has was eipgam's, so stepping out takes the file away.
 func agyHandover(at place, f pluggedFile) (pluggedStash, bool) {
 	if filepath.Base(f.path) != agyOverride {
 		return pluggedStash{}, false

@@ -23,7 +23,7 @@ const (
 	// imageRef stands in a lean body for a picture's base64, followed by
 	// its id in keptImages; never sent anywhere, and not base64, so a
 	// picture's checks never take it for one
-	imageRef = "magpie-image:"
+	imageRef = "eipgam-image:"
 	// leanMin is the shortest string swapped: a smaller picture costs
 	// less than its ref's bookkeeping
 	leanMin = 1 << 10

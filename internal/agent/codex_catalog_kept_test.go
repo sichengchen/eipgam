@@ -7,24 +7,24 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// What the user adds by hand to the model list magpie writes for Codex
+// What the user adds by hand to the model list eipgam writes for Codex
 // stays through the next model switch, sync and stepping out (#1450:
 // supports_reasoning_summaries, put in for Codex to show a model's
-// thinking, was gone after the next change). A key magpie writes, or took
+// thinking, was gone after the next change). A key eipgam writes, or took
 // out on purpose (multi_agent_version with the V1 setting off), is
-// magpie's.
+// eipgam's.
 func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 	home, _ := codexHome(t, "", "")
-	list := filepath.Join(home, ".codex", "magpie-models.json")
+	list := filepath.Join(home, ".codex", "eipgam-models.json")
 	cx := codex(home)
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	// the file as magpie wrote it, edited by hand: two keys on fake/m1's
-	// entry, and a version magpie no longer writes
+	// the file as eipgam wrote it, edited by hand: two keys on fake/m1's
+	// entry, and a version eipgam no longer writes
 	var cat map[string]any
 	if err := json.Unmarshal([]byte(readFile(list)), &cat); err != nil {
 		t.Fatal(err)
@@ -56,13 +56,13 @@ func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 		if m1 == nil || m1["supports_reasoning_summaries"] != true || m1["default_reasoning_summary"] != "detailed" {
 			t.Errorf("%s: the user's keys are gone: %v %v", when, m1["supports_reasoning_summaries"], m1["default_reasoning_summary"])
 		}
-		// magpie writes v2 for a model it offers Ultra (pingqipai3 on X),
+		// eipgam writes v2 for a model it offers Ultra (pingqipai3 on X),
 		// never the user's v1 back
 		if v, ok := m1["multi_agent_version"]; ok && v != "v2" {
-			t.Errorf("%s: a version magpie no longer writes stayed: %v", when, v)
+			t.Errorf("%s: a version eipgam no longer writes stayed: %v", when, v)
 		}
 		if m1["base_instructions"] == nil || m1["supports_parallel_tool_calls"] != true {
-			t.Errorf("%s: magpie's own keys are gone", when)
+			t.Errorf("%s: eipgam's own keys are gone", when)
 		}
 	}
 
@@ -81,8 +81,8 @@ func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 	}
 	has("after a model switch")
 
-	// Codex's own default: magpie steps out, and the list the user added
-	// to stays for when magpie is back
+	// Codex's own default: eipgam steps out, and the list the user added
+	// to stays for when eipgam is back
 	if err := cx.Fields[0].Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -95,10 +95,10 @@ func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 	has("after stepping out and back")
 }
 
-// A list holding nothing of the user's still goes as magpie steps out.
+// A list holding nothing of the user's still goes as eipgam steps out.
 func TestCodexCatalogRemovedWhenNothingAdded(t *testing.T) {
 	home, _ := codexHome(t, "", "")
-	list := filepath.Join(home, ".codex", "magpie-models.json")
+	list := filepath.Join(home, ".codex", "eipgam-models.json")
 	cx := codex(home)
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
@@ -110,6 +110,6 @@ func TestCodexCatalogRemovedWhenNothingAdded(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(list); err == nil {
-		t.Error("magpie's list stayed after it stepped out")
+		t.Error("eipgam's list stayed after it stepped out")
 	}
 }

@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // vendorSeen is one request a vendor's API was sent.
@@ -214,7 +214,7 @@ func TestNativeAnyRecordsUsage(t *testing.T) {
 }
 
 // Only a provider reached with an API key is served: a subscription's
-// or a sign-in's account, a remote magpie's gateway key, or no key at
+// or a sign-in's account, a remote eipgam's gateway key, or no key at
 // all never; a key held to models, accounts or a limit not on any path.
 func TestNativeAnyRefusals(t *testing.T) {
 	fresh(t)

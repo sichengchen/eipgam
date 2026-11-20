@@ -11,7 +11,7 @@ import (
 // Keeping the catalog fresh. It is where a model's list price comes from,
 // so a model models.dev has just listed (gpt-6.1-sol, #224) has no cost
 // until the cache is fetched again: a day old at most, looked at every hour
-// by a magpie left running for days, and sooner when a call's model has no
+// by a eipgam left running for days, and sooner when a call's model has no
 // price, since models.dev may list it by now.
 
 // staleAfter is how old the cached catalog may be before it is fetched
@@ -32,15 +32,15 @@ var (
 )
 
 // KeepFresh fetches the catalog whenever it is stale, now and every hour
-// after, for as long as the process runs (the app's backend, `magpie
+// after, for as long as the process runs (the app's backend, `eipgam
 // serve`). It never returns.
 //
 // A fetch that fails (models.dev unreachable, or hanging past fetch's
 // bound) is tried again sooner than the hour, after retryFirst and then
-// twice as long each time up to the hour, so a magpie started before the
+// twice as long each time up to the hour, so a eipgam started before the
 // network or its proxy was up has the catalog fetched soon after
 // (creeksuen on X). Until then the catalog read before answers, or the
-// one magpie ships with (bundled.go).
+// one eipgam ships with (bundled.go).
 func KeepFresh() {
 	keeping.Store(true)
 	var retry time.Duration
@@ -90,7 +90,7 @@ func Missing() {
 var askedAfter = 10 * time.Minute
 
 // Asked says a model list made of the catalog alone is being fetched: a
-// Claude subscription's, which is models.dev's anthropic list, as magpie
+// Claude subscription's, which is models.dev's anthropic list, as eipgam
 // asks Anthropic nothing in Claude Code's name. The catalog is fetched
 // now, as long as ctx allows, when it is older than askedAfter and wasn't
 // tried in that time, so a model launched since the day's fetch is on the

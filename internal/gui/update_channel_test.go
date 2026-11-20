@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // Settings' Update channel (ssharpcc on X). Every version found 0.1.12
@@ -24,7 +24,7 @@ import (
 // page that doesn't send the channel keeps it.
 func TestUpdateChannelSwitch(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	var downloads atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func TestUpdateChannelSwitch(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.10"
 	defer func() { Version = oldV }()
@@ -149,7 +149,7 @@ func TestWhatsNewKeyedByChannel(t *testing.T) {
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_NOTES_FEED", "http://127.0.0.1:1/") // never the real one
+	t.Setenv("EIPGAM_NOTES_FEED", "http://127.0.0.1:1/") // never the real one
 	oldV := Version
 	Version = "0.1.100"
 	defer func() { Version = oldV }()
@@ -178,7 +178,7 @@ func TestWhatsNewKeyedByChannel(t *testing.T) {
 // stayed on 0.1.10. The version found stands, download and all.
 func TestUpdateFeedBehindKeepsDownload(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	var downloads atomic.Int32
 	var behind atomic.Bool
@@ -197,7 +197,7 @@ func TestUpdateFeedBehindKeepsDownload(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.10"
 	defer func() { Version = oldV }()
@@ -261,7 +261,7 @@ func TestStableUpToDateNamesNewest(t *testing.T) {
 		json.NewEncoder(w).Encode(update.Release{Version: v})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	defer func() { Version = oldV }()
 	o := updates
@@ -332,7 +332,7 @@ func TestUpdateAheadOfChannel(t *testing.T) {
 		json.NewEncoder(w).Encode(update.Release{Version: v, Notes: "- x"})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	oldV := Version
 	defer func() { Version = oldV }()
 	exe, err := update.Executable()

@@ -23,7 +23,7 @@ func usageRelay(t *testing.T, asked *atomic.Int32) *httptest.Server {
 	return srv
 }
 
-// restart is what a new run of magpie starts with: nothing in memory.
+// restart is what a new run of eipgam starts with: nothing in memory.
 func restart() {
 	probed.Lock()
 	probed.m = nil

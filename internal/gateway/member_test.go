@@ -14,16 +14,16 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
 )
 
 // A reply from a group says which member answered it (#822): its
 // X-Magpie-Provider and X-Magpie-Model headers always, relayed or
 // translated, streamed or not, after a failover too; its body's model the
 // group the agent asked for, unless ReplyModel member (or the request's
-// X-Magpie-Response-Model: member) asks for magpie's provider/model id
+// X-Magpie-Response-Model: member) asks for eipgam's provider/model id
 // there — never for Claude Code or Codex, which read it themselves — or
 // ReplyModel or X-Magpie-Response-Model vendor for the vendor's own name,
 // for every agent. memberModel in a file from before ReplyModel still
@@ -332,10 +332,10 @@ func TestReplyNamesAskedModel(t *testing.T) {
 	}
 }
 
-// A reply to a request that came in under one of magpie's own aliases for
+// A reply to a request that came in under one of eipgam's own aliases for
 // Claude Desktop or Claude Science keeps the vendor's own name (#4667):
-// the alias — magpie-<n>.anthropic.claude-opus-5-5 among them — is
-// magpie's deployment name, not one the vendor knows, and naming the reply
+// the alias — eipgam-<n>.anthropic.claude-opus-5-5 among them — is
+// eipgam's deployment name, not one the vendor knows, and naming the reply
 // with it put that name in Claude Code's usage records, where ccusage
 // counts it as a model of its own instead of the one the subscription
 // served. Before the asked-name rule these ids were served the vendor's
@@ -343,8 +343,8 @@ func TestReplyNamesAskedModel(t *testing.T) {
 func TestReplyToMagpieAliasKeepsVendorName(t *testing.T) {
 	const served = "opus-5-5" // what the subscription's reply says
 	aliases := []string{
-		"magpie-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5",
-		"magpie-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5[1m]",
+		"eipgam-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5",
+		"eipgam-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5[1m]",
 		aliasFor("sub/claude-opus-5-5"),
 		desktopEffortAlias + aliasNumber("sub/claude-opus-5-5"),
 		scienceAlias + aliasNumber("sub/claude-opus-5-5"),

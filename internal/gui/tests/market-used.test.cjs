@@ -42,7 +42,7 @@ function serve(lang, counts, asked) {
     }
     if (url.pathname === "/api/library") {
       return json({
-        dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+        dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
         agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }],
         instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
       });
@@ -82,9 +82,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const asked = [];
         await page.route("**/*", serve(lang, counts, asked));
-        await page.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {} });
         t.after(() => browser.close());
-        await page.goto("http://magpie.test/?view=library");
+        await page.goto("http://eipgam.test/?view=library");
         const box = page.locator('#view-library .mk[data-market="mcp"]');
         await box.locator(".mk-card").first().waitFor();
         const ids = () => box.locator(".mk-card").evaluateAll((cs) => cs.map((c) => c.dataset.id));

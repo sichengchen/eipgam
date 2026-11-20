@@ -11,16 +11,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Two magpies each the other's remote (cdredfox on Discord, 100-200% CPU
 // until the remote was off) listed each other's models back, one level
 // more on every 10-minute fetch, without end: rem/back/own/m1, then
 // rem/back/rem/back/own/m1, each another member of the found auto/ group
-// and another trip round the two, masked again on each. The list magpie
-// gives another magpie now says which magpies each model passes, this one
+// and another trip round the two, masked again on each. The list eipgam
+// gives another eipgam now says which magpies each model passes, this one
 // last, a routing group the magpies its members pass, and a model of a
 // remote that went out of here comes back no more.
 func TestRemoteMagpieListLoopsNoMore(t *testing.T) {
@@ -29,13 +29,13 @@ func TestRemoteMagpieListLoopsNoMore(t *testing.T) {
 		io.WriteString(w, `{"object":"list","data":[]}`)
 	}))
 	t.Cleanup(up.Close)
-	// the other magpie: what it serves of its own, and this magpie's own
+	// the other eipgam: what it serves of its own, and this eipgam's own
 	// m1, which it has through this one as its remote
 	peer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, `{"object":"list","data":[
-		  {"id":"up/m1","object":"model","magpie_via":["peer"]},
-		  {"id":"back/own/m1","object":"model","magpie_via":["`+self+`","peer"]}]}`)
+		  {"id":"up/m1","object":"model","eipgam_via":["peer"]},
+		  {"id":"back/own/m1","object":"model","eipgam_via":["`+self+`","peer"]}]}`)
 	}))
 	t.Cleanup(peer.Close)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -60,7 +60,7 @@ func TestRemoteMagpieListLoopsNoMore(t *testing.T) {
 		ids = append(ids, m.ID)
 	}
 	if slices.Contains(ids, "back/own/m1") || !slices.Contains(ids, "up/m1") {
-		t.Fatalf("the remote's list taken = %v; want up/m1 and not this magpie's own model back", ids)
+		t.Fatalf("the remote's list taken = %v; want up/m1 and not this eipgam's own model back", ids)
 	}
 
 	srv := httptest.NewServer(New().Handler())
@@ -75,7 +75,7 @@ func TestRemoteMagpieListLoopsNoMore(t *testing.T) {
 	var list struct {
 		Data []struct {
 			ID  string   `json:"id"`
-			Via []string `json:"magpie_via"`
+			Via []string `json:"eipgam_via"`
 		} `json:"data"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&list); err != nil {
@@ -86,24 +86,24 @@ func TestRemoteMagpieListLoopsNoMore(t *testing.T) {
 		via[m.ID] = m.Via
 	}
 	if v, ok := via["own/m1"]; !ok || !slices.Equal(v, []string{self}) {
-		t.Errorf("own/m1 is listed through %v, %v; want this magpie (%s) alone; list %v", v, ok, self, via)
+		t.Errorf("own/m1 is listed through %v, %v; want this eipgam (%s) alone; list %v", v, ok, self, via)
 	}
 	if v, ok := via["rem/up/m1"]; !ok || !slices.Equal(v, []string{"peer", self}) {
 		t.Errorf("rem/up/m1 is listed through %v, %v; want [peer %s]; list %v", v, ok, self, via)
 	}
 	// the auto/ group of m1 here has the remote's m1 in it, so it reaches
-	// the other magpie too: listed back to it, it is left out there
+	// the other eipgam too: listed back to it, it is left out there
 	if v, ok := via["auto/m1"]; !ok || !slices.Equal(v, []string{"peer", self}) {
 		t.Errorf("auto/m1 is listed through %v, %v; want [peer %s], its members' magpies and this one; list %v", v, ok, self, via)
 	}
 	if _, ok := via["rem/back/own/m1"]; ok {
-		t.Errorf("this magpie's own model came back through the remote: %v", via)
+		t.Errorf("this eipgam's own model came back through the remote: %v", via)
 	}
 }
 
 // A request that went round magpies each the other's remote (or one that
 // is its own) is stopped once it has passed catalog.MaxVia of them, even
-// where their lists came from magpies too old to say: each magpie tells
+// where their lists came from magpies too old to say: each eipgam tells
 // the next how many it passed through (HopsHeader), and no vendor is
 // asked.
 func TestRemoteMagpieRequestLoopStops(t *testing.T) {
@@ -158,26 +158,26 @@ func TestRemoteMagpieRequestLoopStops(t *testing.T) {
 		resp.Body.Close()
 		return resp.StatusCode
 	}
-	// an agent's request goes on as the first pass, another magpie's as
+	// an agent's request goes on as the first pass, another eipgam's as
 	// one more than it came with
 	if code := ask("rem/up/m1", "curl/8", ""); code != http.StatusOK {
 		t.Fatalf("an agent's request to the remote: %d", code)
 	}
-	if code := ask("rem/up/m1", "magpie/test", "3"); code != http.StatusOK {
-		t.Fatalf("another magpie's request to the remote: %d", code)
+	if code := ask("rem/up/m1", "eipgam/test", "3"); code != http.StatusOK {
+		t.Fatalf("another eipgam's request to the remote: %d", code)
 	}
 	if !slices.Equal(hops, []string{"1", "4"}) {
 		t.Errorf("the remote was told %v passes; want [1 4]", hops)
 	}
 	// one that has gone round as many as a list may name is stopped here
 	before := vendor
-	if code := ask("own/m1", "magpie/test", strconv.Itoa(catalog.MaxVia)); code != http.StatusLoopDetected {
+	if code := ask("own/m1", "eipgam/test", strconv.Itoa(catalog.MaxVia)); code != http.StatusLoopDetected {
 		t.Errorf("a request passed on through %d magpies: %d, want 508", catalog.MaxVia, code)
 	}
 	if vendor != before {
 		t.Errorf("the vendor was asked a request that went round in a loop")
 	}
-	// only a magpie's count is read: an agent can't stop its own request
+	// only a eipgam's count is read: an agent can't stop its own request
 	if code := ask("own/m1", "curl/8", "99"); code != http.StatusOK {
 		t.Errorf("an agent's request with a hops header of its own: %d, want 200", code)
 	}

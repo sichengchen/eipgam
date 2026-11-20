@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // tuiCalls is a run in Claude Code's interactive mode, its transcript's
@@ -166,7 +166,7 @@ func tuiRow(id string, block string, stop string, out int) string {
 }
 
 func tuiCall(id string, p int) string {
-	return `{"type":"tool_use","id":"` + id + `","name":"mcp__magpie__Read","input":{"p":` + itoa(p) + `}}`
+	return `{"type":"tool_use","id":"` + id + `","name":"mcp__eipgam__Read","input":{"p":` + itoa(p) + `}}`
 }
 
 const tuiDone = `{"type":"result","subtype":"success","is_error":false,"result":"done"}`
@@ -303,7 +303,7 @@ func TestClaudeTUIStreamedCallToldOnce(t *testing.T) {
 		se(`{"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}`),
 		se(`{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"reading"}}`),
 		se(`{"type":"content_block_stop","index":0}`),
-		se(`{"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_a","name":"mcp__magpie__Read","input":{}}}`),
+		se(`{"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_a","name":"mcp__eipgam__Read","input":{}}}`),
 		se(`{"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"p\":1}"}}`),
 	)
 	c.call("toolu_a", `{"p":1}`)

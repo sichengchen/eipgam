@@ -8,21 +8,21 @@ import (
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
-// installPath is %LOCALAPPDATA%\Programs\magpie\magpie.exe: the user's own
+// installPath is %LOCALAPPDATA%\Programs\eipgam\eipgam.exe: the user's own
 // programs folder (FOLDERID_UserProgramFiles), where per-user installers
 // put their apps, which needs no administrator.
 func installPath() string {
 	local := appdir.Getenv("LOCALAPPDATA")
 	if local == "" {
 		if p, err := windows.KnownFolderPath(windows.FOLDERID_UserProgramFiles, 0); err == nil && p != "" {
-			return filepath.Join(p, "magpie", "magpie.exe")
+			return filepath.Join(p, "eipgam", "eipgam.exe")
 		}
 		return ""
 	}
-	return filepath.Join(local, "Programs", "magpie", "magpie.exe")
+	return filepath.Join(local, "Programs", "eipgam", "eipgam.exe")
 }
 
 // isDownloadFolder: Downloads and Desktop, where they are kept (the
@@ -73,7 +73,7 @@ func exeVersion(path string) uint64 {
 }
 
 // webViewDefault is where WebView2 keeps the profile of the program at
-// exe when magpie names none: %APPDATA%\<exe name> (Wails' default).
+// exe when eipgam names none: %APPDATA%\<exe name> (Wails' default).
 func webViewDefault(exe string) string {
 	a := os.Getenv("AppData")
 	if a == "" {
@@ -94,9 +94,9 @@ func hide(p string) {
 }
 
 // installKey holds InstallLocation, the folder the user chose to install
-// magpie in (Settle). Uninstall removes it. A var so the test writes a
+// eipgam in (Settle). Uninstall removes it. A var so the test writes a
 // key of its own.
-var installKey = `Software\magpie`
+var installKey = `Software\eipgam`
 
 func readInstallDir() string {
 	k, err := registry.OpenKey(registry.CURRENT_USER, installKey, registry.QUERY_VALUE)
@@ -146,7 +146,7 @@ func writeDeclined(exe string) error {
 	return k.SetStringValue(declinedValue, exe)
 }
 
-// ForgetInstallDir takes out the record of the folder magpie was
+// ForgetInstallDir takes out the record of the folder eipgam was
 // installed in, and of a copy kept uninstalled, and its key once nothing
 // else is in it.
 func ForgetInstallDir() error {

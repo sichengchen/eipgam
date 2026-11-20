@@ -3,7 +3,7 @@ package provider
 // Accounts: agents the user has signed in to, offered as providers.
 //
 // Claude Code, Codex CLI (ChatGPT), and Copilot logins are subscriptions with
-// models behind them. magpie reads the credentials the agent itself keeps on
+// models behind them. eipgam reads the credentials the agent itself keeps on
 // disk or in the macOS Keychain, so every other agent can use those models
 // through the gateway. Nothing is stored twice: sign out of the agent and the
 // provider is gone.
@@ -32,14 +32,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/claudecode"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/claudecode"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Account is the signed-in agent behind a provider.
@@ -48,13 +48,13 @@ type Account struct {
 	User  string `json:"user"`           // who is signed in: an email, a GitHub login
 	Plan  string `json:"plan,omitempty"` // the subscription, when the agent says
 
-	// Stream is set when the backend only streams; magpie then translates
+	// Stream is set when the backend only streams; eipgam then translates
 	// a non-streaming request instead of relaying it.
 	Stream bool `json:"-"`
 
 	// Home is where a Grok, Kiro or Devin account keeps its sign-in: the
 	// agent's own (the CLI's home for Grok, "" for Kiro and Devin), or one
-	// of magpie's for a further account (grok_accounts.go, kiro_accounts.go,
+	// of eipgam's for a further account (grok_accounts.go, kiro_accounts.go,
 	// devin_accounts.go).
 	Home string `json:"-"`
 
@@ -84,12 +84,12 @@ type Account struct {
 	models func() []catalog.Model
 	fetch  func(ctx context.Context) ([]catalog.Model, error)
 	// magpieList is set on an account whose fetch asks no vendor and
-	// keeps a copy of models, magpie's own list (Claude's, from the
+	// keeps a copy of models, eipgam's own list (Claude's, from the
 	// models.dev catalog; Factory's, compiled in): the list served is
 	// always models as it is now, never the copy, which held a model
 	// listed after it out until the next Refresh (wakaka on Discord:
 	// Claude Haiku 5.5, in Claude Code on the same account, missing from
-	// magpie).
+	// eipgam).
 	magpieList bool
 
 	// auto is set on a Copilot account: the session of Copilot's Auto,
@@ -267,7 +267,7 @@ func (p Provider) Sign(ctx context.Context, req *http.Request, proto Protocol, b
 		}
 		catalog.PutUserHeader(req.Header, k, v)
 	}
-	// a remote magpie is always sent its key as x-api-key, which no header
+	// a remote eipgam is always sent its key as x-api-key, which no header
 	// of the user's replaces: their Authorization (a proxy's) goes on
 	// without taking the key away (remoteKey)
 	if p.IsRemoteMagpie() && p.Key != "" {
@@ -338,7 +338,7 @@ func (p Provider) Prepare(body []byte) []byte {
 	return body
 }
 
-// Exclusion is a sign-in magpie found but will not offer as a provider.
+// Exclusion is a sign-in eipgam found but will not offer as a provider.
 type Exclusion struct {
 	Agent    string `json:"agent"`
 	Provider string `json:"provider,omitempty"` // set when the user removed it; saving it brings it back
@@ -346,11 +346,11 @@ type Exclusion struct {
 	// plugin's, whose Agent is "plugin" (#694)
 	Name string `json:"name,omitempty"`
 	Why  string `json:"why"`
-	// SignedOut: the agent has accounts saved in magpie but isn't signed
-	// in where magpie looks, and so none of them is offered.
+	// SignedOut: the agent has accounts saved in eipgam but isn't signed
+	// in where eipgam looks, and so none of them is offered.
 	SignedOut bool `json:"signedOut,omitempty"`
 	// Users names those saved accounts (no secrets), so they can be
-	// removed from magpie while none of them is offered.
+	// removed from eipgam while none of them is offered.
 	Users []string `json:"users,omitempty"`
 	// Quiet: the user asked not to be reminded of it; only the Add sheet
 	// offers it back.
@@ -364,9 +364,9 @@ type Exclusion struct {
 	Retry bool `json:"retry,omitempty"`
 }
 
-// Excluded lists sign-ins magpie detects but leaves out: the accounts the
-// user removed from magpie, and the saved accounts of an agent that isn't
-// signed in here (a magpie serve under another HOME, say).
+// Excluded lists sign-ins eipgam detects but leaves out: the accounts the
+// user removed from eipgam, and the saved accounts of an agent that isn't
+// signed in here (a eipgam serve under another HOME, say).
 func Excluded() []Exclusion {
 	var out []Exclusion
 	forgot := map[string]bool{}
@@ -377,7 +377,7 @@ func Excluded() []Exclusion {
 		if forgot[a.ID] {
 			continue
 		}
-		x := Exclusion{Agent: a.Account.Agent, Provider: a.ID, Why: "You removed it from magpie.", Quiet: a.Quiet, Tucked: a.Tucked}
+		x := Exclusion{Agent: a.Account.Agent, Provider: a.ID, Why: "You removed it from eipgam.", Quiet: a.Quiet, Tucked: a.Tucked}
 		if a.IsPlugin() {
 			x.Name = a.Name
 		}
@@ -386,7 +386,7 @@ func Excluded() []Exclusion {
 	return append(out, savedButSignedOut()...)
 }
 
-// claudeBase is Anthropic's API root, which Claude Code asks; magpie never
+// claudeBase is Anthropic's API root, which Claude Code asks; eipgam never
 // does with a Claude sign-in.
 var claudeBase = "https://api.anthropic.com"
 
@@ -550,7 +550,7 @@ func readClaudeCredential() (claudeCredentials, claudeCredentialLocation, bool) 
 		// the item under the account ($USER) is the sign-in Claude Code goes
 		// by, emptied or not: it reads no file beside it, so an emptied item
 		// is a sign-out even where an older file still parses, and a sign-in
-		// made in magpie is put in the item, not beside it (#1742)
+		// made in eipgam is put in the item, not beside it (#1742)
 		mine = readClaudeKeychainItem(claudeKeychainAccount())
 		if mine.found && !mine.hex {
 			return mine.c, mine.loc, mine.ok
@@ -566,7 +566,7 @@ func readClaudeCredential() (claudeCredentials, claudeCredentialLocation, bool) 
 		return claudeCredentials{}, claudeCredentialLocation{}, false
 	}
 	// neither the account's item, as Claude Code reads it, nor the file
-	// holds a sign-in. Left: the account's item as magpie wrote it before,
+	// holds a sign-in. Left: the account's item as eipgam wrote it before,
 	// over lines that `security -w` prints as hex (#70) — Claude Code reads
 	// that as no item, hence the file first — which is written again on one
 	// line, as Claude Code writes it; else by service alone another item,
@@ -591,7 +591,7 @@ func readClaudeCredential() (claudeCredentials, claudeCredentialLocation, bool) 
 // item. found says an item is there that reads as a JSON object — the sign-in
 // Claude Code goes by, emptied or not (an item that reads as none it takes
 // for an absent one, and so does readClaudeDir of the item in a config
-// directory); ok, that it holds tokens to run on; hex, that magpie wrote it
+// directory); ok, that it holds tokens to run on; hex, that eipgam wrote it
 // over more than one line, which `security -w` prints as hex and Claude Code
 // reads as none (#70).
 type claudeKeychainItem struct {
@@ -638,7 +638,7 @@ func readClaudeKeychainItem(account string) claudeKeychainItem {
 }
 
 // claudeHomeService is the keychain item Claude Code keeps the sign-in
-// magpie reads as its own in: "Claude Code-credentials", or with
+// eipgam reads as its own in: "Claude Code-credentials", or with
 // CLAUDE_CONFIG_DIR set, that directory's own (claudeDirService), as
 // Claude Code names it, beside the .credentials.json there.
 func claudeHomeService() string {
@@ -766,7 +766,7 @@ func writeClaudeCredential(loc claudeCredentialLocation, c claudeCredentials) er
 }
 
 // claudeExecutable finds the claude CLI (proc.FindTool: claude.exe in
-// ~/.local/bin on Windows too, #839), else the one magpie downloaded
+// ~/.local/bin on Windows too, #839), else the one eipgam downloaded
 // (claudecode.Find); a var so tests can fake it.
 var claudeExecutable = claudecode.Find
 
@@ -824,8 +824,8 @@ func askClaudeStatus() (user, plan string, signedOut, ok bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// signed out, `claude auth status` exits 1 but still prints the JSON.
-	// Not with a token or endpoint from magpie's own environment: the CLI
-	// would tell of that, not of its sign-in. magpie's wiring in
+	// Not with a token or endpoint from eipgam's own environment: the CLI
+	// would tell of that, not of its sign-in. eipgam's wiring in
 	// settings.json it applies itself (auth status takes no
 	// --setting-sources), and then answers with no email; claudeSignedInUser
 	// names the account from ~/.claude.json instead (#177).
@@ -919,9 +919,9 @@ func claudeProvider(acct *Account) Provider {
 	acct.sign = func(context.Context, *http.Request, []byte) error { return errClaudeViaCLI }
 	acct.models = claudeModels
 	acct.magpieList = true
-	// Claude's models are the ones magpie knows and the ones Claude Code
+	// Claude's models are the ones eipgam knows and the ones Claude Code
 	// was told an account has (claude_models.go): listing them would ask
-	// Anthropic with the account's sign-in, which magpie never does
+	// Anthropic with the account's sign-in, which eipgam never does
 	acct.fetch = func(ctx context.Context) ([]catalog.Model, error) {
 		// models.dev's list, fetched again first when it is older than
 		// a few minutes: a model launched since the day's sync is listed
@@ -1073,10 +1073,10 @@ func CodexTokenURLForTest(u string) func() {
 var CodexBase = "https://chatgpt.com/backend-api/codex"
 
 // codexMu keeps two refreshes of a Codex sign-in from running at once,
-// in this magpie and across magpies: the refresh token rotates, and the
+// in this eipgam and across magpies: the refresh token rotates, and the
 // second would send the one the first spent (refresh_token_reused). Two
 // magpies run at once while a restart hands the gateway over (xuanwo on
-// X), and beside a magpie run from a terminal. The sign-in is read after
+// X), and beside a eipgam run from a terminal. The sign-in is read after
 // it is taken, so one refreshed meanwhile is used as it is.
 var codexMu = filelock.Mutex{Path: func() string { return loginsPath() + ".codex.lock" }}
 
@@ -1142,7 +1142,7 @@ func codexToken(ctx context.Context, dir string) (tok, accountID string, err err
 }
 
 // codexTokenAsKept is the access token Codex keeps in dir, as it is: an
-// expired one is an error, not refreshed, for a sign-in magpie leaves to
+// expired one is an error, not refreshed, for a sign-in eipgam leaves to
 // Codex (leftAlone), which renews it itself.
 func codexTokenAsKept(dir string) (tok, accountID string, err error) {
 	b, _, err := readCodexLogin(dir, false)
@@ -1213,7 +1213,7 @@ func codexTokenRenewing(ctx context.Context, dir, stale string) (tok, accountID 
 	tok, err = codexRefresh(ctx, raw, reason)
 	if err != nil {
 		// OpenAI refused this sign-in for good: Codex is signed out to
-		// magpie's wiring until it is signed in again (#4308)
+		// eipgam's wiring until it is signed in again (#4308)
 		if errors.As(err, new(codexRefreshGoneError)) {
 			noteCodexSignInGone(dir, a.Tokens.RefreshToken)
 		}
@@ -1231,7 +1231,7 @@ func codexTokenRenewing(ctx context.Context, dir, stale string) (tok, accountID 
 	// Only over the sign-in this refresh started from, though. The refresh
 	// is a network round trip, and the store may hold another sign-in by
 	// now: Codex signed in to another account (the Codex app's own
-	// sign-in, or a magpie outside codexMu), or signed out. Writing the
+	// sign-in, or a eipgam outside codexMu), or signed out. Writing the
 	// refreshed one over it switched Codex back to the account it had
 	// been switched off (darwish4021 on Discord: "switched my account").
 	// The fresh access token still serves the request in hand.
@@ -1307,7 +1307,7 @@ func codexRefresh(ctx context.Context, raw map[string]any, reason string) (strin
 	// Once sent, a refresh is waited for even when whoever asked gives up
 	// (a request the agent cancelled, a usage read's or the keep-alive's
 	// deadline): OpenAI rotates the refresh token as it answers, and an
-	// answer dropped leaves magpie holding the spent one, which the next
+	// answer dropped leaves eipgam holding the spent one, which the next
 	// refresh is refused for (refresh_token_reused). The account then
 	// read as signed out while its access token still served (willz on
 	// Discord). The ChatGPT API's refresh waits so already (siwcFresh).
@@ -1569,7 +1569,7 @@ func (a copilotApp) trade(ctx context.Context) (copilotSession, error) {
 	if a.User != "" {
 		who = " for " + CopilotAccountName(a.User, a.Host)
 	}
-	msg := strings.TrimSuffix(err.Error(), "; sign in to Copilot again") + ": the GitHub token Copilot's editors keep in " + a.src + who + " was refused, and it is read before any other sign-in; sign in to Copilot again in your editor or in magpie, or move that file aside"
+	msg := strings.TrimSuffix(err.Error(), "; sign in to Copilot again") + ": the GitHub token Copilot's editors keep in " + a.src + who + " was refused, and it is read before any other sign-in; sign in to Copilot again in your editor or in eipgam, or move that file aside"
 	if ok {
 		msg += " (the Copilot CLI is signed in to " + CopilotAccountName(cli.User, cli.Host) + ", another account, so it isn't used in its place)"
 	}
@@ -1747,7 +1747,7 @@ func copilotToken(ctx context.Context, app copilotApp) (copilotSession, error) {
 }
 
 // copilotAPIs names the APIs of Copilot's supported_endpoints; the
-// websocket one is left out, as is anything magpie doesn't speak. A chat
+// websocket one is left out, as is anything eipgam doesn't speak. A chat
 // model the list gives no supported_endpoints (GPT-4.1, GPT-4o and the other
 // models before them, what a Student plan is served) is served on chat
 // completions alone: Copilot's /v1/messages answers it "no model endpoints
@@ -1764,7 +1764,7 @@ func copilotAPIs(endpoints []string) []string {
 var copilotInternal = lazyre.New(`^(copilot-search|exec-agent|trajectory)|-(secondary|tertiary|4th|free-auto)$`)
 
 // A model Copilot offers with terms of its own stays disabled until the
-// account accepts them, as VS Code does when one is first picked; magpie
+// account accepts them, as VS Code does when one is first picked; eipgam
 // lists it and accepts them the first time a request asks for it.
 var (
 	copilotTermsMu sync.Mutex
@@ -1782,7 +1782,7 @@ func copilotAccept(ctx context.Context, app copilotApp, s copilotSession, model 
 	waiting, known := copilotTerms[app.Token]
 	copilotTermsMu.Unlock()
 	if !known {
-		// not listed since magpie started; the list says which wait
+		// not listed since eipgam started; the list says which wait
 		if _, err := copilotModels(ctx, app); err != nil {
 			return
 		}

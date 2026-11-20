@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.goto(url);
           return page;
         };
-        const page = await open("http://magpie.test/?view=providers");
+        const page = await open("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "ZCode" }).first().click();
         const row = (id) => page.locator(`.editor .accts .acc[data-account-id="${id}"]`);
         await row(TEAM).locator(".acct-who").waitFor();
@@ -178,7 +178,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the tray panel follows the window's setting, not its eye: one
         // shown in the window stays hidden in a screenshot of the panel
         assert.equal(await eye(ME).getAttribute("aria-pressed"), "true", "still shown in the window");
-        const panel = await open("http://magpie.test/?mode=panel");
+        const panel = await open("http://eipgam.test/?mode=panel");
         await panel.evaluate(() => setPanelTab("usage"));
         await panel.locator("#panelQuota .pq-user").first().waitFor();
         await panel.waitForFunction(() => document.querySelector("#panelQuota .pq-user .pii"));
@@ -220,7 +220,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.goto(url);
           return page;
         };
-        const panel = await open("http://magpie.test/?mode=panel");
+        const panel = await open("http://eipgam.test/?mode=panel");
         await panel.evaluate(() => setPanelTab("usage"));
         await panel.locator("#panelQuota .pq-user").first().waitFor();
         // the group's second account is under its "more"
@@ -260,7 +260,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await eye("Personal").getAttribute("aria-pressed"), "true");
 
         // the window has its own: the account shown in the panel stays hidden there
-        const win = await open("http://magpie.test/?view=usage");
+        const win = await open("http://eipgam.test/?view=usage");
         await win.locator(".subscription-account .quota-alias").first().waitFor();
         await win.waitForFunction(() => document.querySelectorAll(".subscription-account .quota-of .pii").length === 2);
         const ws = await win.evaluate(() => [...document.querySelectorAll(".subscription-account")].map((c) => c.textContent).join(" "));
@@ -296,7 +296,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.locator(".subscription-account .quota-alias").first().waitFor();
         const card = (id) => page.locator(".subscription-account", { has: page.locator(".quota-of", { hasText: id }) });
         assert.equal(await opacity(card(ME).locator(".acct-eye")), "none");

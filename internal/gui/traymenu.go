@@ -3,20 +3,20 @@ package gui
 import (
 	"fmt"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/uilang"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/uilang"
 )
 
 // trayZh is the tray menu in Chinese; the page has its own words
 // (i18n.js), and these few are all the menu and the icon's tooltip show
 // (#301).
 var trayZh = map[string]string{
-	"Restart magpie":                       "重启 magpie",
-	"Open magpie":                          "打开 magpie",
+	"Restart eipgam":                       "重启 eipgam",
+	"Open eipgam":                          "打开 eipgam",
 	"Version %s":                           "版本 %s",
 	"Restart to Update":                    "重启以更新",
 	"Restart to Update to %s":              "重启以更新到 %s",
-	"Quit magpie":                          "退出 magpie",
+	"Quit eipgam":                          "退出 eipgam",
 	"Restart Now to Update":                "立即重启以更新",
 	"Restart Now to Update (%d in flight)": "立即重启以更新（%d 个进行中）",
 	// the gateway paused from the menu (gatewaypause.go)
@@ -32,8 +32,8 @@ var trayZh = map[string]string{
 	"%dm":                                 "%d 分钟",
 	"as of %s, couldn't be read just now": "截至 %s，暂时无法获取最新额度",
 	"Jan 2 15:04":                         "1月2日 15:04",
-	"Today in magpie":                     "magpie 今日",
-	"Last 7 days in magpie":               "magpie 近 7 天",
+	"Today in eipgam":                     "eipgam 今日",
+	"Last 7 days in eipgam":               "eipgam 近 7 天",
 	"%d requests":                         "%d 个请求",
 	"%d request":                          "%d 个请求",
 	", %d with no known price":            "，其中 %d 个没有已知价格",
@@ -47,12 +47,12 @@ var trayZh = map[string]string{
 
 // trayZhTW is the tray menu in Traditional Chinese, with Taiwan's words.
 var trayZhTW = map[string]string{
-	"Restart magpie":                       "重新啟動 magpie",
-	"Open magpie":                          "開啟 magpie",
+	"Restart eipgam":                       "重新啟動 eipgam",
+	"Open eipgam":                          "開啟 eipgam",
 	"Version %s":                           "版本 %s",
 	"Restart to Update":                    "重新啟動以更新",
 	"Restart to Update to %s":              "重新啟動以更新到 %s",
-	"Quit magpie":                          "結束 magpie",
+	"Quit eipgam":                          "結束 eipgam",
 	"Restart Now to Update":                "立即重新啟動以更新",
 	"Restart Now to Update (%d in flight)": "立即重新啟動以更新（%d 個進行中）",
 	// the gateway paused from the menu (gatewaypause.go)
@@ -68,8 +68,8 @@ var trayZhTW = map[string]string{
 	"%dm":                                 "%d 分鐘",
 	"as of %s, couldn't be read just now": "截至 %s，暫時無法取得最新額度",
 	"Jan 2 15:04":                         "1月2日 15:04",
-	"Today in magpie":                     "magpie 今日",
-	"Last 7 days in magpie":               "magpie 近 7 天",
+	"Today in eipgam":                     "eipgam 今日",
+	"Last 7 days in eipgam":               "eipgam 近 7 天",
 	"%d requests":                         "%d 個請求",
 	"%d request":                          "%d 個請求",
 	", %d with no known price":            "，其中 %d 個沒有已知價格",
@@ -83,12 +83,12 @@ var trayZhTW = map[string]string{
 
 // trayJa is the tray menu in Japanese.
 var trayJa = map[string]string{
-	"Restart magpie":                       "magpie を再起動",
-	"Open magpie":                          "magpie を開く",
+	"Restart eipgam":                       "eipgam を再起動",
+	"Open eipgam":                          "eipgam を開く",
 	"Version %s":                           "バージョン %s",
 	"Restart to Update":                    "再起動してアップデート",
 	"Restart to Update to %s":              "再起動して %s にアップデート",
-	"Quit magpie":                          "magpie を終了",
+	"Quit eipgam":                          "eipgam を終了",
 	"Restart Now to Update":                "今すぐ再起動してアップデート",
 	"Restart Now to Update (%d in flight)": "今すぐ再起動してアップデート（%d 件処理中）",
 	// the gateway paused from the menu (gatewaypause.go)
@@ -104,8 +104,8 @@ var trayJa = map[string]string{
 	"%dm":                                 "%d分",
 	"as of %s, couldn't be read just now": "%s 時点、現在は読み取れません",
 	"Jan 2 15:04":                         "1月2日 15:04",
-	"Today in magpie":                     "magpie の今日",
-	"Last 7 days in magpie":               "magpie の過去 7 日間",
+	"Today in eipgam":                     "eipgam の今日",
+	"Last 7 days in eipgam":               "eipgam の過去 7 日間",
 	"%d requests":                         "%d 件のリクエスト",
 	"%d request":                          "%d 件のリクエスト",
 	", %d with no known price":            "、うち %d 件は価格不明",
@@ -119,12 +119,12 @@ var trayJa = map[string]string{
 
 // trayDe is the tray menu in German.
 var trayDe = map[string]string{
-	"Restart magpie":                       "magpie neu starten",
-	"Open magpie":                          "magpie öffnen",
+	"Restart eipgam":                       "eipgam neu starten",
+	"Open eipgam":                          "eipgam öffnen",
 	"Version %s":                           "Version %s",
 	"Restart to Update":                    "Zum Aktualisieren neu starten",
 	"Restart to Update to %s":              "Zum Aktualisieren auf %s neu starten",
-	"Quit magpie":                          "magpie beenden",
+	"Quit eipgam":                          "eipgam beenden",
 	"Restart Now to Update":                "Jetzt neu starten und aktualisieren",
 	"Restart Now to Update (%d in flight)": "Jetzt neu starten und aktualisieren (%d laufend)",
 	// the gateway paused from the menu (gatewaypause.go)
@@ -140,8 +140,8 @@ var trayDe = map[string]string{
 	"%dm":                                 "%d min",
 	"as of %s, couldn't be read just now": "Stand %s, konnte gerade nicht gelesen werden",
 	"Jan 2 15:04":                         "2.1. 15:04",
-	"Today in magpie":                     "Heute in magpie",
-	"Last 7 days in magpie":               "Letzte 7 Tage in magpie",
+	"Today in eipgam":                     "Heute in eipgam",
+	"Last 7 days in eipgam":               "Letzte 7 Tage in eipgam",
 	"%d requests":                         "%d Anfragen",
 	"%d request":                          "%d Anfrage",
 	", %d with no known price":            ", %d ohne bekannten Preis",
@@ -200,12 +200,12 @@ type trayLabels struct{ open, pause, version, restart, quit string }
 // waiting for a restart, if there is one; paused, the gateway is.
 func trayMenuLabels(lang, version, update string, paused bool) trayLabels {
 	l := trayLabels{
-		open:    trayText(lang, "Open magpie"),
+		open:    trayText(lang, "Open eipgam"),
 		pause:   trayText(lang, "Pause Gateway"),
 		version: trayText(lang, "Version %s", version),
-		// no update waiting: magpie restarts as it is (restart.go)
-		restart: trayText(lang, "Restart magpie"),
-		quit:    trayText(lang, "Quit magpie"),
+		// no update waiting: eipgam restarts as it is (restart.go)
+		restart: trayText(lang, "Restart eipgam"),
+		quit:    trayText(lang, "Quit eipgam"),
 	}
 	if update != "" {
 		l.restart = trayText(lang, "Restart to Update to %s", update)

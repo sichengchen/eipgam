@@ -8,7 +8,7 @@ package provider
 // SecretId and SecretKey (AccessKeyID, SecretAccessKey), never with the
 // plan's own sk- key. The plan a provider is on is its endpoint's: /plan
 // on tokenhub-intl.tencentmaas.com is 企业版 in Singapore, the one region
-// magpie lists (TokenHub's China host is left out). A provider there given
+// eipgam lists (TokenHub's China host is left out). A provider there given
 // no access key has a card that says so. TokenHub's pay as you go has no
 // plan and no card.
 //
@@ -17,7 +17,7 @@ package provider
 // the scope date/service/tc3_request, and a key derived from "TC3" and
 // the SecretKey. TestTC3SignMatchesDoc pins the doc's own example.
 //
-// Not tried against the real API: magpie has no Tencent Cloud account.
+// Not tried against the real API: eipgam has no Tencent Cloud account.
 // What is read is the docs' reply: TotalUsed of CycleQuota (else
 // TotalQuota), resetting at TokenSummary's CycleEndTime.
 
@@ -183,7 +183,7 @@ func tencentPlanCards(ctx context.Context, p Provider, region string, now func()
 		} `json:"Response"`
 	}
 	if err == nil && (json.Unmarshal(raw, &list) != nil || list.Response == nil) {
-		err = fmt.Errorf("Tencent Cloud DescribeTokenPlanList: a reply magpie can't read: %s", shapeOf(raw))
+		err = fmt.Errorf("Tencent Cloud DescribeTokenPlanList: a reply eipgam can't read: %s", shapeOf(raw))
 	}
 	tag := keyTag("tencent "+region, p.AccessKeyID)
 	if err != nil {

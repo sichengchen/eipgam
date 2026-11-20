@@ -117,7 +117,7 @@ type KeyWindow struct {
 // can follow: each that runs out and starts again on a clock the vendor
 // tells, from the accounts' cards as last read. One with no reset clock
 // can't place a window, nor can money set aside, a text row or another
-// magpie's card.
+// eipgam's card.
 func KeyWindows(ctx context.Context, now time.Time) []KeyWindow {
 	var out []KeyWindow
 	names := AccountNames()

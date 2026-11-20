@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // An agent plugin with no model key is connect only (#2374, a Raycast
-// plugin): its row is magpie as its provider, on or off, with no model to
+// plugin): its row is eipgam as its provider, on or off, with no model to
 // pick, connect is called without a model and writes the gateway and the
 // model list, the list follows the catalog, and switching it off puts back
 // what the user had. Its id is one no built-in has: Raycast is built in
@@ -23,15 +23,15 @@ func TestPluggedConnectOnly(t *testing.T) {
 export const agent = { id: "launcher", name: "Launcher", config: "~/.launcher/providers.json" };
 export function connect({ gateway, model, models }) {
   return {
-    "providers.magpie.base": gateway.v1,
-    "providers.magpie.key": gateway.key,
-    "providers.magpie.models": models.map((m) => m.id),
-    "providers.magpie.given": typeof model,
+    "providers.eipgam.base": gateway.v1,
+    "providers.eipgam.key": gateway.key,
+    "providers.eipgam.models": models.map((m) => m.id),
+    "providers.eipgam.given": typeof model,
   };
 }`)
 	path := filepath.Join(home, ".launcher", "providers.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
-	os.WriteFile(path, []byte(`{"theme":"dark","providers":{"magpie":{"key":"mine"}}}`), 0o644)
+	os.WriteFile(path, []byte(`{"theme":"dark","providers":{"eipgam":{"key":"mine"}}}`), 0o644)
 	read := func() (map[string]any, map[string]any) {
 		t.Helper()
 		var c map[string]any
@@ -40,7 +40,7 @@ export function connect({ gateway, model, models }) {
 			t.Fatalf("%v: %s", err, b)
 		}
 		ps, _ := c["providers"].(map[string]any)
-		m, _ := ps["magpie"].(map[string]any)
+		m, _ := ps["eipgam"].(map[string]any)
 		return c, m
 	}
 
@@ -64,7 +64,7 @@ export function connect({ gateway, model, models }) {
 		t.Fatal(err)
 	}
 	c, m := read()
-	if how.How != "magpie" || m["base"] != gateway.URL()+"/v1" || m["key"] != gateway.TokenFor("launcher") || m["given"] != "undefined" || c["theme"] != "dark" {
+	if how.How != "eipgam" || m["base"] != gateway.URL()+"/v1" || m["key"] != gateway.TokenFor("launcher") || m["given"] != "undefined" || c["theme"] != "dark" {
 		t.Fatalf("connected %+v: %v", how, c)
 	}
 	if _, ok := c["model"]; ok {
@@ -115,7 +115,7 @@ export function connect({ gateway, model, models }) {
 
 // A connect-only module needs a connect, and one that writes something:
 // with neither a model key nor keys of connect's, the row would say
-// connected while nothing in the agent's file was magpie's.
+// connected while nothing in the agent's file was eipgam's.
 func TestPluggedConnectOnlyWritesSomething(t *testing.T) {
 	pluggedHome(t,
 		`export const agent = { id: "bare", config: "~/.bare.json" };`,
@@ -146,16 +146,16 @@ export function connect() { return {}; }`,
 	}
 }
 
-// A connect-only plugin may return nothing but an object magpie merges
-// (Lorca's custom:magpie, plugins#1230): its members are what is written,
+// A connect-only plugin may return nothing but an object eipgam merges
+// (Lorca's custom:eipgam, plugins#1230): its members are what is written,
 // so it connects, reads as connected, and switching it off leaves the file
 // as it was. connect's result was counted after merged() took the object
 // out, so such a plugin was refused with "no keys to write".
 func TestPluggedConnectOnlyMergedOnly(t *testing.T) {
 	home := pluggedHome(t, `
-export const agent = { id: "launcher", config: "~/.launcher/creds.json", format: "json", merge: ["custom.custom:magpie"] };
+export const agent = { id: "launcher", config: "~/.launcher/creds.json", format: "json", merge: ["custom.custom:eipgam"] };
 export function connect({ gateway, models }) {
-  return { "custom.custom:magpie": { base_url: gateway.v1, api_key: gateway.key, models: models.map((m) => ({ id: m.id })) } };
+  return { "custom.custom:eipgam": { base_url: gateway.v1, api_key: gateway.key, models: models.map((m) => ({ id: m.id })) } };
 }`)
 	path := filepath.Join(home, ".launcher", "creds.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
@@ -179,7 +179,7 @@ export function connect({ gateway, models }) {
 	if err := json.Unmarshal(b, &c); err != nil {
 		t.Fatal(err)
 	}
-	if m := c.Custom["custom:magpie"]; m.BaseURL != gateway.URL()+"/v1" || m.APIKey != gateway.TokenFor("launcher") || c.Custom["custom:mine"].BaseURL != "x" {
+	if m := c.Custom["custom:eipgam"]; m.BaseURL != gateway.URL()+"/v1" || m.APIKey != gateway.TokenFor("launcher") || c.Custom["custom:mine"].BaseURL != "x" {
 		t.Fatalf("connected: %s", b)
 	}
 	if f := a.Field("provider"); f.Get() != magpieID || !a.Wired() || a.Check() != "" {

@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // sessionsHome is a sandbox HOME with the sessions package's fixtures as
@@ -81,7 +81,7 @@ func wantAll(t *testing.T, out string, want ...string) {
 	}
 }
 
-// magpie sessions lists the latest sessions; --days sums them day by day
+// eipgam sessions lists the latest sessions; --days sums them day by day
 // with the top models and folders; --model and --folder narrow both.
 func TestSessionsCmd(t *testing.T) {
 	now := sessionsHome(t)

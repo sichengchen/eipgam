@@ -11,32 +11,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/middleware"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/middleware"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"golang.org/x/term"
 )
 
-const pluginUsage = `usage: magpie plugin [list] [--json]
-       magpie plugin add <name | npm | git | path> install a community plugin by its name (workbuddy, think-tags, Qoder), an OpenCode provider plugin, a pi package or a gateway hook/middleware (opencode-gemini-auth, pi-antigravity, github:owner/repo, ./my-plugin.js, ./alias.middleware.js, ./recall.hooks.ts); npm:<name> is npm's package of a name a community plugin goes by
-       magpie plugin rm <name>                     remove one
-       magpie plugin update                        install the newest version of each
-       magpie plugin on|off <name>                 turn one on or off
-       magpie plugin options <name> [<json> | off] show or set what a plugin is handed: the switches it declares for its provider (as its editor's Plugin options), else a middleware's ctx.options
-       magpie plugin use <name> <provider>         have this plugin serve a provider another plugin signs in to as well
-       magpie plugin login <provider> [<method>]   sign in to a provider a plugin adds
-       magpie plugin logout <provider>             forget the sign-in
-       magpie plugin move|migrate <subscription>   run a built-in subscription's accounts on its community plugin
-       magpie plugin builtin [on|off <id>]         list magpie's built-in plugins (Sessions, Library, routing groups…), or turn one on or off
-       magpie plugin preset essentials|all         start the built-in plugins from the Essentials preset, or from all of them
-       magpie plugin registry [<url> | default]   show the npm registry plugins are installed from and npm is asked of, and where it comes from; or set one (an http:// or https:// address) before your .npmrc's and .bunfig.toml's, default to drop it
-       magpie plugin dump [--json]                 what plugins.yml comes to: each built-in plugin, its config, and the layer each value is from`
+const pluginUsage = `usage: eipgam plugin [list] [--json]
+       eipgam plugin add <name | npm | git | path> install a community plugin by its name (workbuddy, think-tags, Qoder), an OpenCode provider plugin, a pi package or a gateway hook/middleware (opencode-gemini-auth, pi-antigravity, github:owner/repo, ./my-plugin.js, ./alias.middleware.js, ./recall.hooks.ts); npm:<name> is npm's package of a name a community plugin goes by
+       eipgam plugin rm <name>                     remove one
+       eipgam plugin update                        install the newest version of each
+       eipgam plugin on|off <name>                 turn one on or off
+       eipgam plugin options <name> [<json> | off] show or set what a plugin is handed: the switches it declares for its provider (as its editor's Plugin options), else a middleware's ctx.options
+       eipgam plugin use <name> <provider>         have this plugin serve a provider another plugin signs in to as well
+       eipgam plugin login <provider> [<method>]   sign in to a provider a plugin adds
+       eipgam plugin logout <provider>             forget the sign-in
+       eipgam plugin move|migrate <subscription>   run a built-in subscription's accounts on its community plugin
+       eipgam plugin builtin [on|off <id>]         list eipgam's built-in plugins (Sessions, Library, routing groups…), or turn one on or off
+       eipgam plugin preset essentials|all         start the built-in plugins from the Essentials preset, or from all of them
+       eipgam plugin registry [<url> | default]   show the npm registry plugins are installed from and npm is asked of, and where it comes from; or set one (an http:// or https:// address) before your .npmrc's and .bunfig.toml's, default to drop it
+       eipgam plugin dump [--json]                 what plugins.yml comes to: each built-in plugin, its config, and the layer each value is from`
 
-// pluginCmd: `magpie plugin …` — OpenCode's provider plugins and pi's
+// pluginCmd: `eipgam plugin …` — OpenCode's provider plugins and pi's
 // packages, which sign in to a subscription and carry its requests
 // (internal/plugin), and gateway middleware (internal/middleware).
 func pluginCmd(args []string) error {
@@ -64,7 +64,7 @@ func pluginCmd(args []string) error {
 		fmt.Println(green.Render("✓"), "added", e.Spec)
 		// a community plugin's name (workbuddy, WorkBuddy) stood for it
 		if typed := strings.TrimSpace(rest[0]); !plugin.IsPath(typed) && !plugin.IsGit(typed) && !strings.HasPrefix(typed, "npm:") && plugin.Name(typed) != plugin.Name(e.Spec) {
-			fmt.Println(faint.Render("  " + strconv.Quote(plugin.Name(typed)) + " is magpie's community plugin " + plugin.Name(e.Spec)))
+			fmt.Println(faint.Render("  " + strconv.Quote(plugin.Name(typed)) + " is eipgam's community plugin " + plugin.Name(e.Spec)))
 		}
 		// a deprecated built-in it serves, not signed in to, is its now
 		provider.HandOver(ctx, false)
@@ -166,7 +166,7 @@ func pluginCmd(args []string) error {
 		return nil
 	case "move-back", "moveback", "unmigrate":
 		// the built-ins are retired: there is no going back to one
-		return errors.New("magpie's built-in subscriptions are retired: their community plugins run them")
+		return errors.New("eipgam's built-in subscriptions are retired: their community plugins run them")
 	case "builtin", "builtins", "built-in":
 		return builtinCmd(rest)
 	case "preset":
@@ -212,7 +212,7 @@ func listPlugins(ctx context.Context, asJSON bool) error {
 			fmt.Println("[]")
 			return nil
 		}
-		fmt.Println("No plugins. Add one: magpie plugin add <npm package | git repo | path>")
+		fmt.Println("No plugins. Add one: eipgam plugin add <npm package | git repo | path>")
 		return nil
 	}
 	loaded, lerr := plugin.Plugins(ctx)
@@ -284,9 +284,9 @@ func listPlugins(ctx context.Context, asJSON bool) error {
 			if p.Spec != e.Spec {
 				continue
 			}
-			who := muted.Render("not signed in · magpie plugin login " + p.ID)
+			who := muted.Render("not signed in · eipgam plugin login " + p.ID)
 			if c, ok := onBuiltin[p.ID]; ok && !p.SignedIn {
-				who = muted.Render(fmt.Sprintf("runs on magpie's built-in (%d accounts) · magpie plugin move %s", c.Accounts, p.ID))
+				who = muted.Render(fmt.Sprintf("runs on eipgam's built-in (%d accounts) · eipgam plugin move %s", c.Accounts, p.ID))
 			}
 			if p.SignedIn {
 				who = green.Render("signed in")
@@ -306,7 +306,7 @@ func listPlugins(ctx context.Context, asJSON bool) error {
 				fmt.Printf("  %s  %s\n", provider.PluginID(c.ID), muted.Render("also signed in to by "+strings.Join(c.With, ", ")+"; this one serves it"))
 				continue
 			}
-			fmt.Printf("  %s  %s\n", provider.PluginID(c.ID), amber.Render("served by "+c.By+", which signs in to it too · magpie plugin use "+e.Spec+" "+c.ID))
+			fmt.Printf("  %s  %s\n", provider.PluginID(c.ID), amber.Render("served by "+c.By+", which signs in to it too · eipgam plugin use "+e.Spec+" "+c.ID))
 		}
 	}
 	if lerr != nil {
@@ -536,7 +536,7 @@ func declaredSwitches(ctx context.Context, spec string, ask bool) []declaredSwit
 }
 
 // pluginProvider is the plugins' provider named by OpenCode's id or
-// magpie's.
+// eipgam's.
 func pluginProvider(ctx context.Context, name string) (plugin.Provider, error) {
 	ps, err := plugin.Providers(ctx)
 	if err != nil {
@@ -552,7 +552,7 @@ func pluginProvider(ctx context.Context, name string) (plugin.Provider, error) {
 		ids = append(ids, p.ID)
 	}
 	if len(ids) == 0 {
-		return plugin.Provider{}, fmt.Errorf("no plugin signs in to %q — add one: magpie plugin add <npm package>", name)
+		return plugin.Provider{}, fmt.Errorf("no plugin signs in to %q — add one: eipgam plugin add <npm package>", name)
 	}
 	return plugin.Provider{}, fmt.Errorf("no plugin signs in to %q; they sign in to %s", name, strings.Join(ids, ", "))
 }
@@ -685,9 +685,9 @@ func pluginLogin(ctx context.Context, name, method string) error {
 		wait, cancel := context.WithTimeout(ctx, 10*time.Minute)
 		defer cancel()
 		if a.Method != "code" && provider.PluginPastesCallback(pp.ID, a.URL) {
-			// a browser on another computer (magpie on a server or in
+			// a browser on another computer (eipgam on a server or in
 			// Docker) ends on a page that won't load: its address finishes it
-			fmt.Println("If the page the browser ends on won't load (magpie on a server or in Docker), paste its whole address here and press Enter:")
+			fmt.Println("If the page the browser ends on won't load (eipgam on a server or in Docker), paste its whole address here and press Enter:")
 			go func() {
 				for wait.Err() == nil {
 					line, err := stdin().ReadString('\n')
@@ -710,7 +710,7 @@ func pluginLogin(ctx context.Context, name, method string) error {
 		}
 	}
 	// as the window's sign-in does: its lapsed mark goes and, removed from
-	// magpie, it comes back
+	// eipgam, it comes back
 	id := provider.PluginSignedIn(saved)
 	fmt.Println(green.Render("✓"), "signed in to", pp.Name, muted.Render("· its models are "+id+"/<model>"))
 	sayStillOff(id)
@@ -719,12 +719,12 @@ func pluginLogin(ctx context.Context, name, method string) error {
 
 // sayStillOff tells, after a sign-in, that the provider it went to is
 // switched off. A sign-in keeps the user's own switch as it was, but
-// "signed in" and then "○ switched off" in magpie providers read as a bug
+// "signed in" and then "○ switched off" in eipgam providers read as a bug
 // with nothing saying how to turn it on (Atlas, WorkBuddy AI). A provider
 // that can't be found says nothing: not known to be off.
 func sayStillOff(id string) {
 	if p, err := provider.Find(id); err == nil && p.Off {
-		fmt.Println(amber.Render("!"), p.Name, "is switched off in magpie, so agents aren't given its models · turn it on: magpie provider on "+p.ID)
+		fmt.Println(amber.Render("!"), p.Name, "is switched off in eipgam, so agents aren't given its models · turn it on: eipgam provider on "+p.ID)
 	}
 }
 
@@ -822,7 +822,7 @@ func toolsLine(names map[string]string) string {
 }
 
 // pageLine is a plugin's page: its title, the built-in page it takes the
-// place of, and what it may read of magpie's.
+// place of, and what it may read of eipgam's.
 func pageLine(w *plugin.WindowSpec, pg *plugin.PageSpec) string {
 	s := pg.Title
 	if pg.Replaces != "" {
@@ -831,8 +831,8 @@ func pageLine(w *plugin.WindowSpec, pg *plugin.PageSpec) string {
 	return s + " " + muted.Render("("+readsText(w.Reads)+")")
 }
 
-// panelsLine is the panels a plugin adds to magpie's own pages: the page
-// each is in, and what they may read of magpie's.
+// panelsLine is the panels a plugin adds to eipgam's own pages: the page
+// each is in, and what they may read of eipgam's.
 func panelsLine(w *plugin.WindowSpec) string {
 	var at []string
 	for _, p := range w.Panels {
@@ -852,8 +852,8 @@ func readsText(reads []string) string {
 	return "reads " + strings.Join(reads, ", ")
 }
 
-// wiredPluginAgent is the agent the plugin named adds, while magpie is in
-// its config: turning the plugin off or removing it takes magpie out
+// wiredPluginAgent is the agent the plugin named adds, while eipgam is in
+// its config: turning the plugin off or removing it takes eipgam out
 // first (provider.PluginAgentGoing, #3810).
 func wiredPluginAgent(name string) *agent.Agent {
 	for _, a := range agent.All() {
@@ -864,19 +864,19 @@ func wiredPluginAgent(name string) *agent.Agent {
 	return nil
 }
 
-// sayAgentBack says that the agent a plugin added was taken off magpie.
+// sayAgentBack says that the agent a plugin added was taken off eipgam.
 func sayAgentBack(a *agent.Agent) {
 	if a == nil {
 		return
 	}
-	fmt.Println(faint.Render("  " + a.Name + " is disconnected from magpie, back to what it had before; with the plugin back, connecting it (its switch on the Agents page) puts back the model it was on"))
+	fmt.Println(faint.Render("  " + a.Name + " is disconnected from eipgam, back to what it had before; with the plugin back, connecting it (its switch on the Agents page) puts back the model it was on"))
 }
 
 // registryFrom says where the npm registry in use came from.
 func registryFrom(r plugin.RegistryInUse) string {
 	switch r.From {
 	case plugin.FromMagpie:
-		return "set in magpie; magpie plugin registry default drops it"
+		return "set in eipgam; eipgam plugin registry default drops it"
 	case plugin.FromEnv:
 		return "from " + r.Var
 	case plugin.FromShell:

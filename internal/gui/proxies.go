@@ -12,9 +12,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Named proxies (the Network page's list): kept once, chosen by reference
@@ -46,7 +46,7 @@ type proxyUseJSON struct {
 }
 
 // proxyTestJSON is one connectivity check: whether a request got through
-// the proxy, how long it took, and where it left from. A failure magpie
+// the proxy, how long it took, and where it left from. A failure eipgam
 // can explain has its reason in Why (netproxy.Why: a sentence the page
 // translates, its slots filled from Addr, Was and Now) and Go's words in
 // Error.
@@ -64,7 +64,7 @@ type proxyTestJSON struct {
 }
 
 // failed is a check that failed with err, its reason in Why when it is
-// one magpie can say.
+// one eipgam can say.
 func (o proxyTestJSON) failed(err error) proxyTestJSON {
 	o.OK = false
 	var w *netproxy.Why

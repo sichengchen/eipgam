@@ -13,12 +13,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/profile"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func TestRestoreKeepsCorruptSettings(t *testing.T) {
@@ -47,7 +47,7 @@ func TestRestoreKeepsCorruptSettings(t *testing.T) {
 	}
 }
 
-// home gives the test a machine of its own: no agents, no magpie files.
+// home gives the test a machine of its own: no agents, no eipgam files.
 func home(t *testing.T) {
 	t.Helper()
 	h := t.TempDir()
@@ -413,7 +413,7 @@ func TestLibrary(t *testing.T) {
 }
 
 func TestNotABackup(t *testing.T) {
-	for _, data := range []string{"", "{}", `{"format":"magpie-backup","version":9,"kdf":"x"}`} {
+	for _, data := range []string{"", "{}", `{"format":"eipgam-backup","version":9,"kdf":"x"}`} {
 		if _, err := Open([]byte(data), "pw"); err == nil || errors.Is(err, ErrPassphrase) {
 			t.Fatalf("%q: %v", data, err)
 		}
@@ -525,7 +525,7 @@ func TestRestorePluginsAndSignIn(t *testing.T) {
 		t.Fatalf("result: %+v, want claude to sign in to, the plugin added, the failure said, acme to key", r)
 	}
 
-	// a backup from a magpie before plugins installs nothing
+	// a backup from a eipgam before plugins installs nothing
 	asked = nil
 	got.Plugins = nil
 	if _, err := Restore(got, All); err != nil || asked != nil {

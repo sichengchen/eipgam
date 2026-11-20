@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=usage&tab=usage");
+      await page.goto("http://eipgam.test/?view=usage&tab=usage");
       await page.locator("#subscriptionUsage .quota").first().waitFor();
       await page.locator(".quota-more").click();
       const w = words[lang];

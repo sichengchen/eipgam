@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // nativeRetrieval is a retrieval some providers are asked in their own
@@ -109,7 +109,7 @@ func geminiVoice(v string) string {
 // cheerfully: …"), in one prebuilt voice, answered with audio alone. speed
 // has no Gemini field and is left out. The answer is 24 kHz PCM, given back
 // as a WAV, or raw for response_format pcm; mp3, opus, aac and flac are
-// answered as a WAV too, with its own Content-Type, since magpie has no
+// answered as a WAV too, with its own Content-Type, since eipgam has no
 // encoder for them and OpenAI's clients ask mp3 by default (a 400 would
 // fail them all, while players read a WAV by its header). A streamed
 // answer (stream_format sse) is turned away: generateContent's is whole.

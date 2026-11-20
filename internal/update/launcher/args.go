@@ -52,7 +52,7 @@ func argsOf(line string) string {
 }
 
 // opensWindow is whether args are a command the app answers with its
-// window (cli.run): none, app, gui, tray, panel, -Embedding or a magpie://
+// window (cli.run): none, app, gui, tray, panel, -Embedding or a eipgam://
 // link.
 func opensWindow(args []string) bool {
 	if len(args) == 0 {
@@ -62,5 +62,5 @@ func opensWindow(args []string) bool {
 	case "app", "gui", "tray", "panel", "-Embedding":
 		return true
 	}
-	return strings.HasPrefix(strings.ToLower(args[0]), "magpie:")
+	return strings.HasPrefix(strings.ToLower(args[0]), "eipgam:")
 }

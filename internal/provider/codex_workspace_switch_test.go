@@ -40,7 +40,7 @@ func codexAppSignIn(t *testing.T, home, workspace, plan string, reclaimed bool) 
 }
 
 // JdAZzzzzz on X: one ChatGPT login with a personal Pro and a Team seat,
-// both in magpie, the workspace switched in the Codex app. Both cards
+// both in eipgam, the workspace switched in the Codex app. Both cards
 // read the personal plan ("Prolite"), its week, its reset time and its
 // two resets: the account not in use shares the sign-in Codex holds (one
 // refresh token), and was read with Codex's sign-in as it is, workspace

@@ -2,7 +2,7 @@ package redact
 
 import "testing"
 
-// A text masked by one magpie and masked again by another process, which
+// A text masked by one eipgam and masked again by another process, which
 // has none of the first's made-up names in memory, comes out as it came:
 // a user name's made-up name, an address's public-ip- name and the
 // placeholders are no values to find. (A made-up key looks like a key, so a

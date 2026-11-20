@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // claudeSilentAt is a Claude subscription with one account whose Claude
@@ -128,7 +128,7 @@ func TestClaudeSilentTurnFails(t *testing.T) {
 						if tui {
 							claudeTUIRuns = true
 							t.Cleanup(func() { claudeTUIRuns = false })
-							helper := filepath.Join(t.TempDir(), "magpie")
+							helper := filepath.Join(t.TempDir(), "eipgam")
 							testenv.Program(t, helper, "#!/bin/sh\n[ \"$1\" = \""+claudetui.Command+"\" ] || exit 9\nshift; claude=$1; shift\nexec \"$claude\" \"$@\"\n")
 							claudeTUIHelper = helper
 							t.Cleanup(func() { claudeTUIHelper = "" })
@@ -172,7 +172,7 @@ func TestClaudeSilentTurnFails(t *testing.T) {
 }
 
 // A reply whose events end with neither its stop nor an error — a run
-// ended by magpie (its timeout) with nothing said, or cut part way — is
+// ended by eipgam (its timeout) with nothing said, or cut part way — is
 // a failure, not a finished reply of nothing, streamed or not.
 func TestRelayUnendedReplyFails(t *testing.T) {
 	for _, said := range []string{"", "half an ans"} {

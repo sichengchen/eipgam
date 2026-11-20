@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // askQueuedGroup sends one request to a provider of keys accounts, in order,
@@ -41,7 +41,7 @@ func askQueuedGroup(t *testing.T, keys, code int, body string) (asked, told int)
 }
 
 // The Qoder plugin (0.2.40, #4049) answers a request Qoder queued at once
-// with a 503 + Retry-After that names the queue, when magpie has another
+// with a 503 + Retry-After that names the queue, when eipgam has another
 // candidate to ask. Asked again as a group's patience asks, every member
 // only meets the queue again, the body sent again on every account, one
 // whole round after another (#5346: 217 accounts, tries up to 656 for one

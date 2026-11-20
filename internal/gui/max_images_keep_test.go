@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A save that doesn't send maxImages (an older window, a preset's sheet)
-// keeps what `magpie provider set <id> max-images=8` or the editor's
+// keeps what `eipgam provider set <id> max-images=8` or the editor's
 // Images per request set, one that sends it sets it, and {} clears it
 // (#6849).
 func TestProviderSaveKeepsMaxImages(t *testing.T) {

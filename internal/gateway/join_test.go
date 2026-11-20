@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 const joinPw = "correct horse battery"
@@ -21,7 +21,7 @@ const joinPw = "correct horse battery"
 func joinGateway(t *testing.T) (http.Handler, *time.Time) {
 	t.Helper()
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	newCaller(t)
 	if err := access.SetJoinPassword(joinPw); err != nil {
 		t.Fatal(err)
@@ -215,7 +215,7 @@ func TestJoinRefusesOtherPages(t *testing.T) {
 	}
 }
 
-// With no password set, or magpie not shared, nothing joins.
+// With no password set, or eipgam not shared, nothing joins.
 func TestJoinClosed(t *testing.T) {
 	h, _ := joinGateway(t)
 	if err := access.SetJoinPassword(""); err != nil {

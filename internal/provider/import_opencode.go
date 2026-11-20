@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // OpenCode's own sign-ins, as `opencode auth login` keeps them: auth.json in
@@ -18,7 +18,7 @@ import (
 // (xdg-basedir's, on Windows too). It maps a provider id (models.dev's) to
 // {"type":"api","key":…}, {"type":"oauth",…} or {"type":"wellknown",…}
 // (packages/opencode/src/auth/index.ts). It holds keys only, never where
-// they go: an id is imported when magpie has its preset.
+// they go: an id is imported when eipgam has its preset.
 
 func openCodeAuthPath() string {
 	if d := appdir.Getenv("XDG_DATA_HOME"); d != "" {
@@ -28,7 +28,7 @@ func openCodeAuthPath() string {
 	return filepath.Join(home, ".local", "share", "opencode", "auth.json")
 }
 
-// openCodePresets are OpenCode's provider ids by the magpie preset at the
+// openCodePresets are OpenCode's provider ids by the eipgam preset at the
 // same address. An id at a host the preset doesn't serve (SiliconFlow's
 // siliconflow-cn, at .cn beside the preset's .com; tencent-token-plan, at
 // China's api.lkeap.cloud.tencent.com beside the preset's Singapore
@@ -80,7 +80,7 @@ func readOpenCodeAuth(path string) ([]AppImport, error) {
 		skip := ""
 		switch {
 		case e.Type == "oauth" || e.Type == "wellknown":
-			skip = "it is a sign-in, not a key; add the subscription in magpie"
+			skip = "it is a sign-in, not a key; add the subscription in eipgam"
 		case e.Type != "api":
 			continue
 		case pr == nil:

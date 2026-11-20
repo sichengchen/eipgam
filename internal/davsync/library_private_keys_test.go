@@ -5,10 +5,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The remote never held C's token. A's keyed library upload therefore cannot
@@ -42,7 +42,7 @@ func TestKeyedLibraryUploadPreservesKeylessLocalSecrets(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		f.mu.Lock()
-		data := slices.Clone(f.objects["team x+y/magpie/magpie.magpie-backup"])
+		data := slices.Clone(f.objects["team x+y/eipgam/eipgam.eipgam-backup"])
 		f.mu.Unlock()
 		b, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {

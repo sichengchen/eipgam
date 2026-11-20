@@ -7,7 +7,7 @@ package provider
 // needs the window's total, left it aside; an account capped at 4 spent
 // over 1,000 credits past it (#5770, 9won_25273 on Discord).
 //
-// So magpie counts what such a wallet spends itself. Each reading's
+// So eipgam counts what such a wallet spends itself. Each reading's
 // balance is set against the one before: a fall is spent, a rise (a
 // top-up, a daily grant) is not. The count runs over a period, the
 // window's own when it tells a reset, else the local day (a wallet never

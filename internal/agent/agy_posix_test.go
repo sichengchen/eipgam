@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-// The function agy magpie puts in a POSIX profile is read by every shell
+// The function agy eipgam puts in a POSIX profile is read by every shell
 // that reads the file: dash too, as sh -lc when ~/.profile reads ~/.bashrc
 // (ljlwlcz on X: fnOS, where bash's "function agy {" failed an SSH probe's
 // sh -lc). Each shell here reads the block after an alias named agy, as a
@@ -28,7 +28,7 @@ func TestAgyFunctionInEveryPOSIXShell(t *testing.T) {
 	dir := t.TempDir()
 	bin := filepath.Join(dir, "bin")
 	home := filepath.Join(dir, "home")
-	settings := filepath.Join(home, ".gemini", "antigravity-cli", "magpie-settings.json")
+	settings := filepath.Join(home, ".gemini", "antigravity-cli", "eipgam-settings.json")
 	if err := os.MkdirAll(bin, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -39,16 +39,16 @@ func TestAgyFunctionInEveryPOSIXShell(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(bin, "agy"), []byte(stub), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(settings, []byte("{\n  \"model\": \"magpie/relay/glm-4.6\"\n}\n"), 0o644); err != nil {
+	if err := os.WriteFile(settings, []byte("{\n  \"model\": \"eipgam/relay/glm-4.6\"\n}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	gone := filepath.Join(dir, "no such magpie")
+	gone := filepath.Join(dir, "no such eipgam")
 	for _, c := range []struct{ name, fn, want string }{
 		{"here", agyFunction("posix", gone), "agy key= gw= args=a b"},
-		{"distro", agyDistroFunction("posix", "k'1", "http://172.20.0.1:3425"), "agy key=k'1 gw=http://172.20.0.1:3425 args=--settings " + settings + " --model magpie/relay/glm-4.6 a b"},
+		{"distro", agyDistroFunction("posix", "k'1", "http://172.20.0.1:3425"), "agy key=k'1 gw=http://172.20.0.1:3425 args=--settings " + settings + " --model eipgam/relay/glm-4.6 a b"},
 	} {
 		profile := filepath.Join(dir, c.name+".profile")
-		body := "alias agy='echo ALIAS' 2>/dev/null\n# >>> magpie agy >>>\n" + c.fn + "\n# <<< magpie agy <<<\n"
+		body := "alias agy='echo ALIAS' 2>/dev/null\n# >>> eipgam agy >>>\n" + c.fn + "\n# <<< eipgam agy <<<\n"
 		if err := os.WriteFile(profile, []byte(body), 0o644); err != nil {
 			t.Fatal(err)
 		}

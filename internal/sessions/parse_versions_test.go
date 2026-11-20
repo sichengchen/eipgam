@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// The index an older magpie kept names no agent: its parses stand on the
+// The index an older eipgam kept names no agent: its parses stand on the
 // update, are named on the next read, and a later raise of Claude Code's
 // parseVersions then reads Claude Code's files alone again, not Codex's
 // (#2278: each raise of cacheVersion read a whole history again).
@@ -41,7 +41,7 @@ func TestParseVersionRaiseReadsThatAgentAlone(t *testing.T) {
 		t.Fatalf("the fixture reads %v: it tests nothing", first)
 	}
 
-	// as an older magpie left it: no agent named, no versions
+	// as an older eipgam left it: no agent named, no versions
 	c := savedIndex(t)
 	for _, s := range c.Files {
 		if s != nil {

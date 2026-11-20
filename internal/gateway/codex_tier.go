@@ -7,9 +7,9 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // codexTiered is the body of a request of Codex's with the service tier
@@ -20,8 +20,8 @@ import (
 // ask would be: an account whose plan has no Ultrafast is put after one
 // that has, or asked for priority (serve), a provider added by its address
 // that turns a tier away is not sent it again (fits). One of Codex's own
-// models no account in magpie lists Ultrafast on is asked for priority
-// instead, as it may go on to Codex's own sign-in, whose plan magpie
+// models no account in eipgam lists Ultrafast on is asked for priority
+// instead, as it may go on to Codex's own sign-in, whose plan eipgam
 // doesn't know.
 func codexTiered(r *http.Request, body []byte, model string) []byte {
 	set := provider.CodexServiceTier()

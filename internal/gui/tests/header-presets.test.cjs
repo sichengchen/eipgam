@@ -54,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], calls = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, calls));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Azure Gateway" }).click();
         const ed = page.locator(".editor");
         await ed.locator(".headers").waitFor({ state: "attached" });

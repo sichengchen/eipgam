@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // plugins#512 (cycocyco): SenseTime Raccoon's 429 for an account's token
@@ -21,7 +21,7 @@ const zcodeWallCode = `{"error":{"code":"1302","message":"[1302][您的账户已
 const zcodeWallMessage = `{"error":{"message":"[1302][您的账户已达到速率限制，请您控制请求频率][20261105173006e812537059cd4a83]"}}`
 
 // ZCode's wall is not asked again in place, by the same-one retries or a
-// patience's rounds: the loop the reporter saw ("magpie keeps asking, so
+// patience's rounds: the loop the reporter saw ("eipgam keeps asking, so
 // the 429 comes back in a loop") is these two. A quoted `[1302]` without
 // the label's shape, and a code of ZCode's that nothing pins the semantics
 // of yet, are a rate limit that passes, as before.

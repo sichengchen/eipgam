@@ -5,17 +5,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-const keyBalanceUsage = "magpie provider key-balance <id> [key [usd|¥cny|off] [--refill monthly[:day]|weekly[:mon…sun]|daily|off] [--expiring amount@yyyy-mm-dd|off]… [--expiring-remove [amount@]yyyy-mm-dd]…]"
+const keyBalanceUsage = "eipgam provider key-balance <id> [key [usd|¥cny|off] [--refill monthly[:day]|weekly[:mon…sun]|daily|off] [--expiring amount@yyyy-mm-dd|off]… [--expiring-remove [amount@]yyyy-mm-dd]…]"
 
 // keyBalanceCmd shows, or sets, the balance typed by hand on a provider's
 // API keys whose vendor tells none (tenacious_eagle on Discord): what is
-// left of it is the amount less what magpie priced the key's calls at
+// left of it is the amount less what eipgam priced the key's calls at
 // since it was typed, or since it last refilled
 // (provider/key_balance_own.go). An amount in yuan ("¥100", "100cny") is
-// counted down at the dollar's rate magpie last learned. Each --expiring
+// counted down at the dollar's rate eipgam last learned. Each --expiring
 // adds a grant of credit that expires (tenacious_eagle_96548: promotional
 // credit twice, gone on two days), off takes every one off, and each
 // --expiring-remove takes off the grants through its day (of its amount,
@@ -49,7 +49,7 @@ func keyBalanceCmd(args []string) error {
 			k, v, _ := strings.Cut(a, "=")
 			grantArgs = append(grantArgs, grantArg{v, k == "--expiring-remove"})
 		case strings.HasPrefix(a, "-") && a != "-":
-			// a flag magpie doesn't know, or a negative amount: never data
+			// a flag eipgam doesn't know, or a negative amount: never data
 			return fmt.Errorf("%s", keyBalanceUsage)
 		default:
 			rest = append(rest, a)

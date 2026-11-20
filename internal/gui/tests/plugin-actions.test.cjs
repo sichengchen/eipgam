@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A community plugin's actions (magpie.actions, pluginpages.js, P6): items
-// its page adds to a provider's and an agent's row menu, after magpie's
+// A community plugin's actions (eipgam.actions, pluginpages.js, P6): items
+// its page adds to a provider's and an agent's row menu, after eipgam's
 // own, named in the plugin's words in the window's language. Picking one
 // opens the plugin's page and tells it the action and that row's id and
-// name, and nothing else of it; a page that gives magpie.onAction late
+// name, and nothing else of it; a page that gives eipgam.onAction late
 // still gets every action picked before. A page with no action adds
 // nothing to a menu. The Plugins page says which menus a plugin adds to.
 // Every language, both engines, a narrow window. The API is faked here;
@@ -19,8 +19,8 @@ const bridge = path.resolve(__dirname, "../pagebridge.js");
 
 const TOK = "7".repeat(32);
 const withActions = [{
-  spec: "/x/magpie-row-tools", name: "magpie-row-tools", key: "plugin-row-tools", title: "Row tools", titles: { zh: "行工具" }, reads: [],
-  url: `/_magpie/plugin/${TOK}/index.html`,
+  spec: "/x/eipgam-row-tools", name: "eipgam-row-tools", key: "plugin-row-tools", title: "Row tools", titles: { zh: "行工具" }, reads: [],
+  url: `/_eipgam/plugin/${TOK}/index.html`,
   actions: [
     { id: "check", menu: "provider", title: "Check balance", titles: { zh: "查余额", "zh-TW": "查餘額", ja: "残高を確認", de: "Guthaben prüfen" } },
     { id: "logs", menu: "agent", title: "Row tools", titles: { zh: "行工具" } },
@@ -28,7 +28,7 @@ const withActions = [{
 }];
 // the page gives its handler late: what was picked before waits for it
 const HTML = `<!doctype html><meta charset="utf-8"><script src="_magpie/bridge.js"></script><ol id="got"></ol><script src="app.js"></script>`;
-const JS = `setTimeout(() => magpie.onAction((a) => { const li = document.createElement("li"); li.textContent = JSON.stringify(a); document.getElementById("got").append(li); }), 400);`;
+const JS = `setTimeout(() => eipgam.onAction((a) => { const li = document.createElement("li"); li.textContent = JSON.stringify(a); document.getElementById("got").append(li); }), 400);`;
 
 const providerList = [{ id: "openai", name: "OpenAI", icon: "generic", host: "api.openai.com", chat: "https://api.openai.com/v1", models: [] }]
   .map((p) => ({ responses: "", anthropic: "", agents: [], fallback: [], headers: {}, key: { set: false }, keyList: [], ready: true, ...p }));
@@ -60,7 +60,7 @@ function server(lang, opts) {
       const type = { ".html": "text/html", ".js": "text/javascript" }[path.extname(rel)];
       return route.fulfill({ status: 200, headers: { "Content-Security-Policy": "sandbox allow-scripts; connect-src 'none'", "Content-Type": type }, body });
     }
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -91,8 +91,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, { pages }));
-          await page.goto("http://magpie.test/");
-          // the agent's menu: magpie's own items, then the plugin's
+          await page.goto("http://eipgam.test/");
+          // the agent's menu: eipgam's own items, then the plugin's
           await page.locator('.row.agent[data-id="codex"] .ag-handle').click();
           await page.locator(".pop.row-menu").waitFor();
           const own = await page.evaluate(() => t("Hide"));
@@ -141,7 +141,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const plugins = { bun: true, bunVersion: "1.3.0", plugins: [
-      { spec: "/x/magpie-row-tools", providers: [], moved: [], inMagpieOnly: true, page: { title: "Row tools", reads: [] }, actions: [{ menu: "provider", title: "Check balance" }, { menu: "agent", title: "Row tools" }] },
+      { spec: "/x/eipgam-row-tools", providers: [], moved: [], inMagpieOnly: true, page: { title: "Row tools", reads: [] }, actions: [{ menu: "provider", title: "Check balance" }, { menu: "agent", title: "Row tools" }] },
     ] };
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
       for (const width of [980, 420]) {
@@ -152,16 +152,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, { pages: [], plugins }));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://eipgam.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const installed = await page.evaluate(() => t("Installed"));
         await page.locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: installed }).first().click();
         const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
-        const row = view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: "magpie-row-tools" }) });
+        const row = view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: "eipgam-row-tools" }) });
         await row.waitFor();
         const lines = (await row.locator(".pm-page").allInnerTexts()).map((x) => x.trim());
         const menus = [await tr("providers' menus"), await tr("agents' menus")].join(await tr(", "));
-        assert.deepEqual(lines, [await tr("Adds a page to the sidebar, which reads nothing of magpie's"), await tr("Adds items to {where}, which open its page", { where: menus })], where);
+        assert.deepEqual(lines, [await tr("Adds a page to the sidebar, which reads nothing of eipgam's"), await tr("Adds items to {where}, which open its page", { where: menus })], where);
         if (lang !== "en") assert.ok(!lines[1].includes("Adds items"), `${where}: translated`);
         assert.ok(await view.evaluate((v) => v.scrollWidth <= v.clientWidth + 1), `${where}: fits`);
         assert.deepEqual(errors, [], where);

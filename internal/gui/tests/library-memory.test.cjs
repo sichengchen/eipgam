@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The Library's Memory tab (internal/memory, /api/memory): the switch that
 // gives the agents ticked for instructions the memories' summary, the
-// Magpie Memory server offered while it isn't in the library, the memories
+// eipgam Memory server offered while it isn't in the library, the memories
 // in use pinned first, a search, the ones an agent only guessed waiting
 // under To review, and a memory added, edited through the app's menu (never
 // a <select>), kept and deleted. Conversations read into memory: switched
@@ -20,7 +20,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/mem";
 const library = {
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [{ id: "claude", name: "Claude Code", icon: "", instructions: `${HOME}/.claude/CLAUDE.md` }, { id: "codex", name: "Codex", icon: "", instructions: `${HOME}/.codex/AGENTS.md` }],
   instructions: { shared: "", sets: [{ id: "default", name: "", active: true, text: "" }], agents: [] },
   foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
@@ -33,7 +33,7 @@ function memories() {
       { id: "m2", text: "Answers in Chinese, code comments in English", kind: "preference", scope: "global", origin: "user", status: "active", pinned: true, created: at(1), updated: at(2) },
       { id: "m3", text: "Deploys go out on Fridays", kind: "fact", scope: "global", origin: "inferred", status: "candidate", sources: [{ agent: "codex", at: at(3) }], created: at(3), updated: at(3) },
     ],
-    projects: { p1: { key: "p1", name: "magpie", roots: [`${HOME}/magpie`] } },
+    projects: { p1: { key: "p1", name: "eipgam", roots: [`${HOME}/eipgam`] } },
     digest: true,
     agents: ["claude"],
   };
@@ -155,7 +155,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang} ${width}`, async () => {
         const w = words[lang];
         const ctx = await browser.newContext({ viewport: { width, height: 860 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "memory"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("eipgam.libTab", "memory"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -165,7 +165,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const dist = distill();
         const sem = semantic();
         await page.route("**/*", server(lang, state, sent, dist, sem));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const rows = page.locator(`${view} .lib-mems .lib-mem`);
         await rows.first().waitFor();
@@ -210,9 +210,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await rows.count(), 2);
         assert.match(await rows.nth(0).textContent(), /Answers in Chinese/);
         assert.match(await rows.nth(1).textContent(), /Use pnpm/);
-        assert.match(await rows.nth(1).textContent(), /magpie/);
+        assert.match(await rows.nth(1).textContent(), /eipgam/);
         assert.match(await rows.nth(1).textContent(), new RegExp(w.rule));
-        // Magpie Memory isn't in the library: it is offered
+        // eipgam Memory isn't in the library: it is offered
         assert.equal(await page.locator(`${view} .lib-memtools`).count(), 1);
 
         // the search narrows the list

@@ -3,13 +3,13 @@
 // rings and left out a wallet window beside them; it now says what is left
 // on it under the rings, in the reader's language, inside a narrow panel.
 // Real page, isolated responses: no vendor or account is used.
-// MAGPIE_QUOTA_ASSETS points at older assets to see it fail.
+// EIPGAM_QUOTA_ASSETS points at older assets to see it fail.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const assets = process.env.MAGPIE_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const iso = n => new Date(n).toISOString();
 function fixtures() {
   const now = Date.now(), readAt = iso(now - 60000);
@@ -55,9 +55,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", e => errors.push(e.message));
-        await page.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "usage"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "usage"); } catch {} });
         await page.route("**/*", serve(lang, { quotas: fixtures() }));
-        await page.goto("http://magpie.test/?mode=panel");
+        await page.goto("http://eipgam.test/?mode=panel");
         await page.locator(`${card} .pq-dial b`, { hasText: "30%" }).waitFor();
         const wallet = page.locator(`${card} .pq-rings + .pq-sub`);
         await wallet.waitFor();

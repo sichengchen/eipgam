@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // HistoricalWindowHolds reckons each window at its last reading in

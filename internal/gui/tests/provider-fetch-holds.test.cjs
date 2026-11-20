@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 const fetched = new Date(Date.now() - 3600e3).toISOString();
 const ids = (n) => Array.from({ length: n }, (_, i) => `relay-model-${i}`);
 const relay = (models, on) => ({
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           const calls = [];
           await page.route("**/*", serve(lang, p, calls));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           const again = await page.evaluate(([l, s]) => (l === "en" ? s : I18N[l][s]), [lang, "Fetch models again"]);
           assert.ok(again, `Fetch models again has its ${lang}`);
 

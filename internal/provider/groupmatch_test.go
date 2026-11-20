@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func patternHome(t *testing.T) {
@@ -336,7 +336,7 @@ func TestRegexpPatternLookahead(t *testing.T) {
 func freePlugins(t *testing.T, wb []plugin.Model) {
 	t.Helper()
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	write := func(name string, v any) {
 		t.Helper()
 		b, _ := json.Marshal(v)
@@ -430,14 +430,14 @@ func TestGroupFreeRule(t *testing.T) {
 	}
 }
 
-// A free: rule is said as a pattern and kept as typed, magpie/ and spaces
+// A free: rule is said as a pattern and kept as typed, eipgam/ and spaces
 // trimmed; one naming nothing, or free: twice, is refused. A provider's
 // AutoInclude, over ids alone, reads free: as it did before.
 func TestFreeRuleSyntax(t *testing.T) {
 	if !IsPattern("free:workbuddy/hy3") || !IsPattern("free:re:workbuddy/hy.*") {
 		t.Error("IsPattern")
 	}
-	got, err := CleanPatterns([]string{" free: magpie/workbuddy/* ", "free:re:workbuddy/hy.*", "free:workbuddy/*"})
+	got, err := CleanPatterns([]string{" free: eipgam/workbuddy/* ", "free:re:workbuddy/hy.*", "free:workbuddy/*"})
 	if err != nil || !slices.Equal(got, []string{"free:workbuddy/*", "free:re:workbuddy/hy.*"}) {
 		t.Fatalf("clean: %v %v", got, err)
 	}

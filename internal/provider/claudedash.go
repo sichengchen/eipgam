@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // Claude Code takes a Claude model by its id's version written with dashes
@@ -97,10 +97,10 @@ func ClaudeSpelled(ref string) string {
 	return ref
 }
 
-// ClaudeRead is a model read back from Claude Code's settings as magpie
+// ClaudeRead is a model read back from Claude Code's settings as eipgam
 // serves it: a dashed spelling ClaudeSpelled wrote taken back to the
 // served id, anything else as it is. A model of a provider switched off
-// since is taken back too, so magpie still knows it for its own and moves
+// since is taken back too, so eipgam still knows it for its own and moves
 // the agent off it (Reseat).
 func ClaudeRead(ref string) string {
 	if real, ok := ClaudeUndashed(ref); ok {
@@ -135,11 +135,11 @@ var claudeOwnModel = lazyre.New(`^claude-(?:opus|sonnet|haiku|fable|mythos)-\d+(
 
 // ClaudeBare is ref (a served "provider/model", with a [1m] mark or not)
 // as Anthropic names it, without the provider, when ref is a Claude model
-// on Claude Code's own subscription in magpie and the bare id goes to that
+// on Claude Code's own subscription in eipgam and the bare id goes to that
 // same model (OwnRoute). Claude Desktop's Code tab on the user's own
 // subscription reads the model variables of settings.json and sends them to
 // Anthropic, which turns "anth/claude-haiku-5-5[1m]" away ("There's an
-// issue with the selected model", iryan_sun on X); through magpie the bare
+// issue with the selected model", iryan_sun on X); through eipgam the bare
 // id arrives at the same subscription. Haiku has no 1M window to mark, so
 // its mark is taken off. Anything else is as it is: another vendor's model
 // or a relay's has no id Anthropic knows, and one with an effort fixed
@@ -167,7 +167,7 @@ func ClaudeBare(ref string) string {
 }
 
 // ClaudeUnbare is ClaudeBare taken back: a Claude model of Anthropic's by
-// its bare id, which magpie sends to Claude Code's own subscription, is
+// its bare id, which eipgam sends to Claude Code's own subscription, is
 // that subscription's ref. Any other value is as it is.
 func ClaudeUnbare(v string) string {
 	id, rest := claudeSplit(v)

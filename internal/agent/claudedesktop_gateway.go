@@ -6,9 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Desktop's built-in SSH remote sessions run its Code tab on another
@@ -66,7 +66,7 @@ func desktopKey(gw string) string { return agentKeyAt("claude-desktop", gw) }
 // desktopSeedSSH puts Desktop's sshHostAllowlist in the profile, seeded once with every
 // host where the profile is pointed beyond loopback and has none: 3p mode
 // refuses every host without it, and the address was picked to reach one.
-// The user may narrow it in Desktop's window, or take it away; magpie never
+// The user may narrow it in Desktop's window, or take it away; eipgam never
 // writes it again (desktopSeedOnce).
 func desktopSeedSSH(p desktopPaths) error {
 	return desktopSeedOnce(p, desktopSSH, "sshHostAllowlist", []string{"*"})
@@ -87,7 +87,7 @@ func desktopGatewayField(ps []desktopPaths, apply func() error) Field {
 		Set: func(v string) error {
 			v = strings.TrimRight(strings.TrimSpace(v), "/")
 			if v != "" && !slices.Contains(desktopLANURLs(), v) {
-				return fmt.Errorf("Claude Desktop can be pointed at %q only while magpie is shared on the local network and serves https:// there (Settings > Network and sharing: Share on local network, HTTPS)", v)
+				return fmt.Errorf("Claude Desktop can be pointed at %q only while eipgam is shared on the local network and serves https:// there (Settings > Network and sharing: Share on local network, HTTPS)", v)
 			}
 			if err := settings.SetDesktopGateway(v); err != nil {
 				return err

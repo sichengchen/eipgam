@@ -8,13 +8,13 @@ let proxyForm = null;
 const proxyChecks = {}; // id -> { busy, out }
 const isSSH = (url) => /^ssh:\/\//i.test(url || "");
 const bareSSH = (url) => (url || "").replace(/^ssh:\/\//i, "");
-// a proxy's failure magpie explained (netproxy.Why) in the reader's
+// a proxy's failure eipgam explained (netproxy.Why) in the reader's
 // language, Go's words after it
 function proxyWhy(o) {
   const s = t(o.why, { addr: o.addr, was: o.was, now: o.now }), d = o.detail ?? o.error;
   return d ? s + " (" + d + ")" : s;
 }
-// a check's failure, said as magpie explained it when it could
+// a check's failure, said as eipgam explained it when it could
 const proxyFailed = (out) => (out.why ? proxyWhy(out) : out.error || "");
 // the country or region a check left from, by the trace page's ISO code,
 // named in the reader's language (IcyLiqu1d on X); a code Intl doesn't
@@ -143,7 +143,7 @@ function proxyFormRow(done) {
   const cancel = el("button", "text", t("Cancel"));
   // what is typed so far, kept when the kind or Advanced redraws the form
   const keep = () => Object.assign(f, { name: name.value, url: url.value, user: user.value });
-  // a proxy or an SSH server: an SSH server is logged in to, and magpie
+  // a proxy or an SSH server: an SSH server is logged in to, and eipgam
   // carries the requests through it itself (@laiuuui on X: a VPS gives
   // only SSH)
   const kind = segs([["proxy", t("Proxy")], ["ssh", "SSH"]], f.kind, (k) => { keep(); f.kind = k; f.err = ""; renderSettings(); });

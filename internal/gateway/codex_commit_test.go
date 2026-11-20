@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 // ephemeral turns whose answer must be the JSON its schema asks for
 // ({"message"}, {"title","body"}). A model behind the Chat API never sees
 // the schema and answers in plain text, which the app turned down (makenxis
-// on X), so magpie hands the text back in the schema's shape.
+// on X), so eipgam hands the text back in the schema's shape.
 func TestCodexCommitMessageOnMagpieProvider(t *testing.T) {
 	for _, c := range []struct{ source, schema, said, want string }{
 		{"commit_message", commitSchema, `Fix login redirect loop`, `{"message":"Fix login redirect loop"}`},

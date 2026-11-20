@@ -6,11 +6,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// magpie model api: the one API a provider's model is asked on, the
+// eipgam model api: the one API a provider's model is asked on, the
 // setting the provider editor's Model settings picks ("API this
 // model is asked on"), for a relay whose one key serves its models on
 // different APIs, set from a script (yew_fence_931206 on Discord). It is
@@ -18,13 +18,13 @@ import (
 // modelAPIs, which a running gateway reads for each request.
 
 const apiUsage = `usage:
-  magpie model api <provider/model>              the API the model is asked on, and the ones its provider has
-  magpie model api <provider/model>... <api>     ask the model(s) on this API: chat, responses, anthropic,
+  eipgam model api <provider/model>              the API the model is asked on, and the ones its provider has
+  eipgam model api <provider/model>... <api>     ask the model(s) on this API: chat, responses, anthropic,
                                                  gemini, or decide (System One: a decision model a routing
                                                  group asks as a turn begins); auto leaves it to the vendor's
                                                  list and every URL the provider has, as by default
-  magpie model api <provider/model>... --reset   the same as auto
-  magpie model apis [<provider>]                 the models you set an API for; with a provider, each of its
+  eipgam model api <provider/model>... --reset   the same as auto
+  eipgam model apis [<provider>]                 the models you set an API for; with a provider, each of its
                                                  models and the API it is asked on
 
   It is the provider editor's "API this model is asked on", under Model settings, and is
@@ -35,10 +35,10 @@ const apiUsage = `usage:
   are all checked first: a model the provider doesn't list, or an API it has no URL for, refuses
   the whole command, and nothing is written.
 
-  e.g. magpie model api relay/gpt-5.5 responses
-       magpie model api relay/claude-opus-5-5 relay/claude-sonnet-5 anthropic
-       magpie model api relay/gpt-5.5 --reset
-       magpie model apis relay`
+  e.g. eipgam model api relay/gpt-5.5 responses
+       eipgam model api relay/claude-opus-5-5 relay/claude-sonnet-5 anthropic
+       eipgam model api relay/gpt-5.5 --reset
+       eipgam model apis relay`
 
 // apiNames are the APIs a model can be set to be asked on, in the
 // editor's order.
@@ -118,7 +118,7 @@ func modelAPICmd(args []string) error {
 		// a setting kept for a model the vendor no longer lists can still
 		// be taken off
 		if !provider.ServesModel(*p, model) && !(val == "" && had) {
-			return fmt.Errorf("%s has no model %s (magpie provider models %s lists them)", p.ID, model, p.ID)
+			return fmt.Errorf("%s has no model %s (eipgam provider models %s lists them)", p.ID, model, p.ID)
 		}
 		if val != "" {
 			choices := apiChoices(p)
@@ -173,7 +173,7 @@ func showModelAPI(ref string) error {
 	}
 	saved, had := settings.Shared().ModelAPIs[p.ID+"/"+model]
 	if !provider.ServesModel(*p, model) && !had {
-		return fmt.Errorf("%s has no model %s (magpie provider models %s lists them)", p.ID, model, p.ID)
+		return fmt.Errorf("%s has no model %s (eipgam provider models %s lists them)", p.ID, model, p.ID)
 	}
 	choices := apiChoices(p)
 	id := p.ID + "/" + model
@@ -189,7 +189,7 @@ func showModelAPI(ref string) error {
 		fmt.Println(faint.Render("  · " + p.ID + " has one API only, so there is nothing to pick"))
 		return nil
 	}
-	fmt.Println(faint.Render("  · " + p.ID + " has " + apiList(choices) + " · magpie model api " + id + " <api> to pick one"))
+	fmt.Println(faint.Render("  · " + p.ID + " has " + apiList(choices) + " · eipgam model api " + id + " <api> to pick one"))
 	return nil
 }
 
@@ -208,7 +208,7 @@ func listedNote(p *provider.Provider, model string) string {
 	return ": as its vendor's list says, " + apiList(on)
 }
 
-// modelAPIs is `magpie model apis`: the models the user set an API for;
+// modelAPIs is `eipgam model apis`: the models the user set an API for;
 // with a provider, each of its models and the API it is asked on, for a
 // script to read.
 func modelAPIs(args []string) error {
@@ -237,7 +237,7 @@ func modelAPIs(args []string) error {
 			}
 		}
 		if len(models) == 0 {
-			fmt.Println(muted.Render(p.ID + " lists no models yet · magpie provider models " + p.ID))
+			fmt.Println(muted.Render(p.ID + " lists no models yet · eipgam provider models " + p.ID))
 			return nil
 		}
 		w := 0
@@ -262,7 +262,7 @@ func modelAPIs(args []string) error {
 	}
 	keys := slices.Sorted(maps.Keys(set))
 	if len(keys) == 0 {
-		fmt.Println(muted.Render("no model has an API of yours yet · magpie model api <provider/model> <api>"))
+		fmt.Println(muted.Render("no model has an API of yours yet · eipgam model api <provider/model> <api>"))
 		return nil
 	}
 	w := 0

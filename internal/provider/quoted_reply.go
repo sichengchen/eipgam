@@ -1,6 +1,6 @@
 package provider
 
-import "github.com/yetone/magpie/internal/redact"
+import "github.com/sichengchen/eipgam/internal/redact"
 
 // quotedReplyMax is the most of a reply QuotedReply scrubs whole, as JSON;
 // past it the head alone is scrubbed, as text.

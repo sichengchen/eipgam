@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/gwbudget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/budget"
+	"github.com/sichengchen/eipgam/internal/gwbudget"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // limitClock is the time a gateway key's limit is checked at: the window
@@ -23,7 +23,7 @@ import (
 var limitClock = time.Now
 
 // remoteKeyLimitHeader marks a 429 as the gateway key's own limit, not a
-// provider's: a magpie that uses this one as a remote rests its key on it,
+// provider's: a eipgam that uses this one as a remote rests its key on it,
 // and only its model on any other refusal (#2077).
 const remoteKeyLimitHeader = "X-Magpie-Limit-Reset"
 
@@ -50,7 +50,7 @@ func keyLimited(next http.Handler) http.Handler {
 		}
 		// a realtime session is opened by a GET and spends as a chat does
 		rt := realtimeUpgrade(r)
-		if !who.Limited() || r.Method != http.MethodPost && !rt || strings.HasPrefix(r.URL.Path, "/_magpie/") || strings.HasPrefix(r.URL.Path, "/mcp/") || r.URL.Path == KeysPath {
+		if !who.Limited() || r.Method != http.MethodPost && !rt || strings.HasPrefix(r.URL.Path, "/_eipgam/") || strings.HasPrefix(r.URL.Path, "/mcp/") || r.URL.Path == KeysPath {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -163,11 +163,11 @@ func protoOfPath(path string) provider.Protocol {
 	return provider.Chat
 }
 
-// keyLimit answers GET /v1/magpie/limit: the calling gateway key's limit,
+// keyLimit answers GET /v1/eipgam/limit: the calling gateway key's limit,
 // what it has used and when it resets; {"limited":false} for a key with
 // none or a request without one. "limits" is each of a key's limits
 // (#2227), and "limit" the one holding it most (budget.Binding), which is
-// what a magpie from before them reads.
+// what a eipgam from before them reads.
 //
 // A key held to a budget, models or accounts is told so as well, so this
 // agrees with the quotas and the status line (steven_4422: a key held to

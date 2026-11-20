@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // axelburks on Discord: a plugin's model that thinks with no variants,
@@ -22,7 +22,7 @@ import (
 // kept of them narrow what is offered.
 func TestPluginModelListedAsBorrowsLevels(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
 	os.WriteFile(catalog.CachePath(), []byte(`{
 	  "anthropic":{"id":"anthropic","models":{"claude-opus-5.5":{"id":"claude-opus-5.5","reasoning":true,

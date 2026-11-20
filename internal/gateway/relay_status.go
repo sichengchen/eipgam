@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // relayStatus relays a backend's events and keeps its upstream failures

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // keepCodexReading puts q in the cache as the reading of the account Codex
@@ -34,11 +34,11 @@ func heldAt(reset time.Time) SubscriptionQuota {
 	}}
 }
 
-// davezfr on X: Codex signed in to account 1 showed "magpie" for its
+// davezfr on X: Codex signed in to account 1 showed "eipgam" for its
 // account in the Codex app, account 2 its own. Account 1 had run out
-// earlier, and the reading magpie kept of it in memory said held, with no
+// earlier, and the reading eipgam kept of it in memory said held, with no
 // end: the catalog sync (CodexUsedUpKnown) took the account as still out
-// once Codex was on it again, past its window's reset, and made magpie
+// once Codex was on it again, past its window's reset, and made eipgam
 // Codex's provider for it (codex.out), where the app reads no account. A
 // hold that came with a window used up ends when that window starts
 // again, as the reading kept on disk already has it (lastQuotasT.reading).
@@ -82,8 +82,8 @@ func TestCodexHoldEndsAtItsWindowsReset(t *testing.T) {
 // loop's fresh read changes that, the sync is told, though the loop's own
 // last answer was the same: Codex was on another account with room at the
 // last look, then signed in to one whose kept reading said held, and the
-// sync made magpie its provider for it. The fresh read saying room left
-// magpie its provider till something else ran the sync.
+// sync made eipgam its provider for it. The fresh read saying room left
+// eipgam its provider till something else ran the sync.
 func TestCodexUsedUpToldWhenKnownChanges(t *testing.T) {
 	told := 0
 	was := catalog.Changed

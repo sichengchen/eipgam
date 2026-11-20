@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // prevEnv is a sandbox with one provider, fresh responses kept, and an
@@ -134,7 +134,7 @@ func TestPreviousResponseGivenWholeToChat(t *testing.T) {
 	}
 }
 
-// An id magpie doesn't hold, to a provider it would be translated for,
+// An id eipgam doesn't hold, to a provider it would be translated for,
 // is OpenAI's own 400; so is one another gateway key's response, and one
 // the client asked not be kept (store false).
 func TestPreviousResponseNotFound(t *testing.T) {
@@ -164,9 +164,9 @@ func TestPreviousResponseNotFound(t *testing.T) {
 	notFound(askResponses(t, s, "", `{"model":"fake/m1","previous_response_id":"`+off+`","input":"again"}`), off)
 }
 
-// An id magpie doesn't hold, to a provider on Responses the request is
+// An id eipgam doesn't hold, to a provider on Responses the request is
 // relayed to, goes as it came: a response the provider made before
-// magpie restarted is still its own to find.
+// eipgam restarted is still its own to find.
 func TestUnknownPreviousResponseRelayedAsSent(t *testing.T) {
 	up := newPrevUp(t, func(int, []byte) (int, string, string) {
 		return 200, "application/json", `{"id":"resp_up","object":"response","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"ok"}]}],"usage":{"input_tokens":3,"output_tokens":1}}`
@@ -350,7 +350,7 @@ func TestPreviousResponseOtherResourceDeltaSentWhole(t *testing.T) {
 }
 
 // The same behind a provider that doesn't keep responses, sent the whole
-// each turn: the items magpie brought back are what is turned away, and
+// each turn: the items eipgam brought back are what is turned away, and
 // they go once more without their ids. A refusal with nothing left to
 // take out is passed on, not asked again as it was.
 func TestPreviousResponseOtherResourceWholeSentWithoutIDs(t *testing.T) {
@@ -370,7 +370,7 @@ func TestPreviousResponseOtherResourceWholeSentWithoutIDs(t *testing.T) {
 	}
 	wholeWithoutIDs(t, up.last())
 
-	// the client's own item with an id: nothing of magpie's to take out
+	// the client's own item with an id: nothing of eipgam's to take out
 	rec = askResponses(t, s, "", `{"model":"fake/m1","input":[{"type":"message","id":"msg_mine","role":"user","content":"hi"}]}`)
 	if rec.Code != 400 || up.calls() != 4 {
 		t.Fatalf("client given %d after %d calls, want the 400 after one", rec.Code, up.calls()-3)

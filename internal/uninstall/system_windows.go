@@ -8,12 +8,12 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
-const schemeKey = `Software\Classes\magpie`
+const schemeKey = `Software\Classes\eipgam`
 
-// unregisterScheme takes out the magpie:// and ccswitch:// handlers the app
+// unregisterScheme takes out the eipgam:// and ccswitch:// handlers the app
 // registered while they open exe, or an exe that is gone.
 func unregisterScheme(exe string) error {
 	return errors.Join(removeSchemeKey(schemeKey, exe), removeSchemeKey(`Software\Classes\ccswitch`, exe))
@@ -28,7 +28,7 @@ func removeSchemeKey(key, exe string) error {
 	k.Close()
 	if run, _, ok := strings.Cut(strings.TrimPrefix(v, `"`), `"`); ok && !strings.EqualFold(filepath.Clean(run), filepath.Clean(exe)) {
 		if _, err := os.Stat(run); err == nil {
-			return nil // another magpie's
+			return nil // another eipgam's
 		}
 	}
 	for _, sub := range []string{`\shell\open\command`, `\shell\open`, `\shell`, `\DefaultIcon`, ``} {
@@ -39,8 +39,8 @@ func removeSchemeKey(key, exe string) error {
 	return nil
 }
 
-// webData is WebView2's profile of an installed magpie: %APPDATA%\<exe
-// name>, and the one a magpie installed from a download keeps under the
+// webData is WebView2's profile of an installed eipgam: %APPDATA%\<exe
+// name>, and the one a eipgam installed from a download keeps under the
 // download's name (appdir.WebView, update.Settle). Portable, it is in the
 // data folder already.
 func webData() []string {

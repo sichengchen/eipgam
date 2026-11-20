@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/library"
 )
 
 // #6685: a plugin installed through the Library on one computer is on the
@@ -91,7 +91,7 @@ func TestSyncLibraryPlugins(t *testing.T) {
 }
 
 // A library with no plugins hashes as it did before they were carried, so
-// a magpie that starts carrying them doesn't see a change to sync.
+// a eipgam that starts carrying them doesn't see a change to sync.
 func TestNoPluginsHashAsBefore(t *testing.T) {
 	none := []*library.CarriedPlugin{}
 	with := backup.Bundle{Library: &library.Bundle{MCP: []*library.Server{}, Skills: []*library.CarriedSkill{}, Plugins: &none}}

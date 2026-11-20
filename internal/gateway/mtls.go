@@ -14,14 +14,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/mtls"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // mTLS (hhdaxia on X, #5596): with Settings → Network and sharing →
-// Require a client certificate on (settings MTLS, `magpie mtls on`), other
-// computers reach the gateway and magpie web's page only over TLS, showing
-// a client certificate magpie's own CA issued (`magpie mtls issue`) and
+// Require a client certificate on (settings MTLS, `eipgam mtls on`), other
+// computers reach the gateway and eipgam web's page only over TLS, showing
+// a client certificate eipgam's own CA issued (`eipgam mtls issue`) and
 // hasn't revoked:
 //
 //   - the TLS listener (tlsListener) asks every peer that isn't this
@@ -29,7 +29,7 @@ import (
 //     of a peer without a good one before any HTTP is read;
 //   - the guards (lanGuard, ClientCertGuard) refuse 403 every request from
 //     another machine that came without a verified one: a proxy's or
-//     tunnel's on loopback (proxied), magpie web's page port, the WSL
+//     tunnel's on loopback (proxied), eipgam web's page port, the WSL
 //     listener's plain HTTP from a peer that isn't WSL's, a connection
 //     made before the switch was turned on, or a certificate revoked
 //     since its connection's handshake.
@@ -41,14 +41,14 @@ import (
 // (ownServerCert); with --tls-cert it is that one, and the CA is used for
 // the client certificates alone.
 
-// MTLSOn: other computers need a client certificate magpie issued.
+// MTLSOn: other computers need a client certificate eipgam issued.
 func MTLSOn() bool { return settings.Shared().MTLS }
 
-// MTLSStore is where magpie's CA and the client certificates it issued are
+// MTLSStore is where eipgam's CA and the client certificates it issued are
 // kept.
 func MTLSStore() mtls.Store { return mtls.Store{Dir: filepath.Join(settings.Dir(), "mtls")} }
 
-// clientCertAdmitted: r came over TLS with a client certificate magpie's
+// clientCertAdmitted: r came over TLS with a client certificate eipgam's
 // CA verified at the handshake, which is still on the issued list.
 func clientCertAdmitted(r *http.Request) bool {
 	if r.TLS == nil || len(r.TLS.VerifiedChains) == 0 || len(r.TLS.PeerCertificates) == 0 {
@@ -89,16 +89,16 @@ func NeedsClientCert(r *http.Request) string {
 	if clientCertAdmitted(r) || local(r) || ownAddress(r) || fromWSL(takeWSLPathKey(r)) {
 		return ""
 	}
-	why := "magpie asks other computers for a client certificate it issued (Settings → Network and sharing → Require a client certificate), and this request came without a good one"
+	why := "eipgam asks other computers for a client certificate it issued (Settings → Network and sharing → Require a client certificate), and this request came without a good one"
 	switch {
 	case r.TLS == nil && proxied(r):
-		why += ": it came through a proxy or tunnel, which can't pass a certificate on; reach magpie directly over https://, or have the proxy check client certificates itself and set MAGPIE_TRUST_PROXY=1"
+		why += ": it came through a proxy or tunnel, which can't pass a certificate on; reach eipgam directly over https://, or have the proxy check client certificates itself and set EIPGAM_TRUST_PROXY=1"
 	case r.TLS == nil:
-		why += ": it came over plain HTTP; call magpie at https://"
+		why += ": it came over plain HTTP; call eipgam at https://"
 	case len(r.TLS.PeerCertificates) > 0:
-		why += ": the certificate shown was revoked or isn't one this magpie issued"
+		why += ": the certificate shown was revoked or isn't one this eipgam issued"
 	default:
-		why += ": issue one with `magpie mtls issue <device>` and give it to the client"
+		why += ": issue one with `eipgam mtls issue <device>` and give it to the client"
 	}
 	return why
 }
@@ -116,7 +116,7 @@ func refuseWithoutClientCert(w http.ResponseWriter, r *http.Request) bool {
 }
 
 // ClientCertGuard refuses a request mtlsRefuses, for a server other than
-// the gateway's own (magpie web's page).
+// the gateway's own (eipgam web's page).
 func ClientCertGuard(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if refuseWithoutClientCert(w, r) {
@@ -127,7 +127,7 @@ func ClientCertGuard(next http.Handler) http.Handler {
 }
 
 // tlsServer is what a listener serves TLS with: the files --tls-cert
-// names, or with mTLS on and none named, a certificate magpie's CA signs.
+// names, or with mTLS on and none named, a certificate eipgam's CA signs.
 // It is asked for each connection, so turning mTLS on or off takes effect
 // for the next one without listening again.
 type tlsServer struct {
@@ -160,7 +160,7 @@ func (t *tlsServer) config(strict bool) *tls.Config {
 	st := MTLSStore()
 	pool, err := mtlsPool(st)
 	if err != nil {
-		log.Printf("mTLS: magpie's CA can't be read (%v): no client certificate is taken", err)
+		log.Printf("mTLS: eipgam's CA can't be read (%v): no client certificate is taken", err)
 		pool = x509.NewCertPool()
 	}
 	cfg.ClientCAs = pool
@@ -208,7 +208,7 @@ var ownCerts struct {
 	cert  *tls.Certificate
 }
 
-// ownServerCert is a server certificate magpie's CA signs for this
+// ownServerCert is a server certificate eipgam's CA signs for this
 // computer's names and addresses and the name the client dialled (a DDNS
 // or Tailscale name): only a client given the CA trusts it, so the name a
 // client asks for is the one it gets. Made in memory, and again when the
@@ -249,7 +249,7 @@ func ownServerCert(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	}
 	c, err := st.ServerCert(names, ips)
 	if err != nil {
-		return nil, errors.New("TLS: magpie's CA can't sign a server certificate: " + err.Error())
+		return nil, errors.New("TLS: eipgam's CA can't sign a server certificate: " + err.Error())
 	}
 	ownCerts.key, ownCerts.stamp, ownCerts.made, ownCerts.cert = key.String(), stampOf(st.CAFile()), time.Now(), &c
 	return &c, nil

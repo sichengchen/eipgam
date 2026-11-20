@@ -138,7 +138,7 @@ func launchLine(p *registryPackage) (cmd string, args []string, inputs []Input, 
 		case t != nil:
 			pa = append(pa, t...)
 		case need && a.Type == "named":
-			return "", nil, nil, false // a named argument magpie can't fill
+			return "", nil, nil, false // a named argument eipgam can't fill
 		case need:
 			label := a.ValueHint
 			if label == "" {
@@ -326,7 +326,7 @@ func pickBin(bins []string, id string) string {
 	return ""
 }
 
-// oldLine is the line magpie offered package p with before
+// oldLine is the line eipgam offered package p with before
 // runtimeArguments and the package's executables were read: the runtime,
 // the package, and its packageArguments as they came.
 func oldLine(p *registryPackage) (string, []string) {
@@ -351,7 +351,7 @@ func lineKey(cmd string, args []string) string {
 	return cmd + "\x00" + strings.Join(args, "\x00")
 }
 
-// marketFixes are the popular servers whose line is not the one magpie
+// marketFixes are the popular servers whose line is not the one eipgam
 // offered before, by that old line: a library that has one installed from
 // the market unchanged (Serena's `uvx serena-agent`, which exits 2) is
 // given the line that starts it.

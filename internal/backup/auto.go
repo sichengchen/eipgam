@@ -16,10 +16,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Backups made by themselves (jwaitq on Discord, who got their setup back
@@ -66,7 +66,7 @@ var (
 	AutoKeeps = []int{3, 7, 14, 30}
 )
 
-const autoFormat = "magpie-auto-backup"
+const autoFormat = "eipgam-auto-backup"
 
 // Reasons a backup was made: by the schedule (or Back up now), or as what
 // was here before a restore, to undo it.
@@ -220,9 +220,9 @@ func autoSignIns(c AutoConfig) (autoSealed, error) {
 // autoName is a backup's file name; anything else in the folder (the
 // temporary file one is written to, the user's own files) is never listed,
 // put back or removed.
-var autoName = lazyre.New(`^magpie-(\d{8}-\d{6})(?:-\d+)?-(auto|restore)\.json$`)
+var autoName = lazyre.New(`^eipgam-(\d{8}-\d{6})(?:-\d+)?-(auto|restore)\.json$`)
 
-const autoTemp = ".magpie-backup-*.tmp"
+const autoTemp = ".eipgam-backup-*.tmp"
 
 // autoRename puts a written backup at its name: a var so a test can stop
 // a write there.
@@ -244,7 +244,7 @@ type autoSeenFile struct {
 }
 
 // bundleBytes is the bundle as a backup holds it, with what changes on
-// every collect (when, by which magpie) taken out, so the same setup is the
+// every collect (when, by which eipgam) taken out, so the same setup is the
 // same bytes and makes no new backup.
 func bundleBytes(b Bundle) ([]byte, string, error) {
 	b.Created, b.App = time.Time{}, ""
@@ -294,12 +294,12 @@ func writeAuto(dir, reason string, b Bundle, si autoSealed, now time.Time) (Auto
 	}
 	os.Chmod(tmp.Name(), 0o600)
 	stamp := now.UTC().Format("20060102-150405")
-	name := "magpie-" + stamp + "-" + reason + ".json"
+	name := "eipgam-" + stamp + "-" + reason + ".json"
 	for i := 2; ; i++ { // never over another
 		if _, err := os.Lstat(filepath.Join(dir, name)); errors.Is(err, os.ErrNotExist) {
 			break
 		}
-		name = fmt.Sprintf("magpie-%s-%d-%s.json", stamp, i, reason)
+		name = fmt.Sprintf("eipgam-%s-%d-%s.json", stamp, i, reason)
 	}
 	if err := autoRename(tmp.Name(), filepath.Join(dir, name)); err != nil {
 		os.Remove(tmp.Name())
@@ -320,7 +320,7 @@ func readAuto(path string) (AutoBackup, autoFile, error) {
 		return AutoBackup{}, f, ErrCorrupt
 	}
 	if f.Version != 1 {
-		return AutoBackup{}, f, errors.New("this backup was made by a newer magpie; update magpie to open it")
+		return AutoBackup{}, f, errors.New("this backup was made by a newer eipgam; update eipgam to open it")
 	}
 	s := sha256.Sum256(f.Bundle)
 	if hex.EncodeToString(s[:]) != f.Sum || (f.Reason != ReasonAuto && f.Reason != ReasonRestore) {
@@ -549,7 +549,7 @@ type AutoView struct {
 	Keep   int    `json:"keep"`
 	Dir    string `json:"dir"`
 	Custom bool   `json:"custom"` // a folder the user picked
-	// Inside: the folder is in magpie's own, so a wiped disk or a
+	// Inside: the folder is in eipgam's own, so a wiped disk or a
 	// reinstalled system takes the backups along with what they back up
 	// (two_2025. on Discord: everything is on C:, lost on a reinstall).
 	// Settings says so beside the folder, for one on another disk.
@@ -616,7 +616,7 @@ func RunAuto(ctx context.Context) {
 		case <-t.C:
 		}
 		t.Reset(autoPoll)
-		_, err := AutoTick(time.Now(), "magpie")
+		_, err := AutoTick(time.Now(), "eipgam")
 		autoMu.Lock()
 		if msg := fmt.Sprint(err); err != nil && msg != autoErr {
 			log.Printf("backing up by itself: %s", msg)

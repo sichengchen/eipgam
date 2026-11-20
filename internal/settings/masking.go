@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/sichengchen/eipgam/internal/redact"
 )
 
 // How many values the masking allowlist may hold, and how long each.

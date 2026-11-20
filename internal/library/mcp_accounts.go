@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
 )
 
 // A remote server can hold several accounts (Elorynth on X: several OAuth
@@ -162,8 +162,8 @@ func SignInServerAccount(ctx context.Context, name, label string) (mcpauth.State
 	return signInServer(ctx, name, &label)
 }
 
-// UseSignIn puts one of magpie's sign-ins to the server in use.
+// UseSignIn puts one of eipgam's sign-ins to the server in use.
 func UseSignIn(name, id string) error { return mcpauth.Use(name, id) }
 
-// RemoveSignIn forgets one of magpie's sign-ins to the server.
+// RemoveSignIn forgets one of eipgam's sign-ins to the server.
 func RemoveSignIn(name, id string) error { return mcpauth.RemoveAccount(name, id) }

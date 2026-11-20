@@ -6,11 +6,11 @@ import (
 	"os/exec"
 	"os/signal"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
-// claudeRunOS starts claude and waits for it, its exit code magpie's, as
-// startExecOS does. Ctrl+C is claude's to handle, so magpie lets it pass.
+// claudeRunOS starts claude and waits for it, its exit code eipgam's, as
+// startExecOS does. Ctrl+C is claude's to handle, so eipgam lets it pass.
 func claudeRunOS(bin string, args, env []string) error {
 	cmd := proc.Command(bin, args...)
 	cmd.Env = env

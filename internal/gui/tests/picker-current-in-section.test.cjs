@@ -2,7 +2,7 @@
 // An agent's current model is listed first in its picker, out of its
 // provider's section (#1229), and says whose it is there. Without it,
 // WorkBuddy AI's Deepseek-V4.1-Flash on top read as WorkBuddy's
-// DeepSeek-V4.1-Flash, and WorkBuddy AI's section, Hy4 alone, as if magpie
+// DeepSeek-V4.1-Flash, and WorkBuddy AI's section, Hy4 alone, as if eipgam
 // had dropped it (ADNANYURTSEVER3 on X). The two spellings, which differ
 // only in case, stay two rows. In the rail's provider and for a query the
 // model is listed once, in its place. Chromium and WebKit, wide and narrow,
@@ -14,17 +14,17 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const row = (group, icon, id, label, note) => ({ value: "magpie/" + id, ref: id, label, group, icon, note });
+const row = (group, icon, id, label, note) => ({ value: "eipgam/" + id, ref: id, label, group, icon, note });
 const options = [
-  row("Routing groups", "workbuddy-color", "auto/DeepSeek-V4.1-Flash", "DeepSeek V4.1 Flash", "routing group · via magpie"),
-  row("Routing groups", "workbuddy-color", "auto/Hy4", "Hy4", "routing group · via magpie"),
-  row("DeepSeek", "deepseek-color", "deepseek/deepseek-v4-flash", "DeepSeek V4 Flash", "DeepSeek · via magpie"),
-  row("WorkBuddy", "workbuddy-color", "workbuddy/Hy4", "Hy4", "a@example.com · via magpie"),
-  row("WorkBuddy", "workbuddy-color", "workbuddy/DeepSeek-V4.1-Flash", "DeepSeek-V4.1-Flash", "a@example.com · via magpie"),
-  row("WorkBuddy AI", "workbuddy-color", "workbuddy-ai/Hy4", "Hy4", "b@example.com · via magpie"),
-  row("WorkBuddy AI", "workbuddy-color", "workbuddy-ai/Deepseek-V4.1-Flash", "Deepseek-V4.1-Flash", "b@example.com · via magpie"),
+  row("Routing groups", "workbuddy-color", "auto/DeepSeek-V4.1-Flash", "DeepSeek V4.1 Flash", "routing group · via eipgam"),
+  row("Routing groups", "workbuddy-color", "auto/Hy4", "Hy4", "routing group · via eipgam"),
+  row("DeepSeek", "deepseek-color", "deepseek/deepseek-v4-flash", "DeepSeek V4 Flash", "DeepSeek · via eipgam"),
+  row("WorkBuddy", "workbuddy-color", "workbuddy/Hy4", "Hy4", "a@example.com · via eipgam"),
+  row("WorkBuddy", "workbuddy-color", "workbuddy/DeepSeek-V4.1-Flash", "DeepSeek-V4.1-Flash", "a@example.com · via eipgam"),
+  row("WorkBuddy AI", "workbuddy-color", "workbuddy-ai/Hy4", "Hy4", "b@example.com · via eipgam"),
+  row("WorkBuddy AI", "workbuddy-color", "workbuddy-ai/Deepseek-V4.1-Flash", "Deepseek-V4.1-Flash", "b@example.com · via eipgam"),
 ];
-const CUR = "magpie/workbuddy-ai/Deepseek-V4.1-Flash";
+const CUR = "eipgam/workbuddy-ai/Deepseek-V4.1-Flash";
 const state = (lang) => ({
   agents: [{ id: "opencode", name: "OpenCode", path: "/test/opencode.json", icon: "opencode", wired: true, fields: [{ key: "model", label: "model", value: CUR, options }] }],
   profiles: [], settings: { lang, theme: "light", guideHidden: true },
@@ -68,8 +68,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const page = await browser.newPage({ viewport: { width, height: 760 } });
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
-          await page.route("http://magpie.test/**", serve(state(lang), lang));
-          await page.goto("http://magpie.test/");
+          await page.route("http://eipgam.test/**", serve(state(lang), lang));
+          await page.goto("http://eipgam.test/");
           await page.locator('#nav [data-view="agents"]').click();
           await page.locator("#agents .ag-link").first().click();
           await page.locator('#agents [data-key="model"]').first().click();

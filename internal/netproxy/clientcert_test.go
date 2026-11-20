@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/mtls"
 )
 
 // mtlsServer is an HTTPS server with a certificate st's CA signs, that

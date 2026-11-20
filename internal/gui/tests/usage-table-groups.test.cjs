@@ -64,9 +64,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.addInitScript(() => localStorage.setItem("magpie.quotaView", '"table"'));
+        await page.addInitScript(() => localStorage.setItem("eipgam.quotaView", '"table"'));
         await page.route("**/*", serve(lang, accounts));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.waitForSelector("#subscriptionUsage .qt tbody tr");
         const rows = () => page.$$eval(".qt tbody tr", (trs) => trs.map((tr) => ({ cls: tr.className, p: tr.dataset.provider, text: tr.innerText.replace(/\s+/g, " ").trim() })));
 
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // a failed read counts for nothing in the mean
         assert.match(r[2].text, /\b0%/);
         assert.equal(await page.locator('.qt-group[data-provider="zcode"] .qt-fold').getAttribute("aria-expanded"), "false");
-        assert.equal(await page.evaluate(() => localStorage.getItem("magpie.quotaTableOpen")), null);
+        assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.quotaTableOpen")), null);
 
         // a click opens it in place, the page not moving
         const at0 = await page.evaluate(() => [scrollY, document.querySelector("#view-usage")?.scrollTop ?? 0]);
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.reload();
         await page.waitForSelector("#subscriptionUsage .qt tbody tr.qt-kid");
         assert.equal(await page.locator(".qt tbody tr.qt-kid").count(), 3);
-        assert.equal(await page.evaluate(() => localStorage.getItem("magpie.quotaTableOpen")), '["zcode"]');
+        assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.quotaTableOpen")), '["zcode"]');
 
         // the keyboard: Enter on the row's button folds it, the focus stays
         await page.locator('.qt-group[data-provider="zcode"] .qt-fold').focus();
@@ -121,9 +121,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.addInitScript(() => localStorage.setItem("magpie.quotaView", '"table"'));
+        await page.addInitScript(() => localStorage.setItem("eipgam.quotaView", '"table"'));
         await page.route("**/*", serve(lang, unnamed));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.waitForSelector("#subscriptionUsage .qt tbody tr");
         const account = await page.evaluate(() => t("Account"));
         const heads = await page.$$eval(".qt thead th", (ths) => ths.map((x) => x.textContent.replace(/[↑↓]/g, "").trim()));

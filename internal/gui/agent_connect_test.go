@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The Agents page's switch: connecting Codex puts it on magpie with the
+// The Agents page's switch: connecting Codex puts it on eipgam with the
 // whole catalog in its own model list — the model it was on, served by
-// magpie, when magpie has it — and switching it off puts back what it had.
+// eipgam, when eipgam has it — and switching it off puts back what it had.
 func TestAgentConnectAPI(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -56,7 +56,7 @@ func TestAgentConnectAPI(t *testing.T) {
 	if !a.Wired || a.Fields[0].Value != "relay/m2" {
 		t.Fatalf("after connect: wired %v, model %q", a.Wired, a.Fields[0].Value)
 	}
-	cat, err := os.ReadFile(filepath.Join(home, ".codex", "magpie-models.json"))
+	cat, err := os.ReadFile(filepath.Join(home, ".codex", "eipgam-models.json"))
 	if err != nil || !strings.Contains(string(cat), "relay/m1") || !strings.Contains(string(cat), "relay/m2") {
 		t.Fatalf("Codex's model list: %s %v", cat, err)
 	}
@@ -135,7 +135,7 @@ func TestClaudeDirConnectURL(t *testing.T) {
 }
 
 // Claude Code's /model lists modelPicker's rows: connected, they are
-// magpie's models; switched off, they go, and a modelPicker the user wrote
+// eipgam's models; switched off, they go, and a modelPicker the user wrote
 // is never touched.
 func TestAgentConnectClaudePicker(t *testing.T) {
 	home := t.TempDir()

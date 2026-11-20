@@ -69,11 +69,11 @@ func TestConfigHasEveryExport(t *testing.T) {
 	}
 }
 
-// The zip a browser outside magpie's computer or container loads holds
+// The zip a browser outside eipgam's computer or container loads holds
 // the extension's folder, pointed at the address it was asked for and
 // carrying the key.
 func TestZipCarriesAddressAndKey(t *testing.T) {
-	b, err := Zip("https://magpie.example:8443", "mk-\"x")
+	b, err := Zip("https://eipgam.example:8443", "mk-\"x")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func TestZipCarriesAddressAndKey(t *testing.T) {
 		seen[f.Name] = string(body)
 	}
 	cfg := seen[Folder+"/config.js"]
-	if !strings.Contains(cfg, `export const GATEWAY = "wss://magpie.example:8443";`) || !strings.Contains(cfg, `export const KEY = "mk-\"x";`) {
+	if !strings.Contains(cfg, `export const GATEWAY = "wss://eipgam.example:8443";`) || !strings.Contains(cfg, `export const KEY = "mk-\"x";`) {
 		t.Fatalf("config.js: %s", cfg)
 	}
 	for _, name := range []string{"manifest.json", "background.js", "popup.js"} {
@@ -114,7 +114,7 @@ func TestOlder(t *testing.T) {
 	}
 }
 
-// Refresh writes over the folders an older magpie wrote, and no other.
+// Refresh writes over the folders an older eipgam wrote, and no other.
 func TestRefreshWritesOnlyWrittenFolders(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

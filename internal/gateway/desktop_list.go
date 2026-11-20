@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A model the user picks for one of Claude Desktop's tiers is, for the
@@ -22,7 +22,7 @@ import (
 // behaves_as feeds Desktop's own effort profile only). A list there
 // replaces the gateway's /v1/models in Desktop's menu, and while none of
 // its names is a bare tier word Desktop doesn't read /v1/models at all
-// (adminListObviatesDiscovery), so the list magpie writes is the whole of
+// (adminListObviatesDiscovery), so the list eipgam writes is the whole of
 // what /v1/models gives Desktop, in its order, by its ids, each with what
 // Desktop would have read off the row: its display_name as labelOverride,
 // supports1m for a window of 1M and up (and prefer1m for a model listed by
@@ -91,10 +91,10 @@ func DesktopTierAliases() map[string][]string {
 	return out
 }
 
-// DesktopInferenceModels is the inferenceModels list magpie gives Claude
+// DesktopInferenceModels is the inferenceModels list eipgam gives Claude
 // Desktop's profile: nil while no model it lists is picked for a tier and
 // no two rows read alike there (desktopNamesClash), when Desktop finds
-// magpie's models on its own (/v1/models). ok is false
+// eipgam's models on its own (/v1/models). ok is false
 // when the picks can't be read: whatever is written stays. A model picked
 // for two tiers is tagged here with the first only; the later tiers are
 // given it through /v1/models (DesktopTierRows), as every entry here is a
@@ -118,7 +118,7 @@ func DesktopInferenceModels() (list []map[string]any, ok bool) {
 		// in its app.asar, 4.4212), unless modelDiscoveryEnabled says to
 		// (DesktopDiscovers), and names an entry by its labelOverride,
 		// else its catalog's name, else the discovered row's, else the id
-		// itself (pzn, ngn): every mythos-magpie-<n> read as that id
+		// itself (pzn, ngn): every mythos-eipgam-<n> read as that id
 		// (chengming0v0 on Discord). Each entry is labelled as /v1/models
 		// labels its row, a catalog-named Claude model too, whose
 		// provider the skipped description said (desktopSaidBy).
@@ -185,7 +185,7 @@ func desktopCatalogNamed(id string) string {
 	return ""
 }
 
-// DesktopDiscovers says magpie's Desktop profile has Desktop read
+// DesktopDiscovers says eipgam's Desktop profile has Desktop read
 // /v1/models beside its inferenceModels (modelDiscoveryEnabled): while a
 // model is picked for two tiers, whose later tiers only /v1/models gives
 // (DesktopTierRows). Desktop's Code tab pins a tier from a discovered row
@@ -277,13 +277,13 @@ func desktopTierKey(id, t string) string { return id + "\x00" + t }
 // entries apart and Claude Code knows a Claude model by either, which
 // aliased reads back to e and the gateway serves as the pick. A model
 // listed by its own id has no number to change, and is listed for the
-// tier as anthropic/magpie-<number>, which runs as e (desktopRunsAs).
+// tier as anthropic/eipgam-<number>, which runs as e (desktopRunsAs).
 func desktopTierAlias(e provider.Entry, t string) string {
 	n := aliasNumber(desktopTierKey(e.ID, t))
 	id := claudeLooking(e)
-	if rest, ok := strings.CutPrefix(id, "magpie-"); ok {
+	if rest, ok := strings.CutPrefix(id, "eipgam-"); ok {
 		if i := strings.Index(rest, desktopClaudeInfix); i > 0 {
-			return "magpie-" + n + rest[i:]
+			return "eipgam-" + n + rest[i:]
 		}
 	}
 	if strings.HasPrefix(id, desktopEffortAlias) {
@@ -312,9 +312,9 @@ func desktopTiersKnown() (map[string]string, bool) {
 // desktopRunsAs is the behavesAs of e, picked for tier t, listed by id:
 // none when Claude Code knows a Claude model by that id on its own, else
 // the Claude model e is, else t's newest. A routing group led by a Claude
-// model is shown by its mythos-magpie-<n> (claudeLooking), which Claude
+// model is shown by its mythos-eipgam-<n> (claudeLooking), which Claude
 // Code doesn't know, so it is given the group's model, as a model listed
-// by anthropic/magpie-<n> is.
+// by anthropic/eipgam-<n> is.
 func desktopRunsAs(e provider.Entry, id, t string) string {
 	m := claudeModel(e)
 	if m == "" {

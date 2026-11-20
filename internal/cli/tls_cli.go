@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // tlsFlags takes --tls-cert <file> and --tls-key <file> (or =<file>) out
-// of args, sets them for the gateway over MAGPIE_TLS_CERT and
-// MAGPIE_TLS_KEY, and checks the pair: one without the other, or files
+// of args, sets them for the gateway over EIPGAM_TLS_CERT and
+// EIPGAM_TLS_KEY, and checks the pair: one without the other, or files
 // that don't load, refuse to start rather than serve plain HTTP the user
 // didn't ask for. rest is the other arguments.
 func tlsFlags(args []string) (rest []string, err error) {
@@ -44,7 +44,7 @@ func tlsLine() string {
 	}
 	cert, _ := gateway.TLSFiles()
 	if cert == "" {
-		cert = "magpie's own CA"
+		cert = "eipgam's own CA"
 		if c, _ := gateway.ImportedFiles(); c != "" {
 			cert = c
 		}
@@ -54,7 +54,7 @@ func tlsLine() string {
 		s += muted.Render(" · " + sum)
 	}
 	if gateway.MTLSOn() {
-		s += "\n" + muted.Render("           other computers show a client certificate magpie issued (magpie mtls)")
+		s += "\n" + muted.Render("           other computers show a client certificate eipgam issued (eipgam mtls)")
 	}
 	return s + "\n" + muted.Render("           https:// from other computers, read again when the files change; this computer may call plain http://")
 }

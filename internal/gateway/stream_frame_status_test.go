@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // relayAsks is a Chat request relayed to a provider that speaks Chat itself
@@ -128,8 +128,8 @@ func TestRelayStreamErrorFrameWithoutStatusAsBefore(t *testing.T) {
 // upstream's status only in the frame's words, "（HTTP 503）", under a
 // string code. Main booked the call at 200, its rest "OK: …"; the status
 // the words name is the one it fails, rests and is booked at. A 4xx the
-// words quote is not read so, and neither is magpie's own loop guard said
-// by a magpie this one relays to: no upstream failed for it.
+// words quote is not read so, and neither is eipgam's own loop guard said
+// by a eipgam this one relays to: no upstream failed for it.
 func TestRelayStreamErrorFrameNamesItsStatusInWords(t *testing.T) {
 	const said503 = `data: {"error":{"message":"灵犀上游返回 AIError：AI服务异常（上游暂时不可用，可重试）（HTTP 503）","type":"upstream_error","code":"upstream_error"}}`
 	const began = `data: {"id":"c1","choices":[{"index":0,"delta":{"content":"partial text"}}]}`
@@ -183,10 +183,10 @@ func TestRelayStreamErrorFrameNamesItsStatusInWords(t *testing.T) {
 	})
 	t.Run("a peer's loop guard", func(t *testing.T) {
 		s := New()
-		relayAsks(t, s, sse(began, `data: {"error":{"message":"magpie ended this reply: the model's text was stuck in a loop, its last 400 characters the same over and over without a break (\"ab\"), and would have run on to its output limit (HTTP 502)","type":"api_error","code":502}}`))
+		relayAsks(t, s, sse(began, `data: {"error":{"message":"eipgam ended this reply: the model's text was stuck in a loop, its last 400 characters the same over and over without a break (\"ab\"), and would have run on to its output limit (HTTP 502)","type":"api_error","code":502}}`))
 		route, try := routeOf(t, s)
 		if try != nil || route.Status != 200 {
-			t.Fatalf("magpie's own loop guard rested %+v, route at %d", try, route.Status)
+			t.Fatalf("eipgam's own loop guard rested %+v, route at %d", try, route.Status)
 		}
 	})
 }

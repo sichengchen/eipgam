@@ -9,9 +9,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentplug"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agentplug"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The Agents page's Install another agent says Plugins has more agents
@@ -34,7 +34,7 @@ func TestPluginAgentsNotInstalled(t *testing.T) {
 		]}`))
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_PLUGIN_MARKET", srv.URL)
+	t.Setenv("EIPGAM_PLUGIN_MARKET", srv.URL)
 	plugin.RefreshMarket()
 	t.Cleanup(plugin.RefreshMarket)
 	dir := settings.Dir()
@@ -72,9 +72,9 @@ func TestPluginAgentsNotInstalled(t *testing.T) {
 	}
 }
 
-// A plugin's agent magpie doesn't find on this computer gets no row on
+// A plugin's agent eipgam doesn't find on this computer gets no row on
 // Agents (zzZ: Kimi's plugin installed, Kimi not in Agents). Its row on
-// Plugins says so, with where magpie looks and the plugin's own notice,
+// Plugins says so, with where eipgam looks and the plugin's own notice,
 // where it said "Adds Kimi to Agents"; once its folder is there it is found.
 func TestPluginAgentMissingSaysSo(t *testing.T) {
 	home := t.TempDir()
@@ -87,7 +87,7 @@ func TestPluginAgentMissingSaysSo(t *testing.T) {
 	os.MkdirAll(dir, 0o755)
 	os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"kimi","magpie":{"agent":"./agent.js"}}`), 0o644)
 	os.WriteFile(filepath.Join(dir, "agent.js"), []byte(`
-export const agent = { id: "kimi-desktop", name: "Kimi", config: "~/.config/magpie-kimi/connection.json", dir: "~/.config/magpie-kimi", model: "model", ua: ["Desktop Kimi Work"], notice: "Open Kimi first." };
+export const agent = { id: "kimi-desktop", name: "Kimi", config: "~/.config/eipgam-kimi/connection.json", dir: "~/.config/eipgam-kimi", model: "model", ua: ["Desktop Kimi Work"], notice: "Open Kimi first." };
 export function connect({ gateway, model }) { return { base: gateway.v1, key: gateway.key }; }
 `), 0o644)
 	os.MkdirAll(settings.Dir(), 0o755)
@@ -102,11 +102,11 @@ export function connect({ gateway, model }) { return { base: gateway.v1, key: ga
 	if got == nil || got.Name != "Kimi" {
 		t.Fatalf("got %+v, want Kimi", got)
 	}
-	if !got.Missing || got.Notice != "Open Kimi first." || got.Looks != "~/.config/magpie-kimi" {
-		t.Errorf("not on this computer: %+v, want missing, its notice and ~/.config/magpie-kimi", got)
+	if !got.Missing || got.Notice != "Open Kimi first." || got.Looks != "~/.config/eipgam-kimi" {
+		t.Errorf("not on this computer: %+v, want missing, its notice and ~/.config/eipgam-kimi", got)
 	}
 
-	if err := os.MkdirAll(filepath.Join(home, ".config", "magpie-kimi"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(home, ".config", "eipgam-kimi"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if got := pluginAgentOf(dir, nil); got == nil || got.Missing || got.Notice != "" || got.Looks != "" {

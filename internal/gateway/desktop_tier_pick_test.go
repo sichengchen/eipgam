@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // desktopPickSetup is a provider serving m1 and claude-sonnet-5-5, both
-// with reasoning levels (so Desktop lists them as mythos-magpie-<n> and
-// magpie-<n>.anthropic.claude-sonnet-5-5), on a fake Anthropic upstream
+// with reasoning levels (so Desktop lists them as mythos-eipgam-<n> and
+// eipgam-<n>.anthropic.claude-sonnet-5-5), on a fake Anthropic upstream
 // that notes the model of the last request.
 func desktopPickSetup(t *testing.T) *desktopSubagentUpstream {
 	t.Helper()
@@ -170,7 +170,7 @@ func TestDesktopTierSharedPick(t *testing.T) {
 		}
 		alias, _ := haiku["id"].(string)
 		alias = strings.TrimSuffix(alias, "[1m]")
-		if !regexp.MustCompile(`^magpie-\d{10}\.anthropic\.claude-sonnet-5-5$`).MatchString(alias) || alias == DesktopID(sonnet) ||
+		if !regexp.MustCompile(`^eipgam-\d{10}\.anthropic\.claude-sonnet-5-5$`).MatchString(alias) || alias == DesktopID(sonnet) ||
 			haiku["is_family_default"] != true {
 			t.Fatalf("haiku's row: %v (sonnet's name %s)", haiku, DesktopID(sonnet))
 		}
@@ -230,7 +230,7 @@ func TestDesktopTierSharedPick(t *testing.T) {
 			t.Fatal("haiku has no row")
 		}
 		alias, _ := haiku["id"].(string)
-		if !regexp.MustCompile(`^mythos-magpie-\d{10}$`).MatchString(alias) || alias == DesktopID(m1) {
+		if !regexp.MustCompile(`^mythos-eipgam-\d{10}$`).MatchString(alias) || alias == DesktopID(m1) {
 			t.Fatalf("haiku's row: %v", haiku)
 		}
 		as, ok := DesktopBehavesAs()
@@ -295,7 +295,7 @@ func TestDesktopTierSharedPick(t *testing.T) {
 
 	// a Claude model with no reasoning levels is listed by its own id,
 	// which has no number to change: the later tier's row is
-	// anthropic/magpie-<n>
+	// anthropic/eipgam-<n>
 	t.Run("own id", func(t *testing.T) {
 		desktopPickSetup(t)
 		if err := provider.Save(provider.Provider{ID: "own", Name: "Own", Key: "k", Anthropic: "http://127.0.0.1:1", Models: []string{"claude-haiku-4-5"}}); err != nil {
@@ -314,7 +314,7 @@ func TestDesktopTierSharedPick(t *testing.T) {
 		}
 		haiku := rowTiers(t, desktopListed(t))["haiku"]
 		alias, _ := haiku["id"].(string)
-		if !regexp.MustCompile(`^anthropic/magpie-\d{10}$`).MatchString(alias) {
+		if !regexp.MustCompile(`^anthropic/eipgam-\d{10}$`).MatchString(alias) {
 			t.Fatalf("haiku's row: %v", haiku)
 		}
 		if got := DesktopCatalogID(alias); got != h.ID {
@@ -324,7 +324,7 @@ func TestDesktopTierSharedPick(t *testing.T) {
 }
 
 // A routing group led by a Claude model, picked for a tier, is shown to
-// Desktop by its mythos-magpie-<n> (claudeLooking: never as the model
+// Desktop by its mythos-eipgam-<n> (claudeLooking: never as the model
 // itself), which Claude Code doesn't know; its entry had no behavesAs, as
 // the group's model is a Claude model, so the tier ran on Claude Code's
 // generic prompt and defaults. It runs as the group's model.
@@ -342,7 +342,7 @@ func TestDesktopGroupPickRunsAsItsModel(t *testing.T) {
 	if haiku == nil || haiku["name"] != DesktopID(g) {
 		t.Fatalf("the group for haiku: %v", list)
 	}
-	if strings.HasPrefix(DesktopID(g), "magpie-") || haiku["behavesAs"] != "claude-sonnet-5-5" {
+	if strings.HasPrefix(DesktopID(g), "eipgam-") || haiku["behavesAs"] != "claude-sonnet-5-5" {
 		t.Fatalf("the group, shown as %s, runs as %v; want claude-sonnet-5-5: %v", DesktopID(g), haiku["behavesAs"], haiku)
 	}
 	if as, _ := DesktopBehavesAs(); as[DesktopID(g)] != "claude-sonnet-5-5" {

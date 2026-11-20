@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Claude Code's and Codex's Accounts say that switching accounts needs no
 // connecting the agent (Greatrobbort on X: "多账号这个我一直都没搞明白到底需要
-// 在magpie关联agent不"): magpie moves the agent's own sign-in either way. A
+// 在eipgam关联agent不"): eipgam moves the agent's own sign-in either way. A
 // subscription the gateway alone uses, Copilot here, doesn't say it.
 // Chromium and WebKit, every language, a wide and a narrow window; no
 // backend, the API is faked here.
@@ -37,11 +37,11 @@ function serve(lang) {
 }
 
 const says = {
-  en: (a) => `${a} needn't be connected to magpie`,
-  zh: (a) => `不需要把 ${a} 接入 magpie`,
-  "zh-TW": (a) => `不需要把 ${a} 接入 magpie`,
-  ja: (a) => `${a} を magpie に接続する必要はありません`,
-  de: (a) => `Dafür muss ${a} nicht mit magpie verbunden sein`,
+  en: (a) => `${a} needn't be connected to eipgam`,
+  zh: (a) => `不需要把 ${a} 接入 eipgam`,
+  "zh-TW": (a) => `不需要把 ${a} 接入 eipgam`,
+  ja: (a) => `${a} を eipgam に接続する必要はありません`,
+  de: (a) => `Dafür muss ${a} nicht mit eipgam verbunden sein`,
 };
 
 const engines = process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"];
@@ -58,7 +58,7 @@ for (const engine of engines) {
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
         for (const [name, agent, shown] of [["Claude", "Claude Code", true], ["Codex", "Codex", true], ["Copilot", "Copilot", false]]) {
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator(".row.provider", { hasText: name }).first().click();
           await page.locator(".editor .acc").first().waitFor();
           const text = await page.locator(".editor").innerText();

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // #304: PI_CODING_AGENT_DIR moves Pi's agent folder (config.js,
@@ -42,16 +42,16 @@ func TestPiAgentDir(t *testing.T) {
 	if f := a.Field("model"); f.Get() != "xai/grok-4.6" {
 		t.Fatalf("model %q", f.Get())
 	}
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+	if err := a.Field("model").Set("eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	settings := filepath.Join(custom, "settings.json")
-	for k, want := range map[string]string{"defaultProvider": "magpie", "defaultModel": "relay/glm-4.6", "theme": "dark"} {
+	for k, want := range map[string]string{"defaultProvider": "eipgam", "defaultModel": "relay/glm-4.6", "theme": "dark"} {
 		if v, _ := edit.GetJSON(settings, k); v != want {
 			t.Fatalf("%s = %q:\n%s", k, v, readFile(settings))
 		}
 	}
-	if v, _ := edit.GetJSON(filepath.Join(custom, "models.json"), "providers.magpie.baseUrl"); v == "" {
+	if v, _ := edit.GetJSON(filepath.Join(custom, "models.json"), "providers.eipgam.baseUrl"); v == "" {
 		t.Fatalf("models.json:\n%s", readFile(filepath.Join(custom, "models.json")))
 	}
 	if c := a.Check(); c != "" {

@@ -16,12 +16,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // The page is DeepSeek's release, as published: its zip is the one
-// whose sha256 the release has, its one API origin is magpie's own path,
-// and magpie.js is loaded before its script.
+// whose sha256 the release has, its one API origin is eipgam's own path,
+// and eipgam.js is loaded before its script.
 func TestChatPageIsTheRelease(t *testing.T) {
 	sum := sha256.Sum256(chatDemoZip)
 	if hex.EncodeToString(sum[:]) != chatDemoSHA256 {
@@ -33,20 +33,20 @@ func TestChatPageIsTheRelease(t *testing.T) {
 	}
 	main := string(files[chatDemoMain])
 	if strings.Contains(main, "api.deepseek.com") || strings.Count(main, chatOrigin) != 1 {
-		t.Fatal("the page still calls DeepSeek, or magpie's origin isn't in it once")
+		t.Fatal("the page still calls DeepSeek, or eipgam's origin isn't in it once")
 	}
 	if _, ok := files["LICENSE"]; !ok {
 		t.Fatal("the release's MIT license isn't served with it")
 	}
 	index := string(files["index.html"])
-	js, page := strings.Index(index, `src="magpie.js"`), strings.Index(index, `src="`+chatDemoMain+`"`)
+	js, page := strings.Index(index, `src="eipgam.js"`), strings.Index(index, `src="`+chatDemoMain+`"`)
 	if js < 0 || page < 0 || js > page {
-		t.Fatalf("magpie.js isn't loaded before the page's script: %s", index)
+		t.Fatalf("eipgam.js isn't loaded before the page's script: %s", index)
 	}
 }
 
 // The page's files are the same bytes for everyone, so another computer
-// opens them with no key while magpie is shared; every call they make,
+// opens them with no key while eipgam is shared; every call they make,
 // the model list included, needs one. The page can load nothing from
 // elsewhere and can't be framed.
 func TestChatPageOpensWithoutAKey(t *testing.T) {
@@ -56,7 +56,7 @@ func TestChatPageOpensWithoutAKey(t *testing.T) {
 	if w.Code != http.StatusFound || w.Header().Get("Location") != ChatPagePath+"/" {
 		t.Fatal("bare path", w.Code, w.Header())
 	}
-	for _, p := range []string{"/", "/" + chatDemoMain, "/magpie.js", "/LICENSE"} {
+	for _, p := range []string{"/", "/" + chatDemoMain, "/eipgam.js", "/LICENSE"} {
 		w := keyPageReq{method: "GET", path: ChatPagePath + p, from: remote}.do(h)
 		if w.Code != 200 {
 			t.Fatalf("%s: %d %s", p, w.Code, w.Body.String())
@@ -108,7 +108,7 @@ func TestChatPageOpensWithoutAKey(t *testing.T) {
 
 // A conversation the page sends back is what the model is asked: the
 // page's DeepSeek identity isn't, its reminder of the day is a system
-// line, a file it attached is the file, one magpie no longer has says
+// line, a file it attached is the file, one eipgam no longer has says
 // so, and a page read before goes after the question it was read for,
 // its text from the result's signature.
 func TestChatPageConversation(t *testing.T) {
@@ -171,8 +171,8 @@ func TestChatPageConversation(t *testing.T) {
 	}
 }
 
-// A question the page asks is answered by a magpie model that can't
-// search: magpie searches for it (shown as DeepSeek's search, with the
+// A question the page asks is answered by a eipgam model that can't
+// search: eipgam searches for it (shown as DeepSeek's search, with the
 // pages found), reads a link it asks for (shown as DeepSeek's link
 // reading, the model given the page's text), and the answer comes in
 // the same reply, titled, with every round's tokens.
@@ -251,7 +251,7 @@ func TestChatPageSearchesAndReadsLinks(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", ChatPagePath+"/anthropic/v1/messages", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", "magpie-deepseek-chat")
+	req.Header.Set("x-api-key", "eipgam-deepseek-chat")
 	New().Handler().ServeHTTP(rec, req)
 	if rec.Code != 200 || !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/event-stream") {
 		t.Fatalf("%d %v %s", rec.Code, rec.Header(), rec.Body.String())

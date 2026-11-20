@@ -11,7 +11,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ZERO_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ZERO_ASSETS || path.resolve(__dirname, "../assets"));
 const quotas = [
   // at 0: used up, a balance of nothing, a balance below nothing
   { provider: "claude", name: "Claude Code", icon: "claude-color", user: "a@b.c", windows: [{ name: "Weekly", used: 100 }, { name: "5-hour", used: 100 }] },
@@ -58,7 +58,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       const context = await browser.newContext({ viewport: { width: 440, height: 300 }, reducedMotion: "reduce" });
       await context.addInitScript(() => {
-        try { if (!sessionStorage.getItem("set")) { localStorage.setItem("magpie.panelTab", "usage"); sessionStorage.setItem("set", "1"); } } catch {}
+        try { if (!sessionStorage.getItem("set")) { localStorage.setItem("eipgam.panelTab", "usage"); sessionStorage.setItem("set", "1"); } } catch {}
         window.__scrolled = 0;
         const scroll = Element.prototype.scrollIntoView;
         Element.prototype.scrollIntoView = function (o) { window.__scrolled++; scroll.call(this, o); };
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       const open = async () => {
-        await page.goto("http://magpie.test/?mode=panel");
+        await page.goto("http://eipgam.test/?mode=panel");
         await page.waitForFunction(() => document.querySelectorAll("#panelQuota .pq-card").length >= 3 && document.querySelector("#panelQuota .pq-foot"));
       };
       await open();

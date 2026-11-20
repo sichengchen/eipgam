@@ -277,7 +277,7 @@ function rulesOf(text, by) {
 }
 // ruleBulk: Import… and Copy on the Masking rules row, as Masked words
 // has them. The box takes many rules at once, a rule the list has or one
-// pasted twice passed over; a list magpie refuses (a regex that doesn't
+// pasted twice passed over; a list eipgam refuses (a regex that doesn't
 // compile, too many) is said in the box and nothing is saved, what was
 // pasted kept. The box open, what it holds and its Prefix or Regex
 // outlive a redraw. Copy writes the rules as JSON, as Import takes them.

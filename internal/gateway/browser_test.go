@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/browserext"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/browserext"
 )
 
 func browserPost(h http.Handler, addr, body string, hdr ...string) *httptest.ResponseRecorder {
@@ -32,7 +32,7 @@ func browserPost(h http.Handler, addr, body string, hdr ...string) *httptest.Res
 	return w
 }
 
-// fakeExtension connects to the gateway at base as Magpie Browser does,
+// fakeExtension connects to the gateway at base as eipgam Browser does,
 // and answers each call with answer.
 func fakeExtension(t *testing.T, base string, answer func(id, session, tool string, args map[string]any) any) {
 	t.Helper()
@@ -172,7 +172,7 @@ func TestBrowserMCPSaysWhenNoBrowser(t *testing.T) {
 		t.Fatalf("tools/list: %d %s", w.Code, w.Body.String())
 	}
 	m := readImageReply(t, browserPost(h, "127.0.0.1:5000", imageToolCall("browser_snapshot", nil)))
-	if !m.Result.IsError || !strings.Contains(m.Result.Content[0].Text, "Magpie Browser isn't connected") {
+	if !m.Result.IsError || !strings.Contains(m.Result.Content[0].Text, "eipgam Browser isn't connected") {
 		t.Fatalf("no browser: %+v", m)
 	}
 	w = browserPost(h, "127.0.0.1:5000", imageToolCall("browser_format_disk", nil))
@@ -186,8 +186,8 @@ func TestBrowserMCPSaysWhenNoBrowser(t *testing.T) {
 // web page on this one.
 func TestBrowserMCPGuarded(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	h := lanGuard(New().Handler())
 	list := `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`
 	const there = "192.0.2.7:4000"
@@ -227,7 +227,7 @@ func TestBrowserMCPGuarded(t *testing.T) {
 // call, and could answer them.
 func TestBrowserExtensionOnlyFromItsOrigin(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	h := lanGuard(New().Handler())
 	_, secrets := newCaller(t, "Laptop")
 	for _, c := range []struct{ addr, host, origin, key string }{
@@ -281,7 +281,7 @@ func TestBrowserToolsAreTheExtensions(t *testing.T) {
 	}
 }
 
-// With Magpie Browser in two browsers (packinggoodsllc_07668 on Discord:
+// With eipgam Browser in two browsers (packinggoodsllc_07668 on Discord:
 // which one is used?), calls go to the last to connect until a session
 // picks the other with browser_tabs use; another session stays where it
 // was, the list of tabs says whose they are, and browsers lists both.
@@ -350,16 +350,16 @@ func TestBrowserName(t *testing.T) {
 	}
 }
 
-// A browser elsewhere connects with a gateway key, as one outside magpie's
+// A browser elsewhere connects with a gateway key, as one outside eipgam's
 // container does through its published port, and is that key's: only that
 // key's callers reach it, never this computer's or another key's, and a
 // key's caller never reaches this computer's browser, whatever session it
 // names.
 func TestBrowserIsItsKeys(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	s := New()
 	// a request carrying testPeer comes from that address, as the host's
 	// browser's does to a container (the bridge's 172.17.0.1, say)
@@ -440,7 +440,7 @@ func TestBrowserIsItsKeys(t *testing.T) {
 	if got, _ := tabs("127.0.0.1:5000", map[string]any{"action": "use", "browser": "b2"}, BrowserSessionHeader, "s1"); !strings.Contains(got, `no connected browser is "b2"`) {
 		t.Fatalf("this computer's caller picked the key's browser: %q", got)
 	}
-	// magpie's router runs `magpie mcp browser` here, which names its
+	// eipgam's router runs `eipgam mcp browser` here, which names its
 	// keyed caller's session as the router gave it (hubCall)
 	if got, bad := tabs("127.0.0.1:5000", map[string]any{}, BrowserSessionHeader, "hub:"+keyedSession(keys[0].ID, "c1")); bad || got != "tabs of the key's" {
 		t.Fatalf("the router's keyed caller: %q", got)
@@ -464,7 +464,7 @@ func TestBrowserOwner(t *testing.T) {
 	}
 }
 
-// The browser connected with the key magpie's own page made for it
+// The browser connected with the key eipgam's own page made for it
 // (OwnBrowserKey) is this computer's too when it connected from this
 // computer (local), as through a name other than loopback's; one
 // connected with another key isn't. From elsewhere the own key proves
@@ -474,9 +474,9 @@ func TestBrowserOwner(t *testing.T) {
 // MCP itself: it connects the extension and nothing else.
 func TestOwnBrowserKeyIsThisComputers(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	if OwnBrowserKey() != "" {
 		t.Fatal("an own browser key with none recorded")
 	}
@@ -492,14 +492,14 @@ func TestOwnBrowserKeyIsThisComputers(t *testing.T) {
 		lanGuard(s.Handler()).ServeHTTP(w, r)
 	}))
 	t.Cleanup(srv.Close)
-	keys, secrets := newCaller(t, "Magpie Browser", "Other")
+	keys, secrets := newCaller(t, "eipgam Browser", "Other")
 	if err := SetOwnBrowserKey(keys[0].ID); err != nil {
 		t.Fatal(err)
 	}
 	if got := OwnBrowserKey(); got != keys[0].ID {
 		t.Fatalf("OwnBrowserKey = %q, want %q", got, keys[0].ID)
 	}
-	// as a magpie from before made it, with full access: held to the
+	// as a eipgam from before made it, with full access: held to the
 	// extension as the gateway starts
 	ScopeOwnBrowserKey()
 	if k, _ := access.List(); !k[len(k)-2].Browser {
@@ -542,7 +542,7 @@ func TestOwnBrowserKeyIsThisComputers(t *testing.T) {
 		t.Fatalf("this computer's caller used the browser a copy of the own key connected from elsewhere: %q", got)
 	}
 	// nor from loopback through a proxy, which is someone else's
-	fakeExtensionWith(t, srv.URL, secrets[0], http.Header{testPeer: {"127.0.0.1:40001"}, testHost: {"magpie.example:3425"}, "X-Forwarded-For": {"203.0.113.9"}}, "Chrome/141", reply("a proxied copy's"))
+	fakeExtensionWith(t, srv.URL, secrets[0], http.Header{testPeer: {"127.0.0.1:40001"}, testHost: {"eipgam.example:3425"}, "X-Forwarded-For": {"203.0.113.9"}}, "Chrome/141", reply("a proxied copy's"))
 	connected(keys[0].ID, 2)
 	if got, bad := tabs("127.0.0.1:5000", BrowserSessionHeader, "s1"); !bad || strings.Contains(got, "copy's") {
 		t.Fatalf("this computer's caller used the browser a proxied copy connected: %q", got)

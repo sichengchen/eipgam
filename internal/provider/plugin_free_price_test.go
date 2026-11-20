@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // A model no catalog prices is at the price its plugin lists it at, and
@@ -20,7 +20,7 @@ import (
 // is free stays unpriced, and one a catalog prices keeps that price.
 func TestPluginFreeModelCostsNothing(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("EIPGAM_BUN", "")
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
 	// models.dev as it has them (2026-10-15): Anthropic's Opus 5.5, and
 	// Cognition's SWE models nowhere

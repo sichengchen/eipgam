@@ -8,16 +8,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// `magpie agy run`, what the function agy in the user's shells runs
-// (bestony on Discord): the agy on PATH, given magpie's gateway, key and
-// --model while settings.json's model is magpie's, every argument agy's;
-// as it is off magpie.
+// `eipgam agy run`, what the function agy in the user's shells runs
+// (bestony on Discord): the agy on PATH, given eipgam's gateway, key and
+// --model while settings.json's model is eipgam's, every argument agy's;
+// as it is off eipgam.
 func TestAgyRun(t *testing.T) {
 	home := helpHome(t)
-	settings := filepath.Join(home, ".gemini", "antigravity-cli", "magpie-settings.json")
+	settings := filepath.Join(home, ".gemini", "antigravity-cli", "eipgam-settings.json")
 	os.MkdirAll(filepath.Dir(settings), 0o755)
 	t.Setenv("GEMINI_API_KEY", "users-own")
 	t.Setenv("GOOGLE_GEMINI_BASE_URL", "")
@@ -46,10 +46,10 @@ func TestAgyRun(t *testing.T) {
 		return out
 	}
 
-	os.WriteFile(settings, []byte(`{"model": "magpie/deepseek/pro", "modelProvider": "gemini"}`), 0o644)
+	os.WriteFile(settings, []byte(`{"model": "eipgam/deepseek/pro", "modelProvider": "gemini"}`), 0o644)
 	for _, c := range []struct{ in, want []string }{
-		{nil, []string{"--settings", settings, "--model", "magpie/deepseek/pro"}},
-		{[]string{"--help"}, []string{"--settings", settings, "--model", "magpie/deepseek/pro", "--help"}},
+		{nil, []string{"--settings", settings, "--model", "eipgam/deepseek/pro"}},
+		{[]string{"--help"}, []string{"--settings", settings, "--model", "eipgam/deepseek/pro", "--help"}},
 		{[]string{"-p", "hi", "--model", "mine"}, []string{"--settings", settings, "-p", "hi", "--model", "mine"}},
 		{[]string{"--model=mine"}, []string{"--settings", settings, "--model=mine"}},
 		{[]string{"-model", "mine"}, []string{"--settings", settings, "-model", "mine"}},
@@ -65,12 +65,12 @@ func TestAgyRun(t *testing.T) {
 		}
 	}
 	out, err := runOut(t, "agy", "env")
-	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + "\nGOOGLE_GEMINI_BASE_URL=" + gateway.URL() + "\nsettings=" + settings + "\nmodel=magpie/deepseek/pro\n"; err != nil || out != want {
+	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + "\nGOOGLE_GEMINI_BASE_URL=" + gateway.URL() + "\nsettings=" + settings + "\nmodel=eipgam/deepseek/pro\n"; err != nil || out != want {
 		t.Fatalf("agy env: %q %v", out, err)
 	}
 
 	// remote control needs agy's Google sign-in: plain, with the user's own
-	// environment, however magpie has agy wired (baysonfox on X)
+	// environment, however eipgam has agy wired (baysonfox on X)
 	for _, in := range [][]string{{"remote-control", "start"}, {"--remote-control"}, {"-p", "hi", "--remote-control"}} {
 		if _, err := runOut(t, append([]string{"agy", "run"}, in...)...); err != nil {
 			t.Fatal(err)
@@ -80,20 +80,20 @@ func TestAgyRun(t *testing.T) {
 		}
 	}
 
-	// off magpie: as it is
+	// off eipgam: as it is
 	os.WriteFile(settings, []byte(`{"model": "mine"}`), 0o644)
 	if _, err := runOut(t, "agy", "run", "-p", "hi"); err != nil {
 		t.Fatal(err)
 	}
 	if !slices.Equal(args, []string{"-p", "hi"}) || !slices.Equal(envOf("GEMINI_API_KEY"), []string{"users-own"}) {
-		t.Fatalf("off magpie: %v %v", args, envOf("GEMINI_API_KEY"))
+		t.Fatalf("off eipgam: %v %v", args, envOf("GEMINI_API_KEY"))
 	}
 	if out, err := runOut(t, "agy", "env"); err != nil || out != "" {
-		t.Fatalf("agy env off magpie: %q %v", out, err)
+		t.Fatalf("agy env off eipgam: %q %v", out, err)
 	}
 
 	// what --help and a stray value say
-	if out, _ := runOut(t, "agy", "--help"); !strings.Contains(out, "magpie agy run [args…]") {
+	if out, _ := runOut(t, "agy", "--help"); !strings.Contains(out, "eipgam agy run [args…]") {
 		t.Fatalf("agy --help:\n%s", out)
 	}
 	if _, err := runOut(t, "agy", "env", "x"); err == nil {

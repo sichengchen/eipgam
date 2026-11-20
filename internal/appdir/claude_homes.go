@@ -9,13 +9,13 @@ import (
 // ClaudeHomes are every Claude Code folder of the user's, ClaudeDir first.
 // More than one Claude account is Claude Code run with CLAUDE_CONFIG_DIR set
 // to a folder of each's (~/.claude-work beside ~/.claude), a session is
-// written into the folder of the account it ran under, and magpie read only
+// written into the folder of the account it ran under, and eipgam read only
 // the one it runs with (@fivesmallq on X: sessions and token use counted one
 // Claude folder). Nothing records those folders, so they are looked for as
 // CodexHomes looks for Codex's: in the home folder, and beside ClaudeDir, a
 // folder whose name starts with "claude" or ".claude", or one folder down in
 // such a folder (~/.claude-profiles/work), that holds projects/; and the
-// folders magpie runs a saved account's Claude Code in (claude-accounts).
+// folders eipgam runs a saved account's Claude Code in (claude-accounts).
 func ClaudeHomes() []string {
 	home, _ := os.UserHomeDir()
 	return ClaudeHomesIn(home)
@@ -62,7 +62,7 @@ func ClaudeHomesIn(home string) []string {
 			}
 		}
 	}
-	// the folders of the Claude accounts saved in magpie
+	// the folders of the Claude accounts saved in eipgam
 	saved := filepath.Join(Config(), "claude-accounts")
 	es, _ := os.ReadDir(saved)
 	for _, e := range es {

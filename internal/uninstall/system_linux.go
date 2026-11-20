@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/appdir"
 )
 
 // dataHome is where the app's desktop entry, icon and WebKitGTK's data
@@ -19,13 +19,13 @@ func dataHome() string {
 	return filepath.Join(h, ".local", "share")
 }
 
-// unregisterScheme takes out the desktop entry the app made for magpie://
+// unregisterScheme takes out the desktop entry the app made for eipgam://
 // links while it runs exe, or an exe that is gone, and its icon with it.
 func unregisterScheme(exe string) error {
-	_, err := removeEntry("magpie-ccswitch.desktop", exe)
-	gone, err2 := removeEntry("magpie.desktop", exe)
+	_, err := removeEntry("eipgam-ccswitch.desktop", exe)
+	gone, err2 := removeEntry("eipgam.desktop", exe)
 	if gone {
-		_ = os.Remove(filepath.Join(dataHome(), "icons", "hicolor", "256x256", "apps", "magpie.png"))
+		_ = os.Remove(filepath.Join(dataHome(), "icons", "hicolor", "256x256", "apps", "eipgam.png"))
 	}
 	return errors.Join(err, err2)
 }
@@ -43,7 +43,7 @@ func removeEntry(name, exe string) (bool, error) {
 			run = strings.TrimSuffix(run, " %u")
 			if run != exe {
 				if _, err := os.Stat(run); err == nil {
-					return false, nil // another magpie's
+					return false, nil // another eipgam's
 				}
 			}
 		}
@@ -57,5 +57,5 @@ func webData() []string {
 	if appdir.Portable() != "" {
 		return nil
 	}
-	return []string{filepath.Join(dataHome(), "magpie")}
+	return []string{filepath.Join(dataHome(), "eipgam")}
 }

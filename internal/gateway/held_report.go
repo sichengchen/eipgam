@@ -13,20 +13,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
-// A request magpie holds too long before routing it is stopped with a 504
+// A request eipgam holds too long before routing it is stopped with a 504
 // (giveUp), and what held it is written to a report of its own: the GUI
 // app's log goes only to a stderr its user never sees, so the log alone
 // can't be sent with a bug report. The report is a small file in HeldDir,
 // the last heldKept of them kept, and the Routing page's row for the
 // request copies it (Route.Held).
 //
-// What it holds: when, magpie's version and system, the method and path,
+// What it holds: when, eipgam's version and system, the method and path,
 // the model asked for and the agent, how long it was held, each kind of
-// wait magpie knew it was in and for how long, the body room's state, how
+// wait eipgam knew it was in and for how long, the body room's state, how
 // many requests were in flight, and where every goroutine stood (function
 // names and lines, no values). Never the request's body or headers.
 
@@ -121,16 +121,16 @@ func HeldReport(name string) (string, error) {
 // heldReport is the report of u's request, held for held and stopped.
 func (s *Server) heldReport(u *unroutedHold, held time.Duration, status int, who, asked, where string, own heldStack) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "magpie held a request before routing it, and stopped it with %d\n\n", status)
+	fmt.Fprintf(&b, "eipgam held a request before routing it, and stopped it with %d\n\n", status)
 	fmt.Fprintf(&b, "time: %s\n", time.Now().UTC().Format(time.RFC3339))
-	fmt.Fprintf(&b, "magpie: %s (%s/%s, served by %s)\n", cmpOr(Version, "dev"), runtime.GOOS, runtime.GOARCH, cmpOr(Serves, "?"))
+	fmt.Fprintf(&b, "eipgam: %s (%s/%s, served by %s)\n", cmpOr(Version, "dev"), runtime.GOOS, runtime.GOARCH, cmpOr(Serves, "?"))
 	fmt.Fprintf(&b, "request: %s %s\n", u.r.Method, u.r.URL.Path)
 	fmt.Fprintf(&b, "model: %s\n", cmpOr(asked, "? (not read yet)"))
 	fmt.Fprintf(&b, "agent: %s\n", who)
 	fmt.Fprintf(&b, "held: %s,%s\n", held, where)
 	fmt.Fprintf(&b, "known waits:%s\n", cmpOr(strings.TrimPrefix(u.waitsSaid(), ";"), " none"))
-	// the step that held it, by name, though it is no wait magpie knows
-	// of: the first of magpie's own functions on its handler's stack
+	// the step that held it, by name, though it is no wait eipgam knows
+	// of: the first of eipgam's own functions on its handler's stack
 	fmt.Fprintf(&b, "stood at: %s\n", cmpOr(own.at, "? (its goroutine not found)"))
 	// a slow body from a body that stopped coming: what had come, and
 	// when the last of it did
@@ -200,7 +200,7 @@ func heldStacks() string {
 }
 
 // heldStack is where a held request's handler stood: its stack, with no
-// values, and at, the first of magpie's own functions on it with what it
+// values, and at, the first of eipgam's own functions on it with what it
 // waited in ("gateway.(*Server).serveAgent (sync.Mutex.Lock, 2 minutes)").
 type heldStack struct {
 	stack string
@@ -210,8 +210,8 @@ type heldStack struct {
 // heldOwnMost bounds the dump heldOwn looks for one goroutine in.
 const heldOwnMost = 64 << 20
 
-// heldModule is magpie's own functions' prefix.
-const heldModule = "github.com/yetone/magpie/internal/"
+// heldModule is eipgam's own functions' prefix.
+const heldModule = "github.com/sichengchen/eipgam/internal/"
 
 // heldArgs is a frame's argument words, and heldPC its pc offset: values,
 // which a report never holds.

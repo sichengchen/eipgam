@@ -1,5 +1,5 @@
 // A key's spend cap (sparkling_lemur_62868 on Discord: a team's OpenAI
-// key, with credits other services spend from too): how much magpie may
+// key, with credits other services spend from too): how much eipgam may
 // spend on it, in USD at the Usage page's prices, a day, a month or in
 // all. Past it the gateway passes the key over, as a usage cap holds an
 // account (provider/key_spend.go). app.js imports this when the provider
@@ -12,8 +12,8 @@ function keySpendPill(p, k) {
   pill.type = "button";
   const v = sc && { spent: usdText(sc.spent || 0), cap: usdText(sc.usd) };
   pill.textContent = !sc ? t("No spend cap") : t(sc.period === "month" ? "{spent} of {cap} this month" : sc.period === "total" ? "{spent} of {cap} in all" : "{spent} of {cap} today", v);
-  pill.title = sc ? t("Stops at {cap} {period}, counted at the prices the Usage page shows for the calls magpie sends on this key. Past it, magpie goes on to the provider's other keys and its fallbacks. Requests under way still finish, so it can go a little past the cap, and a model with no known price counts nothing. Click to change", { cap: v.cap, period: t(SPEND_PERIODS[sc.period] || "a day") })
-    : t("No spend cap: magpie sends this key requests whatever they cost. Click to set how much it may spend, a day, a month or in all; past it, magpie goes on to the provider's other keys and its fallbacks");
+  pill.title = sc ? t("Stops at {cap} {period}, counted at the prices the Usage page shows for the calls eipgam sends on this key. Past it, eipgam goes on to the provider's other keys and its fallbacks. Requests under way still finish, so it can go a little past the cap, and a model with no known price counts nothing. Click to change", { cap: v.cap, period: t(SPEND_PERIODS[sc.period] || "a day") })
+    : t("No spend cap: eipgam sends this key requests whatever they cost. Click to set how much it may spend, a day, a month or in all; past it, eipgam goes on to the provider's other keys and its fallbacks");
   pill.setAttribute("aria-haspopup", "menu");
   pill.setAttribute("aria-expanded", "false");
   const set = (usd, period) => accountAction("provider/keyspendcap", { id: p.id, account: k.id, spend: usd ? { usd, period } : null },
@@ -60,7 +60,7 @@ window.keySpendFill = function (row, p, k) {
   row.querySelector(":scope > .key-spend-line")?.remove();
   const pill = keySpendPill(p, k), gap = row.querySelector(":scope > .grow");
   gap ? gap.before(pill) : row.append(pill);
-  // a key whose usage windows magpie reads takes the usage cap an account
+  // a key whose usage windows eipgam reads takes the usage cap an account
   // does (@wanggenjidev on X): the same pill, the same note when held
   if (k.usageCap) {
     const cp = accountCapPill(p, k.id, accountCapOf(p, k.id), "", true);

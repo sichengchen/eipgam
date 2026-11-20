@@ -42,7 +42,7 @@ func TestPortHolderNamesTheProgram(t *testing.T) {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(bin, "-test.run=^$")
-	cmd.Env = append(os.Environ(), "MAGPIE_PROC_LISTEN=127.0.0.1:"+strconv.Itoa(port))
+	cmd.Env = append(os.Environ(), "EIPGAM_PROC_LISTEN=127.0.0.1:"+strconv.Itoa(port))
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		t.Fatal(err)
@@ -110,7 +110,7 @@ func TestIsTailscale(t *testing.T) {
 		{Name: "tailscaled", Path: `C:\Program Files\Tailscale\tailscaled.exe`}:           true,
 		{Name: "io.tailscale.ipn.macsys.network-extension"}:                               true,
 		{Name: "nginx", Path: "/usr/sbin/nginx"}:                                          false,
-		{Name: "magpie", Path: "/Applications/Magpie.app/Contents/MacOS/magpie"}:          false,
+		{Name: "eipgam", Path: "/Applications/eipgam.app/Contents/MacOS/eipgam"}:          false,
 		{Name: "node", Path: "/Users/u/tools/node"}:                                       false,
 		{}: false,
 	} {
@@ -136,7 +136,7 @@ func TestProgramName(t *testing.T) {
 
 // `tailscale serve status --json` as Tailscale writes it (ipn.ServeConfig):
 // the TCP map by port, Web and AllowFunnel by host:port. The first is a
-// serve of port 8848 over HTTPS to magpie, the second a funnel.
+// serve of port 8848 over HTTPS to eipgam, the second a funnel.
 func TestServePorts(t *testing.T) {
 	serve := `{
   "TCP": {

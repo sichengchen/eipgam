@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// fenglian980510 on X: in magpie's Docker gateway the Library had MCP and
-// no Skills. A magpie on another computer that adds this one as a provider,
+// fenglian980510 on X: in eipgam's Docker gateway the Library had MCP and
+// no Skills. A eipgam on another computer that adds this one as a provider,
 // with Use its skills and prompts on, takes its skills and prompt sets
-// (GET /v1/magpie/library), so with no agent here, or in gateway mode, the
+// (GET /v1/eipgam/library), so with no agent here, or in gateway mode, the
 // Library has Instructions and Skills beside MCP: the sets and the skills,
 // the line saying who takes them, the box to install one, and nothing of
 // agents (no chips, no agents' own skills, no projects, no Agents list).
@@ -20,8 +20,8 @@ const { strings } = require("./strings.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/srv/mg";
 const fixture = (st) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
-  mcpHub: false, hubPath: "/mcp/magpie/hub/",
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
+  mcpHub: false, hubPath: "/mcp/eipgam/hub/",
   // in gateway mode this computer's agents are there, and not shown
   agents: st.gateway ? [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json`, instructions: `${HOME}/.claude/CLAUDE.md` }] : [],
   instructions: {
@@ -59,7 +59,7 @@ function server(lang, st) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         await tabs(page).first().waitFor();
@@ -122,7 +122,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await pick(page, w("Skills"));
         await page.waitForFunction(() => !!document.querySelector("#view-library .lib-row"));
         assert.equal(await tabName(v), w("Skills"));
-        assert.equal((await v.locator(".lib-intro").first().textContent()).trim(), w("A magpie on another computer that adds this one as a provider, with Use its skills and prompts on, takes these skills and gives them to its agents."), where);
+        assert.equal((await v.locator(".lib-intro").first().textContent()).trim(), w("A eipgam on another computer that adds this one as a provider, with Use its skills and prompts on, takes these skills and gives them to its agents."), where);
         assert.ok((await v.textContent()).includes("pdf"), `${where}: the skill isn't listed`);
         assert.equal(await v.locator(".lib-ag").count(), 0, `${where}: agent chips`);
         let text = await v.textContent();
@@ -134,9 +134,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // Instructions: the sets, who takes them, and no Agents list
         await pick(page, w("Instructions"));
         await v.locator(".lib-sets").waitFor();
-        assert.equal((await v.locator(".lib-intro").first().textContent()).trim(), w("A magpie on another computer that adds this one as a provider, with Use its skills and prompts on, takes these sets, and its agents read them."), where);
+        assert.equal((await v.locator(".lib-intro").first().textContent()).trim(), w("A eipgam on another computer that adds this one as a provider, with Use its skills and prompts on, takes these sets, and its agents read them."), where);
         text = await v.textContent();
-        for (const gone of [w("None of your agents reads a user-wide instructions file magpie knows."), w("Project instructions"), "Claude Code"]) assert.ok(!text.includes(gone), `${where}: ${gone} is shown`);
+        for (const gone of [w("None of your agents reads a user-wide instructions file eipgam knows."), w("Project instructions"), "Claude Code"]) assert.ok(!text.includes(gone), `${where}: ${gone} is shown`);
         assert.deepEqual(await sideways(page), [], `${where}: sideways scroll, instructions`);
 
         // the pick is kept: the page opens on it again

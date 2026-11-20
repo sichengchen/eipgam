@@ -10,12 +10,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-const zedProvider = "language_models.openai_compatible.magpie"
+const zedProvider = "language_models.openai_compatible.eipgam"
 const zedModel = "agent.default_model"
 
 // Zed stores API keys in the OS credential store, keyed by the API URL.
@@ -23,12 +23,12 @@ var zedCredential = saveZedCredential
 
 // Zed uses ~/.config on macOS, XDG on Linux and Roaming AppData on Windows.
 func zed(home, cfg string) *Agent {
-	bin := os.Getenv("MAGPIE_ZED_BIN")
+	bin := os.Getenv("EIPGAM_ZED_BIN")
 	if bin == "" {
 		bin = "zed"
 	}
 	processes := zedProcessNames()
-	if custom := appdir.Getenv("MAGPIE_ZED_CONFIG_DIR"); custom != "" {
+	if custom := appdir.Getenv("EIPGAM_ZED_CONFIG_DIR"); custom != "" {
 		return zedAtWith(custom, bin, processes)
 	}
 	switch runtime.GOOS {
@@ -53,8 +53,8 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 	get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
 	model := pairGet(func(k string) (string, bool) { return edit.GetJSON(path, k) }, zedModel+".provider", zedModel+".model")
 	key := "zed:" + path + ":"
-	// at is where Zed's magpie provider reaches the gateway: its own
-	// address, or a proxy to it where magpie answers (#1985), such as
+	// at is where Zed's eipgam provider reaches the gateway: its own
+	// address, or a proxy to it where eipgam answers (#1985), such as
 	// billion-context's /bili/ prefix, which a sync and a pick keep
 	at := func() string { return zedReach(path) }
 	routed := func() bool { return zedRouted(path) }
@@ -100,7 +100,7 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 						edit.KV{Path: zedProvider, Value: zedProviderJSON(path, url)},
 						edit.KV{Path: zedModel, Value: map[string]string{"provider": magpieID, "model": ref}})
 				}
-				// Validate a native selection before removing magpie's wiring.
+				// Validate a native selection before removing eipgam's wiring.
 				p, m, ok := strings.Cut(v, "/")
 				if v != "" && (!ok || p == "" || m == "") {
 					return fmt.Errorf("expected provider/model, got %q", v)
@@ -141,7 +141,7 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 }
 
 func zedProcessNames() []string {
-	value := os.Getenv("MAGPIE_ZED_PROCESS_NAMES")
+	value := os.Getenv("EIPGAM_ZED_PROCESS_NAMES")
 	if value == "" {
 		return []string{`(^|/)(zed|zeditor|zed-editor)( |$)`}
 	}
@@ -158,7 +158,7 @@ func zedProcessNames() []string {
 	return out
 }
 
-// zedLevels are the reasoning_effort values magpie writes for Zed, weakest
+// zedLevels are the reasoning_effort values eipgam writes for Zed, weakest
 // first: those every Zed that reads the field takes. Its settings take
 // language_model_core's ReasoningEffort, lowercase; max and none came after
 // it (Zed 0.233 has minimal to xhigh), and a value a Zed doesn't know is
@@ -191,7 +191,7 @@ func zedEffort(m catalog.Model) string {
 	return zedLevels[best]
 }
 
-// zedProviderJSON is magpie's provider in Zed's settings at path. A
+// zedProviderJSON is eipgam's provider in Zed's settings at path. A
 // reasoning_effort already on a model there is kept: the user may have
 // picked another level, or "none" to keep it from thinking.
 func zedProviderJSON(path, url string) map[string]any {
@@ -247,9 +247,9 @@ func zedProviderJSON(path, url string) map[string]any {
 	return map[string]any{"api_url": url, "available_models": models}
 }
 
-// zedReach is the address Zed's magpie provider (settings.json at path)
+// zedReach is the address Zed's eipgam provider (settings.json at path)
 // reaches the gateway at: its api_url where that is the gateway's, or a
-// proxy to it where magpie has answered (#1985: a company's reverse proxy,
+// proxy to it where eipgam has answered (#1985: a company's reverse proxy,
 // billion-context's http://127.0.0.1:8787/bili/<gateway>), else the
 // gateway's own.
 func zedReach(path string) string {
@@ -266,24 +266,24 @@ func zedReach(path string) string {
 	return gatewayV1()
 }
 
-// zedRouted says Zed's magpie provider sends to magpie (zedReach).
+// zedRouted says Zed's eipgam provider sends to eipgam (zedReach).
 func zedRouted(path string) bool {
 	u, _ := edit.GetJSON(path, zedProvider+".api_url")
 	return u != "" && u == zedReach(path)
 }
 
-// ZedThrough points Zed's magpie provider (a, Zed) at the gateway through
+// ZedThrough points Zed's eipgam provider (a, Zed) at the gateway through
 // prefix, an address a proxy takes the gateway's after (billion-context's
 // http://127.0.0.1:8787/bili/), "" for the gateway itself, and saves its
 // key for that address in the system's credential store, where Zed looks
-// it up by the address. Zed must be on magpie already.
+// it up by the address. Zed must be on eipgam already.
 func ZedThrough(a *Agent, prefix string) error {
 	if a == nil || a.ID != "zed" {
 		return fmt.Errorf("not Zed")
 	}
-	// one through a proxy that is down now is still magpie's to take back
+	// one through a proxy that is down now is still eipgam's to take back
 	if u := ZedURL(a); !zedRouted(a.Path) && (u == "" || !strings.HasSuffix(u, gatewayV1())) {
-		return fmt.Errorf("connect Zed to magpie first: pick one of magpie's models for it on the Agents page")
+		return fmt.Errorf("connect Zed to eipgam first: pick one of eipgam's models for it on the Agents page")
 	}
 	url := prefix + gatewayV1()
 	if err := zedCredential(url); err != nil {
@@ -292,7 +292,7 @@ func ZedThrough(a *Agent, prefix string) error {
 	return edit.SetJSON(a.Path, edit.KV{Path: zedProvider + ".api_url", Value: url})
 }
 
-// ZedURL is the api_url of Zed's magpie provider (a, Zed), "" without one.
+// ZedURL is the api_url of Zed's eipgam provider (a, Zed), "" without one.
 func ZedURL(a *Agent) string {
 	u, _ := edit.GetJSON(a.Path, zedProvider+".api_url")
 	return u
@@ -300,5 +300,5 @@ func ZedURL(a *Agent) string {
 
 // what zed says after a change (notice.go)
 var (
-	noticeZed = newNotice("Restart Zed if it still asks for an API key: magpie has configured its gateway credential in the system credential store.")
+	noticeZed = newNotice("Restart Zed if it still asks for an API key: eipgam has configured its gateway credential in the system credential store.")
 )

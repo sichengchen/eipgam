@@ -126,7 +126,7 @@ func TestModelListDeadlineTellsTheHook(t *testing.T) {
 	})
 }
 
-// TestCancelledCallKeepsTheHostTillItsHookEnds: a call magpie gave up on
+// TestCancelledCallKeepsTheHostTillItsHookEnds: a call eipgam gave up on
 // still counts as the host's own until its handler ends. A hook that goes
 // on after the abort (renewing or saving a sign-in) isn't cut off when the
 // host is then stopped and its stdin closes: the host leaves when the hook

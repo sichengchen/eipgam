@@ -14,17 +14,17 @@ import (
 	"time"
 
 	// search by meaning, when switched on (memory.Semantic)
-	_ "github.com/yetone/magpie/internal/memembed"
-	"github.com/yetone/magpie/internal/memory"
-	"github.com/yetone/magpie/internal/usage"
+	_ "github.com/sichengchen/eipgam/internal/memembed"
+	"github.com/sichengchen/eipgam/internal/memory"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// magpie's memory (internal/memory) is an MCP server every agent can mount,
+// eipgam's memory (internal/memory) is an MCP server every agent can mount,
 // so what one agent learns of the user, another knows: memory_search,
 // memory_save, memory_forget and memory_context (who the caller is taken
 // for), Streamable HTTP at MemoryMCPPath, served
 // as SearchMCPPath is (serveMCP), to the agents on this computer alone.
-// The Library gives it as `magpie mcp memory`, which passes each message on with the folder the
+// The Library gives it as `eipgam mcp memory`, which passes each message on with the folder the
 // agent started it in (MemoryCwdHeader) and the client's name from its
 // initialize (MemoryClientHeader); behind the hub, the call's _meta names
 // the agent's roots and client (HubRootsMeta, HubClientMeta).
@@ -35,9 +35,9 @@ import (
 // the agent's own and the project's.
 
 // MemoryMCPPath is where the memory MCP server is served.
-const MemoryMCPPath = "/mcp/magpie/memory"
+const MemoryMCPPath = "/mcp/eipgam/memory"
 
-// MemoryCwdHeader and MemoryClientHeader are the folder `magpie mcp
+// MemoryCwdHeader and MemoryClientHeader are the folder `eipgam mcp
 // memory` was started in and the client name the agent gave at initialize.
 const (
 	MemoryCwdHeader    = "X-Magpie-Cwd"
@@ -51,7 +51,7 @@ const (
 	memoryContextTool = "memory_context"
 )
 
-const memoryServerName = "magpie-memory"
+const memoryServerName = "eipgam-memory"
 
 func (s *Server) memoryMCP(w http.ResponseWriter, r *http.Request) {
 	// what is known about this computer's user, and what goes into every
@@ -60,10 +60,10 @@ func (s *Server) memoryMCP(w http.ResponseWriter, r *http.Request) {
 	// computer's gateway key, which may be a friend's, and a web page,
 	// even one Settings lists, are turned away.
 	if !local(r) || fromBrowser(r) {
-		http.Error(w, "magpie's memory MCP server answers the agents on this computer alone", http.StatusForbidden)
+		http.Error(w, "eipgam's memory MCP server answers the agents on this computer alone", http.StatusForbidden)
 		return
 	}
-	serveMCP(w, r, "magpie's memory", memoryServerName, 1<<20, s.memoryMCPCall)
+	serveMCP(w, r, "eipgam's memory", memoryServerName, 1<<20, s.memoryMCPCall)
 }
 
 var memoryKinds = strings.Join(memory.Kinds, ", ")
@@ -140,7 +140,7 @@ func (s *Server) memoryMCPCall(r *http.Request, m mcpMessage) (any, map[string]a
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": memoryServerName, "title": "Magpie Memory", "version": Version},
+			"serverInfo":      map[string]any{"name": memoryServerName, "title": "eipgam Memory", "version": Version},
 			"instructions":    "Memory shared by every agent the user works with. Search it before asking the user something they may have said before; save what they ask to be remembered, and preferences, rules and corrections they state; forget what they say no longer holds.",
 		}, nil
 	case "ping":
@@ -237,7 +237,7 @@ func (c *flexCount) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// memoryCaller is who calls: the agent, by magpie's id for it ("" when
+// memoryCaller is who calls: the agent, by eipgam's id for it ("" when
 // it can't be told), and the project it works in (nil when none).
 type memoryCaller struct {
 	agent   string
@@ -250,28 +250,28 @@ type memoryCaller struct {
 }
 
 // memoryCallerOf is the caller of r: the agent its key or User-Agent
-// names, else the client the hub's _meta or `magpie mcp memory` names;
-// the project of the folder the hub's _meta names, else the folder `magpie
+// names, else the client the hub's _meta or `eipgam mcp memory` names;
+// the project of the folder the hub's _meta names, else the folder `eipgam
 // mcp memory` runs in, else the one the agent says when asked (roots/list)
 // or the Codex turn names. An agent on another computer has no folder
 // here.
 func memoryCallerOf(r *http.Request, rawMeta json.RawMessage) memoryCaller {
 	var meta hubCallMeta
 	var extra struct {
-		Roots  *[]string `json:"magpie/roots"`
-		Client string    `json:"magpie/client"`
+		Roots  *[]string `json:"eipgam/roots"`
+		Client string    `json:"eipgam/client"`
 	}
 	if len(rawMeta) > 0 {
 		json.Unmarshal(rawMeta, &meta)
 		json.Unmarshal(rawMeta, &extra)
 	}
-	// the client the hub or `magpie mcp memory` names first: their own
-	// requests go under magpie's key and a Go User-Agent
+	// the client the hub or `eipgam mcp memory` names first: their own
+	// requests go under eipgam's key and a Go User-Agent
 	c := memoryCaller{}
 	for i, name := range []string{extra.Client, r.Header.Get(MemoryClientHeader)} {
 		if c.agent == "" && strings.TrimSpace(name) != "" {
 			c.agent = memoryAgent(usage.AgentOf(name))
-			c.agentFrom = []string{"the client the MCP router names", "the client named at magpie mcp memory's initialize"}[i]
+			c.agentFrom = []string{"the client the MCP router names", "the client named at eipgam mcp memory's initialize"}[i]
 		}
 	}
 	if c.agent == "" {
@@ -308,16 +308,16 @@ func memoryCallerOf(r *http.Request, rawMeta json.RawMessage) memoryCaller {
 	return c
 }
 
-// memoryAgent is id when it names an agent: not magpie itself, nor an
+// memoryAgent is id when it names an agent: not eipgam itself, nor an
 // HTTP library (curl, Go's), which says nothing of which agent; else "".
 func memoryAgent(id string) string {
 	l := strings.ToLower(strings.TrimSpace(id))
 	if strings.HasPrefix(l, "codex") {
-		// codex-mcp-client, codex-tui, codex_cli_rs: Codex, as `magpie
+		// codex-mcp-client, codex-tui, codex_cli_rs: Codex, as `eipgam
 		// mcp memory` and the sessions know it
 		return "codex"
 	}
-	if l == "" || l == "magpie" || l == "other" || l == "go-http-client" || usage.IsLibrary(l) {
+	if l == "" || l == "eipgam" || l == "other" || l == "go-http-client" || usage.IsLibrary(l) {
 		return ""
 	}
 	return id
@@ -441,9 +441,9 @@ func memoryContext(c memoryCaller) (string, map[string]any) {
 		b.WriteString("; scope project keeps memories there.\n")
 	} else {
 		ctx["project"] = nil
-		b.WriteString("Project: none. None of your folders is known here: give memory_search and memory_save a project (a folder, or a key), or run magpie mcp memory in the project's folder.\n")
+		b.WriteString("Project: none. None of your folders is known here: give memory_search and memory_save a project (a folder, or a key), or run eipgam mcp memory in the project's folder.\n")
 	}
-	fmt.Fprintf(&b, "A search with scope all looks in: %s.\nmagpie-memory %s", strings.Join(scopes, ", "), Version)
+	fmt.Fprintf(&b, "A search with scope all looks in: %s.\neipgam-memory %s", strings.Join(scopes, ", "), Version)
 	return b.String(), ctx
 }
 

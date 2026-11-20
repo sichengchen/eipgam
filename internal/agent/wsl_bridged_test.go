@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// ecalpal_ on Discord (magpie 0.1.2689, WSL 3.0.3.0, Ubuntu 22.04.5,
+// ecalpal_ on Discord (eipgam 0.1.2689, WSL 3.0.3.0, Ubuntu 22.04.5,
 // .wslconfig vmSwitch=WSL_Bridge_Switch, networkingMode=Bridged,
 // dhcp=false): in bridged networking the distro's default route is the
 // LAN's router, 192.168.9.1, while Windows is at 192.168.9.147/24 on
-// vEthernet (WSL_Bridge_Switch). magpie wrote the router into wsl.json and
+// vEthernet (WSL_Bridge_Switch). eipgam wrote the router into wsl.json and
 // into Pi's models.json, where nothing listens. Windows' address on the
 // bridge is the distro's way to it, and its key is the WSL key that
 // address takes. NAT and mirrored keep their own values.
@@ -41,8 +41,8 @@ func TestWSLBridgedReachesWindowsOnTheBridge(t *testing.T) {
 	}
 }
 
-// One an older magpie set up on the router has its wsl.json and Pi's
-// models.json written over once magpie starts again and probes the
+// One an older eipgam set up on the router has its wsl.json and Pi's
+// models.json written over once eipgam starts again and probes the
 // running distro: the address and the key with it.
 func TestWSLBridgedOldRouterWrittenOver(t *testing.T) {
 	root, home := piDistroHome(t, `{"defaultProvider": "xai", "defaultModel": "grok-4.6"}`)
@@ -50,7 +50,7 @@ func TestWSLBridgedOldRouterWrittenOver(t *testing.T) {
 	// what 0.1.2689 wrote: Pi on the router, with the gateway's token
 	old := distro{Name: "Ubuntu-22.04", Root: root, Home: "/home/me", Has: map[string]bool{"dir:.pi": true},
 		Gateway: "192.168.9.1", Net: "bridged", Running: true}
-	if err := wslPi(old).Apply("model", "magpie/relay/glm-4.6"); err != nil {
+	if err := wslPi(old).Apply("model", "eipgam/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	pi := func() map[string]any {
@@ -60,7 +60,7 @@ func TestWSLBridgedOldRouterWrittenOver(t *testing.T) {
 		if err := json.Unmarshal([]byte(readFile(models)), &f); err != nil {
 			t.Fatal(err)
 		}
-		return f.Providers["magpie"]
+		return f.Providers["eipgam"]
 	}
 	if p := pi(); p["baseUrl"] != "http://192.168.9.1:"+gateway.Port()+"/v1" {
 		t.Fatalf("old config: %v", p)

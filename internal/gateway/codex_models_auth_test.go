@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 const codexAuthList = CodexPath + "/models?client_version=0.166.0&auth_test=kept"
@@ -95,7 +95,7 @@ func TestCodexModelsKeepOAuthBesideGatewayKey(t *testing.T) {
 	}
 }
 
-// A gateway key authorizes access to magpie, never to the ChatGPT account
+// A gateway key authorizes access to eipgam, never to the ChatGPT account
 // stored on this computer. Missing OAuth stays a refusal, without a fetch.
 func TestCodexModelsGatewayKeyIsNotOAuth(t *testing.T) {
 	for _, bearer := range []string{"", "managed", Token, TokenFor("codex")} {

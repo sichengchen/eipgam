@@ -132,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await browser.close();
         });
         const context = await browser.newContext({ viewport: { width, height: 760 }, reducedMotion: "reduce" });
-        await context.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "usage"); } catch {} });
+        await context.addInitScript(() => { try { localStorage.setItem("eipgam.panelTab", "usage"); } catch {} });
         page = await context.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // the Usage page's cards: a line under the balance for each grant,
         // amber within a week
-        await page.goto("http://magpie.test/?view=usage&tab=usage");
+        await page.goto("http://eipgam.test/?view=usage&tab=usage");
         await page.waitForFunction(() => document.querySelectorAll("#subscriptionUsage .bal-part").length >= 7);
         const lines = () => page.evaluate(() => [...document.querySelectorAll("#subscriptionUsage .quota-balance")].map((b) =>
           [...b.querySelectorAll(".bal-part:not(.lead)")].map((r) => [r.querySelector("span").textContent, r.querySelector("b").textContent, r.classList.contains("soon")])));
@@ -163,14 +163,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const panel = await context.newPage();
         panel.on("pageerror", (e) => errors.push(e.message));
         await panel.route("**/*", serve(lang, [], fresh()));
-        await panel.goto("http://magpie.test/?mode=panel");
+        await panel.goto("http://eipgam.test/?mode=panel");
         await panel.waitForFunction(() => document.querySelectorAll("#panelQuota .pq-bp").length >= 4);
         assert.deepEqual(await panel.evaluate(() => [...document.querySelectorAll("#panelQuota .pq-bp")].map((r) => [r.querySelector("span").textContent, r.querySelector("b").textContent, r.classList.contains("soon")])),
           [[w.inN(30), "$20.00", false], [w.tomorrow, "¥5.00", true], [w.inN(2), "¥8.00", true], [w.today, "$1.00", true]]);
         await panel.close();
 
         // the key's pills in the provider's editor
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Relay" }).first().click();
         await page.locator(".editor .accts .acc .abal").first().waitFor({ state: "attached" });
         await page.waitForLoadState("networkidle");

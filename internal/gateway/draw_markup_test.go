@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // markupPNG stands for the transparent layer: other bytes than pngBytes,
@@ -27,7 +27,7 @@ func sourceURL() string {
 }
 
 // #5364 (kongjianguan): /v1/images/edits takes OpenAI's markup layer, a
-// transparent PNG laid over the first image to steer the edit. magpie
+// transparent PNG laid over the first image to steer the edit. eipgam
 // read only the mask: a JSON markup stopped in drawing.Extra, a
 // multipart one was dropped, and neither the ChatGPT backend's JSON edit
 // nor the plain multipart edit carried it.

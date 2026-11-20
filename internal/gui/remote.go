@@ -13,32 +13,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// The app opens another magpie's page in a window of its own: a magpie on
-// a server (`magpie daemon install --web`, `magpie web`, or an app with
+// The app opens another eipgam's page in a window of its own: a eipgam on
+// a server (`eipgam daemon install --web`, `eipgam web`, or an app with
 // Settings › Network and sharing › Browser access on), whose routing and
 // usage the user reads from the desktop (xuanwo on X). The window is that
-// magpie's own web page, signed in with its own key as a browser is
+// eipgam's own web page, signed in with its own key as a browser is
 // (webGuard there): nothing is served here, and the page in the window
-// talks to that magpie alone. The address and key live in
-// remote-magpie.json beside settings.json, this computer's alone, never
+// talks to that eipgam alone. The address and key live in
+// remote-eipgam.json beside settings.json, this computer's alone, never
 // in settings.json: a sync or a backup never carries the key elsewhere.
 
-// remoteFile is where the other magpie's address and key are kept, 0600.
-func remoteFile() string { return filepath.Join(settings.Dir(), "remote-magpie.json") }
+// remoteFile is where the other eipgam's address and key are kept, 0600.
+func remoteFile() string { return filepath.Join(settings.Dir(), "remote-eipgam.json") }
 
-// remoteConf is remote-magpie.json: URL is the page's address without the
+// remoteConf is remote-eipgam.json: URL is the page's address without the
 // key, Key the key its link carries.
 type remoteConf struct {
 	URL string `json:"url,omitempty"`
 	Key string `json:"key,omitempty"`
 }
 
-// loadRemote reads remote-magpie.json; none is an empty conf.
+// loadRemote reads remote-eipgam.json; none is an empty conf.
 func loadRemote() (remoteConf, error) {
 	var c remoteConf
 	b, err := os.ReadFile(remoteFile())
@@ -58,8 +58,8 @@ func loadRemote() (remoteConf, error) {
 	return c, nil
 }
 
-// saveRemote writes remote-magpie.json readable by its owner alone: the
-// key opens every setting and key the other magpie has.
+// saveRemote writes remote-eipgam.json readable by its owner alone: the
+// key opens every setting and key the other eipgam has.
 func saveRemote(c remoteConf) error {
 	p := remoteFile()
 	if c == (remoteConf{}) {
@@ -81,7 +81,7 @@ func saveRemote(c remoteConf) error {
 	return os.Chmod(p, 0o600)
 }
 
-// remoteAddr reads what was typed as the other magpie's address: the link
+// remoteAddr reads what was typed as the other eipgam's address: the link
 // it printed (with ?k=, which is taken out as the key) or the bare
 // address, https:// when no scheme is named. Plain http is taken only
 // where the key doesn't cross the internet in the clear: an IP address
@@ -91,12 +91,12 @@ func saveRemote(c remoteConf) error {
 func remoteAddr(raw string) (addr, key string, err error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
-		return "", "", errors.New("type the other magpie's address")
+		return "", "", errors.New("type the other eipgam's address")
 	}
 	raw = provider.WithScheme(raw, "https")
 	u, err := url.Parse(raw)
 	if err != nil || u.Host == "" || u.Hostname() == "" {
-		return "", "", fmt.Errorf("%q isn't an address such as https://magpie.example.com", raw)
+		return "", "", fmt.Errorf("%q isn't an address such as https://eipgam.example.com", raw)
 	}
 	if u.Scheme != "http" && u.Scheme != "https" {
 		return "", "", fmt.Errorf("the address is http:// or https://, not %s://", u.Scheme)
@@ -137,7 +137,7 @@ func remoteLink(c remoteConf) string {
 	return u.String()
 }
 
-// remoteProbe asks the other magpie whether it takes the key, as the
+// remoteProbe asks the other eipgam whether it takes the key, as the
 // window's first load would, so a wrong address or key is said in Settings
 // rather than as a window with an error page. It reads nothing behind the
 // key: webGuard answers a link with the key with a redirect and a cookie,
@@ -165,24 +165,24 @@ var remoteProbe = func(c remoteConf) error {
 	case resp.StatusCode == http.StatusSeeOther && remoteSignedIn(resp):
 		return nil
 	case resp.StatusCode == http.StatusUnauthorized:
-		return errors.New("that magpie turned the key away: use the key in the link it printed (MAGPIE_WEB_KEY, or the k= in it)")
+		return errors.New("that eipgam turned the key away: use the key in the link it printed (EIPGAM_WEB_KEY, or the k= in it)")
 	case resp.StatusCode == http.StatusForbidden:
-		return errors.New("that magpie doesn't let this computer in: add this computer's address to its allowed addresses")
+		return errors.New("that eipgam doesn't let this computer in: add this computer's address to its allowed addresses")
 	}
-	return fmt.Errorf("%s answered %s, not as a magpie page: check the address and port (magpie web's is 3430)", req.URL.Host, resp.Status)
+	return fmt.Errorf("%s answered %s, not as a eipgam page: check the address and port (eipgam web's is 3430)", req.URL.Host, resp.Status)
 }
 
-// remoteSignedIn: the answer sets magpie web's cookie.
+// remoteSignedIn: the answer sets eipgam web's cookie.
 func remoteSignedIn(resp *http.Response) bool {
 	for _, c := range resp.Cookies() {
-		if strings.HasPrefix(c.Name, "magpie_web_") {
+		if strings.HasPrefix(c.Name, "eipgam_web_") {
 			return true
 		}
 	}
 	return false
 }
 
-// remoteOpener is a host that can open the other magpie's window: the
+// remoteOpener is a host that can open the other eipgam's window: the
 // app's, not a browser's.
 type remoteOpener interface {
 	OpenRemote(link, title string)
@@ -196,7 +196,7 @@ type remoteJSON struct {
 }
 
 // remoteRoutes: GET /api/remote says what is kept; POST takes {"url",
-// "key"}, checks that magpie takes the key, keeps both and opens its
+// "key"}, checks that eipgam takes the key, keeps both and opens its
 // window (a key left out keeps the one kept for the same address);
 // POST /api/remote/forget forgets them. The app's own windows' alone.
 func remoteRoutes(mux *http.ServeMux, w Windows) {
@@ -231,16 +231,16 @@ func remoteRoutes(mux *http.ServeMux, w Windows) {
 			}
 		}
 		if key == "" {
-			fail(rw, errors.New("type that magpie's key: the k= in the link it printed, or its MAGPIE_WEB_KEY"))
+			fail(rw, errors.New("type that eipgam's key: the k= in the link it printed, or its EIPGAM_WEB_KEY"))
 			return
 		}
 		if err := CheckWebKey(key); err != nil {
-			fail(rw, errors.New(strings.Replace(err.Error(), "MAGPIE_WEB_KEY", "the key", 1)))
+			fail(rw, errors.New(strings.Replace(err.Error(), "EIPGAM_WEB_KEY", "the key", 1)))
 			return
 		}
 		o, ok := w.(remoteOpener)
 		if !ok {
-			fail(rw, errors.New("only the app opens another magpie in a window"))
+			fail(rw, errors.New("only the app opens another eipgam in a window"))
 			return
 		}
 		c := remoteConf{URL: addr, Key: key}
@@ -253,7 +253,7 @@ func remoteRoutes(mux *http.ServeMux, w Windows) {
 			return
 		}
 		u, _ := url.Parse(addr)
-		o.OpenRemote(remoteLink(c), "magpie · "+u.Host)
+		o.OpenRemote(remoteLink(c), "eipgam · "+u.Host)
 		writeJSON(rw, remoteJSON{URL: c.URL, HasKey: true})
 	})
 	mux.HandleFunc("POST /api/remote/forget", func(rw http.ResponseWriter, r *http.Request) {

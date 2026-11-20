@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, theme));
 
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.locator(".subscription-card[data-provider='trae'] .subscription-account").nth(2).waitFor();
         const lines = await page.evaluate(() => [...document.querySelectorAll("#subscriptionUsage > .subscription-card")].map((c) => {
           const line = getComputedStyle(c).getPropertyValue("--line").trim();
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(u.seen.length > 0, `${at}: Usage draws bars`);
         for (const b of u.seen) assert.deepEqual(b, u.usage, `${at}: Usage's bars`);
 
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.locator(".rt-act .bar").first().waitFor();
         for (const sel of [".rt-accts li:not(.nobar) > .bar", ".rt-act > .bar"]) {
           const r = await bars(page, sel);

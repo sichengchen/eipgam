@@ -6,8 +6,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // geminiKindsCatalog is models.dev's rows for the models below, as
@@ -36,7 +36,7 @@ func geminiKinds(t *testing.T) {
 	t.Cleanup(catalog.Reset)
 }
 
-// A Gemini model a list gives bare — Vertex AI's, which magpie names
+// A Gemini model a list gives bare — Vertex AI's, which eipgam names
 // itself, or a relay's — is said to take what models.dev says it takes
 // wherever it is served: audio, video and pdf beside text and image. It
 // was said to take text and image alone, as agents guess for a model they

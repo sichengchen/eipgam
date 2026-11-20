@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Settings' rows where their feature is (the scattered settings audit after
-// netube99 on X): magpie web draws no empty Menu bar cost row, as it has no
+// netube99 on X): eipgam web draws no empty Menu bar cost row, as it has no
 // menu bar; the alerts (allowance, balance, reset, task done) sit under
 // their own Alerts heading, not among the allowances' display; what routing
 // does when an account refuses or every one rests, and a busy model's place
@@ -19,7 +19,7 @@ const assets = path.resolve(__dirname, "../assets");
 function server(lang, web) {
   const cur = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", textSize: 100,
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false, trayUsage: "", trayUsageEvery: 3,
     visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -58,7 +58,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.errors = [];
           page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; page.errors.push(e.message); });
           await page.route("**/*", server(lang, web));
-          await page.goto("http://magpie.test/?view=" + view);
+          await page.goto("http://eipgam.test/?view=" + view);
           return page;
         };
         const tr = (page, s) => page.evaluate((s) => t(s), s);
@@ -77,11 +77,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(await fits(page), "fits");
         assert.deepEqual(page.errors, []);
 
-        // magpie web: no menu bar, so no empty Menu bar cost row
+        // eipgam web: no menu bar, so no empty Menu bar cost row
         page = await open(true, "settings&tab=usage");
         await page.locator("#currencySegs .opt").first().waitFor();
-        assert.equal(await page.locator("#trayCostRow").isVisible(), false, "no Menu bar cost row in magpie web");
-        assert(await fits(page), "fits in magpie web");
+        assert.equal(await page.locator("#trayCostRow").isVisible(), false, "no Menu bar cost row in eipgam web");
+        assert(await fits(page), "fits in eipgam web");
         assert.deepEqual(page.errors, []);
 
         // Models › Routing: the rows about where a request goes, after the

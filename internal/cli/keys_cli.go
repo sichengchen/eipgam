@@ -6,17 +6,17 @@ import (
 	"os"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-const keysUsage = "magpie provider keys <id> [add [key… | -]]"
+const keysUsage = "eipgam provider keys <id> [add [key… | -]]"
 
 // keysCmd prints every key a provider holds, one a line and nothing else,
 // or adds keys: given as words, or one a line on stdin (-, or none given).
-// So one provider's keys go from one magpie to another (@emilochen on X:
-// this computer's to a magpie in the cloud):
+// So one provider's keys go from one eipgam to another (@emilochen on X:
+// this computer's to a eipgam in the cloud):
 //
-//	magpie provider keys relay | ssh cloud magpie provider keys relay add
+//	eipgam provider keys relay | ssh cloud eipgam provider keys relay add
 //
 // What is printed is the keys themselves, asked for by name; they go to
 // stdout alone, never to a log.

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // saidOf is the said of a classified, as the trace's JSON spells it: the

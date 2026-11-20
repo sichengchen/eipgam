@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // asks counts what the updater set here was asked.
@@ -43,14 +43,14 @@ func setUpdater(t *testing.T, out provider.RemoteUpdate) *asks {
 	return a
 }
 
-// nnlrl_75403 on Discord: once magpie here updates, the Remote magpie it
-// uses updates too. POST /v1/magpie/update replaces the program there, so
+// nnlrl_75403 on Discord: once eipgam here updates, the Remote eipgam it
+// uses updates too. POST /v1/eipgam/update replaces the program there, so
 // only the owner asks it: a gateway key of full access, from this computer
-// or another while magpie is shared. Never a request with no key (a page
+// or another while eipgam is shared. Never a request with no key (a page
 // or app the gateway lets in on loopback without one), a page with the
 // key in it, a read-only key or a held one.
 func TestRemoteUpdateNeedsAFullKey(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	keys, secrets := newCaller(t, "Full", "Read only", "Held")
 	if _, err := access.Update("access-key", access.Change{Key: keys[1].ID, ReadOnly: true}); err != nil {
 		t.Fatal(err)
@@ -92,7 +92,7 @@ func TestRemoteUpdateNeedsAFullKey(t *testing.T) {
 		{"a foreign page, no key", loop, gw, "https://evil.example", ""},
 		{"a foreign page with the full key", loop, gw, "https://evil.example", secrets[0]},
 		{"another machine, no key", lan, gw, "", ""},
-		{"another machine, a wrong key", lan, gw, "", "sk-magpie-wrong"},
+		{"another machine, a wrong key", lan, gw, "", "sk-eipgam-wrong"},
 		{"a read-only key", lan, gw, "", secrets[1]},
 		{"a read-only key, this computer", loop, gw, "", secrets[1]},
 		{"a held key", lan, gw, "", secrets[2]},
@@ -143,11 +143,11 @@ func TestRemoteUpdateNeedsAFullKey(t *testing.T) {
 	}
 }
 
-// The office's magpie updated; the home server's, its Remote magpie, is
+// The office's eipgam updated; the home server's, its Remote eipgam, is
 // asked to follow through the provider's key, once a version, and only
 // when it is behind. The row keeps what it answered.
 func TestRemoteMagpieAskedToFollow(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	provider.ForgetRemoteUpdatesForTest()
 	t.Cleanup(provider.ForgetRemoteUpdatesForTest)
 	was := Version
@@ -186,7 +186,7 @@ func TestRemoteMagpieAskedToFollow(t *testing.T) {
 			t.Fatalf("%s: the row says %+v", v, u)
 		}
 	}
-	// automatic updates off here: the user keeps this magpie where it
+	// automatic updates off here: the user keeps this eipgam where it
 	// is, and its remotes with it
 	s := settings.Load()
 	s.NoAutoUpdate = true
@@ -233,18 +233,18 @@ func TestRemoteMagpieAskedToFollow(t *testing.T) {
 		t.Fatalf("read-only key asked %v", got)
 	}
 
-	// a magpie from before the route: too old to be asked
+	// a eipgam from before the route: too old to be asked
 	old := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" && r.URL.Path == "/v1" {
-			writeJSON(w, 200, map[string]any{"name": "magpie", "version": "v0.1.50"})
+			writeJSON(w, 200, map[string]any{"name": "eipgam", "version": "v0.1.50"})
 			return
 		}
-		writeError(w, provider.Chat, http.StatusNotFound, "magpie serves /v1/chat/completions")
+		writeError(w, provider.Chat, http.StatusNotFound, "eipgam serves /v1/chat/completions")
 	}))
 	defer old.Close()
 	save(secrets[0], old.URL)
 	provider.UpdateRemotes(ctx, "v0.1.200")
 	if u, ok := provider.RemoteUpdateOf("home", time.Now()); !ok || u.State != "old" {
-		t.Fatalf("an old magpie: %+v %v", u, ok)
+		t.Fatalf("an old eipgam: %+v %v", u, ok)
 	}
 }

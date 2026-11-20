@@ -7,21 +7,21 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// Settings › Sync's Data folder (CHENGJIAHEGOXIS on X: magpie's files on
+// Settings › Sync's Data folder (CHENGJIAHEGOXIS on X: eipgam's files on
 // an external SSD rather than the Mac's own disk; buhaodeshiyehao on X):
-// where magpie keeps its files and cache, and moving them to a folder on
+// where eipgam keeps its files and cache, and moving them to a folder on
 // another disk, or back. The move is appdir's (move.go). It is never made
-// under this magpie: it is asked for, magpie starts itself again, and the
+// under this eipgam: it is asked for, eipgam starts itself again, and the
 // new one makes it before it reads anything.
 
 type dataFolderView struct {
 	appdir.Place
-	// Other is a magpie other than this one serving the gateway (magpie
+	// Other is a eipgam other than this one serving the gateway (eipgam
 	// serve, a launch agent): the move waits for a start without it.
 	Other bool `json:"other,omitempty"`
 }
@@ -46,7 +46,7 @@ func dataFolder() dataFolderView {
 // servedBy is gateway.ServedBy; tests stand in for it.
 var servedBy = gateway.ServedBy
 
-// restartSelf starts this magpie again once it has exited, with its window
+// restartSelf starts this eipgam again once it has exited, with its window
 // up: the new one makes the move asked for, then opens as before. Tests
 // stand in for it.
 var restartSelf = func() error {
@@ -80,7 +80,7 @@ func dataFolderRoutes(mux *http.ServeMux, w Windows) {
 			dir := ""
 			if r.PathValue("action") == "move" {
 				if dir = in.Dir; dir == "" {
-					if dir, err = w.ChooseFolder("Choose a folder for magpie's files"); err != nil || dir == "" {
+					if dir, err = w.ChooseFolder("Choose a folder for eipgam's files"); err != nil || dir == "" {
 						break // cancelled: nothing asked
 					}
 				}
@@ -89,7 +89,7 @@ func dataFolderRoutes(mux *http.ServeMux, w Windows) {
 				break
 			}
 			v := dataFolder()
-			// magpie web, or another magpie serving: the user starts it
+			// eipgam web, or another eipgam serving: the user starts it
 			// again; the app starts itself again now
 			restart := !ownWeb(app) && !v.Other
 			if restart {

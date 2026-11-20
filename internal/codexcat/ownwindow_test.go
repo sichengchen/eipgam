@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // bundledWindows is Codex's own: every model of its bundled models.json
@@ -39,10 +39,10 @@ func TestBundledWindowsAreCodexOwn(t *testing.T) {
 	}
 }
 
-// @flower__daisy on X: Codex compacted early on magpie. Long
+// @flower__daisy on X: Codex compacted early on eipgam. Long
 // conversations' default told every model with a longer window to compact
 // at 272K, "what OpenAI does with its own models"; Codex's own catalog
-// holds GPT-6.1 Terra to 500K. An OpenAI model magpie serves is held to
+// holds GPT-6.1 Terra to 500K. An OpenAI model eipgam serves is held to
 // the window Codex holds it to, never above its own; another vendor's
 // model, and a size the user set, are as before.
 func TestCodexCatalogHoldsOpenAIModelToCodexWindow(t *testing.T) {

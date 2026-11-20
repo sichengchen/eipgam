@@ -1,20 +1,20 @@
 package library
 
 // The skill router: with the Library's switch on (SkillRouter), an
-// agent's skills folder is given one skill of magpie's, magpie-skills, in
+// agent's skills folder is given one skill of eipgam's, eipgam-skills, in
 // place of a link for each skill ticked for it. Its SKILL.md lists those
 // skills, each with its description and the path of its own SKILL.md,
 // which the agent reads when a task matches one. An
 // agent then carries one skill's description in its prompt, not every
 // one's, however many the library gives it.
 //
-// The entry is a link to a folder magpie writes for the agent's folder
+// The entry is a link to a folder eipgam writes for the agent's folder
 // (routerDir): its SKILL.md, and under .skills a link to each skill it
 // lists. The paths the SKILL.md gives lead through the agent's own skills
 // folder, and .skills is a hidden folder, which the agents that look for
 // skills in every folder under theirs (Codex, OpenCode, Pi) leave alone,
 // so none of them finds a listed skill twice. Claude Code asks before it
-// reads outside its project, even there, so magpie adds it Read rules
+// reads outside its project, even there, so eipgam adds it Read rules
 // for the entry and the folders behind it (routerAllow).
 //
 // What stays a link of its own (routedFor):
@@ -42,7 +42,7 @@ package library
 // uses only the skills picked in its own list), an agent whose folder is
 // ~/.agents/skills itself (read by many agents, each of which would find
 // a second router beside its own), and one whose folder has a
-// magpie-skills of the library's or the user's own.
+// eipgam-skills of the library's or the user's own.
 
 import (
 	"crypto/sha256"
@@ -56,13 +56,13 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/settings"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
 )
 
 // RouterSkill is the name of the one skill the router gives an agent.
-const RouterSkill = "magpie-skills"
+const RouterSkill = "eipgam-skills"
 
 // SkillDirect is Skill.Router for a skill the router leaves out: each
 // agent given it keeps its own link, as with the router off.
@@ -73,8 +73,8 @@ const (
 	routerCopies    = "copies"    // it is given copies, which a link can't list
 	routerLiveAgent = "liveagent" // it uses only the skills picked in its list
 	routerShared    = "shared"    // its folder is ~/.agents/skills, read by many
-	routerTaken     = "taken"     // the library has a skill called magpie-skills
-	routerOwn       = "own"       // its folder has a magpie-skills of its own
+	routerTaken     = "taken"     // the library has a skill called eipgam-skills
+	routerOwn       = "own"       // its folder has a eipgam-skills of its own
 	routerNone      = "none"      // its folder takes it, but no skill is listed there
 )
 
@@ -83,7 +83,7 @@ const (
 const routerDescMax = 1024
 
 // SetSkillRouter turns the router on or off: on, each agent that can take
-// it is given magpie-skills in place of the links of the skills it lists;
+// it is given eipgam-skills in place of the links of the skills it lists;
 // off, their own links again.
 func SetSkillRouter(on bool) (*Result, error) {
 	return change(func(l *Library) error {
@@ -108,7 +108,7 @@ func SkillRouterHow(name string, direct bool) (*Result, error) {
 	})
 }
 
-// routerRoot is where magpie writes the router's folders.
+// routerRoot is where eipgam writes the router's folders.
 func routerRoot() string { return filepath.Join(settings.Dir(), "skill-router") }
 
 // routerDir is the folder the router entry in the skills folder dir leads
@@ -118,7 +118,7 @@ func routerDir(dir string) string {
 	return filepath.Join(routerRoot(), hex.EncodeToString(h[:6]))
 }
 
-// routerOurs is whether the entry at p is magpie's router entry.
+// routerOurs is whether the entry at p is eipgam's router entry.
 func routerOurs(p string) bool {
 	to, ok := linkTarget(p)
 	if ok {
@@ -186,7 +186,7 @@ func (l *Library) routedFor(t *Target, sharers []string, cp bool, inShared func(
 
 // placeRouter writes the router's folder for t's skills folder with the
 // skills routed, and its entry in the folder; with none routed, the entry
-// magpie made there goes, and its folder.
+// eipgam made there goes, and its folder.
 func (l *Library) placeRouter(t *Target, routed, slash map[string]bool, a *Applied, res *Result) {
 	id := t.Agent.ID
 	p := filepath.Join(t.Skills, RouterSkill)
@@ -217,7 +217,7 @@ func (l *Library) placeRouter(t *Target, routed, slash map[string]bool, a *Appli
 	}
 	placeStubs(t, slash, at, res)
 	if !routerOurs(p) || realDir(p) != realDir(dir) {
-		unlink(p) // magpie's, to an old folder: routerWhy left a user's alone
+		unlink(p) // eipgam's, to an old folder: routerWhy left a user's alone
 		if err := os.MkdirAll(t.Skills, 0o755); err != nil {
 			res.fail(id, "skill:"+RouterSkill, err)
 			return
@@ -242,7 +242,7 @@ func (l *Library) placeRouter(t *Target, routed, slash map[string]bool, a *Appli
 // one a link leads to (Claude Code 2.1.316, tried in a sandbox HOME), so
 // one rule is for the router's entry and one for the library's skills
 // folder; a skill whose folder is elsewhere gets its own. Other agents
-// have no such setting magpie writes: none.
+// have no such setting eipgam writes: none.
 func routerRules(t *Target, routed map[string]bool) []string {
 	if t.Agent == nil || t.Agent.Plugin != "" || t.Settings == "" {
 		return nil
@@ -276,8 +276,8 @@ func claudePath(p string) string {
 }
 
 // routerAllow writes the rules (want) into Claude Code's permissions.allow,
-// beside the user's own, and takes away magpie's that are no longer
-// wanted; a rule the user had already is theirs and stays when magpie's
+// beside the user's own, and takes away eipgam's that are no longer
+// wanted; a rule the user had already is theirs and stays when eipgam's
 // go.
 func (l *Library) routerAllow(t *Target, want []string, a *Applied, res *Result) {
 	if len(want) == 0 && len(a.RouterRules) == 0 {
@@ -307,7 +307,7 @@ func (l *Library) routerAllow(t *Target, want []string, a *Applied, res *Result)
 	perms, _ := doc["permissions"].(map[string]any)
 	cur, ok := entryTools(doc, []string{"permissions", "allow"})
 	if !ok {
-		fail(fmt.Errorf("%s: permissions.allow isn't a list of rules, so magpie leaves it as it is", path))
+		fail(fmt.Errorf("%s: permissions.allow isn't a list of rules, so eipgam leaves it as it is", path))
 		return
 	}
 	list, mine := offList(cur, a.RouterRules, want)
@@ -325,7 +325,7 @@ func (l *Library) routerAllow(t *Target, want []string, a *Applied, res *Result)
 	if len(list) > 0 {
 		err = edit.SetJSON(path, edit.KV{Path: "permissions.allow", Value: list})
 	} else {
-		// magpie's were the last: the key goes, and permissions too when
+		// eipgam's were the last: the key goes, and permissions too when
 		// nothing else is in it
 		keys := []string{"permissions.allow"}
 		if len(perms) == 1 {
@@ -432,7 +432,7 @@ func routedAt(dir, skills, n string) string {
 // and /name reads and follows the skill). They go in Claude Code's own
 // commands folder, not its skills folder, which Crush, DevEco Code and
 // Kimi Code read too, and which would give them every description again.
-// What magpie wrote is recorded as a command's is (Applied.RouterCommands,
+// What eipgam wrote is recorded as a command's is (Applied.RouterCommands,
 // syncOwnFiles); a library command or a file of the user's by that name
 // stays, and that skill gets none. Other agents: none.
 func (l *Library) routerCommands(t *Target, routed map[string]bool, a *Applied, res *Result) {
@@ -465,7 +465,7 @@ func (l *Library) routerCommands(t *Target, routed map[string]bool, a *Applied, 
 			body := routerCommand(n, at)
 			if _, err := os.Lstat(path); err == nil && !had[path] {
 				// the user's own command by that name, unless it is what
-				// magpie would write
+				// eipgam would write
 				if cur, err := os.ReadFile(path); err != nil || !slices.Equal(cur, body) {
 					continue
 				}
@@ -595,14 +595,14 @@ func slashFor(t *Target, all []*Target, sharers []string, routed map[string]bool
 
 // stubsDir is the folder of the stubs for the skills folder dir, beside
 // the router's own (routerDir), so an agent that looks for skills in
-// every folder under magpie-skills finds none of them there.
+// every folder under eipgam-skills finds none of them there.
 func stubsDir(dir string) string { return routerDir(dir) + "-slash" }
 
-// stubOf is whether the entry at p is magpie's stub of a skill: a link
+// stubOf is whether the entry at p is eipgam's stub of a skill: a link
 // into the router's folders by another name than the router's.
 func stubOf(p string) bool { return filepath.Base(p) != RouterSkill && routerOurs(p) }
 
-// dropStubs takes out of t's folder each stub of magpie's that isn't to
+// dropStubs takes out of t's folder each stub of eipgam's that isn't to
 // stay (keep), and its folder. It runs before the folder's links are
 // written, so a skill no longer routed gets its link where its stub was.
 func dropStubs(t *Target, keep map[string]bool, res *Result) {
@@ -673,7 +673,7 @@ func writeIfNot(p, s string) (bool, error) {
 
 // placeStubs writes the stub of each skill in slash and links it into t's
 // folder by the skill's name; at is where each one's SKILL.md is read
-// (writeRouter). An entry there that isn't magpie's is left as it is:
+// (writeRouter). An entry there that isn't eipgam's is left as it is:
 // routedFor routes no skill with one.
 func placeStubs(t *Target, slash map[string]bool, at map[string]string, res *Result) {
 	id := t.Agent.ID
@@ -705,7 +705,7 @@ func placeStubs(t *Target, slash map[string]bool, at map[string]string, res *Res
 			if !stubOf(p) {
 				continue
 			}
-			unlink(p) // magpie's, to an old folder
+			unlink(p) // eipgam's, to an old folder
 		}
 		if err := dirLink(d, p); err != nil {
 			res.fail(id, "skill:"+n, err)

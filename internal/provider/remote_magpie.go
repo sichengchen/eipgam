@@ -6,41 +6,41 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
-// A remote magpie is another computer's magpie gateway, shared on its
+// A remote eipgam is another computer's eipgam gateway, shared on its
 // network (Settings → Network and sharing → Share on local network), as a provider: the
-// computers' agents stay wired by their own magpie, while the providers,
-// routing groups and usage are the one magpie's they all share. Its
-// address serves every API magpie does, so the provider speaks them all
+// computers' agents stay wired by their own eipgam, while the providers,
+// routing groups and usage are the one eipgam's they all share. Its
+// address serves every API eipgam does, so the provider speaks them all
 // — Chat Completions and Responses at <address>/v1, Anthropic's Messages
 // at the address — and a request goes on in the API the agent spoke. Its
 // model list tells, of each model, the APIs its own provider serves it on
 // (native_endpoints), and a request for one goes on one of those: turned
 // into another API once, here, when it must be, never on both computers.
 
-// Its list also has the image models the other magpie draws with, which
-// it gives only to a magpie that asks for them (DrawersHeader), each
-// marked "kind": "image": an older magpie would have taken one whose id
+// Its list also has the image models the other eipgam draws with, which
+// it gives only to a eipgam that asks for them (DrawersHeader), each
+// marked "kind": "image": an older eipgam would have taken one whose id
 // doesn't say it draws for a model to chat with. They go on to the other
-// magpie's images API, which asks their vendor as it would its own.
-// Each model's label is the other magpie's name for it, with its provider
+// eipgam's images API, which asks their vendor as it would its own.
+// Each model's label is the other eipgam's name for it, with its provider
 // there after it ("Claude Sonnet 5 · RelayA"), as its own agents see it:
 // two of its providers' models of one name are told apart here too.
 // Provider in model names Off here names each by its name there alone
-// (display_name, catalog.Model's Plain), whatever that magpie's own
+// (display_name, catalog.Model's Plain), whatever that eipgam's own
 // setting put after it (ARNO on Discord).
 
 // Its video models come the same way (VideomakersHeader), marked "kind":
 // "video", and go on to its videos API (#545).
 
 // Its list also tells what each model costs there (PricesHeader): the
-// price the other magpie counts its usage at — what its user set for the
+// price the other eipgam counts its usage at — what its user set for the
 // model by hand, else its provider's list price, at that provider's price
 // rate — so its calls cost the same here (Sorghum on Discord). It is this
 // provider's list price for the model: a price set here for it still comes
-// first, as one set for any provider's list price does. A magpie tells it
+// first, as one set for any provider's list price does. A eipgam tells it
 // only to its own computer and to one sharing it with a gateway key, and
 // one from before it tells nothing, which leaves the models priced as
 // they were: by models.dev.
@@ -49,30 +49,30 @@ import (
 // "kind": "decision", and asked at its System One API, including models
 // whose names aren't Jev's.
 
-// DrawersHeader asks a magpie's model list for its image models as well.
+// DrawersHeader asks a eipgam's model list for its image models as well.
 const DrawersHeader = "X-Magpie-Drawers"
 
-// VideomakersHeader asks a magpie's model list for its video models as
-// well: a magpie that doesn't send it would take grok-imagine-video, whose
+// VideomakersHeader asks a eipgam's model list for its video models as
+// well: a eipgam that doesn't send it would take grok-imagine-video, whose
 // id says "imagine", for an image model.
 const VideomakersHeader = "X-Magpie-Videomakers"
 
-// PricesHeader asks a magpie's model list for what each model costs
-// there ("magpie_price"): a magpie that doesn't send it is told nothing
+// PricesHeader asks a eipgam's model list for what each model costs
+// there ("eipgam_price"): a eipgam that doesn't send it is told nothing
 // more than before.
 const PricesHeader = "X-Magpie-Prices"
 
-// DecidersHeader asks a magpie's model list for its decision models too.
+// DecidersHeader asks a eipgam's model list for its decision models too.
 const DecidersHeader = "X-Magpie-Deciders"
 
 // RemoteMagpiePreset is the preset's id.
-const RemoteMagpiePreset = "remote-magpie"
+const RemoteMagpiePreset = "remote-eipgam"
 
-// IsRemoteMagpie reports whether the provider is another magpie.
+// IsRemoteMagpie reports whether the provider is another eipgam.
 func (p Provider) IsRemoteMagpie() bool { return p.Preset == RemoteMagpiePreset }
 
 // remoteMagpieEndpoints puts every API on the address given, however it
-// was typed: the bare host and port (plain http, which magpie serves),
+// was typed: the bare host and port (plain http, which eipgam serves),
 // …/v1, or the Anthropic root.
 func (p *Provider) remoteMagpieEndpoints() {
 	if !p.IsRemoteMagpie() {
@@ -107,7 +107,7 @@ func (p *Provider) remoteMagpieEndpoints() {
 }
 
 // listHeaders are the headers p's model list is asked with: a remote
-// magpie is asked for its image, video and decision models too, and its prices.
+// eipgam is asked for its image, video and decision models too, and its prices.
 // Its key goes as x-api-key whatever the user's headers say (remoteKey).
 // A list is no turn of a conversation: ${sessionId} and ${threadId} in a
 // value are an id of the list's own (conversation.go).
@@ -161,7 +161,7 @@ func (p Provider) listHeadersAt(u string) map[string]string {
 	return h
 }
 
-// remotePrice is what a remote magpie's list said the model costs there,
+// remotePrice is what a remote eipgam's list said the model costs there,
 // if it said.
 func (p Provider) remotePrice(model string) (catalog.Price, bool) {
 	if !p.IsRemoteMagpie() {
@@ -176,15 +176,15 @@ func (p Provider) remotePrice(model string) (catalog.Price, bool) {
 }
 
 // RemotePriced reports whether the model's list price is the one a remote
-// magpie's list gave, for the editor to say whose it is.
+// eipgam's list gave, for the editor to say whose it is.
 func (p Provider) RemotePriced(model string) bool {
 	_, ok := p.remotePrice(model)
 	return ok
 }
 
-// RemoteVia is the magpies a remote magpie's model passes through to its
-// vendor, as its list said, that magpie last (catalog's magpie_via.go);
-// nil for another provider's, or a list from a magpie from before.
+// RemoteVia is the magpies a remote eipgam's model passes through to its
+// vendor, as its list said, that eipgam last (catalog's eipgam_via.go);
+// nil for another provider's, or a list from a eipgam from before.
 func (p Provider) RemoteVia(model string) []string {
 	if !p.IsRemoteMagpie() {
 		return nil

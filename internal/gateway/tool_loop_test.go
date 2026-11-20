@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // countingVendor is a Chat vendor that answers every request with a word,
@@ -148,9 +148,9 @@ func askAgent(t *testing.T, url, body string) string {
 // The reporter's loop (audie on Discord: Codex Desktop on WorkBuddy's
 // deepseek-v4-pro reading the same code 308 times): once the same call has
 // had the same result toolLoopRepeats turns in a row, the next turn is
-// answered by magpie in the agent's own API, a finished reply saying why,
+// answered by eipgam in the agent's own API, a finished reply saying why,
 // and the vendor is never asked; Usage and the session's requests have it
-// as magpie's, sent nowhere, with the reason.
+// as eipgam's, sent nowhere, with the reason.
 func TestToolLoopIsStoppedOnEveryProtocol(t *testing.T) {
 	for _, x := range toolLoopAsks {
 		t.Run(x.name, func(t *testing.T) {
@@ -179,7 +179,7 @@ func TestToolLoopIsStoppedOnEveryProtocol(t *testing.T) {
 				}
 				time.Sleep(20 * time.Millisecond)
 			}
-			if rec.Provider != "magpie" || !rec.Rejected || !strings.Contains(rec.Error, "tool loop") || rec.Session != "01a15199-593c-77d1-9913-ce0e1efd48e8" {
+			if rec.Provider != "eipgam" || !rec.Rejected || !strings.Contains(rec.Error, "tool loop") || rec.Session != "01a15199-593c-77d1-9913-ce0e1efd48e8" {
 				t.Fatalf("usage record %+v", rec)
 			}
 		})
@@ -237,7 +237,7 @@ func TestToolLoopShortOrOffGoesOn(t *testing.T) {
 
 // Work that makes progress is never stopped, however long it goes on: a
 // poll answered differently each time, and the reporter's read of the
-// same code once the user has said something since, magpie's notice
+// same code once the user has said something since, eipgam's notice
 // included in the conversation.
 func TestToolLoopLetsProgressBy(t *testing.T) {
 	notice := map[provider.Protocol][]string{
@@ -254,7 +254,7 @@ func TestToolLoopLetsProgressBy(t *testing.T) {
 			if strings.Contains(got, "This turn was stopped") || v.asked.Load() != 1 {
 				t.Fatalf("a poll whose answer moves was stopped (vendor asked %d):\n%s", v.asked.Load(), got)
 			}
-			// the loop, magpie's notice and the user's word after it
+			// the loop, eipgam's notice and the user's word after it
 			body := toolTurns(x.from, toolLoopRepeats, codexRead, x.stream, notice[x.from]...)
 			got = askAgent(t, gw+x.path, body)
 			if strings.Contains(got, "This turn was stopped before") || v.asked.Load() != 2 {

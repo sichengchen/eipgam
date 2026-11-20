@@ -5,11 +5,11 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// A text-only model is offered to agents as taking images while magpie
+// A text-only model is offered to agents as taking images while eipgam
 // describes images to it (Discord, Fate: Codex turned an image away for a
 // text model although Settings › Vision was set), and as text-only again
 // with Vision off.

@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Claude Desktop on magpie from an app of its own (#5671): on a Mac, Claude
-// Desktop's opened row has a "Separate app" line with a Claude Magpie
+// Claude Desktop on eipgam from an app of its own (#5671): on a Mac, Claude
+// Desktop's opened row has a "Separate app" line with a Claude eipgam
 // switch. Off as before; a click posts the new choice, the switch follows
 // the state the reply carries, and no click scrolls the page. Where the
 // state has no isolated (Windows, Linux) the line isn't there. Every
@@ -20,7 +20,7 @@ function fixture(lang, offered = true) {
   const state = () => ({
     agents: [{
       id: "claude-desktop", name: "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired: true,
-      fields: [{ key: "provider", label: "provider", value: "magpie", options: [{ value: "magpie", label: "magpie", icon: "magpie" }] }],
+      fields: [{ key: "provider", label: "provider", value: "eipgam", options: [{ value: "eipgam", label: "eipgam", icon: "eipgam" }] }],
       models: { shown: 2, listed: 2, by: [{ name: "OpenCode Go", icon: "opencode", n: 2 }], names: ["DeepSeek V4 Pro", "Exo Free"] },
       ...(offered ? { isolated: { ...iso } } : {}),
     }],
@@ -36,7 +36,7 @@ function fixture(lang, offered = true) {
       const body = req.postDataJSON();
       posts.push(body);
       iso.on = body.on;
-      if (body.on) iso.launcher = "/test/Applications/Claude Magpie.app";
+      if (body.on) iso.launcher = "/test/Applications/Claude eipgam.app";
       else delete iso.launcher;
       return json(state());
     }
@@ -54,11 +54,11 @@ function fixture(lang, offered = true) {
 }
 
 const W = {
-  en: { k: "Separate app", hint: "Your own Claude Desktop stays signed in with Anthropic. macOS only.", ok: "Open Claude Magpie from Applications", details: "Details" },
-  zh: { k: "独立应用", hint: "你自己的 Claude Desktop 保持 Anthropic 登录。仅限 macOS。", ok: "从「应用程序」打开 Claude Magpie", details: "详情" },
-  "zh-TW": { k: "獨立應用程式", hint: "你自己的 Claude Desktop 維持 Anthropic 登入。僅限 macOS。", ok: "從「應用程式」打開 Claude Magpie", details: "詳情" },
-  ja: { k: "独立アプリ", hint: "ご自身の Claude Desktop は Anthropic にサインインしたままです。macOS のみ。", ok: "「アプリケーション」から Claude Magpie を開いてください", details: "詳細" },
-  de: { k: "Eigene App", hint: "Dein eigenes Claude Desktop bleibt bei Anthropic angemeldet. Nur macOS.", ok: "Öffne Claude Magpie unter Programme", details: "Details" },
+  en: { k: "Separate app", hint: "Your own Claude Desktop stays signed in with Anthropic. macOS only.", ok: "Open Claude eipgam from Applications", details: "Details" },
+  zh: { k: "独立应用", hint: "你自己的 Claude Desktop 保持 Anthropic 登录。仅限 macOS。", ok: "从「应用程序」打开 Claude eipgam", details: "详情" },
+  "zh-TW": { k: "獨立應用程式", hint: "你自己的 Claude Desktop 維持 Anthropic 登入。僅限 macOS。", ok: "從「應用程式」打開 Claude eipgam", details: "詳情" },
+  ja: { k: "独立アプリ", hint: "ご自身の Claude Desktop は Anthropic にサインインしたままです。macOS のみ。", ok: "「アプリケーション」から Claude eipgam を開いてください", details: "詳細" },
+  de: { k: "Eigene App", hint: "Dein eigenes Claude Desktop bleibt bei Anthropic angemeldet. Nur macOS.", ok: "Öffne Claude eipgam unter Programme", details: "Details" },
 };
 const cd = '.row.agent[data-id="claude-desktop"]';
 const sw = `${cd} .ag-isolated .lib-switch`;
@@ -73,7 +73,7 @@ async function open(engine, lang, width, offered, t) {
   const fx = fixture(lang, offered);
   await page.route("**/*", fx.serve);
   t.after(() => browser.close());
-  await page.goto("http://magpie.test/");
+  await page.goto("http://eipgam.test/");
   await page.locator(cd).waitFor();
   await page.locator(`${cd} .ag-link`, { hasText: W[lang].details }).click();
   await page.locator(`${cd} .ag-exp`).waitFor();
@@ -83,14 +83,14 @@ async function open(engine, lang, width, offered, t) {
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(W)) {
     for (const width of [1100, 640]) {
-      test(`${engine} ${lang} ${width}px: Claude Desktop's row turns Claude Magpie on and off`, async (t) => {
+      test(`${engine} ${lang} ${width}px: Claude Desktop's row turns Claude eipgam on and off`, async (t) => {
         const w = W[lang];
         const { page, fx, errors } = await open(engine, lang, width, true, t);
         const line = page.locator(`${cd} .ag-exp .ag-isolated`);
         await line.waitFor();
         const row = page.locator(`${cd} .ag-exp .ag-kv`, { has: page.locator(".ag-isolated") });
         assert.equal(await row.locator(".ag-k").textContent(), w.k);
-        assert.equal(await line.locator(".ag-isolated-say").textContent(), "Claude Magpie");
+        assert.equal(await line.locator(".ag-isolated-say").textContent(), "Claude eipgam");
         assert.equal(await line.locator(".ag-hint").textContent(), w.hint);
         assert.equal(await page.locator(sw).getAttribute("aria-checked"), "false", "on before it was switched");
         const box = await line.boundingBox();

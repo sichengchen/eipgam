@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 # On main a run finishes: a release waits for a green run, and one cancelled
 # by every next push left none to wait for (LESSONS.md). A newer push still
@@ -120,7 +121,7 @@ jobs:
         if: runner.os == 'Linux'
         timeout-minutes: 10
         env:
-          MAGPIE_FLOW_BIG: '1'
+          EIPGAM_FLOW_BIG: '1'
         run: |
           bun --version
           go test -timeout 10m -tags "${{ steps.tags.outputs.tags }}" ./internal/plugin/... -run '^TestFlowBigReplyProd$' -count=1

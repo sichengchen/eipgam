@@ -8,48 +8,48 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// The web search APIs, from the terminal: magpie search (#419).
+// The web search APIs, from the terminal: eipgam search (#419).
 
 const searchUsage = `usage:
-  magpie search                              the search APIs a model's web search goes to
-  magpie search add <api> <key> [url=<address>] [pick=turns|order]
+  eipgam search                              the search APIs a model's web search goes to
+  eipgam search add <api> <key> [url=<address>] [pick=turns|order]
                                              add one, or give one a new key
                                              (several keys as k1,k2: searches take them in turn,
                                              or with pick=order the first until it is refused)
-  magpie search add searxng url=<address> [<key>]
-  magpie search add you [<key>]              You.com: free with no key (100 searches a day)
-  magpie search off <api>                    keep one, key and all, but never ask it
-  magpie search on <api>                     ask it again
-  magpie search move <api> <n>               put one at place n in the order they are asked
-  magpie search mix <api>,<api>[,…]          ask these together, at once, and give the model their
+  eipgam search add searxng url=<address> [<key>]
+  eipgam search add you [<key>]              You.com: free with no key (100 searches a day)
+  eipgam search off <api>                    keep one, key and all, but never ask it
+  eipgam search on <api>                     ask it again
+  eipgam search move <api> <n>               put one at place n in the order they are asked
+  eipgam search mix <api>,<api>[,…]          ask these together, at once, and give the model their
                                              pages merged, a page found twice once (at most 12)
-  magpie search mix off                      ask them one at a time again, in order
-  magpie search rm <api>                     take one away
-  magpie search count [<n>]                  how many results a search is answered with when
+  eipgam search mix off                      ask them one at a time again, in order
+  eipgam search rm <api>                     take one away
+  eipgam search count [<n>]                  how many results a search is answered with when
                                              the client names no count (Claude Code's WebSearch,
                                              Codex's web_search): 1 to 20, 6 by default;
-                                             "magpie search count default" puts 6 back
+                                             "eipgam search count default" puts 6 back
 
   apis: tavily, brave, exa, firecrawl, you, tinyfish, searxng
-        and the ones a plugin gives (its search hook), as <plugin>:<id> in magpie's Settings
+        and the ones a plugin gives (its search hook), as <plugin>:<id> in eipgam's Settings
         › Models › Web search; a plugin that is off gives none
 
   url= is the API's base URL, for an endpoint of your own that answers as that API
   does (e.g. url=https://search.example.com/tavily). Without it the vendor's own is
   used; a new key alone keeps the url set before, and url= with nothing after it puts
-  the vendor's own back. magpie puts the API's path after it (/search for Tavily), so
+  the vendor's own back. eipgam puts the API's path after it (/search for Tavily), so
   a url given with that path at its end is taken as its base. The key is sent only
   to that url.
 
   With several keys, a key the API refused lately (turned away, out of credit, rate
   limited) rests and is asked only after the others: a rate limit for as long as the API
   says (30s to 10m), a key turned away for 10 minutes, one out of credit for an hour.
-  For Tavily, magpie search shows what each key has used of its limit (GET /usage).
+  For Tavily, eipgam search shows what each key has used of its limit (GET /usage).
 
   A client's web search (Claude Code's WebSearch, Codex's web_search) is done by the
   model's provider when it can search, then by a provider that can (a Claude or ChatGPT
@@ -62,19 +62,19 @@ const searchUsage = `usage:
   about twice as much for the model to read. Whether an API charges more for more
   results is its own pricing's.
 
-  Two or more mixed (magpie search mix) are asked first, together: a search then spends
+  Two or more mixed (eipgam search mix) are asked first, together: a search then spends
   each one's quota, takes as long as the slowest, and gives the model up to twice the
   results (20 at most). The others are asked, in order, only when none of the mixed ones finds anything.
 
-  e.g. magpie search add tavily tvly-…
-       magpie search add searxng url=https://searx.example.com
-       magpie search add you`
+  e.g. eipgam search add tavily tvly-…
+       eipgam search add searxng url=https://searx.example.com
+       eipgam search add you`
 
 func searchCmd(args []string) error {
 	if len(args) == 0 {
 		as := provider.StoredSearchAPIs()
 		if len(as) == 0 {
-			fmt.Println(muted.Render("  no search API · magpie search add <tavily|brave|exa|firecrawl|you|tinyfish|searxng> <key>"))
+			fmt.Println(muted.Render("  no search API · eipgam search add <tavily|brave|exa|firecrawl|you|tinyfish|searxng> <key>"))
 			return nil
 		}
 		for i, a := range as {
@@ -119,7 +119,7 @@ func searchCmd(args []string) error {
 		return nil
 	case "add", "set":
 		if len(args) < 2 {
-			return fmt.Errorf("magpie search add <api> <key> [url=<address>]")
+			return fmt.Errorf("eipgam search add <api> <key> [url=<address>]")
 		}
 		a := provider.SearchAPI{Vendor: strings.ToLower(args[1])}
 		// a new key alone keeps the address set before (#1580); url= with
@@ -135,7 +135,7 @@ func searchCmd(args []string) error {
 			} else if a.Key == "" {
 				a.Key = v
 			} else {
-				return fmt.Errorf("magpie search add <api> <key> [url=<address>] [pick=turns|order]")
+				return fmt.Errorf("eipgam search add <api> <key> [url=<address>] [pick=turns|order]")
 			}
 		}
 		if i := slices.IndexFunc(provider.StoredSearchAPIs(), func(x provider.SearchAPI) bool { return x.Vendor == a.Vendor }); i >= 0 && !urlGiven {
@@ -150,7 +150,7 @@ func searchCmd(args []string) error {
 		return nil
 	case "on", "off":
 		if len(args) != 2 {
-			return fmt.Errorf("magpie search %s <api>", args[0])
+			return fmt.Errorf("eipgam search %s <api>", args[0])
 		}
 		if err := provider.SwitchSearchAPI(strings.ToLower(args[1]), args[0] == "on"); err != nil {
 			return err
@@ -165,7 +165,7 @@ func searchCmd(args []string) error {
 		as := provider.StoredSearchAPIs()
 		i := slices.IndexFunc(as, func(x provider.SearchAPI) bool { return len(args) > 1 && x.Vendor == strings.ToLower(args[1]) })
 		if len(args) != 3 || n < 1 || n > len(as) {
-			return fmt.Errorf("magpie search move <api> <n>, n from 1 to %d", len(as))
+			return fmt.Errorf("eipgam search move <api> <n>, n from 1 to %d", len(as))
 		}
 		if i < 0 {
 			return fmt.Errorf("no %s search API is set up", strings.ToLower(args[1]))
@@ -185,7 +185,7 @@ func searchCmd(args []string) error {
 		return searchCountCmd(args[1:])
 	case "mix":
 		if len(args) != 2 {
-			return fmt.Errorf("magpie search mix <api>,<api>[,…] | off")
+			return fmt.Errorf("eipgam search mix <api>,<api>[,…] | off")
 		}
 		var vendors []string
 		if strings.ToLower(args[1]) != "off" {
@@ -195,7 +195,7 @@ func searchCmd(args []string) error {
 				}
 			}
 			if len(vendors) < 2 {
-				return fmt.Errorf("magpie search mix <api>,<api>[,…]: name two or more")
+				return fmt.Errorf("eipgam search mix <api>,<api>[,…]: name two or more")
 			}
 		}
 		if err := provider.MixSearchAPIs(vendors); err != nil {
@@ -209,7 +209,7 @@ func searchCmd(args []string) error {
 		return nil
 	case "rm", "remove":
 		if len(args) != 2 {
-			return fmt.Errorf("magpie search rm <api>")
+			return fmt.Errorf("eipgam search rm <api>")
 		}
 		if err := provider.RemoveSearchAPI(strings.ToLower(args[1])); err != nil {
 			return err
@@ -217,14 +217,14 @@ func searchCmd(args []string) error {
 		fmt.Println(green.Render("✓"), "removed")
 		return nil
 	}
-	return fmt.Errorf("magpie search [add|on|off|move|mix|rm|count] (magpie search help)")
+	return fmt.Errorf("eipgam search [add|on|off|move|mix|rm|count] (eipgam search help)")
 }
 
-// searchCountCmd is magpie search count (#5545, mdwsk88): with no word it
+// searchCountCmd is eipgam search count (#5545, mdwsk88): with no word it
 // says the count, with a number from 1 to 20 (or "default") it sets it; any
 // other word is refused and nothing is written.
 func searchCountCmd(args []string) error {
-	usage := fmt.Errorf("magpie search count [<n>], n from 1 to %d, or default for %d", settings.SearchCountMost, settings.SearchCountDefault)
+	usage := fmt.Errorf("eipgam search count [<n>], n from 1 to %d, or default for %d", settings.SearchCountMost, settings.SearchCountDefault)
 	s := settings.Load()
 	switch len(args) {
 	case 0:
@@ -256,7 +256,7 @@ func searchCountCmd(args []string) error {
 	return nil
 }
 
-// quotaLine is what one key has used of its limit, as magpie search lists
+// quotaLine is what one key has used of its limit, as eipgam search lists
 // it: unknown, with why, when it couldn't be read, and never 0.
 func quotaLine(q gateway.SearchKeyQuota) string {
 	var line string

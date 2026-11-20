@@ -11,10 +11,10 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
-const bridge = path.resolve(process.env.MAGPIE_BRIDGE || path.join(__dirname, "../pagebridge.js"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.join(__dirname, "../assets"));
+const bridge = path.resolve(process.env.EIPGAM_BRIDGE || path.join(__dirname, "../pagebridge.js"));
 const tok = "c".repeat(32);
-const page = { spec: "/x/cookie", name: "cookie", key: "plugin-cookie", title: "cookie", reads: [], url: `/_magpie/plugin/${tok}/index.html` };
+const page = { spec: "/x/cookie", name: "cookie", key: "plugin-cookie", title: "cookie", reads: [], url: `/_eipgam/plugin/${tok}/index.html` };
 
 let webkitEngine = false;
 async function server(route) {
@@ -28,8 +28,8 @@ async function server(route) {
   if (url.pathname === "/api/plugin-pages") return json([page]);
   if (url.pathname === "/api/plugin-panels") return json([]);
   if (url.pathname.startsWith("/api/")) return json({});
-  if (url.pathname.startsWith("/_magpie/plugin/")) {
-    const name = url.pathname.slice(`/_magpie/plugin/${tok}/`.length);
+  if (url.pathname.startsWith("/_eipgam/plugin/")) {
+    const name = url.pathname.slice(`/_eipgam/plugin/${tok}/`.length);
     const headers = { "Cache-Control": "no-cache" };
     if (name === "index.html") {
       const body = `<!doctype html><meta charset="utf-8"><script>globalThis.__magpieInlined=1;\n${(await fs.readFile(bridge, "utf8")).replaceAll("</script", "<\\/script")}</script>
@@ -45,7 +45,7 @@ async function server(route) {
     if (name === "dyn.js") return route.fulfill({ headers: { ...headers, "Content-Type": "text/javascript" }, body: "window.DYN = 42;" });
     return route.fulfill({ status: 404, body: "" });
   }
-  if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+  if (url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
   const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
   const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
   try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -57,12 +57,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const ctx = await browser.newContext({ viewport: { width: 1100, height: 700 }, reducedMotion: "reduce" });
-    await ctx.addCookies([{ name: "CF_Authorization", value: "x", url: "http://magpie.test/", sameSite: "Lax" }]);
+    await ctx.addCookies([{ name: "CF_Authorization", value: "x", url: "http://eipgam.test/", sameSite: "Lax" }]);
     const p = await ctx.newPage();
     p.setDefaultTimeout(8000);
     p.setDefaultNavigationTimeout(60000);
     await p.route("**/*", server);
-    await p.goto("http://magpie.test/");
+    await p.goto("http://eipgam.test/");
     await p.locator("#nav button[data-plugin-page]").first().waitFor({ state: "attached" });
     await p.evaluate(() => show("plugin-cookie"));
     const frame = () => p.frames().find((x) => x.url().includes(tok));

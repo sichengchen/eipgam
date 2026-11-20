@@ -80,8 +80,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang));
           // the reader opened Codex's accounts
-          await page.addInitScript(() => { try { localStorage.setItem("magpie.routingKeysOpen", JSON.stringify(["codex/@"])); } catch {} });
-          await page.goto("http://magpie.test/?view=routing");
+          await page.addInitScript(() => { try { localStorage.setItem("eipgam.routingKeysOpen", JSON.stringify(["codex/@"])); } catch {} });
+          await page.goto("http://eipgam.test/?view=routing");
           await page.locator(".rt-acts .rt-act", { hasText: "ivy@example.com" }).waitFor();
           const rows = await page.evaluate(() => {
             const probe = document.createElement("i");

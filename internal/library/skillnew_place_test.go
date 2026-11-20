@@ -75,7 +75,7 @@ func TestCheckSkillsFindsNewInFolder(t *testing.T) {
 	src := filepath.Join(h, "src/skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	skill(t, filepath.Join(src, "xlsx"), "xlsx", "Sheets")
-	checkedAt.Store(0) // no check since magpie started
+	checkedAt.Store(0) // no check since eipgam started
 	t.Cleanup(func() { checkedAt.Store(0) })
 	if v, _ := Read(nil); v.CheckFolders || checkDue(mustLoad(t)) {
 		t.Fatal("a check is offered with nothing to look at")

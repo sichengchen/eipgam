@@ -9,15 +9,15 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Google's Python SDK (google-genai) writes a part's bytes with
 // base64.urlsafe_b64encode, '-' and '_' where standard base64 has '+' and
-// '/', and Google's own API reads either. A vendor or relay behind magpie
+// '/', and Google's own API reads either. A vendor or relay behind eipgam
 // may read only the standard alphabet: dludream's image through a Gemini
 // provider came back 400 "Failed to base64-decode image data", the same
-// request with '+' and '/' answered (#5697). Every place in magpie that
+// request with '+' and '/' answered (#5697). Every place in eipgam that
 // reads an image's bytes (HEIC and webp conversion, resizing, describing,
 // token counts) read them as standard base64 too, and passed over one it
 // couldn't. stdBase64Body writes the inline base64 a client sends as

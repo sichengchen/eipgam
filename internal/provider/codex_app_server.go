@@ -15,26 +15,26 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/dirent"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/dirent"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
-// The Codex app greys its Send for every model, magpie's too, while the
+// The Codex app greys its Send for every model, eipgam's too, while the
 // ChatGPT account it is signed in to is used up (its composer's gate,
 // XP in ChatGPT.app 26.1013's app-primary: authMethod "chatgpt" and
 // rate_limit.allowed false). It reads authMethod from its app-server's
-// account/read, which answers no account once magpie is Codex's provider
+// account/read, which answers no account once eipgam is Codex's provider
 // (requires_openai_auth false), but it asks only as the app-server
-// starts. So when magpie becomes Codex's provider for the used-up
+// starts. So when eipgam becomes Codex's provider for the used-up
 // account (the agent package's AppOut), and again when it puts Codex
-// back on the account after its reset, magpie ends the app's own
+// back on the account after its reset, eipgam ends the app's own
 // app-server, the one it started with: the app starts another at once,
 // reads account/read again, and sends (tried in ChatGPT.app 26.1013 on
 // macOS; its window, threads and drafts stay). It does that on every
 // system the app runs on, with nothing for the user to do, once no Codex
-// turn is running: none through magpie, none open in Codex's sessions.
+// turn is running: none through eipgam, none open in Codex's sessions.
 //
-// The same holds for every change magpie makes to where Codex sends its
+// The same holds for every change eipgam makes to where Codex sends its
 // requests: a Disconnect that takes openai_base_url out, a Connect that
 // puts it in, failover, the gateway moved to another port. The app-server
 // read config.toml as it started, and a Codex app left running kept
@@ -52,15 +52,15 @@ import (
 // error page all the same; codex_app_crash.go reopens it then.
 
 // CodexAppRoute is set by the agent package: what in Codex's config the
-// app-server reads as it starts and magpie writes (its provider and base
-// URL: route, compared, never parsed), and whether magpie is Codex's
+// app-server reads as it starts and eipgam writes (its provider and base
+// URL: route, compared, never parsed), and whether eipgam is Codex's
 // provider for its used-up ChatGPT account (out, AppOut); known false
 // when Codex's config can't be read. Nothing the Codex app writes itself
 // (its model or effort pick) and not the model list is in route, or a
 // pick would restart it.
 var CodexAppRoute func() (route string, out, known bool)
 
-// CodexAppDesk is set by the agent package: when magpie named its model
+// CodexAppDesk is set by the agent package: when eipgam named its model
 // list for the Codex app in Codex's config (model_catalog_json beside the
 // ChatGPT sign-in), zero while it names none or the time isn't known. The
 // app-server reads model_catalog_json only as it starts and never again
@@ -83,7 +83,7 @@ var CodexBeforeAppEnd func(home string)
 
 // CodexNoAccount is set by the agent package: whether the provider Codex's
 // config names takes no ChatGPT account at all (a [model_providers] table
-// without requires_openai_auth = true, such as magpie's with the user's
+// without requires_openai_auth = true, such as eipgam's with the user's
 // own requires_openai_auth = false; danzi002 on Discord). Such a provider
 // sends its own key, and the app-server answers account/read with no
 // account for it (codex-rs ModelProviderInfo::account_state and
@@ -93,7 +93,7 @@ var CodexBeforeAppEnd func(home string)
 var CodexNoAccount func() bool
 
 // CodexTakeoverOff is set by the agent package: whether the user has
-// turned off magpie's takeover of Codex's used-up account (AppOutOff):
+// turned off eipgam's takeover of Codex's used-up account (AppOutOff):
 // its sign-in set to Always ChatGPT, as the takeover note's Keep on
 // ChatGPT does, or Codex not connected. The takeover ending while it says
 // so is the user's change, and the Codex app's app-server is restarted
@@ -121,13 +121,13 @@ func codexNoAccount() bool {
 // opened again (蛋仔 on Discord, 10-30; reproduced on the Windows box
 // with codex 0.164's app-server and an MCP server that outlived it: its
 // stdout ended only when the MCP server did). So once the ones ended are
-// gone, magpie waits codexAppBackWait for a new one; when none comes
+// gone, eipgam waits codexAppBackWait for a new one; when none comes
 // while the app still runs, it has the agent package reopen the app
 // (CodexAppReopen), and says it is stuck when that can't be done.
 //
 // CodexAppOpen, set by the agent package, says whether the Codex desktop
 // app runs here; known false when that can't be told. CodexAppReopen
-// quits it and opens it again, erring where magpie doesn't (macOS, where
+// quits it and opens it again, erring where eipgam doesn't (macOS, where
 // a reopen opens a new window: the user does it).
 var (
 	CodexAppOpen   func(ctx context.Context) (open, known bool)
@@ -153,14 +153,14 @@ func codexAppGotNone(ctx context.Context) (stuck bool) {
 	if !codexRestartsApp() {
 		// the user's app is never quit unasked (Michael25651150 on X):
 		// the Agents row says to, and its Restart does it
-		log.Printf("codex: the Codex app started no app-server in place of the one magpie ended; left for the user to reopen (Restart the Codex app is off)")
+		log.Printf("codex: the Codex app started no app-server in place of the one eipgam ended; left for the user to reopen (Restart the Codex app is off)")
 		return true
 	}
 	if err := CodexAppReopen(ctx); err != nil {
-		log.Printf("codex: the Codex app started no app-server in place of the one magpie ended; reopening it: %v", err)
+		log.Printf("codex: the Codex app started no app-server in place of the one eipgam ended; reopening it: %v", err)
 		return true
 	}
-	log.Printf("codex: the Codex app started no app-server in place of the one magpie ended; reopened it")
+	log.Printf("codex: the Codex app started no app-server in place of the one eipgam ended; reopened it")
 	return false
 }
 
@@ -173,9 +173,9 @@ func codexAppOpenNow(ctx context.Context) (open, known bool) {
 }
 
 // codexAppEvery is how often KeepCodexAppOnItsProvider looks; codexAppIdle
-// how long after Codex's last request through magpie a turn counts ended
+// how long after Codex's last request through eipgam a turn counts ended
 // (a tool runs between two of a turn's requests); codexAppTries how often
-// one app-server is ended before magpie says it can't.
+// one app-server is ended before eipgam says it can't.
 var (
 	codexAppEvery = 3 * time.Second
 	codexAppIdle  = 10 * time.Second
@@ -189,7 +189,7 @@ const codexTurnWindow = 30 * time.Minute
 
 // codexTurnStuckAfter is how long a turn left open on an app-server whose
 // account was used up has to have written nothing to Codex's sessions,
-// with no Codex request through magpie either, before it counts stuck and
+// with no Codex request through eipgam either, before it counts stuck and
 // the app-server is restarted past it. Such a turn can't go on: its next
 // request is refused on that account, and when quota ran out mid-turn
 // the app sat on it and greyed every thread until restarted (蛋仔 on
@@ -297,7 +297,7 @@ var codexApp struct {
 	sync.Mutex
 	seen  bool
 	route string
-	// out: whether the route last seen was magpie as Codex's provider for
+	// out: whether the route last seen was eipgam as Codex's provider for
 	// its used-up account (CodexAppRoute's out)
 	out bool
 	// stale: the app-servers started before Codex's provider last changed,
@@ -308,15 +308,15 @@ var codexApp struct {
 	// switched: Codex's ChatGPT account changed since the app-servers were
 	// last listed (codexAppAccountSwitched)
 	switched bool
-	// auto: every switch since then magpie made by itself
+	// auto: every switch since then eipgam made by itself
 	// (SwitchWhenSpent), none the user made
 	auto bool
 	// spent: the app-servers are on an account used up, so a turn they
 	// left open can't be served by them any more: Codex was switched off
 	// it (SwitchWhenSpent, or by hand off one known held, noteCodexSwitch),
-	// or magpie became Codex's provider for it (out)
+	// or eipgam became Codex's provider for it (out)
 	spent bool
-	// desk: magpie's list named for the app as last handled (CodexAppDesk)
+	// desk: eipgam's list named for the app as last handled (CodexAppDesk)
 	desk time.Time
 	// ended: the app-servers ended and no new one seen since, and by when
 	// one has to start (codexAppBackWait after the last end)
@@ -331,16 +331,16 @@ var codexApp struct {
 	// when they are ended, so a crash a user reports can be put down to
 	// an account switch, a route change or a used-up account (#4550)
 	why string
-	// back: the app-servers left running on magpie as Codex's provider
-	// when magpie gave Codex back its ChatGPT account at the reset, with
+	// back: the app-servers left running on eipgam as Codex's provider
+	// when eipgam gave Codex back its ChatGPT account at the reset, with
 	// Restart the Codex app to follow off (CodexAppBack), and when they
 	// were last listed
 	back   map[int]bool
 	backAt time.Time
-	// crashSince, crashBy: magpie last ended the app's app-server at
+	// crashSince, crashBy: eipgam last ended the app's app-server at
 	// crashSince, and until crashBy its logs are read for the page the
 	// app shows when it can't take another (codexAppCrashStep); snag:
-	// the app showed that page and magpie couldn't reopen it, while the
+	// the app showed that page and eipgam couldn't reopen it, while the
 	// app-servers in snagPids (those running then) run
 	crashSince, crashBy time.Time
 	// crashSpent: an end in that window was made for a used-up account
@@ -357,14 +357,14 @@ var codexApp struct {
 var codexAppBackEvery = 30 * time.Second
 
 // CodexAppBack is whether the Codex app still runs on the app-server it
-// started while magpie was Codex's provider for its used-up account, now
-// that magpie gave Codex back its ChatGPT account and left the app
+// started while eipgam was Codex's provider for its used-up account, now
+// that eipgam gave Codex back its ChatGPT account and left the app
 // running (Restart the Codex app to follow off, #4550). That app-server
 // read account/read as it started, when Codex's provider took no ChatGPT
 // account, so the app shows no account, no usage meter and none of its
 // ChatGPT side until it restarts: the Agents row says so and offers the
 // restart (練習^1.0beta by mail, 11-04: the panels loaded only after
-// `magpie codex default` and a restart).
+// `eipgam codex default` and a restart).
 func CodexAppBack() bool {
 	c := &codexApp
 	c.Lock()
@@ -400,7 +400,7 @@ func checkCodexAppBack(ctx context.Context, now time.Time, home string) {
 }
 
 // CodexAppStuck is whether a Codex app is left on the provider it started
-// with, which magpie couldn't restart: the user quits and opens it.
+// with, which eipgam couldn't restart: the user quits and opens it.
 func CodexAppStuck() bool {
 	c := &codexApp
 	c.Lock()
@@ -433,7 +433,7 @@ func codexAppAccountSwitched() { codexAppSwitched(false, false) }
 func codexAppSpentSwitch() { codexAppSwitched(true, false) }
 
 // codexAppSwitched notes a switch of Codex's account: spent, off one used
-// up; byMagpie, made by magpie itself (SwitchWhenSpent). magpie's switch
+// up; byMagpie, made by eipgam itself (SwitchWhenSpent). eipgam's switch
 // back restarts the app only with RestartApp on; its switch off a spent
 // account, and one the user made among them, restart it all the same.
 func codexAppSwitched(spent, byMagpie bool) {
@@ -446,10 +446,10 @@ func codexAppSwitched(spent, byMagpie bool) {
 
 // KeepCodexAppOnItsProvider runs codexAppStep every codexAppEvery till
 // ctx ends. busy says how many of Codex's requests are in flight through
-// magpie and when the last ended.
+// eipgam and when the last ended.
 //
-// A Codex request this magpie didn't serve is one the magpie before it
-// may still be serving: a magpie that hands the gateway over (an update)
+// A Codex request this eipgam didn't serve is one the eipgam before it
+// may still be serving: a eipgam that hands the gateway over (an update)
 // lets the requests in flight finish in the old one, and the new one saw
 // none of them. Its start counts as a Codex request ended then, so a
 // reply streaming from the old one isn't cut short by the new one's
@@ -476,9 +476,9 @@ func KeepCodexAppOnItsProvider(ctx context.Context, busy func() (int, time.Time)
 }
 
 // codexAppStep notes the app-servers running as Codex's route changes
-// (magpie becomes Codex's provider for the used-up account, or stops being
+// (eipgam becomes Codex's provider for the used-up account, or stops being
 // it; Codex is connected or disconnected), and ends each of them once no
-// Codex turn is running. Started with magpie on, the app may
+// Codex turn is running. Started with eipgam on, the app may
 // have opened before: its app-servers are ended too. It says which pids it
 // ended.
 func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Time)) []int {
@@ -498,7 +498,7 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 	wasOut := c.seen && c.out
 	c.Unlock()
 	// the takeover ending now: by the user's hand (CodexTakeoverOff), or
-	// by the reset, which is magpie's own change
+	// by the reset, which is eipgam's own change
 	offByHand := wasOut && !out && CodexTakeoverOff != nil && CodexTakeoverOff()
 	// an account switch is nothing to an app-server on a provider that
 	// takes no ChatGPT account (CodexNoAccount): it is forgotten, and a
@@ -511,23 +511,23 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 	}
 	c.Lock()
 	// at the first look only a used-up account's app-servers are ended:
-	// what the others read before magpie started isn't known
+	// what the others read before eipgam started isn't known
 	changed := !c.seen && out || c.seen && c.route != route || c.switched
-	// magpie becoming Codex's provider for the used-up account: the
+	// eipgam becoming Codex's provider for the used-up account: the
 	// app-servers are on that account, and a turn left open on it when
 	// quota ran out mid-turn would hold their restart, and the app's grey
 	// Send, for up to codexTurnWindow (xiaoq6285 on Discord)
 	into := changed && out && (!c.seen || !c.out)
 	// what the app works without: a switch among accounts with room,
-	// magpie's own switch back or one the user made, and the takeover out
+	// eipgam's own switch back or one the user made, and the takeover out
 	// at the reset. The ChatGPT app shows the end of its app-server as an
 	// error and relaunches (#4550), and on its new account shows that
 	// account's projects, none for one that never had the app open (the
 	// app keeps them per ChatGPT identity, codex_projects.go): "switching
 	// the preferred account force-restarts the client, and the projects
 	// are lost" (Michael25651150 on X, after 15acba534). So that waits for
-	// the user to restart it unless they asked magpie to (RestartApp;
-	// atom0964 on Discord: both of Codex's sign-in ticks off, and magpie
+	// the user to restart it unless they asked eipgam to (RestartApp;
+	// atom0964 on Discord: both of Codex's sign-in ticks off, and eipgam
 	// still restarted the app to switch accounts); the account rows say
 	// the app is still on the account before (CodexAppStale), with a
 	// Restart. A Connect or a Disconnect is the user's, and restarts it,
@@ -536,21 +536,21 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 	// takeover in, the first look on one and a switch off one. The app
 	// greys Send for every model while that account's rate limit says not
 	// allowed and reads the account only as its app-server starts
-	// (8b0132b3d), so nothing magpie serves would reach it until a
+	// (8b0132b3d), so nothing eipgam serves would reach it until a
 	// restart; an app-server left on an account that runs out later is
 	// restarted then (restartCodexAppLeftOnSpent).
 	byHand := c.seen && c.route != route && c.out == out || offByHand
 	needed := into || c.switched && c.spent
-	// left on the takeover: the app-servers it started while magpie was
+	// left on the takeover: the app-servers it started while eipgam was
 	// Codex's provider, which show no account till they restart
 	leftBack := false
 	if changed && !byHand && !needed && !codexRestartsApp() {
-		why := "magpie switched Codex's ChatGPT account back"
+		why := "eipgam switched Codex's ChatGPT account back"
 		if c.switched && !c.auto {
 			why = "Codex's ChatGPT account was switched"
 		}
 		if !c.switched {
-			why = "magpie gave Codex back its ChatGPT account after the reset"
+			why = "eipgam gave Codex back its ChatGPT account after the reset"
 			leftBack = c.out && !out
 		}
 		log.Printf("codex: %s; the Codex app's app-server is left running (Restart the Codex app to follow is off), and the app follows once it is restarted", why)
@@ -597,7 +597,7 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 		case c.switched:
 			c.why = "Codex's ChatGPT account was switched"
 		case into:
-			c.why = "Codex's account is used up, so magpie serves it"
+			c.why = "Codex's account is used up, so eipgam serves it"
 		default:
 			c.why = "where Codex's config sends it changed"
 		}
@@ -656,8 +656,8 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 	endedAt := c.endedAt
 	c.Unlock()
 	if none {
-		// a Codex request through magpie since the end came from an
-		// app-server magpie didn't list: the app has one, and is never
+		// a Codex request through eipgam since the end came from an
+		// app-server eipgam didn't list: the app has one, and is never
 		// quit and opened under it
 		if inFlight, last := busy(); inFlight > 0 || last.After(endedAt) {
 			return nil
@@ -689,8 +689,8 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 	spent, changedAt := c.spent, c.changedAt
 	c.Unlock()
 	if codexTurnRunning(home, now, codexServersSince(stale)) {
-		// a turn Codex went on with through magpie after the change is
-		// served, by a routing group's fallback or magpie's takeover, and
+		// a turn Codex went on with through eipgam after the change is
+		// served, by a routing group's fallback or eipgam's takeover, and
 		// is not stuck however long a tool in it runs: only a turn that
 		// sent nothing since is (Norethcy on X: the reply a group's
 		// fallback served after the ChatGPT account ran out was cut short)
@@ -739,9 +739,9 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 }
 
 // codexAppDeskStep notes the Codex app's app-servers that started before
-// magpie last named its list for the app (CodexAppDesk) as stale, once for
+// eipgam last named its list for the app (CodexAppDesk) as stale, once for
 // each naming, and says whether a step should go on to end them. Not
-// around the takeover (takeover: magpie Codex's provider for the used-up
+// around the takeover (takeover: eipgam Codex's provider for the used-up
 // account now or until this look), where the list is taken out and named
 // again as it ends and the app is left on the takeover's app-server
 // (c.back) as the reset leaves it (#4550): that naming is noted and
@@ -781,7 +781,7 @@ func codexAppDeskStep(ctx context.Context, takeover bool, home string) bool {
 	if len(before) == 0 {
 		return true
 	}
-	c.why = "magpie's model list was named for the Codex app after its app-server started"
+	c.why = "eipgam's model list was named for the Codex app after its app-server started"
 	if c.stale == nil {
 		c.stale = map[int]int{}
 	}
@@ -934,7 +934,7 @@ var (
 // written more since it started (a tool's long output, an image, a turn
 // going on for an hour: the owner's run 22 MB) read as no turn at all,
 // so the app's app-server was ended under it as soon as Codex had sent
-// nothing through magpie for codexAppIdle, while a tool ran between two
+// nothing through eipgam for codexAppIdle, while a tool ran between two
 // of its requests (Norethcy on X: the turn a routing group's fallback
 // served after the ChatGPT account ran out was cut short).
 func sessionTurnOpen(path string, since time.Time) bool {
@@ -1092,8 +1092,8 @@ func codexAppBack(ctx context.Context, list func(context.Context) ([]int, error)
 	}
 }
 
-// RestartCodexAppWhenIdle ends the Codex app's own app-servers once, for a magpie
-// that won't be running to watch them (magpie uninstall): the app starts
+// RestartCodexAppWhenIdle ends the Codex app's own app-servers once, for a eipgam
+// that won't be running to watch them (eipgam uninstall): the app starts
 // a new one, which reads Codex's config as it is now. It waits up to wait
 // for a running Codex turn to end, and cuts none short: left says an
 // app-server was still on the old config when it gave up, or couldn't be

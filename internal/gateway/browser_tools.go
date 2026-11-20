@@ -5,9 +5,9 @@ package gateway
 // (browser_one.go), whose actions are these; their names are still taken
 // from a client that listed them before.
 
-const browserInstructions = `The browser tool uses the user's own browser (Chrome, Edge or another Chromium browser with Magpie Browser installed): its real tabs, signed in to the sites the user is signed in to. Use it when a task needs the user's sessions or a real browser.
+const browserInstructions = `The browser tool uses the user's own browser (Chrome, Edge or another Chromium browser with eipgam Browser installed): its real tabs, signed in to the sites the user is signed in to. Use it when a task needs the user's sessions or a real browser.
 How to work:
-- Start with tab_new (with a url) or snapshot. You work in tabs of your own, opened behind the user's in your own tab group ("Magpie", or "Magpie 2" and on beside other agents), so the user goes on using their browser undisturbed. Naming one of the user's own tabs opens its page in a tab of yours, signed in the same; theirs is left alone. Leave the tabs that tabs marks ~ to the agents working in them.
+- Start with tab_new (with a url) or snapshot. You work in tabs of your own, opened behind the user's in your own tab group ("eipgam", or "eipgam 2" and on beside other agents), so the user goes on using their browser undisturbed. Naming one of the user's own tabs opens its page in a tab of yours, signed in the same; theirs is left alone. Leave the tabs that tabs marks ~ to the agents working in them.
 - Clicks, typing and scrolling go at a person's pace, so a step takes a second or two: don't hurry them with repeated calls. console starts reading a tab's console the first time it is asked (except on localhost and other development hosts, read from the start).
 - With two browsers connected (Chrome and Edge, or two profiles), calls go to the last to connect: action browsers lists them, and use_browser picks one.
 - snapshot shows the page as an accessibility tree. Elements you can act on carry a ref (e12); pass it to click, type and the rest. Refs stay the element's while the page keeps it. Every action answers with the page after it, so you rarely need another snapshot.
@@ -47,7 +47,7 @@ func browserTools() []any {
 		return map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": desc}
 	}
 	return []any{
-		browserTool("browser_tabs", "Tabs", "List the browser's tabs, open a new one (in this session's Magpie tab group), switch the tab calls go to, or close one. With more than one browser connected: list them (browsers), or pick the one calls go to (use).", false, map[string]any{
+		browserTool("browser_tabs", "Tabs", "List the browser's tabs, open a new one (in this session's eipgam tab group), switch the tab calls go to, or close one. With more than one browser connected: list them (browsers), or pick the one calls go to (use).", false, map[string]any{
 			"action":  enum("list (default), new, select, close, browsers or use", "list", "new", "select", "close", "browsers", "use"),
 			"url":     str("For new: the page to open in it."),
 			"front":   boolean("For new: show it to the user, only when they asked to see it; it opens behind their tab otherwise."),
@@ -118,7 +118,7 @@ func browserTools() []any {
 		browserTool("browser_text", "Page text", "Read the page's visible text, without the tree.", true, map[string]any{
 			"maxChars": num("The most characters to return (default 40000)."),
 		}),
-		browserTool("browser_console", "Console", "Read the tab's console messages, script errors and failed requests since magpie started watching it.", true, map[string]any{
+		browserTool("browser_console", "Console", "Read the tab's console messages, script errors and failed requests since eipgam started watching it.", true, map[string]any{
 			"level": enum("all (default), errors or network", "all", "errors", "network"),
 			"limit": num("The most recent messages to return (default 50)."),
 		}),

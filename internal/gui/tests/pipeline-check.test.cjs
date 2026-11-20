@@ -22,7 +22,7 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], lanURLs: [],
     imageGenAuto: "openai/gpt-image-2",
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, checks));
-          await page.goto("http://magpie.test/?view=settings&tab=models");
+          await page.goto("http://eipgam.test/?view=settings&tab=models");
           const rows = page.locator("#pipeCheckList .pipe-check");
           await rows.nth(3).waitFor();
           const head = page.locator(".row-head", { has: page.locator("#pipeCheckAll") });

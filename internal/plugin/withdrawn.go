@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-// Withdrawal is an official package magpie gives to nobody new: a user
+// Withdrawal is an official package eipgam gives to nobody new: a user
 // who has it keeps it, updated as before, and is told the risk and what
 // to use instead; everyone else is turned away at Add.
 type Withdrawal struct {
@@ -32,7 +32,7 @@ func WithdrawnOf(name string) (Withdrawal, bool) {
 	return w, ok
 }
 
-// WithdrawnKept are the withdrawn packages this magpie still has listed,
+// WithdrawnKept are the withdrawn packages this eipgam still has listed,
 // on or off: their users, who are told the risk.
 func WithdrawnKept() []Withdrawal {
 	var out []Withdrawal
@@ -54,7 +54,7 @@ func KeepWithdrawn(ctx context.Context) context.Context {
 }
 
 // RefuseWithdrawn turns away an add of a withdrawn package that this
-// magpie doesn't have listed already.
+// eipgam doesn't have listed already.
 func RefuseWithdrawn(ctx context.Context, spec string) error {
 	if IsPath(spec) || ctx.Value(keepWithdrawnKey{}) != nil {
 		return nil
@@ -67,5 +67,5 @@ func RefuseWithdrawn(ctx context.Context, spec string) error {
 	if slices.ContainsFunc(Load().Plugins, func(e Entry) bool { return PackageName(e.Spec) == name }) {
 		return nil
 	}
-	return fmt.Errorf("%s is no longer installed: its vendor suspends accounts it sees used this way. Use %s instead: magpie plugin add %s", name, w.Instead, w.Package)
+	return fmt.Errorf("%s is no longer installed: its vendor suspends accounts it sees used this way. Use %s instead: eipgam plugin add %s", name, w.Instead, w.Package)
 }

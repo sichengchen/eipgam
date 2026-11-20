@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // limitedUp is a vendor that has every key or account it serves over its
@@ -93,7 +93,7 @@ func heldRetryAfter(t *testing.T, rec *httptest.ResponseRecorder) {
 }
 
 // hsjzg58958 on X: a vendor rate limited the account for 300 seconds, and
-// magpie asked it again about every half second, as the agent retried,
+// eipgam asked it again about every half second, as the agent retried,
 // till the vendor flagged two accounts. A key or account the vendor named
 // a time for is not asked again before it: the agent's retries are
 // answered here, 429 with when the first of them is back.

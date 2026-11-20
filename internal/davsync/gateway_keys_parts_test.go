@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 func TestGatewayKeysSettingsHash(t *testing.T) {
@@ -143,7 +143,7 @@ func TestGatewayKeysConflict(t *testing.T) {
 				if err := Now(context.Background()); err != nil {
 					t.Fatal(err)
 				}
-				path := "/dav/magpie/magpie.magpie-backup"
+				path := "/dav/eipgam/eipgam.eipgam-backup"
 				fake.mu.Lock()
 				data := append([]byte(nil), fake.files[path]...)
 				fake.mu.Unlock()
@@ -283,7 +283,7 @@ func TestGatewayKeysExcluded(t *testing.T) {
 				t.Error("a keyless theme change did not upload exactly once")
 			}
 			f.mu.Lock()
-			data := append([]byte(nil), f.objects["team x+y/magpie/magpie.magpie-backup"]...)
+			data := append([]byte(nil), f.objects["team x+y/eipgam/eipgam.eipgam-backup"]...)
 			f.mu.Unlock()
 			remote, err := backup.Open(data, cfg.Passphrase)
 			if err != nil {

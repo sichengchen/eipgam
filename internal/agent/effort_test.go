@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// effortHome is a sandbox HOME with a provider for magpie to serve.
+// effortHome is a sandbox HOME with a provider for eipgam to serve.
 func effortHome(t *testing.T) string {
 	t.Helper()
 	home := t.TempDir()
@@ -73,7 +73,7 @@ func TestEffortFields(t *testing.T) {
 	writeFile(t, filepath.Join(home, ".claude", "settings.json"), `{"theme":"dark","model":"opus"}`)
 	c := claude(home)
 	setEffort(t, c, "xhigh", `"theme"`)
-	// max lasts a session in Claude Code's /effort; magpie keeps it as its
+	// max lasts a session in Claude Code's /effort; eipgam keeps it as its
 	// env (TestClaudeEffortMax)
 	setEffort(t, c, "max", `"theme"`)
 

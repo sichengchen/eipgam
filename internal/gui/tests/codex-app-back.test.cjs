@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A bug report by mail (11-04): after its ChatGPT allowance reset, Codex
 // was back on its account, but the Codex app still showed no account and
-// no usage. Its app-server was the one started while magpie served Codex,
+// no usage. Its app-server was the one started while eipgam served Codex,
 // and it reads the account only as it starts; with "restart the Codex app
-// when magpie switches its account back" off, nothing restarted it, and
+// when eipgam switches its account back" off, nothing restarted it, and
 // nothing said so. The Agents row now says it (appBack), on hover and in
 // the row opened, with a Restart that posts codex/daemon/restart-app.
 // Every language, both engines, wide and narrow. No backend, the API is
@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             page.on("pageerror", (e) => errors.push(e.message));
             const posts = [];
             await page.route("**/*", serve(lang, posts));
-            await page.goto("http://magpie.test/?view=agents");
+            await page.goto("http://eipgam.test/?view=agents");
             const st = page.locator(`${row} .ag-st-t`);
             await st.waitFor();
             const text = await st.textContent();
@@ -129,7 +129,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (new URL(route.request().url()).pathname === "/api/state") return route.fulfill({ json: { agents: [codex(undefined)], profiles: [], settings: { lang: "en", theme: "light" } } });
       return handler(route);
     });
-    await page.goto("http://magpie.test/?view=agents");
+    await page.goto("http://eipgam.test/?view=agents");
     await page.locator(`${row} .ag-st-t`).waitFor();
     assert.doesNotMatch(await page.locator(`${row} .ag-st-t`).textContent(), /Back on ChatGPT/);
     await page.locator(`${row} .ag-link`).click();

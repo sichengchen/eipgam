@@ -9,12 +9,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // idlessReasoningMsg is the reporter's error, word for word (yyhhyyyyyy on
 // X): a DeepSeek channel's Responses API refusing the " " reasoning item
-// magpie put first in a step that had none.
+// eipgam put first in a step that had none.
 const idlessReasoningMsg = `Input tag 'reasoning' found using 'type' does not match any of the expected tags: 'message', 'tool_result'`
 
 // idlessReasoning422s are that message in the envelopes a channel answers
@@ -67,7 +67,7 @@ func (u *idlessChannel) sent() (n int, last []map[string]any) {
 
 // TestIdlessReasoningRefusedByChannel (yyhhyyyyyy on X): Codex continuing
 // on a DeepSeek channel whose reply had no reasoning sends a step with
-// nothing to replay, and magpie leads it with a " " reasoning item without
+// nothing to replay, and eipgam leads it with a " " reasoning item without
 // an id (reasonFirst), which DeepSeek's own API wants (#1822). The channel
 // turned the whole request away with 422 and the agent got it. It is asked
 // once more without the item, and not sent one again; its own reasoning,

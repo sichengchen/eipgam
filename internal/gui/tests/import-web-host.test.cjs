@@ -1,5 +1,5 @@
-// In a browser tab (magpie web, possibly on another machine than the one
-// magpie runs on), Add magpie asks the host to open the app's import link; it
+// In a browser tab (eipgam web, possibly on another machine than the one
+// eipgam runs on), Add eipgam asks the host to open the app's import link; it
 // never navigates the viewer's own browser to it (Jealousy_Du on X).
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -12,7 +12,7 @@ const LINK = "cindy://provider/import?v=1&data=fixture";
 const cindy = { id: "cindy", name: "Cindy", path: "", icon: "cindy", import: LINK, added: false, fields: [] };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(`web: Add magpie opens the link on the host (${engine})`, async () => {
+  test(`web: Add eipgam opens the link on the host (${engine})`, async () => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const page = await browser.newPage({ viewport: { width: 960, height: 600 } });
     page.setDefaultTimeout(8000);
@@ -20,7 +20,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const opened = [];
     const navs = [];
     page.on("framenavigated", (f) => navs.push(f.url()));
-    await page.route("http://magpie.test/**", async (route) => {
+    await page.route("http://eipgam.test/**", async (route) => {
       const url = new URL(route.request().url());
       const json = (data) => route.fulfill({ json: data });
       if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: 'window.bootPrefs = {lang:"en",theme:"light",web:true,textSize:100};' });
@@ -37,7 +37,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         return route.fulfill({ body, contentType: type });
       } catch { return route.fulfill({ status: 404, body: "" }); }
     });
-    await page.goto("http://magpie.test/");
+    await page.goto("http://eipgam.test/");
     await page.waitForLoadState("networkidle");
     const more = page.locator('.agent-more[aria-expanded="false"]');
     if (await more.count()) await more.click();
@@ -48,7 +48,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await asked;
     await new Promise((r) => setTimeout(r, 300));
     assert.deepEqual(opened, [LINK]);
-    assert.ok(navs.every((u) => u.startsWith("http://magpie.test/")), `navigated: ${navs}`);
+    assert.ok(navs.every((u) => u.startsWith("http://eipgam.test/")), `navigated: ${navs}`);
     await browser.close();
   });
 }

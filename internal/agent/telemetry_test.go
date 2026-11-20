@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // telemetryHome is a sandbox HOME with file (under it) holding body; "" is
@@ -168,7 +168,7 @@ func TestCodexTelemetryLeavesTheUsers(t *testing.T) {
 }
 
 // Claude Code's telemetry and error reports go off in settings.json's env
-// beside the user's variables; on takes out only magpie's, and a variable
+// beside the user's variables; on takes out only eipgam's, and a variable
 // the user set keeps its value.
 func TestClaudeTelemetrySwitch(t *testing.T) {
 	home, path := telemetryHome(t, ".claude/settings.json", `{
@@ -192,20 +192,20 @@ func TestClaudeTelemetrySwitch(t *testing.T) {
 	if st := telemetryOf(t, a); !st.Off || !reflect.DeepEqual(st.Own, []string{"env.DISABLE_TELEMETRY"}) {
 		t.Fatalf("after off: %+v", st)
 	}
-	// on: magpie's goes; the user's DISABLE_TELEMETRY stays, and with
+	// on: eipgam's goes; the user's DISABLE_TELEMETRY stays, and with
 	// error reports back on, telemetry reads as not all off (no error)
 	if err := a.SetTelemetry(false); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := jsonAt(t, path, "env.DISABLE_ERROR_REPORTING"); ok {
-		t.Fatalf("on kept magpie's:\n%s", readFile(path))
+		t.Fatalf("on kept eipgam's:\n%s", readFile(path))
 	}
 	if v, _ := jsonAt(t, path, "env.DISABLE_TELEMETRY"); v != "true" {
 		t.Fatalf("on took the user's:\n%s", readFile(path))
 	}
 }
 
-// A value magpie wrote that the user changed since is theirs: on leaves it.
+// A value eipgam wrote that the user changed since is theirs: on leaves it.
 func TestClaudeTelemetryChangedSince(t *testing.T) {
 	home, path := telemetryHome(t, ".claude/settings.json", `{"env": {}}`)
 	a := claude(home)
@@ -222,7 +222,7 @@ func TestClaudeTelemetryChangedSince(t *testing.T) {
 		t.Fatalf("on took the user's changed value:\n%s", readFile(path))
 	}
 	if _, ok := jsonAt(t, path, "env.DISABLE_ERROR_REPORTING"); ok {
-		t.Fatalf("on kept magpie's:\n%s", readFile(path))
+		t.Fatalf("on kept eipgam's:\n%s", readFile(path))
 	}
 }
 

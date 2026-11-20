@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // keptBucket is a bucket in memory that can be listed and removed from,
@@ -44,7 +44,7 @@ func (b *keptBucket) Delete(_ context.Context, name string) error {
 
 func (b *keptBucket) Where() string { return b.where }
 
-// The serving magpie brings a bucket grown before under the archive's size
+// The serving eipgam brings a bucket grown before under the archive's size
 // once it has started, the archive on or off: the oldest calls go, down to
 // a tenth under the size, and nothing but calls of the archive's shape is
 // listed as one or removed.
@@ -67,7 +67,7 @@ func TestBucketArchiveBroughtUnderItsSizeAtStart(t *testing.T) {
 		}
 	}
 	b.refuse = call(1, 3)
-	foreign := []string{"magpie.magpie-backup", "usage/a.magpie-usage", "archive/notes.txt",
+	foreign := []string{"eipgam.eipgam-backup", "usage/a.eipgam-usage", "archive/notes.txt",
 		"archive/2026-10-01/README.md", "archive/2026-10-01/ABC.json", "archive/x/2026-10-01/000000-00.json"}
 	for _, k := range foreign {
 		b.objs[k] = []byte(strings.Repeat("f", 5000))

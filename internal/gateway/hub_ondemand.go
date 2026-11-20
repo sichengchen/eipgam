@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // The router's tools on demand (ArvinCharl on X, 11-04: MCP tools fill

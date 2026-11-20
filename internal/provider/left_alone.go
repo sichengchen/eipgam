@@ -1,7 +1,7 @@
 package provider
 
 // A provider the user switched off (Provider.Off) or whose account they
-// removed from magpie (Provider.Hidden) is left alone in the background:
+// removed from eipgam (Provider.Hidden) is left alone in the background:
 // no CLI is asked who is signed in (`claude auth status`, `cursor-agent
 // about`, `devin auth status`), no allowance is read, no sign-in renewed,
 // no window warmed, no account switched and no model list fetched. What was last known of it is still shown. Each of
@@ -10,11 +10,11 @@ package provider
 // machine's own address (Riko on Discord).
 //
 // One read is kept for Codex: the account it is signed in to, while it
-// takes magpie's models, for whether the Codex app holds it
+// takes eipgam's models, for whether the Codex app holds it
 // (codexHoldReading), which decides where Codex sends at all.
 
-// leftAlone says whether magpie leaves provider id alone in the
-// background: switched off, or its account removed from magpie.
+// leftAlone says whether eipgam leaves provider id alone in the
+// background: switched off, or its account removed from eipgam.
 func leftAlone(id string) bool {
 	if id == "" {
 		return false

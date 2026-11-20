@@ -62,7 +62,7 @@ func TestLoginsMissedTogetherListedOnce(t *testing.T) {
 		t.Fatalf("codex accounts: %+v", ls)
 	}
 	runs := loginsRuns.Load()
-	dropHeld() // a write magpie made: what is held is listed anew
+	dropHeld() // a write eipgam made: what is held is listed anew
 	const n = 20
 	start := make(chan struct{})
 	done := make(chan []Login, n)

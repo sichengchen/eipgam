@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/sichengchen/eipgam/internal/access"
 )
 
 // joinRoutes: Settings → Local network → Join with a password (EV_John_Liu
 // on X). A password set here opens the gateway's /join page to other
-// computers while magpie is shared: each that types it gets a gateway key
+// computers while eipgam is shared: each that types it gets a gateway key
 // of its own, removed in Gateway keys like any other. "" turns it off.
 // The password is kept as a hash only (access.SetJoinPassword) and never
 // sent back.

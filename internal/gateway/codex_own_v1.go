@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // codexSignInToken is Codex's ChatGPT sign-in as Codex keeps it, which
@@ -20,18 +20,18 @@ import (
 var codexSignInToken = provider.CodexSignInAsKept
 
 // codexOwnOffMagpie is the request a Codex on this computer sent to /v1
-// for one of its own models that magpie serves nothing for, put on the
+// for one of its own models that eipgam serves nothing for, put on the
 // ChatGPT backend's route (CodexPath) and signed with Codex's own ChatGPT
 // sign-in, as Codex's built-in provider would have sent it. A thread
-// keeps the provider it was started on: one started while magpie was
+// keeps the provider it was started on: one started while eipgam was
 // Codex's provider (its API, or the takeover of a used-up account) goes
 // on sending to /v1 after Codex is disconnected or set back to ChatGPT,
-// and an official model picked in it (gpt-6.1-sol) met "magpie knows no
-// model" whenever no ChatGPT account in magpie serves it (iuengei on
-// Discord). nil when that isn't the case: a model magpie serves, switched
+// and an official model picked in it (gpt-6.1-sol) met "eipgam knows no
+// model" whenever no ChatGPT account in eipgam serves it (iuengei on
+// Discord). nil when that isn't the case: a model eipgam serves, switched
 // off, disabled or a group; a model not OpenAI's; a request from another
 // computer or held by its gateway key. Codex's sign-in not to be had
-// (subscription accounts off in magpie, signed out, expired), why is what
+// (subscription accounts off in eipgam, signed out, expired), why is what
 // the request is answered instead of the bare 404: what sends it here and
 // what to do.
 func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Request, why string) {
@@ -40,11 +40,11 @@ func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Req
 	}
 	// one of Codex's hidden side calls on its own model that a setting
 	// sends elsewhere — a thread's title or description, a composer
-	// prediction, the app's prompt suggestions — is magpie's to answer where it stands (codexTitlesTo
+	// prediction, the app's prompt suggestions — is eipgam's to answer where it stands (codexTitlesTo
 	// and its siblings, further down handle), never to put on Codex's
 	// ChatGPT sign-in: with no sign-in to be had the request was answered
 	// 404 and Codex named the thread after its first message, whatever the
-	// settings said (#4590). With no setting magpie has nothing of its own
+	// settings said (#4590). With no setting eipgam has nothing of its own
 	// to answer it with, and it goes on the sign-in as the thread's turns do.
 	if codexSideSet(requestCallKind(r.Header, requestSessionMetadata(r.Header, body))) {
 		return nil, ""
@@ -84,9 +84,9 @@ func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Req
 		if err == nil {
 			err = errors.New("Codex is signed out")
 		}
-		return nil, fmt.Sprintf("%q is one of Codex's own models, and this Codex thread was started while magpie was Codex's model provider, so it is still sent to magpie whatever Codex is set to now. "+
-			"No ChatGPT account in magpie serves it, and magpie can't send it on Codex's own ChatGPT sign-in: %v. "+
-			"Start a new thread in Codex for its own models, or add Codex's ChatGPT account in magpie (Providers)", model, err)
+		return nil, fmt.Sprintf("%q is one of Codex's own models, and this Codex thread was started while eipgam was Codex's model provider, so it is still sent to eipgam whatever Codex is set to now. "+
+			"No ChatGPT account in eipgam serves it, and eipgam can't send it on Codex's own ChatGPT sign-in: %v. "+
+			"Start a new thread in Codex for its own models, or add Codex's ChatGPT account in eipgam (Providers)", model, err)
 	}
 	r2 := r.Clone(r.Context())
 	r2.URL.Path = CodexPath + "/responses"
@@ -96,8 +96,8 @@ func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Req
 	r2.ContentLength = int64(len(body))
 	r2.Header.Del("Content-Encoding")
 	r2.Header.Del("Content-Length")
-	// magpie's key and the header that names magpie Codex's provider are
-	// magpie's own, never sent on to OpenAI
+	// eipgam's key and the header that names eipgam Codex's provider are
+	// eipgam's own, never sent on to OpenAI
 	r2.Header.Del("X-Api-Key")
 	r2.Header.Del("X-Openai-Actor-Authorization")
 	r2.Header.Set("Authorization", "Bearer "+tok)
@@ -108,7 +108,7 @@ func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Req
 }
 
 // codexOwnModel: model is one of Codex's own, as the ChatGPT backend last
-// listed it to Codex (models_cache.json, magpie's entries left out) or as
+// listed it to Codex (models_cache.json, eipgam's entries left out) or as
 // the catalog has it for OpenAI.
 func codexOwnModel(model string) bool {
 	if _, ok := codexcat.CacheEntries()[model]; ok {

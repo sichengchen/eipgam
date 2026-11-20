@@ -11,7 +11,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // inZone runs the test with the local time zone at a fixed offset. The

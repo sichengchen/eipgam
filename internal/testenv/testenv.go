@@ -26,19 +26,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 const (
 	// prefix starts the temporary home's name; Run removes only a folder
 	// so named.
-	prefix = "magpie-test-home-"
+	prefix = "eipgam-test-home-"
 	// Marker holds the temporary home in the environment. A test binary
 	// started again by one of its own tests inherits it, and keeps the
 	// environment that test gave it (its fixtures) instead of isolating
 	// again; a test that hands such a child an environment of its own
 	// passes Marker along.
-	Marker = "MAGPIE_TEST_SANDBOX"
+	Marker = "EIPGAM_TEST_SANDBOX"
 )
 
 // folderVars are the variables Isolate points into the temporary home.
@@ -224,9 +224,9 @@ func inertTools(home string) error {
 // appends them (/mnt/c/Windows/System32, …\VS Code\bin and the rest)
 // over 9P, where a stat takes milliseconds, and a test binary takes the
 // PATH folders' stamp again at every look (proc's lookFreshInTests): a
-// `magpie <agent> <field>` run looked for each agent's command through
+// `eipgam <agent> <field>` run looked for each agent's command through
 // them, and internal/cli's TestEveryAgentFieldNameWritesNothing ran past
-// 40 minutes in the magpie-desktop distro (0.3s without them). They
+// 40 minutes in the eipgam-desktop distro (0.3s without them). They
 // also hold the machine's own Windows programs, such as VS Code's `code`
 // script, which no Linux test is to find.
 func dropWindowsPath() error {

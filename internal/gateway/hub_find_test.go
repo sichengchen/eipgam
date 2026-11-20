@@ -8,7 +8,7 @@ import (
 
 // realHubTools are tools as real MCP servers describe them: GitHub's
 // (github-mcp-server), the reference filesystem server's, Linear's, and
-// magpie-image's and magpie-browser's own.
+// eipgam-image's and eipgam-browser's own.
 func realHubTools() []hubTool {
 	var ts []HubTool
 	add := func(server, tool, desc string) {
@@ -30,8 +30,8 @@ func realHubTools() []hubTool {
 	add("linear", "save_issue", "Create or update a Linear issue. If `id` is provided, updates the existing issue; otherwise creates a new one. When creating, `team` is required, and `title` is required unless `template` is set.")
 	add("linear", "list_issues", "List issues in the user's Linear workspace, including active Triage Intelligence suggestions for issues in triage. For issues assigned to me, use \"me\" as the assignee.")
 	add("linear", "search_documentation", "Search Linear's product documentation for feature and usage guidance. Returns up to five results with titles, URLs, and content snippets per page.")
-	add("magpie-image", "generate_image", "Generate an image from a text prompt, or edit/combine images given as reference_images, with the image model set in Magpie. The image is saved as a file in the project (generated-images/ unless path says where) and its path is returned.")
-	add("magpie-browser", "browser", "Act in the user's own browser. Actions, with the arguments each takes:\ntabs: list them. tab_new [url, background]. navigate [url]. back. forward. reload.\nsnapshot [interactive, ref, maxChars]: the page as an accessibility tree, a ref on each element you can act on.\nclick [ref]. type [ref, text]. screenshot [ref, fullPage, png]. text [maxChars]: the visible text.")
+	add("eipgam-image", "generate_image", "Generate an image from a text prompt, or edit/combine images given as reference_images, with the image model set in eipgam. The image is saved as a file in the project (generated-images/ unless path says where) and its path is returned.")
+	add("eipgam-browser", "browser", "Act in the user's own browser. Actions, with the arguments each takes:\ntabs: list them. tab_new [url, background]. navigate [url]. back. forward. reload.\nsnapshot [interactive, ref, maxChars]: the page as an accessibility tree, a ref on each element you can act on.\nclick [ref]. type [ref, text]. screenshot [ref, fullPage, png]. text [maxChars]: the visible text.")
 	return hubNamed(ts)
 }
 
@@ -66,21 +66,21 @@ func TestHubFindNothingClose(t *testing.T) {
 		if !strings.HasPrefix(text, "No tool was found for") || strings.Contains(text, "inputSchema") || strings.Contains(text, "__") {
 			t.Errorf("%q: %s", q, text)
 		}
-		for _, s := range []string{"github (5 tools: create_issue, list_issues,", "filesystem (4 tools:", "linear (3 tools:", "magpie-image (1 tool: generate_image)", "magpie-browser (1 tool: browser)"} {
+		for _, s := range []string{"github (5 tools: create_issue, list_issues,", "filesystem (4 tools:", "linear (3 tools:", "eipgam-image (1 tool: generate_image)", "eipgam-browser (1 tool: browser)"} {
 			if !strings.Contains(text, s) {
 				t.Errorf("%q: no %q in %s", q, s, text)
 			}
 		}
 	}
 	for q, want := range map[string]string{
-		"generate an image":          "magpie-image__generate_image",
-		"open a page in the browser": "magpie-browser__browser",
+		"generate an image":          "eipgam-image__generate_image",
+		"open a page in the browser": "eipgam-browser__browser",
 		"read a file":                "filesystem__read_file",
 		"create a GitHub issue":      "github__create_issue",
 		"open a pull request":        "github__create_pull_request",
 		"list my Linear issues":      "linear__list_issues",
 		"search code":                "github__search_code",
-		"browser":                    "magpie-browser__browser",
+		"browser":                    "eipgam-browser__browser",
 		"write_file":                 "filesystem__write_file",
 		"列出":                         "",
 	} {
@@ -97,7 +97,7 @@ func TestHubFindNothingClose(t *testing.T) {
 	}
 	// a match comes with its parameters, and only matches do
 	text := findText(t, ts, `{"query":"read a file"}`)
-	if !strings.Contains(text, `"filesystem__read_file"`) || strings.Contains(text, "magpie-browser") || strings.Contains(text, "linear__") {
+	if !strings.Contains(text, `"filesystem__read_file"`) || strings.Contains(text, "eipgam-browser") || strings.Contains(text, "linear__") {
 		t.Fatalf("read a file: %s", text)
 	}
 }

@@ -3,12 +3,12 @@ package gateway
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// With provider search Off, this magpie's model list no longer tells
-// another magpie that a Kimi Code plan's models are searched for by it:
+// With provider search Off, this eipgam's model list no longer tells
+// another eipgam that a Kimi Code plan's models are searched for by it:
 // without a search API it adds no search tool to them (#1483).
 func TestSearchProviderOffTellsRemoteMagpie(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())

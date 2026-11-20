@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// matrix0487 on Discord: of magpie's three own MCP servers, image
+// matrix0487 on Discord: of eipgam's three own MCP servers, image
 // recognition, image generation and search, the Library's Discover had
-// Magpie Image and Magpie Web Search but not image recognition. It now has
-// Magpie Image Recognition beside them, given only to the agents picked
+// eipgam Image and eipgam Web Search but not image recognition. It now has
+// eipgam Image Recognition beside them, given only to the agents picked
 // for it, and Settings' Image recognition row says the way there as the
-// Library is: Give agents Magpie Image Recognition… opens its sheet, which
+// Library is: Give agents eipgam Image Recognition… opens its sheet, which
 // says where each image goes; with the Library off, Turn on the Library
 // switches it on; with recognition off, or in gateway mode, there is none.
 // One that can't answer yet says why on its Discover card and sheet, so
@@ -26,8 +26,8 @@ const tr = (lang, s) => (lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
 const HINT = "Pick the agents that may read images with it: each image goes to the Image recognition model set in Settings › Models › Images, and costs what that model charges.";
 const UNREADY = "No model that sees images is set up yet: it reads images once a provider with one is added, and says so until then";
-const ABOUT = "Read an image (a file, a URL, a screenshot) with the image recognition model set in Magpie (Settings › Models › Images), for a model that can't see.";
-const SEARCH = "Search the web with the search set in Magpie (Settings › Models › Web search), and read a page by its URL.";
+const ABOUT = "Read an image (a file, a URL, a screenshot) with the image recognition model set in eipgam (Settings › Models › Images), for a model that can't see.";
+const SEARCH = "Search the web with the search set in eipgam (Settings › Models › Web search), and read a page by its URL.";
 
 function fixture(lang, { libOn, have = false, gateway = false, unready = "", vision = "" }) {
   const st = { libOn };
@@ -35,7 +35,7 @@ function fixture(lang, { libOn, have = false, gateway = false, unready = "", vis
   const builtins = () => [{ id: "library", name: "Library", sub: "Instructions, MCP servers and skills for every agent", on: st.libOn, chosen: st.libOn, source: "preset", state: st.libOn ? "active" : "off", inUse: 0 }];
   const settings = () => ({
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999", port: 3999,
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision, imageGen: "", lanURLs: [], visionAuto: "probe/eye",
     visionModels: [], imageGenModels: [],
     searcher: "", searchChoices: [],
@@ -46,10 +46,10 @@ function fixture(lang, { libOn, have = false, gateway = false, unready = "", vis
     ...(gateway ? { web: true, gatewayMode: "on", gatewayOn: true } : {}),
   });
   const lib = () => ({
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents: [{ id: "pi", name: "Pi", icon: "generic", mcp: `${HOME}/.pi/mcp.json`, skills: `${HOME}/.pi/skills` }],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
-    servers: have ? [{ name: "magpie-vision", transport: "stdio", command: "/Applications/magpie.app/Contents/MacOS/magpie", args: ["mcp", "vision"], agents: ["pi"] }] : [],
+    servers: have ? [{ name: "eipgam-vision", transport: "stdio", command: "/Applications/eipgam.app/Contents/MacOS/eipgam", args: ["mcp", "vision"], agents: ["pi"] }] : [],
   });
   const route = async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -69,9 +69,9 @@ function fixture(lang, { libOn, have = false, gateway = false, unready = "", vis
     if (url.pathname === "/api/library") return json(lib());
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "magpie-image", name: "magpie-image", title: "Magpie Image", publisher: "Magpie", description: "Generate and edit images with the image model set in Magpie.", transport: "stdio", runs: "magpie", featured: true, optIn: true, have: "" },
-        { id: "magpie-web-search", name: "magpie-web-search", title: "Magpie Web Search", publisher: "Magpie", description: SEARCH, transport: "stdio", runs: "magpie", featured: true, optIn: true, have: "" },
-        { id: "magpie-vision", name: "magpie-vision", title: "Magpie Image Recognition", publisher: "Magpie", description: ABOUT, transport: "stdio", runs: "magpie", featured: true, optIn: true, have: have ? "magpie-vision" : "", ...(unready ? { unready } : {}) },
+        { id: "eipgam-image", name: "eipgam-image", title: "eipgam Image", publisher: "eipgam", description: "Generate and edit images with the image model set in eipgam.", transport: "stdio", runs: "eipgam", featured: true, optIn: true, have: "" },
+        { id: "eipgam-web-search", name: "eipgam-web-search", title: "eipgam Web Search", publisher: "eipgam", description: SEARCH, transport: "stdio", runs: "eipgam", featured: true, optIn: true, have: "" },
+        { id: "eipgam-vision", name: "eipgam-vision", title: "eipgam Image Recognition", publisher: "eipgam", description: ABOUT, transport: "stdio", runs: "eipgam", featured: true, optIn: true, have: have ? "eipgam-vision" : "", ...(unready ? { unready } : {}) },
       ] });
     }
     if (url.pathname === "/api/library/market/skills") return json({ items: [] });
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", f.route);
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=models");
+      await page.goto("http://eipgam.test/?view=settings&tab=models");
       await settingsDrawn(page);
       await row(page).waitFor();
       return { page, posts: f.posts };
@@ -122,17 +122,17 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of LANGS) {
       const w = (s) => tr(lang, s);
       for (const width of [1100, 420]) {
-        await t.test(`${lang} at ${width}px: Give agents Magpie Image Recognition… opens its sheet in the Library`, async () => {
+        await t.test(`${lang} at ${width}px: Give agents eipgam Image Recognition… opens its sheet in the Library`, async () => {
           const { page } = await open(lang, width, { libOn: true, unready: UNREADY });
           const go = row(page).locator(".who button.vision-mcp-lib");
-          assert.equal((await go.textContent()).trim(), w("Give agents Magpie Image Recognition…"));
+          assert.equal((await go.textContent()).trim(), w("Give agents eipgam Image Recognition…"));
           assert.equal(await wide(page), 0);
           shots.push([`${lang}-${width}-row`, await row(page).screenshot()]);
           await go.click();
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
           assert.equal(await page.locator("#view-library").isVisible(), true);
-          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Magpie Image Recognition");
+          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "eipgam Image Recognition");
           assert.equal((await sheet.locator(".mk-about").textContent()).trim(), w(ABOUT));
           assert.equal((await sheet.locator(".mk-hint").first().textContent()).trim(), w(HINT));
           // nothing sees yet: the sheet says so, and still adds it
@@ -150,27 +150,27 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal((await go.textContent()).trim(), w("Turn on the Library"));
           assert.equal(await wide(page), 0);
           await go.click();
-          await page.waitForFunction((s) => document.querySelector("#imagesList button.vision-mcp-lib")?.textContent.trim() === s, w("Give agents Magpie Image Recognition…"));
+          await page.waitForFunction((s) => document.querySelector("#imagesList button.vision-mcp-lib")?.textContent.trim() === s, w("Give agents eipgam Image Recognition…"));
           assert.deepEqual(posts, [{ id: "library", on: true }]);
           assert.deepEqual(page.errors, []);
           await page.context().close();
         });
       }
-      for (const width of [1100, 420]) await t.test(`${lang} at ${width}px: one already in the library opens Discover, all three of magpie's own there, the one not set up saying so`, async () => {
+      for (const width of [1100, 420]) await t.test(`${lang} at ${width}px: one already in the library opens Discover, all three of eipgam's own there, the one not set up saying so`, async () => {
         const { page } = await open(lang, width, { libOn: true, have: true, unready: UNREADY });
         await row(page).locator("button.vision-mcp-lib").click();
         const card = (id) => page.locator(`#view-library .mk[data-market="mcp"] .mk-card[data-id="${id}"]`);
-        await card("magpie-vision").waitFor();
+        await card("eipgam-vision").waitFor();
         assert.equal(await page.locator("#modal .mk-sheet").count(), 0);
-        for (const id of ["magpie-image", "magpie-web-search"]) {
+        for (const id of ["eipgam-image", "eipgam-web-search"]) {
           assert.equal(await card(id).count(), 1, id);
           assert.equal(await card(id).locator(".mk-unready").count(), 0, id);
         }
-        const badge = card("magpie-vision").locator(".mk-badge.mk-unready");
+        const badge = card("eipgam-vision").locator(".mk-badge.mk-unready");
         assert.equal((await badge.textContent()).trim(), w("Not set up yet"));
         assert.equal(await badge.getAttribute("title"), w(UNREADY));
         // the badge gives way inside its card
-        const [c, b] = await Promise.all([card("magpie-vision").boundingBox(), badge.boundingBox()]);
+        const [c, b] = await Promise.all([card("eipgam-vision").boundingBox(), badge.boundingBox()]);
         assert(b.x + b.width <= c.x + c.width + 0.5, `badge ${JSON.stringify(b)} past card ${JSON.stringify(c)}`);
         assert.equal(await wide(page), 0);
         shots.push([`${lang}-${width}-discover`, await page.screenshot()]);

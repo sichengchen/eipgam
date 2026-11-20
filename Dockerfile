@@ -10,12 +10,12 @@ COPY . .
 
 ARG VERSION=dev
 RUN CGO_ENABLED=0 go build -tags nogui -trimpath \
-      -ldflags "-s -w -X main.version=${VERSION}" -o /out/magpie . \
+      -ldflags "-s -w -X main.version=${VERSION}" -o /out/eipgam . \
     && mkdir -p /config/home /config/cache /config/data /config/state
 
 # The runtimes the Library's MCP servers start with: npx (most of them,
 # chrome-devtools among them: "npx not found", Passings_z on X), node and
-# npm (magpie installs an npx server's package and runs it with node,
+# npm (eipgam installs an npx server's package and runs it with node,
 # mcp_npx.go), and uvx. Node is the official build, for Debian 12's glibc;
 # uv's static binaries download the Python a uvx server needs into the
 # volume the first time.
@@ -51,16 +51,16 @@ RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && chmod 755 /usr/local/bin/python3 \
     && ln -s python3 /usr/local/bin/python
 
-COPY --from=build /out/magpie /magpie
-# magpie on PATH, so `magpie accounts add …` works in that terminal
-RUN ln -s /magpie /usr/local/bin/magpie
+COPY --from=build /out/eipgam /eipgam
+# eipgam on PATH, so `eipgam accounts add …` works in that terminal
+RUN ln -s /eipgam /usr/local/bin/eipgam
 USER nonroot
 COPY --from=build --chown=65532:65532 /config /config
 
-# Everything magpie and the sign-ins it manages write goes into the volume:
-# its own files (/config/magpie), sign-ins kept where an agent keeps them
+# Everything eipgam and the sign-ins it manages write goes into the volume:
+# its own files (/config/eipgam), sign-ins kept where an agent keeps them
 # (~/.codex, ~/.claude…, under HOME), and the cache holding Bun and the
-# model catalog. magpie makes the folders a volume from an older image
+# model catalog. eipgam makes the folders a volume from an older image
 # lacks.
 ENV HOME=/config/home \
     XDG_CONFIG_HOME=/config \
@@ -70,14 +70,14 @@ ENV HOME=/config/home \
     NPM_CONFIG_UPDATE_NOTIFIER=false \
     UV_PYTHON_PREFERENCE=only-managed \
     UV_PYTHON=3.14 \
-    MAGPIE_ADDR=0.0.0.0:3425
+    EIPGAM_ADDR=0.0.0.0:3425
 
 VOLUME /config
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD ["/magpie", "healthcheck"]
+    CMD ["/eipgam", "healthcheck"]
 
 EXPOSE 3425 3430
 
-ENTRYPOINT ["/magpie"]
+ENTRYPOINT ["/eipgam"]
 CMD ["serve"]

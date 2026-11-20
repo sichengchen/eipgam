@@ -9,18 +9,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The models a Remote magpie's agents are on, followed here (KoiLx0 on X:
-// several computers use one remote magpie, and each had every agent's
+// The models a Remote eipgam's agents are on, followed here (KoiLx0 on X:
+// several computers use one remote eipgam, and each had every agent's
 // models set again by hand, and again after each change on the remote).
 //
 //   - The remote tells, for each agent connected there, the catalog ref of
 //     each model field (SharedModels, GET provider.RemoteAgentModelsPath).
 //   - An agent connected here starts on the remote's picks, where this
-//     magpie lists them (How "remote"), after the models it was on when
+//     eipgam lists them (How "remote"), after the models it was on when
 //     it was switched off and after a Codex that keeps its own.
 //   - A field set from the remote, or found on the remote's pick, is
 //     recorded (<agent>.<field>.remote in the stash). While it still holds
@@ -35,15 +35,15 @@ func init() {
 	}
 }
 
-// FollowRemoteEvery is how often a Remote magpie's picks are asked.
+// FollowRemoteEvery is how often a Remote eipgam's picks are asked.
 const FollowRemoteEvery = 5 * time.Minute
 
-// remoteAsk is how long a connect waits for a Remote magpie's picks it
+// remoteAsk is how long a connect waits for a Remote eipgam's picks it
 // has none of yet.
 const remoteAsk = 4 * time.Second
 
 // SharedModels is, by agent id, the catalog ref of each model field of
-// every agent connected here: what another magpie with this one as its
+// every agent connected here: what another eipgam with this one as its
 // provider starts its agents on.
 func SharedModels() map[string]map[string]string {
 	out := map[string]map[string]string{}
@@ -85,7 +85,7 @@ var remoteCache struct {
 }
 
 // remotePicks are the Remote magpies' picks, asked again when older than
-// fresh (0: always). Never asked while there is no Remote magpie.
+// fresh (0: always). Never asked while there is no Remote eipgam.
 func remotePicks(ctx context.Context, fresh time.Duration) []provider.RemotePicks {
 	if !provider.HasPickedMagpie() {
 		return nil
@@ -106,7 +106,7 @@ func remotePicks(ctx context.Context, fresh time.Duration) []provider.RemotePick
 	return picks
 }
 
-// remotePickFor is the option of opts a Remote magpie's agent of a's id
+// remotePickFor is the option of opts a Remote eipgam's agent of a's id
 // has its field key on, the first remote that has one listed here.
 func remotePickFor(id, key string, opts []Option, picks []provider.RemotePicks) (Option, bool) {
 	for _, rp := range picks {
@@ -126,8 +126,8 @@ func remotePickFor(id, key string, opts []Option, picks []provider.RemotePicks) 
 
 func remoteKey(id, key string) string { return id + "." + key + ".remote" }
 
-// connectRemote starts a on the models a Remote magpie's agent of its id
-// is on. ok is false when no remote has a pick this magpie lists, or the
+// connectRemote starts a on the models a Remote eipgam's agent of its id
+// is on. ok is false when no remote has a pick this eipgam lists, or the
 // picks leave a not connected.
 func (a *Agent) connectRemote() (c Connection, ok bool, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), remoteAsk)
@@ -166,7 +166,7 @@ var followed struct {
 }
 
 // FollowRemotePicks puts each connected agent's field that is on a Remote
-// magpie's pick onto that pick's change, at most every FollowRemoteEvery.
+// eipgam's pick onto that pick's change, at most every FollowRemoteEvery.
 func FollowRemotePicks(ctx context.Context) {
 	if !provider.HasPickedMagpie() {
 		return
@@ -183,9 +183,9 @@ func FollowRemotePicks(ctx context.Context) {
 	followRemote(ctx)
 }
 
-// KeepFollowingRemote runs FollowRemotePicks until ctx ends, for a magpie
+// KeepFollowingRemote runs FollowRemotePicks until ctx ends, for a eipgam
 // with no app: the app's Library loop runs it there (library.KeepLinked),
-// and a headless `magpie serve` client of a Remote magpie followed its
+// and a headless `eipgam serve` client of a Remote eipgam followed its
 // model list and efforts but never a pick changed on the remote (KoiLx0
 // on X).
 func KeepFollowingRemote(ctx context.Context, interval time.Duration) {
@@ -218,7 +218,7 @@ func followRemote(ctx context.Context) {
 	}
 }
 
-// Connecting new agents from a Remote magpie (KoiLx0 on X: each agent
+// Connecting new agents from a Remote eipgam (KoiLx0 on X: each agent
 // still had to be switched on by hand on every client). The remote's
 // editor, under Advanced, has a switch, off by default and kept on this
 // computer alone (remoteConnectKey). While it is on, an agent installed
@@ -238,7 +238,7 @@ func remoteConnectKey(provider string) string { return "remote." + provider + ".
 // connected, "off" once it was disconnected here.
 func autoKey(id string) string { return id + ".remote.auto" }
 
-// ConnectsAgents reports, by Remote magpie id, whose switch is on.
+// ConnectsAgents reports, by Remote eipgam id, whose switch is on.
 func ConnectsAgents() map[string]bool {
 	out := map[string]bool{}
 	const pre, suf = "remote.", ".connectAgents"
@@ -250,7 +250,7 @@ func ConnectsAgents() map[string]bool {
 	return out
 }
 
-// SetConnectAgents turns the switch of the Remote magpie id on or off. On,
+// SetConnectAgents turns the switch of the Remote eipgam id on or off. On,
 // the next follow (FollowRemotePicks) is not waited for.
 func SetConnectAgents(id string, on bool) {
 	if on {
@@ -300,12 +300,12 @@ func connectFromRemote(as []*Agent, picks []provider.RemotePicks) {
 		}
 		c, err := a.ConnectHow()
 		if err != nil {
-			log.Printf("agent: %s, connected as the remote magpie's: %v", a.Name, err)
+			log.Printf("agent: %s, connected as the remote eipgam's: %v", a.Name, err)
 			continue
 		}
 		if a.Wired() {
 			stash(map[string]string{autoKey(a.ID): "on"})
-			log.Printf("agent: %s connected as the remote magpie's (%s)", a.Name, c.How)
+			log.Printf("agent: %s connected as the remote eipgam's (%s)", a.Name, c.How)
 		}
 	}
 }
@@ -333,7 +333,7 @@ func (a *Agent) followRemote(picks []provider.RemotePicks) {
 		case rec != "" && cur == rec:
 			// still what was taken from the remote: the remote changed it
 			if err := a.Apply(f.Key, o.Value); err != nil {
-				log.Printf("agent: %s's %s from the remote magpie: %v", a.Name, f.Key, err)
+				log.Printf("agent: %s's %s from the remote eipgam: %v", a.Name, f.Key, err)
 				continue
 			}
 			stash(map[string]string{k: f.Get()})

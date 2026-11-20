@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 const relay = {
   id: "relay", name: "Relay", icon: "generic", chat: "https://relay.example/v1", responses: "", anthropic: "", catalog: "",
   models: [
@@ -58,11 +58,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], saves = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, saves));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const L = {};
         for (const k of ["Model settings", "Context window", "Max output", "Restore default", "unsaved",
           "The window agents are told {id} takes; empty: the vendor's or models.dev's",
-          "The most a reply of {id} may hold, told to agents as their max tokens and kept to by magpie; empty: the vendor's or models.dev's",
+          "The most a reply of {id} may hold, told to agents as their max tokens and kept to by eipgam; empty: the vendor's or models.dev's",
           "Max output: {v} is not a number of tokens like 32k"]) {
           L[k] = await say(page, lang, k);
           assert.ok(L[k], `${k} has its ${lang}`);
@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await out.inputValue(), "");
         assert.equal(await win.getAttribute("placeholder"), "1M");
         assert.equal(await limit("glm-5", "contexts").inputValue(), "160K");
-        assert.equal(await out.getAttribute("title"), L["The most a reply of {id} may hold, told to agents as their max tokens and kept to by magpie; empty: the vendor's or models.dev's"].replace("{id}", "deepseek-v4.1-flash"));
+        assert.equal(await out.getAttribute("title"), L["The most a reply of {id} may hold, told to agents as their max tokens and kept to by eipgam; empty: the vendor's or models.dev's"].replace("{id}", "deepseek-v4.1-flash"));
         assert.equal(await win.getAttribute("title"), L["The window agents are told {id} takes; empty: the vendor's or models.dev's"].replace("{id}", "deepseek-v4.1-flash"));
         // the row fits its model row
         const [r, b] = [await row("deepseek-v4.1-flash").boundingBox(), await out.boundingBox()];

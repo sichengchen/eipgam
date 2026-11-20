@@ -71,17 +71,17 @@ func TestBaseOnlyWhereNeeded(t *testing.T) {
 	})
 }
 
-// rosettaInstall is an Intel magpie's pf-serve of serveTag (pf-v9), as
-// fetched before magpie knew it ran under Rosetta, and from then on under
+// rosettaInstall is an Intel eipgam's pf-serve of serveTag (pf-v9), as
+// fetched before eipgam knew it ran under Rosetta, and from then on under
 // Rosetta, Apple silicon's served at want's paths.
 func rosettaInstall(t *testing.T, want map[string][]byte) string {
 	t.Helper()
 	wasArch, wasTr := osArch, translated
-	wasTag, wasOld, wasBase, wasServe := serveTag, oldTags, serveBase, serveSHA
+	wasTag, wasOld := serveTag, oldTags
 	t.Cleanup(func() {
 		upgrades.Wait()
 		osArch, translated = wasArch, wasTr
-		serveTag, oldTags, serveBase, serveSHA = wasTag, wasOld, wasBase, wasServe
+		serveTag, oldTags = wasTag, wasOld
 	})
 	osArch, translated = "darwin-amd64", func() bool { return false }
 	serveTag, oldTags = "pf-v9", nil
@@ -96,7 +96,8 @@ func rosettaInstall(t *testing.T, want map[string][]byte) string {
 	if z, ok := want["/rel/pf-v9/pf-serve-darwin-arm64.zip"]; ok {
 		zipSum = sum(z)
 	}
-	serveBase, serveSHA = s.URL+"/rel/", map[string]string{"darwin-arm64": zipSum, "darwin-amd64": "x"}
+	serveFrom(t, s.URL, zipSum)
+	t.Cleanup(upgrades.Wait)
 	return log
 }
 
@@ -148,7 +149,7 @@ func TestRosettaKeepsIntelsWhereNoneIsFetched(t *testing.T) {
 	}
 }
 
-// onArm runs the test as a magpie for windows-arm64: built for it, or the
+// onArm runs the test as a eipgam for windows-arm64: built for it, or the
 // x64 one updated to it on Windows on Arm (update's arch).
 func onArm(t *testing.T) {
 	t.Helper()
@@ -158,8 +159,8 @@ func onArm(t *testing.T) {
 }
 
 // pf-serve has no arm64 build: Windows on Arm runs the x64 one, emulated,
-// as it ran the x64 magpie that updated to arm64 there. Before, an arm64
-// magpie had no Privacy Filter, and the x64 one's update left the model
+// as it ran the x64 eipgam that updated to arm64 there. Before, an arm64
+// eipgam had no Privacy Filter, and the x64 one's update left the model
 // on in the settings and "not downloaded".
 func TestArmWindowsRunsX64Serve(t *testing.T) {
 	onArm(t)

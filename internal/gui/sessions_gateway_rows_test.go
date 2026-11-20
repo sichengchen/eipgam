@@ -13,8 +13,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // TestSessionsListMakesOnlyTheGatewayRowsItShows: while a session grew,

@@ -6,8 +6,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // didNotStream is in the error for an upstream that answered a stream
@@ -34,7 +34,7 @@ const didNotStream = "did not stream"
 // singlePatience is how long a request to one provider, not a group, is
 // kept once it has failed in a way that passes and the same-one retries
 // (passing) are spent: as long as a group that sets no Patience waits
-// (zoecats on Discord), unless the provider sets its own Patience (magpie
+// (zoecats on Discord), unless the provider sets its own Patience (eipgam
 // provider set <id> patience=), which wins. A group's, set or not, is the
 // group's.
 var singlePatience = provider.PatienceDefault * time.Second
@@ -80,7 +80,7 @@ func busy(status int, body []byte) bool {
 }
 
 // queuedWords matches the 503 the Qoder plugin answers when Qoder put a
-// request in the model's queue (its code 10605) and magpie has another
+// request in the model's queue (its code 10605) and eipgam has another
 // candidate to ask (#4049: "Qoder queued the request for efficient (this
 // plan's queue: p3, 3 ahead); try again in 30s", or "Qoder is busy for
 // efficient (this plan's queue: p3); …" when the model's service is out).
@@ -286,10 +286,10 @@ func editsOf(moved func() bool) <-chan struct{} {
 	return provider.Edited()
 }
 
-// readdressedOf says whether any of cs is a Remote magpie saved at another
+// readdressedOf says whether any of cs is a Remote eipgam saved at another
 // address since the request read it: the user typed its new address in
 // while the request paused before asking it again (le13ure on X). nil
-// when none of cs is a Remote magpie, for a pause that never wakes early.
+// when none of cs is a Remote eipgam, for a pause that never wakes early.
 func readdressedOf(cs []candidate) func() bool {
 	if !slices.ContainsFunc(cs, func(c candidate) bool { return c.p.IsRemoteMagpie() }) {
 		return nil

@@ -1,7 +1,7 @@
 # Builds pf-serve, the program that runs Settings → Privacy's local
 # masking model (native/privacy-filter, internal/pii), for each system.
 # A change to it is built on every push; a pf-v* tag publishes the zips as
-# a prerelease of this repo, never Latest, whose sha256s internal/pii pins.
+# a prerelease of this repo, never Latest. eipgam verifies its build provenance.
 name: privacy-filter
 
 on:
@@ -29,6 +29,10 @@ jobs:
           - { target: linux-arm64, os: ubuntu-22.04-arm }
           - { target: windows-amd64, os: ubuntu-24.04 }
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
       - name: tools (macOS)
@@ -52,6 +56,10 @@ jobs:
             [ -f "$p" ] || continue
             ./"$p" | tee out.txt; grep -q usage out.txt
           done
+      - uses: actions/attest@v4
+        if: startsWith(github.ref, 'refs/tags/pf-v')
+        with:
+          subject-path: pf-serve-${{ matrix.target }}.zip
       - uses: actions/upload-artifact@v4
         with:
           name: pf-serve-${{ matrix.target }}
@@ -74,5 +82,5 @@ jobs:
           sha256sum pf-serve-*.zip | tee SHA256SUMS
           gh release create "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" --prerelease --latest=false \
             --title "pf-serve $GITHUB_REF_NAME" \
-            --notes "pf-serve, which runs the local masking model of Settings → Privacy (native/privacy-filter). Not a magpie release: magpie downloads these itself, checked against the sha256s in internal/pii." \
+            --notes "pf-serve, which runs the local masking model of Settings → Privacy (native/privacy-filter). eipgam downloads the versioned helpers and verifies their GitHub build attestations." \
             pf-serve-*.zip SHA256SUMS

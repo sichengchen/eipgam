@@ -114,6 +114,6 @@ func TestSignInMovesSaysWhatSwitchDoes(t *testing.T) {
 		}
 	}
 	if SignInMovesOf("gemini") != nil {
-		t.Fatal("an agent whose sign-in magpie never moves has a line")
+		t.Fatal("an agent whose sign-in eipgam never moves has a line")
 	}
 }

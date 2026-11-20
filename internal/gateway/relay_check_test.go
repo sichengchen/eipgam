@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // checkedRelayUp is an OpenAI-compatible relay that streams answer(prompt) for
@@ -183,7 +183,7 @@ func TestRelayPromptsNameNoOne(t *testing.T) {
 	ps = append(ps, string(relayCheckTools))
 	for _, p := range ps {
 		l := strings.ToLower(p)
-		for _, w := range []string{"magpie", "openai", "anthropic", "claude", "gpt", "gemini", "qwen", "relay", "limit", "test", "check"} {
+		for _, w := range []string{"eipgam", "openai", "anthropic", "claude", "gpt", "gemini", "qwen", "relay", "limit", "test", "check"} {
 			if strings.Contains(l, w) {
 				t.Errorf("%q names %q", p, w)
 			}

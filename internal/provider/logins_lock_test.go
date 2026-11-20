@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
-// newProcess is what a magpie run from a terminal starts with: nothing
+// newProcess is what a eipgam run from a terminal starts with: nothing
 // remembered of when the accounts were last looked at.
 func newProcess() {
 	loginsMu.Lock()
@@ -36,7 +36,7 @@ func seenAgo(t *testing.T, d time.Duration) (raw []byte, mod time.Time) {
 		l["seen"] = time.Now().Add(-d).UTC().Truncate(time.Second)
 	}
 	writeFile(t, loginsPath(), ls)
-	// a time of its own each call, as another magpie's write has: the
+	// a time of its own each call, as another eipgam's write has: the
 	// same size at the same time would read as the file unchanged
 	seenAgoCalls++
 	mod = time.Now().Add(-time.Hour - time.Duration(seenAgoCalls)*time.Minute).Truncate(time.Second)
@@ -57,7 +57,7 @@ func loginsUnchanged(t *testing.T, raw []byte, mod time.Time) bool {
 	return bytes.Equal(b, raw) && fi.ModTime().Equal(mod)
 }
 
-// A magpie run from a terminal that only lists accounts (magpie ls,
+// A eipgam run from a terminal that only lists accounts (eipgam ls,
 // providers, sessions, usage) writes nothing to logins.json (#1674,
 // FaintGhost): each is a new process, so the 30 seconds between looks
 // never held, and every run wrote the file back with Seen moved on, over
@@ -110,7 +110,7 @@ func TestReadOnlyRunLeavesLogins(t *testing.T) {
 // TestLoginsOtherMagpie is the gateway of TestLoginsKeepAnotherMagpiesWrite:
 // it renews the saved account's sign-in, as renewSavedLogin writes it.
 func TestLoginsOtherMagpie(t *testing.T) {
-	if os.Getenv("MAGPIE_LOGINS_WRITER") == "" {
+	if os.Getenv("EIPGAM_LOGINS_WRITER") == "" {
 		t.Skip("run by TestLoginsKeepAnotherMagpiesWrite")
 	}
 	loginsMu.Lock()
@@ -132,7 +132,7 @@ func TestLoginsOtherMagpie(t *testing.T) {
 	}
 }
 
-// The gateway renews a saved account's sign-in while a magpie run from a
+// The gateway renews a saved account's sign-in while a eipgam run from a
 // terminal is between reading logins.json and writing it back (#1674): the
 // renewed sign-in stays. Codex's refresh tokens are spent by use, so the
 // old one written back would sign the account out.
@@ -146,7 +146,7 @@ func TestLoginsKeepAnotherMagpiesWrite(t *testing.T) {
 		t.Fatalf("work@example.com not saved: %s", b)
 	}
 
-	// Codex refreshed its own sign-in: this magpie has a change to write
+	// Codex refreshed its own sign-in: this eipgam has a change to write
 	codexSignIn(t, home, "me@example.com", "r-me-2")
 	newProcess()
 	var other *exec.Cmd
@@ -154,7 +154,7 @@ func TestLoginsKeepAnotherMagpiesWrite(t *testing.T) {
 	beforeLoginsWrite = func() {
 		beforeLoginsWrite = func() {}
 		other = exec.Command(os.Args[0], "-test.run=^TestLoginsOtherMagpie$", "-test.count=1")
-		other.Env = append(os.Environ(), "MAGPIE_LOGINS_WRITER=1")
+		other.Env = append(os.Environ(), "EIPGAM_LOGINS_WRITER=1")
 		var out bytes.Buffer
 		other.Stdout, other.Stderr = &out, &out
 		if err := other.Start(); err != nil {
@@ -165,11 +165,11 @@ func TestLoginsKeepAnotherMagpiesWrite(t *testing.T) {
 		go func() {
 			err := other.Wait()
 			if err != nil {
-				t.Logf("the other magpie: %v\n%s", err, out.Bytes())
+				t.Logf("the other eipgam: %v\n%s", err, out.Bytes())
 			}
 			otherDone <- err
 		}()
-		// the other magpie writes now if it can; with the lock held here
+		// the other eipgam writes now if it can; with the lock held here
 		// it waits for this one's write instead
 		select {
 		case err := <-otherDone:
@@ -180,23 +180,23 @@ func TestLoginsKeepAnotherMagpiesWrite(t *testing.T) {
 	t.Cleanup(func() { beforeLoginsWrite = func() {} })
 	rememberLogins(false)
 	if other == nil {
-		t.Fatal("this magpie wrote nothing")
+		t.Fatal("this eipgam wrote nothing")
 	}
 	if err := <-otherDone; err != nil {
-		t.Fatal("the other magpie failed")
+		t.Fatal("the other eipgam failed")
 	}
 
 	b, _ := os.ReadFile(loginsPath())
 	if !bytes.Contains(b, []byte("r-rotated")) || bytes.Contains(b, []byte(`r-work"`)) {
-		t.Fatalf("the other magpie's renewed sign-in was written over:\n%s", b)
+		t.Fatalf("the other eipgam's renewed sign-in was written over:\n%s", b)
 	}
 	if !bytes.Contains(b, []byte("r-me-2")) {
-		t.Fatalf("this magpie's change was lost:\n%s", b)
+		t.Fatalf("this eipgam's change was lost:\n%s", b)
 	}
 }
 
 // A change is made from logins.json as it is on the disk, not as this
-// magpie parsed it before another wrote it: the GUI's state holds what
+// eipgam parsed it before another wrote it: the GUI's state holds what
 // was read for a second (filememo.Hold), and taking loginsMu looks again.
 func TestLoginsReadAfreshUnderLock(t *testing.T) {
 	home := signIn(t)
@@ -208,7 +208,7 @@ func TestLoginsReadAfreshUnderLock(t *testing.T) {
 	defer release()
 	readLogins()
 
-	// another magpie's write, which this one's filememo.Forget never hears of
+	// another eipgam's write, which this one's filememo.Forget never hears of
 	b, _ := os.ReadFile(loginsPath())
 	if err := os.WriteFile(loginsPath(), bytes.ReplaceAll(b, []byte("r-work"), []byte("r-rotated")), 0o600); err != nil {
 		t.Fatal(err)
@@ -222,7 +222,7 @@ func TestLoginsReadAfreshUnderLock(t *testing.T) {
 }
 
 // Writing logins.json only to move when the accounts were last seen
-// builds no catalog anew: an idle magpie did each seenEvery, and dsh's
+// builds no catalog anew: an idle eipgam did each seenEvery, and dsh's
 // round alone built ~42 MB of models again for it. A change besides the
 // time still has them built anew.
 func TestSeenOnlyWriteBuildsNothingAnew(t *testing.T) {

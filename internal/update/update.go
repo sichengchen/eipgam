@@ -1,6 +1,4 @@
-// Package update keeps magpie current. Builds are published as GitHub
-// releases of yetone/magpie-releases; usemagpie.ai/api/latest describes the
-// newest one: its version, notes, and every file with its SHA-256.
+// Package update checks GitHub for eipgam releases and installs verified updates.
 //
 // The macOS app replaces its own bundle: the new zip is downloaded, checked
 // against its hash, unpacked, and accepted only if it is signed by the same
@@ -31,27 +29,21 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/rosetta"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/source"
-	"github.com/yetone/magpie/internal/winarm"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/rosetta"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/source"
+	"github.com/sichengchen/eipgam/internal/winarm"
 )
 
-// Site is magpie's home; its /api/latest is the update feed.
-const Site = "https://usemagpie.ai"
+// Repository is the home of eipgam's source and releases.
+const Repository = "https://github.com/" + releaseRepo
 
-// Feed is where the newest release is described. MAGPIE_UPDATE_FEED points
-// it elsewhere, for testing an update against a local server.
-func Feed() string {
-	if f := os.Getenv("MAGPIE_UPDATE_FEED"); f != "" {
-		return f
-	}
-	return siteFeed
-}
+// Feed is an explicit custom feed for development and testing.
+func Feed() string { return os.Getenv("EIPGAM_UPDATE_FEED") }
 
 // Release is one published version.
 type Release struct {
@@ -59,8 +51,6 @@ type Release struct {
 	Notes   string           `json:"notes"`   // markdown
 	URL     string           `json:"url"`     // the release page
 	Assets  map[string]Asset `json:"assets"`  // by file name
-	// Signed is what vouches for Assets' hashes (signed.go).
-	Signed *Signed `json:"signed,omitempty"`
 }
 
 // Asset is one downloadable file of a release.
@@ -75,13 +65,13 @@ type Asset struct {
 	// site's copy on R2): where a download goes on when URL fails, and
 	// what a mirror the user gave is put in front of.
 	GitHub string `json:"github,omitempty"`
-	// attest is set by Release.verify for a file of a release that carries
-	// GitHub build attestations (attest.go): download checks it.
-	attest bool
+	// releaseTag requires an attestation from this exact release workflow run.
+	releaseTag      string
+	releaseWorkflow string
 }
 
 // client asks the feed and downloads a release through the proxy the rest
-// of magpie's requests take — Settings' Proxy, else the environment's, else
+// of eipgam's requests take — Settings' Proxy, else the environment's, else
 // the system's (#294) — on a transport of its own, whatever the process has
 // done to http.DefaultTransport. Its Timeout bounds the feed's small
 // answers; a release's file goes through fileClient, which has none.
@@ -109,7 +99,7 @@ func proxied() http.RoundTripper {
 }
 
 // updateProxy has a request that names no proxy of its own (WithProxy,
-// magpie update --proxy) go through Settings' UpdateProxy when it is set
+// eipgam update --proxy) go through Settings' UpdateProxy when it is set
 // (moonlityu on X: models direct, updates through a proxy); unset, it
 // follows the global proxy as updates always did.
 type updateProxy struct{ http.RoundTripper }
@@ -131,24 +121,27 @@ func (u updateProxy) CloseIdleConnections() {
 // Latest asks the feed for the newest release, its notes in English.
 func Latest(ctx context.Context) (*Release, error) { return LatestIn(ctx, "") }
 
-// LatestIn asks the feed for the newest release, its notes in lang (see
-// InLang): the app's language, which What's new follows. On Settings'
-// Stable channel it is Stable's release (see Stable).
+// LatestIn checks the configured channel and localizes custom feed notes.
 func LatestIn(ctx context.Context, lang string) (*Release, error) {
-	return latestAt(ctx, withChannel(withLang(Feed(), lang)), lang)
+	if feed := Feed(); feed != "" {
+		return latestFrom(ctx, withChannel(withLang(feed, lang)), lang)
+	}
+	return githubLatest(ctx, Channel())
 }
 
-// LatestEvery is LatestIn on every version, whatever Settings' channel:
-// what Stable's "up to date" leaves out, the newest release out.
+// LatestEvery checks for the newest release regardless of channel.
 func LatestEvery(ctx context.Context, lang string) (*Release, error) {
-	return latestAt(ctx, withLang(Feed(), lang), lang)
+	if feed := Feed(); feed != "" {
+		return latestFrom(ctx, withLang(feed, lang), lang)
+	}
+	return githubLatest(ctx, "")
 }
 
-// LatestStable is the Stable channel's release, whatever Settings'
-// channel: what a fresh install compares itself with, to stay on Stable
-// when it is Stable's version (the site's Stable download). Only the site
-// knows it, so a failed feed is never answered from GitHub.
+// LatestStable checks what the Stable channel offers.
 func LatestStable(ctx context.Context) (*Release, error) {
+	if Feed() == "" {
+		return githubLatest(ctx, settings.UpdateStable)
+	}
 	u, err := url.Parse(Feed())
 	if err != nil {
 		return nil, err
@@ -157,32 +150,6 @@ func LatestStable(ctx context.Context) (*Release, error) {
 	q.Set("channel", settings.UpdateStable)
 	u.RawQuery = q.Encode()
 	return latestFrom(ctx, u.String(), "")
-}
-
-func latestAt(ctx context.Context, feed, lang string) (*Release, error) {
-	if githubOnly() {
-		return githubLatest(ctx, lang)
-	}
-	if !fallsBack(ctx) {
-		return latestFrom(ctx, feed, lang)
-	}
-	// the site may be unreachable where github.com is (a company's allow
-	// list): after a failed feed, GitHub's own release is read and held
-	// to the same signature (fallback.go)
-	fctx, cancel := context.WithTimeout(ctx, feedWait)
-	defer cancel()
-	rel, err := latestFrom(fctx, feed, lang)
-	if err == nil {
-		return rel, nil
-	}
-	if ctx.Err() != nil {
-		return nil, err
-	}
-	rel, gerr := githubLatest(ctx, lang)
-	if gerr != nil {
-		return nil, fmt.Errorf("%w (and GitHub: %v)", err, gerr)
-	}
-	return rel, nil
 }
 
 func latestFrom(ctx context.Context, feed, lang string) (*Release, error) {
@@ -205,11 +172,7 @@ func latestFrom(ctx context.Context, feed, lang string) (*Release, error) {
 	if parse(r.Version) == nil {
 		return nil, fmt.Errorf("update feed: no version")
 	}
-	if err := r.verify(); err != nil {
-		return nil, fmt.Errorf("update feed: %w", err)
-	}
 	r.Notes = InLang(r.Notes, lang)
-	r.githubAddresses()
 	return &r, nil
 }
 
@@ -305,7 +268,7 @@ func parse(v string) *semver {
 // one.
 var GUI bool
 
-// goos and goarch are the system this magpie was built for, translated
+// goos and goarch are the system this eipgam was built for, translated
 // says it runs under Rosetta, and emulated under Windows on Arm's x64
 // emulation; tests set them.
 var (
@@ -315,18 +278,18 @@ var (
 )
 
 // arch is the architecture an update installs: this build's, but Apple
-// silicon's for an Intel magpie under Rosetta. Kept on the Intel build,
+// silicon's for an Intel eipgam under Rosetta. Kept on the Intel build,
 // such a Mac ran the local masking model in Go under translation, with no
 // CoreML, at 150% of a core (cdredfox on Discord), and every update
 // fetched the Intel build again. Installing Apple silicon's is the same
-// swap: the zip's magpie.app is renamed over the bundle, signed by the
+// swap: the zip's eipgam.app is renamed over the bundle, signed by the
 // same team (sameSigner), and the bare binary is renamed over itself.
 //
-// The same on Windows: an x64 magpie on an Arm64 computer, emulated,
-// updates to the arm64 exe (@EV_John_Liu on X, "magpie是转译的"). The swap
+// The same on Windows: an x64 eipgam on an Arm64 computer, emulated,
+// updates to the arm64 exe (@EV_John_Liu on X, "eipgam是转译的"). The swap
 // is the x64 one: canStart starts the download, which runs natively there,
 // the running exe is moved aside and the arm64 one renamed in under its
-// name, and magpie.com is written again from the new app's own launcher.
+// name, and eipgam.com is written again from the new app's own launcher.
 func arch() string {
 	if goarch == "amd64" && (goos == "darwin" && translated() || goos == "windows" && emulated()) {
 		return "arm64"
@@ -335,11 +298,11 @@ func arch() string {
 }
 
 // AppAsset and BinaryAsset name the files this machine would install.
-func AppAsset() string { return "magpie-darwin-" + arch() + ".zip" }
+func AppAsset() string { return "eipgam-darwin-" + arch() + ".zip" }
 func BinaryAsset() string {
-	name := "magpie-cli-" + goos + "-" + arch()
+	name := "eipgam-cli-" + goos + "-" + arch()
 	if GUI && goos != "darwin" {
-		name = "magpie-" + goos + "-" + arch()
+		name = "eipgam-" + goos + "-" + arch()
 	}
 	if goos == "windows" {
 		name += ".exe"
@@ -357,7 +320,7 @@ func Bundle() string {
 	if err != nil {
 		return ""
 	}
-	// …/magpie.app/Contents/MacOS/magpie
+	// …/eipgam.app/Contents/MacOS/eipgam
 	app := filepath.Dir(filepath.Dir(filepath.Dir(exe)))
 	if filepath.Ext(app) != ".app" || filepath.Base(filepath.Dir(exe)) != "MacOS" {
 		return ""
@@ -365,11 +328,11 @@ func Bundle() string {
 	return app
 }
 
-// Homebrew is whether exe was installed by Homebrew (brew install magpie),
+// Homebrew is whether exe was installed by Homebrew (brew install eipgam),
 // which keeps it in its Cellar and has to be the one to upgrade it: a
 // binary replaced under it leaves brew thinking the old version is there.
 func Homebrew(exe string) bool {
-	return strings.Contains(filepath.ToSlash(exe), "/Cellar/magpie/")
+	return strings.Contains(filepath.ToSlash(exe), "/Cellar/eipgam/")
 }
 
 // Executable is the running binary, symlinks resolved. When they can't be
@@ -392,9 +355,9 @@ func resolved(path string) string {
 	return path
 }
 
-// Writable reports whether magpie may replace what lives in dir.
+// Writable reports whether eipgam may replace what lives in dir.
 func Writable(dir string) bool {
-	f, err := os.CreateTemp(dir, ".magpie-update-*")
+	f, err := os.CreateTemp(dir, ".eipgam-update-*")
 	if err != nil {
 		return false
 	}
@@ -428,10 +391,10 @@ func Stage(ctx context.Context, rel *Release, bundle string) (string, error) {
 		return "", fmt.Errorf("unzip: %v: %s", err, b)
 	}
 	os.Remove(zip)
-	// the zip holds magpie.app, which leaves that name at once: a folder
+	// the zip holds eipgam.app, which leaves that name at once: a folder
 	// ending in .app beside the installed one is taken by LaunchServices
-	// for a second magpie, and Spotlight lists it after it is gone (#3965)
-	unzipped := filepath.Join(out, "magpie.app")
+	// for a second eipgam, and Spotlight lists it after it is gone (#3965)
+	unzipped := filepath.Join(out, "eipgam.app")
 	app := filepath.Join(dir, stagedName)
 	if err := os.Rename(unzipped, app); err != nil {
 		os.RemoveAll(dir)
@@ -472,7 +435,7 @@ func team(ctx context.Context, app string) string {
 
 // stagedName is what the new app is unpacked as in stageDir, and asideName
 // what the installed one is moved to while they are swapped. Neither ends
-// in .app, so LaunchServices never registers either as a second magpie
+// in .app, so LaunchServices never registers either as a second eipgam
 // (#3965); the renames don't need the name, and stay on one volume.
 const (
 	stagedName = "payload"
@@ -480,7 +443,7 @@ const (
 )
 
 // stageDir is where an update is unpacked: beside what it replaces, so
-// installing it is a rename on one volume, or, where magpie may not write,
+// installing it is a rename on one volume, or, where eipgam may not write,
 // in its cache, to be moved in with the administrator's password.
 func stageDir(dir string) string {
 	if !Writable(dir) {
@@ -488,12 +451,12 @@ func stageDir(dir string) string {
 			return filepath.Join(cache, "update")
 		}
 	}
-	return filepath.Join(dir, ".magpie-update")
+	return filepath.Join(dir, ".eipgam-update")
 }
 
 // Install swaps the staged app in for bundle. The running copy keeps going
 // until it quits; the next launch is the new one. Where the folder is not
-// magpie's to change the error is a permission one (NeedsAdmin), and
+// eipgam's to change the error is a permission one (NeedsAdmin), and
 // InstallAsAdmin can do it instead.
 func Install(staged, bundle string) error {
 	old := filepath.Join(filepath.Dir(staged), asideName)
@@ -505,7 +468,7 @@ func Install(staged, bundle string) error {
 		os.Rename(old, bundle) // put it back
 		return err
 	}
-	os.RemoveAll(filepath.Dir(staged)) // .magpie-update
+	os.RemoveAll(filepath.Dir(staged)) // .eipgam-update
 	return nil
 }
 
@@ -523,8 +486,8 @@ func InstallAsAdmin(staged, bundle string) error {
 // Relaunch opens bundle again once this process (pid) has exited: with its
 // window when window is set, else only its menu bar icon (`tray`, as a
 // login launch), which a restart by itself uses while no window was up.
-// Each try, and what it came to, is written to relaunch.log in magpie's
-// own folder. quiet, the restart is one magpie made by itself: the app
+// Each try, and what it came to, is written to relaunch.log in eipgam's
+// own folder. quiet, the restart is one eipgam made by itself: the app
 // opens in the background (open -g), as it does too with no window, so it
 // takes no focus from the app the user is in (relaunchOpen).
 func Relaunch(bundle string, window, quiet bool) error {
@@ -532,20 +495,20 @@ func Relaunch(bundle string, window, quiet bool) error {
 }
 
 // openWaits are the pauses, in seconds, between tries of the relaunch's
-// open: about 13s in all. Just after magpie exits, LaunchServices can
+// open: about 13s in all. Just after eipgam exits, LaunchServices can
 // still hold it as running and send the open to the process that is gone,
 // and open fails (-600, procNotFound; seen with the screen locked). Tried
-// once, nothing started magpie again until the user did, nine hours later.
+// once, nothing started eipgam again until the user did, nine hours later.
 var openWaits = []string{"0.5", "1", "1", "2", "2", "3", "4"}
 
-// relaunchLogName is the file in magpie's folder the relaunch writes each
+// relaunchLogName is the file in eipgam's folder the relaunch writes each
 // try of its open to, and the start it falls back to: the shell that runs
-// them has no output anyone sees, and a magpie that never came back left
+// them has no output anyone sees, and a eipgam that never came back left
 // only the system log to say why.
 const relaunchLogName = "relaunch.log"
 
 // relaunchLog is the relaunch's log file, made ready to append to; once it
-// is past 64KB the last one is kept as relaunch.log.old. "" when magpie's
+// is past 64KB the last one is kept as relaunch.log.old. "" when eipgam's
 // folder can't be made: the tries then go unwritten.
 func relaunchLog() string {
 	h, err := appdir.Home()
@@ -563,10 +526,10 @@ func relaunchLog() string {
 	return p
 }
 
-// relaunchCommand is the shell command Relaunch runs once magpie has
+// relaunchCommand is the shell command Relaunch runs once eipgam has
 // exited: open, tried again while it fails, and, when it never worked,
 // the bundle's own executable run straight, as the login launch agent
-// runs it. With the screen locked, magpie stayed closed after an update
+// runs it. With the screen locked, eipgam stayed closed after an update
 // even with the 13s of tries (molvqingtai, after fb23bca5c): LaunchServices
 // can go on refusing the open for as long as the session is locked, and a
 // program run by its path needs nothing from it to start.
@@ -589,7 +552,7 @@ func relaunchScript(bundle string, window, quiet bool, log string, waits []strin
 	b.WriteString(`note() { echo "$(date '+%Y-%m-%d %H:%M:%S %z') $*" >> "$log" 2>/dev/null; }; `)
 	// open's own exit status and what it said, on one line
 	b.WriteString(`try() { n=$((n+1)); e=$(` + relaunchOpen(bundle, window, quiet) + ` 2>&1 >/dev/null); s=$?; note "open try $n: exit $s $(printf '%s' "$e" | tr '\n' ' ')"; return $s; }; `)
-	b.WriteString("n=0; note " + shellQuote("magpie has exited; opening "+bundle) + "; ")
+	b.WriteString("n=0; note " + shellQuote("eipgam has exited; opening "+bundle) + "; ")
 	b.WriteString(retried("try", waits))
 	b.WriteString(" || { note \"open gave up after $n tries; starting \"" + shellQuote(run) + "; ")
 	b.WriteString("[ -x " + shellQuote(exe) + " ] || { note \"no executable at \"" + shellQuote(exe) + "; exit 1; }; ")
@@ -602,7 +565,7 @@ var bundleExecutableKey = lazyre.New(`<key>CFBundleExecutable</key>\s*<string>([
 
 // bundleExecutable is the name of the program in bundle's Contents/MacOS:
 // the one its Info.plist names, else this one's own when it runs from
-// that bundle, else magpie.
+// that bundle, else eipgam.
 func bundleExecutable(bundle string) string {
 	if b, err := os.ReadFile(filepath.Join(bundle, "Contents", "Info.plist")); err == nil {
 		if m := bundleExecutableKey.FindSubmatch(b); m != nil {
@@ -614,7 +577,7 @@ func bundleExecutable(bundle string) string {
 	if exe, err := Executable(); err == nil && filepath.Dir(exe) == filepath.Join(bundle, "Contents", "MacOS") {
 		return filepath.Base(exe)
 	}
-	return "magpie"
+	return "eipgam"
 }
 
 // retried is a shell command that runs command until it succeeds, sleeping
@@ -628,11 +591,11 @@ func retried(command string, waits []string) string {
 
 // runAfterExit starts a shell that runs command once pid has exited. The
 // shell is in a session of its own: launchd ends the process group of a
-// job whose process exits, so one left in magpie's group was killed as
-// magpie quit and the new version never opened. That is the launch agent
+// job whose process exits, so one left in eipgam's group was killed as
+// eipgam quit and the new version never opened. That is the launch agent
 // of Open at login without AbandonProcessGroup (ee16c657), and, on macOS
 // 13 at least, the job LaunchServices runs an app in when it is opened from
-// the Dock or Finder, which magpie can't set that key on (#2362).
+// the Dock or Finder, which eipgam can't set that key on (#2362).
 func runAfterExit(pid int, command string) error {
 	script := fmt.Sprintf(`while kill -0 %d 2>/dev/null; do sleep 0.2; done; %s`, pid, command)
 	cmd := proc.Command("/bin/sh", "-c", script)
@@ -643,19 +606,19 @@ func runAfterExit(pid int, command string) error {
 
 // relaunchOpen is the open command Relaunch runs for bundle. -n asks
 // LaunchServices for a new instance: without it, open looks the app up
-// among those running first, and just after magpie exits LaunchServices
-// can still have the gone process registered as magpie. open then sends
+// among those running first, and just after eipgam exits LaunchServices
+// can still have the gone process registered as eipgam. open then sends
 // it a reopen Apple event (aevt/rapp) rather than launching the bundle,
 // and fails with -600, procNotFound ("Specified target process … does
 // not exist", "LAUNCH: Launch failed in CSUI"; Linka's log on Discord,
-// macOS 27.0.1, v0.1.1308), as often as it is tried. A magpie that is in
+// macOS 27.0.1, v0.1.1308), as often as it is tried. A eipgam that is in
 // fact up still has the one instance: the new process finds the instance
 // lock held and hands over to it (runningAlready in internal/gui).
 //
 // -g opens it in the background, unless it comes back with its window on
-// a restart the user asked for. Without it, LaunchServices brings magpie
+// a restart the user asked for. Without it, LaunchServices brings eipgam
 // to the front as it starts: a restart into an update with only the menu
-// bar icon to come back, or one magpie made by itself (Settings'
+// bar icon to come back, or one eipgam made by itself (Settings'
 // AutoRestart), took the focus from the app the user was typing in
 // (xyxyxy_15591 on Discord).
 func relaunchOpen(bundle string, window, quiet bool) string {
@@ -725,20 +688,20 @@ func stageBinaryFor(ctx context.Context, a Asset, exe string) (string, error) {
 
 // The GUI downloads an update when it is out and swaps it in at the next
 // restart, which may be days later. It was downloaded beside the program
-// as magpie.exe.new, so a magpie kept on the Desktop showed the download
+// as eipgam.exe.new, so a eipgam kept on the Desktop showed the download
 // there, and deleted, it came back with the next check (nianshou5 on
-// Discord). It is downloaded to magpie's cache now, in a folder of this
+// Discord). It is downloaded to eipgam's cache now, in a folder of this
 // program's own, whenever a rename from there reaches the program's
 // folder, which is what puts it in; else (the cache on another volume)
-// into a hidden .magpie-update folder beside the program. Where magpie may
+// into a hidden .eipgam-update folder beside the program. Where eipgam may
 // not write beside the program, it goes to the cache as before, to be
 // moved in with the administrator's password.
 
 // besideStage is the hidden folder beside the program an update is
 // downloaded into when no rename from the cache reaches the program.
-const besideStage = ".magpie-update"
+const besideStage = ".eipgam-update"
 
-// stageCache is magpie's cache folder; tests set it.
+// stageCache is eipgam's cache folder; tests set it.
 var stageCache = appdir.SystemCache
 
 // binaryStage is the file StageBinary downloads exe's new build to, its
@@ -784,7 +747,7 @@ func freshStage(d, name string) (string, error) {
 }
 
 // cacheStage is exe's own folder in the cache for its downloads, "" with
-// no cache: two copies of magpie (a portable one and the installed one)
+// no cache: two copies of eipgam (a portable one and the installed one)
 // never share one.
 func cacheStage(exe string) string {
 	cache, err := stageCache()
@@ -798,7 +761,7 @@ func cacheStage(exe string) string {
 // renamesInto says whether a file in from can be renamed into dir: the
 // same volume, which a move that can't fail half way needs.
 func renamesInto(from, dir string) bool {
-	f, err := os.CreateTemp(from, ".magpie-update-*")
+	f, err := os.CreateTemp(from, ".eipgam-update-*")
 	if err != nil {
 		return false
 	}
@@ -865,7 +828,7 @@ func InstallBinaryAside(staged, exe string) (string, error) {
 			if err := tryStart(staged); heldOpen(err) {
 				// held, not refused: kept, for a restart to try again
 				// once whatever holds it lets go
-				return "", &saidError{"couldn't start the new version to check it: another program still has the download open (often an antivirus checking it); restart to update again in a minute, or let magpie through it", err}
+				return "", &saidError{"couldn't start the new version to check it: another program still has the download open (often an antivirus checking it); restart to update again in a minute, or let eipgam through it", err}
 			} else if err != nil {
 				os.Remove(staged)
 				dropStage(staged)
@@ -875,7 +838,7 @@ func InstallBinaryAside(staged, exe string) (string, error) {
 		}
 		// A running .exe cannot be overwritten, but it can be moved aside.
 		// What the last update moved aside may still be running too (a
-		// `magpie serve` started before it), and can't be removed or
+		// `eipgam serve` started before it), and can't be removed or
 		// replaced then: this one goes beside it, under a name of its own.
 		// The download is kept, for another try.
 		RemoveOld(exe)
@@ -888,7 +851,7 @@ func InstallBinaryAside(staged, exe string) (string, error) {
 		if heldOpen(err) {
 			// the reason and what to do, shown as is in the version row
 			// and the Update pill's tooltip, without the paths
-			err = &saidError{fmt.Sprintf("couldn't put the new version in place of %s: another program still has the download open (often an antivirus checking it): let magpie through it and restart to update again, or download the new version and put it in place of this one", filepath.Base(exe)), err}
+			err = &saidError{fmt.Sprintf("couldn't put the new version in place of %s: another program still has the download open (often an antivirus checking it): let eipgam through it and restart to update again, or download the new version and put it in place of this one", filepath.Base(exe)), err}
 		}
 		if old != "" {
 			if restoreErr := moveIn(old, exe); restoreErr != nil {
@@ -1057,9 +1020,9 @@ func moveAside(exe string) (string, error) {
 	var hint string
 	switch {
 	case heldOpen(err):
-		hint = "another program has it open (often an antivirus or OneDrive): let magpie through it and restart to update again, or download the new version and put it in place of this one"
+		hint = "another program has it open (often an antivirus or OneDrive): let eipgam through it and restart to update again, or download the new version and put it in place of this one"
 	case errors.Is(err, fs.ErrPermission):
-		hint = "Windows doesn't let magpie change files in " + filepath.Dir(exe) + " (an antivirus' folder protection, or the folder's permissions): let magpie through, or download the new version and put it in place of this one"
+		hint = "Windows doesn't let eipgam change files in " + filepath.Dir(exe) + " (an antivirus' folder protection, or the folder's permissions): let eipgam through, or download the new version and put it in place of this one"
 	default:
 		hint = "download the new version and put it in place of this one"
 	}
@@ -1089,7 +1052,7 @@ func RemoveOld(exe string) {
 }
 
 // Replaced reports whether exe is no longer the binary that was there when
-// this process looked (started, from os.Stat): another magpie installed an
+// this process looked (started, from os.Stat): another eipgam installed an
 // update over it, and this one runs from where it was moved aside.
 func Replaced(exe string, started os.FileInfo) bool {
 	now, err := os.Stat(exe)
@@ -1097,9 +1060,9 @@ func Replaced(exe string, started os.FileInfo) bool {
 }
 
 // RemoveStaleNew removes a download of exe's next build (stagedFiles)
-// that is no newer than exe: exe over again (the update a magpie left
+// that is no newer than exe: exe over again (the update a eipgam left
 // running from before it downloaded once more), or an older version a
-// swap never put in. A newer one, which a magpie still running may yet
+// swap never put in. A newer one, which a eipgam still running may yet
 // put in, stays.
 func RemoveStaleNew(exe string) {
 	mine := fileVersion(exe)
@@ -1154,7 +1117,7 @@ func InstallBinaryAsAdmin(staged, exe string) error {
 // one then runs on rather than quitting.
 func RelaunchBinary(exe, old string, window bool, view string) error {
 	args := RelaunchArgs(window, view)
-	env := append(os.Environ(), "MAGPIE_REPLACES="+strconv.Itoa(os.Getpid()))
+	env := append(os.Environ(), "EIPGAM_REPLACES="+strconv.Itoa(os.Getpid()))
 	if old != "" {
 		return startChecked(exe, old, args, env)
 	}
@@ -1162,7 +1125,7 @@ func RelaunchBinary(exe, old string, window bool, view string) error {
 	return err
 }
 
-// RelaunchArgs is what RelaunchBinary starts magpie with: `gui [view]` for
+// RelaunchArgs is what RelaunchBinary starts eipgam with: `gui [view]` for
 // the window, `tray` for the tray icon alone.
 func RelaunchArgs(window bool, view string) []string {
 	switch {
@@ -1174,12 +1137,12 @@ func RelaunchArgs(window bool, view string) []string {
 	return []string{"gui"}
 }
 
-// AwaitPredecessor blocks, for a while at most, until the magpie that
+// AwaitPredecessor blocks, for a while at most, until the eipgam that
 // relaunched this one has exited; on Windows its WebView2 too (awaitGone).
 func AwaitPredecessor() {
 	reportStarted() // first: the one that started this waits for it
-	pid, err := strconv.Atoi(os.Getenv("MAGPIE_REPLACES"))
-	os.Unsetenv("MAGPIE_REPLACES")
+	pid, err := strconv.Atoi(os.Getenv("EIPGAM_REPLACES"))
+	os.Unsetenv("EIPGAM_REPLACES")
 	if err != nil || pid <= 0 {
 		return
 	}
@@ -1244,7 +1207,7 @@ func download(ctx context.Context, a Asset, path string) error {
 	if a.SHA256 == "" {
 		return errors.New("the release lists no checksum for " + filepath.Base(path))
 	}
-	// the attestation of the signed checksum, before the bytes are fetched
+	// the attestation for the expected checksum, before the bytes are fetched
 	if err := attestedFile(ctx, a, filepath.Base(path)); err != nil {
 		return err
 	}
@@ -1263,16 +1226,6 @@ func download(ctx context.Context, a Asset, path string) error {
 	on, viaAPI := a, false
 	toGitHub := a.GitHub != "" && a.GitHub != a.URL
 	toAPI := mirrorOf(ctx) == ""
-	// Settings' update source (source.go): GitHub only starts at github.com
-	// and goes on to its API route; the site only goes to no other
-	switch Source() {
-	case settings.UpdateSourceGitHub:
-		if toGitHub {
-			on.URL, toGitHub = a.GitHub, false
-		}
-	case settings.UpdateSourceSite:
-		toGitHub, toAPI = false, false
-	}
 	var before []string // each route left, and how it failed
 	for try := 0; try <= len(retryWaits); try++ {
 		if try > 0 {
@@ -1490,7 +1443,7 @@ func fetch(ctx context.Context, a Asset, path string) error {
 		}
 		if res.StatusCode == http.StatusPartialContent && have > 0 && !restarted && !strings.HasPrefix(res.Header.Get("Content-Range"), fmt.Sprintf("bytes %d-", have)) {
 			// a 206 that doesn't say it starts where it was asked to (a
-			// host whose Content-Range is bytes NaN-NaN/…, usemagpie.ai
+			// host whose Content-Range is bytes NaN-NaN/…, a broken download host
 			// before 0.1.3733): what came can't be laid after what was kept,
 			// so once more, whole
 			res.Body.Close()
@@ -1551,7 +1504,7 @@ func fetch(ctx context.Context, a Asset, path string) error {
 	if !strings.EqualFold(fileHash(path), a.SHA256) {
 		err = fmt.Errorf("%s does not match its checksum", name)
 		if u != a.URL {
-			err = fmt.Errorf("%s from the mirror %s does not match its checksum from %s; not installed", name, mirror, Site)
+			err = fmt.Errorf("%s from the mirror %s does not match its checksum from %s; not installed", name, mirror, Repository+"/releases")
 		}
 		return fail(err)
 	}
@@ -1614,22 +1567,9 @@ func openBeside(bundle string, window, quiet bool) string {
 
 // StartBeside starts exe now, beside this process, as RelaunchBinary's
 // args say: the new version of a restart that hands the gateway over. It
-// isn't told to wait for this one (MAGPIE_REPLACES): it takes the gateway
+// isn't told to wait for this one (EIPGAM_REPLACES): it takes the gateway
 // from it while it runs.
 func StartBeside(exe string, window bool, view string) error {
 	_, _, err := launch(exe, RelaunchArgs(window, view), os.Environ())
 	return err
-}
-
-// githubAddresses gives each file the feed names on the site its
-// github.com address, where download goes on when the site's can't be
-// reached; the hash it is checked against is the same.
-func (rel *Release) githubAddresses() {
-	for name, a := range rel.Assets {
-		if a.GitHub != "" || rel.Version == "" || !strings.HasPrefix(a.URL, Site+"/") {
-			continue
-		}
-		a.GitHub = fmt.Sprintf("%s/%s/releases/download/v%s/%s", githubWeb, releaseRepo, rel.Version, url.PathEscape(name))
-		rel.Assets[name] = a
-	}
 }

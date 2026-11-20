@@ -15,20 +15,20 @@ import (
 	"github.com/klauspost/compress/zstd"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/claudeseal"
-	"github.com/yetone/magpie/internal/codexsummary"
-	"github.com/yetone/magpie/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/claudeseal"
+	"github.com/sichengchen/eipgam/internal/codexsummary"
+	"github.com/sichengchen/eipgam/internal/filelock"
 )
 
 const portThread = "01a15820-ff81-7840-bb3f-e18771c53aa8"
 
-// portRolloutLines is a Codex 0.162 rollout of a thread magpie compacted,
+// portRolloutLines is a Codex 0.162 rollout of a thread eipgam compacted,
 // in the shapes Codex writes (codex-rs/history/src/rollout_payload.rs,
-// CompactedItemWire; the compaction item as magpie's gateway streams it):
+// CompactedItemWire; the compaction item as eipgam's gateway streams it):
 // a session_meta, a user message that talks about "magpie1:" (text, never
-// changed), magpie's compaction item as a response_item, the compacted
+// changed), eipgam's compaction item as a response_item, the compacted
 // checkpoint holding it in replacement_history with its metadata beside,
-// a checkpoint with an unreadable one of magpie's, OpenAI's own sealed
+// a checkpoint with an unreadable one of eipgam's, OpenAI's own sealed
 // compaction, and a later turn.
 func portRolloutLines(summary string) []string {
 	enc := codexsummary.Encrypted(summary)
@@ -95,9 +95,9 @@ func decode(t *testing.T, line string) map[string]any {
 	return v
 }
 
-// LukeMa (X): a Codex conversation magpie compacted errored once magpie
-// was quit, as OpenAI can't read magpie's compaction item
-// (invalid_encrypted_content). PortCodexRollouts writes each of magpie's
+// LukeMa (X): a Codex conversation eipgam compacted errored once eipgam
+// was quit, as OpenAI can't read eipgam's compaction item
+// (invalid_encrypted_content). PortCodexRollouts writes each of eipgam's
 // items as Codex's own summary message, the one the gateway sends for it,
 // and changes nothing else: the other lines keep their bytes, the file
 // its line count, mode and time, and a compacted line's metadata stays
@@ -162,10 +162,10 @@ func TestPortCodexRollouts(t *testing.T) {
 			if m := p4["replacement_history_metadata"].([]any); len(m) != 1 || !reflect.DeepEqual(m[0], map[string]any{"client_authored": true}) {
 				t.Errorf("metadata %v", m)
 			}
-			// nothing of magpie's that OpenAI would refuse is left
+			// nothing of eipgam's that OpenAI would refuse is left
 			for i, l := range got {
 				if i != 1 && strings.Contains(l, codexsummary.Mark) {
-					t.Errorf("line %d still has magpie's item: %s", i, l)
+					t.Errorf("line %d still has eipgam's item: %s", i, l)
 				}
 			}
 			// a second pass has nothing to do
@@ -176,10 +176,10 @@ func TestPortCodexRollouts(t *testing.T) {
 	}
 }
 
-// #4735: a pass over a rollout with nothing of magpie's in it only reads
+// #4735: a pass over a rollout with nothing of eipgam's in it only reads
 // it. It wrote each one out again, compressed for a .zst, and threw that
 // away, which cost a pass more than the read. A line longer than the read
-// buffer is read whole, and one of magpie's after it is still written.
+// buffer is read whole, and one of eipgam's after it is still written.
 func TestPortCodexRolloutsOnlyReadsWhatHasNothingToChange(t *testing.T) {
 	long := `{"timestamp":"2026-10-20T07:06:00.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"` + strings.Repeat("x", 300<<10) + `"}]}}`
 	for _, zst := range []bool{false, true} {
@@ -237,7 +237,7 @@ func TestPortCodexRolloutsLeavesAnOpenThread(t *testing.T) {
 	if b, _ := os.ReadFile(path); !bytes.Equal(b, orig) {
 		t.Fatal("written while a Codex had the thread open")
 	}
-	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(path), ".magpie-*")); len(left) > 0 {
+	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(path), ".eipgam-*")); len(left) > 0 {
 		t.Fatalf("left behind: %v", left)
 	}
 	filelock.Unlock(lf)
@@ -258,9 +258,9 @@ func TestPortCodexRolloutsLeavesAnOpenThread(t *testing.T) {
 	}
 }
 
-// A line is parsed only for magpie's item; text that only mentions
+// A line is parsed only for eipgam's item; text that only mentions
 // "magpie1:" keeps its bytes, and a line that is one unreadable item of
-// magpie's alone stays (leaving it out would move the lines after it).
+// eipgam's alone stays (leaving it out would move the lines after it).
 func TestPortLineLeavesOthers(t *testing.T) {
 	for _, l := range []string{
 		`{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"magpie1:abc"}]}}` + "\n",
@@ -330,7 +330,7 @@ func lineEnds(t *testing.T, path string) []int {
 // rollout"). A fork or a revert names the byte its parent's history ends
 // at (session_meta.history_base), and Codex's state database keeps turns
 // and how far it has read by byte too; a ported line, a summary message
-// shorter than magpie's base64 item, made the parent shorter, so every
+// shorter than eipgam's base64 item, made the parent shorter, so every
 // such place moved or went past its end. A rollout written portable keeps
 // every line where it was, and a fork's place in it stays a line's end.
 func TestPortCodexRolloutsKeepsBytePlaces(t *testing.T) {
@@ -370,7 +370,7 @@ func TestPortCodexRolloutsKeepsBytePlaces(t *testing.T) {
 			for i, l := range got {
 				decode(t, l) // padded lines still read as JSON
 				if i != 1 && (strings.Contains(l, codexsummary.Mark) || strings.Contains(l, claudeseal.Mark)) {
-					t.Errorf("line %d still has magpie's item: %.200s", i, l)
+					t.Errorf("line %d still has eipgam's item: %.200s", i, l)
 				}
 			}
 			if b, _ := os.ReadFile(cpath); string(b) != meta {
@@ -406,7 +406,7 @@ func TestPortCodexRolloutsLongerLine(t *testing.T) {
 			got := readRollout(t, path)
 			for i, l := range got {
 				if strings.Contains(l, `"encrypted_content":"magpie1:`) {
-					t.Errorf("line %d still has magpie's item: %.300s", i, l)
+					t.Errorf("line %d still has eipgam's item: %.300s", i, l)
 				}
 				if !json.Valid([]byte(l)) {
 					t.Errorf("line %d isn't JSON: %.300s", i, l)
@@ -445,18 +445,18 @@ func TestFitShorterRetires(t *testing.T) {
 	}
 }
 
-// A compacted line an earlier pass wrote with magpie_reasoning in its
+// A compacted line an earlier pass wrote with eipgam_reasoning in its
 // replacement_history (or a compaction item retired) had Codex send the
 // item as "other", and OpenAI refused every turn after ("Invalid
 // response.create payload: Invalid value: 'other'", real codex-cli
 // 0.169.1). The next pass leaves it out, and its metadata entry with it,
-// the line as long as it was; a magpie_reasoning response_item, which
+// the line as long as it was; a eipgam_reasoning response_item, which
 // Codex never sends, stays.
 func TestPortCodexRolloutsDropsRetiredFromHistory(t *testing.T) {
 	lines := []string{
 		`{"timestamp":"2026-10-30T07:05:20.118Z","type":"session_meta","payload":{"id":"` + portThread + `","model_provider":"openai","history_mode":"paginated"}}`,
-		`{"timestamp":"2026-10-30T07:05:40.551Z","type":"response_item","payload":{"type":"magpie_reasoning","summary":[{"type":"summary_text","text":"先看 go.mod"}]}}`,
-		`{"timestamp":"2026-10-30T07:40:02.553Z","type":"compacted","payload":{"message":"","replacement_history":[{"type":"message","role":"user","content":[{"type":"input_text","text":"修一下构建"}]},{"type":"magpie_reasoning","summary":[]},{"type":"magpie_compaction"},{"type":"message","role":"user","content":[{"type":"input_text","text":"go on"}]}],"replacement_history_metadata":[{"client_authored":true},{},{"compaction_model_hash":"h1"},{"client_authored":true}]}}`,
+		`{"timestamp":"2026-10-30T07:05:40.551Z","type":"response_item","payload":{"type":"eipgam_reasoning","summary":[{"type":"summary_text","text":"先看 go.mod"}]}}`,
+		`{"timestamp":"2026-10-30T07:40:02.553Z","type":"compacted","payload":{"message":"","replacement_history":[{"type":"message","role":"user","content":[{"type":"input_text","text":"修一下构建"}]},{"type":"eipgam_reasoning","summary":[]},{"type":"eipgam_compaction"},{"type":"message","role":"user","content":[{"type":"input_text","text":"go on"}]}],"replacement_history_metadata":[{"client_authored":true},{},{"compaction_model_hash":"h1"},{"client_authored":true}]}}`,
 	}
 	home, path := portHome(t, lines, false)
 	ends := lineEnds(t, path)
@@ -517,7 +517,7 @@ func TestPortCodexRolloutsRefitsOnce(t *testing.T) {
 	}
 }
 
-// A fork made before magpie kept its parent's lines whole names a byte
+// A fork made before eipgam kept its parent's lines whole names a byte
 // the shorter parent doesn't end a line at, or doesn't have (xybio's
 // thread). The pass after sets it again, once, from the ordinal the fork
 // names, keeping the fork's first line as long as it was; a fork whose
@@ -568,27 +568,27 @@ func TestPortCodexRolloutsRepairsForks(t *testing.T) {
 	}
 }
 
-// hentulong (X): Codex routed through magpie to WorkBuddy, then back to
+// hentulong (X): Codex routed through eipgam to WorkBuddy, then back to
 // its own ChatGPT sign-in, couldn't go on with the thread or a fork of it:
 //
 //	{"type":"error","error":{"message":"Persisted response contains hosted-tool, compaction, or unverifiable hidden reasoning state that Rustponses cannot replay. Start a new response or use the Python Responses service for this continuation.","type":"invalid_request_error","param":"previous_response_id","code":"unsupported_persisted_item_context"},"status":400}
 //
-// The thread holds the reasoning items magpie gave Codex for WorkBuddy's
-// translated replies: a summary, magpie's id, encrypted_content null, as
+// The thread holds the reasoning items eipgam gave Codex for WorkBuddy's
+// translated replies: a summary, eipgam's id, encrypted_content null, as
 // Codex writes them. Codex's websocket sends the thread as a warmup and
 // the turn with previous_response_id; OpenAI takes the warmup and refuses
 // the turn with that error (tried on a real ChatGPT account, gpt-6-sol;
 // the same history without the item goes on). Line 6 is the one a real
-// Codex 0.165 wrote for auto/deepseek-flash through magpie, which, on
+// Codex 0.165 wrote for auto/deepseek-flash through eipgam, which, on
 // Codex's own sign-in after, was refused with array_above_max_length
-// ("Invalid 'input[5].content': array too long"). A pass made as magpie
+// ("Invalid 'input[5].content': array too long"). A pass made as eipgam
 // lets Codex go writes each reasoning item OpenAI didn't seal as
-// magpie_reasoning, a type Codex reads as Other and never sends, in a
+// eipgam_reasoning, a type Codex reads as Other and never sends, in a
 // response_item; in replacement_history, where Codex sends an Other as
 // "other" and OpenAI refuses the turn ("Invalid value: 'other'", real
 // codex-cli 0.165.0 and 0.169.1), it is left out with its metadata entry.
 // Each line keeps its length; OpenAI's own sealed reasoning and every
-// other line keep their bytes. A pass while Codex goes through magpie
+// other line keep their bytes. A pass while Codex goes through eipgam
 // leaves them: there a DeepSeek or Kimi model gets its reasoning back
 // from them. A thread begun on a provider of the user's own is left be.
 func TestPortCodexRolloutsLeftRetiresUnsealedReasoning(t *testing.T) {
@@ -608,14 +608,14 @@ func TestPortCodexRolloutsLeftRetiresUnsealedReasoning(t *testing.T) {
 			home, path := portHome(t, lines, zst)
 			ends := lineEnds(t, path)
 
-			// through magpie: magpie's unsealed reasoning stays; Claude's
+			// through eipgam: eipgam's unsealed reasoning stays; Claude's
 			// block goes as before
 			if _, err := PortCodexRollouts(context.Background(), home); err != nil {
 				t.Fatal(err)
 			}
 			got := readRollout(t, path)
 			if got[2] != lines[2] || got[4] != lines[4] {
-				t.Fatalf("written while Codex goes through magpie:\n%s\n%s", got[2], got[4])
+				t.Fatalf("written while Codex goes through eipgam:\n%s\n%s", got[2], got[4])
 			}
 
 			res, err := PortCodexRolloutsLeft(context.Background(), home)
@@ -632,9 +632,9 @@ func TestPortCodexRolloutsLeftRetiresUnsealedReasoning(t *testing.T) {
 				}
 			}
 			p2 := decode(t, got[2])["payload"].(map[string]any)
-			if p2["type"] != "magpie_reasoning" || p2["encrypted_content"] != nil || p2["id"] != nil ||
+			if p2["type"] != "eipgam_reasoning" || p2["encrypted_content"] != nil || p2["id"] != nil ||
 				!reflect.DeepEqual(p2["summary"], []any{map[string]any{"type": "summary_text", "text": "先看 go.mod，再跑测试。"}}) {
-				t.Errorf("magpie's reasoning item: %s", got[2])
+				t.Errorf("eipgam's reasoning item: %s", got[2])
 			}
 			p4 := decode(t, got[4])["payload"].(map[string]any)
 			hist := p4["replacement_history"].([]any)
@@ -645,21 +645,21 @@ func TestPortCodexRolloutsLeftRetiresUnsealedReasoning(t *testing.T) {
 			if m := p4["replacement_history_metadata"].([]any); len(m) != 2 || !reflect.DeepEqual(m[0], map[string]any{"client_authored": true}) {
 				t.Errorf("metadata %v", m)
 			}
-			if p7 := decode(t, got[7])["payload"].(map[string]any); p7["type"] != "magpie_reasoning" || strings.Contains(got[7], claudeseal.Mark) {
+			if p7 := decode(t, got[7])["payload"].(map[string]any); p7["type"] != "eipgam_reasoning" || strings.Contains(got[7], claudeseal.Mark) {
 				t.Errorf("Claude's block: %s", got[7])
 			}
-			if !strings.HasPrefix(got[6], `{"timestamp":"2026-10-31T09:26:38.975Z","ordinal":12,"type":"response_item","payload":{"type":"magpie_reasoning","summary":[],"content":[{"type":"reasoning_text","text":"We need answer just number. 17*23=391."}],"internal_chat_message_metadata_passthrough":{"turn_id":"01a19148-3e68-7bc2-82be-0c4681743dab"}}}  `) {
+			if !strings.HasPrefix(got[6], `{"timestamp":"2026-10-31T09:26:38.975Z","ordinal":12,"type":"response_item","payload":{"type":"eipgam_reasoning","summary":[],"content":[{"type":"reasoning_text","text":"We need answer just number. 17*23=391."}],"internal_chat_message_metadata_passthrough":{"turn_id":"01a19148-3e68-7bc2-82be-0c4681743dab"}}}  `) {
 				t.Errorf("another API's reasoning: %s", got[6])
 			}
 			// nothing OpenAI can't take as a base is left
 			for i, l := range got {
 				if i != 1 && strings.Contains(l, `"type":"reasoning"`) && !strings.Contains(l, "gAAAA") {
-					t.Errorf("line %d still has magpie's reasoning: %s", i, l)
+					t.Errorf("line %d still has eipgam's reasoning: %s", i, l)
 				}
 			}
-			// magpie still reads it as the model's output
+			// eipgam still reads it as the model's output
 			if !cxAnswerItem([]byte(got[2])) {
-				t.Error("cxAnswerItem doesn't take magpie_reasoning")
+				t.Error("cxAnswerItem doesn't take eipgam_reasoning")
 			}
 			if res, err := PortCodexRolloutsLeft(context.Background(), home); err != nil || len(res.Rewritten) != 0 {
 				t.Errorf("second left pass: %+v, %v", res, err)
@@ -679,7 +679,7 @@ func TestPortCodexRolloutsLeftRetiresUnsealedReasoning(t *testing.T) {
 	})
 }
 
-// A pass through magpie that ran first doesn't keep a left pass from
+// A pass through eipgam that ran first doesn't keep a left pass from
 // looking at what it looked at: each keeps its own state.
 func TestPortCodexRolloutsLeftKeepsItsOwnState(t *testing.T) {
 	line := `{"timestamp":"2026-10-30T07:05:40.551Z","type":"response_item","payload":{"type":"reasoning","id":"rs_18b3f2a9c1d2e3f40000002a","summary":[],"encrypted_content":null}}`
@@ -692,7 +692,7 @@ func TestPortCodexRolloutsLeftKeepsItsOwnState(t *testing.T) {
 	if res, err := PortCodexRolloutsLeft(context.Background(), home); err != nil || len(res.Rewritten) != 1 {
 		t.Fatalf("left pass after two others: %+v, %v", res, err)
 	}
-	if got := readRollout(t, path); !strings.Contains(got[0], `"magpie_reasoning"`) {
+	if got := readRollout(t, path); !strings.Contains(got[0], `"eipgam_reasoning"`) {
 		t.Fatalf("not written: %s", got[0])
 	}
 }

@@ -10,13 +10,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Gateway mode (Player on Discord): `magpie web` on a server that is only
+// Gateway mode (Player on Discord): `eipgam web` on a server that is only
 // the gateway for other machines' agents shows what such a gateway needs —
 // Providers, Gateway, Routing, Usage, Sessions, Plugins, Settings and the
 // Library's MCP servers with the router (treeman_26897) — and leaves out
@@ -26,20 +26,20 @@ import (
 // windows show everything whatever it says.
 //
 // Settings' choice (settings.GatewayMode, "on" or "off") wins; with none,
-// `magpie web --gateway` turns it on, and so does a magpie web with no
+// `eipgam web --gateway` turns it on, and so does a eipgam web with no
 // agent on its machine (a container, a NAS). Settings › General turns it
 // off again, which brings the pages back.
 
-// WebGateway is `magpie web --gateway`'s.
+// WebGateway is `eipgam web --gateway`'s.
 var WebGateway atomic.Bool
 
-// webPage is set once the page is served by `magpie web`: settingsState,
+// webPage is set once the page is served by `eipgam web`: settingsState,
 // which has no Windows, tells the page its gateway mode by it.
 var webPage atomic.Bool
 
 // gatewayMode says whether the page is in gateway mode, and why: "on" or
-// "off" (Settings' choice), "flag" (magpie web --gateway), "no-agents", or
-// "" (the app's windows, or magpie web on a machine with agents).
+// "off" (Settings' choice), "flag" (eipgam web --gateway), "no-agents", or
+// "" (the app's windows, or eipgam web on a machine with agents).
 func gatewayMode(web bool) (bool, string) {
 	if !web {
 		return false, ""
@@ -64,7 +64,7 @@ func gatewayMode(web bool) (bool, string) {
 var agentsHere = func() bool { return slices.ContainsFunc(agent.AllKnown(), (*agent.Agent).Detected) }
 
 // gatewayModeRoutes: POST /api/settings/gateway-mode {"mode": "on" | "off"
-// | ""} sets Settings' choice, "" leaving it to magpie again.
+// | ""} sets Settings' choice, "" leaving it to eipgam again.
 func gatewayModeRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/settings/gateway-mode", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
@@ -160,6 +160,6 @@ func init() {
 	f := ownSessionsOff
 	sessions.OwnOff.Store(&f)
 	// the browser page in gateway mode ticks a skill or the prompts for
-	// no agent: a magpie that uses this one's Library gives them to its own
+	// no agent: a eipgam that uses this one's Library gives them to its own
 	library.NoAgentsShown = func() bool { on, _ := gatewayMode(true); return on }
 }

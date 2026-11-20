@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // codexPlanModels are the ChatGPT backend's /codex/models entries, as it
@@ -176,11 +176,11 @@ func TestCodexProviderListsEveryAccountsModels(t *testing.T) {
 }
 
 // bigfisheatsmall on X: Codex kept signed in to a Free ChatGPT account, a
-// Team one the only account on in magpie. dsh listed the Team plan's
-// models; Codex, joined to magpie beside its sign-in, was handed the
-// backend's list for the Free sign-in and magpie's models without any
+// Team one the only account on in eipgam. dsh listed the Team plan's
+// models; Codex, joined to eipgam beside its sign-in, was handed the
+// backend's list for the Free sign-in and eipgam's models without any
 // ChatGPT account's (CodexListed), so a model only the Team account has
-// was in no picker of Codex's. Codex's list now has those by magpie's id,
+// was in no picker of Codex's. Codex's list now has those by eipgam's id,
 // and a turn on one goes to the account that has it.
 func TestCodexListHasAnotherAccountsModels(t *testing.T) {
 	tried := codexFreeBesidePro(t)
@@ -240,9 +240,9 @@ func TestCodexListHasAnotherAccountsModels(t *testing.T) {
 		t.Fatalf("codex/gpt-6.1-sol from Codex: status %d, tried %s: %s", rec.Code, got, rec.Body)
 	}
 
-	// spawn_agent's models for a lead on another of magpie's models: the
+	// spawn_agent's models for a lead on another of eipgam's models: the
 	// Free sign-in's (Codex's models_cache.json) and the Team plan's
-	// beyond them, by magpie's id
+	// beyond them, by eipgam's id
 	if err := os.WriteFile(catalog.CodexModelsCache(), []byte(codexPlanList(true)), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestCodexListHasAnotherAccountsModels(t *testing.T) {
 }
 
 // One account, Codex's own sign-in: the backend lists every model it has,
-// and Codex's list has none of them again by magpie's id.
+// and Codex's list has none of them again by eipgam's id.
 func TestCodexListOneAccountNoneTwice(t *testing.T) {
 	codexFreeBesidePro(t)
 	ls := filepath.Join(filepath.Dir(provider.Path()), "logins.json")

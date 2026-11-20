@@ -7,28 +7,28 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
-// claude-magpie (baranwang on X) is a command of its own beside magpie's:
-// on Windows a .cmd that runs the magpie beside it (magpie.com, the
-// console one, before magpie.exe), elsewhere a shell script that runs
+// claude-eipgam (baranwang on X) is a command of its own beside eipgam's:
+// on Windows a .cmd that runs the eipgam beside it (eipgam.com, the
+// console one, before eipgam.exe), elsewhere a shell script that runs
 // this program by its path. Each passes every argument on as it is.
 func TestLauncherText(t *testing.T) {
-	win := launcherText("windows", `C:\ignored\magpie.exe`, "claude", "run")
-	if win != "@echo off\r\nrem written by magpie: runs magpie claude run\r\n\"%~dp0magpie\" claude run %*\r\n" {
+	win := launcherText("windows", `C:\ignored\eipgam.exe`, "claude", "run")
+	if win != "@echo off\r\nrem written by eipgam: runs eipgam claude run\r\n\"%~dp0eipgam\" claude run %*\r\n" {
 		t.Fatalf("Windows launcher:\n%q", win)
 	}
-	if LauncherFile("windows", "claude-magpie") != "claude-magpie.cmd" || LauncherFile("linux", "claude-magpie") != "claude-magpie" {
+	if LauncherFile("windows", "claude-eipgam") != "claude-eipgam.cmd" || LauncherFile("linux", "claude-eipgam") != "claude-eipgam" {
 		t.Fatal("launcher file names")
 	}
-	sh := launcherText("darwin", "/Users/o'neil/Applications/magpie.app/Contents/MacOS/magpie", "claude", "run")
-	want := "#!/bin/sh\n# written by magpie: runs magpie claude run\nexec '/Users/o'\\''neil/Applications/magpie.app/Contents/MacOS/magpie' 'claude' 'run' \"$@\"\n"
+	sh := launcherText("darwin", "/Users/o'neil/Applications/eipgam.app/Contents/MacOS/eipgam", "claude", "run")
+	want := "#!/bin/sh\n# written by eipgam: runs eipgam claude run\nexec '/Users/o'\\''neil/Applications/eipgam.app/Contents/MacOS/eipgam' 'claude' 'run' \"$@\"\n"
 	if sh != want {
 		t.Fatalf("shell launcher:\n%s\nwant:\n%s", sh, want)
 	}
 	if !strings.Contains(win, launcherMark) || !strings.Contains(sh, launcherMark) {
-		t.Fatal("a launcher without magpie's mark")
+		t.Fatal("a launcher without eipgam's mark")
 	}
 }
 
@@ -39,12 +39,12 @@ func TestLauncherRunsWithEveryArgument(t *testing.T) {
 		t.Skip("a shell script")
 	}
 	dir := t.TempDir()
-	prog := filepath.Join(dir, "it's magpie")
+	prog := filepath.Join(dir, "it's eipgam")
 	out := filepath.Join(dir, "args")
 	if err := os.WriteFile(prog, []byte("#!/bin/sh\nfor a in \"$@\"; do printf '%s\\n' \"$a\"; done > '"+out+"'\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	l := filepath.Join(dir, "claude-magpie")
+	l := filepath.Join(dir, "claude-eipgam")
 	if err := writeLauncher(l, launcherText(runtime.GOOS, prog, "claude", "run")); err != nil {
 		t.Fatal(err)
 	}
@@ -58,31 +58,31 @@ func TestLauncherRunsWithEveryArgument(t *testing.T) {
 }
 
 // A file of the user's own by the launcher's name is left as it is; one
-// magpie wrote is written again.
+// eipgam wrote is written again.
 func TestLauncherLeavesTheUsersOwnFile(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "claude-magpie")
+	p := filepath.Join(dir, "claude-eipgam")
 	own := "#!/bin/sh\necho mine\n"
 	if err := os.WriteFile(p, []byte(own), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := writeLauncher(p, launcherText("linux", "/opt/magpie", "claude", "run")); err == nil {
-		t.Fatal("the user's own claude-magpie was written over")
+	if err := writeLauncher(p, launcherText("linux", "/opt/eipgam", "claude", "run")); err == nil {
+		t.Fatal("the user's own claude-eipgam was written over")
 	}
 	if b, _ := os.ReadFile(p); string(b) != own {
 		t.Fatalf("the user's file is now:\n%s", b)
 	}
 	if ownLauncher(p) {
-		t.Fatal("the user's file reads as magpie's")
+		t.Fatal("the user's file reads as eipgam's")
 	}
-	if err := os.WriteFile(p, []byte(launcherText("linux", "/old/magpie", "claude", "run")), 0o755); err != nil {
+	if err := os.WriteFile(p, []byte(launcherText("linux", "/old/eipgam", "claude", "run")), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	text := launcherText("linux", "/new/magpie", "claude", "run")
+	text := launcherText("linux", "/new/eipgam", "claude", "run")
 	if err := writeLauncher(p, text); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(p); string(b) != text {
-		t.Fatalf("magpie's own launcher wasn't brought up to date:\n%s", b)
+		t.Fatalf("eipgam's own launcher wasn't brought up to date:\n%s", b)
 	}
 }

@@ -3,24 +3,24 @@ package usage
 import (
 	"strings"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
-// MagpieAlias says id is one of magpie's own alias ids for a model, the names
+// MagpieAlias says id is one of eipgam's own alias ids for a model, the names
 // the gateway lists Claude Desktop, Claude Code under it and Claude Science
-// by: anthropic/magpie-<number>, mythos-magpie-<number>, claude-magpie-<number>
-// and magpie-<number>.anthropic.<Claude model>, with or without Claude Code's
+// by: anthropic/eipgam-<number>, mythos-eipgam-<number>, claude-eipgam-<number>
+// and eipgam-<number>.anthropic.<Claude model>, with or without Claude Code's
 // "[1m]", the number ten digits (gateway's aliasNumber). Only the gateway
 // knows them, so a call that names one went through it. A test in the
 // gateway keeps this in step with the ids it lists.
 func MagpieAlias(id string) bool {
 	id = strings.TrimSuffix(id, "[1m]")
-	for _, p := range []string{"anthropic/magpie-", "mythos-magpie-", "claude-magpie-"} {
+	for _, p := range []string{"anthropic/eipgam-", "mythos-eipgam-", "claude-eipgam-"} {
 		if n, ok := strings.CutPrefix(id, p); ok {
 			return tenDigits(n)
 		}
 	}
-	if rest, ok := strings.CutPrefix(id, "magpie-"); ok {
+	if rest, ok := strings.CutPrefix(id, "eipgam-"); ok {
 		if n, _, ok := strings.Cut(rest, ".anthropic."); ok {
 			return tenDigits(n)
 		}
@@ -41,7 +41,7 @@ func tenDigits(s string) bool {
 }
 
 // viaGateway is a call its agent's session file records under one of
-// magpie's alias ids (Claude Desktop's Code tab writes the id the gateway
+// eipgam's alias ids (Claude Desktop's Code tab writes the id the gateway
 // listed it by). The gateway's own log counts that call under the model that
 // served it, so the file's is not another call but the same one: counted
 // beside it, it showed twice, once under an alias that is no model

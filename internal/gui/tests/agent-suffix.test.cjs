@@ -3,7 +3,7 @@
 // agent. An agent's Details now has its own: As in Settings (every agent's,
 // named), On, Not on names I set or Off, saved for that agent by the id its
 // lists are kept by (settings.AgentSuffix). An agent whose list doesn't take
-// magpie's names (noNames) has none. Every language, narrow too.
+// eipgam's names (noNames) has none. Every language, narrow too.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -11,7 +11,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { agentRow } = require("./reader.cjs");
 
-const assets = process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets");
 const words = {
   en: { every: "As in Settings · Off", on: "On", off: "Off", label: "Provider in model names" },
   zh: { every: "跟随设置 · 关闭", on: "开启", off: "关闭", label: "模型名带供应商" },
@@ -63,7 +63,7 @@ async function openPage(t, engine, lang, width) {
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); }
     catch { await route.fulfill({ status: 404, body: "" }); }
   });
-  await page.goto("http://magpie.test/?view=agents");
+  await page.goto("http://eipgam.test/?view=agents");
   await page.locator(row("opencode") + " .ag-link").waitFor();
   return { page, errors, posts };
 }
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
   }
 
-  test(`${engine}: an agent whose list takes no names of magpie's has none`, async (t) => {
+  test(`${engine}: an agent whose list takes no names of eipgam's has none`, async (t) => {
     const { page, errors } = await openPage(t, engine, "en", 1180);
     await page.locator(row("goose") + " .ag-link").click();
     await page.locator(row("goose") + " .ag-exp").waitFor();

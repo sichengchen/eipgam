@@ -320,7 +320,7 @@ func TestFetchIconLeavesNoIdleConnection(t *testing.T) {
 	}
 	srv.Start()
 	t.Cleanup(srv.Close)
-	t.Setenv("MAGPIE_ICON_PROXY", srv.URL+"/api/icon")
+	t.Setenv("EIPGAM_ICON_PROXY", srv.URL+"/api/icon")
 	old := iconClient
 	iconClient = srv.Client
 	t.Cleanup(func() { iconClient = old })

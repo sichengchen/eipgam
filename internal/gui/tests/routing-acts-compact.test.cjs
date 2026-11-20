@@ -86,8 +86,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang));
-          await page.addInitScript(() => { try { if (!sessionStorage.getItem("seeded")) { localStorage.setItem("magpie.usageTab", "requests"); sessionStorage.setItem("seeded", "1"); } } catch {} });
-          await page.goto("http://magpie.test/?view=routing");
+          await page.addInitScript(() => { try { if (!sessionStorage.getItem("seeded")) { localStorage.setItem("eipgam.usageTab", "requests"); sessionStorage.setItem("seeded", "1"); } } catch {} });
+          await page.goto("http://eipgam.test/?view=routing");
           const w = words[lang];
           const acts = page.locator(".rt-acts");
           const more = page.locator(".rt-acts-foot button.rt-acts-more");
@@ -141,7 +141,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.locator("#view-usage").waitFor({ state: "visible" });
           await page.locator("#usagePane").waitFor({ state: "visible" });
           assert.equal(await page.locator("#ledgerPane").isVisible(), false);
-          assert.equal(await page.evaluate(() => localStorage.getItem("magpie.usageTab")), "requests");
+          assert.equal(await page.evaluate(() => localStorage.getItem("eipgam.usageTab")), "requests");
           assert.deepEqual(errors, []);
         } finally {
           await ctx.close();

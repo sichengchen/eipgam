@@ -10,7 +10,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const back = (n) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - n); return d; };
 
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const on = () => page.locator("#period .opt.on").textContent();
       const settle = () => page.waitForFunction(() => document.querySelector("#period .opt") && !document.querySelector("#period .opt:disabled"));
 
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://eipgam.test/?view=usage");
       await settle();
       assert.equal(asked[0], "today", "a first visit opens on Today");
       const opts = await page.locator("#period .opt:not(.range-opt)").allTextContents();
@@ -89,11 +89,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the menu bar's total names its own period, which isn't kept
       asked.length = 0;
-      await page.goto("http://magpie.test/?view=usage&period=7d");
+      await page.goto("http://eipgam.test/?view=usage&period=7d");
       await settle();
       assert.equal(asked[0], "7d");
       asked.length = 0;
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://eipgam.test/?view=usage");
       await settle();
       assert.equal(asked[0], "last:24h", "a way in leaves the pick as it was");
       assert.deepEqual(errors, []);

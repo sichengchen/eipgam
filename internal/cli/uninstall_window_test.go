@@ -5,15 +5,15 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/applog"
-	"github.com/yetone/magpie/internal/gui"
-	"github.com/yetone/magpie/internal/shortcut"
+	"github.com/sichengchen/eipgam/internal/applog"
+	"github.com/sichengchen/eipgam/internal/gui"
+	"github.com/sichengchen/eipgam/internal/shortcut"
 )
 
-// Windows' Installed apps runs magpie's Uninstall with no console
-// (shortcut.UninstallArgs): the terminal's `magpie uninstall` would refuse
+// Windows' Installed apps runs eipgam's Uninstall with no console
+// (shortcut.UninstallArgs): the terminal's `eipgam uninstall` would refuse
 // for want of one to ask on, so it opens the app's window at Settings ›
-// Uninstall magpie, which asks, and puts every agent back before magpie's
+// Uninstall eipgam, which asks, and puts every agent back before eipgam's
 // files go. Nothing is removed by the command itself.
 func TestInstalledAppsUninstallOpensTheWindow(t *testing.T) {
 	was, wasRun := openApp, runUninstall
@@ -31,6 +31,6 @@ func TestInstalledAppsUninstallOpensTheWindow(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(shown) != 1 || !shown[0] {
-		t.Fatalf("the app's window wasn't opened on Uninstall magpie: %v", shown)
+		t.Fatalf("the app's window wasn't opened on Uninstall eipgam: %v", shown)
 	}
 }

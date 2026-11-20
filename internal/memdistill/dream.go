@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/filelock"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 // Dreaming is the nightly tidy: once a day, after DreamHour, a model is

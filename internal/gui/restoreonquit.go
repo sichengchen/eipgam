@@ -3,20 +3,20 @@ package gui
 import (
 	"log"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Settings › General › Put agents back when quitting (tudjam17795 on X:
 // after quitting, the harness it was connected to can't go on). Off by
-// default, a connected agent keeps magpie as it quits. On, the app's quit
+// default, a connected agent keeps eipgam as it quits. On, the app's quit
 // does what each agent's Disconnect does (agent.RestoreOnQuit: their own
 // files back as they were, no Quit question), and the next start connects
 // them again (agent.RewireOnStart). Only the agents connected at the quit,
 // and not disconnected by the user, are touched.
 
 // restoreOnQuit says whether the quit puts the agents back: the setting,
-// and a gateway this process serves (another magpie serving it goes on
+// and a gateway this process serves (another eipgam serving it goes on
 // serving its agents). A settings file that can't be read leaves them.
 func restoreOnQuit() bool {
 	s, err := settings.LoadChecked()
@@ -50,10 +50,10 @@ func restoreAgentsOnQuit() {
 // each connected agent put back as RestoreOnQuit puts it, so the next
 // start connects it again. It disconnected each one as its row's
 // Disconnect does, whose mark keeps an agent off at every start after:
-// a user who chose it so their agents work while magpie is closed found
-// every switch off when magpie opened again, and turned each back on by
+// a user who chose it so their agents work while eipgam is closed found
+// every switch off when eipgam opened again, and turned each back on by
 // hand (jtbbtnt54249 on X, "退出有时候又要重新开启"). An agent that can't
-// be put back is named in the error, and magpie stays open.
+// be put back is named in the error, and eipgam stays open.
 func quitDisconnect() error {
 	ids, err := quitRestore(quitDetect())
 	if len(ids) > 0 {

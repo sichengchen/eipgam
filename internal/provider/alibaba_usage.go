@@ -49,7 +49,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 const (
@@ -377,7 +377,7 @@ func aliAskUsage(ctx context.Context, token string, c aliConsole) ([]byte, error
 		} `json:"data"`
 	}
 	if json.Unmarshal(raw, &env) != nil {
-		return nil, fmt.Errorf("%s answered in a form magpie doesn't know: %s", c.who, replyHead(raw))
+		return nil, fmt.Errorf("%s answered in a form eipgam doesn't know: %s", c.who, replyHead(raw))
 	}
 	if env.Data.Success != nil && !*env.Data.Success && len(env.Data.ErrorCode) > 0 {
 		code := strings.Trim(string(env.Data.ErrorCode), `"`)

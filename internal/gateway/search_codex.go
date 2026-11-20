@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A ChatGPT account searches the web for a model that can't by the ChatGPT

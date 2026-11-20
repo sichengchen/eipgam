@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 // MemorySkill makes the procedure memory with id a skill of the library's

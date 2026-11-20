@@ -16,7 +16,7 @@ import (
 // ships a Bun module as its main beside its moejs agent file. It loads
 // and adds its agent, but the GitHub list read a package with a main as
 // a provider and showed it under Providers (miaocell, plugins#737). A
-// package that declares magpie.agent is an agent plugin, main or not;
+// package that declares eipgam.agent is an agent plugin, main or not;
 // the file looked for in the repository is still the one Bun loads, its
 // main. The package.json, module and agent file are
 // miaocell/magpie-agent-deva's, as they are; it isn't on npm.

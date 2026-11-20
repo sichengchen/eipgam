@@ -1,7 +1,7 @@
 package usage
 
 import (
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 	"math/rand"
 	"reflect"
 	"strconv"

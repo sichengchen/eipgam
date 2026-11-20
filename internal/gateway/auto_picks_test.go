@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // seeing saves a provider whose one enabled model, eye, sees, at price
@@ -132,21 +132,21 @@ func TestAddedProviderTakesNoAutomaticPick(t *testing.T) {
 func TestAutoPicksSeededFromTheLedger(t *testing.T) {
 	ago := func(h int) time.Time { return time.Now().Add(-time.Duration(h) * time.Hour) }
 	call := func(at time.Time, kind, pid, source string) {
-		usage.Append(usage.Record{Time: at, Agent: "magpie", Kind: kind, Provider: pid, Model: "eye", Source: source, Status: 200})
+		usage.Append(usage.Record{Time: at, Agent: "eipgam", Kind: kind, Provider: pid, Model: "eye", Source: source, Status: 200})
 	}
 
 	t.Run("taken over", func(t *testing.T) {
 		fresh(t)
 		seeing(t, provider.Provider{ID: "oai", Responses: "https://api.openai.com/v1"}, 5)
 		seeing(t, provider.Provider{ID: "anth", Anthropic: "https://api.anthropic.com"}, 1)
-		// anth's own search for its own model, before it was magpie's pick:
+		// anth's own search for its own model, before it was eipgam's pick:
 		// not a searcher's call
 		call(ago(9), "web_search", "anth", usage.SourceSearch)
 		call(ago(8), "vision", "oai", "")
 		call(ago(7), "web_search", "oai", "")
 		call(ago(6), "vision", "oai", "")
 		call(ago(5), "web_search", "oai", "")
-		// anth added: magpie picked it for both
+		// anth added: eipgam picked it for both
 		call(ago(2), "vision", "anth", "")
 		call(ago(1), "web_search", "anth", "")
 		seedAutoPicks()

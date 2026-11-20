@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posts));
-        await page.goto("http://magpie.test/?view=settings&tab=network");
+        await page.goto("http://eipgam.test/?view=settings&tab=network");
         const list = page.locator("#proxiesList");
         await list.getByText("Home", { exact: true }).waitFor();
 

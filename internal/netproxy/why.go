@@ -68,7 +68,7 @@ func Explain(address, msg string) *Why {
 	case strings.Contains(msg, "no such host"):
 		w.Why = "the proxy's host name doesn't resolve"
 	case strings.Contains(msg, "i/o timeout"), strings.Contains(msg, "deadline exceeded"), strings.Contains(msg, "Client.Timeout"):
-		w.Why = "no answer through {addr} in time: check the address, and that a firewall lets magpie reach it"
+		w.Why = "no answer through {addr} in time: check the address, and that a firewall lets eipgam reach it"
 	case strings.Contains(msg, "connection reset"), strings.Contains(msg, "EOF"):
 		w.Why = "{addr} hung up: check whether it is HTTP, SOCKS5 or SSH, and its login"
 	default:

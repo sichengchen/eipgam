@@ -1,12 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// refeccd on Discord: Library > MCP servers > magpie-web-search > Edit, the
+// refeccd on Discord: Library > MCP servers > eipgam-web-search > Edit, the
 // Form | JSON switch: the first click changed the text size but not the
 // view; it took a second click. A trackpad's tap lifts a few pixels from
 // where it came down: here a press near the top of the option that slides 8px
 // up, off the switch, in under 300ms. The view must change on the first one,
 // both ways, in every language, in Chromium and WebKit, at 1100 and 390
 // wide. No backend: the API is faked.
-// refeccd on Discord (third report): Library > MCP servers > magpie-web-search >
+// refeccd on Discord (third report): Library > MCP servers > eipgam-web-search >
 // Edit, the Form | JSON switch: on a Mac with Tap to click the first tap only
 // shrinks the button (:active) and does nothing; a second tap works. A
 // physical press works. No physical trackpad has been used for this test, and
@@ -31,10 +31,10 @@ const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skill
 
 function server(lang, web) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents: ["claude:Claude Code","codex:Codex","gemini:Gemini CLI","cursor:Cursor","opencode:OpenCode","kimi:Kimi Code","droid:Droid","amp:Amp","qwen:Qwen Code","crush:Crush","pi:Pi","zed:Zed","trae:Trae","iflow:iFlow","goose:Goose","cline:Cline","roo:Roo","kilo:Kilo","aider:Aider","warp:Warp"].map((x) => agent(...x.split(":"))), mcpHub: true, hubPath: "/mcp",
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
-    servers: [{ name: "magpie-web-search", transport: "stdio", command: "/Applications/magpie.app/Contents/MacOS/magpie", args: ["mcp", "search"], env: {}, icon: "https://usemagpie.ai/favicon.png", agents: ["claude", "codex", "gemini"] }],
+    servers: [{ name: "eipgam-web-search", transport: "stdio", command: "/Applications/eipgam.app/Contents/MacOS/eipgam", args: ["mcp", "search"], env: {}, icon: "https://usemagpie.ai/favicon.png", agents: ["claude", "codex", "gemini"] }],
   };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const w = (s) => tr(lang, s);
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
           await ctx.addInitScript(() => {
-            try { localStorage.setItem("magpie.libTab", "mcp"); } catch {}
+            try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {}
             // the engine that sends the mouseup and no click: the next
             // trusted click after a mouseup is lost, once per arming
             let up = false;
@@ -85,10 +85,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           await page.route("**/*", server(lang, width < 600));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           const ed = page.locator("#modal .lib-editor");
-          await page.locator("#view-library .lib-server .name", { hasText: "magpie-web-search" }).click();
+          await page.locator("#view-library .lib-server .name", { hasText: "eipgam-web-search" }).click();
           await ed.waitFor();
           await page.waitForTimeout(600); // the dialog has stopped growing in
           const pick = (name) => ed.locator(".lib-viewpick .opt", { hasText: new RegExp("^" + name + "$") });

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // A withdrawn plugin (Antigravity's, owner 11-15) is still installed for

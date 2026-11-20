@@ -43,19 +43,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // A migration's states.
 const (
 	MoveMoving = "moving" // under way, or cut short (put back at the next try)
 	MovePlugin = "plugin" // the plugin has the id
-	MovedBack  = "back"   // moved back to the built-in by an older magpie: moved again by itself
+	MovedBack  = "back"   // moved back to the built-in by an older eipgam: moved again by itself
 	MoveFailed = "failed" // the last try failed: the built-in carries on
 	// MoveRemoved is a moved one whose plugin the user removed: its
 	// accounts stay with the plugin's sign-ins, and the plugin installed
@@ -63,7 +63,7 @@ const (
 	MoveRemoved = "removed"
 )
 
-// retiring are the built-ins magpie moves onto their plugins by itself:
+// retiring are the built-ins eipgam moves onto their plugins by itself:
 // every one with a mover, since each built-in is being retired (the owner,
 // 10-16: 陆续把内置Provider下线掉). A tests' list stands in for it.
 var retiring = MovableIDs
@@ -114,10 +114,10 @@ type Migration struct {
 // MoveWhy is why a move didn't go through: Code names the case, Args fill
 // in its sentence.
 //
-//	offline   magpie couldn't reach npm (or Bun's download) to install the plugin
+//	offline   eipgam couldn't reach npm (or Bun's download) to install the plugin
 //	install   npm couldn't install it: line
 //
-// An older magpie also failed a move for an account (lapsed, unserved,
+// An older eipgam also failed a move for an account (lapsed, unserved,
 // account), which the page still reads from migrations.json; since the
 // built-ins are retired every account goes along.
 type MoveWhy struct {
@@ -152,7 +152,7 @@ var unreachable = lazyre.New(`(?i)ConnectionRefused|ConnectionClosed|FailedToOpe
 // installFailed says why the plugin couldn't be installed.
 func installFailed(pkg string, err error) error {
 	if unreachable.MatchString(err.Error()) {
-		return &moveError{MoveWhy{Code: "offline"}, "magpie couldn't reach npm to install the plugin. Check the network or proxy, then try again.", err}
+		return &moveError{MoveWhy{Code: "offline"}, "eipgam couldn't reach npm to install the plugin. Check the network or proxy, then try again.", err}
 	}
 	line := strings.TrimSpace(err.Error())
 	if ls := strings.Split(line, "\n"); len(ls) > 1 {
@@ -287,7 +287,7 @@ var errStays = errors.New("stays with the plugin")
 // Movable is whether the built-in id has a plugin it can move to.
 func Movable(id string) bool { return movers[id] != nil }
 
-// BuiltinRetired is whether magpie's built-in id is retired: its plugin serves
+// BuiltinRetired is whether eipgam's built-in id is retired: its plugin serves
 // it, and the built-in serves nothing, moved or not. One whose accounts
 // haven't moved yet (a failed install, an account the plugin turned away)
 // is listed by MoveCandidates with why, until it moves. The built-ins are
@@ -337,7 +337,7 @@ var retiredBuiltins = map[string]bool{
 }
 
 // PluginServes is whether the built-in id's subscription is its plugin's to
-// serve, and magpie's built-in code serves none of it: moved onto its plugin,
+// serve, and eipgam's built-in code serves none of it: moved onto its plugin,
 // or retired.
 func PluginServes(id string) bool { return Moved(id) || BuiltinRetired(id) }
 
@@ -396,7 +396,7 @@ func MoveCandidates() []MoveCandidate {
 	return out
 }
 
-// a retired subscription's id names its plugin to `magpie plugin add`
+// a retired subscription's id names its plugin to `eipgam plugin add`
 // and the Plugins page's field (qoder-cn, commandcode-plan)
 func init() { plugin.SubscriptionPlugin = MovePackage }
 
@@ -526,7 +526,7 @@ func lockMoves() (func(), error) {
 			f.Close()
 			return func() { os.Remove(p) }, nil
 		}
-		// one left by a magpie that died moving (killed, or stopped
+		// one left by a eipgam that died moving (killed, or stopped
 		// mid-move) holds nothing
 		if b, rerr := os.ReadFile(p); rerr == nil {
 			if pid, perr := strconv.Atoi(strings.TrimSpace(string(b))); perr == nil && pid != os.Getpid() && !update.Alive(pid) {
@@ -538,9 +538,9 @@ func lockMoves() (func(), error) {
 			os.Remove(p)
 			continue
 		}
-		return nil, errors.New("another magpie is moving subscriptions to plugins")
+		return nil, errors.New("another eipgam is moving subscriptions to plugins")
 	}
-	return nil, errors.New("another magpie is moving subscriptions to plugins")
+	return nil, errors.New("another eipgam is moving subscriptions to plugins")
 }
 
 // Hooks the tests stand in for.
@@ -862,7 +862,7 @@ func commitMove(id string, mv *mover, moved []movedAccount, installed bool, host
 }
 
 // tidyMoved takes a moved built-in's accounts out of logins.json (into its
-// backup, if one was left behind when a magpie stopped between the two).
+// backup, if one was left behind when a eipgam stopped between the two).
 func tidyMoved(id string) {
 	mv := movers[id]
 	if mv == nil || !Moved(id) {
@@ -938,7 +938,7 @@ func putBack(ctx context.Context, id string, mv *mover, why string) {
 
 // handBack writes the plugin's accounts keys back into the built-in's
 // saved accounts, then takes them out of the plugin. They are written
-// before they are taken, so a magpie stopped between the two loses no
+// before they are taken, so a eipgam stopped between the two loses no
 // sign-in; one the plugin renewed in between is written again. arrange
 // finishes the accounts written (given each key's user). An account that
 // can't go back stops it all before anything is written.
@@ -1029,7 +1029,7 @@ func handBack(ctx context.Context, id string, mv *mover, accts []movedAccount, k
 }
 
 // MoveRetiring moves the built-ins being retired that have accounts, at
-// start-up: once, or again retryWait after one failed. One an older magpie
+// start-up: once, or again retryWait after one failed. One an older eipgam
 // moved back is moved again: there is no way back, as the built-in is
 // going. One whose plugin the user removed waits for them to install it.
 func MoveRetiring(ctx context.Context) map[string]error {
@@ -1130,7 +1130,7 @@ func pluginReady(mv *mover) bool {
 
 // keepMovedCurrent updates the plugin of each built-in moved onto one to
 // the version its move needs, when older: a built-in came up to date with
-// magpie, and its plugin does too. One turned off or run from a folder is
+// eipgam, and its plugin does too. One turned off or run from a folder is
 // left as it is.
 func keepMovedCurrent(ctx context.Context) {
 	for _, id := range OnPlugins() {
@@ -1145,8 +1145,8 @@ func keepMovedCurrent(ctx context.Context) {
 }
 
 // KeepRetiringMoved moves the built-ins being retired, and hands over
-// those whose plugin the user installed (HandOver), run by the magpie
-// serving the gateway (one magpie, never two at once): a little after it
+// those whose plugin the user installed (HandOver), run by the eipgam
+// serving the gateway (one eipgam, never two at once): a little after it
 // starts, then every hour, so a failed move is tried again once retryWait
 // has gone; a retired built-in's failed move brings the next run forward
 // to when it is due. It also keeps each moved built-in's plugin up to date.
@@ -1208,10 +1208,10 @@ func MovedOnto(name string) []string {
 	return out
 }
 
-// PluginAgentGoing, set by internal/agent, takes magpie out of the config
+// PluginAgentGoing, set by internal/agent, takes eipgam out of the config
 // of the agent the plugin spec adds and puts back what the user had, as
-// `magpie <agent> default` does. It runs before the plugin is turned off
-// or removed, while magpie still knows the agent: after, nothing could
+// `eipgam <agent> default` does. It runs before the plugin is turned off
+// or removed, while eipgam still knows the agent: after, nothing could
 // (#3810).
 var PluginAgentGoing func(spec string) error
 
@@ -1223,7 +1223,7 @@ func agentGoing(name, left string) error {
 		return nil
 	}
 	if err := PluginAgentGoing(spec); err != nil {
-		return fmt.Errorf("%s is left %s: magpie couldn't put back its agent's config as it was (%w); switch the agent off magpie first", name, left, err)
+		return fmt.Errorf("%s is left %s: eipgam couldn't put back its agent's config as it was (%w); switch the agent off eipgam first", name, left, err)
 	}
 	return nil
 }
@@ -1232,7 +1232,7 @@ func agentGoing(name, left string) error {
 // its providers it leaves in providers.json (plugin_left.go). A built-in
 // moved onto it isn't moved back, as the built-in is going: it is
 // MoveRemoved, its accounts kept with the plugin's sign-ins for when the
-// plugin is installed again. The agent it adds is taken off magpie first
+// plugin is installed again. The agent it adds is taken off eipgam first
 // (PluginAgentGoing).
 func RemovePlugin(ctx context.Context, name string) error {
 	if err := agentGoing(name, "installed"); err != nil {
@@ -1264,7 +1264,7 @@ func RemovePlugin(ctx context.Context, name string) error {
 
 // SetPluginOff turns the plugin named off, or back on. A built-in moved
 // onto it stays moved, off with it: nothing moves it back, as the built-in
-// is going. The agent it adds is taken off magpie before it is off
+// is going. The agent it adds is taken off eipgam before it is off
 // (PluginAgentGoing), and stays off when it is on again: the agent's
 // switch puts back the model it was on.
 func SetPluginOff(_ context.Context, name string, off bool) error {

@@ -39,7 +39,7 @@ func fatalLine(at time.Time) string {
 	return at.UTC().Format("2006-01-02T15:04:05.000Z") + " error [AppServerConnection] fatal_error_broadcasted initialized=true listenerCount=2 pendingRequestCount=0 transportKind=stdio\n"
 }
 
-// The page the Codex app shows when it can't go on after magpie restarted
+// The page the Codex app shows when it can't go on after eipgam restarted
 // its app-server (ysm119 on Discord) is read from the app's own logs: a
 // complete fatal_error_broadcasted line at or after the end, in a file
 // written to since, in the newest day folders (a file opened the day

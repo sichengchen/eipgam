@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Pausing the gateway (me2seeks on X: the gateway could be stopped only by
-// quitting magpie with Disconnect and quit). Settings → General has a
+// quitting eipgam with Disconnect and quit). Settings → General has a
 // Gateway row, On or Paused: Paused asks the backend to pause (agents
 // disconnected, the listener stopped), and the row reads Paused once it
 // says so. An agent that couldn't be disconnected is named in the status
@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const world = { paused: false, posts: [], refuse: true };
       await page.route("**/*", serve(lang, world));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=general");
+      await page.goto("http://eipgam.test/?view=settings&tab=general");
       await settingsDrawn(page);
       const row = page.locator("#gatewayPauseRow");
       await row.locator(".opt.on").waitFor();
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, "the page scrolls sideways");
 
       // the Gateway page says so, and resumes it
-      await page.goto("http://magpie.test/?view=gateway");
+      await page.goto("http://eipgam.test/?view=gateway");
       const fix = page.locator("#gateway .gw-fix");
       await fix.waitFor();
       assert.equal((await page.locator("#gateway .state").textContent()).trim(), w.state);

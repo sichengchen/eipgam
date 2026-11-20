@@ -14,23 +14,23 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
-// nb5p on Discord (macOS 26): Ice put magpie's menu bar icon back in its
+// nb5p on Discord (macOS 26): Ice put eipgam's menu bar icon back in its
 // hidden section after every update, and after a plain quit and reopen,
 // however often it was moved out. AppKit keeps where the item sits by its
 // autosave name ("NSStatusItem Preferred Position Item-0"), and Wails
-// removes the item as the app quits, which forgets it: the next magpie's
+// removes the item as the app quits, which forgets it: the next eipgam's
 // item started at the default spot. Renamed first, the removal forgets
 // nothing kept.
 func TestQuitKeepsTheMenuBarIconsPlace(t *testing.T) {
 	for _, c := range []struct{ keep, want string }{
 		{"0", "tray place: forgotten"}, // the cause, without the fix
 		{"1", "tray place: kept"},
-		// imty42 on X, #3873: the magpie handing over to the new version
+		// imty42 on X, #3873: the eipgam handing over to the new version
 		// hides its item, and setVisible:NO forgets the place the new
 		// version's Item-0 shares
 		{"handover", "tray place: kept"},
 	} {
-		out, err := runAppKit(t, 30*time.Second, []string{"MAGPIE_TEST_TRAY_PLACE=" + c.keep})
+		out, err := runAppKit(t, 30*time.Second, []string{"EIPGAM_TEST_TRAY_PLACE=" + c.keep})
 		if err != nil || !strings.Contains(string(out), c.want) {
 			t.Fatalf("keep %s: want %q: %v\n%s", c.keep, c.want, err, out)
 		}
@@ -38,7 +38,7 @@ func TestQuitKeepsTheMenuBarIconsPlace(t *testing.T) {
 }
 
 func init() {
-	keep := os.Getenv("MAGPIE_TEST_TRAY_PLACE")
+	keep := os.Getenv("EIPGAM_TEST_TRAY_PLACE")
 	if keep == "" {
 		return
 	}
@@ -49,11 +49,11 @@ func init() {
 	// where the user put it, the launch before
 	setTrayPlace("Item-0", 400)
 	app := application.New(application.Options{
-		Name: "magpie tray place regression",
+		Name: "eipgam tray place regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyAccessory},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<p>magpie</p>`)
+			fmt.Fprint(w, `<p>eipgam</p>`)
 		})},
 	})
 	tray := app.SystemTray.New()
@@ -85,7 +85,7 @@ func init() {
 				}
 				os.Exit(0)
 			}
-			// what the app's shutdown does: magpie's task, then Wails'
+			// what the app's shutdown does: eipgam's task, then Wails'
 			// removal of every tray
 			if keep == "1" {
 				if n := keepTrayPlace(); n != 1 {

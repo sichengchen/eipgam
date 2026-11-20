@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The editor doesn't send that magpie filled an AI Studio key's Gemini URL
+// The editor doesn't send that eipgam filled an AI Studio key's Gemini URL
 // in (GeminiFilled), so its save keeps it: the URL cleared in the form
 // stays cleared, and isn't filled in again.
 func TestSaveKeepsGeminiCleared(t *testing.T) {

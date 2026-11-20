@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Gateway mode's Sessions (paultian on Discord): magpie web as the gateway
+// Gateway mode's Sessions (paultian on Discord): eipgam web as the gateway
 // for other computers lists only the sessions that came through it, never
 // this computer's agents' files (ownSessionsOff). The server says so with
 // reads.gateway, so the page never asks which agents' history to read
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine} ${lang} ${width}px: gateway mode lists the gateway's sessions and never asks to read this computer's`, async (t) => {
       const { page, errors } = await open(engine, width, t);
       await page.route("**/*", serve(lang, { sessions: true }));
-      await page.goto("http://magpie.test/?view=sessions");
+      await page.goto("http://eipgam.test/?view=sessions");
       await page.locator('#view-sessions .row.sm-sess[data-id="ses_remote_1"]').waitFor();
       assert.equal(await page.locator("#view-sessions .sm-consent").count(), 0, "the consent card in gateway mode");
       await fits(page, "#view-sessions");
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine} ${lang} ${width}px: gateway mode with no session yet says where they come from`, async (t) => {
       const { page, errors } = await open(engine, width, t);
       await page.route("**/*", serve(lang, { sessions: false }));
-      await page.goto("http://magpie.test/?view=sessions");
+      await page.goto("http://eipgam.test/?view=sessions");
       const empty = page.locator("#view-sessions .empty-state");
       await empty.waitFor();
       assert.equal(await empty.locator("span").textContent(), w.empty);
@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const asked = [];
       page.on("request", (r) => { if (new URL(r.url()).pathname === "/api/sessions/reads") asked.push(r.method()); });
       await page.route("**/*", serve(lang, { sessions: true }));
-      await page.goto("http://magpie.test/?view=settings&tab=privacy");
+      await page.goto("http://eipgam.test/?view=settings&tab=privacy");
       await page.locator("#setPage-privacy").waitFor();
       await page.locator("#setPage-privacy .row-head .label", { hasText: "Sharing" }).or(page.locator("#shareList")).first().waitFor({ state: "attached" });
       // a reads answer the page asked for is drawn from before the check

@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           const posts = [];
           await page.route("**/*", serve(lang, posts));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator(".row.provider", { hasText: "My Relay" }).click();
           const ed = page.locator(".editor");
           await ed.locator(".base-url").waitFor();

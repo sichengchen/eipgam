@@ -6,18 +6,18 @@ import (
 	"golang.org/x/sys/cpu"
 )
 
-// osArch is the system magpie was built for.
+// osArch is the system eipgam was built for.
 var osArch = runtime.GOOS + "-" + runtime.GOARCH
 
-// target is this system's name in serveSHA: the one magpie was built
-// for, but Apple silicon's where an Intel magpie runs under Rosetta.
+// target is this system's name in serveTargets: the one eipgam was built
+// for, but Apple silicon's where an Intel eipgam runs under Rosetta.
 // Rosetta before macOS 15 has no AVX, so the Intel pf-serve ended with
 // SIGILL on its first instruction of it, on Metal and on the CPU alike
 // (echo_yip on X); Apple silicon's runs there natively, on Metal.
 //
 // On Windows on Arm it is the other way round: pf-serve has no arm64
 // build, and Windows 11 runs the x64 one emulated, as it ran the whole of
-// an x64 magpie there. The arm64 magpie an x64 one updates to (update's
+// an x64 eipgam there. The arm64 eipgam an x64 one updates to (update's
 // arch) finds the x64 pf-serve already on disk and goes on with it; one
 // that found no pf-serve for windows-arm64 left the model "not
 // downloaded" while it was on in the settings.

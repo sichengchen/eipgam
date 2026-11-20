@@ -7,16 +7,16 @@ import (
 	"strings"
 )
 
-// Restoring on quit (tudjam17795 on X: after magpie quits, the harness
+// Restoring on quit (tudjam17795 on X: after eipgam quits, the harness
 // it was connected to can't go on). Settings › General › Put agents back
-// when quitting is off by default: a connected agent keeps magpie as it
+// when quitting is off by default: a connected agent keeps eipgam as it
 // quits, which is what the Quit question names. With it on, RestoreOnQuit
 // does what each agent's Disconnect does, the files put back as they were
-// before magpie, and RewireOnStart connects them again at the next start.
+// before eipgam, and RewireOnStart connects them again at the next start.
 //
-// Only the agents magpie had connected are touched, and only those are
+// Only the agents eipgam had connected are touched, and only those are
 // connected again: one the user disconnected stays so (its disconnectedKey
-// mark), and one the user disconnected, or connected, while magpie was
+// mark), and one the user disconnected, or connected, while eipgam was
 // closed (the CLI) is left as they set it. Unlike a Disconnect, a quit
 // leaves no mark, which would stop the start from connecting it again.
 
@@ -24,7 +24,7 @@ import (
 // JSON list of ids.
 const quitRestoredKey = "quit.restored"
 
-// RestoreOnQuit disconnects each of as that has magpie in its config and
+// RestoreOnQuit disconnects each of as that has eipgam in its config and
 // that the user hasn't disconnected, and records which for RewireOnStart.
 // An agent that can't be disconnected is left as it is and named in the
 // error; the others go on.

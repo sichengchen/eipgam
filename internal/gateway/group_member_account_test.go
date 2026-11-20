@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A group's member on one account of its own (EastonXvii on X: Astra on
@@ -238,7 +238,7 @@ func TestGroupMemberAccountsDraw(t *testing.T) {
 		}
 		mu.Unlock()
 		noRests()
-		code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/`+group+`","prompt":"a magpie"}`)
+		code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/`+group+`","prompt":"a eipgam"}`)
 		mu.Lock()
 		defer mu.Unlock()
 		if code != 200 {

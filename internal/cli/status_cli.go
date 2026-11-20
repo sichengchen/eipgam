@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// status is what `magpie status` tells of the magpie serving the gateway.
+// status is what `eipgam status` tells of the eipgam serving the gateway.
 type status struct {
 	Running bool   `json:"running"`
 	URL     string `json:"url"`
@@ -20,20 +20,20 @@ type status struct {
 	Pid     int    `json:"pid,omitempty"`
 	Version string `json:"version,omitempty"`
 	Started string `json:"started,omitempty"`
-	// File is where the running magpie writes this down for a program that
+	// File is where the running eipgam writes this down for a program that
 	// reads files (a watchdog)
 	File string `json:"file"`
 }
 
-// statusUsage is magpie status --help.
-const statusUsage = `usage: magpie status [--json] [--addr host:port]
-  says which magpie serves the gateway on this computer: its role (app, tray, web,
-  serve or tui), process id, version and listen address. magpie.exe tray and
-  magpie.exe mcp image are one image name; the pid here is the one that serves.
+// statusUsage is eipgam status --help.
+const statusUsage = `usage: eipgam status [--json] [--addr host:port]
+  says which eipgam serves the gateway on this computer: its role (app, tray, web,
+  serve or tui), process id, version and listen address. eipgam.exe tray and
+  eipgam.exe mcp image are one image name; the pid here is the one that serves.
   --json prints one JSON object (running false when none answers), for a watchdog.
-  The running magpie also keeps the same in gateway.json in magpie's config folder
-  while it serves. It looks where --addr says, else at MAGPIE_ADDR, else where the
-  running magpie wrote down that it listens, else at the port in Settings' Gateway
+  The running eipgam also keeps the same in gateway.json in eipgam's config folder
+  while it serves. It looks where --addr says, else at EIPGAM_ADDR, else where the
+  running eipgam wrote down that it listens, else at the port in Settings' Gateway
   address.`
 
 func statusCmd(args []string) error {
@@ -67,10 +67,10 @@ func statusCmd(args []string) error {
 		return nil
 	}
 	if !st.Running {
-		fmt.Println(amber.Render("○"), "no magpie answers on", st.URL)
+		fmt.Println(amber.Render("○"), "no eipgam answers on", st.URL)
 		return nil
 	}
-	line := "magpie " + st.Version + " serves the gateway on " + bold.Render(st.Addr)
+	line := "eipgam " + st.Version + " serves the gateway on " + bold.Render(st.Addr)
 	if st.Role != "" {
 		line += " · " + st.Role
 	}

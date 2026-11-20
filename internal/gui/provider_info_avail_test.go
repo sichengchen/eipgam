@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A provider's row on the Providers page reads the vendor's list once:
@@ -26,7 +26,7 @@ func TestProviderInfoReadsTheListOnce(t *testing.T) {
 		fmt.Fprintf(&b, `"m-%d": {"id":"m-%d","name":"M %d"},`, i, i, i)
 	}
 	b.WriteString(`"x": {"id":"x"}}}}`)
-	os.MkdirAll(h+"/.cache/magpie", 0o755)
+	os.MkdirAll(h+"/.cache/eipgam", 0o755)
 	if err := os.WriteFile(catalog.CachePath(), []byte(b.String()), 0o644); err != nil {
 		t.Fatal(err)
 	}

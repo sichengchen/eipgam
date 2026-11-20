@@ -61,7 +61,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
         page.on("pageerror", (e) => errors.push(e.message));
         const now = new Date();
         await page.route("**/*", serve(lang, () => routes(now), now));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://eipgam.test/?view=routing");
         await page.waitForFunction(() => /\d/.test(document.body.innerText) && document.querySelector(".rt-cap")?.textContent);
         const text = await page.evaluate(() => document.body.innerText + "\n" + document.querySelector(".rt-cap").textContent);
         for (const w of words[lang]) assert.ok(text.includes(w), `${w} not in\n${text}`);

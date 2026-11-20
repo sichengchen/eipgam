@@ -27,7 +27,7 @@ const REFUSED = 'server name "Agent HUD": use letters, digits, - and _ only';
 
 function server(lang, saves) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
     agents: [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [{ name: "mine", transport: "stdio", command: "/opt/mine/mcp", agents: ["claude"] }],
@@ -80,15 +80,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
           await ctx.addInitScript(() => {
             Object.defineProperty(Navigator.prototype, "platform", { get: () => "MacIntel" });
-            try { localStorage.setItem("magpie.libTab", "mcp"); } catch {}
+            try { localStorage.setItem("eipgam.libTab", "mcp"); } catch {}
           });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           const saves = [];
-          await page.route("http://magpie.test/**", server(lang, saves));
-          await page.goto("http://magpie.test/");
+          await page.route("http://eipgam.test/**", server(lang, saves));
+          await page.goto("http://eipgam.test/");
           await page.locator('button[data-view="library"]').click();
           await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
 

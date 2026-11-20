@@ -1,4 +1,4 @@
-// Package imagemcp is `magpie mcp image`: a stdio MCP server an agent is
+// Package imagemcp is `eipgam mcp image`: a stdio MCP server an agent is
 // given, when it is picked for it in the Library, to make images with the
 // model the Settings' Image generation names, and videos with the first
 // video model the gateway has (gateway.AutoVideomaker), or with the model
@@ -29,9 +29,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // Folder is where images go in the project when no path is given, and
@@ -77,8 +77,8 @@ var (
 
 var videoSchema = map[string]any{
 	"name": videoTool,
-	"description": "Generate a short video from a text prompt, optionally starting from an image to animate, with a video model set up in Magpie " +
-		"(a Grok subscription's Grok Imagine, Volcengine Ark Agent Plan's Seedance, a MiniMax API key's MiniMax H3, another Magpie's, or a provider whose model list marks video models). It takes from ten seconds to a few minutes, then the video is saved as an mp4 file in the project (" + VideoFolder +
+	"description": "Generate a short video from a text prompt, optionally starting from an image to animate, with a video model set up in eipgam " +
+		"(a Grok subscription's Grok Imagine, Volcengine Ark Agent Plan's Seedance, a MiniMax API key's MiniMax H3, another eipgam's, or a provider whose model list marks video models). It takes from ten seconds to a few minutes, then the video is saved as an mp4 file in the project (" + VideoFolder +
 		"/ unless path says where) and its path is returned; when it is not ready within about 20 seconds, the answer is an id to wait on with " + resultTool + " instead. Describe the subject, the motion and the camera: what moves, how, and what the shot is.",
 	"inputSchema": map[string]any{
 		"type": "object",
@@ -101,7 +101,7 @@ var resultSchema = map[string]any{
 
 var schema = map[string]any{
 	"name": tool,
-	"description": "Generate an image from a text prompt, or edit/combine images given as reference_images, with the image model set in Magpie. " +
+	"description": "Generate an image from a text prompt, or edit/combine images given as reference_images, with the image model set in eipgam. " +
 		"The image is saved as a file in the project (" + Folder + "/ unless path says where) and its path is returned (when it is not ready within about 20 seconds, the answer is an id to wait on with " + resultTool + " instead); " +
 		"reference it from code or docs by that path. Write a detailed prompt: subject, style, composition, colours, any text to render exactly.",
 	"inputSchema": map[string]any{
@@ -138,7 +138,7 @@ type server struct {
 }
 
 // caller is who a tool call is made for: the agent that started this
-// server, or, behind magpie's MCP hub (one server for every agent), the
+// server, or, behind eipgam's MCP hub (one server for every agent), the
 // agent the hub's call carries in its _meta (gateway.HubRootsMeta).
 type caller struct {
 	hub   bool     // the call came through the hub
@@ -241,7 +241,7 @@ func Run(args []string) error {
 		}
 		wsl = w
 	}
-	base := strings.TrimRight(os.Getenv("MAGPIE_GATEWAY"), "/")
+	base := strings.TrimRight(os.Getenv("EIPGAM_GATEWAY"), "/")
 	if base == "" {
 		base = gateway.URL()
 	}
@@ -317,7 +317,7 @@ func (s *server) handle(req rpc) {
 		s.mu.Lock()
 		s.roots = len(p.Capabilities.Roots) > 0 && string(p.Capabilities.Roots) != "null"
 		if name := strings.ReplaceAll(strings.TrimSpace(p.ClientInfo.Name), " ", "-"); name != "" {
-			// the call is the agent's: usage names it, not magpie
+			// the call is the agent's: usage names it, not eipgam
 			if p.ClientInfo.Version != "" {
 				name += "/" + p.ClientInfo.Version
 			}
@@ -327,7 +327,7 @@ func (s *server) handle(req rpc) {
 		result = map[string]any{
 			"protocolVersion": "2025-06-18",
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "magpie-image", "version": "1"},
+			"serverInfo":      map[string]any{"name": "eipgam-image", "version": "1"},
 		}
 	case "ping":
 		result = map[string]any{}
@@ -340,8 +340,8 @@ func (s *server) handle(req rpc) {
 			Arguments json.RawMessage `json:"arguments"`
 			Meta      struct {
 				ProgressToken json.RawMessage `json:"progressToken"`
-				Roots         *[]string       `json:"magpie/roots"`
-				Client        string          `json:"magpie/client"`
+				Roots         *[]string       `json:"eipgam/roots"`
+				Client        string          `json:"eipgam/client"`
 			} `json:"_meta"`
 		}
 		if err := json.Unmarshal(req.Params, &p); err != nil || (p.Name != tool && p.Name != videoTool && p.Name != resultTool) {
@@ -368,7 +368,7 @@ func (s *server) handle(req rpc) {
 			j = s.jobs[strings.TrimSpace(a.ID)]
 			s.mu.Unlock()
 			if j == nil {
-				result = map[string]any{"content": []any{map[string]any{"type": "text", "text": fmt.Sprintf("no image or video is being made as %q (magpie-image may have been restarted): look in the project's %s/ or %s/, or generate it again", a.ID, Folder, VideoFolder)}}, "isError": true}
+				result = map[string]any{"content": []any{map[string]any{"type": "text", "text": fmt.Sprintf("no image or video is being made as %q (eipgam-image may have been restarted): look in the project's %s/ or %s/, or generate it again", a.ID, Folder, VideoFolder)}}, "isError": true}
 				break
 			}
 		} else {
@@ -424,7 +424,7 @@ func (s *server) handle(req rpc) {
 
 // report tells the gateway of a tool call this server answered, for its
 // request log (gateway.MCPCalledMethod): in the background, after the
-// answer, and a gateway that can't take it (not running, an older magpie)
+// answer, and a gateway that can't take it (not running, an older eipgam)
 // is let be. The call's arguments are never sent.
 func (s *server) report(c gateway.MCPCalled) {
 	s.running.Add(1)
@@ -495,7 +495,7 @@ func (s *server) generate(raw json.RawMessage, used *string, c caller) (string, 
 	r.Header.Set("User-Agent", c.agent)
 	res, err := s.client.Do(r)
 	if err != nil {
-		return "", fmt.Errorf("magpie isn't answering at %s (is it running?): %w", s.gateway, err)
+		return "", fmt.Errorf("eipgam isn't answering at %s (is it running?): %w", s.gateway, err)
 	}
 	defer res.Body.Close()
 	data, _ := io.ReadAll(io.LimitReader(res.Body, 256<<20))
@@ -591,9 +591,9 @@ func (s *server) generate(raw json.RawMessage, used *string, c caller) (string, 
 }
 
 // project is the folder images are saved in: the client's first root when
-// it can say, else the folder the agent started magpie in; behind the hub,
+// it can say, else the folder the agent started eipgam in; behind the hub,
 // the first of the roots the call carries. The home folder or / isn't a
-// project: ~/Pictures/Magpie is used then (the distro's, for an agent in
+// project: ~/Pictures/eipgam is used then (the distro's, for an agent in
 // WSL), as it is when the hub's caller has no roots, since this server
 // was started in the home folder for every agent.
 func (s *server) project(c caller) string {
@@ -610,12 +610,12 @@ func (s *server) project(c caller) string {
 	}
 	if wsl != nil && wsl.home != "" {
 		if d := wsl.shown(dir); d == "" || d == "/" || strings.TrimSuffix(d, "/") == strings.TrimSuffix(wsl.home, "/") {
-			return wsl.local(strings.TrimSuffix(wsl.home, "/") + "/Pictures/Magpie")
+			return wsl.local(strings.TrimSuffix(wsl.home, "/") + "/Pictures/eipgam")
 		}
 	}
 	home, _ := os.UserHomeDir()
 	if dir == "" || dir == "/" || dir == home || filepath.Dir(dir) == dir {
-		return filepath.Join(home, "Pictures", "Magpie")
+		return filepath.Join(home, "Pictures", "eipgam")
 	}
 	return dir
 }
@@ -629,7 +629,7 @@ func (s *server) root() string {
 		return ""
 	}
 	s.nextCall++
-	id := fmt.Sprintf(`"magpie-roots-%d"`, s.nextCall)
+	id := fmt.Sprintf(`"eipgam-roots-%d"`, s.nextCall)
 	ch := make(chan rpc, 1)
 	s.pending[id] = ch
 	s.mu.Unlock()
@@ -719,7 +719,7 @@ func reference(project, ref string) (string, error) {
 // Target is where the i-th of n files made from prompt, of extension ext,
 // goes under dir: path as a file (numbered when n > 1) or a folder, else a
 // name from the prompt in dir's generated-images/ (generated-videos/);
-// never a file that is there. `magpie tool` saves what it is given by it.
+// never a file that is there. `eipgam tool` saves what it is given by it.
 func Target(dir, path, prompt, ext string, i, n int) (string, error) {
 	return target(dir, path, prompt, ext, i, n)
 }
@@ -854,7 +854,7 @@ func (s *server) call(c caller, method, path string, body []byte) ([]byte, int, 
 	r.Header.Set("User-Agent", c.agent)
 	res, err := s.client.Do(r)
 	if err != nil {
-		return nil, 0, fmt.Errorf("magpie isn't answering at %s (is it running?): %w", s.gateway, err)
+		return nil, 0, fmt.Errorf("eipgam isn't answering at %s (is it running?): %w", s.gateway, err)
 	}
 	defer res.Body.Close()
 	data, _ := io.ReadAll(io.LimitReader(res.Body, 512<<20))
@@ -1024,12 +1024,12 @@ func (s *server) ask(method string, params any) (json.RawMessage, int, error) {
 	s.mu.Unlock()
 	res, err := s.client.Do(r)
 	if err != nil {
-		return nil, 0, fmt.Errorf("magpie isn't answering at %s (is it running?): %w", s.gateway, err)
+		return nil, 0, fmt.Errorf("eipgam isn't answering at %s (is it running?): %w", s.gateway, err)
 	}
 	defer res.Body.Close()
 	data, _ := io.ReadAll(io.LimitReader(res.Body, 4<<20))
 	if res.StatusCode != http.StatusOK {
-		return nil, 0, fmt.Errorf("magpie at %s answered %d: %s", s.gateway, res.StatusCode, gatewaySaid(data))
+		return nil, 0, fmt.Errorf("eipgam at %s answered %d: %s", s.gateway, res.StatusCode, gatewaySaid(data))
 	}
 	var m struct {
 		Result json.RawMessage `json:"result"`
@@ -1039,7 +1039,7 @@ func (s *server) ask(method string, params any) (json.RawMessage, int, error) {
 		} `json:"error"`
 	}
 	if err := json.Unmarshal(data, &m); err != nil {
-		return nil, 0, fmt.Errorf("magpie at %s answered what isn't JSON-RPC: %w", s.gateway, err)
+		return nil, 0, fmt.Errorf("eipgam at %s answered what isn't JSON-RPC: %w", s.gateway, err)
 	}
 	if m.Error != nil {
 		return nil, m.Error.Code, errors.New(m.Error.Message)
@@ -1052,8 +1052,8 @@ func (s *server) ask(method string, params any) (json.RawMessage, int, error) {
 // asked.
 func (s *server) modelProps() map[string]any {
 	out := map[string]any{
-		tool:      map[string]any{"type": "string", "description": "The image model to use, as provider/model. Leave it out to use the one set in Magpie (Settings → Models → Images → Image generation)."},
-		videoTool: map[string]any{"type": "string", "description": "The video model to use, as provider/model. Leave it out to use the video model set up in Magpie."},
+		tool:      map[string]any{"type": "string", "description": "The image model to use, as provider/model. Leave it out to use the one set in eipgam (Settings → Models → Images → Image generation)."},
+		videoTool: map[string]any{"type": "string", "description": "The video model to use, as provider/model. Leave it out to use the video model set up in eipgam."},
 	}
 	res, _, err := s.ask("tools/list", map[string]any{})
 	if err != nil {
@@ -1093,7 +1093,7 @@ func withModel(sc map[string]any, prop any) map[string]any {
 func (s *server) mediaModel(name, asked string) (string, error) {
 	res, code, err := s.ask(gateway.MediaModelMethod, map[string]any{"tool": name, "model": asked})
 	if code == -32601 {
-		// a magpie older than this one: it takes the model as named
+		// a eipgam older than this one: it takes the model as named
 		return strings.TrimSpace(asked), nil
 	}
 	if err != nil {
@@ -1103,7 +1103,7 @@ func (s *server) mediaModel(name, asked string) (string, error) {
 		Model string `json:"model"`
 	}
 	if json.Unmarshal(res, &m) != nil || m.Model == "" {
-		return "", fmt.Errorf("magpie at %s didn't say which model %q is", s.gateway, asked)
+		return "", fmt.Errorf("eipgam at %s didn't say which model %q is", s.gateway, asked)
 	}
 	return m.Model, nil
 }

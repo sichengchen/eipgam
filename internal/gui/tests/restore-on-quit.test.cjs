@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// tudjam17795 on X: after magpie quits, the harness it was connected to
+// tudjam17795 on X: after eipgam quits, the harness it was connected to
 // can't go on. Settings › General › Put agents back when quitting is Off by
 // default, On saves restoreOnQuit with the rest of the settings kept, and
 // Off saves it false. The app's only: a browser's page has no quit to
@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const saved = [];
       await page.route("**/*", serve(lang, saved, own, web));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=general");
+      await page.goto("http://eipgam.test/?view=settings&tab=general");
       await settingsDrawn(page);
       return { page, saved };
     };

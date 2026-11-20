@@ -21,7 +21,7 @@ func bunBiliSandbox(t *testing.T, bun string) (home, name string) {
 	return home, name
 }
 
-// Zerenjie on X: on Windows magpie 0.1.3693 didn't find billion-context
+// Zerenjie on X: on Windows eipgam 0.1.3693 didn't find billion-context
 // installed with bun. `bun add -g` puts bili.exe (a shim, bili.bunx beside
 // it) in the bin of BUN_INSTALL, and biliPath looked for bili.cmd on PATH
 // and in npm's folder only. bun's folder, and an exe, count too.

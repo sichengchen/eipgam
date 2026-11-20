@@ -9,14 +9,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // fremontdango on Discord: a group of one model from two of a remote
-// magpie's providers, made on the magpie that uses the remote, kept its
+// eipgam's providers, made on the eipgam that uses the remote, kept its
 // conversations as if the two were one vendor, since both are the one
-// remote magpie key here. The same group made on the remote itself
-// doesn't. remoteVendors is the remote: a magpie serving m from two
+// remote eipgam key here. The same group made on the remote itself
+// doesn't. remoteVendors is the remote: a eipgam serving m from two
 // providers, "first/m" and "second/m", each answering "from <provider>",
 // first out of its usage (429) while breaking is set.
 type remoteVendors struct {

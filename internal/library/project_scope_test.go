@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
 // claudeRecord is Claude Code's record of the project at root in h's
@@ -126,7 +126,7 @@ func TestProjectSetThroughRouter(t *testing.T) {
 
 	key := projectKey(proj)
 	rec := claudeRecord(t, h, proj)
-	hub, _ := rec["mcpServers"].(map[string]any)["magpie"].(map[string]any)
+	hub, _ := rec["mcpServers"].(map[string]any)["eipgam"].(map[string]any)
 	if u, _ := hub["url"].(string); !strings.HasSuffix(u, gateway.HubMCPPath+"claude"+gateway.HubProjectSep+key) {
 		t.Fatalf("claude's project hub entry: %v", rec["mcpServers"])
 	}
@@ -134,7 +134,7 @@ func TestProjectSetThroughRouter(t *testing.T) {
 		t.Errorf("the router's server was written into .mcp.json:\n%s", read(t, filepath.Join(proj, ".mcp.json")))
 	}
 	c := read(t, filepath.Join(proj, ".codex", "config.toml"))
-	if !strings.Contains(c, "[mcp_servers.magpie]") || !strings.Contains(c, "codex"+gateway.HubProjectSep+key) || strings.Contains(c, "erp-mcp") {
+	if !strings.Contains(c, "[mcp_servers.eipgam]") || !strings.Contains(c, "codex"+gateway.HubProjectSep+key) || strings.Contains(c, "erp-mcp") {
 		t.Errorf("codex project config:\n%s", c)
 	}
 	if g := excluded(t, proj); !strings.Contains(g, "/.codex/config.toml\n") {
@@ -171,7 +171,7 @@ func TestProjectSetThroughRouter(t *testing.T) {
 	ok(t)(ProjectServer(proj, "erp", nil))
 	ok(t)(ProjectServerOff(proj, "docs", nil))
 	ok(t)(ProjectServerOff(proj, "fs", nil))
-	if rec := claudeRecord(t, h, proj); rec != nil && rec["mcpServers"].(map[string]any)["magpie"] != nil {
+	if rec := claudeRecord(t, h, proj); rec != nil && rec["mcpServers"].(map[string]any)["eipgam"] != nil {
 		t.Errorf("claude's project hub entry stayed: %v", rec)
 	}
 	gone(t, filepath.Join(proj, ".codex"))
@@ -201,7 +201,7 @@ func TestProjectSkillOff(t *testing.T) {
 		t.Errorf("skillOverrides after: %v", got)
 	}
 
-	// a file magpie made, with nothing else in it, goes
+	// a file eipgam made, with nothing else in it, goes
 	os.Remove(f)
 	ok(t)(ProjectSkillsOff(proj, []string{"pdf"}, []string{"claude"}))
 	ok(t)(ProjectSkillsOff(proj, []string{"pdf"}, nil))
@@ -251,7 +251,7 @@ func TestProjectWorktreeFollows(t *testing.T) {
 	ok(t)(ProjectSkill(proj, "pdf", nil))
 	gone(t, filepath.Join(wt, ".claude", "skills", "pdf"))
 
-	// git worktree remove: magpie lets it go
+	// git worktree remove: eipgam lets it go
 	os.RemoveAll(wt)
 	os.RemoveAll(own)
 	if l, _ = load(); !l.treesChanged() {

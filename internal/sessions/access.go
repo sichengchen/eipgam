@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Which agents' session files magpie may read (RustCats on X: a new
+// Which agents' session files eipgam may read (RustCats on X: a new
 // install showed every agent's history before anyone agreed to it). Reads
 // is the one gate: every lister asks it before it lists an agent's
 // folder, the listings are filtered by it again, and so are the readers
@@ -21,8 +21,8 @@ import (
 // Sessions page's consent, or Settings, allows an agent; an install that
 // already read sessions keeps reading them all.
 
-// ErrNotRead: the session's agent is one magpie may not read.
-var ErrNotRead = errors.New("magpie is not allowed to read this agent's sessions (Settings, Sessions)")
+// ErrNotRead: the session's agent is one eipgam may not read.
+var ErrNotRead = errors.New("eipgam is not allowed to read this agent's sessions (Settings, Sessions)")
 
 // settled is the decision SettleReads made this run, so a fresh install
 // that couldn't save it (settings.json unreadable) still reads nothing,
@@ -38,7 +38,7 @@ var settled struct {
 // tests of the gate turn it off.
 var readsAllInTests = testing.Testing()
 
-// Reads is whether magpie may read agent's own session files.
+// Reads is whether eipgam may read agent's own session files.
 func Reads(agent string) bool {
 	return currentReads().Reads(agent)
 }
@@ -46,7 +46,7 @@ func Reads(agent string) bool {
 // readsNone is the answer while OwnOff holds: no agent's files are read.
 var readsNone = &settings.SessionReads{Asked: true}
 
-// OwnOff, when set and true, is gateway mode on magpie web's page
+// OwnOff, when set and true, is gateway mode on eipgam web's page
 // (gui.gatewayMode; paultian on Discord): the page lists what came
 // through this gateway from other computers, never this computer's own
 // agents' session files, so no agent's files are read, whatever
@@ -190,7 +190,7 @@ func SetReads(all *bool, agents map[string]bool) error {
 	return nil
 }
 
-// allowed is fs without the files of agents magpie may not read.
+// allowed is fs without the files of agents eipgam may not read.
 func allowed(fs []file) []file {
 	r := currentReads()
 	// most polls read every agent: fs as it is then, not a copy of each

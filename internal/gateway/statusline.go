@@ -1,20 +1,20 @@
 package gateway
 
-// GET or POST /v1/magpie/statusline: the text `magpie statusline` prints
+// GET or POST /v1/eipgam/statusline: the text `eipgam statusline` prints
 // for Claude Code's status line, for a Claude Code on another computer
-// than the gateway (steven_4422 on Discord runs magpie in Docker and
+// than the gateway (steven_4422 on Discord runs eipgam in Docker and
 // Claude Code on the Linux host: the container can't write the host's
 // settings.json, and a command naming a binary inside it runs nowhere
 // else). The host needs only curl:
 //
-//	curl -fsS -m 1 -H 'Authorization: Bearer <key>' --data-binary @- http://<host>:3425/v1/magpie/statusline || true
+//	curl -fsS -m 1 -H 'Authorization: Bearer <key>' --data-binary @- http://<host>:3425/v1/eipgam/statusline || true
 //
 // Claude Code puts its JSON on the command's stdin, and curl sends it as
 // the body, whose session_id picks the "→ model" part (?session= does as
 // well, for a GET). ?only=claude,a@example.com keeps those accounts, as
-// `magpie statusline claude a@example.com` does. The line is made by
+// `eipgam statusline claude a@example.com` does. The line is made by
 // provider.StatuslineText, the CLI's own, from the same kept windows
-// (/v1/magpie/quotas?kept=1: no vendor asked) and the session's route.
+// (/v1/eipgam/quotas?kept=1: no vendor asked) and the session's route.
 //
 // It answers like the quotas and the route it is made of: this computer,
 // and another only with an enabled gateway key (lanGuard asks for it), a
@@ -28,7 +28,7 @@ package gateway
 // ?format=json answers the same as JSON, for a status line that draws its
 // own (claude-hud's external usage snapshot, steven_4422): "text" the line,
 // "model" the session's, and "accounts" the cards the line shows, each in
-// /v1/magpie/quotas?kept=1's shape (a window that has started again since
+// /v1/eipgam/quotas?kept=1's shape (a window that has started again since
 // it was read is used 0 there too).
 
 import (
@@ -38,16 +38,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // StatuslinePath is where the status line is told.
-const StatuslinePath = "/v1/magpie/statusline"
+const StatuslinePath = "/v1/eipgam/statusline"
 
 func (s *Server) statusline(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "magpie's status line is told to another machine only when magpie is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "eipgam's status line is told to another machine only when eipgam is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -71,7 +71,7 @@ func (s *Server) statusline(w http.ResponseWriter, r *http.Request) {
 	}
 	model := ""
 	who := access.Caller(r.Context())
-	// a read-only key is refused /v1/magpie/route (another key's routes), so
+	// a read-only key is refused /v1/eipgam/route (another key's routes), so
 	// it is told no model here either
 	if session != "" && !who.ReadOnly {
 		only := ""

@@ -12,17 +12,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/mtls"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// mtlsHome is a sandbox HOME with magpie shared, a gateway key, and mTLS
+// mtlsHome is a sandbox HOME with eipgam shared, a gateway key, and mTLS
 // on or off; it returns the key.
 func mtlsHome(t *testing.T, on bool) string {
 	t.Helper()
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3499")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3499")
 	t.Setenv(AllowIPsEnv, "")
 	t.Setenv(TLSCertEnv, "")
 	t.Setenv(TLSKeyEnv, "")
@@ -62,7 +62,7 @@ func issued(t *testing.T, st mtls.Store, name string) tls.Certificate {
 	return c
 }
 
-// mtlsClient trusts magpie's CA for the server and shows cert (none when
+// mtlsClient trusts eipgam's CA for the server and shows cert (none when
 // nil); keepAlive keeps one connection for every request.
 func mtlsClient(t *testing.T, cert *tls.Certificate, keepAlive bool) *http.Client {
 	t.Helper()
@@ -146,14 +146,14 @@ var mtlsRoutes = [][2]string{
 	{"POST", "/v1/chat/completions"},
 	{"POST", "/v1/messages"},
 	{"POST", "/v1/responses"},
-	{"GET", "/v1/magpie/quotas"},
+	{"GET", "/v1/eipgam/quotas"},
 	{"POST", "/backend-api/codex/responses"},
 	{"GET", "/api/state"},
 	{"GET", "/"},
 }
 
 // Another computer's connection (#5596, hhdaxia on X): with mTLS on, the
-// handshake ends without a client certificate magpie issued — none, one
+// handshake ends without a client certificate eipgam issued — none, one
 // another CA signed, one revoked, or plain HTTP — before any HTTP is
 // read; one with a good certificate and the gateway key is answered.
 func TestMTLSOtherComputerHandshake(t *testing.T) {
@@ -235,7 +235,7 @@ func TestMTLSGuardEveryRoute(t *testing.T) {
 // This computer is answered as before, over plain HTTP and without a
 // key; a request through a proxy or tunnel on loopback is another
 // machine's, and is refused without a certificate even with the key,
-// unless MAGPIE_TRUST_PROXY says the proxy checks its clients.
+// unless EIPGAM_TRUST_PROXY says the proxy checks its clients.
 func TestMTLSThisComputerAndProxies(t *testing.T) {
 	key := mtlsHome(t, true)
 	addr := serveMTLSGateway(t, false, "")
@@ -253,9 +253,9 @@ func TestMTLSThisComputerAndProxies(t *testing.T) {
 	}
 	code, body, err := mcall(t, plain, "GET", "http://"+addr+"/v1/models", key, PagePortHeader, "1")
 	if err != nil || code != http.StatusForbidden || !strings.Contains(body, "client certificate") {
-		t.Errorf("magpie web's page port with key: %d %q %v", code, body, err)
+		t.Errorf("eipgam web's page port with key: %d %q %v", code, body, err)
 	}
-	t.Setenv("MAGPIE_TRUST_PROXY", "1")
+	t.Setenv("EIPGAM_TRUST_PROXY", "1")
 	if code, body, err := mcall(t, plain, "GET", "http://"+addr+"/v1/models", "", "X-Forwarded-For", "203.0.113.5"); err != nil || code != 200 {
 		t.Errorf("a trusted proxy: %d %q %v", code, body, err)
 	}
@@ -321,7 +321,7 @@ func TestMTLSRevokeMidConnection(t *testing.T) {
 	}
 }
 
-// magpie web's page refuses another machine's request without a good
+// eipgam web's page refuses another machine's request without a good
 // certificate (ClientCertGuard), and serves this computer's.
 func TestClientCertGuardPage(t *testing.T) {
 	mtlsHome(t, true)

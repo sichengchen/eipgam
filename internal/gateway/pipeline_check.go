@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Pipelines magpie serves besides chat, each of which Settings › Models
+// Pipelines eipgam serves besides chat, each of which Settings › Models
 // can check with one real call (EV_John_Liu on X).
 const (
 	PipelineImage         = "image"
@@ -168,7 +168,7 @@ func (s *Server) CheckPipeline(ctx context.Context, kind string) PipelineCheck {
 func (s *Server) checkSearch(ctx context.Context, c *PipelineCheck) {
 	ctx = netproxy.With(context.WithValue(ctx, searchForKey{}, &CallFor{Agent: CheckAgent}), "")
 	ctx = withSearchCount(ctx, 1)
-	const query = "magpie"
+	const query = "eipgam"
 	if !searchServed() {
 		c.Unset, c.Error = true, errSearchOff.Error()
 		return

@@ -14,7 +14,7 @@ package agent
 //     (Telemetry.all). One that was off already, by its own row or the
 //     user's config, isn't: that is its own choice.
 //   - Off, each marked agent is turned back on, which takes out only what
-//     magpie wrote; the rest stay as their own rows had them.
+//     eipgam wrote; the rest stay as their own rows had them.
 //   - While it is on, an agent's own row is held (ErrTelemetryAllOff).
 //
 // A settings.json that can't be read is unknown: nothing is written.
@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // telemetryAllMu keeps the switch for every agent and an agent's own row
@@ -105,7 +105,7 @@ func SetTelemetryAll(off bool) error {
 		return errors.Join(errs...)
 	}
 	// every agent, found here or not: one taken away since keeps no key of
-	// magpie's behind
+	// eipgam's behind
 	for _, a := range All() {
 		t := a.Telemetry
 		if t == nil || stashShared()[t.all] == "" {
@@ -113,7 +113,7 @@ func SetTelemetryAll(off bool) error {
 		}
 		err := t.Set(false)
 		if err != nil {
-			// on as far as magpie goes: what keeps it off is the user's
+			// on as far as eipgam goes: what keeps it off is the user's
 			if st, gerr := t.Get(); gerr == nil && !hasOurs(st) {
 				err = nil
 			}
@@ -127,7 +127,7 @@ func SetTelemetryAll(off bool) error {
 	return errors.Join(errs...)
 }
 
-// hasOurs: a state off by keys of magpie's, where Own are the user's
+// hasOurs: a state off by keys of eipgam's, where Own are the user's
 func hasOurs(st TelemetryState) bool { return st.Off && len(st.Own) < len(st.Keys) }
 
 // KeepTelemetryAllOff turns off, while the switch for every agent is on,

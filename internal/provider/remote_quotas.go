@@ -13,61 +13,61 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
-// A remote magpie's quotas (莫 on Discord): a computer whose providers are
-// another's magpie (remote-magpie) has the accounts signed in there, not
-// here, so its Usage page, menu bar and magpie quota had nothing to show.
-// They now show the other magpie's cards as it last read them, each named
-// with that magpie ("Codex · office") and its provider id put after the
+// A remote eipgam's quotas (莫 on Discord): a computer whose providers are
+// another's eipgam (remote-eipgam) has the accounts signed in there, not
+// here, so its Usage page, menu bar and eipgam quota had nothing to show.
+// They now show the other eipgam's cards as it last read them, each named
+// with that eipgam ("Codex · office") and its provider id put after the
 // remote's ("office/codex"), so they never meet this computer's own.
 //
-// Only the magpie holding the sign-ins asks the vendors. It answers
+// Only the eipgam holding the sign-ins asks the vendors. It answers
 // RemoteCardsPath from what it has kept (CachedCards: its page's cards and
 // what was read behind the requests since, cards_kept.go) and asks nobody;
 // a card's refresh here asks it to read that card again
 // (RemoteRefreshPath), which is the one time a vendor is asked for us.
 
 // RemoteCardsPath is the gateway's answer of its kept cards.
-const RemoteCardsPath = "/v1/magpie/quotas/cards"
+const RemoteCardsPath = "/v1/eipgam/quotas/cards"
 
 // RemoteRefreshPath has the gateway read a card (?provider=, &user=)
 // again, or every card when no provider is named, then answer as
 // RemoteCardsPath.
-const RemoteRefreshPath = "/v1/magpie/quotas/refresh"
+const RemoteRefreshPath = "/v1/eipgam/quotas/refresh"
 
 // RemoteCodexResetPath has the gateway spend one of its Codex account's
 // rate-limit resets (?user=, the account always named; &credit=, one of
 // its resets.each, else the one that runs out first), as its Usage page's
-// "Use a reset" does (#3850, prgrmrwy): a reset shown on another magpie's
+// "Use a reset" does (#3850, prgrmrwy): a reset shown on another eipgam's
 // card, or in an app reading the cards, can be used from there too. It
 // can't be undone, so the gateway takes it only with a gateway key of full
 // access, never from a page or app it lets in without one.
-const RemoteCodexResetPath = "/v1/magpie/quotas/codex-reset"
+const RemoteCodexResetPath = "/v1/eipgam/quotas/codex-reset"
 
-// RemoteResetWait is how long a remote magpie is waited for to spend a
+// RemoteResetWait is how long a remote eipgam is waited for to spend a
 // reset: its use (20s at most) and its wait for routing to know (10s).
 const RemoteResetWait = 35 * time.Second
 
-// remoteCardsFor is how long another magpie's cards are kept here before
+// remoteCardsFor is how long another eipgam's cards are kept here before
 // they are asked for again: reading its cache costs it nothing from the
 // vendors, but the menu bar and alerts ask often.
 const remoteCardsFor = 30 * time.Second
 
-// errRemoteNothingRead is a remote magpie that has read no card since it
+// errRemoteNothingRead is a remote eipgam that has read no card since it
 // started: it is asked to only when a card is refreshed here.
-const errRemoteNothingRead = "nothing read on that magpie yet; refresh to have it read"
+const errRemoteNothingRead = "nothing read on that eipgam yet; refresh to have it read"
 
-// errRemoteNoShare is a remote magpie too old to answer RemoteCardsPath.
-const errRemoteNoShare = "remote magpie doesn't share its quotas; update magpie on that computer"
+// errRemoteNoShare is a remote eipgam too old to answer RemoteCardsPath.
+const errRemoteNoShare = "remote eipgam doesn't share its quotas; update eipgam on that computer"
 
-// errRemoteNotShared is a remote magpie that answers models but not its
-// quotas (403): it isn't shared on its local network, as an older magpie's
-// gateway that MAGPIE_ADDR opened (Docker's) wasn't until it was (Fim980 on
+// errRemoteNotShared is a remote eipgam that answers models but not its
+// quotas (403): it isn't shared on its local network, as an older eipgam's
+// gateway that EIPGAM_ADDR opened (Docker's) wasn't until it was (Fim980 on
 // X: the card said only "Allowance unavailable"). A newer one asks a key of
 // every other machine and, given one, answers the quotas too.
-const errRemoteNotShared = "remote magpie isn't shared; turn on Share on local network on that computer"
+const errRemoteNotShared = "remote eipgam isn't shared; turn on Share on local network on that computer"
 
 // errRemoteHeld is the remote's own card while it holds this provider's
 // key to a budget, models or accounts (errKeyHeld): its accounts' cards
@@ -75,10 +75,10 @@ const errRemoteNotShared = "remote magpie isn't shared; turn on Share on local n
 // on, rather than leaving the remote's Claude or Codex out with no word
 // (yi_time on Discord: a Claude shared from another computer showed no
 // usage on any page here, its key held to Claude's models there).
-const errRemoteHeld = "remote magpie tells this key none of its quotas, as it holds the key to a budget, models or accounts; on that computer, turn on Quotas for the key under Gateway keys, and let it use every model of a provider whose usage it is to see"
+const errRemoteHeld = "remote eipgam tells this key none of its quotas, as it holds the key to a budget, models or accounts; on that computer, turn on Quotas for the key under Gateway keys, and let it use every model of a provider whose usage it is to see"
 
 // remoteRefused is the error of a 403 from p that isn't a key held or
-// read-only: "isn't shared" only when the magpie there says so (its
+// read-only: "isn't shared" only when the eipgam there says so (its
 // gateway's refusal names sharing on the local network). Any other 403 —
 // a client certificate the remote, or a proxy in front of it, asked for
 // and didn't get (hhdaxia on X: the Usage page said "isn't shared" while
@@ -99,47 +99,47 @@ func remoteRefused(p Provider, res *http.Response, b []byte) error {
 	}
 	if said == "" || strings.HasPrefix(said, "<") || len(said) > 600 {
 		// an HTML page, most likely a proxy's
-		return fmt.Errorf("%s refused magpie's request (%s), not as a magpie that isn't shared would; a proxy or a client certificate check in front of it may have", remoteName(p), res.Status)
+		return fmt.Errorf("%s refused eipgam's request (%s), not as a eipgam that isn't shared would; a proxy or a client certificate check in front of it may have", remoteName(p), res.Status)
 	}
-	return fmt.Errorf("%s refused magpie's request (%s): %s", remoteName(p), res.Status, said)
+	return fmt.Errorf("%s refused eipgam's request (%s): %s", remoteName(p), res.Status, said)
 }
 
-// errRemoteKey is a remote magpie that didn't take this provider's key (401).
-const errRemoteKey = "remote magpie didn't take this key; use one of its enabled gateway keys"
+// errRemoteKey is a remote eipgam that didn't take this provider's key (401).
+const errRemoteKey = "remote eipgam didn't take this key; use one of its enabled gateway keys"
 
 // KeyReadOnlyCode is the error code a gateway answers a read-only key
 // with on a route that uses or changes anything.
 const KeyReadOnlyCode = "gateway_key_read_only"
 
-// errRemoteReadOnly is a remote magpie whose key here is read-only: it
+// errRemoteReadOnly is a remote eipgam whose key here is read-only: it
 // shows the cards, and spends nothing.
-const errRemoteReadOnly = "this key is read-only on the remote magpie; give the provider a key with full access to use a reset from here"
+const errRemoteReadOnly = "this key is read-only on the remote eipgam; give the provider a key with full access to use a reset from here"
 
 // KeyHeldCode is the error code a gateway answers a key held to a budget,
 // models or accounts with, where its own accounts would be told (#1981):
 // the key is someone else's to use, and is told its own limit alone.
 const KeyHeldCode = "gateway_key_held"
 
-// errKeyHeld is a remote magpie that holds this provider's key to a
+// errKeyHeld is a remote eipgam that holds this provider's key to a
 // budget, models or accounts: it tells the key's own card (remoteKeyCards)
 // and none of its accounts', so none is shown, not even one kept from
 // before the key was held; the remote's own card says why (errRemoteHeld).
-var errKeyHeld = errors.New("remote magpie holds this key to a budget, models or accounts")
+var errKeyHeld = errors.New("remote eipgam holds this key to a budget, models or accounts")
 
-// errRemoteUnreachable starts the error of a remote magpie that couldn't
+// errRemoteUnreachable starts the error of a remote eipgam that couldn't
 // be reached at all.
-const errRemoteUnreachable = "couldn't reach the remote magpie"
+const errRemoteUnreachable = "couldn't reach the remote eipgam"
 
-// CachedCards is the Usage page's cards as this magpie last read them,
-// each with its kind, for another magpie to show: no vendor is asked,
-// whatever their age. The cards a Remote magpie gave this one, as last
-// read from it (passedOnCards), are passed on too, so a magpie that
+// CachedCards is the Usage page's cards as this eipgam last read them,
+// each with its kind, for another eipgam to show: no vendor is asked,
+// whatever their age. The cards a Remote eipgam gave this one, as last
+// read from it (passedOnCards), are passed on too, so a eipgam that
 // uses this one sees the accounts behind it as well (yuyong_id on
-// Discord: a third magpie in a chain had none of the first's Codex
-// cards). Each card carries the way it came by, this magpie last (Via).
+// Discord: a third eipgam in a chain had none of the first's Codex
+// cards). Each card carries the way it came by, this eipgam last (Via).
 //
 // The cards are the page's with what was read of the same accounts and
-// keys behind it since (cards_kept.go): a magpie serving only other
+// keys behind it since (cards_kept.go): a eipgam serving only other
 // magpies has nobody on its page (#1313).
 func CachedCards(now time.Time) []SubscriptionQuota {
 	c := &subscriptionUsageCache
@@ -184,13 +184,13 @@ func CachedCards(now time.Time) []SubscriptionQuota {
 	return oneCardPerAccount(append(out, passedOnCards()...))
 }
 
-// passedOnCards are the cards of each Remote magpie this one uses, as
+// passedOnCards are the cards of each Remote eipgam this one uses, as
 // last read from it (remoteCards, at most 30 seconds old while anything
 // here shows them): no remote is asked, so a chain of magpies, or two
 // that are each the other's Remote, never asks along itself. A remote
-// read nothing from, or holding this magpie's key (errKeyHeld), passes
+// read nothing from, or holding this eipgam's key (errKeyHeld), passes
 // on nothing; the card standing for the remote itself and its keys'
-// limits (remoteKeyCards) are this magpie's own business with it.
+// limits (remoteKeyCards) are this eipgam's own business with it.
 func passedOnCards() []SubscriptionQuota {
 	var out []SubscriptionQuota
 	for _, p := range remoteMagpies() {
@@ -210,7 +210,7 @@ func passedOnCards() []SubscriptionQuota {
 }
 
 // ReadAllCards has every card read again, the page's Refresh asked by
-// another magpie whose card of this one's said nothing was read yet, or
+// another eipgam whose card of this one's said nothing was read yet, or
 // by an app holding a gateway key (POST RemoteRefreshPath with no card
 // named). It is the user's refresh of every allowance, as the Usage
 // page's Refresh is (AskEveryClaudeUsage): each saved Claude account's
@@ -270,7 +270,7 @@ func ForgetKeptCardsForTest() {
 	c.Unlock()
 }
 
-// remoteMagpies are the remote magpies this magpie uses.
+// remoteMagpies are the remote magpies this eipgam uses.
 func remoteMagpies() []Provider {
 	var out []Provider
 	for _, p := range All() {
@@ -281,7 +281,7 @@ func remoteMagpies() []Provider {
 	return out
 }
 
-// RemoteCards is every remote magpie's cards, named for this computer.
+// RemoteCards is every remote eipgam's cards, named for this computer.
 func RemoteCards(ctx context.Context) []SubscriptionQuota {
 	ps := remoteMagpies()
 	got := make([][]SubscriptionQuota, len(ps))
@@ -324,17 +324,17 @@ func remoteCards(ctx context.Context, p Provider, fresh bool) []SubscriptionQuot
 		} else if msg == "" {
 			msg = errRemoteNothingRead
 		}
-		return []SubscriptionQuota{{Provider: p.ID, Name: name, Icon: "magpie", Kind: "subscription", From: name, Windows: []QuotaWindow{}, Error: msg}}
+		return []SubscriptionQuota{{Provider: p.ID, Name: name, Icon: "eipgam", Kind: "subscription", From: name, Windows: []QuotaWindow{}, Error: msg}}
 	}
 	return namedRemoteCards(p, r.cards)
 }
 
-// namedRemoteCards is cards, as the remote magpie p told them, named for
-// this computer. A card p has from a magpie behind it (its own Remote
-// magpie, yuyong_id on Discord: magpie3 → magpie2 → magpie1, and
+// namedRemoteCards is cards, as the remote eipgam p told them, named for
+// this computer. A card p has from a eipgam behind it (its own Remote
+// eipgam, yuyong_id on Discord: magpie3 → magpie2 → magpie1, and
 // magpie3 had magpie1's Codex card from nobody) comes with the way it
 // came by (Via) and is named after it ("Codex · magpie1 · magpie2",
-// "magpie2/magpie1/codex"); one whose way leaves this magpie and comes
+// "magpie2/magpie1/codex"); one whose way leaves this eipgam and comes
 // back to it (two magpies each the other's Remote) is left out, as a
 // model listed that way is (catalog.Loops).
 func namedRemoteCards(p Provider, cards []SubscriptionQuota) []SubscriptionQuota {
@@ -370,7 +370,7 @@ func remoteName(p Provider) string {
 	return p.ID
 }
 
-// remoteOf is the remote magpie a card's provider id names, and the id of
+// remoteOf is the remote eipgam a card's provider id names, and the id of
 // the card there ("" for the card that stands for the remote itself).
 func remoteOf(id string) (Provider, string, bool) {
 	rid, card, _ := strings.Cut(id, "/")
@@ -382,14 +382,14 @@ func remoteOf(id string) (Provider, string, bool) {
 	return Provider{}, "", false
 }
 
-// IsRemoteCard is whether id is a card this magpie has from a remote
-// magpie, or the card standing for the remote itself.
+// IsRemoteCard is whether id is a card this eipgam has from a remote
+// eipgam, or the card standing for the remote itself.
 func IsRemoteCard(id string) bool {
 	_, _, ok := remoteOf(id)
 	return ok
 }
 
-// refreshRemote has the remote magpie read its card again (every card,
+// refreshRemote has the remote eipgam read its card again (every card,
 // for the remote's own), then keeps what it now has.
 func refreshRemote(ctx context.Context, p Provider, card, user string) {
 	// a key's limit card is read again with that key (or every key's)
@@ -453,8 +453,8 @@ func keepRemoteCardsOf(id string, gen int, asked time.Time, cards []Subscription
 	return r
 }
 
-// RemoteQuotaHistories is every remote magpie's quota history since days
-// ago, as its own GET /v1/magpie/quotas/history has it (read from its
+// RemoteQuotaHistories is every remote eipgam's quota history since days
+// ago, as its own GET /v1/eipgam/quotas/history has it (read from its
 // disk, no vendor asked), the providers named as RemoteCards names them.
 func RemoteQuotaHistories(ctx context.Context, days string) []QuotaHistory {
 	ps := remoteMagpies()
@@ -465,7 +465,7 @@ func RemoteQuotaHistories(ctx context.Context, days string) []QuotaHistory {
 		go func() {
 			defer wg.Done()
 			var hs []QuotaHistory
-			if err := remoteJSON(ctx, p, http.MethodGet, "/v1/magpie/quotas/history?days="+url.QueryEscape(days), remoteWait, &hs); err != nil {
+			if err := remoteJSON(ctx, p, http.MethodGet, "/v1/eipgam/quotas/history?days="+url.QueryEscape(days), remoteWait, &hs); err != nil {
 				return
 			}
 			for j := range hs {
@@ -478,7 +478,7 @@ func RemoteQuotaHistories(ctx context.Context, days string) []QuotaHistory {
 	return slices.Concat(got...)
 }
 
-// remoteWait is how long a remote magpie is waited for to answer what it
+// remoteWait is how long a remote eipgam is waited for to answer what it
 // keeps; remoteRefreshWait, to read a card or every card again first,
 // which asks the vendors there: one saved Claude account's /usage alone
 // takes about 5 seconds, and a refresh of the remote's every card runs
@@ -498,7 +498,7 @@ func askRemote(ctx context.Context, p Provider, method, path string, wait time.D
 	return cards, nil
 }
 
-// signRemote puts on req, a request of magpie's own to the remote magpie
+// signRemote puts on req, a request of eipgam's own to the remote eipgam
 // p (its cards, a refresh, its quota history, a key's limit), key and p's
 // Headers, as its model list and its API requests carry them (Yirasumi on
 // Discord: the Usage page's read of the remote went without the headers a
@@ -515,7 +515,7 @@ func (p Provider) signRemote(req *http.Request, key string) {
 }
 
 // remoteKey writes key as x-api-key, in place of the header in any case:
-// to a remote magpie that header is magpie's key, which a gateway reads
+// to a remote eipgam that header is eipgam's key, which a gateway reads
 // beside Authorization, so a user's header (a proxy's Authorization) never
 // leaves the request without it, and a key's limit is read with that key.
 func remoteKey(h http.Header, key string) {
@@ -603,11 +603,11 @@ func remoteBodyAs(ctx context.Context, p Provider, method, path string, wait tim
 	return b, nil
 }
 
-// errRemoteResetUnknown is a reset asked of a remote magpie that didn't
+// errRemoteResetUnknown is a reset asked of a remote eipgam that didn't
 // answer in time: it may have been spent there, so it isn't asked again.
 const errRemoteResetUnknown = "%s didn't say in time whether the reset was used; it may have been. Refresh the card to see before asking again"
 
-// UseRemoteCodexReset has the remote magpie whose card id is (its Codex
+// UseRemoteCodexReset has the remote eipgam whose card id is (its Codex
 // card, "office/codex") spend one of user's resets there, as its own
 // Usage page would (#3850, prgrmrwy: the card here said "1 reset", and
 // using it took a walk to the other computer). credit is one of the
@@ -618,7 +618,7 @@ const errRemoteResetUnknown = "%s didn't say in time whether the reset was used;
 func UseRemoteCodexReset(ctx context.Context, id, user, credit string) (ResetOutcome, error) {
 	p, card, ok := remoteOf(id)
 	if !ok || card != "codex" {
-		return ResetOutcome{}, fmt.Errorf("%s is no remote magpie's Codex card", id)
+		return ResetOutcome{}, fmt.Errorf("%s is no remote eipgam's Codex card", id)
 	}
 	if user == "" {
 		return ResetOutcome{}, errors.New("name the Codex account whose reset is used")

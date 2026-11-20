@@ -22,20 +22,20 @@ import (
 )
 
 // The fake stdio server is this test binary, started again with
-// MAGPIE_FAKE_MCP saying how it behaves.
-const fakeMode = "MAGPIE_FAKE_MCP"
+// EIPGAM_FAKE_MCP saying how it behaves.
+const fakeMode = "EIPGAM_FAKE_MCP"
 
 func TestFakeMCPServer(t *testing.T) {
 	mode := os.Getenv(fakeMode)
 	if mode == "" {
 		t.Skip("run by the checker's tests")
 	}
-	if f := os.Getenv("MAGPIE_FAKE_MCP_LOG"); f != "" {
+	if f := os.Getenv("EIPGAM_FAKE_MCP_LOG"); f != "" {
 		l, _ := os.OpenFile(f, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 		fmt.Fprintf(l, "%d\n", os.Getpid())
 		l.Close()
 	}
-	if f := os.Getenv("MAGPIE_FAKE_MCP_CWD"); f != "" {
+	if f := os.Getenv("EIPGAM_FAKE_MCP_CWD"); f != "" {
 		wd, _ := os.Getwd()
 		os.WriteFile(f, []byte(wd+"\n"+os.Getenv("PWD")), 0o644)
 	}
@@ -79,9 +79,9 @@ func TestFakeMCPServer(t *testing.T) {
 		os.Exit(0)
 	}
 	// a server that needs its token, as GitHub's does: it exits when the
-	// token isn't the one MAGPIE_FAKE_MCP_WANT names
-	if want, ok := os.LookupEnv("MAGPIE_FAKE_MCP_WANT"); ok && os.Getenv("MAGPIE_FAKE_MCP_TOKEN") != want {
-		fmt.Fprintf(os.Stderr, "Error: bad token %q\n", os.Getenv("MAGPIE_FAKE_MCP_TOKEN"))
+	// token isn't the one EIPGAM_FAKE_MCP_WANT names
+	if want, ok := os.LookupEnv("EIPGAM_FAKE_MCP_WANT"); ok && os.Getenv("EIPGAM_FAKE_MCP_TOKEN") != want {
+		fmt.Fprintf(os.Stderr, "Error: bad token %q\n", os.Getenv("EIPGAM_FAKE_MCP_TOKEN"))
 		os.Exit(4)
 	}
 	// ok: a log line on stdout first, as some servers write
@@ -119,10 +119,10 @@ func TestFakeMCPServer(t *testing.T) {
 		case "initialize":
 			fmt.Printf(`{"jsonrpc":"2.0","id":%d,"result":{"protocolVersion":"2025-06-18","capabilities":{"tools":{}},"serverInfo":{"name":"fake","version":"1"}}}`+"\n", *m.ID)
 		case "notifications/initialized":
-			os.WriteFile(os.Getenv("MAGPIE_FAKE_MCP_INIT"), []byte("yes"), 0o644)
+			os.WriteFile(os.Getenv("EIPGAM_FAKE_MCP_INIT"), []byte("yes"), 0o644)
 		case "tools/list":
 			// file: the reply a real server gave, under this request's id
-			if f := os.Getenv("MAGPIE_FAKE_MCP_TOOLS"); f != "" {
+			if f := os.Getenv("EIPGAM_FAKE_MCP_TOOLS"); f != "" {
 				var r map[string]any
 				b, _ := os.ReadFile(f)
 				json.Unmarshal(b, &r)
@@ -160,7 +160,7 @@ func short(t *testing.T, d time.Duration) {
 func TestCheckStdio(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		initFile := filepath.Join(t.TempDir(), "init")
-		h := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"MAGPIE_FAKE_MCP_INIT": initFile}))
+		h := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"EIPGAM_FAKE_MCP_INIT": initFile}))
 		if h.State != "ok" || h.Tools != 3 {
 			t.Fatalf("got %+v, want ok with 3 tools", h)
 		}
@@ -175,8 +175,8 @@ func TestCheckStdio(t *testing.T) {
 		}
 	})
 	t.Run("not found", func(t *testing.T) {
-		h := CheckServer(context.Background(), &Server{Name: "x", Transport: "stdio", Command: "magpie-no-such-mcp-server"})
-		if h.State != "error" || h.Why != "notfound" || h.Detail != "magpie-no-such-mcp-server" {
+		h := CheckServer(context.Background(), &Server{Name: "x", Transport: "stdio", Command: "eipgam-no-such-mcp-server"})
+		if h.State != "error" || h.Why != "notfound" || h.Detail != "eipgam-no-such-mcp-server" {
 			t.Fatalf("got %+v, want notfound", h)
 		}
 	})
@@ -196,7 +196,7 @@ func TestCheckStdio(t *testing.T) {
 		work := t.TempDir()
 		h := ownHome(t, work)
 		cwdFile := filepath.Join(t.TempDir(), "cwd")
-		got := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"MAGPIE_FAKE_MCP_CWD": cwdFile}))
+		got := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"EIPGAM_FAKE_MCP_CWD": cwdFile}))
 		if got.State != "ok" {
 			t.Fatalf("got %+v, want ok", got)
 		}
@@ -236,7 +236,7 @@ func TestCheckStdio(t *testing.T) {
 		short(t, 1500*time.Millisecond)
 		pids := filepath.Join(t.TempDir(), "pids")
 		start := time.Now()
-		h := CheckServer(context.Background(), fakeStdio(t, "hang", map[string]string{"MAGPIE_FAKE_MCP_LOG": pids}))
+		h := CheckServer(context.Background(), fakeStdio(t, "hang", map[string]string{"EIPGAM_FAKE_MCP_LOG": pids}))
 		if h.State != "error" || h.Why != "timeout" {
 			t.Fatalf("got %+v, want timeout", h)
 		}
@@ -444,12 +444,12 @@ func TestCheckServersOnce(t *testing.T) {
 	checked.m = map[string]checkedServer{}
 	checked.Unlock()
 	pids := filepath.Join(t.TempDir(), "pids")
-	s := fakeStdio(t, "ok", map[string]string{"MAGPIE_FAKE_MCP_LOG": pids})
+	s := fakeStdio(t, "ok", map[string]string{"EIPGAM_FAKE_MCP_LOG": pids})
 	s.Agents = []string{}
 	if _, err := SaveServer("", *s); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := SaveServer("", Server{Name: "gone", Transport: "stdio", Command: "magpie-no-such-mcp-server", Agents: []string{}}); err != nil {
+	if _, err := SaveServer("", Server{Name: "gone", Transport: "stdio", Command: "eipgam-no-such-mcp-server", Agents: []string{}}); err != nil {
 		t.Fatal(err)
 	}
 	starts := func() int {
@@ -506,7 +506,7 @@ func snapshot(t *testing.T, dir string) string {
 func TestCheckServerThatRefusesHome(t *testing.T) {
 	hubSandbox(t)
 	cwdFile := filepath.Join(t.TempDir(), "cwd")
-	fake := fakeStdio(t, "nohome", map[string]string{"MAGPIE_FAKE_MCP_CWD": cwdFile})
+	fake := fakeStdio(t, "nohome", map[string]string{"EIPGAM_FAKE_MCP_CWD": cwdFile})
 	fake.Agents = []string{"claude"}
 	ok(t)(SaveServer("", *fake))
 	got := CheckServer(context.Background(), fake)
@@ -516,7 +516,7 @@ func TestCheckServerThatRefusesHome(t *testing.T) {
 	// an empty folder of its own, gone with the check
 	b, _ := os.ReadFile(cwdFile)
 	wd, _, _ := strings.Cut(string(b), "\n")
-	if !strings.Contains(filepath.Base(wd), "magpie-mcp-project-") {
+	if !strings.Contains(filepath.Base(wd), "eipgam-mcp-project-") {
 		t.Fatalf("it listed its tools in %q, want a project folder of the check's own", wd)
 	}
 	if _, err := os.Stat(wd); !os.IsNotExist(err) {
@@ -533,7 +533,7 @@ func TestCheckServerThatRefusesHome(t *testing.T) {
 	if got = CheckServer(context.Background(), fake); got.State != "ok" || !got.Project {
 		t.Fatalf("kept direct: got %+v, want ok in a project", got)
 	}
-	// Codex on magpie is given it as RunPath, which magpie runs in home too
+	// Codex on eipgam is given it as RunPath, which eipgam runs in home too
 	ok(t)(SetMCPHub(false))
 	ok(t)(ServerHub(fake.Name, false))
 	fake.Hub = ""
@@ -544,7 +544,7 @@ func TestCheckServerThatRefusesHome(t *testing.T) {
 	runs.Unlock()
 	t.Cleanup(func() { runs.Lock(); runs.wired = was; runs.Unlock() })
 	if got = CheckServer(context.Background(), fake); got.Why != "home" {
-		t.Fatalf("given to Codex on magpie: got %+v, want error home", got)
+		t.Fatalf("given to Codex on eipgam: got %+v, want error home", got)
 	}
 	// a server that exits wherever it starts is told as before
 	bad := fakeStdio(t, "exit", nil)

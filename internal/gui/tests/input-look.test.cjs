@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Every text field is magpie's own, never the system's (the owner, 11-12:
+// Every text field is eipgam's own, never the system's (the owner, 11-12:
 // Settings › Network's saved-proxy form showed four bare white boxes, "根本
 // 就不是我们整个产品的输入框组件"). A field the CSS names nowhere still
 // gets the product's look from app.css's base rule, so a new form can't
@@ -106,7 +106,7 @@ const unfold = (page, sel) => page.evaluate((sel) => { for (const d of document.
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(words)) {
     for (const width of [1100, 420]) {
-      test(`${engine} ${lang} ${width}px: every text field in Settings and the editors is magpie's own`, async (t) => {
+      test(`${engine} ${lang} ${width}px: every text field in Settings and the editors is eipgam's own`, async (t) => {
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium" }));
         t.after(() => browser.close());
         const found = [], errors = [];
@@ -119,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.route("**/*", serve(lang, theme));
           await watchSettingsReads(page);
           for (const tab of ["general", "usage", "network", "models", "privacy", "otel", "sync", "plugins", "about"]) {
-            await page.goto(`http://magpie.test/?view=settings&tab=${tab}`);
+            await page.goto(`http://eipgam.test/?view=settings&tab=${tab}`);
             await page.locator(`#setTab-${tab}`).waitFor({ state: "attached" });
             await settingsDrawn(page);
             if (tab === "network") {
@@ -132,14 +132,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             found.push(...await bare(page, `${theme} settings/${tab}`, dark));
           }
           for (const id of ["relay", "codex"]) {
-            await page.goto(`http://magpie.test/?view=providers&edit=${id}`);
+            await page.goto(`http://eipgam.test/?view=providers&edit=${id}`);
             await page.locator(".editor details.advanced").waitFor({ state: "attached" });
             await unfold(page, ".editor details");
             await customs(page, ".editor");
             await unfold(page, ".editor details");
             found.push(...await bare(page, `${theme} provider ${id}`, dark));
           }
-          await page.goto("http://magpie.test/?view=groups");
+          await page.goto("http://eipgam.test/?view=groups");
           const card = page.locator(".rt-group", { hasText: "Work" });
           await card.waitFor();
           await card.locator("button", { hasText: words[lang].edit }).first().evaluate((b) => b.click());

@@ -20,7 +20,7 @@ const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/eipgam",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -44,7 +44,7 @@ function serve(lang, posts) {
       if (action === "follow-server") {
         const on = request.postDataJSON().on;
         sync = { ...sync, followServer: on || undefined,
-          notice: on ? { at: new Date().toISOString(), here: ["providers"], followed: true, saved: "/tmp/magpie/sync" } : undefined };
+          notice: on ? { at: new Date().toISOString(), here: ["providers"], followed: true, saved: "/tmp/eipgam/sync" } : undefined };
       }
       return json(sync);
     }
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
 
-        await page.goto("http://magpie.test/");
+        await page.goto("http://eipgam.test/");
         await page.locator("#prefs").click();
         await openPart(page, "sync");
         const list = page.locator("#syncList");

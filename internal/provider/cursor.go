@@ -27,11 +27,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // CursorExecutable finds the cursor-agent CLI; a var so tests can fake it.
@@ -186,7 +186,7 @@ func cursorContext(id, name string) int {
 }
 
 // withCursorContexts fills in a saved list's contexts, fetched before
-// magpie kept them.
+// eipgam kept them.
 func withCursorContexts(ms []catalog.Model) []catalog.Model {
 	out := slices.Clone(ms)
 	for i, m := range out {
@@ -232,7 +232,7 @@ var cursorTok struct {
 }
 
 // cursorTokenTTL is how long a token read from the Keychain is taken as
-// it: a sign-in or out in magpie reads it afresh (forgetCursorStatus), one
+// it: a sign-in or out in eipgam reads it afresh (forgetCursorStatus), one
 // made in cursor-agent is seen within it.
 const cursorTokenTTL = 10 * time.Second
 

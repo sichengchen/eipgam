@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 const workerAsk = `{"type":"message","role":"user","content":[{"type":"input_text","text":"go on"}]}`
@@ -58,7 +58,7 @@ func TestCodexResumedSubagentKeepsItsSpawnModel(t *testing.T) {
 			t.Fatalf("step %d (%s asking %s) went on %s, want %s", i, st.thread, st.model, got[len(got)-1], st.want)
 		}
 	}
-	// a magpie started afresh still knows worker-1
+	// a eipgam started afresh still knows worker-1
 	if rec := codexThreadAsks(New(), "gpt-5.5", "worker-1", "root-1"); rec.Code != 200 {
 		t.Fatalf("after a restart: %d %s", rec.Code, rec.Body.String())
 	}
@@ -104,7 +104,7 @@ func TestCodexSubagentThreadOf(t *testing.T) {
 
 // jockyer on X: a provider removed, Codex moved to another model, and a
 // subagent spawned on the removed provider's model was still put back on
-// it when resumed, a 404 each time. A spawn model magpie no longer serves
+// it when resumed, a 404 each time. A spawn model eipgam no longer serves
 // is not gone back to: the subagent goes on as asked, and stays there,
 // after a restart too.
 func TestCodexResumedSubagentLeavesARemovedProvider(t *testing.T) {

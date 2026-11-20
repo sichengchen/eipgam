@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // riskBlocked answers as an account whose vendor's risk control blocked it,
-// in magpie's words (provider.ZCodeRestrictedHint, as the ZCode plugin
+// in eipgam's words (provider.ZCodeRestrictedHint, as the ZCode plugin
 // puts its 3012).
 func riskBlocked(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")

@@ -1,21 +1,21 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Usage › Context's Tuned for you draws what /api/tune answers, and the
-// magpie answering can be of another version than the page (Linka on
-// Discord, a Docker magpie: "undefined is not an object (evaluating
+// eipgam answering can be of another version than the page (Linka on
+// Discord, a Docker eipgam: "undefined is not an object (evaluating
 // 'r.cost')"). A row put in with too few calls has no replay (few, no
 // compact or ttl), and a row this page doesn't know, a null or one with
 // no setting, is left out: the page draws the rest and throws nothing, in
 // Chromium and WebKit, in English and Chinese, at 900 and 420 wide.
-// MAGPIE_ASSETS runs it against another version's assets.
+// EIPGAM_ASSETS runs it against another version's assets.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.EIPGAM_ASSETS || path.resolve(__dirname, "../assets"));
 const facts = { calls: 4100, streams: 60, compacts: 0, peak: 166000, after: 57000, growth: 1000, rework: 4700, quick: 0.95, pause: 0.045, away: 0.005, hour: 0.9 };
-// as magpie sends them since v0.1.3120: put in, too few calls, no replay
+// as eipgam sends them since v0.1.3120: put in, too few calls, no replay
 const fewRows = { knob: "cache_ttl", setting: { value: "1h", source: "settings", ours: true }, few: true };
 const codex = { agent: "codex", calls: 900, advice: [
   { knob: "compact", setting: {}, compact: { current: 200000, best: 200000, cost: 2e8, low: 2e8, curve: [{ value: 100000, cost: 3e8 }, { value: 200000, cost: 2e8 }], facts } },
@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
         await ctx.addInitScript(() => {
-          try { localStorage.setItem("magpie.usageTab", "context"); } catch {}
+          try { localStorage.setItem("eipgam.usageTab", "context"); } catch {}
           // every line the status pill says, which an error leaves after 8s
           window.__said = [];
           new MutationObserver(() => { const s = document.querySelector("#status"); if (s?.textContent) window.__said.push(s.textContent); })
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, tune));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         await page.locator(".ctx-tunes").waitFor({ timeout: 10000 }).catch(() => {});
         assert.deepEqual(errors, []);
         // the load's failure is said in the status line, as the report shows it

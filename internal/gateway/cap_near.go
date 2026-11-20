@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // nearChecked, for tests, is told each try's near-cap check, right after

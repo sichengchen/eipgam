@@ -1,28 +1,28 @@
 package library
 
 // The MCP hub (#2679): with the Library's switch on (MCPHub), an agent
-// that can reach a streamable HTTP server is given one, magpie's own, at
+// that can reach a streamable HTTP server is given one, eipgam's own, at
 // gateway.HubMCPPath<agent>, in place of the library's servers ticked for
 // it; the gateway lists their tools as one server's and hands each call on
 // to the server it is of (gateway/hub_mcp.go). The servers are run here:
 //
 //   - a command is started once, for every agent, as the check starts it
-//     (startServer: in home, with PWD, magpie's environment with the
+//     (startServer: in home, with PWD, eipgam's environment with the
 //     login shell's PATH, the server's own variables with ${NAME}
 //     expanded), the first time a tool of it is listed or called; it is
 //     ended once no call has used it for hubIdle, and started again when
-//     next used, or when it ended by itself. Its stdin is magpie's: a
-//     magpie that dies without ending it closes it, which ends an MCP
-//     server, and on Windows its job ends with magpie.
-//   - a URL is reached as the check reaches it, with magpie's sign-in
+//     next used, or when it ended by itself. Its stdin is eipgam's: a
+//     eipgam that dies without ending it closes it, which ends an MCP
+//     server, and on Windows its job ends with eipgam.
+//   - a URL is reached as the check reaches it, with eipgam's sign-in
 //     (httpSession), or over its event stream (SSE).
 //
-// magpie's own image server saves into the calling agent's project, which
+// eipgam's own image server saves into the calling agent's project, which
 // a server started once for every agent can't ask its client for: the
 // gateway asks the agent for its roots on each call (gateway.HubCaller)
 // and the call carries them to it, in _meta (imageMeta). An agent in WSL
 // is given it directly still, run in the distro, whose paths it takes.
-// magpie's memory server (isMemory) is sent the same, for the project and
+// eipgam's memory server (isMemory) is sent the same, for the project and
 // the agent a memory is kept for. A
 // server the user keeps direct (Server.Hub, #4382) is each agent's own
 // too: a command that reads its project from the folder it starts in, or
@@ -48,21 +48,21 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
 )
 
 func init() { gateway.MCPHub = theHub{} }
 
 // HubEntry is the name of the one entry the hub is given to an agent by.
-const HubEntry = "magpie"
+const HubEntry = "eipgam"
 
 // hubIdle is how long a server the hub started is kept with no call.
 var hubIdle = 10 * time.Minute
 
 // SetMCPHub turns the hub on or off: on, each agent that can reach it is
-// given magpie's one entry in place of its servers; off, their own entries
+// given eipgam's one entry in place of its servers; off, their own entries
 // again, and the servers the hub started are ended.
 func SetMCPHub(on bool) (*Result, error) {
 	res, err := change(func(l *Library) error {
@@ -80,7 +80,7 @@ func SetMCPHub(on bool) (*Result, error) {
 const HubDirect = "direct"
 
 // inHub is whether the hub gives s to agent id: every server but one the
-// user keeps direct (Server.Hub), and magpie's own image server to an
+// user keeps direct (Server.Hub), and eipgam's own image server to an
 // agent in WSL, which is given it run in its distro (mcpFile.side) for the
 // paths it saves to be the agent's.
 func inHub(s *Server, id string) bool {
@@ -140,15 +140,15 @@ func HubLink(app string) (string, error) {
 		cfg, _ := json.Marshal(map[string]string{"name": HubEntry, "type": "http", "url": u})
 		return "vscode:mcp/install?" + url.QueryEscape(string(cfg)), nil
 	}
-	return "", fmt.Errorf("magpie has no install link for %q", app)
+	return "", fmt.Errorf("eipgam has no install link for %q", app)
 }
 
 // Why an agent with the hub on keeps each server's own entry (AgentView's
 // HubWhy).
 const (
 	hubNoRemote = "no-remote" // it reaches no server over HTTP (Claude Desktop)
-	hubTaken    = "taken"     // a library server is called magpie
-	hubOwn      = "own"       // the agent has an entry called magpie of its own
+	hubTaken    = "taken"     // a library server is called eipgam
+	hubOwn      = "own"       // the agent has an entry called eipgam of its own
 )
 
 // hubFor is the hub's entry for t, or nil and why it isn't given one: the
@@ -241,25 +241,25 @@ func hubAbouts(ss []*Server) []gateway.HubServer {
 }
 
 // hereOnly is whether s acts as this computer's user beyond what its
-// tools' arguments say (gateway.HubServer's HereOnly): Magpie Browser and
-// another magpie's router (keepsSession), and magpie's image, memory and
+// tools' arguments say (gateway.HubServer's HereOnly): eipgam Browser and
+// another eipgam's router (keepsSession), and eipgam's image, memory and
 // sessions servers.
 func hereOnly(s *Server) bool { return keepsSession(s) || isSelf(s) || isMemory(s) || isSessions(s) }
 
-// isSessions is whether s is magpie's own sessions server (`magpie mcp
+// isSessions is whether s is eipgam's own sessions server (`eipgam mcp
 // sessions`), which reads this computer's user's conversations.
 func isSessions(s *Server) bool {
 	return !s.Remote() && len(s.Args) >= 2 && s.Args[0] == "mcp" && s.Args[1] == "sessions"
 }
 
-// isMemory is whether s is magpie's own memory server (`magpie mcp
+// isMemory is whether s is eipgam's own memory server (`eipgam mcp
 // memory`), which holds what is known about this computer's user.
 func isMemory(s *Server) bool {
 	return !s.Remote() && len(s.Args) >= 2 && s.Args[0] == "mcp" && s.Args[1] == "memory"
 }
 
 // wantsCaller is whether a call of s is made with the calling agent's
-// roots and name (imageMeta): magpie's image and memory servers.
+// roots and name (imageMeta): eipgam's image and memory servers.
 func wantsCaller(s *Server) bool { return isSelf(s) || isMemory(s) }
 
 // visitorServers are ss without those the hub's caller of ctx isn't
@@ -273,7 +273,7 @@ func visitorServers(ctx context.Context, ss []*Server) []*Server {
 func (theHub) Tools(ctx context.Context, agentID string) []gateway.HubTool {
 	ss := visitorServers(ctx, hubServers(agentID))
 	if gateway.FromRouter(ctx) {
-		// another magpie's router: not given a Remote magpie's back
+		// another eipgam's router: not given a Remote eipgam's back
 		ss = slices.DeleteFunc(ss, func(s *Server) bool { return s.Bridge != "" })
 	}
 	lists := make([][]gateway.HubTool, len(ss))
@@ -317,20 +317,20 @@ func (theHub) Call(ctx context.Context, agentID, server, tool string, args json.
 	ss := hubServers(agentID)
 	i := slices.IndexFunc(ss, func(s *Server) bool { return s.Name == server })
 	if i >= 0 && !gateway.HubVisitorOf(ctx).Gives(hubServerOf(ss[i])) {
-		return nil, errors.New("it acts as this computer's user, so magpie runs it for this computer's agents only")
+		return nil, errors.New("it acts as this computer's user, so eipgam runs it for this computer's agents only")
 	}
 	if i < 0 && agentID == "" {
-		return nil, errors.New("it isn't in magpie's Library")
+		return nil, errors.New("it isn't in eipgam's Library")
 	}
 	if i < 0 {
-		return nil, fmt.Errorf("it isn't switched on for %s in magpie's Library", gateway.HubAgentOf(agentID))
+		return nil, fmt.Errorf("it isn't switched on for %s in eipgam's Library", gateway.HubAgentOf(agentID))
 	}
 	s := ss[i]
 	if s.Bridge != "" && gateway.FromRouter(ctx) {
-		return nil, errors.New("it is another magpie's router, which isn't run for a magpie's router")
+		return nil, errors.New("it is another eipgam's router, which isn't run for a eipgam's router")
 	}
 	if slices.Contains(s.DisabledTools, tool) {
-		return nil, errors.New("the tool is turned off in magpie's Library")
+		return nil, errors.New("the tool is turned off in eipgam's Library")
 	}
 	var meta map[string]any
 	if wantsCaller(s) {
@@ -349,10 +349,10 @@ func (theHub) Call(ctx context.Context, agentID, server, tool string, args json.
 }
 
 // keepsSession is whether s is told which of the hub's callers a call is
-// from: Magpie Browser, which works in a tab of each caller's own (one
+// from: eipgam Browser, which works in a tab of each caller's own (one
 // process serves every agent behind the hub, so its own session would be
-// all of theirs), and another magpie's router, which passes it on to its
-// Magpie Browser. No other server is sent it.
+// all of theirs), and another eipgam's router, which passes it on to its
+// eipgam Browser. No other server is sent it.
 func keepsSession(s *Server) bool {
 	if s.Remote() {
 		u, err := url.Parse(s.URL)
@@ -361,7 +361,7 @@ func keepsSession(s *Server) bool {
 	return len(s.Args) >= 2 && s.Args[0] == "mcp" && s.Args[1] == "browser"
 }
 
-// imageMeta is the _meta a call of magpie's image or memory server is
+// imageMeta is the _meta a call of eipgam's image or memory server is
 // made with:
 // the calling agent's roots, which it saves into, and its name, which its
 // requests go under.
@@ -493,7 +493,7 @@ type backend struct {
 	stopped bool
 }
 
-var errHubStopped = errors.New("magpie stopped it")
+var errHubStopped = errors.New("eipgam stopped it")
 
 // connect is the connection to the server, made when there is none: a
 // command started, a URL initialized. A start goes on when ctx ends, for
@@ -605,7 +605,7 @@ func (b *backend) done() {
 }
 
 // stop ends the server for good: it was edited, the hub turned off, or
-// magpie is stopping.
+// eipgam is stopping.
 func (b *backend) stop() {
 	b.mu.Lock()
 	b.stopped = true
@@ -700,7 +700,7 @@ func healthErr(h ServerHealth) error {
 	var s string
 	switch {
 	case h.State == "auth":
-		s = "it asks for a sign-in or a key: sign in to it, or give it its key, in magpie's Library"
+		s = "it asks for a sign-in or a key: sign in to it, or give it its key, in eipgam's Library"
 	case h.Why == "notfound":
 		s = "its command " + h.Detail + " wasn't found"
 	case h.Why == "start":
@@ -723,9 +723,9 @@ func healthErr(h ServerHealth) error {
 	case h.Why == "refused" || h.Why == "unreachable":
 		s = "it couldn't be reached: " + h.Detail
 	case h.Why == "nobrowser":
-		s = "it starts a Chrome, and there is none where magpie runs: use Magpie Browser, or give it " + h.Detail + " for a Chrome it can reach"
+		s = "it starts a Chrome, and there is none where eipgam runs: use eipgam Browser, or give it " + h.Detail + " for a Chrome it can reach"
 	case h.Why == "novar":
-		s = h.Detail + " isn't set where magpie runs"
+		s = h.Detail + " isn't set where eipgam runs"
 	default:
 		s = h.Detail
 	}
@@ -856,7 +856,7 @@ func (c *streamConn) read(b []byte, changed func()) {
 		if m.Method == "ping" {
 			reply["result"] = map[string]any{}
 		} else {
-			reply["error"] = map[string]any{"code": -32601, "message": "magpie's hub doesn't offer " + m.Method}
+			reply["error"] = map[string]any{"code": -32601, "message": "eipgam's hub doesn't offer " + m.Method}
 		}
 		out, _ := json.Marshal(reply)
 		go func() {
@@ -1128,7 +1128,7 @@ var (
 // hubFindsItself is the names of the agents the router gives every tool
 // whole, as they search their MCP tools themselves (gateway.HubFindsItself),
 // for the Tools on demand row to say: its words named four of the six
-// (11-18). An agent's name doesn't change while magpie runs, so they are
+// (11-18). An agent's name doesn't change while eipgam runs, so they are
 // looked up once; one not found is said by its id.
 var hubFindsItself = sync.OnceValue(func() []string {
 	names := map[string]string{}

@@ -1,11 +1,11 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// PapainTea on X: where GitHub is slow to magpie, the update took ages to
+// PapainTea on X: where GitHub is slow to eipgam, the update took ages to
 // download in the app. While an update is out, downloading, or failed to
 // download, Settings › About › Version offers the release page, opened in
 // the browser, where it can be fetched through the user's own proxy or
 // accelerator. The button outlives the download's redraws (every 700ms), so
 // a click on it isn't lost, and it goes once there is nothing to fetch.
-// Every language, both engines, narrow and wide; no backend, the API is
+// English, both engines, narrow and wide; no backend, the API is
 // faked. No click moves the page, nothing is a native select.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -14,21 +14,17 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const URL_ = "https://github.com/yetone/magpie-releases/releases/tag/v0.1.901";
+const URL_ = "https://github.com/sichengchen/eipgam/releases/tag/v0.1.901";
 
 const words = {
   en: { page: "Open the release page", download: "Download", check: "Check" },
-  zh: { page: "打开发布页面", download: "下载", check: "检查" },
-  "zh-TW": { page: "打開發布頁面", download: "下載", check: "檢查" },
-  ja: { page: "リリースページを開く", download: "ダウンロード", check: "確認" },
-  de: { page: "Release-Seite öffnen", download: "Herunterladen", check: "Prüfen" },
 };
 
 function server(lang, ctl) {
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data, status) => route.fulfill({ json: data, status: status || 200 });
-    const settings = () => ({ theme: "light", lang, version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 } });
+    const settings = () => ({ theme: "light", lang, version: "0.1.900", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 } });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: settings() });
@@ -59,7 +55,7 @@ async function open(browser, lang, ctl, errors, width) {
   // webkit's note that a resize settled a frame late is not the page's error
   page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
   await page.route("**/*", server(lang, ctl));
-  await page.goto("http://magpie.test/?view=settings");
+  await page.goto("http://eipgam.test/?view=settings");
   await page.locator("#setTab-about").click();
   await page.locator("#setPage-about").waitFor({ state: "visible" });
   return page;

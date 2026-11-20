@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, settings, saved, fixtures(Date.now())));
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://eipgam.test/?view=usage");
       const handle = (key) => page.locator(`#subscriptionUsage > [data-key="${key}"] .us-handle`);
       await handle("zai").waitFor();
       await page.waitForTimeout(500);

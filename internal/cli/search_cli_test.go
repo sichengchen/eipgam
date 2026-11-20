@@ -6,11 +6,11 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// magpie search add, with a key and an address in either order, and rm.
+// eipgam search add, with a key and an address in either order, and rm.
 func TestSearchCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
@@ -71,7 +71,7 @@ func TestSearchCLI(t *testing.T) {
 	}
 }
 
-// magpie search add you, with no key, adds You.com's free search (#1626).
+// eipgam search add you, with no key, adds You.com's free search (#1626).
 func TestSearchCLIYouWithoutKey(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
@@ -84,7 +84,7 @@ func TestSearchCLIYouWithoutKey(t *testing.T) {
 	}
 }
 
-// magpie search off keeps an API, key and all, out of every search, on
+// eipgam search off keeps an API, key and all, out of every search, on
 // puts it back, and move puts it at another place in the order (#2286).
 func TestSearchCLIOffAndMove(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -142,7 +142,7 @@ func TestSearchCLIOffAndMove(t *testing.T) {
 	}
 }
 
-// magpie search count (#5545, mdwsk88): a number from 1 to 20 is written,
+// eipgam search count (#5545, mdwsk88): a number from 1 to 20 is written,
 // "default" puts 6 back, and a flag, a word or a number out of range is
 // refused with nothing written.
 func TestSearchCLICount(t *testing.T) {
@@ -184,7 +184,7 @@ func TestSearchCLICount(t *testing.T) {
 	}
 }
 
-// magpie search mix names two or more search APIs to ask together, and
+// eipgam search mix names two or more search APIs to ask together, and
 // off puts them back in order (#2845).
 func TestSearchCLIMix(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())

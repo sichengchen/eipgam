@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => { if (engine === "webkit" && /due to access control checks/.test(e.message)) return; errors.push(e.message); }); // #1350
         await page.route("**/*", serve(lang, settings));
-        await page.goto(`http://magpie.test/?view=providers&edit=${encodeURIComponent(id)}`);
+        await page.goto(`http://eipgam.test/?view=providers&edit=${encodeURIComponent(id)}`);
         const adv = page.locator(".editor details.advanced");
         await adv.waitFor({ timeout: 60000 });
         // the lists are mounted once Settings are read

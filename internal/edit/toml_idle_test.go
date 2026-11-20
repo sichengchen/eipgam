@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // Once nothing has used a file's whole parse for tomlIdle it is let go,
@@ -27,11 +27,11 @@ func TestTOMLParseLetGoWhenIdle(t *testing.T) {
 		os.Chtimes(p, old, old)
 		filememo.Forget()
 	}
-	write("model_provider = \"magpie\"\nother = 2\n\n[model_providers.magpie]\nbase_url = \"http://x\"\n")
-	if v, ok := GetTOMLTop(p, "model_provider"); v != "magpie" || !ok {
+	write("model_provider = \"eipgam\"\nother = 2\n\n[model_providers.eipgam]\nbase_url = \"http://x\"\n")
+	if v, ok := GetTOMLTop(p, "model_provider"); v != "eipgam" || !ok {
 		t.Fatalf("model_provider = %q, %v", v, ok)
 	}
-	tb, _ := GetTOMLTable(p, "model_providers.magpie")
+	tb, _ := GetTOMLTable(p, "model_providers.eipgam")
 	if tb["base_url"] != "http://x" {
 		t.Fatalf("table = %v", tb)
 	}
@@ -44,13 +44,13 @@ func TestTOMLParseLetGoWhenIdle(t *testing.T) {
 
 	n := tomlParses.Load()
 	for range 3 {
-		if v, _ := GetTOMLTop(p, "model_provider"); v != "magpie" {
+		if v, _ := GetTOMLTop(p, "model_provider"); v != "eipgam" {
 			t.Fatalf("model_provider after the let-go = %q", v)
 		}
 		if _, ok := GetTOMLTop(p, "absent"); ok {
 			t.Fatal("absent key found after the let-go")
 		}
-		if tb, _ := GetTOMLTable(p, "model_providers.magpie"); tb["base_url"] != "http://x" {
+		if tb, _ := GetTOMLTable(p, "model_providers.eipgam"); tb["base_url"] != "http://x" {
 			t.Fatalf("table after the let-go = %v", tb)
 		}
 	}
@@ -65,7 +65,7 @@ func TestTOMLParseLetGoWhenIdle(t *testing.T) {
 	if v, _ := GetTOMLTop(p, "model_provider"); v != "openai" {
 		t.Fatalf("after a change model_provider = %q", v)
 	}
-	if tb, err := GetTOMLTable(p, "model_providers.magpie"); tb != nil || err != nil {
+	if tb, err := GetTOMLTable(p, "model_providers.eipgam"); tb != nil || err != nil {
 		t.Fatalf("after a change the table = %v, %v", tb, err)
 	}
 }
@@ -86,8 +86,8 @@ func TestTOMLTablesKeptWhenIdle(t *testing.T) {
 		os.Chtimes(p, old, old)
 		filememo.Forget()
 	}
-	write("a = 1\n\n[projects.\"/x\"]\ntrust_level = \"trusted\"\n\n[[arr]]\nb = 1\n\n[model_providers.magpie]\nbase_url = \"http://x\"\n")
-	want := []string{`projects."/x"`, "model_providers.magpie"}
+	write("a = 1\n\n[projects.\"/x\"]\ntrust_level = \"trusted\"\n\n[[arr]]\nb = 1\n\n[model_providers.eipgam]\nbase_url = \"http://x\"\n")
+	want := []string{`projects."/x"`, "model_providers.eipgam"}
 	names, err := TOMLTables(p)
 	if err != nil || !slices.Equal(names, want) {
 		t.Fatalf("tables = %q, %v; want %q", names, err, want)
@@ -117,13 +117,13 @@ func TestTOMLNamesLetGoWhenIdle(t *testing.T) {
 	tomlKept.off = false
 	t.Cleanup(func() { tomlKept.off = true })
 	p := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(p, []byte("a = 1\n\n[projects.\"/x\"]\ntrust_level = \"trusted\"\n\n[model_providers.magpie]\nbase_url = \"http://x\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(p, []byte("a = 1\n\n[projects.\"/x\"]\ntrust_level = \"trusted\"\n\n[model_providers.eipgam]\nbase_url = \"http://x\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	old := time.Now().Add(-time.Hour)
 	os.Chtimes(p, old, old)
 	filememo.Forget()
-	want := []string{`projects."/x"`, "model_providers.magpie"}
+	want := []string{`projects."/x"`, "model_providers.eipgam"}
 	held, err := TOMLTables(p)
 	if err != nil || !slices.Equal(held, want) {
 		t.Fatalf("tables = %q, %v", held, err)
@@ -162,9 +162,9 @@ func TestTOMLNamesLetGoWhenIdle(t *testing.T) {
 }
 
 func BenchmarkTOMLTablesCold(b *testing.B) {
-	src := os.Getenv("MAGPIE_BENCH_TOML")
+	src := os.Getenv("EIPGAM_BENCH_TOML")
 	if src == "" {
-		b.Skip("MAGPIE_BENCH_TOML unset")
+		b.Skip("EIPGAM_BENCH_TOML unset")
 	}
 	for b.Loop() {
 		filememo.DropKind("toml file")

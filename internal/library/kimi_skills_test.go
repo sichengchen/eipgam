@@ -62,7 +62,7 @@ func TestKimiCodeSkillsOwnFolder(t *testing.T) {
 	}
 }
 
-// A skill an older magpie put in ~/.agents/skills for Kimi Code is taken
+// A skill an older eipgam put in ~/.agents/skills for Kimi Code is taken
 // out of there once it is Kimi Code's alone: the link left behind would go
 // on reaching every reader of the folder, whatever the library ticks
 // (#4379). One an agent whose folder the shared one is (Goose, then;
@@ -77,7 +77,7 @@ func TestKimiOldSharedEntrySwept(t *testing.T) {
 	own := filepath.Join(h, ".kimi-code/skills/pdf")
 
 	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"kimi"}))
-	// what a magpie before Kimi Code's own folder left in the shared one
+	// what a eipgam before Kimi Code's own folder left in the shared one
 	if _, err := os.Lstat(shared); os.IsNotExist(err) {
 		if err := os.MkdirAll(filepath.Dir(shared), 0o755); err != nil {
 			t.Fatal(err)
@@ -105,7 +105,7 @@ func TestKimiOldSharedEntrySwept(t *testing.T) {
 	}
 }
 
-// The sweep of ~/.agents/skills takes magpie's own entries alone: the
+// The sweep of ~/.agents/skills takes eipgam's own entries alone: the
 // user's own folders and links there, one by the name of a library skill
 // Kimi Code is given among them, stay as they were, files and targets
 // (#4379). A skill given to Kimi Code and Codex, both of which read the
@@ -149,7 +149,7 @@ func TestKimiSweepLeavesTheUsersOwnSharedSkills(t *testing.T) {
 	for n, want := range before {
 		p := filepath.Join(shared, n)
 		if ours(p, n) {
-			t.Errorf("%s in ~/.agents/skills became magpie's", n)
+			t.Errorf("%s in ~/.agents/skills became eipgam's", n)
 		}
 		b, err := os.ReadFile(filepath.Join(p, "SKILL.md"))
 		if err != nil || string(b) != want {
@@ -164,7 +164,7 @@ func TestKimiSweepLeavesTheUsersOwnSharedSkills(t *testing.T) {
 	}
 	for _, d := range []string{".kimi-code/skills/orca", ".codex/skills/orca"} {
 		if !ours(filepath.Join(h, d), "orca") {
-			t.Errorf("%s isn't magpie's link", d)
+			t.Errorf("%s isn't eipgam's link", d)
 		}
 	}
 }

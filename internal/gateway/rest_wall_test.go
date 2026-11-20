@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A rest is kept on the wall clock alone. A time from time.Now() carries
@@ -14,7 +14,7 @@ import (
 // it stops while the computer sleeps, so a rest to 00:40 set the day
 // before still held at 09:57 after a night of sleep, 17 hours past the
 // time it showed (plugins#1126). Sleep can't be had in a test, so this
-// checks what makes it harmless: no rest magpie keeps carries a monotonic
+// checks what makes it harmless: no rest eipgam keeps carries a monotonic
 // reading ("m=" in its String).
 func TestRestsKeepTheWallClock(t *testing.T) {
 	monotonic := func(at time.Time) bool { return strings.Contains(at.String(), " m=") }

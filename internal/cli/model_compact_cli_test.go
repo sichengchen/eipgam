@@ -3,11 +3,11 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// magpie model compact off runs Codex's and Claude Code's conversations to
+// eipgam model compact off runs Codex's and Claude Code's conversations to
 // the model's whole window, on compacts them at the working window again
 // (Max on Discord found no way to it but the app's Settings); anything else
 // is refused.
@@ -34,7 +34,7 @@ func TestModelCompactCmd(t *testing.T) {
 	}
 }
 
-// magpie model compact codex 300k gives Codex a Long conversations of its
+// eipgam model compact codex 300k gives Codex a Long conversations of its
 // own, which Claude Code doesn't take; every takes it away, and an agent
 // that writes no compaction window is refused (molianyin4227 on Discord).
 func TestModelCompactAgentCmd(t *testing.T) {
@@ -67,7 +67,7 @@ func TestModelCompactAgentCmd(t *testing.T) {
 	}
 }
 
-// magpie model window pi deepseek-v4-flash=500k gives Pi a window of its
+// eipgam model window pi deepseek-v4-flash=500k gives Pi a window of its
 // own for that model (ul3140773077392 on X); a size alone is for every
 // model, off takes them away, and a size that is not one is refused.
 func TestModelAgentWindowCmd(t *testing.T) {

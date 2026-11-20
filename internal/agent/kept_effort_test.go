@@ -8,13 +8,13 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // keptEffortHome is a sandbox HOME with a provider of thinking models: deep
-// (none, low, high: magpie's default high) and wide (low, medium, high:
-// magpie's default medium).
+// (none, low, high: eipgam's default high) and wide (low, medium, high:
+// eipgam's default medium).
 func keptEffortHome(t *testing.T, models ...string) string {
 	t.Helper()
 	home := t.TempDir()
@@ -48,20 +48,20 @@ func keptEffortModels(t *testing.T, models ...string) {
 	}
 }
 
-// Kimi Code's default_effort set by hand on one of magpie's models stays
+// Kimi Code's default_effort set by hand on one of eipgam's models stays
 // through a sync.
 func TestKimiKeepsTheUsersDefaultEffort(t *testing.T) {
 	home := keptEffortHome(t)
 	path := filepath.Join(home, ".kimi-code", "config.toml")
 	writeFile(t, path, "")
 	a := kimi(home)
-	if err := a.Field("model").Set("magpie/think/deep"); err != nil {
+	if err := a.Field("model").Set("eipgam/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(path)
-	at := strings.Index(string(b), `[models."magpie/think/wide"]`)
+	at := strings.Index(string(b), `[models."eipgam/think/wide"]`)
 	if at < 0 || !strings.Contains(string(b[at:]), `default_effort = "high"`) {
-		t.Fatalf("magpie's default: %s", b)
+		t.Fatalf("eipgam's default: %s", b)
 	}
 	s := string(b[:at]) + strings.Replace(string(b[at:]), `default_effort = "high"`, `default_effort = "low"`, 1)
 	os.WriteFile(path, []byte(s), 0o600)
@@ -77,7 +77,7 @@ func TestKimiKeepsTheUsersDefaultEffort(t *testing.T) {
 	if err := toml.Unmarshal(b, &c); err != nil {
 		t.Fatalf("%v\n%s", err, b)
 	}
-	if c.Models["magpie/think/wide"].DefaultEffort != "low" || c.Models["magpie/think/deep"].DefaultEffort != "high" {
+	if c.Models["eipgam/think/wide"].DefaultEffort != "low" || c.Models["eipgam/think/deep"].DefaultEffort != "high" {
 		t.Fatalf("after sync: %s", b)
 	}
 }

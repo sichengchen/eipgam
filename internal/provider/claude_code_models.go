@@ -10,7 +10,7 @@ package provider
 // state file (.claude.json): additionalModelOptionsCache, the models its
 // /model picker offers beyond its own; modelAccessCache, the models the
 // account is or isn't entitled to; additionalModelCostsCache, their
-// prices. magpie reads them back, as it reads the account's identity from
+// prices. eipgam reads them back, as it reads the account's identity from
 // the same file: nothing is asked of Anthropic in Claude Code's name
 // (iebb on Discord: "最好以 claude code 返回为准"). Claude Code 2.1.323
 // and later keep the models in a catalog file too (claude_code_catalog.go),
@@ -23,8 +23,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // claudeCodeModels is what Claude Code keeps of an account's models.
@@ -152,7 +152,7 @@ func readClaudeCodeModels(path string) (claudeCodeModels, bool) {
 	return m, true
 }
 
-// claudeCodeFiles are the state files of every Claude Code magpie knows of
+// claudeCodeFiles are the state files of every Claude Code eipgam knows of
 // an account in: the one Claude Code itself is signed in to, then each
 // saved account's own config directory (claude_dirs.go). Listed once
 // while a request holds the catalog: each Claude model's price asked for

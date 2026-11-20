@@ -14,7 +14,7 @@ import (
 // system: each distro named in probes is installed and running, answers
 // the probe with what probes has for it (wslProbeScript()'s output: "home:/
 // home/me\ndir:.codex\n…") and is opened at roots' folder for it. What
-// magpie remembers of WSL is forgotten, before and after; the returned
+// eipgam remembers of WSL is forgotten, before and after; the returned
 // func puts everything back.
 func FakeWSL(probes, roots map[string]string) func() {
 	on, run, root, exec := wslOn, wslRun, wslRoot, wslExec
@@ -114,7 +114,7 @@ func StartFakeWSL(name string) {
 	}
 }
 
-// FakeWSLRuns is how many commands magpie ran in FakeWSL's distro name
+// FakeWSLRuns is how many commands eipgam ran in FakeWSL's distro name
 // (wsl.exe -d name …), each of which starts a stopped distro.
 func FakeWSLRuns(name string) int {
 	fakeCalls.Lock()

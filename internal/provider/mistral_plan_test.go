@@ -209,7 +209,7 @@ func TestMistralStudioBudget(t *testing.T) {
 		t.Errorf("read again, asked %q, want no second whoami", asked)
 	}
 
-	// the currency billing names, else none: never one magpie picked
+	// the currency billing names, else none: never one eipgam picked
 	for _, c := range []struct{ body, unit string }{
 		{`"currency":"EUR"`, "EUR"}, {`"currency":" eur "`, "EUR"}, {`"currency":""`, ""}, {`"x":1`, ""},
 	} {

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 type otelAttribute struct {
@@ -36,7 +36,7 @@ func otelAttributes(r Record) []otelAttribute {
 	if op == "" {
 		op = "chat"
 	}
-	a := []otelAttribute{otelString("gen_ai.operation.name", op), otelString("gen_ai.provider.name", r.Provider), otelString("gen_ai.request.model", r.Model), otelString("magpie.agent", r.Agent)}
+	a := []otelAttribute{otelString("gen_ai.operation.name", op), otelString("gen_ai.provider.name", r.Provider), otelString("gen_ai.request.model", r.Model), otelString("eipgam.agent", r.Agent)}
 	a = gatewayKeyAttr(a, r)
 	if r.Served != "" {
 		a = append(a, otelString("gen_ai.response.model", r.Served))
@@ -52,19 +52,19 @@ func otelAttributes(r Record) []otelAttribute {
 }
 
 // gatewayKeyAttr adds the name of the gateway key a call came with
-// (Record.CallerKeyName) as magpie.gateway_key.name; a call without one
+// (Record.CallerKeyName) as eipgam.gateway_key.name; a call without one
 // has no such attribute.
 func gatewayKeyAttr(a []otelAttribute, r Record) []otelAttribute {
 	if r.CallerKeyName == "" {
 		return a
 	}
-	return append(a, otelString("magpie.gateway_key.name", r.CallerKeyName))
+	return append(a, otelString("eipgam.gateway_key.name", r.CallerKeyName))
 }
 
 func otelEnvelope(signal string, data any) map[string]any {
 	return map[string]any{"resource" + signal: []any{map[string]any{
 		"resource":       map[string]any{"attributes": otelResourceAttributes()},
-		"scope" + signal: []any{map[string]any{"scope": map[string]any{"name": "github.com/yetone/magpie"}, map[string]string{"Spans": "spans", "Metrics": "metrics"}[signal]: data}},
+		"scope" + signal: []any{map[string]any{"scope": map[string]any{"name": "github.com/sichengchen/eipgam"}, map[string]string{"Spans": "spans", "Metrics": "metrics"}[signal]: data}},
 	}}}
 }
 
@@ -98,21 +98,21 @@ func (e *otelExporter) traces(items []otelItem) any {
 		a := append(otelAttributes(r), otelInt("http.response.status_code", int64(r.Status)),
 			otelInt("gen_ai.usage.input_tokens", int64(r.Input+r.CacheRead+r.CacheWrite)), otelInt("gen_ai.usage.output_tokens", int64(r.Output)),
 			otelInt("gen_ai.usage.cache_read.input_tokens", int64(r.CacheRead)), otelInt("gen_ai.usage.cache_creation.input_tokens", int64(r.CacheWrite)),
-			otelInt("gen_ai.usage.reasoning.output_tokens", int64(r.Reasoning)), otelInt("magpie.ttft_ms", r.TTFT), otelInt("magpie.first_text_ms", r.FirstText))
+			otelInt("gen_ai.usage.reasoning.output_tokens", int64(r.Reasoning)), otelInt("eipgam.ttft_ms", r.TTFT), otelInt("eipgam.first_text_ms", r.FirstText))
 		if r.FirstReasoning > 0 {
-			a = append(a, otelInt("magpie.first_reasoning_ms", r.FirstReasoning))
+			a = append(a, otelInt("eipgam.first_reasoning_ms", r.FirstReasoning))
 		}
 		if r.ReasoningHidden {
-			a = append(a, otelInt("magpie.reasoning_hidden", 1))
+			a = append(a, otelInt("eipgam.reasoning_hidden", 1))
 		}
 		if r.RouteID != 0 {
-			a = append(a, otelInt("magpie.route.id", r.RouteID))
+			a = append(a, otelInt("eipgam.route.id", r.RouteID))
 		}
 		if r.Requested != "" {
-			a = append(a, otelString("magpie.requested_model", r.Requested))
+			a = append(a, otelString("eipgam.requested_model", r.Requested))
 		}
 		if r.Effort != "" {
-			a = append(a, otelString("magpie.reasoning_effort", r.Effort))
+			a = append(a, otelString("eipgam.reasoning_effort", r.Effort))
 		}
 		if r.BodyIn != "" {
 			a = append(a, otelString("langfuse.observation.input", r.BodyIn))
@@ -142,10 +142,10 @@ func (e *otelExporter) traces(items []otelItem) any {
 			}
 			if sp.Root {
 				span["name"], span["kind"] = "gateway "+r.Model, 2
-				a = []otelAttribute{otelString("magpie.agent", r.Agent), otelString("magpie.requested_model", r.Model), otelInt("http.response.status_code", int64(r.Status))}
+				a = []otelAttribute{otelString("eipgam.agent", r.Agent), otelString("eipgam.requested_model", r.Model), otelInt("http.response.status_code", int64(r.Status))}
 				a = gatewayKeyAttr(a, r)
 				if r.RouteID != 0 {
-					a = append(a, otelInt("magpie.route.id", r.RouteID))
+					a = append(a, otelInt("eipgam.route.id", r.RouteID))
 				}
 				// a request its agent canceled is no failure
 				// (Record.Canceled): its status code alone says 499
@@ -159,7 +159,7 @@ func (e *otelExporter) traces(items []otelItem) any {
 			if sp.Session {
 				span["name"], span["kind"] = sp.Name, 1
 				if sp.Type != "generation" {
-					a = []otelAttribute{otelString("magpie.agent", r.Agent)}
+					a = []otelAttribute{otelString("eipgam.agent", r.Agent)}
 					if r.Status >= 400 {
 						a = append(a, otelString("error.type", "agent_operation_failed"))
 					}
@@ -174,9 +174,9 @@ func (e *otelExporter) traces(items []otelItem) any {
 				}
 				a = append(filtered, otelString("langfuse.observation.type", sp.Type))
 				if sp.Inferred {
-					a = append(a, otelString("magpie.timing.source", "inferred"))
+					a = append(a, otelString("eipgam.timing.source", "inferred"))
 				} else {
-					a = append(a, otelString("magpie.timing.source", "recorded"))
+					a = append(a, otelString("eipgam.timing.source", "recorded"))
 				}
 				if sp.Type != "generation" {
 					if r.BodyIn != "" {

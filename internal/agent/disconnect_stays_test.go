@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// agentFiles reads every file under home but magpie's own (its settings,
+// agentFiles reads every file under home but eipgam's own (its settings,
 // stash and caches): what an agent reads its config from.
 func agentFiles(t *testing.T, home string) map[string]string {
 	t.Helper()
@@ -23,7 +23,7 @@ func agentFiles(t *testing.T, home string) map[string]string {
 		}
 		rel, _ := filepath.Rel(home, p)
 		if e.IsDir() {
-			if rel == filepath.Join(".config", "magpie") || rel == ".cache" {
+			if rel == filepath.Join(".config", "eipgam") || rel == ".cache" {
 				return filepath.SkipDir
 			}
 			return nil
@@ -48,11 +48,11 @@ func codexChatGPTAuth(email, acct string) map[string]any {
 }
 
 // paynezhuang on Discord: Codex signed in to ChatGPT, with another of the
-// user's ChatGPT accounts on in magpie. magpie's first start pointed Codex
+// user's ChatGPT accounts on in eipgam. eipgam's first start pointed Codex
 // at the gateway for failover then; the user switched Codex on, then chose
-// "Disconnect from magpie", and after each update and restart Codex had
-// magpie's base URL in config.toml again. A disconnect is the user's say:
-// no start brings it back, with ChatGPT sign-in or magpie API, until the
+// "Disconnect from eipgam", and after each update and restart Codex had
+// eipgam's base URL in config.toml again. A disconnect is the user's say:
+// no start brings it back, with ChatGPT sign-in or eipgam API, until the
 // user connects Codex again.
 func TestCodexDisconnectStaysWithAccountsOn(t *testing.T) {
 	for _, login := range []string{"", "api"} {
@@ -65,7 +65,7 @@ func TestCodexDisconnectStaysWithAccountsOn(t *testing.T) {
 			os.MkdirAll(filepath.Dir(provider.Path()), 0o755)
 			os.WriteFile(filepath.Join(filepath.Dir(provider.Path()), "logins.json"), b, 0o600)
 			cx := codex(home)
-			// magpie's first start: a magpie from before pointed Codex at
+			// eipgam's first start: a eipgam from before pointed Codex at
 			// the gateway for failover then; Codex not connected stays off
 			// it now (TylerBai_loveai on X)
 			SyncCatalog()
@@ -88,7 +88,7 @@ func TestCodexDisconnectStaysWithAccountsOn(t *testing.T) {
 			}
 			restored := read()
 			if strings.Contains(restored, "openai_base_url") || strings.Contains(restored, "model_provider =") {
-				t.Fatalf("disconnect left magpie in:\n%s", restored)
+				t.Fatalf("disconnect left eipgam in:\n%s", restored)
 			}
 			// restarts, an update among them
 			for i := 0; i < 3; i++ {
@@ -100,7 +100,7 @@ func TestCodexDisconnectStaysWithAccountsOn(t *testing.T) {
 					t.Fatalf("start %d: wired %v, failing over %v", i, cx.Wired(), cx.FailingOver())
 				}
 			}
-			// a pick of one of Codex's own models in magpie keeps it so
+			// a pick of one of Codex's own models in eipgam keeps it so
 			if login == "" {
 				if err := cx.Pick("model", "gpt-5.4"); err != nil {
 					t.Fatal(err)
@@ -109,7 +109,7 @@ func TestCodexDisconnectStaysWithAccountsOn(t *testing.T) {
 					t.Fatalf("own model picked after Disconnect:\n%s", cfg)
 				}
 			}
-			// connected again, it is magpie's again, and a start keeps it so
+			// connected again, it is eipgam's again, and a start keeps it so
 			if _, err := cx.ConnectHow(); err != nil {
 				t.Fatal(err)
 			}
@@ -121,7 +121,7 @@ func TestCodexDisconnectStaysWithAccountsOn(t *testing.T) {
 	}
 }
 
-// On magpie API, Codex's own model served on its ChatGPT account (#701's
+// On eipgam API, Codex's own model served on its ChatGPT account (#701's
 // config): Sync wires a Codex left unwired so, but not one the user
 // disconnected.
 func TestCodexAPIDisconnectStays(t *testing.T) {
@@ -132,14 +132,14 @@ func TestCodexAPIDisconnectStays(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !cx.Wired() {
-		t.Fatalf("magpie API not wired:\n%s", read())
+		t.Fatalf("eipgam API not wired:\n%s", read())
 	}
 	if err := cx.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
 	restored := read()
 	if cx.Wired() || strings.Contains(restored, "model_provider =") || strings.Contains(restored, "openai_base_url") {
-		t.Fatalf("disconnect left magpie in:\n%s", restored)
+		t.Fatalf("disconnect left eipgam in:\n%s", restored)
 	}
 	for i := 0; i < 2; i++ {
 		SyncCatalog()
@@ -147,20 +147,20 @@ func TestCodexAPIDisconnectStays(t *testing.T) {
 			t.Fatalf("start %d after Disconnect wired Codex again:\n--- disconnected\n%s\n--- now\n%s", i, restored, cfg)
 		}
 	}
-	// connected again by the user, magpie API wires it as before
+	// connected again by the user, eipgam API wires it as before
 	if _, err := cx.ConnectHow(); err != nil {
 		t.Fatal(err)
 	}
 	SyncCatalog()
-	if cfg := read(); !cx.Wired() || !strings.Contains(cfg, `model_provider = "magpie"`) {
+	if cfg := read(); !cx.Wired() || !strings.Contains(cfg, `model_provider = "eipgam"`) {
 		t.Fatalf("connected again:\n%s", cfg)
 	}
 }
 
-// A disconnect the user chose stays through magpie's start-up sync, which
+// A disconnect the user chose stays through eipgam's start-up sync, which
 // runs at every start and after every update (SyncCatalog): no agent is
 // wired again, and none of its files changes (paynezhuang on Discord: Codex
-// had magpie's base URL back after each update).
+// had eipgam's base URL back after each update).
 func TestDisconnectStaysThroughSync(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	managed := claudeManaged

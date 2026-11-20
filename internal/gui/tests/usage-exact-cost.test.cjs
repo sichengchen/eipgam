@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", serve(lang));
-          await p.goto("http://magpie.test/?view=usage&tab=requests");
+          await p.goto("http://eipgam.test/?view=usage&tab=requests");
           const say = (s) => p.evaluate((s) => t(s), s);
           const rows = p.locator(".led tbody tr.led-row");
           await rows.nth(ROWS.length - 1).waitFor({ timeout: 15000 });

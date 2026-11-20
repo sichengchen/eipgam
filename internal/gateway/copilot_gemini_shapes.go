@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // Copilot's Gemini answers 400 to tool schemas of six shapes that other

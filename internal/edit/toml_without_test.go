@@ -10,7 +10,7 @@ import (
 )
 
 func TestTOMLWithoutDropsOnlyThatTable(t *testing.T) {
-	src := `model_provider = "magpie" # projects = no
+	src := `model_provider = "eipgam" # projects = no
 profile = "p"
 sqlite_home = "/s"
 
@@ -32,7 +32,7 @@ y = 2
 
 [features]
 projects_view = true
-[model_providers.magpie]
+[model_providers.eipgam]
 name = "projects"
 `
 	got := string(TOMLWithout([]byte(src), "projects"))
@@ -67,7 +67,7 @@ func TestTOMLWithoutLeavesTheRestAlone(t *testing.T) {
 
 func manyProjects(n int) []byte {
 	var b strings.Builder
-	b.WriteString("model_provider = \"magpie\"\nprofile = \"p\"\n[features]\nmulti_agent = true\n")
+	b.WriteString("model_provider = \"eipgam\"\nprofile = \"p\"\n[features]\nmulti_agent = true\n")
 	for i := range n {
 		fmt.Fprintf(&b, "\n[projects.\"/Users/someone/workspace/projects/repo-%05d\"]\ntrust_level = \"trusted\"\n", i)
 	}

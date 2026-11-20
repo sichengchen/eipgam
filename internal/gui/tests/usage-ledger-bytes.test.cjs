@@ -52,7 +52,7 @@ function server(lang, bytes) {
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" }, fx: { rate: 7.2, at: new Date().toISOString() } });
     if (url.pathname === "/api/usage/requests") return json(page(url.searchParams, bytes));
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 3, errors: 0, input: 700, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0.03, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 3, errors: 0, input: 700, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0.03, bucket: "day", series: [], agents: [], models: [], path: "~/.config/eipgam/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", server(lang, true));
-          await p.goto("http://magpie.test/");
+          await p.goto("http://eipgam.test/");
           await p.locator('[data-view="usage"]').first().click();
           await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
           await p.locator("#ledWrap .led tbody tr.led-row").first().waitFor();
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultTimeout(5000);
           p.setDefaultNavigationTimeout(60000);
           await p.route("**/*", server(lang, "big"));
-          await p.goto("http://magpie.test/");
+          await p.goto("http://eipgam.test/");
           await p.locator('[data-view="usage"]').first().click();
           await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
           await p.locator("#ledKpi .led-io").waitFor();
@@ -167,7 +167,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultTimeout(5000);
         p.setDefaultNavigationTimeout(60000);
         await p.route("**/*", server(lang, false));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://eipgam.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledWrap .led tbody tr.led-row").first().waitFor();

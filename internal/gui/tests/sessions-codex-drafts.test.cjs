@@ -34,7 +34,7 @@ function serve(lang, calls) {
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { running: true, window: true } });
     if (url.pathname === "/api/sessions/manage") {
       return json({ agents: [{ agent: "codex", count: sessions.length, deletable: true, name: "Codex", icon: "codex" }],
-        agent: "codex", home: "/home/me", sessions, terminal: false, trash: [], trashDir: "~/.local/share/magpie/trash/sessions" });
+        agent: "codex", home: "/home/me", sessions, terminal: false, trash: [], trashDir: "~/.local/share/eipgam/trash/sessions" });
     }
     if (url.pathname === "/api/sessions/delete") {
       const body = req.postDataJSON();
@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve("en", []));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       await page.evaluate(() => show("sessions"));
       const view = page.locator("#view-sessions");
       const folders = view.locator(".sm-folders .row.sm-folder");

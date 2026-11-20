@@ -13,7 +13,7 @@ import (
 )
 
 // A page whose page talks to a local service of its own ships that
-// service as its main (magpie.page.service). The GitHub list read a
+// service as its main (eipgam.page.service). The GitHub list read a
 // package with a main as a provider, so xiaopeng66/magpie-model-lab
 // showed under Providers (plugins#1226). A page that says
 // "magpie-page" in its keywords, as every page in the plugins

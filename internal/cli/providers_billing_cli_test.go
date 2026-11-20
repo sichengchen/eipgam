@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// magpie provider set billing=plan marks a provider on a plan (EV_John_Liu
-// on X), show says so, billing=auto hands it back to magpie's reading, and
+// eipgam provider set billing=plan marks a provider on a plan (EV_John_Liu
+// on X), show says so, billing=auto hands it back to eipgam's reading, and
 // any other value is refused and leaves the saved one alone.
 func TestProviderSetBilling(t *testing.T) {
 	groupsHome(t)

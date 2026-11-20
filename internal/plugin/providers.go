@@ -17,10 +17,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
 // Method is a way a plugin signs in: "oauth" (a browser, then a code
@@ -29,10 +29,10 @@ type Method struct {
 	Type  string `json:"type"`
 	Label string `json:"label"`
 	// Labels is Label by the window's language ("zh", "zh-TW", "ja",
-	// "de"), magpie's own field beside OpenCode's (host.js byLang)
+	// "de"), eipgam's own field beside OpenCode's (host.js byLang)
 	Labels map[string]string `json:"labels,omitempty"`
 	// Placeholder is the hint an "api" method gives in its key's field
-	// (magpie's own field: OpenCode's says "API key")
+	// (eipgam's own field: OpenCode's says "API key")
 	Placeholder string `json:"placeholder,omitempty"`
 	// Keyless skips personal-key entry; authorize supplies the credential.
 	Keyless bool `json:"keyless,omitempty"`
@@ -43,7 +43,7 @@ type Method struct {
 }
 
 // NoKey is whether an "api" method is signed in to with no key of
-// magpie's asking: keyless, or its prompts ask the key.
+// eipgam's asking: keyless, or its prompts ask the key.
 func (m Method) NoKey() bool { return m.Keyless || m.KeyAsked }
 
 // KeyTitle is what an "api" method's key is asked as: its label, as
@@ -134,7 +134,7 @@ type Model struct {
 	Decides bool `json:"decides,omitempty"`
 	// Searches is set by the plugin on a model that searches the web by
 	// itself when asked in plain words (m.searches: Trae's search model),
-	// which magpie may then search with for other models.
+	// which eipgam may then search with for other models.
 	Searches bool `json:"searches,omitempty"`
 	// Also are the AI SDK packages of the other APIs the plugin says its
 	// vendor serves the model on besides its own (NPM), as the packages
@@ -159,10 +159,10 @@ type Provider struct {
 	// Usage says the plugin tells each account's allowance (auth.usage)
 	Usage bool `json:"usage"`
 	// Calls says the plugin lists each account's calls made outside
-	// magpie, for the Usage page (auth.calls)
+	// eipgam, for the Usage page (auth.calls)
 	Calls bool `json:"calls,omitempty"`
-	// Renews says the plugin renews its accounts' sign-ins through magpie
-	// (auth.refresh) and lets the gateway's magpie do it in the background
+	// Renews says the plugin renews its accounts' sign-ins through eipgam
+	// (auth.refresh) and lets the gateway's eipgam do it in the background
 	// as each comes due (auth.keepAlive not false); RenewLead is how long
 	// before a token expires it is due, in milliseconds (auth.refreshLead,
 	// 5 minutes when not said), as the host reckons it (RenewAt).
@@ -178,7 +178,7 @@ type Provider struct {
 	// (auth.options, #2038), as the host checked them
 	Options []Option `json:"options,omitempty"`
 	// Decide says the plugin serves a decision API (TypeSafe's System
-	// One) for this provider: its config hook set decide on it. magpie
+	// One) for this provider: its config hook set decide on it. eipgam
 	// posts the questions to the provider's own base, at /systemone,
 	// through the plugin's fetch (#1514).
 	Decide bool `json:"decide,omitempty"`
@@ -203,18 +203,18 @@ type Provider struct {
 	// Single is the auth hook declaring that sign-in replaces one identity.
 	Single bool `json:"single,omitempty"`
 	// Importable says the plugin takes accounts from a file the user picks
-	// (auth.import, magpie's own hook); ImportFrom is which file, as the
+	// (auth.import, eipgam's own hook); ImportFrom is which file, as the
 	// plugin says it, and ImportFroms the same in other languages.
 	Importable  bool              `json:"importable,omitempty"`
 	ImportFrom  string            `json:"importFrom,omitempty"`
 	ImportFroms map[string]string `json:"importFroms,omitempty"`
 	// CLI is the vendor CLI the plugin runs through and can install itself
-	// (auth.cli, magpie's own hook): a sign-in on a machine without it,
-	// magpie in a container above all, installs it first (CLIInstalled,
+	// (auth.cli, eipgam's own hook): a sign-in on a machine without it,
+	// eipgam in a container above all, installs it first (CLIInstalled,
 	// InstallCLI). nil for a plugin that names none.
 	CLI *CLI `json:"cli,omitempty"`
 	// MaxConcurrency is how many requests the plugin says each of its
-	// accounts takes at once (magpie's own field, which OpenCode ignores:
+	// accounts takes at once (eipgam's own field, which OpenCode ignores:
 	// the auth hook's maxConcurrency, else package.json's
 	// magpie.maxConcurrency); 0 for none said. The user's setting on the
 	// provider goes over it.
@@ -228,7 +228,7 @@ type Provider struct {
 }
 
 // Option is a switch a plugin declares for its provider (auth.options,
-// #2038): magpie shows it, keeps the user's value in settings'
+// #2038): eipgam shows it, keeps the user's value in settings'
 // PluginOptions and hands it to the plugin (input.magpie.option). A change
 // has the providers listed again (SetProviderOptions); nothing else runs.
 type Option struct {
@@ -472,11 +472,11 @@ func refreshProvidersInBackground(ctx context.Context, epoch uint64) {
 
 // ProxyFor is the proxy choice (netproxy.With's) of the provider's
 // account at key, or of the provider for key "": set by the providers
-// magpie keeps, which know them.
+// eipgam keeps, which know them.
 var ProxyFor func(provider, key string) string
 
 // ListingOff is the plugin providers (by the plugin's own id) switched off
-// in magpie: set by the providers magpie keeps, which know them. A
+// in magpie: set by the providers eipgam keeps, which know them. A
 // listing asks none of them their models (ChangQiu on Discord): Off means no request
 // goes to the provider, and a models hook asks its vendor, renewing the
 // sign-in first.
@@ -699,7 +699,7 @@ func Settle() {
 }
 
 // Cached is the plugins' providers as last asked, without starting the
-// host: what is known of them when magpie has only just started. A
+// host: what is known of them when eipgam has only just started. A
 // provider's sign-in is read afresh from plugin-auth.json.
 func Cached() []Provider {
 	checkList()
@@ -1343,7 +1343,7 @@ type UsageWindow struct {
 	Balance *float64 `json:"balance"`
 }
 
-// OutsideCall is one call an account made outside magpie, as the plugin's
+// OutsideCall is one call an account made outside eipgam, as the plugin's
 // auth.calls said it: RID is the vendor's id of it, T its time (epoch ms),
 // In the input tokens with the cache apart, Cost its USD price as the
 // vendor gave it (nil when not said), Session the conversation it was in.
@@ -1360,7 +1360,7 @@ type OutsideCall struct {
 }
 
 // AccountCalls asks the plugin for account's calls of provider made
-// outside magpie, from since on.
+// outside eipgam, from since on.
 func AccountCalls(ctx context.Context, provider, account string, since time.Time) ([]OutsideCall, error) {
 	var r struct {
 		Calls []OutsideCall `json:"calls"`

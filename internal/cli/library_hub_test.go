@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// magpie library mcp router on|off (#2679): on, the agent is given magpie's
+// eipgam library mcp router on|off (#2679): on, the agent is given eipgam's
 // one MCP server in place of the library's; off, each server's own again.
 // Any other word is refused, and writes nothing. "hub", its name before,
 // still works.
@@ -52,13 +52,13 @@ func TestLibraryMCPHub(t *testing.T) {
 	if err := libraryCmd([]string{"library", "mcp", "router", "on"}); err != nil {
 		t.Fatal(err)
 	}
-	if got := names(); !slices.Equal(got, []string{"magpie"}) {
+	if got := names(); !slices.Equal(got, []string{"eipgam"}) {
 		t.Fatalf("router on: %v", got)
 	}
 	if err := libraryCmd([]string{"library", "mcp", "router", "yes"}); err == nil || !strings.Contains(err.Error(), "usage") {
 		t.Fatalf("router yes: %v", err)
 	}
-	if got := names(); !slices.Equal(got, []string{"magpie"}) {
+	if got := names(); !slices.Equal(got, []string{"eipgam"}) {
 		t.Fatalf("after a word it doesn't know: %v", got)
 	}
 	// a server kept direct (#4382) is its own entry again, beside no hub
@@ -76,7 +76,7 @@ func TestLibraryMCPHub(t *testing.T) {
 	if err := libraryCmd([]string{"library", "mcp", "hub", "fs", "shared"}); err != nil {
 		t.Fatal(err)
 	}
-	if got := names(); !slices.Equal(got, []string{"magpie"}) {
+	if got := names(); !slices.Equal(got, []string{"eipgam"}) {
 		t.Fatalf("fs shared: %v", got)
 	}
 	if err := libraryCmd([]string{"library", "mcp", "hub", "off"}); err != nil {

@@ -19,11 +19,11 @@ import (
 	"github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/jsonc"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
-// sandbox is a home with every agent magpie can give the library to, and
+// sandbox is a home with every agent eipgam can give the library to, and
 // nothing on PATH, so only these are found.
 func sandbox(t *testing.T) string {
 	t.Helper()
@@ -441,7 +441,7 @@ authorization_server_issuer = "https://id.example"
 	}
 }
 
-// What a TOML value magpie keeps reads back as the same value and type.
+// What a TOML value eipgam keeps reads back as the same value and type.
 func TestTOMLValueKeepsTypes(t *testing.T) {
 	src := "f = 120.0\ng = 1e21\nh = -0.5\ni = 7\nd = 2026-10-06\nlt = 07:32:00.5\nldt = 2026-10-06T07:32:00\nodt = 2026-10-06T07:32:00.123+08:00\ninf = inf\n"
 	var want map[string]any
@@ -569,13 +569,13 @@ func TestInstructions(t *testing.T) {
 		t.Error("rewrite didn't")
 	}
 
-	// off: magpie's part goes, the user's stays; a file only magpie wrote goes
+	// off: eipgam's part goes, the user's stays; a file only eipgam wrote goes
 	ok(t)(SaveInstructions(InstructionsChange{Agents: []string{}}))
 	if s := read(t, cl); s != "# Mine\n\nBe brief.\n" {
 		t.Errorf("claude after:\n%q", s)
 	}
 	if _, err := os.Stat(cx); !os.IsNotExist(err) {
-		t.Error("codex's AGENTS.md, only magpie's, is still there")
+		t.Error("codex's AGENTS.md, only eipgam's, is still there")
 	}
 	if es, _ := os.ReadDir(BackupDir()); len(es) == 0 {
 		t.Error("nothing was backed up")
@@ -583,7 +583,7 @@ func TestInstructions(t *testing.T) {
 }
 
 // TestInstructionsSetLinkedToAgentsFile is #2349: instructions.md linked to
-// the file Claude Code reads. The set was read with magpie's part in it, so
+// the file Claude Code reads. The set was read with eipgam's part in it, so
 // each sync wrote the whole file into its own part again and it doubled.
 func TestInstructionsSetLinkedToAgentsFile(t *testing.T) {
 	h := sandbox(t)
@@ -612,7 +612,7 @@ func TestInstructionsSetLinkedToAgentsFile(t *testing.T) {
 		t.Errorf("shared: %q", iv.Shared)
 	}
 
-	// a file grown before: every part magpie wrote into itself comes out
+	// a file grown before: every part eipgam wrote into itself comes out
 	grown := "# Mine\n\nBe brief.\n"
 	for range 4 {
 		grown = withBlock(grown, strings.TrimSpace(grown))
@@ -1291,7 +1291,7 @@ func TestInstructionSetTakesAnEmptyOnesPlace(t *testing.T) {
 	if s := read(t, md); !strings.HasPrefix(s, "# Mine\n\n"+blockBegin+"\nCompany rules.\n"+blockEnd) {
 		t.Errorf("CLAUDE.md:\n%s", s)
 	}
-	// off: magpie's part out, the user's own as it was
+	// off: eipgam's part out, the user's own as it was
 	ok(t)(SaveInstructions(InstructionsChange{Agents: []string{}}))
 	if s := read(t, md); s != "# Mine\n" {
 		t.Errorf("switched off:\n%q", s)

@@ -20,12 +20,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/filememo"
 )
 
 // A vendor's own /models endpoint is the truth about what it serves today;
-// models.dev lags and keeps legacy names around. magpie asks the vendor when
+// models.dev lags and keeps legacy names around. eipgam asks the vendor when
 // it has a key, remembers the answer next to the models.dev cache, and lets
 // the catalog fill in display names and reasoning levels.
 
@@ -171,7 +171,7 @@ func LiveByID(provider, model string) []Model {
 
 // LiveByIDShared is LiveByID without the copy, for a caller that only
 // reads it: asked for a model's APIs, price or tiers for every model a
-// page lists, the copies were 32 MB of a live magpie's 2.6 GB in a minute
+// page lists, the copies were 32 MB of a live eipgam's 2.6 GB in a minute
 // and a half.
 func LiveByIDShared(provider, model string) []Model {
 	f, err := readLive(provider)
@@ -387,7 +387,7 @@ func LiveAsked(provider string) string {
 }
 
 // LiveSince is when the provider's fetched list first had model, as far
-// as magpie kept it: since the first save that listed it, or, for a list
+// as eipgam kept it: since the first save that listed it, or, for a list
 // saved before that was kept, since that list's own fetch (no earlier
 // one is known). ok is false when the list doesn't have it, or there is
 // none.
@@ -467,8 +467,8 @@ func saveLive(provider, base, asked string, models []Model, sides map[string][]M
 		// minutes, KeepAccountsListed): only when it was fetched is other.
 		// Its next read looks at the file, and nothing else is told:
 		// Touched had every agent's lists built and compared again, and
-		// Forget moved the stamp dsh's rounds build magpie's models by,
-		// ~40 MB of allocations a time in a magpie at rest.
+		// Forget moved the stamp dsh's rounds build eipgam's models by,
+		// ~40 MB of allocations a time in a eipgam at rest.
 		filememo.Look(p)
 		return nil
 	}
@@ -518,7 +518,7 @@ func liveSince(provider string, models []Model, now time.Time) map[string]time.T
 	return out
 }
 
-// Changed, when set, is told that the models magpie offers may be others
+// Changed, when set, is told that the models eipgam offers may be others
 // now: a provider added, edited or removed, a vendor's list fetched anew.
 // The agent package sets it, to bring the model lists agents keep in files
 // of their own up to date.
@@ -854,7 +854,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 			return nil, nil, err
 		}
 		req.Header.Set("Accept", "application/json")
-		req.Header.Set("User-Agent", "magpie")
+		req.Header.Set("User-Agent", "eipgam")
 		if key != "" {
 			req.Header.Set("Authorization", "Bearer "+key)
 			req.Header.Set("x-api-key", key)
@@ -947,11 +947,11 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 		if id == "" {
 			continue
 		}
-		// one that goes from here and comes back (magpie_via.go)
+		// one that goes from here and comes back (eipgam_via.go)
 		if loops(r.Via) {
 			continue
 		}
-		// Another magpie's list is already what its user exposed. Keep
+		// Another eipgam's list is already what its user exposed. Keep
 		// its retrieval models too; a vendor's general list still leaves
 		// out models agents can't chat with.
 		decision := r.Kind == "decision"
@@ -961,7 +961,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 			// "output_modalities": ["video"]}
 			ins, outs = Kinds(r.Modalities.InputModalities), Kinds(r.Modalities.OutputModalities)
 		}
-		// a model the list says makes videos: another magpie's kind, or,
+		// a model the list says makes videos: another eipgam's kind, or,
 		// where the list marks no kind, Ark's domain "VideoGeneration" or
 		// an output of video without text (doubao-seedance-*, wan2-1-*),
 		// which is no model to chat with (axelburks on Discord: Ark's
@@ -978,7 +978,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 		md.Modalities.Output = outs
 		// one made for another API (embeddings, rerank, speech,
 		// transcriptions) is kept, said so, for that API's routes and
-		// groups (#5339); another magpie's list keeps them as it lists
+		// groups (#5339); another eipgam's list keeps them as it lists
 		// them
 		serves := ""
 		if !drawer && !films && !decision && headers["X-Magpie-Drawers"] == "" {
@@ -1049,7 +1049,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 			m.Output = int(n)
 		}
 		m.Efforts = levelsOf(r.Levels)
-		if r.WebSearch == "native" || r.WebSearch == "magpie" {
+		if r.WebSearch == "native" || r.WebSearch == "eipgam" {
 			m.WebSearch = r.WebSearch
 		}
 		if input != nil {
@@ -1118,7 +1118,7 @@ type liveModel struct {
 	// the context window, where the list tells it (OpenRouter, Command
 	// Code); any, as a vendor's odd value mustn't lose the whole list
 	ContextLength any `json:"context_length"`
-	// what another magpie's list tells of each model: the APIs its own
+	// what another eipgam's list tells of each model: the APIs its own
 	// provider serves it on, where a request goes on as it is rather
 	// than translated (native_endpoints), its longest reply and its
 	// reasoning levels. any, as a vendor's odd value mustn't lose the
@@ -1126,28 +1126,28 @@ type liveModel struct {
 	Native []string `json:"native_endpoints"`
 	Output any      `json:"max_output_tokens"`
 	Levels any      `json:"supported_reasoning_levels"`
-	// another magpie's name for the model with its provider there after
+	// another eipgam's name for the model with its provider there after
 	// it, and "image", "video" or "decision" for its other models
-	Label string `json:"magpie_label"`
+	Label string `json:"eipgam_label"`
 	// the provider serving the model there, the first in a chain of
 	// magpies (Model.By)
-	By   string `json:"magpie_by"`
+	By   string `json:"eipgam_by"`
 	Kind string `json:"kind"`
-	// how another magpie searches the web for the model: "native" or
-	// "magpie" (Model.WebSearch)
+	// how another eipgam searches the web for the model: "native" or
+	// "eipgam" (Model.WebSearch)
 	WebSearch string `json:"web_search"`
-	// the service tiers another magpie offers its Codex on the model
+	// the service tiers another eipgam offers its Codex on the model
 	// (Fast's "priority"), as Codex's catalog writes them ({"id":…}) or
 	// as plain ids: kept as Model.Tiers (#1234). any, as an odd value
 	// mustn't lose the whole list
 	Tiers any `json:"service_tiers"`
-	// what another magpie counts a call to the model at, asked for with
+	// what another eipgam counts a call to the model at, asked for with
 	// its X-Magpie-Prices header: the price its user set, else its list
 	// price. Raw, as an odd value mustn't lose the whole list
-	Price json.RawMessage `json:"magpie_price"`
-	// the magpies another magpie's model passes through to its vendor,
-	// itself last (magpie_via.go)
-	Via []string `json:"magpie_via"`
+	Price json.RawMessage `json:"eipgam_price"`
+	// the magpies another eipgam's model passes through to its vendor,
+	// itself last (eipgam_via.go)
+	Via []string `json:"eipgam_via"`
 	// the protocol family PipeLLM routes the model by: openai, anthropic
 	// or gemini
 	TypeTarget string `json:"type_target"`
@@ -1250,7 +1250,7 @@ func tiersOf(v any) []string {
 }
 
 // levelsOf are the efforts of a list's supported_reasoning_levels, as
-// magpie and Codex write them ([{"effort":"high"}]) or as plain names.
+// eipgam and Codex write them ([{"effort":"high"}]) or as plain names.
 func levelsOf(v any) []string {
 	xs, _ := v.([]any)
 	var out []string
@@ -1267,7 +1267,7 @@ func levelsOf(v any) []string {
 }
 
 // EndpointAPIs names the APIs of a model list's supported_endpoints —
-// "chat", "responses", "anthropic" — leaving out any magpie doesn't speak
+// "chat", "responses", "anthropic" — leaving out any eipgam doesn't speak
 // (Copilot's websocket one); nil when it names none of them.
 func EndpointAPIs(endpoints []string) []string {
 	var out []string
@@ -1364,7 +1364,7 @@ func Decorate(live []Model, known []Model) []Model {
 	return out
 }
 
-// sane reports whether a price another magpie sent is one a vendor could
+// sane reports whether a price another eipgam sent is one a vendor could
 // charge: no part below zero or out of range, and tiers of a size.
 func (p Price) sane() bool {
 	ok := func(vs ...float64) bool {

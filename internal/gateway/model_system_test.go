@@ -11,7 +11,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 const ownPrompt = "Answer in Chinese."
@@ -102,7 +102,7 @@ func TestModelSystemNoneLeavesTheBody(t *testing.T) {
 	}
 }
 
-// magpie's own asks go without it.
+// eipgam's own asks go without it.
 func TestModelSystemNotOnMagpiesOwnAsks(t *testing.T) {
 	fresh(t)
 	p := provider.Provider{ID: "fake", Name: "Fake", Key: "k", Chat: "http://127.0.0.1:9/v1", Models: []string{"sol"}}
@@ -118,10 +118,10 @@ func TestModelSystemNotOnMagpiesOwnAsks(t *testing.T) {
 		t.Errorf("an agent's turn went without it: %s", got)
 	}
 	if got := withModelSystem(r.WithContext(ownAsk(r.Context())), p, "sol", provider.Chat, body); string(got) != string(body) {
-		t.Errorf("magpie's own ask was sent it: %s", got)
+		t.Errorf("eipgam's own ask was sent it: %s", got)
 	}
 	if magpiesOwnAsk(r) || magpiesOwnAsk(agentTurn(r)) {
-		t.Error("an agent's request taken for magpie's own")
+		t.Error("an agent's request taken for eipgam's own")
 	}
 	if !magpiesOwnAsk(r.WithContext(ownAsk(r.Context()))) {
 		t.Error("search and vision stand-ins are sent it")
@@ -323,7 +323,7 @@ func TestModelSystemReachesAPluginsModel(t *testing.T) {
 	}
 	rec := httptest.NewRecorder()
 	r := httptest.NewRequest("POST", "/v1/messages", strings.NewReader(`{"model":"`+pid+`/fake-1","max_tokens":10,"system":"AGENT","messages":[{"role":"user","content":"hi"}]}`))
-	r.Header.Set("Authorization", "Bearer magpie")
+	r.Header.Set("Authorization", "Bearer eipgam")
 	New().Handler().ServeHTTP(rec, r)
 	if rec.Code != 200 {
 		t.Fatalf("%d %s", rec.Code, rec.Body)

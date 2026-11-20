@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // Vercel AI Gateway is a preset (Archie627 on X): Chat Completions and

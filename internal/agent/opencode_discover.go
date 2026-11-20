@@ -12,19 +12,19 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
 )
 
-// OpenCode finds magpie's models itself (chawyehsu on X, after
-// yuhp/opencode-models-discovery): opencode.json keeps magpie's provider
-// without a list of its models, and a plugin magpie writes beside it,
-// plugins/magpie-models.js in OpenCode's config folder, fills the list
+// OpenCode finds eipgam's models itself (chawyehsu on X, after
+// yuhp/opencode-models-discovery): opencode.json keeps eipgam's provider
+// without a list of its models, and a plugin eipgam writes beside it,
+// plugins/eipgam-models.js in OpenCode's config folder, fills the list
 // from the gateway's /v1/models?format=opencode (opencode2 for OpenCode 2)
-// each time OpenCode starts. So OpenCode follows magpie's models without a
-// sync, and a model the user puts under magpie's provider in the file is
-// theirs: the plugin lays its fields over magpie's, and lists one magpie
-// doesn't. With magpie not answering, the plugin lists the models magpie
+// each time OpenCode starts. So OpenCode follows eipgam's models without a
+// sync, and a model the user puts under eipgam's provider in the file is
+// theirs: the plugin lays its fields over eipgam's, and lists one eipgam
+// doesn't. With eipgam not answering, the plugin lists the models eipgam
 // had when it last wrote the file, which it keeps in the file.
 //
 // OpenCode loads every {plugin,plugins}/*.{js,ts} in its config folders
@@ -39,21 +39,21 @@ import (
 // the list in opencode.json, as before.
 //
 // Moving a config that has the list: the first sync that finds it takes
-// out what magpie wrote there and leaves what the user added to a model
-// of magpie's (a variant, a limit.output of theirs), as only the fields
-// that say something other than magpie's (modelsLeft).
+// out what eipgam wrote there and leaves what the user added to a model
+// of eipgam's (a variant, a limit.output of theirs), as only the fields
+// that say something other than eipgam's (modelsLeft).
 
 //go:embed opencode_models.js
 var openCodePluginSource string
 
-// openCodePluginMark opens the plugin magpie writes; a file at its path
+// openCodePluginMark opens the plugin eipgam writes; a file at its path
 // without it is the user's own, never written over or removed.
-const openCodePluginMark = "// magpie: written by magpie"
+const openCodePluginMark = "// eipgam: written by eipgam"
 
-// openCodePluginPath is magpie's plugin beside the OpenCode config at
+// openCodePluginPath is eipgam's plugin beside the OpenCode config at
 // path.
 func openCodePluginPath(path string) string {
-	return filepath.Join(filepath.Dir(path), "plugins", "magpie-models.js")
+	return filepath.Join(filepath.Dir(path), "plugins", "eipgam-models.js")
 }
 
 // openCodeVersionAt is the version of the OpenCode at a place, "" when not
@@ -87,7 +87,7 @@ func openCodeVersionParts(v string) (n [3]int, ok bool) {
 	return n, true
 }
 
-// openCodeDiscovers says whether the OpenCode of version v loads magpie's
+// openCodeDiscovers says whether the OpenCode of version v loads eipgam's
 // plugin: OpenCode 1 from 1.4.0, OpenCode 2 from 2.0.5.
 func openCodeDiscovers(v string) bool {
 	n, ok := openCodeVersionParts(v)
@@ -134,10 +134,10 @@ func withoutModels(block func() any) func() any {
 }
 
 // openCodeDiscoverKey is the stash's word that the OpenCode config at path
-// had magpie's models taken out of it.
+// had eipgam's models taken out of it.
 func openCodeDiscoverKey(path string) string { return "opencode-discover:" + path }
 
-// openCodeModelList is the models of magpie's block (its "models", an
+// openCodeModelList is the models of eipgam's block (its "models", an
 // orderedJSON) as the plugin reads them.
 func openCodeModelList(block any) []gateway.OpenCodeModel {
 	b, _ := block.(map[string]any)
@@ -159,8 +159,8 @@ func init() {
 	}
 }
 
-// openCodePluginFor is the plugin's source for magpie's block: the
-// gateway's address and key, and the models it lists when magpie doesn't
+// openCodePluginFor is the plugin's source for eipgam's block: the
+// gateway's address and key, and the models it lists when eipgam doesn't
 // answer.
 func openCodePluginFor(block any) string {
 	b, _ := block.(map[string]any)
@@ -172,9 +172,9 @@ func openCodePluginFor(block any) string {
 	return strings.Replace(openCodePluginSource, "__MAGPIE__", string(data), 1)
 }
 
-// pluginSynced brings magpie's plugin beside the file to what the file
-// says: there while the file has magpie's provider and its OpenCode
-// discovers, else gone. A file there magpie didn't write is left as it is.
+// pluginSynced brings eipgam's plugin beside the file to what the file
+// says: there while the file has eipgam's provider and its OpenCode
+// discovers, else gone. A file there eipgam didn't write is left as it is.
 func (f ocFile) pluginSynced() error {
 	path := openCodePluginPath(f.path)
 	cur, err := os.ReadFile(path)
@@ -201,20 +201,20 @@ func (f ocFile) pluginSynced() error {
 	return edit.WriteAtomic(path, []byte(want))
 }
 
-// openCodePluginGone takes magpie's plugin beside the OpenCode config at
-// path out, once magpie's provider is out of it.
+// openCodePluginGone takes eipgam's plugin beside the OpenCode config at
+// path out, once eipgam's provider is out of it.
 func openCodePluginGone(path string) error {
 	return ocFile{path: path}.pluginSynced()
 }
 
-// modelsLeft takes magpie's models out of the file, under key (provider's
+// modelsLeft takes eipgam's models out of the file, under key (provider's
 // or providers'), leaving what the user said there. kept is the block as a
 // sync would have written it, with what of the user's a sync keeps (a
 // variant of theirs, a limit.output they typed: openCodeKept,
-// openCodeNativeKept); pure is magpie's own. Of each model magpie lists,
+// openCodeNativeKept); pure is eipgam's own. Of each model eipgam lists,
 // what stays is the fields of kept's that say other than pure's
-// (jsonDelta), which the plugin lays over magpie's. A model magpie doesn't
-// list was magpie's while magpie wrote the models whole, and goes the first
+// (jsonDelta), which the plugin lays over eipgam's. A model eipgam doesn't
+// list was eipgam's while eipgam wrote the models whole, and goes the first
 // time (moved false); after that it is one the user added, and stays.
 func (f ocFile) modelsLeft(key string, kept, pure any, moved bool) error {
 	raw, ok := edit.GetJSONRaw(f.path, key+".models")
@@ -260,7 +260,7 @@ func (f ocFile) modelsLeft(key string, kept, pure any, moved bool) error {
 		}
 		if key == openCodeNativeKey {
 			// with no variants to say, OpenCode 2 would make up its own
-			// for the model (Variant.resolve), where magpie's has none
+			// for the model (Variant.resolve), where eipgam's has none
 			if m, ok := d.(map[string]any); ok && m["variants"] == nil {
 				m["variants"] = []any{}
 			}

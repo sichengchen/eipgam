@@ -11,9 +11,9 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/conptypair"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/conptypair"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // child is Claude Code, started in a pseudo console (ConPTY): Windows' own
@@ -36,10 +36,10 @@ var endSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
 // takes a long message as many pastes and gets a part of it
 // (yetone/magpie#5205); the ConPTY Windows Terminal ships (conpty.dll,
 // which runs the OpenConsole.exe beside it) keeps them. In order:
-//   - dsh-cross: a conpty folder beside magpie's executable holding both,
+//   - dsh-cross: a conpty folder beside eipgam's executable holding both,
 //     the user's own;
 //   - on Windows 10, the pair a release carries (internal/conptypair),
-//     written to magpie's cache and checked against its pins there;
+//     written to eipgam's cache and checked against its pins there;
 //   - the system's.
 type pseudoConsole struct {
 	create, close *windows.LazyProc
@@ -91,7 +91,7 @@ func cutHint() string {
 		return ""
 	}
 	// short, for the bridge's log line to hold it whole
-	return "; on Windows 10, a conpty folder beside magpie.exe fixes it (#5205)"
+	return "; on Windows 10, a conpty folder beside eipgam.exe fixes it (#5205)"
 }
 
 func createPseudoConsole(size windows.Coord, in, out windows.Handle, h *windows.Handle) error {

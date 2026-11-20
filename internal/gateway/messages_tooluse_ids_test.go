@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // toolsUpstream is a Responses relay in front of a Chat model (LiteLLM's

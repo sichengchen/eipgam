@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 func memberIDs(ms []Member) []string {
@@ -112,7 +112,7 @@ func TestKindlessListFetchedOnce(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	// "old"'s list as a magpie before this one saved it: no kinded mark,
+	// "old"'s list as a eipgam before this one saved it: no kinded mark,
 	// embed-1 dropped
 	path := catalog.LivePath("old")
 	b, err := os.ReadFile(path)

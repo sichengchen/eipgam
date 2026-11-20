@@ -10,8 +10,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Betas an agent asks of Anthropic's messages (the anthropic-beta header,
@@ -36,8 +36,8 @@ var bedrockRefuses = []string{
 
 // askedBetas are the betas an agent asked in its anthropic-beta header,
 // but for its own sign-in's: Claude Code signed in to claude.ai asks
-// oauth-2025-04-20, which names a credential that never leaves magpie, so
-// a provider gets the request as magpie's key sends it.
+// oauth-2025-04-20, which names a credential that never leaves eipgam, so
+// a provider gets the request as eipgam's key sends it.
 func askedBetas(in http.Header) []string {
 	var out []string
 	for _, v := range in.Values("anthropic-beta") {

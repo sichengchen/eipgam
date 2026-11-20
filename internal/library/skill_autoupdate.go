@@ -3,7 +3,7 @@ package library
 // Skills kept up to date by themselves (0xYaCo on X: "skill 能自动化升级吗？").
 // With the switch on (AutoUpdateSkills), the gateway checks the skills
 // from GitHub and other git repositories as the Library page does, a
-// little after magpie starts and every checkEvery after, and fetches
+// little after eipgam starts and every checkEvery after, and fetches
 // again each one the check found changed there. Everything an update by
 // hand does holds: a skill changed here is left as it is and keeps its
 // Update button (updateSkills refuses it), one removed there is only
@@ -28,7 +28,7 @@ func SetAutoUpdateSkills(on bool) (*Result, error) {
 }
 
 const (
-	// autoUpdateFirst is how long after magpie starts the first look is:
+	// autoUpdateFirst is how long after eipgam starts the first look is:
 	// the start itself has enough to do
 	autoUpdateFirst = 2 * time.Minute
 	// autoUpdatePoll is how often the loop asks whether a look is due, so

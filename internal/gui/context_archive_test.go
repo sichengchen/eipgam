@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/gwmw"
+	"github.com/sichengchen/eipgam/internal/masking"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // wangbinyq on Discord: clicking a block of the context window card said
-// its text was gone, as magpie keeps only the last 10 requests' bodies in
+// its text was gone, as eipgam keeps only the last 10 requests' bodies in
 // memory, with the request archive on. The archive's copy is read instead,
 // the reply beside it, masked as the copy in memory is; a request the
 // archive has no copy of says why.

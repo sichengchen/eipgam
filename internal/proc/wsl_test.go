@@ -10,10 +10,10 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// #4872: with Settings' Detect agents in WSL off, nothing magpie makes
+// #4872: with Settings' Detect agents in WSL off, nothing eipgam makes
 // starts wsl.exe, by any name or path: a request's stand-in asked it past
 // agent's gates, and on a computer without WSL each ask put up a window
 // offering to install it.
@@ -69,7 +69,7 @@ func TestWSLOffStartsNoWSL(t *testing.T) {
 	}
 }
 
-// TraderX219 on X: with no WSL distro registered, nothing magpie makes
+// TraderX219 on X: with no WSL distro registered, nothing eipgam makes
 // starts wsl.exe, which on a computer without WSL's package put up a
 // console window asking to install it every 20 to 30 seconds. The registry
 // that can't be read, or that has a distro, starts it as before, and a

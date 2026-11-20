@@ -6,20 +6,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-// maxleebeta in #feedback: Pi connected to magpie, picking one of Pi's own
+// maxleebeta in #feedback: Pi connected to eipgam, picking one of Pi's own
 // models in the OPENCODE GO section (opencode-go/<model>, Pi signed in to
 // OpenCode Go itself) turned 「接入」 off, with nothing said. The pick
 // writes defaultProvider opencode-go, so Pi asks OpenCode Go itself and
-// magpie isn't in its config any more; what was missing is that the model
+// eipgam isn't in its config any more; what was missing is that the model
 // said so. Each of an agent's own models now says who it asks (Direct), as
 // Claude Code's and Codex's do, so the picker tags it "direct, not via
-// magpie" and asks before a pick takes the agent off magpie. Every agent
+// eipgam" and asks before a pick takes the agent off eipgam. Every agent
 // whose own models come from ownOptions shares this, so OpenCode is held
-// to it too; magpie's own models stay unmarked.
+// to it too; eipgam's own models stay unmarked.
 func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 	home := syncHome(t)
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
@@ -34,7 +34,7 @@ func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 
 	piDir := filepath.Join(home, ".pi", "agent")
 	writeFile(t, filepath.Join(piDir, "auth.json"), auth)
-	writeFile(t, filepath.Join(piDir, "settings.json"), `{"defaultProvider": "magpie", "defaultModel": "deepseek/deepseek-v4.1-flash"}`)
+	writeFile(t, filepath.Join(piDir, "settings.json"), `{"defaultProvider": "eipgam", "defaultModel": "deepseek/deepseek-v4.1-flash"}`)
 	writeFile(t, filepath.Join(home, ".local", "share", "opencode", "auth.json"), auth)
 	cfg := filepath.Join(home, ".config")
 
@@ -52,7 +52,7 @@ func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 					t.Errorf("%s: own model %s says it goes direct to %q, want OpenCode Go", a.ID, o.Value, o.Direct)
 				}
 			} else if o.Ref != "" && o.Direct != "" {
-				t.Errorf("%s: magpie's %s said to go direct to %q", a.ID, o.Value, o.Direct)
+				t.Errorf("%s: eipgam's %s said to go direct to %q", a.ID, o.Value, o.Direct)
 			}
 		}
 		if own == 0 {

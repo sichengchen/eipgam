@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// Anotiaww on X: one magpie asked another's "claude/claude-opus-5-5"; with
+// Anotiaww on X: one eipgam asked another's "claude/claude-opus-5-5"; with
 // the Claude account at its usage cap and no fallback set on the provider,
 // the request was answered by a routing group of the user's that has that
 // model in it (a WorkBuddy member), with nothing said. A request that

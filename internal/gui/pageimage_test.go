@@ -20,7 +20,7 @@ import (
 func dayPlugin(t *testing.T) (on, off string) {
 	t.Helper()
 	on, off = pagePlugins(t)
-	pkg := `{"name":"magpie-usage-glance","version":"0.1.0","magpie":{"page":{"title":"Usage glance","file":"page/index.html","icon":"page/icon.svg"},"permissions":["usage:day"]}}`
+	pkg := `{"name":"eipgam-usage-glance","version":"0.1.0","magpie":{"page":{"title":"Usage glance","file":"page/index.html","icon":"page/icon.svg"},"permissions":["usage:day"]}}`
 	if err := os.WriteFile(filepath.Join(on, "package.json"), []byte(pkg), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func testPNG(t *testing.T, w, h int) []byte {
 }
 
 // A page's picture is put on the clipboard or saved in Downloads, never
-// over a file there; what isn't a PNG of a card's size, a page magpie
+// over a file there; what isn't a PNG of a card's size, a page eipgam
 // doesn't show, an action of no name and a page that asks over and over
 // are refused.
 func TestPluginPageSharesAPicture(t *testing.T) {
@@ -125,16 +125,16 @@ func TestPluginPageSharesAPicture(t *testing.T) {
 	}
 	next()
 	var saved struct{ Path string }
-	w := pagePost(h, "/api/plugin-pages/image", map[string]any{"spec": on, "action": "save", "name": "magpie 2026-11-09", "png": pic})
-	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &saved) != nil || filepath.Base(saved.Path) != "magpie 2026-11-09.png" {
+	w := pagePost(h, "/api/plugin-pages/image", map[string]any{"spec": on, "action": "save", "name": "eipgam 2026-11-09", "png": pic})
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &saved) != nil || filepath.Base(saved.Path) != "eipgam 2026-11-09.png" {
 		t.Fatalf("save: %d %s", w.Code, w.Body)
 	}
-	if b, err := os.ReadFile(filepath.Join(dir, "magpie 2026-11-09.png")); err != nil || !bytes.Equal(b, pic) {
+	if b, err := os.ReadFile(filepath.Join(dir, "eipgam 2026-11-09.png")); err != nil || !bytes.Equal(b, pic) {
 		t.Errorf("saved: %v", err)
 	}
 	next()
-	w = pagePost(h, "/api/plugin-pages/image", map[string]any{"spec": on, "action": "save", "name": "magpie 2026-11-09.png", "png": pic})
-	if w.Code != 200 || !strings.HasSuffix(w.Body.String(), `magpie 2026-11-09-2.png"}`+"\n") {
+	w = pagePost(h, "/api/plugin-pages/image", map[string]any{"spec": on, "action": "save", "name": "eipgam 2026-11-09.png", "png": pic})
+	if w.Code != 200 || !strings.HasSuffix(w.Body.String(), `eipgam 2026-11-09-2.png"}`+"\n") {
 		t.Errorf("a second save: %d %s", w.Code, w.Body)
 	}
 	if w := pagePost(h, "/api/plugin-pages/image", map[string]any{"spec": on, "action": "copy", "png": pic}); w.Code != http.StatusTooManyRequests {
@@ -176,13 +176,13 @@ func TestPluginPageSharesAPicture(t *testing.T) {
 
 func TestPageImageName(t *testing.T) {
 	for in, want := range map[string]string{
-		"":                       "magpie",
-		"  ":                     "magpie",
-		"magpie 2026-11-09.png":  "magpie 2026-11-09",
+		"":                       "eipgam",
+		"  ":                     "eipgam",
+		"eipgam 2026-11-09.png":  "eipgam 2026-11-09",
 		"../../etc/passwd":       "etc-passwd",
 		`a:b*c?"d"<e>|f\g`:       "a-b-c--d--e--f-g",
 		"x\ny\x00":               "x-y",
-		"..":                     "magpie",
+		"..":                     "eipgam",
 		strings.Repeat("长", 100): strings.Repeat("长", 80),
 	} {
 		if got := pageImageName(in); got != want {
@@ -210,7 +210,7 @@ func TestClipImageCommand(t *testing.T) {
 		t.Errorf("darwin: %s %q %v", name, args, err)
 	}
 	name, args, extra, err := clipImageCommand("windows", getenv, look, file)
-	if err != nil || name != "powershell.exe" || !strings.Contains(strings.Join(args, " "), "-STA") || len(extra) != 1 || extra[0] != "MAGPIE_CLIP_PNG="+file || strings.Contains(strings.Join(args, " "), file) {
+	if err != nil || name != "powershell.exe" || !strings.Contains(strings.Join(args, " "), "-STA") || len(extra) != 1 || extra[0] != "EIPGAM_CLIP_PNG="+file || strings.Contains(strings.Join(args, " "), file) {
 		t.Errorf("windows: %s %q %q %v", name, args, extra, err)
 	}
 	if _, _, _, err := clipImageCommand("linux", getenv, look, file); !errors.Is(err, errNoImageClipboard) {

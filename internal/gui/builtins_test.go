@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	_ "github.com/yetone/magpie/plugins/all"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/pluginrt"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	_ "github.com/sichengchen/eipgam/plugins/all"
 )
 
 func builtinHome(t *testing.T) http.Handler {
@@ -40,7 +40,7 @@ func TestBuiltinSwitch(t *testing.T) {
 	if _, err := pluginrt.Settle(); err != nil {
 		t.Fatal(err)
 	}
-	// a new install has every one on, so a new user sees all magpie does
+	// a new install has every one on, so a new user sees all eipgam does
 	for _, b := range builtinsState() {
 		if !b.On || b.State != pluginrt.Active {
 			t.Fatalf("a new install: %+v", b)
@@ -142,11 +142,11 @@ func TestBootSaysBuiltinsOff(t *testing.T) {
 
 // boot.js says where the gateway listens when this process serves it, so
 // the sidebar's line is drawn before the first paint (#3429), and nothing
-// when it doesn't: one served by another magpie is the providers' read to
+// when it doesn't: one served by another eipgam is the providers' read to
 // find, never this process's guess.
 func TestBootSaysWhereItsGatewayListens(t *testing.T) {
 	h := builtinHome(t)
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3481")
+	t.Setenv("EIPGAM_ADDR", "127.0.0.1:3481")
 	boot := func() string {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, httptest.NewRequest("GET", "/boot.js", nil))
@@ -161,24 +161,24 @@ func TestBootSaysWhereItsGatewayListens(t *testing.T) {
 	if b := boot(); !strings.Contains(b, `"sideGateway":{"boot":true,"running":true,"url":"http://127.0.0.1:3481"}`) {
 		t.Fatalf("served here: %s", b)
 	}
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3483")
+	t.Setenv("EIPGAM_ADDR", "0.0.0.0:3483")
 	// on the network, it says so, with the addresses other machines use,
 	// for the window's line to name them (coeo91 on Discord)
 	if b := boot(); !strings.Contains(b, `"sideGateway":{"boot":true,"lan":true,`) || !strings.Contains(b, `"running":true,"url":"http://127.0.0.1:3483"}`) {
 		t.Fatalf("every interface, reached on loopback: %s", b)
 	}
-	// MAGPIE_PUBLIC_URL goes with it while other machines are let in, for
-	// magpie web's page to show (noahhrreion on Discord, in Docker), and
+	// EIPGAM_PUBLIC_URL goes with it while other machines are let in, for
+	// eipgam web's page to show (noahhrreion on Discord, in Docker), and
 	// not while the gateway is this computer's alone
-	t.Setenv("MAGPIE_PUBLIC_URL", "http://nas.local:3425")
+	t.Setenv("EIPGAM_PUBLIC_URL", "http://nas.local:3425")
 	if b := boot(); !strings.Contains(b, `"sideGateway":{"boot":true,"lan":true,"lanURLs":["http://nas.local:3425"],"publicURL":"http://nas.local:3425","running":true,"url":"http://127.0.0.1:3483"}`) {
-		t.Fatalf("on the network, with MAGPIE_PUBLIC_URL: %s", b)
+		t.Fatalf("on the network, with EIPGAM_PUBLIC_URL: %s", b)
 	}
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3483")
+	t.Setenv("EIPGAM_ADDR", "127.0.0.1:3483")
 	if b := boot(); strings.Contains(b, "nas.local") || strings.Contains(b, `"lan"`) {
 		t.Fatalf("on loopback, not shared: %s", b)
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	served.Store(nil)
 	if b := boot(); strings.Contains(b, "sideGateway") {
 		t.Fatalf("stopped: %s", b)

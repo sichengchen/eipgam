@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // TestClaudeCompactHeldToClaudeMax (ZeroX2017 on X, 0.1.4404): a
@@ -16,9 +16,9 @@ import (
 // went into Claude Code's settings.json as it was, and Claude Code
 // (2.1.316, Claude Desktop 2.7032's schema too) takes 100000 to 1000000
 // there and reads a larger one as none: a new Claude App session ran at
-// the 272K for every model. What magpie writes for Claude is held to
+// the 272K for every model. What eipgam writes for Claude is held to
 // 1000000, per model, top-level and in CLAUDE_CODE_AUTO_COMPACT_WINDOW;
-// the threshold in magpie stays 1048576, and Codex still runs to it.
+// the threshold in eipgam stays 1048576, and Codex still runs to it.
 func TestClaudeCompactHeldToClaudeMax(t *testing.T) {
 	home, path := desktopWindowSandbox(t)
 	if err := provider.Save(provider.Provider{ID: "ollama", Name: "Ollama Cloud", Chat: "http://127.0.0.1:1/v1", Key: "k",
@@ -39,7 +39,7 @@ func TestClaudeCompactHeldToClaudeMax(t *testing.T) {
 	if err := a.Field("model").Set("v/plain"); err != nil {
 		t.Fatal(err)
 	}
-	if err := claudeDesktop(home).Field("provider").Set("magpie"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	ids := map[string]string{}
@@ -54,7 +54,7 @@ func TestClaudeCompactHeldToClaudeMax(t *testing.T) {
 	if ds != "1000000" || top != "272000" {
 		t.Fatalf("the Claude App's DeepSeek: entry %q, top-level %q; want 1000000 and 272000: %s", ds, top, readFile(path))
 	}
-	// a sync again changes nothing: the held value is magpie's own
+	// a sync again changes nothing: the held value is eipgam's own
 	before := readFile(path)
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
@@ -63,7 +63,7 @@ func TestClaudeCompactHeldToClaudeMax(t *testing.T) {
 		t.Fatalf("a second sync rewrote the file:\n%s\n%s", before, after)
 	}
 	if n := provider.CompactSet("ollama/deepseek-v4.1-flash"); n != 1048576 {
-		t.Fatalf("the threshold in magpie became %d", n)
+		t.Fatalf("the threshold in eipgam became %d", n)
 	}
 
 	// Claude Code alone, on the DeepSeek: the variable is held too
@@ -89,7 +89,7 @@ func TestClaudeCompactHeldToClaudeMax(t *testing.T) {
 			Compact int    `json:"auto_compact_token_limit"`
 		} `json:"models"`
 	}
-	raw := readFile(filepath.Join(home, ".codex", "magpie-models.json"))
+	raw := readFile(filepath.Join(home, ".codex", "eipgam-models.json"))
 	if err := json.Unmarshal([]byte(raw), &got); err != nil {
 		t.Fatalf("%v: %s", err, raw)
 	}
@@ -133,7 +133,7 @@ func TestClaudeTopCompactHeldToClaudeMax(t *testing.T) {
 	if err := a.Field("model").Set("v/plain"); err != nil {
 		t.Fatal(err)
 	}
-	if err := claudeDesktop(home).Field("provider").Set("magpie"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	if top, _ := edit.GetJSON(path, "autoCompactWindow"); top != "1000000" {

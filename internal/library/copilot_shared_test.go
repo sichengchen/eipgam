@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/sichengchen/eipgam/internal/agent"
 )
 
 // GitHub Copilot reads ~/.copilot/copilot-instructions.md as the user's own
@@ -97,12 +97,12 @@ func TestCopilotVSCodeAloneGetsInstructions(t *testing.T) {
 		t.Fatal(err)
 	}
 	if a.Detected() {
-		t.Error("the instructions magpie wrote in ~/.copilot made Copilot CLI detected")
+		t.Error("the instructions eipgam wrote in ~/.copilot made Copilot CLI detected")
 	}
 }
 
-// The user's own copilot-instructions.md is kept, with magpie's block
-// beside it, and comes back whole when magpie's instructions are off.
+// The user's own copilot-instructions.md is kept, with eipgam's block
+// beside it, and comes back whole when eipgam's instructions are off.
 func TestCopilotInstructionsKeepTheUsersOwn(t *testing.T) {
 	h := sandbox(t)
 	noCopilotCLI(t, h)
@@ -119,7 +119,7 @@ func TestCopilotInstructionsKeepTheUsersOwn(t *testing.T) {
 	empty := ""
 	ok(t)(SaveInstructions(InstructionsChange{Shared: &empty, Agents: []string{"copilot"}}))
 	if s := read(t, p); strings.TrimSpace(s) != strings.TrimSpace(mine) {
-		t.Errorf("after magpie's instructions are gone:\n%q", s)
+		t.Errorf("after eipgam's instructions are gone:\n%q", s)
 	}
 }
 

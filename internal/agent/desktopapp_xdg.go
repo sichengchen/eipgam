@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // linuxApp is how a desktop app whose vendor ships no Linux package is

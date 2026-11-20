@@ -9,13 +9,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
-// A project in a git repository keeps what magpie places in it out of git
+// A project in a git repository keeps what eipgam places in it out of git
 // through the repository's own info/exclude, which git reads beside the
 // .gitignore and which is never committed (gitignore(5)): nothing of
-// magpie's goes into the project's history, its .gitignore included. The
+// eipgam's goes into the project's history, its .gitignore included. The
 // file is shared by the repository's worktrees, each reading it against
 // its own top folder, so one block of lines keeps a project's entries out
 // of git in every worktree.
@@ -146,15 +146,15 @@ func projectKey(dir string) string {
 	return hex.EncodeToString(h[:6])
 }
 
-// excludeBegin is the first of the lines magpie keeps a project's entries
+// excludeBegin is the first of the lines eipgam keeps a project's entries
 // between in info/exclude, one block per project (several can share a
 // repository); ignoreEnd ends it.
 func excludeBegin(dir string) string {
-	return "# >>> magpie: library items placed in " + filepath.ToSlash(dir) + " (magpie adds and removes these lines) >>>"
+	return "# >>> eipgam: library items placed in " + filepath.ToSlash(dir) + " (eipgam adds and removes these lines) >>>"
 }
 
 // writeExclude keeps the repository's info/exclude listing the entries
-// magpie placed in the project, relative to its worktree's top, between
+// eipgam placed in the project, relative to its worktree's top, between
 // the project's two lines; every other line is git's or the user's.
 func (p *Project) writeExclude(g gitWhere, entries []string) error {
 	f := filepath.Join(g.Common, "info", "exclude")

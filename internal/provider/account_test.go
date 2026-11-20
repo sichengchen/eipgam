@@ -17,10 +17,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/codexcat"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // fakeJWT is a token whose payload is the given claims; nobody checks the
@@ -59,7 +59,7 @@ func signIn(t *testing.T) string {
 			"refresh_token": "r", "account_id": "acct-1",
 		},
 	})
-	// Codex lists its models in its own cache; magpie reads that, nothing else.
+	// Codex lists its models in its own cache; eipgam reads that, nothing else.
 	writeFile(t, filepath.Join(home, ".codex", "models_cache.json"), map[string]any{
 		"models": []any{map[string]any{"slug": "gpt-5.5", "display_name": "GPT-5.5", "visibility": "list", "priority": 1}},
 	})
@@ -169,7 +169,7 @@ func TestAccountsAreProviders(t *testing.T) {
 	if len(codex.Exposed()) != 1 || codex.Exposed()[0].ID != "gpt-5.5" || codex.Responses == "" {
 		t.Fatalf("picks: %+v", codex.Exposed())
 	}
-	// removing an account hides it from magpie; adding it back restores
+	// removing an account hides it from eipgam; adding it back restores
 	// it with its picks
 	if err := Delete("codex"); err != nil {
 		t.Fatal(err)
@@ -314,7 +314,7 @@ func claudeSignIn(t *testing.T, home string, expiry time.Time) string {
 			"expiresAt": expiry.UnixMilli(), "subscriptionType": "max",
 			"scopes": []string{"user:inference", "user:profile"},
 		},
-		// what magpie must not clobber when it writes a refreshed token back
+		// what eipgam must not clobber when it writes a refreshed token back
 		"mcpOAuth": map[string]any{"plugin:slack:slack|x": map[string]any{"serverName": "Slack"}},
 	})
 	return path
@@ -351,7 +351,7 @@ func TestClaudeAccountIsProvider(t *testing.T) {
 	home := claudeHome(t)
 	creds := claudeSignIn(t, home, time.Now().Add(time.Hour))
 
-	// Claude's models are the catalog's: magpie asks Anthropic nothing with
+	// Claude's models are the catalog's: eipgam asks Anthropic nothing with
 	// the account's sign-in, not even its model list
 	asked := false
 	anthropic := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -656,7 +656,7 @@ func TestCopilotAPIs(t *testing.T) {
 	}
 }
 
-// A sign-in magpie wrote on several lines comes back from `security -w` as
+// A sign-in eipgam wrote on several lines comes back from `security -w` as
 // hex; it is read, and written on one line so Claude Code can read it (#70).
 func TestKeychainText(t *testing.T) {
 	c := claudeCredentials{OAuth: claudeAuth{AccessToken: "a", RefreshToken: "r", Scopes: []string{"user:inference"}}}

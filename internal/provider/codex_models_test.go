@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A ChatGPT account lists the models of its own plan, asked with its own
@@ -83,7 +83,7 @@ func TestCodexVersion(t *testing.T) {
 	}
 }
 
-// A Codex that came through the gateway newer than any magpie can find
+// A Codex that came through the gateway newer than any eipgam can find
 // counts at once, the cached lookup notwithstanding: the account's model
 // list is asked for as that Codex, and its turns say they are it. Only
 // Codex's requests count, and never an older version.
@@ -143,7 +143,7 @@ func TestCodexVersionSeen(t *testing.T) {
 // With no Codex CLI here, or an older one, the models list is still asked
 // for as a Codex new enough for every model the account has: GPT-6.2 Sol
 // and Astra, listed to 0.166.0 and later only, were never offered at the
-// 0.159.0 magpie asked as (zzstar101 and m0eaki on X). npm's latest
+// 0.159.0 eipgam asked as (zzstar101 and m0eaki on X). npm's latest
 // counts once read, and only a release version of it.
 func TestCodexVersionPublished(t *testing.T) {
 	if compareClaudeVersion(codexClientVersion, "0.166.0") < 0 {
@@ -302,7 +302,7 @@ func TestCodexVersionNotRerun(t *testing.T) {
 	}
 }
 
-// A magpie with no Codex to ask (in Docker: OoopsHh on X) asks for an
+// A eipgam with no Codex to ask (in Docker: OoopsHh on X) asks for an
 // account's models as a Codex the ChatGPT backend lists GPT-6.2 and
 // Ultrafast to, which it does from 0.166.0 on.
 func TestCodexFallbackListsUltrafast(t *testing.T) {

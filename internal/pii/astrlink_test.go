@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/pii/guard"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/sichengchen/eipgam/internal/pii/guard"
+	"github.com/sichengchen/eipgam/internal/redact"
 )
 
 // guardSandbox gives AstrLink Guard a folder of the test's own, and
@@ -380,7 +380,7 @@ func (f panicFinder) Find(text string) []guard.Span {
 }
 
 // A model that panics reading one request fails that request, held back
-// as for a model that failed, instead of ending magpie from the read's
+// as for a model that failed, instead of ending eipgam from the read's
 // goroutine (#4553), and isn't counted as failed for the requests after
 // it, which it reads.
 func TestGuardPanicFailsOnlyItsRequest(t *testing.T) {
@@ -424,7 +424,7 @@ func TestGuardNowSaysRosetta(t *testing.T) {
 }
 
 // Now says when AstrLink Guard runs under Windows on Arm's x64 emulation,
-// as under Rosetta: the next update installs the arm64 magpie, where it
+// as under Rosetta: the next update installs the arm64 eipgam, where it
 // runs natively. Privacy Filter's pf-serve is x64 on either build, so it
 // says nothing.
 func TestGuardNowSaysEmulated(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // outputLimit is the most a reply of a provider's model may hold, where
@@ -29,7 +29,7 @@ func outputLimit(p provider.Provider, model string) int {
 // userOutput is the Max output the user set for p's model (provider ›
 // model, or the provider's "*"), 0 when they set none. A request asking
 // for more is lowered to it on any route, not only in a group: Claude Code
-// asks claude-* models for their full 128000 and isn't told magpie's
+// asks claude-* models for their full 128000 and isn't told eipgam's
 // figure for them (claudeOutput), so a key whose quota is held per request
 // as max_tokens times the price turned every turn away, and the field the
 // editor says caps max_tokens did nothing (YaCo on Discord).
@@ -209,7 +209,7 @@ const leastReplyLeft = 8192
 // withReplyCap is body asking for a reply of at most limit tokens, in
 // proto's words, whether or not it named a limit before: a request that
 // named none was given the vendor's own, which was too large. false when
-// it asked for no more already, or proto keeps no such field magpie sets.
+// it asked for no more already, or proto keeps no such field eipgam sets.
 func withReplyCap(proto provider.Protocol, body []byte, limit int) ([]byte, bool) {
 	if limit <= 0 {
 		return nil, false
@@ -257,9 +257,9 @@ func withReplyCap(proto provider.Protocol, body []byte, limit int) ([]byte, bool
 // API reads none as the model's whole, which another vendor's needn't
 // (DeepSeek's reads it as 8K). Anthropic's always is, as
 // it needs one. An account's own backend (the ChatGPT one turns
-// max_output_tokens away) isn't. Another magpie is: this fills only a
+// max_output_tokens away) isn't. Another eipgam is: this fills only a
 // translated turn (forwardTranslated), and one translated here goes to
-// the other magpie with its tools converted, a body it passes whole —
+// the other eipgam with its tools converted, a body it passes whole —
 // its own filling is translation work it never does (#5566), so its
 // vendor's short default was all a cascade got.
 func fillsOutput(p provider.Provider, to provider.Protocol) bool {
@@ -287,7 +287,7 @@ func outputFieldRefused(status int, body []byte) bool {
 }
 
 // outputFillRefused names, for markUnfit, a model whose vendor turned
-// away the reply limit magpie filled in: a request naming none is sent
+// away the reply limit eipgam filled in: a request naming none is sent
 // none there from then on, as before.
 func outputFillRefused(model string) string { return "filled-output:" + model }
 

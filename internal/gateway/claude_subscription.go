@@ -7,7 +7,7 @@ package gateway
 // Extra Usage. The subprocess keeps Claude Code's real Agent/CLI identity.
 //
 // Caller tools are exposed as an MCP server. A tools/call blocks in the hidden
-// stdio helper while magpie returns the tool_use to the caller. The caller's next
+// stdio helper while eipgam returns the tool_use to the caller. The caller's next
 // HTTP request supplies tool_result blocks, which unblock the same Claude Code
 // turn. This is the protocol-neutral equivalent of pi-claude-bridge's parked
 // Agent SDK query (https://github.com/elidickinson/pi-claude-bridge, MIT).
@@ -61,19 +61,19 @@ import (
 	"unicode/utf8"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/bridgesid"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/claudecode"
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/bridgesid"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/claudecode"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/proc"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/wslrun"
 )
 
 type subscriptionBridge struct {
@@ -99,7 +99,7 @@ type subscriptionBridge struct {
 	stopping bool
 	// untrusted are callers' folders, by account folder, whose
 	// interactive Claude Code asked whether to trust them, and when: a
-	// run for one goes in magpie's own folder until untrustedFor has
+	// run for one goes in eipgam's own folder until untrustedFor has
 	// passed (start)
 	untrusted sync.Map
 	// thirdParty are agents' system prompts (thirdPartyKey) Anthropic
@@ -129,7 +129,7 @@ func (e *tuiUntrusted) Error() string { return e.err.Error() }
 func (e *tuiUntrusted) Unwrap() error { return e.err }
 
 // passedOver is whether a run in dir under configDir's account goes in
-// magpie's own folder instead: its Claude Code asked lately whether to
+// eipgam's own folder instead: its Claude Code asked lately whether to
 // trust it.
 func (b *subscriptionBridge) passedOver(configDir, dir string) bool {
 	at, ok := b.untrusted.Load(configDir + "\x00" + dir)
@@ -187,14 +187,14 @@ type subscriptionRun struct {
 	outputs []*os.File
 	reading sync.WaitGroup
 	// exited is closed once Claude Code has exited and its output is read,
-	// exit then how it ended (Wait's error); killed says magpie ended it
+	// exit then how it ended (Wait's error); killed says eipgam ended it
 	// (abort) while it ran
 	exited chan struct{}
 	exit   error
 	killed bool
 	tmp    string
 	// room frees the process's place in claudeRoom once it has exited,
-	// roomLeft telling it magpie ended it (abort)
+	// roomLeft telling it eipgam ended it (abort)
 	room     func(left bool)
 	roomLeft bool
 	// schema says the client asked for an answer fitting a JSON schema,
@@ -290,7 +290,7 @@ type subscriptionRun struct {
 	// the interactive mode may tell after the turn ended (cutReply)
 	behindLine string
 	behindMsg  string
-	// endWhy is why magpie ended it, as the log of a turn that finds it
+	// endWhy is why eipgam ended it, as the log of a turn that finds it
 	// gone says (abortFor); results are the calls whose results it was
 	// last handed (continueWith)
 	endWhy  string
@@ -348,14 +348,14 @@ type subscriptionRun struct {
 	// helper hands each one over. Set and read under mu.
 	onCall func(id, name string, args json.RawMessage)
 
-	// search answers magpie's web search tool, searchName, which the
+	// search answers eipgam's web search tool, searchName, which the
 	// client never sees
 	search     func(ctx context.Context, query string) (string, []Hit, error)
 	searchName string
 	// advice answers Claude Code's advisor (advisor_serve.go), which the
 	// client is told of as Anthropic's server tells it: for the request
 	// the run now answers, adviceReq, its nth call made after said. The
-	// run's agent is offered magpie's tools only, never the server tool.
+	// run's agent is offered eipgam's tools only, never the server tool.
 	// adviceSaid is the reply's words so far, and advised the calls of
 	// it, both counted from the request. asker is the caller of the
 	// request the run answers now: its advisor and web search are asked
@@ -402,7 +402,7 @@ type subscriptionRun struct {
 	parkedAt time.Time
 
 	// started is when it was started, and active when its turn under way
-	// began (r.mu), for `magpie claude-code runs` (claudeRunList)
+	// began (r.mu), for `eipgam claude-code runs` (claudeRunList)
 	started time.Time
 	active  time.Time
 	// ends is when its timer lets it go (endIn), under r.mu
@@ -459,7 +459,7 @@ type shownCall struct {
 }
 
 // waitTool collects a tool result that took longer than an agent's patience.
-const waitTool = "magpie_wait"
+const waitTool = "eipgam_wait"
 
 type mcpToolResult struct {
 	Content []map[string]any `json:"content"`
@@ -491,12 +491,12 @@ func claudeProjectName(path string) string {
 
 // sweepBridgeProjects removes the projects that runs from before
 // --no-session-persistence left in Claude Code's folder: only those named
-// after a magpie-claude- folder in the temp directory, which no one but the
+// after a eipgam-claude- folder in the temp directory, which no one but the
 // bridge works in.
 func sweepBridgeProjects(claudeDir, tempDir string) {
 	var prefixes []string
 	for _, d := range []string{tempDir, evalSymlinks(tempDir)} {
-		prefix := claudeProjectName(filepath.Join(d, "magpie-claude-"))
+		prefix := claudeProjectName(filepath.Join(d, "eipgam-claude-"))
 		if !slices.Contains(prefixes, prefix) {
 			prefixes = append(prefixes, prefix)
 		}
@@ -515,7 +515,7 @@ func sweepBridgeProjects(claudeDir, tempDir string) {
 }
 
 // sweepBridgeTemps removes the folders runs a gateway no longer running
-// left in the temp directory: a run's own magpie-claude-<n> (its tools.json,
+// left in the temp directory: a run's own eipgam-claude-<n> (its tools.json,
 // its work folder when it has no shared one) is removed when it ends, but a
 // gateway quit for an update, or killed, ends none of its runs (#958).
 // Another gateway on the same account (a dev build) makes them in the same
@@ -525,7 +525,7 @@ func sweepBridgeProjects(claudeDir, tempDir string) {
 func sweepBridgeTemps(tempDir string) {
 	entries, _ := os.ReadDir(tempDir)
 	for _, e := range entries {
-		rest, ok := strings.CutPrefix(e.Name(), "magpie-claude-")
+		rest, ok := strings.CutPrefix(e.Name(), "eipgam-claude-")
 		if !ok || !e.IsDir() || rest == "" || strings.Trim(rest, "0123456789") != "" {
 			continue
 		}
@@ -586,7 +586,7 @@ func clientWorkDir(req *Request) string {
 		// a folder the redact rules masked a word of names no folder on
 		// disk, and is never unmasked to run in: Claude Code tells its
 		// vendor the folder it runs in, so the masked word would go out
-		// as it is. The run works in magpie's folder, told the caller's
+		// as it is. The run works in eipgam's folder, told the caller's
 		// (envElsewhere), and the model's paths are put back on the way
 		// to the caller's tools (#4449)
 		return ""
@@ -681,7 +681,7 @@ func clientNamedWorkPlace(req *Request) (dir string, inTurns bool) {
 // pi's ("Current working directory:"); Codex's <cwd> on its line, and
 // pi 1.x's, whose <cwd> holds the folder on a line of its own
 // ("<cwd>\n/x\n</cwd>"): read only on one line, pi's runs started in
-// magpie's temp folder and its model was told both (fysly on X). The
+// eipgam's temp folder and its model was told both (fysly on X). The
 // path's &, < and > come as entities (workDirIn reads them the same way).
 var clientSaidWorkDir = lazyre.New(`(?m)^\s*(?:-\s*)?(?:Primary working directory|Working directory|Current working directory|CWD): *([^\r\n]+)$|<cwd>\s*([^<\r\n]+?)\s*</cwd>`)
 
@@ -756,7 +756,7 @@ func randomToken() string {
 	return hex.EncodeToString(b[:])
 }
 
-// claudeCLI is the Claude Code magpie runs: this machine's, or, on Windows
+// claudeCLI is the Claude Code eipgam runs: this machine's, or, on Windows
 // without one, the one installed in a running WSL distro, run there with
 // its own login and quota (wslrun).
 type claudeCLI struct {
@@ -764,7 +764,7 @@ type claudeCLI struct {
 	wsl  *wslrun.Tool
 }
 
-// claudeBinary is this machine's Claude Code, or the one magpie downloaded
+// claudeBinary is this machine's Claude Code, or the one eipgam downloaded
 // for it (claudecode.Find), else one in WSL.
 func claudeBinary() (claudeCLI, error) {
 	if p := claudecode.Find(); p != "" {
@@ -783,10 +783,10 @@ func (c claudeCLI) command(ctx context.Context, args ...string) *exec.Cmd {
 	return proc.CommandContext(ctx, c.path, args...)
 }
 
-// claudeEuid is the user magpie runs as; a var for tests.
+// claudeEuid is the user eipgam runs as; a var for tests.
 var claudeEuid = os.Geteuid
 
-// root is whether this Claude Code runs as root: magpie itself as root
+// root is whether this Claude Code runs as root: eipgam itself as root
 // (a server's or a container's), or a WSL distro's default user root.
 func (c claudeCLI) root() bool {
 	if c.wsl != nil {
@@ -800,7 +800,7 @@ func (c claudeCLI) root() bool {
 // used with root/sudo privileges") unless IS_SANDBOX is "1" or
 // CLAUDE_CODE_BUBBLEWRAP is set: its setup checks exactly that (2.1.296).
 // The run has no tool of Claude Code's own that touches the machine, only
-// magpie's MCP ones, answered by the client, and Anthropic's web search,
+// eipgam's MCP ones, answered by the client, and Anthropic's web search,
 // so skipping the permission prompts as root does nothing more than as
 // anyone else. Run as anyone else, env is kept as it is.
 func (c claudeCLI) asRoot(env []string) []string {
@@ -823,7 +823,7 @@ func (c claudeCLI) asRoot(env []string) []string {
 	return append(out, "IS_SANDBOX=1")
 }
 
-// claudeEnvVars are the variables magpie sets for a Claude Code run, which
+// claudeEnvVars are the variables eipgam sets for a Claude Code run, which
 // one in WSL is handed (wslrun's Env).
 var claudeEnvVars = []string{"ENABLE_CLAUDEAI_MCP_SERVERS", "DISABLE_AUTO_COMPACT", "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC",
 	"DISABLE_TELEMETRY", "DO_NOT_TRACK", "DISABLE_ERROR_REPORTING", "DISABLE_AUTOUPDATER", "ANTHROPIC_BETAS",
@@ -858,7 +858,7 @@ func (c claudeCLI) proxied(ctx context.Context, env []string) ([]string, error) 
 	return netproxy.EnvForBunWith(claudeProxy(ctx), env, c.wsl == nil || c.wsl.Host == "")
 }
 
-// file is where this Claude Code reads a file of magpie's at path: one in
+// file is where this Claude Code reads a file of eipgam's at path: one in
 // WSL under the distro's mount of the drive.
 func (c claudeCLI) file(path string) string {
 	if c.wsl != nil {
@@ -900,7 +900,7 @@ func (c claudeCLI) tuiWSLUnread() bool {
 	return err != nil
 }
 
-// exe is magpie's own executable, as this Claude Code starts it.
+// exe is eipgam's own executable, as this Claude Code starts it.
 func (c claudeCLI) exe() (string, error) {
 	if c.wsl != nil {
 		return c.wsl.Exe()
@@ -922,7 +922,7 @@ func callbackBaseURL() string {
 
 // claudeMCPPath is where the Claude subscription bridge's MCP helper hands
 // a tool call back: the path, then the run's callback token.
-const claudeMCPPath = "/_magpie/claude-mcp/"
+const claudeMCPPath = "/_eipgam/claude-mcp/"
 
 // from, when set, is the conversation's session a run let go past idleMost
 // saved (unshelve): Claude Code goes on with it, told only the messages
@@ -949,7 +949,7 @@ func (b *subscriptionBridge) start(ctx context.Context, req *Request, model, con
 	return run, events, err
 }
 
-// startTrusted is startRun, run again in magpie's own folder when the
+// startTrusted is startRun, run again in eipgam's own folder when the
 // caller's is one the user hasn't trusted in their own Claude Code, which
 // only they answer: told the caller's folder (envElsewhere), the turn is
 // answered. It was a 502, which a Claude Code client asks again and
@@ -962,21 +962,21 @@ func (b *subscriptionBridge) startTrusted(ctx context.Context, req *Request, mod
 	}
 	// passed over from now on (passedOver): this run, and the next,
 	// aren't in the caller's folder. The conversation's session, kept
-	// (startRun), is gone on with there when it is magpie's folder's: a
+	// (startRun), is gone on with there when it is eipgam's folder's: a
 	// run started anew replayed the whole conversation once in each
 	// folder (sleepy_shibe on Discord)
 	b.untrusted.Store(untrusted.key, time.Now())
-	log.Printf("claude: Claude Code asks whether to trust %s, which its user hasn't; the run goes in magpie's own folder, told the caller's", untrusted.dir)
+	log.Printf("claude: Claude Code asks whether to trust %s, which its user hasn't; the run goes in eipgam's own folder, told the caller's", untrusted.dir)
 	return b.startRun(ctx, req, model, configDir, owner, from)
 }
 
 // untrustedHere is whether a run in the caller's folder work goes in
-// magpie's own instead: in the interactive mode under the account Claude
+// eipgam's own instead: in the interactive mode under the account Claude
 // Code is signed in to, Claude Code would ask whether to trust it, which
 // only the user answers. It is decided for each run as Claude Code
 // decides it (claudeTrusts), before the run, so a conversation whose
-// session is in magpie's folder goes on with it there instead of being
-// replayed in the caller's, asked about and replayed again in magpie's
+// session is in eipgam's folder goes on with it there instead of being
+// replayed in the caller's, asked about and replayed again in eipgam's
 // every time passedOver's 10 minutes were up (sleepy_shibe on Discord),
 // and a folder the user trusts since is run in from the next turn on.
 // A folder Claude Code asked about lately all the same stays passed
@@ -986,7 +986,7 @@ func (b *subscriptionBridge) untrustedHere(req *Request, binary claudeCLI, confi
 		return true
 	}
 	if configDir != "" || claudePrintWhy(req, binary) != "" {
-		// a saved account's folder is magpie's, which answers yes, and
+		// a saved account's folder is eipgam's, which answers yes, and
 		// claude -p asks nothing
 		return false
 	}
@@ -996,7 +996,7 @@ func (b *subscriptionBridge) untrustedHere(req *Request, binary claudeCLI, confi
 		return false
 	}
 	if !trusted {
-		log.Printf("claude: Claude Code hasn't been told to trust %s; the run goes in magpie's own folder, told the caller's", logSafe(work))
+		log.Printf("claude: Claude Code hasn't been told to trust %s; the run goes in eipgam's own folder, told the caller's", logSafe(work))
 	}
 	return !trusted
 }
@@ -1029,7 +1029,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 			sweepBridgeTemps(os.TempDir())
 		}()
 	})
-	tmp, err := os.MkdirTemp("", "magpie-claude-")
+	tmp, err := os.MkdirTemp("", "eipgam-claude-")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1056,7 +1056,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 	// the interactive mode's first message waits for the file the tool
 	// server writes once Claude Code has listed its tools (MinhuWang on X)
 	mcpConfig, _ := json.Marshal(map[string]any{"mcpServers": map[string]any{
-		"magpie": map[string]any{"command": exe, "args": []string{claudetui.MCPCommand, callbackPath, toolsPath, filepath.Join(tmp, "listed")}},
+		"eipgam": map[string]any{"command": exe, "args": []string{claudetui.MCPCommand, callbackPath, toolsPath, filepath.Join(tmp, "listed")}},
 	}})
 	args := claudeCLIArgs(claudeRunName(model), string(mcpConfig), req.Effort, req.WebSearch)
 	if req.ThinkOff {
@@ -1068,7 +1068,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 	}
 	// in the caller's own folder when it says which it is and it is one
 	// here (clientWorkDir): Claude Code tells the model the folder it runs
-	// in as its working directory, and a model told magpie's folder wrote
+	// in as its working directory, and a model told eipgam's folder wrote
 	// the caller's files there, through tools that run in the caller's
 	work := ""
 	if binary.wsl == nil {
@@ -1116,13 +1116,13 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 		sessions = claudeSessions(configDir, work)
 		args = slices.DeleteFunc(args, func(a string) bool { return a == "--no-session-persistence" })
 		// a caller's folder keeps its own sessions beside the runs': only
-		// magpie's own folder is swept, a run's session removed by its id
+		// eipgam's own folder is swept, a run's session removed by its id
 		if !client {
 			b.sweepSessions(sessions)
 		}
 	}
 	// kept is the session from was, for startTrusted to go on with in
-	// magpie's folder when Claude Code asks about the caller's
+	// eipgam's folder when Claude Code asks about the caller's
 	kept := false
 	if from != nil {
 		defer func(from *savedSession) {
@@ -1334,16 +1334,16 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 		}
 	}
 	if tui && (!client || configDir != "") {
-		// a folder of magpie's, or an account folder of magpie's whose
+		// a folder of eipgam's, or an account folder of eipgam's whose
 		// Claude Code no one else runs: asked whether to trust it, the
 		// shim says yes; in the user's own account a caller's folder is
-		// theirs to answer for, and the run goes in magpie's
+		// theirs to answer for, and the run goes in eipgam's
 		// (startTrusted)
 		env = append(env, claudetui.TrustEnv+"=1")
 	}
 	env = append(env, claudeBypassEnv(tui, configDir)...)
 	if tui && !client {
-		// a saved account's run in magpie's folder is never asked (#4830)
+		// a saved account's run in eipgam's folder is never asked (#4830)
 		trustWork(binary, configDir, work)
 	}
 	cmd.Env = binary.env(binary.asRoot(env), configDir)
@@ -1488,7 +1488,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 }
 
 // claudeTUIHelper, when set, is run as the interactive mode's helper in
-// place of magpie's executable: a test's stand-in.
+// place of eipgam's executable: a test's stand-in.
 var claudeTUIHelper string
 
 // tuiStarts is the interactive mode's starts, one at a time: a Claude Code
@@ -1499,7 +1499,7 @@ var claudeTUIHelper string
 // ending "showed no prompt" (#5579). The turn taken (tuiStartTurn) is held
 // till the run has been started and its helper has answered initialize —
 // its prompt shown — and given back however the start goes; a start that
-// missed the wait holds it until magpie has given up on it (its stop is
+// missed the wait holds it until eipgam has given up on it (its stop is
 // under way, not waited out), so the retries behind it land on a machine
 // with one start to do, not a pile.
 // Runs already up are none of it: a -p run starts without a prompt to
@@ -1547,7 +1547,7 @@ type tuiNoStart struct{ err error }
 func (e *tuiNoStart) Error() string { return e.err.Error() }
 func (e *tuiNoStart) Unwrap() error { return e.err }
 
-// claudeTUIRuns is false where magpie's executable has no shim to run:
+// claudeTUIRuns is false where eipgam's executable has no shim to run:
 // the gateway's tests, whose fake Claude Codes are -p ones. It is the one
 // case besides the setting turned off (ClaudePrintMode) where a model
 // request runs as -p.
@@ -1630,7 +1630,7 @@ type ClaudeMode struct {
 	TUI bool   `json:"tui"`
 	Why string `json:"why,omitempty"`
 	WSL bool   `json:"wsl,omitempty"` // Claude Code in WSL
-	// how the last run since magpie started went (noteClaudeRun)
+	// how the last run since eipgam started went (noteClaudeRun)
 	Last *ClaudeLastRun `json:"last,omitempty"`
 }
 
@@ -1642,7 +1642,7 @@ type ClaudeLastRun struct {
 	At  time.Time `json:"at"`
 }
 
-// claudeLast is the last run's, since magpie started
+// claudeLast is the last run's, since eipgam started
 var claudeLast struct {
 	sync.Mutex
 	run ClaudeLastRun
@@ -1885,8 +1885,8 @@ func writeGuard(path, body string) error {
 // tuiCommand is the interactive mode's helper (claudetui) running this
 // Claude Code with the -p arguments args; tuiEnv adds to its environment.
 func (c claudeCLI) tuiCommand(ctx context.Context, args ...string) (*exec.Cmd, error) {
-	// the helper runs here, on Windows for Claude Code in WSL too: magpie
-	// itself, not exe, which is magpie as the distro starts it (/mnt/c/…)
+	// the helper runs here, on Windows for Claude Code in WSL too: eipgam
+	// itself, not exe, which is eipgam as the distro starts it (/mnt/c/…)
 	helper, err := os.Executable()
 	if err != nil {
 		return nil, err
@@ -1914,7 +1914,7 @@ func (c claudeCLI) tuiEnv(env []string, configDir string) []string {
 
 // claudeTUIOn is whether a Claude subscription's model requests run in
 // Claude Code's interactive mode, and never as -p: the user hasn't turned
-// it off (ClaudePrintMode), and magpie has its shim (claudeTUIRuns).
+// it off (ClaudePrintMode), and eipgam has its shim (claudeTUIRuns).
 func claudeTUIOn() bool {
 	return claudeTUIRuns && !settings.Shared().ClaudePrintMode
 }
@@ -1943,7 +1943,7 @@ func claudeTUIErr(why string) error {
 	// the settings come first: "Models" close before the error's
 	// "invalid_request_error" read as a model the account doesn't serve
 	// (provider.ModelUnserved), and the next account was asked
-	return fmt.Errorf("Claude Code's interactive mode, on in Settings › Models › Replies, can't answer this request (%s), and magpie never runs it as claude -p instead; turned off there, every request runs as -p", why)
+	return fmt.Errorf("Claude Code's interactive mode, on in Settings › Models › Replies, can't answer this request (%s), and eipgam never runs it as claude -p instead; turned off there, every request runs as -p", why)
 }
 
 // tuiRefusal is a request the interactive mode refuses for what it asks,
@@ -1967,7 +1967,7 @@ func (r *subscriptionRun) cliControlWithin(ctx context.Context, request map[stri
 	ch := make(chan controlReply, 1)
 	// one that ended says how, and the last it wrote to stderr: "Claude
 	// Code ended" alone left the user nothing to act on
-	what := fmt.Sprintf("answered magpie's %v request", request["subtype"])
+	what := fmt.Sprintf("answered eipgam's %v request", request["subtype"])
 	r.mu.Lock()
 	if r.closed {
 		r.mu.Unlock()
@@ -2642,7 +2642,7 @@ func (b *subscriptionBridge) keepIdle(r *subscriptionRun, key, conv string) bool
 	// request exclude each other through gone()). Left there, the same
 	// run under two keys was the oldest again after each pass below, which
 	// let go of one key only, so the loop never ended and drop grew with
-	// b.mu held (X, Sma1lboy: magpie at 158 GB after two days).
+	// b.mu held (X, Sma1lboy: eipgam at 158 GB after two days).
 	if r.idleKey != "" && r.idleKey != key && b.idle[r.idleKey] == r {
 		delete(b.idle, r.idleKey)
 	}
@@ -2691,7 +2691,7 @@ const shelfMost = 64
 // have asked it, a prefix it has cached; a run started anew is told the
 // whole conversation in one message, and writes all of it to the cache
 // again (X, AncientTwo: a Claude subscription's limits went much faster
-// through magpie than in Claude Code — with more than idleMost
+// through eipgam than in Claude Code — with more than idleMost
 // conversations going, each turn of each wrote its whole conversation).
 type savedSession struct {
 	session  string
@@ -2704,7 +2704,7 @@ type savedSession struct {
 	// session carries that exchange, and the next turn leaves it out, so
 	// the turn that takes it resumes a copy cut before it (unshelve):
 	// before the side question's own message, behindTurn, that a -p run
-	// was told under magpie's uuid, or, for the interactive mode, which
+	// was told under eipgam's uuid, or, for the interactive mode, which
 	// names its messages itself, after behindLine, the reply before it
 	// (as far as that reply's last line, behindMsg)
 	behind     string
@@ -3093,7 +3093,7 @@ func endedLatestFirst(ended map[*subscriptionRun]time.Time) []*subscriptionRun {
 // retryBranch is where a turn sent again while its run is busy answering
 // it goes on from a copy of the run's session, cut before the turn
 // (#5405): the client's connection dropped mid-reply, its request was
-// retried, and no cancel reached magpie — the run the first attempt
+// retried, and no cancel reached eipgam — the run the first attempt
 // started is still busy with the very turn, and its answer would reach no
 // one. A new Claude Code told the whole conversation writes it all to the
 // cache again, only its own system prompt and tools read from it; the
@@ -3940,7 +3940,7 @@ var claudeGenRe = lazyre.New(`^claude-(?:opus|sonnet|haiku|fable|mythos)-([0-9]+
 // claudeRunName is the name a run asks Claude Code for model by. A Claude
 // model of the 5 generation or later that Claude Code doesn't know (Fable
 // 5.2 on 2.1.316) it holds to 200K, and turned away a longer conversation
-// before Anthropic was asked ("Prompt is too long"), while magpie tells
+// before Anthropic was asked ("Prompt is too long"), while eipgam tells
 // the agent the model's 1M window: Codex, which compacts at 272K, never
 // compacted and failed every turn past 200K instead (magicalaciw18 on X).
 // CLAUDE_CODE_MAX_CONTEXT_TOKENS isn't read for a Claude name; "[1m]" is,
@@ -3948,7 +3948,7 @@ var claudeGenRe = lazyre.New(`^claude-(?:opus|sonnet|haiku|fable|mythos)-([0-9]+
 // One Claude Code knows keeps its id, as does every 4 generation one, whose
 // 1M a subscription without usage credits is refused even a short turn
 // on (claude-sonnet-4-6[1m]: "Usage credits required for 1M context"),
-// and one whose window magpie knows to be less.
+// and one whose window eipgam knows to be less.
 func claudeRunName(model string) string {
 	id := strings.ToLower(model)
 	m := claudeGenRe.Regexp().FindStringSubmatch(id)
@@ -4088,14 +4088,14 @@ func claudeSettingsKnown() bool {
 //     itself would;
 //   - an hour when the request's marks name it: its client picked it;
 //   - the pick of the user of the computer the request's Claude Code runs
-//     on (pickedTTL: this one's, or what the magpie it came through
+//     on (pickedTTL: this one's, or what the eipgam it came through
 //     named), and with none picked this computer's or an hour, as Claude
 //     Code keeps it on a subscription. Claude Code marks five minutes with
 //     no ttl, picked or as its default off a subscription, so its marks
 //     can't say which (linkaww: a 5m pick, relayed side calls an hour's;
 //     nothing picked, every relayed write five minutes');
 //   - else what the marks ask for, five minutes for a mark with no ttl (a
-//     remote magpie's relay was given the hour of its own setting, never
+//     remote eipgam's relay was given the hour of its own setting, never
 //     the Mac's, Linka);
 //   - else, for a request with no marks, this computer's pick or an hour
 //     (claudeRunTTL).
@@ -4151,7 +4151,7 @@ func cleanClaudeEnvTTL(env []string, ttl string) []string {
 		// the cache from there on
 		"CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS=1",
 		// the cache kept as the user picked (claudeRunTTL), stated so that
-		// the marks magpie puts in the first message (renderClaudePrompt,
+		// the marks eipgam puts in the first message (renderClaudePrompt,
 		// Request.cacheTTL) are the same: Anthropic refuses a 1h mark after
 		// a 5m one
 		"CLAUDE_CODE_PROMPT_CACHE_TTL="+ttl)
@@ -4172,7 +4172,7 @@ var claudeQuietVars = []string{"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC", "DISA
 // Nothing is forced: an account Anthropic hasn't given threads goes whole,
 // as its own claude does. Updates and error reports stay off, which the
 // flags don't need. The quiet variables stay as the user set them, in
-// magpie's environment or in their Claude Code's settings.json env (the run
+// eipgam's environment or in their Claude Code's settings.json env (the run
 // reads no settings of the user's: --setting-sources ""), since they are the
 // user's telemetry choice for Claude Code.
 //
@@ -4210,7 +4210,7 @@ func claudeRunEnv(env []string, ttl string) []string {
 	return append(out, "DISABLE_AUTOUPDATER=1", "DISABLE_ERROR_REPORTING=1")
 }
 
-// claudeToolWaitVars keep a turn's run waiting on magpie's MCP calls for as
+// claudeToolWaitVars keep a turn's run waiting on eipgam's MCP calls for as
 // long as the caller's tool takes: the caller runs them and has its own
 // timeouts. Claude Code otherwise moves a call still running after 120s to
 // the background and the model goes on without the result, so the turn's
@@ -4224,7 +4224,7 @@ func claudeRunEnv(env []string, ttl string) []string {
 // mid-call (Claude Code 2.1.316's isMcpCallMovableWithoutTimer asks the
 // same value). Claude Code also aborts a call that sent nothing for 30
 // minutes, a user's answer that took longer among them. A value set in
-// magpie's environment stays.
+// eipgam's environment stays.
 var claudeToolWaitVars = []string{"CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0", "CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT=0"}
 
 type lockedWriter struct{ run *subscriptionRun }
@@ -4468,14 +4468,14 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 	}
 	// toolStart says whether a tool_use block, index of this message, is a
 	// call of the client's, to be handed over as name: Claude Code's own
-	// calls (WebSearch, magpie's web search, a schema's StructuredOutput)
+	// calls (WebSearch, eipgam's web search, a schema's StructuredOutput)
 	// are its own to answer
 	toolStart := func(index int, name string) (string, bool) {
 		if r.schema && name == "StructuredOutput" {
 			own[index] = true
 			return "", false
 		}
-		rest, ok := strings.CutPrefix(name, "mcp__magpie__")
+		rest, ok := strings.CutPrefix(name, "mcp__eipgam__")
 		r.mu.Lock()
 		called := name
 		name = declaredName(r.names, rest)
@@ -4485,19 +4485,19 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 		// a tool the client announced but hasn't loaded yet (Claude
 		// Code's deferred tools, told by name in the conversation and
 		// not in tools until a ToolSearch) is called by the client's
-		// own name. A tool of magpie's MCP server is
-		// mcp__magpie__<server>__<tool> there, the name the run's agent
+		// own name. A tool of eipgam's MCP server is
+		// mcp__eipgam__<server>__<tool> there, the name the run's agent
 		// called: cut to <server>__<tool> it is no tool the client has,
 		// and it answered "No such tool available" before a retry
 		// (packinggoods). A deferred built-in (WebFetch, CronCreate) has
 		// no __ in its name and the client no prefix on it: handed over
-		// as mcp__magpie__WebFetch it was no tool either (steven_4422).
+		// as mcp__eipgam__WebFetch it was no tool either (steven_4422).
 		// Another server's (mcp__linear__…) is the client's name as cut.
 		if ok && !search && name == rest && r.tools != nil && !r.tools[rest] && magpieServerTool(rest) {
 			name = called
 		}
 		r.mu.Unlock()
-		// magpie answers its own web search, as Claude Code does
+		// eipgam answers its own web search, as Claude Code does
 		// its WebSearch, and a call of a tool the turn may not call
 		// (mcpCall): the client is never shown it
 		if !ok || search || refused {
@@ -4582,7 +4582,7 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 					return
 				}
 				begin("msg_"+strings.ReplaceAll(newUUID(), "-", ""), r.model, cliUsage{})
-				name, _ = toolStart(0, "mcp__magpie__"+name)
+				name, _ = toolStart(0, "mcp__eipgam__"+name)
 				told[id] = true
 				if written[id] {
 					delete(written, id)
@@ -4716,7 +4716,7 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 			_ = json.Unmarshal(envelope.Message, &whole)
 			var ids []string
 			for _, c := range whole.Content {
-				if c.Type == "tool_use" && strings.HasPrefix(c.Name, "mcp__magpie__") && c.ID != "" {
+				if c.Type == "tool_use" && strings.HasPrefix(c.Name, "mcp__eipgam__") && c.ID != "" {
 					ids = append(ids, c.ID)
 				}
 			}
@@ -5461,7 +5461,7 @@ func cacheMark1h() map[string]string {
 	return map[string]string{"type": "ephemeral", "ttl": "1h"}
 }
 
-// runMark is the prompt-cache mark on what magpie gives a run: kept as
+// runMark is the prompt-cache mark on what eipgam gives a run: kept as
 // long as Claude Code's own (Request.cacheTTL, given to the run by
 // cleanClaudeEnvTTL), since Anthropic refuses a 1h mark after a 5m one.
 func (r *Request) runMark() map[string]string {
@@ -5629,28 +5629,28 @@ func historyEnd(msgs []Message) int {
 // "Bash is disabled for this session, in subagents as well as here.",
 // which the model takes for a fact and gives up (#958).
 func bridgeName(name string) string {
-	return "mcp__magpie__" + bridgeToolName(name)
+	return "mcp__eipgam__" + bridgeToolName(name)
 }
 
 // bridgeToolName is the name the MCP helper offers a tool of the caller's
 // under. Claude Code takes an MCP tool's name as [A-Za-z0-9_-] only, with
-// mcp__magpie__ before it in at most 64: it made "spawn.agent" its
+// mcp__eipgam__ before it in at most 64: it made "spawn.agent" its
 // spawn_agent, which the client never offered (#2649). A name it would
 // change, or one ending as a changed name ends, is told apart by a hash of
 // it, the same in every run, so a resumed session and a conversation's
 // history name the tool as before; declaredName maps it back.
 //
-// A tool of magpie's own MCP server, which the client (Claude Code with
-// magpie's Library) already names mcp__magpie__<server>__<tool>, is
-// offered under the rest of its name: with the helper's mcp__magpie__
+// A tool of eipgam's own MCP server, which the client (Claude Code with
+// eipgam's Library) already names mcp__eipgam__<server>__<tool>, is
+// offered under the rest of its name: with the helper's mcp__eipgam__
 // before it again, the run's model was shown
-// mcp__magpie__mcp__magpie__magpie-browser__browser_click, while a
+// mcp__eipgam__mcp__eipgam__magpie-browser__browser_click, while a
 // deferred tool the client named in its text kept the single prefix
 // (packinggoods on Discord, 11-01). The model now sees the client's own
-// name. A client offering both "mcp__magpie__x" and a bare "x" would
+// name. A client offering both "mcp__eipgam__x" and a bare "x" would
 // have the two offered alike, which this doesn't tell apart.
 func bridgeToolName(name string) string {
-	if rest, ok := strings.CutPrefix(name, "mcp__magpie__"); ok && bridgeToolNameOK.MatchString(rest) && !bridgeToolNameHashed.MatchString(rest) {
+	if rest, ok := strings.CutPrefix(name, "mcp__eipgam__"); ok && bridgeToolNameOK.MatchString(rest) && !bridgeToolNameHashed.MatchString(rest) {
 		return rest
 	}
 	if bridgeToolNameOK.MatchString(name) && !bridgeToolNameHashed.MatchString(name) {
@@ -5692,7 +5692,7 @@ func declaredName(names map[string]string, name string) string {
 }
 
 // magpieServerTool says whether rest, a name the run's agent called with
-// mcp__magpie__ cut off, is a tool of magpie's MCP server as the client
+// mcp__eipgam__ cut off, is a tool of eipgam's MCP server as the client
 // names it after that prefix: <server>__<tool> (the router's names,
 // hub_mcp.go). Claude Code's built-ins (WebFetch, WebSearch, CronCreate,
 // NotebookEdit…) have no __ in their names, and another MCP server's tool
@@ -6518,7 +6518,7 @@ func (b *subscriptionBridge) mcpCall(w http.ResponseWriter, r *http.Request) {
 	run := b.runs[token]
 	b.mu.Unlock()
 	if run == nil {
-		// a run of the magpie this one took the gateway over from, its
+		// a run of the eipgam this one took the gateway over from, its
 		// turn under way when the gateway changed hands (handover.go)
 		if forwardCallback(w, r) {
 			return
@@ -6761,10 +6761,10 @@ func (r *subscriptionRun) launch() error {
 // tell writes line to Claude Code's input. Wait closes that input as
 // Claude Code exits, and a write after it failed "write |1: file already
 // closed", which said nothing of why: one Claude Code no longer reads says
-// how it ended, or that magpie ended it, and the last it wrote to stderr —
+// how it ended, or that eipgam ended it, and the last it wrote to stderr —
 // the cause comes last, after any warnings before it.
 func (r *subscriptionRun) tell(line []byte) error {
-	// one magpie ended is not written to: until Wait has reaped it, its
+	// one eipgam ended is not written to: until Wait has reaped it, its
 	// input still takes a write, which no one will read
 	r.mu.Lock()
 	killed := r.killed
@@ -6790,7 +6790,7 @@ func (r *subscriptionRun) tell(line []byte) error {
 	return r.whyEnded()
 }
 
-// whyEnded says how the run's Claude Code ended, or that magpie ended it,
+// whyEnded says how the run's Claude Code ended, or that eipgam ended it,
 // and the last it wrote to stderr.
 func (r *subscriptionRun) whyEnded() error {
 	return r.endedBefore("read its input")
@@ -6820,7 +6820,7 @@ func (r *subscriptionRun) endedBefore(what string) error {
 	defer r.mu.Unlock()
 	why := "exited before it " + what
 	if r.killed {
-		why = "was ended by magpie before it " + what
+		why = "was ended by eipgam before it " + what
 	} else if r.exit != nil {
 		why += " (" + r.exit.Error() + ")"
 	}
@@ -6985,7 +6985,7 @@ func (b *subscriptionBridge) abortAll() {
 		runs = append(runs, run)
 	}
 	b.mu.Unlock()
-	// each asked at once, then waited for: a Claude Code magpie exits
+	// each asked at once, then waited for: a Claude Code eipgam exits
 	// under is not left to be killed by no one
 	stops := make([]<-chan struct{}, 0, len(runs))
 	for _, run := range runs {
@@ -7021,7 +7021,7 @@ func keepLost(m map[string]lostRun, key string, l lostRun, most int) {
 }
 
 // whyLost is why the run ended, for the log of its conversation's next
-// turn: the reason magpie gave (abortFor), or how its Claude Code exited.
+// turn: the reason eipgam gave (abortFor), or how its Claude Code exited.
 func (r *subscriptionRun) whyLost() string {
 	r.mu.Lock()
 	why, killed, exit := r.endWhy, r.killed, r.exit
@@ -7030,7 +7030,7 @@ func (r *subscriptionRun) whyLost() string {
 	case why != "":
 		return why
 	case killed:
-		return "magpie ended it"
+		return "eipgam ended it"
 	case exit != nil:
 		return "its Claude Code exited (" + exit.Error() + ")"
 	}
@@ -7316,7 +7316,7 @@ func (s *Server) serveClaudeSubscription(w http.ResponseWriter, r *http.Request,
 // anthropic-ratelimit-unified-* headers, which a Claude Code signed in to
 // claude.ai reads into its status line's rate_limits (claude-hud's 5-hour
 // and weekly figures, #1257). Its run tells them in its rate_limit_event,
-// not as headers, so they are said again from what magpie keeps.
+// not as headers, so they are said again from what eipgam keeps.
 func limitHeaders(w http.ResponseWriter, owner string) {
 	user, own := ownerAccount(owner)
 	if user == "" || own && provider.ClaudeCodeMovedOff(user) {
@@ -7356,10 +7356,10 @@ func (s *Server) serveSubscription(w http.ResponseWriter, r *http.Request, from 
 
 // bridgeRequest is the request a Claude subscription's run is told, as
 // serveSubscriptionAs reads it: with the client's cache marks when Claude
-// Code places its own, and with Claude Code's advisor, which magpie runs
-// (advisor_serve.go), when magpie serves the advisor's model.
+// Code places its own, and with Claude Code's advisor, which eipgam runs
+// (advisor_serve.go), when eipgam serves the advisor's model.
 func bridgeRequest(r *http.Request, from provider.Protocol, name string, body []byte) (req *Request, err error) {
-	// Claude Code's advisor, run by magpie: the run's agent has no server
+	// Claude Code's advisor, run by eipgam: the run's agent has no server
 	// tools (advisor_serve.go)
 	advised := name == "Claude Code" && advisedInBridge(from, body)
 	parse := parse
@@ -7378,7 +7378,7 @@ func bridgeRequest(r *http.Request, from provider.Protocol, name string, body []
 	if name == "Claude Code" && wantsClientCache(r, from) {
 		req, err = parseAnthropicRequest(body, true)
 	} else if name == "Claude Code" && classifierClientCache(from, body) {
-		// the classifier never asked for its marks through magpie's
+		// the classifier never asked for its marks through eipgam's
 		// header: a set the bridge can't keep (a TTL order Anthropic
 		// would refuse) goes the default way, as before, not refused; in
 		// the interactive mode, which can't place them, it goes the
@@ -7475,7 +7475,7 @@ func (s *Server) serveSubscriptionAs(w http.ResponseWriter, r *http.Request, fro
 			return writeError(w, from, 400, "Claude Code: "+err.Error()), err.Error()
 		}
 	}
-	// the interactive mode answers a schema through magpie's answer tool
+	// the interactive mode answers a schema through eipgam's answer tool
 	var answer Tool
 	var answerSchema *jsonschema.Schema
 	if name == "Claude Code" && wantTUI(req) && len(req.Format.schema()) > 0 {
@@ -7485,7 +7485,7 @@ func (s *Server) serveSubscriptionAs(w http.ResponseWriter, r *http.Request, fro
 		answer = answerTool(req.Tools, req.Format.schema())
 		req.Tools = append(slices.Clone(req.Tools), answer)
 	}
-	// its model searches the web with magpie's tool, which magpie answers
+	// its model searches the web with eipgam's tool, which eipgam answers
 	var search Tool
 	if req.WebSearch && !searching(r.Context()) {
 		if canSearch() {
@@ -7493,7 +7493,7 @@ func (s *Server) serveSubscriptionAs(w http.ResponseWriter, r *http.Request, fro
 			req.Tools = append(slices.Clone(req.Tools), search)
 		}
 	}
-	// and asks the advisor with magpie's tool, which magpie answers
+	// and asks the advisor with eipgam's tool, which eipgam answers
 	if req.Advisor != "" {
 		req.Tools = append(slices.Clone(req.Tools), advisorToolDef())
 	}
@@ -7805,13 +7805,13 @@ func thirdPartyRefused(name string, req *Request, code int, msg string) string {
 	}
 	if !req.interactive {
 		log.Printf("claude: Anthropic refused a claude -p turn on %s as a third-party app's (#4503)", req.Model)
-		return msg + " (magpie: Anthropic counted this turn, run as claude -p, as a third-party app's and answered nothing. " +
-			"Asking again may draw from the Claude account's extra usage, so magpie doesn't ask again on its own.)"
+		return msg + " (eipgam: Anthropic counted this turn, run as claude -p, as a third-party app's and answered nothing. " +
+			"Asking again may draw from the Claude account's extra usage, so eipgam doesn't ask again on its own.)"
 	}
 	log.Printf("claude: Anthropic refused an interactive-mode turn on %s as a third-party app's, its reply begun (#4503)", req.Model)
-	return msg + " (magpie: Anthropic counted this turn as a third-party app's once its reply had begun. " +
+	return msg + " (eipgam: Anthropic counted this turn as a third-party app's once its reply had begun. " +
 		"It ran in Claude Code's interactive mode with your agent's own system prompt, which Anthropic can refuse there. " +
-		"magpie runs this agent's next turns as claude -p, which is served such prompts: ask again.)"
+		"eipgam runs this agent's next turns as claude -p, which is served such prompts: ask again.)"
 }
 
 // thirdPartySaid is whether a Claude Code run's failure is Anthropic's
@@ -8183,7 +8183,7 @@ func relayFailing(w http.ResponseWriter, r *http.Request, from provider.Protocol
 // too (bbfatx on X: a title or a summary asked with tool_choice none, of
 // a long conversation). The turn may call none of them (allowedTools).
 // Each schema is folded to an object root (objectSchema), as a Messages
-// request magpie builds is: Claude Code leaves out an MCP tool whose
+// request eipgam builds is: Claude Code leaves out an MCP tool whose
 // inputSchema has a oneOf, anyOf or allOf at its root, which Anthropic's
 // API refuses, so Codex desktop's browser tool mcp__cua_repl__js, a oneOf
 // of objects, never reached the model (Lee931018 on X).

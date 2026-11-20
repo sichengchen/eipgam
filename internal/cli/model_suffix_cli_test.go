@@ -3,12 +3,12 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// magpie model suffix off has the agents' lists name models alone, on
+// eipgam model suffix off has the agents' lists name models alone, on
 // names them with their providers again (#335), own all but the names the
 // user gave (#92); anything else is refused.
 func TestModelSuffixCmd(t *testing.T) {
@@ -42,7 +42,7 @@ func TestModelSuffixCmd(t *testing.T) {
 	}
 }
 
-// magpie model suffix pi off gives Pi its own Provider in model names,
+// eipgam model suffix pi off gives Pi its own Provider in model names,
 // over every agent's (KillTry27355 on X); every gives it back. Every
 // agent's is left as it was, and a word it doesn't know is refused.
 func TestModelSuffixAgentCmd(t *testing.T) {

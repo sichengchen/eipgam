@@ -18,17 +18,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/autostart"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
-	"github.com/yetone/magpie/internal/upstream"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/agent"
+	"github.com/sichengchen/eipgam/internal/autostart"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/library"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
+	"github.com/sichengchen/eipgam/internal/upstream"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // The providers page: the vendors the user added, the presets they can add
@@ -38,8 +38,8 @@ type modelJSON struct {
 	ID      string   `json:"id"`
 	Name    string   `json:"name"`              // the user's name for it, if they gave one
 	Default string   `json:"default,omitempty"` // its own name, when the user gave it another
-	Plain   string   `json:"plain,omitempty"`   // a remote magpie's model's name there alone, when Name has its provider there after it (catalog.Model's)
-	By      string   `json:"by,omitempty"`      // a remote magpie's model's provider there, the first in a chain (catalog.Model's)
+	Plain   string   `json:"plain,omitempty"`   // a remote eipgam's model's name there alone, when Name has its provider there after it (catalog.Model's)
+	By      string   `json:"by,omitempty"`      // a remote eipgam's model's provider there, the first in a chain (catalog.Model's)
 	Kept    []string `json:"kept,omitempty"`    // the reasoning levels the user keeps of Efforts, when not all
 	Efforts []string `json:"efforts,omitempty"`
 	Given   bool     `json:"given,omitempty"` // its levels aren't known: Efforts are those it can be given, Kept those it was
@@ -65,7 +65,7 @@ type modelJSON struct {
 	API   string   `json:"api,omitempty"`   // the one API the user said it is asked on
 	Auto  []string `json:"auto,omitempty"`  // the APIs its vendor's list says it is served on, what Auto asks it on
 	NoAPI bool     `json:"noAPI,omitempty"` // the provider has a URL for none of them: agents aren't offered it (provider.NoAPIFor, #2094)
-	Same  string   `json:"same,omitempty"`  // the model the user said it is the same as, for the groups magpie finds (#583)
+	Same  string   `json:"same,omitempty"`  // the model the user said it is the same as, for the groups eipgam finds (#583)
 	Merge string   `json:"merge,omitempty"` // what those groups merge it by when the user says nothing; absent when ID
 	Kind  string   `json:"kind,omitempty"`  // what the user said it makes: image or video (#1399)
 	// Inputs are the media beyond text and images its source listed it
@@ -101,8 +101,8 @@ type modelJSON struct {
 	// provider's price rate
 	Price *catalog.Price `json:"price,omitempty"`
 	List  *catalog.Price `json:"list,omitempty"`
-	// RemoteList says the list price is what the other magpie counts the
-	// model at, as its list told (a Remote magpie's), not models.dev's
+	// RemoteList says the list price is what the other eipgam counts the
+	// model at, as its list told (a Remote eipgam's), not models.dev's
 	RemoteList bool `json:"remoteList,omitempty"`
 	// ListedOutput is its reply limit before the user's Max output: its
 	// vendor's list's, else models.dev's, within Listed; Model settings'
@@ -185,7 +185,7 @@ type providerJSON struct {
 	// every model of it counted free by the user's word, for Free first
 	// and Cheapest (provider.CountFree)
 	CountFree bool `json:"countFree,omitempty"`
-	// how it bills, by the user's word ("" for magpie's reading), and as
+	// how it bills, by the user's word ("" for eipgam's reading), and as
 	// it is taken: plan, payg, mixed or "" when unknown
 	// (provider.BillingKind; EV_John_Liu on X)
 	Billing     string `json:"billing,omitempty"`
@@ -200,7 +200,7 @@ type providerJSON struct {
 	HTTP1 bool `json:"http1"`
 	// the client certificate, its key and the server CA it is reached
 	// with (provider.ClientCert, #5596), as shown; TakesClientCert: it
-	// may have them, being the user's own or Remote magpie
+	// may have them, being the user's own or Remote eipgam
 	ClientCert      string `json:"clientCert,omitempty"`
 	ClientKey       string `json:"clientKey,omitempty"`
 	ServerCA        string `json:"serverCA,omitempty"`
@@ -224,7 +224,7 @@ type providerJSON struct {
 	// asked as usual after a quota refusal or a 429, never set aside for
 	// it (provider.LimitRestOff)
 	LimitRestOff bool `json:"limitRestOff"`
-	// a Remote magpie's models named by the provider serving each there
+	// a Remote eipgam's models named by the provider serving each there
 	// (provider.UpstreamProviders, lcc580 on X)
 	UpstreamProviders bool `json:"upstreamProviders,omitempty"`
 	// Codex's compaction asked of it as Codex sent it, its sealed item
@@ -232,7 +232,7 @@ type providerJSON struct {
 	// wire can carry it, so the editor offers it
 	NativeCompaction  bool `json:"nativeCompaction"`
 	CarriesCompaction bool `json:"carriesCompaction,omitempty"`
-	// requests go with the agent's own User-Agent, not magpie's
+	// requests go with the agent's own User-Agent, not eipgam's
 	// (provider.MagpieUserAgent off, #1851); OwnClient: they go as a client of
 	// the vendor's own whatever is set (provider.OwnClient), so the
 	// editor offers no such choice
@@ -284,11 +284,11 @@ type providerJSON struct {
 	BalanceMethod string `json:"balanceMethod,omitempty"`
 	// NoBalanceProbe: the look for a balance query is turned off
 	NoBalanceProbe bool `json:"noBalanceProbe,omitempty"`
-	// the query magpie found by itself for a relay added by hand with no
+	// the query eipgam found by itself for a relay added by hand with no
 	// Balance URL, and its field (provider.BalanceFound)
 	BalanceFound      string `json:"balanceFound,omitempty"`
 	BalanceFoundField string `json:"balanceFoundField,omitempty"`
-	// whether magpie looks for a balance query for it at all (the switch
+	// whether eipgam looks for a balance query for it at all (the switch
 	// aside), and whether it looked and found none
 	BalanceProbe      bool `json:"balanceProbe,omitempty"`
 	BalanceUndetected bool `json:"balanceUndetected,omitempty"`
@@ -350,7 +350,7 @@ type providerJSON struct {
 	// videos (provider.MarksKinds, #1399): a chip's right-click offers it
 	MarksKinds bool `json:"marksKinds,omitempty"`
 	// Deciders explicitly identifies decision models for OpenRouter and
-	// remote magpie. An empty remote list suppresses name-based guessing.
+	// remote eipgam. An empty remote list suppresses name-based guessing.
 	Deciders *[]string `json:"deciders,omitempty"`
 
 	Key struct {
@@ -381,43 +381,43 @@ type providerJSON struct {
 	// another provider's model (provider.Provider.NoStandIn), set on its
 	// own with standin
 	NoStandIn bool `json:"noStandIn,omitempty"`
-	// KeepLogin: magpie keeps Codex or Claude Code signed in to the first
+	// KeepLogin: eipgam keeps Codex or Claude Code signed in to the first
 	// account rather than moving it on when that runs low (#524)
 	KeepLogin bool `json:"keepLogin,omitempty"`
 	// KeepLoginAs: the account it is kept signed in to instead of the
 	// first, the gateway still trying them in their order
 	KeepLoginAs string `json:"keepLoginAs,omitempty"`
-	// SwitchOnly: magpie only moves Codex's own sign-in between its
+	// SwitchOnly: eipgam only moves Codex's own sign-in between its
 	// accounts, never routing its requests for failover (#1907); on
 	// Claude's, the accounts are kept to Claude Code's own sign-in and
-	// serve no request through magpie (myduso on Discord)
+	// serve no request through eipgam (myduso on Discord)
 	SwitchOnly bool `json:"switchOnly,omitempty"`
-	// SignInMoves: how magpie moves Codex's or Claude Code's own sign-in
+	// SignInMoves: how eipgam moves Codex's or Claude Code's own sign-in
 	// between its accounts (provider.SignInMovesOf), said beside them
 	SignInMoves *provider.SignInMoves `json:"signInMoves,omitempty"`
-	// RestartApp: magpie restarts the Codex app's app-server for an
+	// RestartApp: eipgam restarts the Codex app's app-server for an
 	// account change it makes by itself (provider.Provider.RestartApp)
 	RestartApp bool `json:"restartApp,omitempty"`
-	// Self: a Remote magpie that turned out to be this magpie (sync
+	// Self: a Remote eipgam that turned out to be this eipgam (sync
 	// brought it from the computer that uses this one), left out of
 	// routing unless KeepSelf (provider.Provider.SelfAnswered)
 	Self     bool `json:"self,omitempty"`
 	KeepSelf bool `json:"keepSelf,omitempty"`
 	// ThisDevice: kept on this computer, out of sync (provider.Provider.ThisDevice)
 	ThisDevice bool `json:"thisDevice,omitempty"`
-	// LibraryMCP: a Remote magpie whose router is a Library server, or
+	// LibraryMCP: a Remote eipgam whose router is a Library server, or
 	// is to be one (library.RemoteMCPOn)
 	LibraryMCP bool `json:"libraryMCP,omitempty"`
-	// LibraryShared: a Remote magpie whose Library's skills and prompts
+	// LibraryShared: a Remote eipgam whose Library's skills and prompts
 	// are used here (library.BorrowedOn), and LibraryNote what its last
 	// read said went wrong or was left as the user's (KoiLx0 on X)
 	LibraryShared bool   `json:"libraryShared,omitempty"`
 	LibraryNote   string `json:"libraryNote,omitempty"`
-	// ConnectAgents: a Remote magpie whose connected agents are
+	// ConnectAgents: a Remote eipgam whose connected agents are
 	// connected here too, those installed here (agent.ConnectsAgents)
 	ConnectAgents bool `json:"connectAgents,omitempty"`
-	// RemoteUpdate: a Remote magpie's word on its last ask to follow
-	// this magpie's version (remoteUpdateNote)
+	// RemoteUpdate: a Remote eipgam's word on its last ask to follow
+	// this eipgam's version (remoteUpdateNote)
 	RemoteUpdate *remoteUpdateJSON `json:"remoteUpdate,omitempty"`
 	// CapStop and CapCareful: how its accounts end at their caps
 	// (plugins#349), set on their own with capstop and capcareful
@@ -579,7 +579,7 @@ type accountJSON struct {
 	Agent string `json:"agent"`     // the agent's id
 	Name  string `json:"agentName"` // the agent's name, for "from Codex CLI's sign-in"
 	Icon  string `json:"agentIcon"`
-	// Logins are the agent's accounts magpie remembers, to switch between
+	// Logins are the agent's accounts eipgam remembers, to switch between
 	Logins []provider.Login `json:"logins,omitempty"`
 	// Builtin is a plugin's provider id, for a plugin beside a built-in
 	// subscription (cursor-plugin's cursor): its plan named as the built-in's
@@ -591,7 +591,7 @@ type accountJSON struct {
 // agentNamed is agent.Find among the agents built once for the request
 // (provider.Held). Each account's row named its agent, and Find built all
 // of them again for it: with the owner's config 58 MB of the 1.4 GB a
-// magpie allocated over 20 window polls.
+// eipgam allocated over 20 window polls.
 func agentNamed(q string) (*agent.Agent, error) {
 	return agent.FindIn(heldAgents(), q)
 }
@@ -603,7 +603,7 @@ func agentNamed(q string) (*agent.Agent, error) {
 func heldAgents() []*agent.Agent { return provider.Held("agent.All", agent.All) }
 
 // accountLabel is the name and logo an account is shown with: its agent's,
-// the subscription's for one no agent magpie configures, and a plugin's
+// the subscription's for one no agent eipgam configures, and a plugin's
 // provider's for a plugin's sign-in, whose agent is "plugin" (#694 listed a
 // removed Qoder as "plugin", with no logo).
 func accountLabel(p provider.Provider) (name, icon string) {
@@ -613,7 +613,7 @@ func accountLabel(p provider.Provider) (name, icon string) {
 	}
 	name, icon = a.Agent, "generic"
 	if a.Agent == "factory" {
-		// a Factory subscription is magpie's own sign-in, not Droid's
+		// a Factory subscription is eipgam's own sign-in, not Droid's
 		name, icon = "Factory", "factory"
 	} else if a.Agent == provider.MiMoID {
 		// a Xiaomi MiMo account, not MiMo Code (the agent "mimo" also names)
@@ -624,15 +624,15 @@ func accountLabel(p provider.Provider) (name, icon string) {
 	} else if ag, err := agentNamed(a.Agent); err == nil {
 		name, icon = ag.Name, ag.Icon
 	} else if a.Agent == "cursor" {
-		// a Cursor subscription is served by the gateway, not an agent magpie configures
+		// a Cursor subscription is served by the gateway, not an agent eipgam configures
 		name, icon = "Cursor CLI", "cursor"
 	} else if a.Agent == "kiro" {
-		// Kiro's sign-in is magpie's own, kiro-cli's or the Kiro IDE's
+		// Kiro's sign-in is eipgam's own, kiro-cli's or the Kiro IDE's
 		name, icon = "Kiro", "kiro-color"
 	} else if a.Agent == "antigravity" {
 		name, icon = "Antigravity", "antigravity-color"
 	} else if a.Agent == provider.WorkBuddyAIID {
-		// WorkBuddy AI, the international build, isn't an agent magpie configures
+		// WorkBuddy AI, the international build, isn't an agent eipgam configures
 		name, icon = "WorkBuddy AI", "workbuddy-color"
 	} else if a.Agent == provider.CommandCodePlanID {
 		// Command Code's CLI keeps the key its sign-in made
@@ -699,7 +699,7 @@ type gatewayJSON struct {
 	URL     string   `json:"url"`
 	LAN     bool     `json:"lan"`
 	LANURLs []string `json:"lanURLs,omitempty"`
-	// PublicURL is MAGPIE_PUBLIC_URL when it is among LANURLs: Connect
+	// PublicURL is EIPGAM_PUBLIC_URL when it is among LANURLs: Connect
 	// starts there until the user picks an address (#1551)
 	PublicURL string `json:"publicURL,omitempty"`
 	// PublicKind is gateway.URLKind's of PublicURL, which Connect and
@@ -713,13 +713,13 @@ type gatewayJSON struct {
 	// page offers the host's it was opened at first (lanShown)
 	Container bool `json:"container,omitempty"`
 	// ContainerHost: where other containers on this host reach the
-	// gateway while magpie runs in one (gateway.ContainerHostURL)
+	// gateway while eipgam runs in one (gateway.ContainerHostURL)
 	ContainerHost string `json:"containerHost,omitempty"`
 	// LazyCat: a LazyCat app's domain, which only devices with LazyCat's
 	// client reach; LazyCatBox: the box's LAN addresses are listed too
 	LazyCat    string `json:"lazyCat,omitempty"`
 	LazyCatBox bool   `json:"lazyCatBox,omitempty"`
-	// OnNetwork: MAGPIE_ADDR puts it beyond loopback (a server, a Docker
+	// OnNetwork: EIPGAM_ADDR puts it beyond loopback (a server, a Docker
 	// image), so every caller is shown a gateway key, and LAN is true too:
 	// callers from elsewhere, a container's host among them, need one
 	OnNetwork bool `json:"onNetwork,omitempty"`
@@ -727,13 +727,13 @@ type gatewayJSON struct {
 	Mine      bool `json:"mine"` // this process serves it
 	// Paused: the user paused it (gatewaypause.go), and nothing serves it
 	Paused bool `json:"paused,omitempty"`
-	Window bool `json:"window"` // the magpie serving it shows its routing
-	// Version is another magpie's, serving it, and Older says it is older
+	Window bool `json:"window"` // the eipgam serving it shows its routing
+	// Version is another eipgam's, serving it, and Older says it is older
 	// than this one: agents' requests are then sent as that version sends
 	// them, without this one's fixes (#506)
 	Version string `json:"version,omitempty"`
 	Older   bool   `json:"older,omitempty"`
-	// Pid and Serves are the serving magpie's own: which process it is and
+	// Pid and Serves are the serving eipgam's own: which process it is and
 	// how it was started, for the Routing page to name the one that is
 	// routing (#2606)
 	Pid    int            `json:"pid,omitempty"`
@@ -787,7 +787,7 @@ type excludedJSON struct {
 type providersJSON struct {
 	Providers []providerJSON `json:"providers"`
 	Presets   []presetJSON   `json:"presets"`
-	Excluded  []excludedJSON `json:"excluded"` // sign-ins magpie found but will not share
+	Excluded  []excludedJSON `json:"excluded"` // sign-ins eipgam found but will not share
 	Gateway   gatewayJSON    `json:"gateway"`
 	// CodexDaemon is the account Codex's background app-server is still
 	// signed in to after Codex was switched to another; "" when none is
@@ -806,7 +806,7 @@ type providersJSON struct {
 	// which the add sheet offers as the plugin's alone
 	OnPlugins []string `json:"onPlugins,omitempty"`
 	// Movable are the built-in subscriptions a community plugin can run,
-	// deprecated in magpie itself: the add sheet marks them so
+	// deprecated in eipgam itself: the add sheet marks them so
 	Movable []string `json:"movable,omitempty"`
 	// MovesTo is the plugin each of them goes to, for the add sheet's
 	// offer to install it before signing in
@@ -814,7 +814,7 @@ type providersJSON struct {
 	// Unmoved are the retired built-ins whose accounts haven't moved onto
 	// their plugins yet, served by nothing until they do, with why
 	Unmoved []provider.MoveCandidate `json:"unmoved,omitempty"`
-	// Withdrawn are the plugins this magpie still has that magpie gives
+	// Withdrawn are the plugins this eipgam still has that eipgam gives
 	// to nobody new, for the page to say the risk and what to use instead
 	Withdrawn []plugin.Withdrawal `json:"withdrawn,omitempty"`
 	// AgyMove are the withdrawn Antigravity plugin's accounts (by email)
@@ -850,12 +850,12 @@ type unremovedJSON struct {
 	Error string `json:"error"`
 }
 
-// agentModel is the model an agent is on, as magpie's catalog names it.
+// agentModel is the model an agent is on, as eipgam's catalog names it.
 func agentModel(a *agent.Agent) string {
 	if len(a.Fields) == 0 {
 		return ""
 	}
-	return strings.TrimPrefix(a.Fields[0].Get(), "magpie/")
+	return strings.TrimPrefix(a.Fields[0].Get(), "eipgam/")
 }
 
 // agentUse is what an agent is on now: read once for the page, not again
@@ -919,7 +919,7 @@ func groupsOnce(find func(string) (provider.Group, []provider.Member, bool)) fun
 
 // presetOwnClient says a provider added from pr goes as a client of its
 // vendor's own (provider.OwnClient): OpenCode's, Cline's, Kilo's, another
-// magpie.
+// eipgam.
 func presetOwnClient(pr provider.PresetDef) bool {
 	return provider.Provider{Preset: pr.ID, Chat: pr.Chat, Responses: pr.Responses, Anthropic: pr.Anthropic}.OwnClient()
 }
@@ -1075,7 +1075,7 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 		}
 		out.KeyList[i].Spend = ks
 	}
-	// a key whose windows magpie reads takes a usage cap as an account
+	// a key whose windows eipgam reads takes a usage cap as an account
 	// does, and says when the cap holds it (the gateway holds it by the
 	// same reading, gateway.keyCapHeld)
 	if p.TakesUsageCap() && p.Account == nil {
@@ -1151,7 +1151,7 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 	// each provider was 16 MB of what twenty window polls allocated
 	held := settings.Shared()
 	sames := held.ModelSameAs
-	// a list fetched before magpie kept each model's most: the one Codex
+	// a list fetched before eipgam kept each model's most: the one Codex
 	// CLI keeps says it
 	var most []catalog.Model
 	if p.Account != nil && p.Account.Agent == "codex" {
@@ -1293,7 +1293,7 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 	for _, m := range avail {
 		seen[m.ID] = true
 	}
-	// Keep an explicit empty list for remote magpie: the editor must not
+	// Keep an explicit empty list for remote eipgam: the editor must not
 	// guess that a Jev Router chat model answers System One.
 	var deciders []string
 	if p.IsRemoteMagpie() {
@@ -1443,7 +1443,7 @@ func accountRests(id string) map[string][]provider.KeyRest {
 
 func providersState() providersJSON {
 	// an account signed in since start-up is listed with its vendor's
-	// models, not magpie's own list of them (#204): asked behind the page,
+	// models, not eipgam's own list of them (#204): asked behind the page,
 	// which is told so and asks again, never waited for (#541)
 	provider.FetchNewBehind(8 * time.Second)
 	agents := agent.DetectedIn(heldAgents())
@@ -1497,7 +1497,7 @@ func providersState() providersJSON {
 	uses := agentUses(agents, findGroup)
 	desktop := desktopNumbers(uses)
 	have := map[string]bool{}
-	var remoteMCP map[string]bool // read once, at the first Remote magpie
+	var remoteMCP map[string]bool // read once, at the first Remote eipgam
 	var connects map[string]bool  // the same
 	all := provider.All()
 	// both lists made once at their size: each grown by append was 6 MB of
@@ -1576,7 +1576,7 @@ func providersState() providersJSON {
 		s.Gateway.Running, s.Gateway.Window, s.Gateway.Version = o.Running, o.Window, o.Version
 		s.Gateway.Older = o.Running && update.Newer(gateway.Version, o.Version)
 		// the process that is routing, for the Routing page to name it
-		// (#2606): another magpie on this computer, whose routing this
+		// (#2606): another eipgam on this computer, whose routing this
 		// console shows through OwnerTrace, and its lanes for the rows
 		s.Gateway.Pid, s.Gateway.Serves = o.Pid, o.Serves
 		if o.Running {
@@ -1602,9 +1602,9 @@ func failMove(rw http.ResponseWriter, err error) {
 	_ = json.NewEncoder(rw).Encode(map[string]any{"error": err.Error(), "why": provider.WhyOf(err)})
 }
 
-// errRetired answers a move back to a built-in subscription, which magpie
+// errRetired answers a move back to a built-in subscription, which eipgam
 // no longer runs: its plugin does.
-var errRetired = errors.New("magpie's built-in subscriptions are retired: their community plugins run them")
+var errRetired = errors.New("eipgam's built-in subscriptions are retired: their community plugins run them")
 
 // moveProvider and adoptProvider are provider.Move and Adopt, for tests
 // to stand in for.
@@ -1638,7 +1638,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		if gw := served.Load(); gw != nil {
 			lanes = gw.Lanes()
 		} else if l, ok := gateway.OwnerLanes(); ok {
-			// another magpie on this computer serves the gateway: its lanes
+			// another eipgam on this computer serves the gateway: its lanes
 			// are the ones to show (the rows read the same wherever it runs)
 			lanes = l
 		}
@@ -1887,12 +1887,12 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			// NoBalanceProbe turns off the look for a relay's balance query;
 			// a save that leaves it out keeps it
 			NoBalanceProbe *bool `json:"noBalanceProbe"`
-			// UpstreamProviders, on a Remote magpie, names its models by the
+			// UpstreamProviders, on a Remote eipgam, names its models by the
 			// provider serving each there; a save that leaves it out keeps it
 			UpstreamProviders *bool `json:"upstreamProviders"`
 			// PassErrors is whether its errors go to the agent as the
 			// vendor sent them (ne9ko9); a save that leaves it out keeps
-			// it, as `magpie provider set <id> errors=pass` set it
+			// it, as `eipgam provider set <id> errors=pass` set it
 			PassErrors *bool `json:"passErrors"`
 			// MaxConcurrency is how many requests each of its keys or
 			// accounts has out at once: a number (0 none), null for what
@@ -1936,14 +1936,14 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			ClearAccessKey bool    `json:"clearAccessKey"`
 			// From is the id the provider had: another is a rename
 			From string `json:"from"`
-			// LibraryMCP, on a Remote magpie, is its editor's switch: its
+			// LibraryMCP, on a Remote eipgam, is its editor's switch: its
 			// router a Library server (library.SetRemoteMCP); left out,
 			// it stays as it is
 			LibraryMCP *bool `json:"libraryMCP"`
-			// LibraryShared, on a Remote magpie, is the switch for its
+			// LibraryShared, on a Remote eipgam, is the switch for its
 			// Library's skills and prompts (library.SetBorrow)
 			LibraryShared *bool `json:"libraryShared"`
-			// ConnectAgents, on a Remote magpie, is the switch that
+			// ConnectAgents, on a Remote eipgam, is the switch that
 			// connects here the agents it has connected
 			// (agent.SetConnectAgents)
 			ConnectAgents *bool `json:"connectAgents"`
@@ -2002,7 +2002,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			// one per endpoint
 			Test []string `json:"test"`
 			// As, for test: the agent the request is asked as
-			// (provider.TestAs: "codex", "claude-code"), "" as magpie
+			// (provider.TestAs: "codex", "claude-code"), "" as eipgam
 			As string `json:"as"`
 			// Run, for test and teststop: the window's name for one
 			// test, which its Stop ends (testRuns)
@@ -2172,7 +2172,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			}
 		case "tuck", "untuck":
 			// a removed account hidden from the Add sheet's "Removed from
-			// magpie" too, or listed there again (#116)
+			// eipgam" too, or listed there again (#116)
 			if err := provider.TuckAccount(in.ID, r.PathValue("action") == "tuck"); err != nil {
 				fail(rw, err)
 				return
@@ -2245,12 +2245,12 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 				fail(rw, errors.New(why))
 				return
 			}
-			// and reply headers magpie never passes on (#4145)
+			// and reply headers eipgam never passes on (#4145)
 			if why := provider.ReplyHeadersOK(in.ReplyHeaders); why != "" {
 				fail(rw, errors.New(why))
 				return
 			}
-			// and request headers that carry magpie's key or the
+			// and request headers that carry eipgam's key or the
 			// connection's own
 			if why := provider.RequestHeadersOK(in.PassHeaders); why != "" {
 				fail(rw, errors.New(why))
@@ -2453,37 +2453,37 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 					in.RateWindows = old.RateWindows
 				}
 				// how long its keys rest out of quota is set in
-				// providers.json or with `magpie provider quota-rest`,
+				// providers.json or with `eipgam provider quota-rest`,
 				// which the form doesn't show: kept as it was (#1772)
 				if in.QuotaRest == 0 && old != nil {
 					in.QuotaRest = old.QuotaRest
 				}
-				// and the time of day they are back, set with `magpie
+				// and the time of day they are back, set with `eipgam
 				// provider quota-rest <id> until 08:00` (#2008)
 				if in.QuotaResetAt == "" && old != nil {
 					in.QuotaResetAt = old.QuotaResetAt
 				}
 				// and the most they sit out while they keep failing, set
-				// with `magpie provider rest-cap` (#2008)
+				// with `eipgam provider rest-cap` (#2008)
 				if in.RestCap == 0 && old != nil {
 					in.RestCap = old.RestCap
 				}
-				// and Codex's requests as sent, set with `magpie provider
+				// and Codex's requests as sent, set with `eipgam provider
 				// set <id> codex=as-sent` (#1758)
 				if !in.CodexAsSent && old != nil {
 					in.CodexAsSent = old.CodexAsSent
 				}
-				// and Antigravity's prompt as written, set with `magpie
+				// and Antigravity's prompt as written, set with `eipgam
 				// provider set antigravity prompt=as-written`
 				if !in.PromptAsWritten && old != nil {
 					in.PromptAsWritten = old.PromptAsWritten
 				}
-				// and that magpie filled the Gemini URL in once, which the
+				// and that eipgam filled the Gemini URL in once, which the
 				// form doesn't send: a URL cleared in it stays cleared
 				if !in.GeminiFilled && old != nil {
 					in.GeminiFilled = old.GeminiFilled
 				}
-				// and additional_tools taken, set with `magpie provider
+				// and additional_tools taken, set with `eipgam provider
 				// set <id> additional-tools=on` (#2660)
 				if !in.AdditionalTools && old != nil {
 					in.AdditionalTools = old.AdditionalTools
@@ -2492,7 +2492,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 					in.AdditionalToolsOff = old.AdditionalToolsOff
 				}
 				// and how long a request to it alone is kept while it is
-				// busy, set with `magpie provider set <id> patience=`
+				// busy, set with `eipgam provider set <id> patience=`
 				if in.Patience == 0 && old != nil {
 					in.Patience = old.Patience
 				}
@@ -2668,7 +2668,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 					return
 				}
 			}
-			// a Remote magpie's router given a server or taken out, before
+			// a Remote eipgam's router given a server or taken out, before
 			// its list below asks it
 			askHub := false
 			if req.LibraryMCP != nil {
@@ -2752,7 +2752,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			// With Account, the key of that id: each of several keys'
 			// rows copies its own (#1480). With AllKeys, every one of
 			// them, one a line, as Paste several takes them in another
-			// magpie (@emilochen on X); never logged.
+			// eipgam (@emilochen on X); never logged.
 			if req.AllKeys {
 				keys, err := provider.AllKeys(in.ID)
 				if err != nil {
@@ -2927,7 +2927,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			}
 			agent.SyncCatalogSoon()
 		case "switchonly":
-			// magpie only switches Codex's own sign-in, its requests going
+			// eipgam only switches Codex's own sign-in, its requests going
 			// straight to OpenAI, or routes them for failover again
 			// (#1907); the agent's config follows at once
 			if err := provider.SetSwitchOnly(in.ID, in.SwitchOnly); err != nil {
@@ -2937,13 +2937,13 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			agent.SyncCatalogSoon()
 		case "restartapp":
 			// the Codex app's app-server restarted for an account change
-			// magpie makes by itself, or left be (atom0964 on Discord)
+			// eipgam makes by itself, or left be (atom0964 on Discord)
 			if err := provider.SetRestartApp(in.ID, in.RestartApp); err != nil {
 				fail(rw, err)
 				return
 			}
 		case "keepself":
-			// a Remote magpie that is this magpie, used anyway or left out
+			// a Remote eipgam that is this eipgam, used anyway or left out
 			// (hanslin1666 on Discord)
 			if err := provider.SetKeepSelf(in.ID, in.KeepSelf); err != nil {
 				fail(rw, err)
@@ -3255,7 +3255,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		defer cancel()
 		writeJSON(rw, provider.WithCapped(provider.LoginUsageShown(ctx, r.URL.Query().Get("agent"))))
 	})
-	// Switching the account an agent is signed in to, among those magpie
+	// Switching the account an agent is signed in to, among those eipgam
 	// remembers, and forgetting one.
 	mux.HandleFunc("POST /api/login/{action}", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Agent, User string }
@@ -3279,7 +3279,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			change = func() error { return provider.SetLoginOn(in.Agent, in.User, r.PathValue("action") == "on") }
 		case "access-only", "renewed":
 			// kept access token only, never renewed (EastonXvii on X), or
-			// renewed by magpie again
+			// renewed by eipgam again
 			change = func() error {
 				return provider.SetLoginAccessOnly(in.Agent, in.User, r.PathValue("action") == "access-only")
 			}
@@ -3294,7 +3294,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			fail(rw, err)
 			return
 		}
-		// an agent on its own models goes through magpie while more of
+		// an agent on its own models goes through eipgam while more of
 		// its accounts are on, and straight to its vendor again once not
 		agent.SyncCatalogSoon()
 		st := providersState()
@@ -3439,7 +3439,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		st.Moved, st.Added, st.Had, st.Removed = moved, added, had, removed
 		writeJSON(rw, st)
 	})
-	// Adding a subscription: magpie opens the vendor's sign-in in the
+	// Adding a subscription: eipgam opens the vendor's sign-in in the
 	// browser and the window follows it until the account is in.
 	mux.HandleFunc("POST /api/signin", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
@@ -3565,7 +3565,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		}{res, providersState()})
 	})
 	// ChatGPT and Claude accounts taken out as a file Sub2API, CLIProxyAPI
-	// or magpie imports (heyiwei5 and Rk1ngggg on X). The file holds live
+	// or eipgam imports (heyiwei5 and Rk1ngggg on X). The file holds live
 	// sign-ins: it is written 0600 into Downloads, never sent to the page,
 	// and its tokens are never logged.
 	mux.HandleFunc("POST /api/signin/export", func(rw http.ResponseWriter, r *http.Request) {
@@ -3586,7 +3586,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		stamp := time.Now().Format("2006-01-02")
 		if in.Format == provider.ExportCLIProxy {
 			// one file an account, in a folder of their own
-			base := filepath.Join(dir, "magpie-cliproxyapi-"+in.Agent+"-"+stamp)
+			base := filepath.Join(dir, "eipgam-cliproxyapi-"+in.Agent+"-"+stamp)
 			dir = base
 			for i := 2; ; i++ {
 				if _, err := os.Stat(dir); err != nil {
@@ -3595,7 +3595,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 				dir = fmt.Sprintf("%s-%d", base, i)
 			}
 		} else {
-			res.Files[0].Name = "magpie-sub2api-" + in.Agent + "-" + stamp + ".json"
+			res.Files[0].Name = "eipgam-sub2api-" + in.Agent + "-" + stamp + ".json"
 		}
 		paths, err := provider.WriteExport(res, dir)
 		if err != nil {
@@ -3614,7 +3614,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		}{tilde(shown), res.Accounts, res.Skipped})
 	})
 	// StepFun's Step Plan windows: the session the user copied from their
-	// browser with magpie's bookmarklet, the provider's own (two on one
+	// browser with eipgam's bookmarklet, the provider's own (two on one
 	// site can be two accounts, #2384), on the provider's platform
 	stepfunOf := func(rw http.ResponseWriter, r *http.Request) (string, string, bool) {
 		p, err := provider.Find(r.PathValue("id"))

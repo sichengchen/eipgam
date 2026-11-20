@@ -43,7 +43,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           return base(route);
         });
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://eipgam.test/?view=gateway");
         const row = page.locator('#gatewayKeys .acc[data-key="work"]');
         await row.waitFor();
         await row.getByRole("button", { name: tr(lang, "Set a limit for this key"), exact: true }).click();

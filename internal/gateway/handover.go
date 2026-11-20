@@ -18,13 +18,13 @@ import (
 )
 
 // A restart to update hands the gateway over rather than ending it
-// (internal/handoff): the magpie updating gives the new version the
+// (internal/handoff): the eipgam updating gives the new version the
 // socket it listens on, the new one serves on it at once, and the old
 // stops accepting and finishes the requests it has (handedOffDrain at
 // most) before it quits. No connection is refused on the way: the socket
 // is never closed, only accepted from by the other process.
 
-// handedOffDrain is how long a magpie that handed the gateway over waits
+// handedOffDrain is how long a eipgam that handed the gateway over waits
 // for its requests in flight to finish: the longest stream an agent has
 // been seen to keep, as `make dev`'s handover waits.
 var handedOffDrain = 15 * time.Minute
@@ -37,7 +37,7 @@ func HandedOffDrain() time.Duration { return handedOffDrain }
 // nothing serves the port after it: a quit, or a restart that waits.
 var shortDrain = 2 * time.Second
 
-// inherited is the listener the magpie before this one handed over, taken
+// inherited is the listener the eipgam before this one handed over, taken
 // by the first Listen of its address; ack is called once this gateway
 // serves on it, which tells the one before to stop accepting.
 var inherited struct {
@@ -46,7 +46,7 @@ var inherited struct {
 	ack func()
 }
 
-// Inherit has this process's gateway serve on ln, the socket the magpie
+// Inherit has this process's gateway serve on ln, the socket the eipgam
 // it replaces listened on, rather than listening itself; ack is called
 // once it serves.
 func Inherit(ln net.Listener, ack func()) {
@@ -59,7 +59,7 @@ func Inherit(ln net.Listener, ack func()) {
 }
 
 // Inherited is whether a listener handed over is waiting to be served:
-// the gateway's port is then held by the magpie that handed it over, and
+// the gateway's port is then held by the eipgam that handed it over, and
 // is this process's to serve all the same.
 func Inherited() bool {
 	inherited.Lock()
@@ -143,7 +143,7 @@ func sameAddr(a net.Addr, addr string) bool {
 }
 
 // ListenerFile is a copy of the socket the gateway listens on, to hand to
-// the magpie that takes it over; the caller closes it once sent.
+// the eipgam that takes it over; the caller closes it once sent.
 func (s *Server) ListenerFile() (*os.File, error) {
 	s.lnMu.Lock()
 	ln := s.ln
@@ -158,7 +158,7 @@ func (s *Server) ListenerFile() (*os.File, error) {
 	return tl.File()
 }
 
-// HandOff has the gateway stop accepting at once: the magpie it was
+// HandOff has the gateway stop accepting at once: the eipgam it was
 // handed to takes every connection from now on (one this one took as its
 // end began was closed unanswered, #3568). Once its ctx ends, it waits
 // for every request in flight to finish (handedOffDrain at most) rather
@@ -169,7 +169,7 @@ func (s *Server) HandOff() {
 }
 
 // stopAccepting has the gateway take no connection from here on, for the
-// magpie serving the port after it: the copy of the socket handed to that
+// eipgam serving the port after it: the copy of the socket handed to that
 // one keeps the socket open, so a connection waits there rather than
 // being refused. (`make dev`'s takes them on a socket of its own.)
 func (s *Server) stopAccepting() {
@@ -183,7 +183,7 @@ func (s *Server) stopAccepting() {
 
 // closesWhenHandedOff has each reply the gateway gives once it takes no
 // connection (stopAccepting) close its connection, so the agent's next
-// request dials the magpie serving the port after this one rather than
+// request dials the eipgam serving the port after this one rather than
 // waiting on a connection this one's end closes (unreadConns).
 func (s *Server) closesWhenHandedOff(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +194,7 @@ func (s *Server) closesWhenHandedOff(h http.Handler) http.Handler {
 	})
 }
 
-// handingOver is whether another magpie serves the port once this
+// handingOver is whether another eipgam serves the port once this
 // gateway ends: it was handed off, or `make dev` started one beside it.
 func (s *Server) handingOver() bool { return Handover || s.handedOff.Load() }
 
@@ -219,7 +219,7 @@ var unreadWait = 5 * time.Second
 // sent on it just then is cut ("connection reset", #3451), so a
 // handover's end waits for them first: each one's next request is
 // answered here, its reply closing it (closesWhenHandedOff), and the
-// agent's next one dials the magpie after this one.
+// agent's next one dials the eipgam after this one.
 type unreadConns struct {
 	mu    sync.Mutex
 	conns map[net.Conn]bool
@@ -277,13 +277,13 @@ func (u *unreadConns) wait(ctx context.Context) {
 
 // ServeCallbacks answers, on ln, the tool calls of the Claude Code runs
 // this process started (claudeMCPPath): their MCP helper calls the
-// gateway's port, which the magpie this one handed it to now serves, and
+// gateway's port, which the eipgam this one handed it to now serves, and
 // that one passes on the calls of runs it doesn't have (ForwardCallbacks).
 // It also lets the successor wait until Claude sessions have been saved.
 // It returns once ln is closed.
 func (s *Server) ServeCallbacks(ln net.Listener) error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /_magpie/claude-ready", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /_eipgam/claude-ready", func(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-s.sessionsSaved:
 			w.WriteHeader(http.StatusNoContent)
@@ -298,7 +298,7 @@ func (s *Server) ServeCallbacks(ln net.Listener) error {
 	return err
 }
 
-// predecessorCallbacks is the unix socket of the magpie this one took the
+// predecessorCallbacks is the unix socket of the eipgam this one took the
 // gateway over from, which answers its own runs' tool calls there; ""
 // when there is none.
 var predecessorCallbacks struct {
@@ -308,7 +308,7 @@ var predecessorCallbacks struct {
 }
 
 // ForwardCallbacks has a tool call for a Claude Code run this process
-// doesn't know passed on to sock, where the magpie it took the gateway
+// doesn't know passed on to sock, where the eipgam it took the gateway
 // over from answers those of its own runs (ServeCallbacks): a turn under
 // way there when the gateway changed hands still gets its tool results.
 // "" stops it.
@@ -320,7 +320,7 @@ func ForwardCallbacks(sock string) {
 }
 
 // forwardCallback passes the tool call r, for a run this process doesn't
-// have, on to the magpie before this one; false when there is none to.
+// have, on to the eipgam before this one; false when there is none to.
 func forwardCallback(w http.ResponseWriter, r *http.Request) bool {
 	predecessorCallbacks.Lock()
 	sock := predecessorCallbacks.sock
@@ -329,7 +329,7 @@ func forwardCallback(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	if _, err := os.Stat(sock); err != nil {
-		// that magpie has finished and gone
+		// that eipgam has finished and gone
 		ForwardCallbacks("")
 		return false
 	}
@@ -345,7 +345,7 @@ func forwardCallback(w http.ResponseWriter, r *http.Request) bool {
 		FlushInterval: -1,
 		ErrorHandler: func(w http.ResponseWriter, _ *http.Request, err error) {
 			if !errors.Is(err, io.EOF) {
-				log.Printf("claude: a tool call for the magpie before this one didn't reach it: %v", err)
+				log.Printf("claude: a tool call for the eipgam before this one didn't reach it: %v", err)
 			}
 			http.Error(w, "unknown or expired Claude run", http.StatusNotFound)
 		},
@@ -355,7 +355,7 @@ func forwardCallback(w http.ResponseWriter, r *http.Request) bool {
 }
 
 // forwarding is whether tool calls this process doesn't know go on to the
-// magpie it took the gateway over from.
+// eipgam it took the gateway over from.
 func forwarding() bool {
 	predecessorCallbacks.Lock()
 	sock := predecessorCallbacks.sock
@@ -403,7 +403,7 @@ func awaitPredecessorSessions(ctx context.Context) error {
 		return d.DialContext(ctx, "unix", sock)
 	}}
 	defer transport.CloseIdleConnections()
-	req, err := http.NewRequestWithContext(ctx, "GET", "http://predecessor/_magpie/claude-ready", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://predecessor/_eipgam/claude-ready", nil)
 	if err != nil {
 		return err
 	}

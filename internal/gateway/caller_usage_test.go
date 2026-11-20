@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 func newCaller(t *testing.T, names ...string) ([]access.Key, []string) {
@@ -174,7 +174,7 @@ func TestMigratedLANKeyUsageAndRevocation(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := settings.Load()
-	s.LAN, s.LANKey = true, "sk-magpie-test-legacy-lan"
+	s.LAN, s.LANKey = true, "sk-eipgam-test-legacy-lan"
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}

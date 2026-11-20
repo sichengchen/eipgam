@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Magpie Memory has a mark of its own, a brain (the owner, 11-12: the
+// eipgam Memory has a mark of its own, a brain (the owner, 11-12: the
 // Library's Memory tab had a bookmark, and Memory's own requests the
 // generic cube in Routing). The sidebar's Memory tab and every request
 // Memory makes (client "memory", agent.others) draw the one brain in
@@ -28,7 +28,7 @@ const routes = clients.map((c, i) => ({
 }));
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = {
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 };
@@ -54,7 +54,7 @@ function serve(lang) {
     if (url.pathname === "/api/library") return json(lib);
     if (url.pathname === "/api/memory") return json({ memories: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "eipgam.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       if (width === 1100) {
         // the sidebar's Memory tab: the brain, and no other tab has it
-        await page.goto("http://magpie.test/?view=library");
+        await page.goto("http://eipgam.test/?view=library");
         await page.waitForSelector("body.side-nav");
         await page.waitForFunction(() => window.NAV_SUB_IC && document.querySelectorAll('.nav-sub[data-view="library"]:not(.leaving) .nav-s').length >= 8);
         const tabs = await page.evaluate(() => [...document.querySelectorAll('.nav-sub[data-view="library"]:not(.leaving) .nav-s')].map((s) => ({
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
 
       // a request Memory made: its brain and its name, never the cube
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").nth(clients.length - 1).waitFor();
       // the mask's picture has come, or failed (a failed one is the cube)

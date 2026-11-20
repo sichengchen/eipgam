@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // Google's API takes a part's fields by their proto names as well
@@ -131,7 +131,7 @@ func TestHeldGeminiStreamSendsNoComment(t *testing.T) {
 // ZCode with a local WebM attached sends a Messages video block or, on
 // Chat, a video_url data URL (Flandern1211's capture of ZCode 0.17.1,
 // #5098). Both reach a Gemini model through Code Assist as inlineData with
-// the bytes and type ZCode sent, now that magpie tells ZCode the model
+// the bytes and type ZCode sent, now that eipgam tells ZCode the model
 // takes video (zcodeInputs).
 func TestZCodeVideoReachesCodeAssist(t *testing.T) {
 	for _, tc := range []struct{ name, body string }{

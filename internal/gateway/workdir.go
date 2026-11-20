@@ -31,8 +31,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 var (
@@ -119,7 +119,7 @@ func workPlace(req *Request) (dir, git string) {
 // it is in a git repository (provider.WorkGitHeader), as far as body, in
 // protocol to, says: a plugin that tells its vendor the user's
 // environment, as ZCode's Start Plan does, says the agent's own and not
-// magpie's (magpie-community/plugins#86). A folder not said leaves both
+// eipgam's (magpie-community/plugins#86). A folder not said leaves both
 // off: unknown. Whether it is a git repository is the agent's word, else
 // looked at on disk.
 func tellWorkPlace(h http.Header, to provider.Protocol, body []byte) {

@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Which agents' session history magpie reads (RustCats on X: a new
+// Which agents' session history eipgam reads (RustCats on X: a new
 // install showed every agent's history before anyone agreed). Until the
 // user says (sessions/manage's reads.asked false), the Sessions page shows
 // the consent first: the agents found, each with a switch of its own, off;
@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const { page, errors } = await open(engine, width, t);
       const store = { asked: false, all: false, found: found(), named: {} }, posts = [];
       await page.route("**/*", serve(lang, store, posts));
-      await page.goto("http://magpie.test/?view=sessions");
+      await page.goto("http://eipgam.test/?view=sessions");
       const card = page.locator("#view-sessions .sm-consent");
       await card.waitFor();
       assert.equal(await card.locator(".sm-consent-title").textContent(), w.title);
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           found: [{ agent: "claude", name: "Claude Code", icon: "claudecode-color", on: true }, { agent: "antigravity", name: "Antigravity", icon: "antigravity-color", on: false }],
         }, posts = [];
         await page.route("**/*", serve(lang, store, posts));
-        await page.goto("http://magpie.test/?view=sessions");
+        await page.goto("http://eipgam.test/?view=sessions");
         const card = page.locator("#view-sessions .sm-later");
         await card.waitFor();
         assert.equal(await page.locator("#view-sessions .sm-consent:not(.sm-later)").count(), 0, "the first consent is not shown again");
@@ -173,7 +173,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const { page, errors } = await open(engine, 390, t);
     const store = { asked: false, all: false, found: found(), named: {} }, posts = [];
     await page.route("**/*", serve("en", store, posts));
-    await page.goto("http://magpie.test/?view=sessions");
+    await page.goto("http://eipgam.test/?view=sessions");
     const card = page.locator("#view-sessions .sm-consent");
     await card.getByRole("button", { name: "Allow all", exact: true }).click();
     await card.waitFor({ state: "detached" });
@@ -185,7 +185,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const { page, errors } = await open(engine, 900, t);
     const store = { asked: false, all: false, found: [], named: {} }, posts = [];
     await page.route("**/*", serve("en", store, posts));
-    await page.goto("http://magpie.test/?view=sessions");
+    await page.goto("http://eipgam.test/?view=sessions");
     const card = page.locator("#view-sessions .sm-consent");
     await card.locator(".sm-consent-none").waitFor();
     assert.equal(await card.getByRole("button", { name: "Allow selected" }).count(), 0);
@@ -198,7 +198,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const { page, errors } = await open(engine, width, t);
       const store = { asked: true, all: true, found: found().map((f) => ({ ...f, on: true })), named: {} }, posts = [];
       await page.route("**/*", serve(lang, store, posts));
-      await page.goto("http://magpie.test/?view=settings&tab=privacy");
+      await page.goto("http://eipgam.test/?view=settings&tab=privacy");
       const list = page.locator("#sessionReadsList");
       await page.locator("#setPage-privacy .row-head .label", { hasText: w.head }).waitFor();
       const row = (sel) => list.locator(sel);

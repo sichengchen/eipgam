@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Codex's own models, routed through magpie, keep what Codex knows of them
-// — image input, context window, tools — under magpie's id; a third-party
+// Codex's own models, routed through eipgam, keep what Codex knows of them
+// — image input, context window, tools — under eipgam's id; a third-party
 // model gets the generic entry.
 func TestCodexCatalogKeepsOwnEntries(t *testing.T) {
 	home := t.TempDir()
@@ -69,7 +69,7 @@ func TestCodexCatalogImages(t *testing.T) {
 	}
 }
 
-// A model magpie describes has Codex search its MCP tools rather than send
+// A model eipgam describes has Codex search its MCP tools rather than send
 // every one in each request (#258), with its prompt, context window, and
 // neither code mode nor Responses Lite. Its whole window is told, and a
 // window above the working one is compacted at that (auto_compact_token_
@@ -176,7 +176,7 @@ func TestCodexCatalogServiceTiers(t *testing.T) {
 
 // Codex turns a pasted image away for a model without "image" itself, so
 // /model says such a model is text-only and where that is changed, and the
-// entry still reads as magpie's (KimYx0207 on X).
+// entry still reads as eipgam's (KimYx0207 on X).
 func TestCodexCatalogSaysTextOnly(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -192,7 +192,7 @@ func TestCodexCatalogSaysTextOnly(t *testing.T) {
 		{ID: "probe/text", Name: "Text"},
 		{ID: "probe/sees", Name: "Sees", Images: true},
 		{ID: "group/words", Name: "Words"},
-		{ID: "auto/found", Name: "Found"}, // a group magpie found, as it is listed
+		{ID: "auto/found", Name: "Found"}, // a group eipgam found, as it is listed
 	}), &got)
 	if len(got.Models) != 4 {
 		t.Fatalf("%+v", got.Models)
@@ -201,7 +201,7 @@ func TestCodexCatalogSaysTextOnly(t *testing.T) {
 	if !strings.Contains(text.Description, "text only") || !strings.Contains(text.Description, "Model settings") || !catalog.MagpieAdded("", text.Slug, text.Description) {
 		t.Errorf("text-only model: %q", text.Description)
 	}
-	if sees.Description != "Sees via magpie" || group.Description != "Words via magpie" || found.Description != "Found via magpie" {
+	if sees.Description != "Sees via eipgam" || group.Description != "Words via eipgam" || found.Description != "Found via eipgam" {
 		t.Errorf("a model that sees, a group and a found one: %q, %q, %q", sees.Description, group.Description, found.Description)
 	}
 }

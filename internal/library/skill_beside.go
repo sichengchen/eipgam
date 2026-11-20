@@ -212,7 +212,7 @@ func (s *Skill) fetchedHash(from string) string {
 	if s.Called == "" {
 		return hashDir(from)
 	}
-	tmp, err := os.MkdirTemp("", "magpie-skill-named-")
+	tmp, err := os.MkdirTemp("", "eipgam-skill-named-")
 	if err != nil {
 		return ""
 	}

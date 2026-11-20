@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // /api/state's settings, polled after nearly every click, carry none of
@@ -14,7 +14,7 @@ import (
 // last state served at start (?last=1), which has today's settings.
 func TestStateSendsNoCredentials(t *testing.T) {
 	sandboxHome(t)
-	const pass, lan, bark, gh = "hunter2-proxy-pass", "sk-magpie-statelanstatelanstatelan0123", "bark-state-key-0123", "ghp_statetokenstatetoken0123"
+	const pass, lan, bark, gh = "hunter2-proxy-pass", "sk-eipgam-statelanstatelanstatelan0123", "bark-state-key-0123", "ghp_statetokenstatetoken0123"
 	h := Handler(nil, nil)
 	call := func(method, path, body string) string {
 		t.Helper()

@@ -15,7 +15,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A bundle is a Claude Code plugin kept in the library as one item
@@ -65,7 +65,7 @@ type Plugin struct {
 	MCP       []string `json:"mcp,omitempty"`
 	Hooks     []string `json:"hooks,omitempty"`
 	Subagents []string `json:"subagents,omitempty"`
-	// Left are the parts of the plugin magpie doesn't carry, and why
+	// Left are the parts of the plugin eipgam doesn't carry, and why
 	Left []PluginLeft `json:"left,omitempty"`
 	// Installed is when it was installed or last updated
 	Installed string `json:"installed,omitempty"`
@@ -357,12 +357,12 @@ func readPlugin(dir, hint, force string, over map[string]any) (*plLoaded, error)
 			}
 		}
 		if c > 0 {
-			leave(fmt.Sprintf("%d slash commands", c), "slash commands are Claude Code's own: magpie carries a plugin's skills, MCP servers, hooks and subagents")
+			leave(fmt.Sprintf("%d slash commands", c), "slash commands are Claude Code's own: eipgam carries a plugin's skills, MCP servers, hooks and subagents")
 		}
 	}
 	for _, k := range []string{"lspServers", "outputStyles", "themes", "monitors"} {
 		if man[k] != nil {
-			leave(k, "no agent magpie writes to reads it")
+			leave(k, "no agent eipgam writes to reads it")
 		}
 	}
 	return p, nil
@@ -821,7 +821,7 @@ func marketSource(s map[string]any) (Source, string) {
 		}
 		return Source{}, "its address " + u + " isn't a git repository's"
 	}
-	return Source{}, "its source of kind " + plStr(s["source"]) + " isn't one magpie fetches"
+	return Source{}, "its source of kind " + plStr(s["source"]) + " isn't one eipgam fetches"
 }
 
 func candidateOf(pl *plLoaded, dir string, over map[string]any) PluginCandidate {
@@ -969,7 +969,7 @@ func installPlugins(p *PluginProbe, input string, names, agents []string) (*Resu
 			return nil, fmt.Errorf("%s: %w", c.Name, err)
 		}
 		if pl.parts() == 0 {
-			return nil, fmt.Errorf("%s has no skills, MCP servers, hooks or subagents magpie can give an agent", pl.name)
+			return nil, fmt.Errorf("%s has no skills, MCP servers, hooks or subagents eipgam can give an agent", pl.name)
 		}
 		ones = append(ones, one{c, pl, d})
 	}

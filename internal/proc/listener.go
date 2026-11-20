@@ -11,8 +11,8 @@ import (
 )
 
 // The process listening on a port, and its program: how the GUI finds the
-// older magpie that keeps the gateway's port and quits it, when the user
-// asks it to (leslie_luo on Discord: the page said an older magpie served
+// older eipgam that keeps the gateway's port and quits it, when the user
+// asks it to (leslie_luo on Discord: the page said an older eipgam served
 // the gateway, with no way to find it and quit it).
 
 // ErrDenied is a process this user may not end: another user's, or one
@@ -36,7 +36,7 @@ func Executable(pid int) (string, error) {
 	return strings.TrimSuffix(p, " (deleted)"), nil
 }
 
-// Terminate asks process pid to end: SIGTERM on Unix, which a magpie quits
+// Terminate asks process pid to end: SIGTERM on Unix, which a eipgam quits
 // on; on Windows it is ended at once (nothing else reaches a tray app).
 // ErrDenied when this user may not.
 func Terminate(pid int) error { return terminate(pid) }
@@ -45,13 +45,13 @@ func Terminate(pid int) error { return terminate(pid) }
 func Kill(pid int) error { return kill(pid) }
 
 // RunsMagpie says whether process pid, running the program at path (as
-// Executable says), is a magpie: by the program's name (IsMagpie), or else
-// by what the program is, magpie's own main package, read from the build
-// information Go writes into it. A magpie under a name of the user's
-// (acezan on Discord: magpie.real, behind a wrapper script installed as
-// magpie) is still one, and on Linux this holds for one whose file an
+// Executable says), is a eipgam: by the program's name (IsMagpie), or else
+// by what the program is, eipgam's own main package, read from the build
+// information Go writes into it. A eipgam under a name of the user's
+// (acezan on Discord: eipgam.real, behind a wrapper script installed as
+// eipgam) is still one, and on Linux this holds for one whose file an
 // update has since replaced, read through /proc/<pid>/exe: the panel had
-// called that magpie "not magpie" and left it holding the gateway's port.
+// called that eipgam "not eipgam" and left it holding the gateway's port.
 func RunsMagpie(pid int, path string) bool {
 	if IsMagpie(path) {
 		return true
@@ -67,14 +67,14 @@ func RunsMagpie(pid int, path string) bool {
 	return err == nil && bi.Path == magpieMain
 }
 
-// magpieMain is magpie's main package, as a build of it names itself; a
+// magpieMain is eipgam's main package, as a build of it names itself; a
 // var for the tests, whose own binary is another package's.
-var magpieMain = "github.com/yetone/magpie"
+var magpieMain = "github.com/sichengchen/eipgam"
 
-// IsMagpie says whether the program at path is a magpie: magpie, its
-// magpie-* builds or dial, its name before; with .exe, and Windows' .old
+// IsMagpie says whether the program at path is a eipgam: eipgam, its
+// eipgam-* builds or dial, its name before; with .exe, and Windows' .old
 // for one replaced by an update while it ran, or .old-2 when that one was
-// still held; and magpie.real, the program a wrapper script named magpie
+// still held; and eipgam.real, the program a wrapper script named eipgam
 // runs (acezan on Discord).
 func IsMagpie(path string) bool {
 	if path == "" {
@@ -90,7 +90,7 @@ func IsMagpie(path string) bool {
 	n = strings.TrimSuffix(n, ".new")
 	n = strings.TrimSuffix(n, ".exe")
 	n = strings.TrimSuffix(n, ".real")
-	for _, name := range []string{"magpie", "dial"} {
+	for _, name := range []string{"eipgam", "dial"} {
 		if n == name || strings.HasPrefix(n, name+"-") || strings.HasPrefix(n, name+"_") {
 			return true
 		}
@@ -99,7 +99,7 @@ func IsMagpie(path string) bool {
 }
 
 // isOldCount is the -2, -3 an update appends when exe.old is taken too: a
-// number alone is magpie's own naming, so another program's is left alone.
+// number alone is eipgam's own naming, so another program's is left alone.
 func isOldCount(s string) bool {
 	s = strings.TrimPrefix(s, "-")
 	if s == "" {
@@ -116,8 +116,8 @@ func isOldCount(s string) bool {
 // IsForwarder says whether the program at path holds a port for a container
 // or a VM, which serves on it from inside: OrbStack's helper, Docker
 // Desktop's backend and vpnkit, docker-proxy, Podman's gvproxy, Lima's
-// (Colima's, Rancher Desktop's) host agent, WSL's relay. A magpie answering
-// there runs in that container (leslie_luo on Discord: magpie v0.1.552 in
+// (Colima's, Rancher Desktop's) host agent, WSL's relay. A eipgam answering
+// there runs in that container (leslie_luo on Discord: eipgam v0.1.552 in
 // OrbStack held 3425, and its helper was named as the program to quit),
 // which only the container's own tools stop.
 func IsForwarder(path string) bool {

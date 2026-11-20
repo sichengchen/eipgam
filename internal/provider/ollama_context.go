@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/catalog"
 )
 
 // Ollama's /v1/models lists no window. What a model runs with is in its
@@ -42,7 +42,7 @@ const ollamaShowFor = 6 * time.Second
 // ollamaShowEach is how many models are asked at once.
 const ollamaShowEach = 8
 
-// ollamaOutputCap is the most reply magpie assumes for a local model it
+// ollamaOutputCap is the most reply eipgam assumes for a local model it
 // knows no limit for.
 const ollamaOutputCap = 32_768
 

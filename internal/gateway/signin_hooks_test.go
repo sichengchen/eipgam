@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
 // A ChatGPT account of several whose sign-in OpenAI revoked (shannnnnks
@@ -21,7 +21,7 @@ import (
 // installed to hear it, and not again on the next look.
 func TestRevokedAccountToldToHooksOnce(t *testing.T) {
 	codexSignedIn(t, "spare@example.com")
-	t.Setenv("MAGPIE_BUN", testenv.Bun(t))
+	t.Setenv("EIPGAM_BUN", testenv.Bun(t))
 	t.Cleanup(plugin.Settle)
 	access := codexAccessToken(t)
 	revokedUpstream(t, access)

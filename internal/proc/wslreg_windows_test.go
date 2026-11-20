@@ -9,14 +9,14 @@ import (
 	"testing"
 )
 
-// On a real Windows with WSL (MAGPIE_WSL_REGISTRY_LIVE set): every distro
+// On a real Windows with WSL (EIPGAM_WSL_REGISTRY_LIVE set): every distro
 // wsl.exe -l -q lists (which reads and starts nothing) is one the registry
 // has, so the gate never reads none while wsl.exe has some. The registry
 // may have more: a distro being installed or uninstalled (its State), which
 // wsl.exe leaves out, keeps wsl.exe asked.
 func TestWSLRegistryLive(t *testing.T) {
-	if os.Getenv("MAGPIE_WSL_REGISTRY_LIVE") == "" {
-		t.Skip("MAGPIE_WSL_REGISTRY_LIVE not set")
+	if os.Getenv("EIPGAM_WSL_REGISTRY_LIVE") == "" {
+		t.Skip("EIPGAM_WSL_REGISTRY_LIVE not set")
 	}
 	names, ok := registeredDistros()
 	if !ok {

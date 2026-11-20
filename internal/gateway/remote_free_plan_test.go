@@ -8,17 +8,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // #6708 (zzh11223311): Free quota by expiry told a free plan by the
-// account's own Plan, which a Remote magpie member has none of, so a
+// account's own Plan, which a Remote eipgam member has none of, so a
 // remote signed in to a free plan was weighed as a paid one. Its card's
 // plan tells it now: the free one goes first, though the paid one has
 // more left and renews sooner, and the trace says it is free.
 func TestRemoteMagpieFreePlanSpentFirst(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("EIPGAM_ADDR", "")
 	provider.ForgetRemoteCardsForTest()
 	t.Cleanup(provider.ForgetRemoteCardsForTest)
 	now := time.Now()
@@ -41,11 +41,11 @@ func TestRemoteMagpieFreePlanSpentFirst(t *testing.T) {
 		t.Cleanup(srv.Close)
 		return srv
 	}
-	paid := remote("sk-magpie-paid", "Pro", 20, 30*time.Hour)
-	free := remote("sk-magpie-free", "Free", 60, 100*time.Hour)
+	paid := remote("sk-eipgam-paid", "Pro", 20, 30*time.Hour)
+	free := remote("sk-eipgam-free", "Free", 60, 100*time.Hour)
 	for _, p := range []provider.Provider{
-		{ID: "mac-paid", Name: "Mac Paid", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-paid", Chat: paid.URL},
-		{ID: "mac-free", Name: "Mac Free", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-free", Chat: free.URL},
+		{ID: "mac-paid", Name: "Mac Paid", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-paid", Chat: paid.URL},
+		{ID: "mac-free", Name: "Mac Free", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-free", Chat: free.URL},
 	} {
 		if err := provider.Save(p); err != nil {
 			t.Fatal(err)
@@ -63,7 +63,7 @@ func TestRemoteMagpieFreePlanSpentFirst(t *testing.T) {
 	g := provider.Provider{ID: "auto-free", Routing: provider.FreeExpiring}
 	got, wg := weigh(g, []candidate{a, b}, "claude-sonnet-5-5", provider.Anthropic)
 	if got[0].p.ID != "mac-free" {
-		t.Errorf("%s first, want the Remote magpie on a free plan", got[0].p.ID)
+		t.Errorf("%s first, want the Remote eipgam on a free plan", got[0].p.ID)
 	}
 	if !wg.free[b.rest] || wg.free[a.rest] {
 		t.Errorf("free %v, want mac-free's alone", wg.free)

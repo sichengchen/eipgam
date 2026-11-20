@@ -13,10 +13,10 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// The join password (EV_John_Liu on X): while magpie is shared, another
+// The join password (EV_John_Liu on X): while eipgam is shared, another
 // computer on the network opens the gateway's /join page, types this
 // password and gets a gateway key of its own, with the setup for its
 // agents. Only a salted PBKDF2-SHA256 hash of it is kept, in join.json

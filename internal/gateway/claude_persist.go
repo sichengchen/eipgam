@@ -11,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
 // The idle runs and the shelf survive the gateway's end (#6292, recih on
-// X): a magpie that stops (an update, a restart) keeps the saved session
+// X): a eipgam that stops (an update, a restart) keeps the saved session
 // of each Claude Code waiting for its conversation's next turn, and the
 // gateway that starts next resumes it (--resume), told the turn alone,
 // where a new Claude Code told the whole conversation wrote ~100k tokens
@@ -25,7 +25,7 @@ import (
 //
 // The file is claude-shelf.json beside the settings. It is written once,
 // as the gateway ends (abortAll), and read by the next gateway the first
-// time a turn finds nothing on its shelf (the magpie a restart hands over
+// time a turn finds nothing on its shelf (the eipgam a restart hands over
 // to may start before the old one has written it); a read takes the file
 // away, so a session that went on in a run is not resumed from a record of
 // where it stood. A record is a hint: the file is unknown to the shelf
@@ -117,7 +117,7 @@ func (b *subscriptionBridge) keepShelf() {
 	if path, err = edit.Target(path); err != nil {
 		return
 	}
-	tmp := path + ".magpie-tmp"
+	tmp := path + ".eipgam-tmp"
 	if os.WriteFile(tmp, data, 0o600) != nil {
 		return
 	}

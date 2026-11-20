@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // liteRequest is a request as Codex's Responses Lite sends it: no tools and
@@ -55,7 +55,7 @@ func TestAdditionalToolsRelayed(t *testing.T) {
 		n, _ := tl["name"].(string)
 		names = append(names, tl["type"].(string)+":"+n)
 	}
-	// tool search as the function magpie serves it; Codex's own tools out
+	// tool search as the function eipgam serves it; Codex's own tools out
 	// of their namespace; an MCP server's namespace as it was
 	if want := "function:tool_search function:shell custom:apply_patch namespace:mcp__probe"; strings.Join(names, " ") != want {
 		t.Fatalf("tools %v, want %s\n%s", names, want, f.got)
@@ -116,7 +116,7 @@ func liteSent(body string) *http.Request {
 	return req
 }
 
-// A remote magpie's codex model is served there through its ChatGPT
+// A remote eipgam's codex model is served there through its ChatGPT
 // account, which passes on what it got, and the ChatGPT backend refuses a
 // request for one of its Lite models without reasoning context "all_turns"
 // (#4445). So a Lite request routed to it goes as Codex sent it — what the
@@ -170,8 +170,8 @@ func TestRemoteMagpieCodexModelKeepsLite(t *testing.T) {
 }
 
 // The reporter's own route (#4445): Codex Desktop's turn on one of its
-// own models comes to magpie's ChatGPT backend route, and the Model Map
-// plugin names the remote magpie's codex model in it.
+// own models comes to eipgam's ChatGPT backend route, and the Model Map
+// plugin names the remote eipgam's codex model in it.
 func TestRemoteMagpieCodexModelKeepsLiteOnCodexPath(t *testing.T) {
 	f := &fake{t: t, reply: sse(
 		`data: {"type":"response.created","response":{"id":"r1","model":"m1"}}`,
@@ -223,7 +223,7 @@ func TestRemoteMagpieCodexModelKeepsLiteOnCodexPath(t *testing.T) {
 	}
 }
 
-// Another of the remote magpie's models still gets what Codex sends a model
+// Another of the remote eipgam's models still gets what Codex sends a model
 // that isn't Lite (#350): its tools lifted, the reasoning context and the
 // Lite header taken off. Only the codex model keeps the shape.
 func TestRemoteMagpieOtherModelLeavesLite(t *testing.T) {

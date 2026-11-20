@@ -1,9 +1,9 @@
 // Package settings keeps the few preferences the desktop app has: which
 // palette to paint with, which language to speak, how the agents are
-// arranged. Everything else magpie knows is derived from the agents' own
+// arranged. Everything else eipgam knows is derived from the agents' own
 // files.
 //
-// The file is ~/.config/magpie/settings.json; a missing file means "follow
+// The file is ~/.config/eipgam/settings.json; a missing file means "follow
 // the system" for both.
 package settings
 
@@ -24,16 +24,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/capre"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/fonts"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/redact"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/capre"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/fonts"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/redact"
+	"github.com/sichengchen/eipgam/internal/steady"
 )
 
 // CodexAutoReviewSession is the CodexAutoReview that runs Codex's
@@ -68,16 +68,16 @@ type Settings struct {
 	// and gives each quota curve window, and its legend key, a dash of its
 	// own (#2073).
 	Colorblind bool `json:"colorblind,omitempty"`
-	// ReduceMotion stills magpie's animations as the system's Reduce
+	// ReduceMotion stills eipgam's animations as the system's Reduce
 	// Motion does, for a computer or phone that the moving Routing page
 	// keeps busy (#3813).
 	ReduceMotion bool `json:"reduceMotion,omitempty"`
-	// NoBird keeps magpie's bird off the loading skeletons and the
+	// NoBird keeps eipgam's bird off the loading skeletons and the
 	// Plugins page's README, for a small server where its watch for them
 	// is work enough to matter (Yayoi_no_yume on X). Off means shown.
 	NoBird bool `json:"noBird,omitempty"`
-	// Accent is the colour picked for magpie's buttons, links and
-	// selection, as #rrggbb; "" keeps magpie's own (CHENGJIAHEGOXIS on
+	// Accent is the colour picked for eipgam's buttons, links and
+	// selection, as #rrggbb; "" keeps eipgam's own (CHENGJIAHEGOXIS on
 	// X). Each theme draws it as dark or light as its text needs.
 	Accent string `json:"accent,omitempty"`
 	// Wallpaper is when the picture behind the window's pages was saved,
@@ -113,11 +113,11 @@ type Settings struct {
 	// cny, "" being usd. It means nothing with another Currency.
 	TotalCurrency string `json:"totalCurrency,omitempty"`
 	// TrayCurrency is what the menu bar's and the tray tooltip's cost of
-	// magpie's totals is in: usd or cny, "" following the totals'
+	// eipgam's totals is in: usd or cny, "" following the totals'
 	// (TrayCostIn; onkashiko on X, who wanted the bar and the totals set
 	// apart). Every sum is still made in dollars and changed once.
 	TrayCurrency string `json:"trayCurrency,omitempty"`
-	// ChineseUnits shortens a large count in 万 and 亿 when magpie speaks
+	// ChineseUnits shortens a large count in 万 and 亿 when eipgam speaks
 	// Chinese (8000 万 rather than 80M); otherwise it is in K, M and B, as
 	// prices per million tokens and context windows (200K, 1M) are, in
 	// Chinese too (#740). It means nothing in English. It replaces
@@ -129,17 +129,17 @@ type Settings struct {
 	// who codes past 1am). The Usage page, its daily cards and the gateway
 	// keys' daily and calendar caps cut their days there.
 	DayStart int `json:"dayStart,omitempty"`
-	// Dock keeps magpie in the Mac's Dock as well as the menu bar, for a
+	// Dock keeps eipgam in the Mac's Dock as well as the menu bar, for a
 	// menu bar too full to show its icon.
 	Dock bool `json:"dock,omitempty"`
-	// DockWindow is the With window choice: magpie is in the Dock, and so
-	// in Command-Tab, only while its window is open. It is what magpie
+	// DockWindow is the With window choice: eipgam is in the Dock, and so
+	// in Command-Tab, only while its window is open. It is what eipgam
 	// does with neither Dock nor DockNever set (ShouguangCao on X: the
 	// window was out of Command-Tab, so going back to it to paste a key
 	// copied elsewhere took the menu bar), so it is still written for an
-	// older magpie reading the file, which took none for Hide.
+	// older eipgam reading the file, which took none for Hide.
 	DockWindow bool `json:"dockWindow,omitempty"`
-	// DockNever keeps magpie out of the Dock and Command-Tab even while
+	// DockNever keeps eipgam out of the Dock and Command-Tab even while
 	// its window is open, the Hide choice. Dock wins over it.
 	DockNever bool `json:"dockNever,omitempty"`
 	// DockSettled says this file's Dock choice is read with With window as
@@ -150,7 +150,7 @@ type Settings struct {
 	// default. A new install, with no file, is settled from the start.
 	// Every save writes it.
 	DockSettled bool `json:"dockSettled,omitempty"`
-	// Proxy for magpie's own requests to vendors: "" follows the
+	// Proxy for eipgam's own requests to vendors: "" follows the
 	// environment and then the system, "direct" uses none, anything else
 	// is the proxy (http://, https:// or socks5://; host:port means http).
 	Proxy string `json:"proxy,omitempty"`
@@ -160,7 +160,7 @@ type Settings struct {
 	// Save sets it from Proxy, and it is stored as Proxy is. This
 	// computer's own (KeepOwn), as Proxy is.
 	ProxyCustom string `json:"proxyCustom,omitempty"`
-	// PluginProxy is the proxy magpie downloads plugins through: the
+	// PluginProxy is the proxy eipgam downloads plugins through: the
 	// plugins list, npm's registry, GitHub, the plugins repo's dist
 	// branch, Bun's own download, and bun add, update and git clone
 	// (JonahFu on X: GitHub needs a proxy where the vendors don't). ""
@@ -172,23 +172,15 @@ type Settings struct {
 	PluginProxy string `json:"pluginProxy,omitempty"`
 	// PluginProxyCustom is PluginProxy's ProxyCustom.
 	PluginProxyCustom string `json:"pluginProxyCustom,omitempty"`
-	// UpdateProxy is the proxy magpie's own update goes through: the
+	// UpdateProxy is the proxy eipgam's own update goes through: the
 	// update feed, the release notes and the release's file (moonlityu on
 	// X: models direct, updates through a proxy). "" follows Proxy, as
 	// updates always did; "direct" uses none; anything else is the proxy,
-	// as Proxy takes it. A proxy given to one `magpie update --proxy` run
+	// as Proxy takes it. A proxy given to one `eipgam update --proxy` run
 	// comes first. This computer's own (KeepOwn), as Proxy is.
 	UpdateProxy string `json:"updateProxy,omitempty"`
 	// UpdateProxyCustom is UpdateProxy's ProxyCustom.
 	UpdateProxyCustom string `json:"updateProxyCustom,omitempty"`
-	// UpdateSource is where magpie's update is read and downloaded from
-	// (RootSir and Sakugar_ on X: usemagpie.ai's download is slow, or
-	// github.com is the one that works). "" is automatic: usemagpie.ai,
-	// then GitHub when it can't be reached; UpdateSourceSite never goes to
-	// GitHub; UpdateSourceGitHub never to usemagpie.ai (Stable's release
-	// list excepted, which only the site has). The release is held to its
-	// signature whichever source gave it. This computer's own (KeepOwn).
-	UpdateSource string `json:"updateSource,omitempty"`
 	// Proxies are the proxies kept by name (NamedProxy); a proxy choice
 	// "@"+id anywhere (Proxy, PluginProxy, a provider's, a key's, an
 	// account's) uses one. This computer's own (KeepOwn).
@@ -203,11 +195,11 @@ type Settings struct {
 	// backup or sync without keys leaves it out, as it does LANKey.
 	GitHubToken string `json:"githubToken,omitempty"`
 	// Redact keeps secrets in what agents send (API keys, private keys,
-	// tokens, passwords) from the vendors behind magpie: they go as
+	// tokens, passwords) from the vendors behind eipgam: they go as
 	// placeholders, and come back as they were. RedactPersonal does the same
 	// for emails, phone numbers and ID and bank card numbers, and
 	// RedactWords for the user's own words. RedactRules are the user's own
-	// rules for secrets magpie's don't know (a gateway's oc_sk_… key), a
+	// rules for secrets eipgam's don't know (a gateway's oc_sk_… key), a
 	// prefix or a pattern each, masked with the secrets while Redact is on.
 	// RedactKinds turns the other kinds of personal data on or off one by
 	// one, by redact.Categories' ids (ssn, ip, home…), under
@@ -263,7 +255,7 @@ type Settings struct {
 	// each request; one that isn't now is as unset, masked.
 	RedactRouteTo string `json:"redactRouteTo,omitempty"`
 	// LAN shares the gateway on the local network; remote callers must use
-	// named caller keys. LANKey is retained for older Magpie versions.
+	// named caller keys. LANKey is retained for older eipgam versions.
 	// LAN is this computer's own (KeepOwn; Lullaby on Discord: sharing
 	// turned on at home came on at work too). LANKey and LANKeyID name the
 	// default key, which rides the synced gateway-key store, so they follow
@@ -282,26 +274,26 @@ type Settings struct {
 	// AllowIPs are the addresses (IPs and CIDR ranges) other computers may
 	// reach the gateway from at all (lc on Discord); any other is refused
 	// 403 even with a gateway key. None: every address, as before. This
-	// computer is always let in. MAGPIE_ALLOW_IPS, where set, is used in
+	// computer is always let in. EIPGAM_ALLOW_IPS, where set, is used in
 	// its place (gateway.AllowIPs). This computer's own (KeepOwn), as LAN
 	// is: the addresses are of the network this computer is on.
 	AllowIPs []string `json:"allowIPs,omitempty"`
-	// MTLS has other computers show a client certificate magpie issued
-	// (`magpie mtls`, Settings → Network and sharing) before anything is
-	// answered (hhdaxia on X, #5596): the gateway and magpie web's page
-	// are served over TLS with magpie's own CA, and a remote request
+	// MTLS has other computers show a client certificate eipgam issued
+	// (`eipgam mtls`, Settings → Network and sharing) before anything is
+	// answered (hhdaxia on X, #5596): the gateway and eipgam web's page
+	// are served over TLS with eipgam's own CA, and a remote request
 	// without a good certificate is refused. This computer's own
 	// (KeepOwn), as LAN is.
 	MTLS bool `json:"mtls,omitempty"`
-	// HTTPS serves the gateway and magpie web's page to other computers
+	// HTTPS serves the gateway and eipgam web's page to other computers
 	// over https:// (zhangly1 on X: Claude on another computer on the LAN
 	// needed https), with the certificate imported in Settings (kept in
-	// <dir>/https) or else one magpie's own CA signs for this computer's
+	// <dir>/https) or else one eipgam's own CA signs for this computer's
 	// names and addresses (gateway.ServedCert). This computer may still
 	// call plain http://. This computer's own (KeepOwn), as LAN is.
 	HTTPS bool `json:"https,omitempty"`
 	// FetchPrivate are the private hosts and ranges (a name, name:port, an
-	// IP or a CIDR range) magpie may download a URL from that it didn't
+	// IP or a CIDR range) eipgam may download a URL from that it didn't
 	// choose itself: an image or video a request names or a vendor answers
 	// with, or a page web_fetch reads. None by default: such a URL is
 	// downloaded from public addresses only, whoever sent the request and
@@ -322,13 +314,13 @@ type Settings struct {
 	// one that runs it (gateway.hubOnDemand; ArvinCharl on X: the tools
 	// filled the context). This computer's own (KeepOwn).
 	RouterAllTools bool `json:"routerAllTools,omitempty"`
-	// Name is what this magpie is called, said in its web page's browser
-	// tab as "<name> · magpie", to tell several deployed ones apart
-	// (starballl on X). "" is MAGPIE_NAME, else none (InstanceName). This
-	// computer's own (KeepOwn): each magpie is named on its own.
+	// Name is what this eipgam is called, said in its web page's browser
+	// tab as "<name> · eipgam", to tell several deployed ones apart
+	// (starballl on X). "" is EIPGAM_NAME, else none (InstanceName). This
+	// computer's own (KeepOwn): each eipgam is named on its own.
 	Name string `json:"name,omitempty"`
 	// Port is the gateway's port on this computer, 0 for DefaultPort.
-	// MAGPIE_ADDR, where it is set, comes first (GatewayAddr).
+	// EIPGAM_ADDR, where it is set, comes first (GatewayAddr).
 	Port int `json:"port,omitempty"`
 	// LANKeyID remembers the default named key created when sharing is enabled.
 	LANKeyID string `json:"lanKeyId,omitempty"`
@@ -344,7 +336,7 @@ type Settings struct {
 	// every computer writes to the one bucket.
 	RequestArchiveMB int `json:"requestArchiveMB,omitempty"`
 	// RequestArchiveLocal keeps the request archive on this computer's disk,
-	// in magpie's folder (gateway/archive_local.go), while sync has no S3
+	// in eipgam's folder (gateway/archive_local.go), while sync has no S3
 	// bucket for it (CyberCaius on Discord). Its own switch, separate from
 	// RequestArchive, which sync carries to every computer: this computer's
 	// own (KeepOwn), so a request body is written to a disk only where the
@@ -357,7 +349,7 @@ type Settings struct {
 	// GatewayConversations is local, opt-in recording of session traffic.
 	// Only SetGatewayConversations changes it; other saves keep local consent.
 	GatewayConversations bool `json:"gatewayConversations,omitempty"`
-	// SessionReads is which agents' own session files magpie may read
+	// SessionReads is which agents' own session files eipgam may read
 	// (RustCats on X: a first open listed every agent's history unasked).
 	// Nil is not settled yet (sessions.SettleReads decides it once). Only
 	// SetSessionReads changes it; other saves keep what the file holds,
@@ -378,9 +370,9 @@ type Settings struct {
 	// so the windows line up with the day (06:00 gives three by 21:00, where
 	// the first use at 9 gives two by the end of it); "" off. It works
 	// with CodexWarmup or without it. ClaudeWarmAt is the Claude accounts'.
-	// Each is CodexWarmAts' (ClaudeWarmAts') first, all a magpie before
+	// Each is CodexWarmAts' (ClaudeWarmAts') first, all a eipgam before
 	// them read: a file with it and no list has that one time, and it is
-	// kept written for an older magpie to go on starting the day's first.
+	// kept written for an older eipgam to go on starting the day's first.
 	CodexWarmAt  string `json:"codexWarmAt,omitempty"`
 	ClaudeWarmAt string `json:"claudeWarmAt,omitempty"`
 	// CodexWarmAts are the times of day CodexWarmAt's start is made at,
@@ -444,7 +436,7 @@ type Settings struct {
 	// model's own id, a provider/model id): "" the model the agent asked
 	// for (issennknight on Discord: an agent warned that
 	// deepseek-v4.1-flash came back as deepseek-v4.1-flash-1017), "member"
-	// magpie's provider/model id of the member that answered
+	// eipgam's provider/model id of the member that answered
 	// (workbuddy/glm-5.3-flash), for agents that count usage by it (#822),
 	// "vendor" the vendor's own text, as every reply said before the
 	// asked-for name (ZoeCats on Discord). One the vendor named as asked
@@ -453,9 +445,9 @@ type Settings struct {
 	// replyNamingOf). A request's X-Magpie-Response-Model says it for
 	// that request alone. "asked" is read as "".
 	ReplyModel string `json:"replyModel,omitempty"`
-	// MemberModel is ReplyModel "member" as a magpie before ReplyModel
+	// MemberModel is ReplyModel "member" as a eipgam before ReplyModel
 	// kept it: read as that when ReplyModel isn't set, and written beside
-	// it for such a magpie (normal).
+	// it for such a eipgam (normal).
 	MemberModel bool `json:"memberModel,omitempty"`
 	// NoLoopGuard lets a streamed reply run on when its reasoning or text
 	// is stuck in a loop of the same few lines (#1359). Off, as by
@@ -468,7 +460,7 @@ type Settings struct {
 	// real Claude Code, its billing line and identity line kept; off, as by
 	// default, the run is the shape every Claude Code run has.
 	ClaudeLeanPrompt bool `json:"claudeLeanPrompt,omitempty"`
-	// ClaudeNoExtraUsage keeps magpie from sending a Claude subscription
+	// ClaudeNoExtraUsage keeps eipgam from sending a Claude subscription
 	// account a request once a plan window that stops it is used up,
 	// where Anthropic would go on on the account's extra usage (usage
 	// credits bought beyond the plan, baksili_ on X): routing holds it at
@@ -490,7 +482,7 @@ type Settings struct {
 	// ClaudeRunsMost is how many Claude Code processes a Claude
 	// subscription may have running at once: conversations' runs, those
 	// waiting for a next turn or on tool results, and one-off tests and
-	// allowance reads alike. 0, as by default, has magpie size it from
+	// allowance reads alike. 0, as by default, has eipgam size it from
 	// this machine's memory on Linux (its cgroup's limit, else MemTotal),
 	// and leaves it unbounded elsewhere: each Claude Code holds about
 	// 100 MiB of its own, and a 512 MiB service was OOM-killed (#2956).
@@ -514,7 +506,7 @@ type Settings struct {
 	// who is signed in, and no subscription is offered; API-key providers
 	// work as before (see AccountDiscoveryOff, provider/discovery.go). Off,
 	// as by default, subscriptions are found as ever. This computer's own
-	// (KeepOwn), set only by its own switch or `magpie accounts discovery`.
+	// (KeepOwn), set only by its own switch or `eipgam accounts discovery`.
 	NoAccountDiscovery bool `json:"noAccountDiscovery,omitempty"`
 	// SignInLinkOnly keeps an account's sign-in page out of the default
 	// browser: the window (and the command line) shows its link to copy
@@ -523,21 +515,21 @@ type Settings struct {
 	// is kept to its link too (hkxhkxhkx on X). Off, as by default, the
 	// page opens as ever. A
 	// plugin whose own CLI opens its page (Grok Build on macOS and
-	// Windows) still does: magpie can't stop that.
+	// Windows) still does: eipgam can't stop that.
 	SignInLinkOnly bool `json:"signInLinkOnly,omitempty"`
 	// AgentTelemetryOff turns off the telemetry of every agent with a
 	// switch for it, an agent found later too, over each agent's own
 	// Telemetry row (agent/telemetry_all.go; OipsAnthony on X). Set only
 	// by its route, which writes the agents' files as it changes.
 	AgentTelemetryOff bool `json:"agentTelemetryOff,omitempty"`
-	// NoUpdatePill keeps the header's Update pill away when a newer magpie
+	// NoUpdatePill keeps the header's Update pill away when a newer eipgam
 	// is out; UpdateSkip is the one version it was hidden for, and a newer
-	// one brings it back. Either way magpie still downloads the version and
+	// one brings it back. Either way eipgam still downloads the version and
 	// puts it in as it quits, and Settings' version row still offers it.
 	NoUpdatePill bool   `json:"noUpdatePill,omitempty"`
 	UpdateSkip   string `json:"updateSkip,omitempty"`
-	// NoAutoUpdate stops magpie asking for a newer version by itself, and
-	// so downloading one (#472): only Settings' Check, or magpie update,
+	// NoAutoUpdate stops eipgam asking for a newer version by itself, and
+	// so downloading one (#472): only Settings' Check, or eipgam update,
 	// asks then. UpdateEvery is how often it asks otherwise, in minutes:
 	// one of UpdateEveries, 0 for every six hours.
 	NoAutoUpdate bool `json:"noAutoUpdate,omitempty"`
@@ -546,7 +538,7 @@ type Settings struct {
 	// say a newer version is out (with its notes and size) rather than
 	// download it (#2296): a metered network or a proxy billed by traffic
 	// downloads it only on a click (Download update, the header's Update,
-	// magpie update). Off, as by default, a newer version is downloaded
+	// eipgam update). Off, as by default, a newer version is downloaded
 	// as soon as it is found.
 	NoAutoDownload bool `json:"noAutoDownload,omitempty"`
 	// AutoRestart has the app restart into an update it downloaded by
@@ -558,9 +550,9 @@ type Settings struct {
 	// UpdateMirror is a GitHub download mirror an update's file is fetched
 	// through, its prefix put before the release's github.com URL
 	// (https://mirror.example/https://github.com/…): "" for none, which is
-	// the default — magpie names no mirror of its own. The file is still
-	// checked against the SHA-256 the update feed at usemagpie.ai gives,
-	// never one from the mirror. magpie update mirror sets it.
+	// the default — eipgam names no mirror of its own. The file is still
+	// checked against the SHA-256 from the GitHub build attestation,
+	// never one from the mirror. eipgam update mirror sets it.
 	UpdateMirror string `json:"updateMirror,omitempty"`
 	// UpdateChannel is which versions an update is offered: "" every
 	// version as it comes out, the default; UpdateStable ("stable") one a
@@ -569,26 +561,26 @@ type Settings struct {
 	// the update feed's ?channel=stable (ssharpcc on X); UpdateDaily
 	// ("daily") one a day, the newest that passed its tests, or an urgent
 	// one at once, from ?channel=daily (fishmagic80 on X). Settings' Update
-	// channel and magpie update channel set it.
+	// channel and eipgam update channel set it.
 	UpdateChannel string `json:"updateChannel,omitempty"`
 	// Vision is the model that describes an image to a model that can't see
 	// it: a model's id (provider/model, group/<id>), "off" to turn such an
-	// image away, or empty for one magpie picks (see gateway.seer).
+	// image away, or empty for one eipgam picks (see gateway.seer).
 	Vision string `json:"vision,omitempty"`
 	// VisionEffort is how hard the Image recognition model thinks as it
 	// reads an image (MOMO on Discord): a level of catalog.EffortRank,
 	// fitted to the model's own levels when it is asked, or empty for
-	// magpie's choice, the least the model has (gateway.visionEffort).
+	// eipgam's choice, the least the model has (gateway.visionEffort).
 	VisionEffort string `json:"visionEffort,omitempty"`
-	// ImageGen is the model magpie's generate_image tool draws with (the
+	// ImageGen is the model eipgam's generate_image tool draws with (the
 	// gateway's /v1/images/generations when a request names no model): a
-	// model's id, "off", or empty for one magpie picks (gateway.drawer).
+	// model's id, "off", or empty for one eipgam picks (gateway.drawer).
 	// "off" turns the video a request that names no model gets off too
 	// (gateway.videomaker).
 	ImageGen string `json:"imageGen,omitempty"`
 	// VideoGen is the model a video request that names none is made with
 	// (generate_video, the gateway's /v1/videos): a model's id, or empty
-	// for one magpie picks (gateway.videomaker). ImageGen's "off" turns it
+	// for one eipgam picks (gateway.videomaker). ImageGen's "off" turns it
 	// off too.
 	VideoGen string `json:"videoGen,omitempty"`
 	// ImageTimeout is how long, in minutes, a vendor is given to draw an
@@ -619,15 +611,15 @@ type Settings struct {
 	// load reported, or one older than plugin.LoadFresh, keeps its place.
 	BusyLoad int `json:"busyLoad,omitempty"`
 	// Searcher is the provider that searches the web for a model that
-	// can't: "<provider>" with the small model magpie picks of it,
-	// "<provider>/<model>", or empty for the one magpie picks
+	// can't: "<provider>" with the small model eipgam picks of it,
+	// "<provider>/<model>", or empty for the one eipgam picks
 	// (gateway.searcher). "off" allows only configured search APIs.
-	// One that is gone, off or can't search gives way to magpie's pick.
+	// One that is gone, off or can't search gives way to eipgam's pick.
 	Searcher string `json:"searcher,omitempty"`
 	// SearcherThen are the searchers asked in turn, in this order, when
 	// the one Searcher names fails or finds nothing, each written as
 	// Searcher is (axelburks on Discord: a second provider when the first
-	// fails). Read only while Searcher names one; magpie's own pick hands
+	// fails). Read only while Searcher names one; eipgam's own pick hands
 	// on to the next it would pick by itself.
 	SearcherThen []string `json:"searcherThen,omitempty"`
 	// SearcherEffort is how hard the searcher's model thinks as it searches
@@ -640,11 +632,11 @@ type Settings struct {
 	// SearchFirstAPI for the search APIs, the provider's search after them
 	// when they fail; empty for the provider first, as before.
 	SearchFirst string `json:"searchFirst,omitempty"`
-	// SearchAll is that magpie searches for every model, one whose
+	// SearchAll is that eipgam searches for every model, one whose
 	// provider searches the web by itself too (cybercaius on Discord):
 	// the client's search is answered by the searcher and the search APIs,
 	// as for a model that can't, and the provider is sent no search tool.
-	// Only while magpie can search for it (gateway.magpieSearches).
+	// Only while eipgam can search for it (gateway.magpieSearches).
 	SearchAll bool `json:"searchAll,omitempty"`
 	// SearchCount is how many pages a client's search is answered with
 	// when it names no count, as Claude Code's WebSearch and Codex's
@@ -656,9 +648,9 @@ type Settings struct {
 	// beside the tray icon, in the order shown, each by its provider and
 	// account ("claude|a@b.c"); none when empty.
 	TrayUsages []string `json:"trayUsages,omitempty"`
-	// TrayUsage is TrayUsages' first, all a magpie before them read: a file
+	// TrayUsage is TrayUsages' first, all a eipgam before them read: a file
 	// with it and no TrayUsages shows that one, and it is kept written for
-	// an older magpie to go on showing it.
+	// an older eipgam to go on showing it.
 	TrayUsage string `json:"trayUsage,omitempty"`
 	// TrayUsageEvery is how often, in minutes, that text is brought up to
 	// date; 0 is every 3 (one of TrayEvery).
@@ -667,7 +659,7 @@ type Settings struct {
 	// is its windows stacked alone, a thin line between one card and the
 	// next.
 	TrayNoLogos bool `json:"trayNoLogos,omitempty"`
-	// TrayNoBird leaves magpie's bird out of the Mac menu bar while the
+	// TrayNoBird leaves eipgam's bird out of the Mac menu bar while the
 	// cards are there, the cards alone (KevinXC on Discord); a click on one
 	// still opens the panel, and with no cards the bird is shown.
 	TrayNoBird bool `json:"trayNoBird,omitempty"`
@@ -675,7 +667,7 @@ type Settings struct {
 	// Anthropic's "A\" mark in place of Claude's logo (qingnianxiaozhe on
 	// X); off by default, Claude's logo as the Usage page has it.
 	TrayAnthropicMark bool `json:"trayAnthropicMark,omitempty"`
-	// TrayNoNumber keeps magpie's icon in Windows' tray while cards are
+	// TrayNoNumber keeps eipgam's icon in Windows' tray while cards are
 	// picked; off by default, the icon is the first card's figure
 	// (Benjaminliang_1 on X), as Windows' tray shows no text beside it.
 	TrayNoNumber bool `json:"trayNoNumber,omitempty"`
@@ -683,7 +675,7 @@ type Settings struct {
 	// menu bar ("42% +12%"), as the Usage page's cards have it (fflake33
 	// on Discord); off by default, as it widens every card.
 	TrayPace bool `json:"trayPace,omitempty"`
-	// TrayNoCost leaves money out of magpie's own totals in the menu bar:
+	// TrayNoCost leaves money out of eipgam's own totals in the menu bar:
 	// the today and last-7-days cards, their tooltips and the tooltip with
 	// no cards say the tokens alone (BussanQ on Discord); off by default,
 	// the cost shown.
@@ -704,22 +696,22 @@ type Settings struct {
 	// one who turned it on keeps it on (LightweightOn).
 	Lightweight *bool `json:"lightweight,omitempty"`
 	// QuitNoAsk lets a Quit the user chooses quit at once while agents go
-	// through magpie, without the question that names them (gui's
+	// through eipgam, without the question that names them (gui's
 	// quitask.go). Off by default, it asks; the question's "Don't ask
 	// again" sets it, and Settings › General › Ask before quitting turns
 	// it back off (zhujiu on Discord).
 	QuitNoAsk bool `json:"quitNoAsk,omitempty"`
 	// RestoreOnQuit puts every connected agent's config back as it was
-	// before magpie when the app quits, and connects them again at the
+	// before eipgam when the app quits, and connects them again at the
 	// next start (tudjam17795 on X; agent.RestoreOnQuit). Off by default:
-	// a connected agent keeps magpie as it quits. A quit then needs no
+	// a connected agent keeps eipgam as it quits. A quit then needs no
 	// question, as nothing is left pointing at a gateway that's gone.
 	RestoreOnQuit bool `json:"restoreOnQuit,omitempty"`
 	// KeepAwake keeps this computer from going to sleep by itself while
 	// agents work through the gateway and for a while after (xiao_wang24004
 	// on X; internal/awake). This computer's own (KeepOwn).
 	KeepAwake bool `json:"keepAwake,omitempty"`
-	// NoWSLAgents stops magpie looking in WSL on its own, on Windows
+	// NoWSLAgents stops eipgam looking in WSL on its own, on Windows
 	// (#1264): no distro is listed or probed for agents, their sessions or
 	// Claude Code, and the agents found there before aren't shown.
 	NoWSLAgents bool `json:"noWSLAgents,omitempty"`
@@ -727,44 +719,44 @@ type Settings struct {
 	// computer awake (#975, Hu9956: an agent recording the screen to check
 	// its work found it locked). This computer's own (KeepOwn).
 	KeepAwakeDisplay bool `json:"keepAwakeDisplay,omitempty"`
-	// GatewayMode is whether `magpie web` shows only what a gateway serving
+	// GatewayMode is whether `eipgam web` shows only what a gateway serving
 	// other machines needs (Player on Discord): "on", "off", or "" to
-	// decide by itself — on for `magpie web --gateway`, or with no agents
+	// decide by itself — on for `eipgam web --gateway`, or with no agents
 	// on this machine. This computer's own (KeepOwn).
 	GatewayMode string `json:"gatewayMode,omitempty"`
 	// QuotaLeft shows a subscription's windows by how much of each is left,
 	// not used: the Usage page, the tray panel and the menu bar alike.
 	QuotaLeft bool `json:"quotaLeft,omitempty"`
-	// QuotaReads is when magpie reads subscriptions' allowances and keys'
+	// QuotaReads is when eipgam reads subscriptions' allowances and keys'
 	// balances from their vendors (#1518, RooobinYe): "" whenever it needs
 	// them (the Usage page and tray, routing, alerts, the switch to an
 	// account with room), "asked" only when the user asks — the Usage page
-	// opened or refreshed, a card's refresh, `magpie quota`/`accounts`.
+	// opened or refreshed, a card's refresh, `eipgam quota`/`accounts`.
 	// Otherwise the readings kept from the last time stand, marked as of
 	// then; an account the vendor turned away for its quota is still read.
-	// This computer's own (KeepOwn): magpie at login comes up before the
+	// This computer's own (KeepOwn): eipgam at login comes up before the
 	// proxy app, and its reads went out direct.
 	QuotaReads string `json:"quotaReads,omitempty"`
 	// UsageAlert is how much of a subscription's or plan's window, in
-	// percent, is used when magpie says so with a notification (#368):
+	// percent, is used when eipgam says so with a notification (#368):
 	// once for each time the window runs, for every window routing counts
 	// (not one set aside, as on-demand spending is); 0 is off.
 	UsageAlert int `json:"usageAlert,omitempty"`
 	// BalanceAlert is the balance a key or account has fallen to when
-	// magpie says so, in that balance's own currency or credits, once until
+	// eipgam says so, in that balance's own currency or credits, once until
 	// it is topped up past it again; 0 is off.
 	BalanceAlert float64 `json:"balanceAlert,omitempty"`
-	// ResetReminder is how many hours before a renewal magpie says what
+	// ResetReminder is how many hours before a renewal eipgam says what
 	// would be lost by it (#720): a weekly or monthly window with much of
 	// it left before it renews, a reset credit unspent before it runs out;
 	// once each. 0 is off.
 	ResetReminder int `json:"resetReminder,omitempty"`
 	// TurnDoneAlert is how many seconds an agent's turn runs, from the
-	// user's prompt to its last reply, before magpie says it is done with a
+	// user's prompt to its last reply, before eipgam says it is done with a
 	// notification (itieniu on X): a long task set going while the user
 	// works elsewhere. Only turns the app's own gateway serves; 0 is off.
 	TurnDoneAlert int `json:"turnDoneAlert,omitempty"`
-	// MaskAlert has magpie say with a notification when masking swaps a
+	// MaskAlert has eipgam say with a notification when masking swaps a
 	// value it never masked before (Must2333 on X): its kind and how many,
 	// never the value, a burst said once and at most once a minute. Only
 	// requests the app's own gateway serves; off until turned on.
@@ -780,7 +772,7 @@ type Settings struct {
 	BarkServer string `json:"barkServer,omitempty"`
 	BarkKey    string `json:"barkKey,omitempty"`
 	BarkDaily  string `json:"barkDaily,omitempty"`
-	// PlainNames has the model lists magpie gives agents name each model
+	// PlainNames has the model lists eipgam gives agents name each model
 	// by its name alone, without its provider's or "routing group" after it
 	// (#335) — but for two in one list that would read the same, which keep
 	// it (see provider.Labels).
@@ -802,33 +794,33 @@ type Settings struct {
 	BareModelIDs bool `json:"bareModelIDs,omitempty"`
 	// BareModelIDsOnly, with BareModelIDs, has the list give a model its
 	// bare id in place of the provider/model ids it stands for, not beside
-	// them (qQianye on X: a client of a Docker magpie listed every model
+	// them (qQianye on X: a client of a Docker eipgam listed every model
 	// twice, and a gateway has no Agents page to pick models on). A
 	// provider/model id the bare one doesn't reach stays (provider.BareOnly).
 	BareModelIDsOnly bool `json:"bareModelIDsOnly,omitempty"`
-	// CodexAgentsV1 has the OpenAI models magpie hands Codex — the ChatGPT
+	// CodexAgentsV1 has the OpenAI models eipgam hands Codex — the ChatGPT
 	// account's own, their codex/ ids, the groups one is in, and those a
 	// provider that seals as that backend does serves (catalog.Model.Seals:
 	// a relay of it, brethhbbm on X) — say
 	// multi_agent_version "v1" (#141): their subagents are then handed
-	// their tasks as text, which a magpie-served subagent can read, where
+	// their tasks as text, which a eipgam-served subagent can read, where
 	// V2's are sealed by OpenAI's server, and it is V1 that a ChatGPT
-	// lead's subagent on a magpie-served model needs (a V2 task to a
+	// lead's subagent on a eipgam-served model needs (a V2 task to a
 	// non-ChatGPT model fails). Codex's own features.multi_agent_v2 would
-	// still win: where it is on in the config magpie routes, magpie says so
+	// still win: where it is on in the config eipgam routes, eipgam says so
 	// (internal/agent/codex.go, and the Settings row) and leaves it to the
 	// user to turn off. A thread keeps the version it started with.
 	CodexAgentsV1 bool `json:"codexAgentsV1,omitempty"`
 	// CodexTitles is where the requests Codex makes for a thread's title
 	// (thread_title, thread_title_reconsideration: a hidden turn of their
 	// own, on Codex's own model through its ChatGPT sign-in) go (#705): ""
-	// as Codex sends them, "off" answered by magpie with no title and sent
+	// as Codex sends them, "off" answered by eipgam with no title and sent
 	// nowhere, or a model's id (provider/model, group/<id>) that writes it.
 	CodexTitles string `json:"codexTitles,omitempty"`
 	// CodexDescriptions is where the request Codex makes for a thread's
 	// description (thread_description: its own hidden turn, on Codex's own
 	// model through its ChatGPT sign-in) goes: "" as Codex sends it, "off"
-	// answered by magpie with no description and sent nowhere, or a
+	// answered by eipgam with no description and sent nowhere, or a
 	// model's id (provider/model, group/<id>) that writes it. It is not
 	// CodexTitles: a description asks for {"description"} alone.
 	CodexDescriptions string `json:"codexDescriptions,omitempty"`
@@ -836,24 +828,24 @@ type Settings struct {
 	// the user's next message for its composer (composer_predictions: a
 	// hidden turn on a fork of the whole conversation, on the thread's own
 	// model through its ChatGPT sign-in) goes (#1970, pluo): "" as Codex
-	// sends it, "off" answered by magpie with no prediction and sent
+	// sends it, "off" answered by eipgam with no prediction and sent
 	// nowhere, or a model's id (provider/model, group/<id>) that writes it.
 	CodexPredictions string `json:"codexPredictions,omitempty"`
 	// CodexAutoReview is the model Codex's auto-review (approvals_reviewer
 	// = "auto_review": the guardian that decides an approval in the user's
 	// place) runs on (#938): a model's id (provider/model, group/<id>) put
-	// in every entry of the list magpie hands Codex as
+	// in every entry of the list eipgam hands Codex as
 	// auto_review_model_override, which Codex takes before its own
 	// codex-auto-review or the conversation's model at low effort. ""
 	// leaves the list as it was. CodexAutoReviewSession has each of
-	// magpie's entries name itself, so the review runs on the session's
-	// model when that is one of magpie's, not on codex-auto-review through
+	// eipgam's entries name itself, so the review runs on the session's
+	// model when that is one of eipgam's, not on codex-auto-review through
 	// the ChatGPT sign-in (cybercaius on Discord).
 	CodexAutoReview string `json:"codexAutoReview,omitempty"`
 	// CodexSubagentModel is the model the gateway puts every subagent
 	// Codex spawns on (a request x-openai-subagent names collab_spawn),
 	// whatever model its lead asked for in spawn_agent: a model a ChatGPT
-	// account in magpie serves (provider/model), since a subagent's task
+	// account in eipgam serves (provider/model), since a subagent's task
 	// is sealed for one (willz on Discord). "" leaves each on the model its
 	// lead asked for; CodexSubagentLead puts each on the model its lead's
 	// own turns go on, even when the lead names another.
@@ -865,7 +857,7 @@ type Settings struct {
 	// Ultra Fast). Codex's words, as codex-rs ServiceTier::request_value
 	// sends them; its Flex is not offered, the ChatGPT backend takes none.
 	CodexServiceTier string `json:"codexServiceTier,omitempty"`
-	// CodexClient is the Codex client magpie presents to the ChatGPT
+	// CodexClient is the Codex client eipgam presents to the ChatGPT
 	// backend on a signed-in account's requests (ouhthuo on X): "" is Codex
 	// CLI (originator codex_cli_rs), "desktop" the Codex app (originator
 	// "Codex Desktop"), each with the User-Agent that client sends.
@@ -895,8 +887,8 @@ type Settings struct {
 	// leaves each compaction on the model it asks for.
 	DshCompactModel string `json:"dshCompactModel,omitempty"`
 	// CodexCompactModel is the model the gateway puts Codex's own
-	// compaction of its context on, when it is made by magpie (a model of
-	// magpie's, not a ChatGPT account's sealed one). "" leaves each on the
+	// compaction of its context on, when it is made by eipgam (a model of
+	// eipgam's, not a ChatGPT account's sealed one). "" leaves each on the
 	// session's model.
 	CodexCompactModel string `json:"codexCompactModel,omitempty"`
 	// CodexSuggestions is the model the Codex app's prompt suggestions
@@ -920,26 +912,26 @@ type Settings struct {
 	// "[1m]", and adds none to one whose id has it. Off, as before, it shows
 	// both, the plain one compacting at Claude Code's 200K.
 	DesktopLongest bool `json:"desktopLongest,omitempty"`
-	// DesktopIsolated runs Claude Desktop on magpie in a folder of its own
-	// (#5671): magpie's 3p mode goes into
-	// ~/Library/Application Support/Claude-Magpie-3p instead of Claude and
-	// Claude-3p, and ~/Applications/Claude Magpie.app starts Desktop with
+	// DesktopIsolated runs Claude Desktop on eipgam in a folder of its own
+	// (#5671): eipgam's 3p mode goes into
+	// ~/Library/Application Support/Claude-eipgam-3p instead of Claude and
+	// Claude-3p, and ~/Applications/Claude eipgam.app starts Desktop with
 	// --user-data-dir set to it, beside the user's own signed-in Desktop,
 	// which is left as it is. macOS only (desktopdir.Isolated).
 	DesktopIsolated bool `json:"desktopIsolated,omitempty"`
 	// DesktopIsolatedClaude gives that Desktop's Code tab a Claude Code
-	// config folder of its own (#6459, xMopf7RF on X): Claude Magpie.app
-	// starts Desktop with CLAUDE_CONFIG_DIR set to ~/.claude-magpie-desktop,
-	// and magpie writes the windows and capabilities of Desktop's models
+	// config folder of its own (#6459, xMopf7RF on X): Claude eipgam.app
+	// starts Desktop with CLAUDE_CONFIG_DIR set to ~/.claude-eipgam-desktop,
+	// and eipgam writes the windows and capabilities of Desktop's models
 	// there instead of ~/.claude/settings.json. The folder starts with none
 	// of ~/.claude's CLAUDE.md, skills, plugins or history. Turned on when
-	// a Claude Magpie is made new (no Claude-Magpie-3p yet) and the user
+	// a Claude eipgam is made new (no Claude-eipgam-3p yet) and the user
 	// never chose (xMopf7RF on X: a twin like a phone's app clone); one
 	// made before keeps what it had.
 	DesktopIsolatedClaude bool `json:"desktopIsolatedClaude,omitempty"`
 	// DesktopIsolatedClaudeChosen: the user set DesktopIsolatedClaude
 	// themselves (the Advanced fold, `launcher claude-dir`), so a new
-	// Claude Magpie never turns it on over their off.
+	// Claude eipgam never turns it on over their off.
 	DesktopIsolatedClaudeChosen bool `json:"desktopIsolatedClaudeChosen,omitempty"`
 	// GuideHidden: the user put away the Agents page's Get started card
 	// (wangye1644294 on X) before finishing it. Kept here, not in the
@@ -979,14 +971,14 @@ type Settings struct {
 	// CodexAsyncCompactPercent of the model's window (#2490, lantern2077
 	// on Discord): [features.async_compaction] enabled in the config Codex
 	// is routed through, and capabilities.remote_compaction = "v2" on
-	// magpie's provider table, without which Codex never starts one on a
+	// eipgam's provider table, without which Codex never starts one on a
 	// provider other than OpenAI's. A value the user set there is theirs
 	// and stays (internal/agent/codex_async.go).
 	CodexAsyncCompact bool `json:"codexAsyncCompact,omitempty"`
 	// CodexAsyncCompactPercent is that share, 1–100; 0 is Codex's own, 65.
 	CodexAsyncCompactPercent int `json:"codexAsyncCompactPercent,omitempty"`
 	// NPMRegistry is the npm registry set on the Plugins page or with
-	// `magpie plugin registry`: plugins are installed from it and npm's
+	// `eipgam plugin registry`: plugins are installed from it and npm's
 	// answers asked of it, before a registry the user's .npmrc, bunfig or
 	// shell names (plugin.Registry). "" leaves it to those.
 	NPMRegistry string `json:"npmRegistry,omitempty"`
@@ -1000,7 +992,7 @@ type Settings struct {
 	CodeFont *fonts.Face `json:"codeFont,omitempty"`
 	// How the agents are listed, by agent id. AgentOrder comes first, as
 	// ordered; an agent it doesn't name (one installed since) follows in
-	// magpie's own order. A hidden agent is folded away at the bottom of the
+	// eipgam's own order. A hidden agent is folded away at the bottom of the
 	// list; a shown one stays in view even while nothing is set on it, which
 	// otherwise folds it away too. The agents' own files never hear of it.
 	AgentOrder   []string `json:"agentOrder,omitempty"`
@@ -1012,7 +1004,7 @@ type Settings struct {
 	// picks in for one nor take this computer's up. This computer's own.
 	AgentsHere []string `json:"agentsHere,omitempty"`
 	// UsageOrder is how the Usage page's cards are listed, by provider id,
-	// as they were dragged there; one it doesn't name follows in magpie's
+	// as they were dragged there; one it doesn't name follows in eipgam's
 	// own order. Only the page's: the order providers are tried in is the
 	// Providers page's.
 	UsageOrder []string `json:"usageOrder,omitempty"`
@@ -1048,7 +1040,7 @@ type Settings struct {
 	// every row is named, all show. Only what is shown, there, in the tray
 	// panel, the menu bar and the TUI's Usage page.
 	UsageWindowsHidden []string `json:"usageWindowsHidden,omitempty"`
-	// ClientAgents counts a client magpie doesn't know as one of the agents
+	// ClientAgents counts a client eipgam doesn't know as one of the agents
 	// it does, on the Usage and Sessions pages (#1958, NorethSea): a bridge
 	// that starts Codex's app-server under a name of its own
 	// ("hermes-codex-thread-bridge") is counted as Codex. Keyed by the
@@ -1074,7 +1066,7 @@ type Settings struct {
 	// or a group's) taken out of an agent's lists one by one, by agent id,
 	// after Visible: a model not named here, a new one among them, is shown.
 	HiddenModels map[string][]string `json:"hiddenModels,omitempty"`
-	// DisabledModels are models turned off for every request through magpie
+	// DisabledModels are models turned off for every request through eipgam
 	// (#1867), each an exact id or a glob ("*fable*"), matched ignoring case
 	// against "<provider>/<model>" and the bare model id: they are left out
 	// of every list, and the gateway refuses them on every route.
@@ -1086,8 +1078,8 @@ type Settings struct {
 	// read for such an agent. An agent named with no entries is shown none.
 	PickedModels map[string][]string `json:"pickedModels,omitempty"`
 	// OwnModelsHidden are the agents, by id, whose pickers leave out the
-	// models the agent reaches on its own, not through magpie (DeepSeek
-	// Harness's own DeepSeek models, #1642): only magpie's are offered, and
+	// models the agent reaches on its own, not through eipgam (DeepSeek
+	// Harness's own DeepSeek models, #1642): only eipgam's are offered, and
 	// one the agent is set to stays.
 	OwnModelsHidden []string `json:"ownModelsHidden,omitempty"`
 	// AgentEfforts are the reasoning efforts the gateway asks for on an
@@ -1121,18 +1113,18 @@ type Settings struct {
 	// whose keys are not a model's is not one of these, and is not named
 	// Model* — Visible, which is by agent id, among them.
 	// ModelNames are the names the user gave models, by "<provider
-	// id>/<model id>": agents, the gateway's model list and magpie itself
+	// id>/<model id>": agents, the gateway's model list and eipgam itself
 	// show them for the vendor's (see provider.SetModelName).
 	ModelNames map[string]string `json:"modelNames,omitempty"`
 	// ModelEfforts are the reasoning levels the user keeps of a model's,
-	// by "<provider id>/<model id>": the lists magpie hands out offer only
+	// by "<provider id>/<model id>": the lists eipgam hands out offer only
 	// those, while the vendor is still asked at any level it has; for a
 	// model with no levels known they are the levels given it, and the
 	// gateway fits a request to them (see provider.SetModelEfforts,
-	// magpie model spec).
+	// eipgam model spec).
 	ModelEfforts map[string][]string `json:"modelEfforts,omitempty"`
 	// ModelReasonless are the models the user said take no reasoning ask,
-	// by "<provider id>/<model id>": magpie offers them no levels and
+	// by "<provider id>/<model id>": eipgam offers them no levels and
 	// sends them no reasoning field, on any API, though their list says
 	// they think (see provider.SetModelReasonless; yuexian7 on Discord: a
 	// model models.dev lists with reasoning answered reasoning_effort
@@ -1163,17 +1155,17 @@ type Settings struct {
 	// own is longer, over CompactAt and FullContext. One at or above the
 	// model's window is its whole window.
 	ModelCompacts map[string]int `json:"modelCompacts,omitempty"`
-	// ModelWires is the name to send a vendor for a model magpie knows by
+	// ModelWires is the name to send a vendor for a model eipgam knows by
 	// another, by "<provider id>/<model id>", and "*" for every model of that
 	// provider. A "*" in the name is the model itself, so one name covers a
 	// relay that namespaces its models — vendor-c/* asks for model-3 as
 	// vendor-c/model-3 — while a name with no "*" in it sends every model of
 	// that key under that one name. Everything else — the catalog agents see,
 	// the routing groups, the usage records and what a call is priced at —
-	// keeps the name magpie knows the model by.
+	// keeps the name eipgam knows the model by.
 	ModelWires map[string]string `json:"modelWires,omitempty"`
 	// ModelIDs are the ids the user lists a provider's models by, from
-	// "<provider id>/<the id magpie lists it by>" to the id the provider
+	// "<provider id>/<the id eipgam lists it by>" to the id the provider
 	// itself serves it under (zeewell on X: deepseek-v4.1-flash-1017 known
 	// as deepseek-v4.1-flash). The model is listed, picked, grouped, found
 	// in routing groups, limited by gateway keys and recorded in usage by
@@ -1191,8 +1183,8 @@ type Settings struct {
 	ModelAPIs map[string]string `json:"modelAPIs,omitempty"`
 	// ModelSameAs is the model another vendor sells under another name
 	// that a model is, by "<provider id>/<model id>": the routing groups
-	// magpie finds (provider's autoGroups) merge it with that one rather
-	// than by its own id, for an id no rule of magpie's matches up
+	// eipgam finds (provider's autoGroups) merge it with that one rather
+	// than by its own id, for an id no rule of eipgam's matches up
 	// (kyzhouxu, #583), and a call to it that no list prices is costed at
 	// that model's maker's price (provider.SamePriceIn, #2344). Absent
 	// leaves it to its id.
@@ -1268,7 +1260,7 @@ type ModelPrice struct {
 	// which bills an hour's write as a 5-minute one, at the 5-minute price.
 	CacheWrite1h *float64 `json:"cache_write_1h,omitempty"`
 	// Tiers are the prices of a request whose input is over a size, each
-	// whole: "magpie model price … --tier 272k …" (PAMI on Discord).
+	// whole: "eipgam model price … --tier 272k …" (PAMI on Discord).
 	Tiers []catalog.Tier `json:"tiers,omitempty"`
 }
 
@@ -1320,7 +1312,7 @@ func StatedPrice(p catalog.Price) ModelPrice {
 	return m
 }
 
-// CheckModelPrice is whether a price the user gives is one magpie will bill a
+// CheckModelPrice is whether a price the user gives is one eipgam will bill a
 // call at: the key names a model the way the per-model maps key one, and
 // every part of the price is a number a vendor could charge, naming the first
 // that is not. It is where a price is checked rather than in Save: one a hand
@@ -1356,12 +1348,6 @@ const UpdateStable = "stable"
 // UpdateDaily is UpdateChannel's Daily: a version a day, the newest that
 // passed its tests and has all its files, an urgent one at once.
 const UpdateDaily = "daily"
-
-// The values of Settings.UpdateSource; "" is automatic.
-const (
-	UpdateSourceSite   = "site"
-	UpdateSourceGitHub = "github"
-)
 
 // What a reply's model name says (ReplyModel): the model asked for is "".
 const (
@@ -1582,9 +1568,9 @@ const (
 )
 
 // DefaultTextSize is the text size of settings that have never had one
-// saved. Windows' and Linux's body text is 14px against magpie's 13px at
+// saved. Windows' and Linux's body text is 14px against eipgam's 13px at
 // 100%, a size smaller than what is around it there, so they start at
-// 110% (#914); the Mac's is 13px, as magpie's. A size once saved, 100%
+// 110% (#914); the Mac's is 13px, as eipgam's. A size once saved, 100%
 // too, is kept as it is. A var so tests can be any system.
 var DefaultTextSize = func() int {
 	if runtime.GOOS == "windows" || runtime.GOOS == "linux" {
@@ -1593,11 +1579,11 @@ var DefaultTextSize = func() int {
 	return 100
 }
 
-// validAccent is an Accent other than magpie's own: a colour as #rrggbb.
+// validAccent is an Accent other than eipgam's own: a colour as #rrggbb.
 var validAccent = capre.MustCompile(`^#[0-9A-Fa-f]{6}$`, 7)
 
 // WallpaperPath is the picture behind the window's pages, as it was
-// chosen, in magpie's folder.
+// chosen, in eipgam's folder.
 func WallpaperPath() string { return appdir.Join(Dir(), "wallpaper") }
 
 var validTerminalBundleID = capre.MustCompile(`^[A-Za-z0-9][A-Za-z0-9.-]*$`, 255)
@@ -1714,7 +1700,7 @@ type AgentCompact struct {
 	Full bool `json:"full,omitempty"`
 }
 
-// CompactAgents are the agents whose configs magpie writes a compaction
+// CompactAgents are the agents whose configs eipgam writes a compaction
 // window into, by the key each reads: Codex's model catalog
 // (auto_compact_token_limit), Claude Code's settings.json
 // (CLAUDE_CODE_AUTO_COMPACT_WINDOW, autoCompactWindow) and Grok Build's
@@ -1749,12 +1735,12 @@ func (s Settings) Compact() int {
 // place and whether it was maximised, the proxy (and plugin downloads'), the gateway's port, whether it
 // is shared on the local network and the addresses let in to it, the
 // address Claude Desktop is pointed at (DesktopGateway), what
-// its MCP router says of itself, what this magpie is called (Name), the Dock, gateway mode, whether WSL is
+// its MCP router says of itself, what this eipgam is called (Name), the Dock, gateway mode, whether WSL is
 // looked in, whether agents' sign-ins are read, when allowances are read, the terminal app a session resumes
 // in, the quick panel's shortcut, whether the local masking model is on
 // (it is downloaded on this computer alone), how many Claude Code processes may run (its memory),
 // whether every agent's telemetry is off (in this computer's files),
-// and what the menu bar or tray shows beside magpie's icon (yoooo on
+// and what the menu bar or tray shows beside eipgam's icon (yoooo on
 // Discord: usage turned off on a Mac came back from a Windows box that
 // shows it; Lullaby: sharing turned on at home came on at work).
 func (s *Settings) KeepOwn(cur Settings) {
@@ -1766,7 +1752,6 @@ func (s *Settings) KeepOwn(cur Settings) {
 	s.ProxyCustom, s.Proxies, s.ProxyNames = cur.ProxyCustom, cur.Proxies, cur.ProxyNames
 	s.PluginProxy, s.PluginProxyCustom = cur.PluginProxy, cur.PluginProxyCustom
 	s.UpdateProxy, s.UpdateProxyCustom = cur.UpdateProxy, cur.UpdateProxyCustom
-	s.UpdateSource = cur.UpdateSource
 	s.WindowMaximised, s.KeepAwake, s.KeepAwakeDisplay = cur.WindowMaximised, cur.KeepAwake, cur.KeepAwakeDisplay
 	s.WindowAt, s.OnTop = cur.WindowAt, cur.OnTop
 	s.TrayUsages, s.TrayUsage, s.TrayUsageEvery, s.TrayNoLogos, s.TrayNoBird, s.TrayPace, s.TrayNoCost = cur.TrayUsages, cur.TrayUsage, cur.TrayUsageEvery, cur.TrayNoLogos, cur.TrayNoBird, cur.TrayPace, cur.TrayNoCost
@@ -1778,7 +1763,7 @@ func (s *Settings) KeepOwn(cur Settings) {
 	s.LAN, s.AllowIPs, s.MTLS, s.HTTPS = cur.LAN, cur.AllowIPs, cur.MTLS, cur.HTTPS
 	s.DesktopGateway = cur.DesktopGateway // an address of this computer
 	s.RouterNote, s.RouterAllTools = cur.RouterNote, cur.RouterAllTools
-	s.Name = cur.Name // what this magpie is called
+	s.Name = cur.Name // what this eipgam is called
 	s.FetchPrivate = cur.FetchPrivate
 	s.SessionTerminal = cur.SessionTerminal
 	s.CodexOpen = cur.CodexOpen
@@ -1898,11 +1883,11 @@ func renameInMap(m reflect.Value, from, to string) bool {
 // Path is the settings file.
 func Path() string { return appdir.Join(Dir(), "settings.json") }
 
-// Dir is the folder every magpie file lives in: the data folder beside a
-// portable magpie (appdir.Portable), else ~/.config/magpie.
+// Dir is the folder every eipgam file lives in: the data folder beside a
+// portable eipgam (appdir.Portable), else ~/.config/eipgam.
 func Dir() string { return appdir.Config() }
 
-// Portable is the data folder of a portable magpie, or "" when installed.
+// Portable is the data folder of a portable eipgam, or "" when installed.
 func Portable() string { return appdir.Portable() }
 
 // Serialize reads with saves too: the editor preserves hard links by
@@ -1911,7 +1896,7 @@ var fileMu sync.RWMutex
 
 // writing is set while fileMu is held for a write: what a write is made
 // from is read from the disk even while a request holds what was read
-// (filememo.Hold), or a change another magpie or the user made in the
+// (filememo.Hold), or a change another eipgam or the user made in the
 // held second would be written over. Only set or read under fileMu.
 var writing bool
 
@@ -2078,14 +2063,14 @@ func loadChecked() (Settings, error) {
 }
 
 // Defaults are the settings of a new install, with no settings.json:
-// what `magpie settings list` shows as each one's default, and what
-// `magpie settings reset` puts back.
+// what `eipgam settings list` shows as each one's default, and what
+// `eipgam settings reset` puts back.
 func Defaults() Settings {
 	return Settings{DockSettled: true}.normal()
 }
 
 // settleDock reads a Dock choice written before With window was the
-// default (DockSettled unset) as that magpie did: no choice is Hide.
+// default (DockSettled unset) as that eipgam did: no choice is Hide.
 func (s Settings) settleDock() Settings {
 	if s.DockSettled {
 		return s
@@ -2159,7 +2144,7 @@ func validSettings(b []byte) bool {
 	return json.Unmarshal(bytes.TrimPrefix(b, []byte("\xef\xbb\xbf")), &s) == nil
 }
 
-// CheckProxy says whether p is a proxy setting magpie takes: "" (follow),
+// CheckProxy says whether p is a proxy setting eipgam takes: "" (follow),
 // "direct", or an http://, https:// or socks5:// address (host:port
 // meaning http). The global Proxy and a provider's own are both checked
 // with it.
@@ -2187,7 +2172,7 @@ func CheckProxy(p string) error {
 	return nil
 }
 
-// DefaultPort is the gateway's port unless Settings or MAGPIE_ADDR say
+// DefaultPort is the gateway's port unless Settings or EIPGAM_ADDR say
 // another.
 const DefaultPort = 3425
 
@@ -2201,18 +2186,18 @@ func CheckPort(p int) error {
 	return nil
 }
 
-// GatewayAddr is where the gateway listens: MAGPIE_ADDR when it is set,
+// GatewayAddr is where the gateway listens: EIPGAM_ADDR when it is set,
 // else the port Settings has, on loopback (Magic_zero on Discord: 3425 was
 // taken, and a port of one's own is easier to tell apart).
 func GatewayAddr() string {
-	if a := os.Getenv("MAGPIE_ADDR"); a != "" {
+	if a := os.Getenv("EIPGAM_ADDR"); a != "" {
 		return a
 	}
 	return SavedAddr()
 }
 
-// SavedAddr is GatewayAddr with MAGPIE_ADDR left aside: the address of the
-// magpie whose settings these are, which one the variable moves (magpie-dev,
+// SavedAddr is GatewayAddr with EIPGAM_ADDR left aside: the address of the
+// eipgam whose settings these are, which one the variable moves (eipgam-dev,
 // a sandbox) runs beside.
 func SavedAddr() string {
 	p := Shared().Port
@@ -2229,7 +2214,7 @@ func Save(s Settings) error {
 	return save(s, false)
 }
 
-// SessionReads is the user's answer to which agents' session files magpie
+// SessionReads is the user's answer to which agents' session files eipgam
 // reads. Before it is asked (Asked false) no agent's are read. Then an
 // agent named in Agents is read as it says, and any other as All says:
 // "allow all" is All with no Agents, so an agent installed later is read
@@ -2591,7 +2576,7 @@ func saveOwn(s Settings, recording, reads bool) error {
 		return fmt.Errorf("the menu bar's usage is refreshed every %v minutes, not %d", TrayEvery, s.TrayUsageEvery)
 	}
 	if !slices.Contains(UpdateEveries, s.UpdateEvery) {
-		return fmt.Errorf("magpie checks for updates every %v minutes, not %d", UpdateEveries, s.UpdateEvery)
+		return fmt.Errorf("eipgam checks for updates every %v minutes, not %d", UpdateEveries, s.UpdateEvery)
 	}
 	if !slices.Contains(UpdateChannels, s.UpdateChannel) {
 		return fmt.Errorf("the update channel is %q, %q or empty (every version), not %q", UpdateStable, UpdateDaily, s.UpdateChannel)
@@ -2643,7 +2628,7 @@ func saveOwn(s Settings, recording, reads bool) error {
 		return fmt.Errorf("a reply's model names %q (the model asked for), %q or %q, not %q", ReplyAsked, ReplyMember, ReplyVendor, s.ReplyModel)
 	}
 	if s.QuotaReads != "" && s.QuotaReads != "asked" {
-		return fmt.Errorf(`allowances are read "" (whenever magpie needs them) or "asked" (only when asked), not %q`, s.QuotaReads)
+		return fmt.Errorf(`allowances are read "" (whenever eipgam needs them) or "asked" (only when asked), not %q`, s.QuotaReads)
 	}
 	if err := CheckPort(s.Port); err != nil {
 		return err
@@ -2680,11 +2665,7 @@ func saveOwn(s Settings, recording, reads bool) error {
 	if s.UpdateProxy != "" && s.UpdateProxy != "direct" && !IsProxyRef(s.UpdateProxy) {
 		s.UpdateProxyCustom = s.UpdateProxy
 	}
-	switch s.UpdateSource {
-	case "", UpdateSourceSite, UpdateSourceGitHub:
-	default:
-		return fmt.Errorf("the update source must be site or github, not %q", s.UpdateSource)
-	}
+
 	s.Vision = strings.TrimSpace(s.Vision)
 	if s.Vision != "" && s.Vision != "off" && !strings.Contains(s.Vision, "/") {
 		return fmt.Errorf("the vision model must be a model's id such as openai/gpt-5-mini, or off, not %q", s.Vision)
@@ -2921,15 +2902,15 @@ func (s Settings) normal() Settings {
 	if s.TextSize == 0 {
 		s.TextSize = DefaultTextSize()
 	}
-	// one card, as a magpie before TrayUsages kept it; an empty list
+	// one card, as a eipgam before TrayUsages kept it; an empty list
 	// sent on purpose (all of them turned off) stays empty
 	if s.TrayUsages == nil && s.TrayUsage != "" {
 		s.TrayUsages = []string{s.TrayUsage}
 	}
-	// the times of day: the one a magpie before the lists kept, when the
+	// the times of day: the one a eipgam before the lists kept, when the
 	// list isn't there (an empty one sent on purpose stays empty), each as
 	// 06:00 whichever way it came (6:00, 06:00:00), earliest first, once;
-	// and the first kept as the one for that older magpie
+	// and the first kept as the one for that older eipgam
 	for _, w := range []struct {
 		at  *string
 		ats *[]string
@@ -2944,9 +2925,9 @@ func (s Settings) normal() Settings {
 		}
 	}
 	s.BarkServer, s.BarkKey, s.BarkDaily = normalBark(s.BarkServer, s.BarkKey, s.BarkDaily)
-	// a reply's model name: memberModel, as a magpie before replyModel
+	// a reply's model name: memberModel, as a eipgam before replyModel
 	// kept it, when replyModel isn't set, and kept beside it for that
-	// magpie
+	// eipgam
 	switch s.ReplyModel {
 	case "":
 		if s.MemberModel {

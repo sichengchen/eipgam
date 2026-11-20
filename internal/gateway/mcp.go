@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/netproxy"
+	"github.com/sichengchen/eipgam/internal/mcpauth"
+	"github.com/sichengchen/eipgam/internal/netproxy"
 )
 
-// mcpClient relays the agents' requests to a remote MCP server magpie is
+// mcpClient relays the agents' requests to a remote MCP server eipgam is
 // signed in to. It has no timeout: a GET's event stream stays open for as
 // long as the agent keeps it.
 var mcpClient = &http.Client{Transport: mcpTransport(nil)}
@@ -39,7 +39,7 @@ var mcpHop = map[string]bool{
 	"Transfer-Encoding": true, "Upgrade": true, "Content-Length": true, "Accept-Encoding": true,
 }
 
-// RunMCP serves /mcp/run/<server>: a server magpie runs by its command,
+// RunMCP serves /mcp/run/<server>: a server eipgam runs by its command,
 // for an agent on this computer given it that way (library's ServeRun);
 // nil until the library sets it.
 var RunMCP func(w http.ResponseWriter, r *http.Request, name string)
@@ -49,11 +49,11 @@ var RunMCP func(w http.ResponseWriter, r *http.Request, name string)
 // posting a form, or of a name pointed at 127.0.0.1), may have it started.
 func runMCP(w http.ResponseWriter, r *http.Request) {
 	if !local(r) || r.Header.Get("Origin") != "" || !loopbackHost(r.Host) {
-		http.Error(w, "magpie runs the Library's MCP servers for the agents on this computer alone", http.StatusForbidden)
+		http.Error(w, "eipgam runs the Library's MCP servers for the agents on this computer alone", http.StatusForbidden)
 		return
 	}
 	if RunMCP == nil {
-		http.Error(w, "magpie runs no MCP server here", http.StatusNotFound)
+		http.Error(w, "eipgam runs no MCP server here", http.StatusNotFound)
 		return
 	}
 	// a gateway key held to some MCP servers or tools (access.Key.MCP)
@@ -65,24 +65,24 @@ func runMCP(w http.ResponseWriter, r *http.Request) {
 	RunMCP(w, r, r.PathValue("name"))
 }
 
-// mcpProxy is /mcp/<server>: a remote MCP server magpie signed in to once,
+// mcpProxy is /mcp/<server>: a remote MCP server eipgam signed in to once,
 // for every agent the Library gives it to (#615). The agent speaks to it as
 // to the server itself (streamable HTTP: a POST answered with JSON or an
 // event stream, a GET's event stream, a DELETE that ends the session, with
-// Mcp-Session-Id), and magpie sends it on with its own token, renewing it
+// Mcp-Session-Id), and eipgam sends it on with its own token, renewing it
 // when it runs out or the server says it has.
 func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	if !local(r) && !sharedWith(r) {
-		http.Error(w, "magpie lends its MCP sign-ins to another machine only when magpie is shared on the local network and the request carries its API key", http.StatusForbidden)
+		http.Error(w, "eipgam lends its MCP sign-ins to another machine only when eipgam is shared on the local network and the request carries its API key", http.StatusForbidden)
 		return
 	}
 	// a web page can make the browser send a request here too (a form, or
-	// a hostname of its own pointed at 127.0.0.1), and magpie would carry
+	// a hostname of its own pointed at 127.0.0.1), and eipgam would carry
 	// it to the server with the user's sign-in; agents send no Origin and
 	// name this computer, as the MCP spec has servers check
 	if r.Header.Get("Origin") != "" || !sharedWith(r) && !loopbackHost(r.Host) {
-		http.Error(w, "magpie lends its MCP sign-ins to agents, not to web pages", http.StatusForbidden)
+		http.Error(w, "eipgam lends its MCP sign-ins to agents, not to web pages", http.StatusForbidden)
 		return
 	}
 	// a gateway key held to some MCP servers or tools (access.Key.MCP)
@@ -93,7 +93,7 @@ func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 	defer done()
 	rec, ok := mcpauth.Get(name)
 	if !ok {
-		http.Error(w, "magpie isn't signed in to an MCP server called "+name+": sign in to it in magpie's Library", http.StatusNotFound)
+		http.Error(w, "eipgam isn't signed in to an MCP server called "+name+": sign in to it in eipgam's Library", http.StatusNotFound)
 		return
 	}
 	// a body cut at the limit would go to the server as a shorter message
@@ -124,7 +124,7 @@ func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 			return nil, err
 		}
 		for k, v := range r.Header {
-			// nor what a proxy in front of magpie says of the caller
+			// nor what a proxy in front of eipgam says of the caller
 			if mcpHop[http.CanonicalHeaderKey(k)] || proxyIdentity(k) {
 				continue
 			}
@@ -165,7 +165,7 @@ func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusUnauthorized {
-		// the agent would start a sign-in of its own, at magpie's address
+		// the agent would start a sign-in of its own, at eipgam's address
 		io.Copy(io.Discard, io.LimitReader(resp.Body, 1<<16))
 		mcpRefused(w, name, mcpauth.ErrExpired)
 		return
@@ -195,13 +195,13 @@ func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// mcpRefused answers an agent whose request magpie has no token for. It is
+// mcpRefused answers an agent whose request eipgam has no token for. It is
 // not a 401, which would set the agent signing in itself.
 func mcpRefused(w http.ResponseWriter, name string, err error) {
 	status := http.StatusBadGateway
 	msg := err.Error()
 	if errors.Is(err, mcpauth.ErrExpired) || errors.Is(err, mcpauth.ErrNotSignedIn) {
-		msg = "magpie's sign-in to the MCP server " + name + " has run out: sign in to it again in magpie's Library"
+		msg = "eipgam's sign-in to the MCP server " + name + " has run out: sign in to it again in eipgam's Library"
 	}
 	http.Error(w, msg, status)
 }

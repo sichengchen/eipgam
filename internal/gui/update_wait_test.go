@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // fakeBusy stands in for the gateway's Busy in these tests.
@@ -37,7 +37,7 @@ func (f *fakeBusy) get() gateway.Busy {
 
 // quick has u's waits run in milliseconds, against busy, with no feed asked.
 func quick(t *testing.T, busy *fakeBusy, u *updater) {
-	t.Setenv("MAGPIE_UPDATE_FEED", "http://127.0.0.1:1/") // never the real one
+	t.Setenv("EIPGAM_UPDATE_FEED", "http://127.0.0.1:1/") // never the real one
 	oldBusy, oldSettle, oldMost, oldTick, oldRecheck := gatewayBusy, idleSettle, waitMost, waitTick, waitRecheck
 	gatewayBusy, idleSettle, waitMost, waitTick = busy.get, 80*time.Millisecond, time.Minute, 5*time.Millisecond
 	waitRecheck = func(*updater, bool) {}
@@ -172,7 +172,7 @@ func TestRestartWhenIdleIntoTheWaiting(t *testing.T) {
 	u := &updater{}
 	quick(t, busy, u)
 	waitRecheck = (*updater).recheck
-	body := []byte("new magpie")
+	body := []byte("new eipgam")
 	sum := sha256.Sum256(body)
 	var latest atomic.Value
 	latest.Store("0.1.11")
@@ -186,7 +186,7 @@ func TestRestartWhenIdleIntoTheWaiting(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("EIPGAM_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()

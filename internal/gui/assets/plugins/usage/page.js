@@ -20,7 +20,7 @@ function headersPanel(label, first, headers) {
 
 // A call's HTTP headers both ways (usrname1833 on Discord: 查看原始请求和
 // 原始响应的http头, to debug what a capture would show), as the gateway
-// read them out, secrets taken out: the client's, then each request magpie
+// read them out, secrets taken out: the client's, then each request eipgam
 // sent upstream for it and the head of its answer. Folded under the bodies
 // on the Gateway page's recent calls and on Routing; open when open is.
 // h is /api/gateway/call's headers, or the archive's upstream ones.
@@ -58,11 +58,11 @@ function wireHeadersGrid(h, withClient) {
     );
   }
   if (h.more) grid.append(el("p", "call-wire-note", t("{n} more requests upstream, not kept", { n: h.more })));
-  if (plugin) grid.append(el("p", "call-wire-note", t("A plugin sends a request on to its vendor with headers of its own, which magpie doesn't see.")));
+  if (plugin) grid.append(el("p", "call-wire-note", t("A plugin sends a request on to its vendor with headers of its own, which eipgam doesn't see.")));
   return grid;
 }
 
-// The archived file, whole, however large: to the browser in magpie web,
+// The archived file, whole, however large: to the browser in eipgam web,
 // to Downloads in the app (#447).
 async function downloadArchive(name, b) {
   const [date, aid] = name.split("/");
@@ -146,7 +146,7 @@ function archivePanel(name, id, redraw) {
     archiveBodyPanel("Response Body", got.response, id + "|archive"),
   );
   box.append(grid);
-  // what magpie sent upstream for it, and the heads that came back
+  // what eipgam sent upstream for it, and the heads that came back
   if (got.upstream?.length) box.append(wireHeadersGrid({ upstream: got.upstream, more: got.upstreamMore }, false));
   return box;
 }
@@ -167,12 +167,12 @@ function periodHours(p) {
 }
 const keptPeriod = (id) => PERIODS.some(([p]) => p === id) || periodHours(id) > 0;
 const hoursName = (n) => (n === 1 ? t("Last hour") : t("Last {n} hours", { n }));
-try { const v = localStorage.getItem("magpie.usagePeriod"); if (keptPeriod(v)) period = v; } catch {}
+try { const v = localStorage.getItem("eipgam.usagePeriod"); if (keptPeriod(v)) period = v; } catch {}
 
-// The reader's time zone, which magpie reads the period's days, the chart's
-// hours and a picked day in: magpie web may be read from another zone than
+// The reader's time zone, which eipgam reads the period's days, the chart's
+// hours and a picked day in: eipgam web may be read from another zone than
 // the computer's, whose days put a call at 9:00 in UTC+8 under 1:00 (Outvi V
-// on Discord). None, and magpie reads its own.
+// on Discord). None, and eipgam reads its own.
 function usageZone() {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch { return ""; }
 }
@@ -311,7 +311,7 @@ function renderPeriod(loading) {
 
 function pickPeriod(id) {
   period = id; ledDay = ""; ledOffset = 0;
-  if (keptPeriod(id)) try { localStorage.setItem("magpie.usagePeriod", id); } catch {}
+  if (keptPeriod(id)) try { localStorage.setItem("eipgam.usagePeriod", id); } catch {}
   loadUsage().catch((e) => status(e.message, "err"));
 }
 
@@ -335,7 +335,7 @@ function typedTime(v, end) {
   const m = /^([01]?\d|2[0-3]):?([0-5]\d)$/.exec(v);
   return m ? m[1].padStart(2, "0") + ":" + m[2] : null;
 }
-// readsNote: on an empty page, whether magpie is not yet allowed to read the
+// readsNote: on an empty page, whether eipgam is not yet allowed to read the
 // agents' session files, the only reason Claude Code's and Codex's own calls
 // (tokens, time, speed) are missing with no provider set up (simonzyzy on X).
 // It asks once what the Sessions page's consent knows, and says so with the
@@ -346,7 +346,7 @@ async function readsNote(host) {
   if (!r || r.asked || r.gateway || !r.found?.length || !host.isConnected) return;
   const box = el("div", "reads-note");
   const names = r.found.map((x) => x.name).join(t(", "));
-  box.append(el("p", "", t("magpie reads no agent's session files until you allow it, so {names} calls aren't counted here yet.", { names })));
+  box.append(el("p", "", t("eipgam reads no agent's session files until you allow it, so {names} calls aren't counted here yet.", { names })));
   const go = el("button", "text primary", t("Count {names}", { names }));
   go.type = "button";
   go.onclick = async () => {
@@ -362,11 +362,11 @@ async function readsNote(host) {
   host.append(box);
 }
 
-// readsLater: the agents found here whose session files magpie doesn't
+// readsLater: the agents found here whose session files eipgam doesn't
 // read, and which were never turned off on their own (reads.found[].new):
 // one installed after "allow selected", or left off in its list
 // (baysonfox on X: Antigravity 2.0 beside agy CLI, whose calls made
-// without magpie were counted nowhere). Requests says so above its rows
+// without eipgam were counted nowhere). Requests says so above its rows
 // and asks once: Count reads them, Don't count keeps them off and the line
 // is gone for good. sessions/reads is read again at most once a minute.
 let readsLaterAt = 0, readsLaterGot = null, readsLaterKey = "";
@@ -385,7 +385,7 @@ async function readsLater() {
   box.hidden = !found.length;
   if (!found.length) { box.replaceChildren(); return; }
   const names = found.map((x) => x.name).join(t(", "));
-  const p = el("p", "", t("magpie doesn't read the session files of {names}, so their calls that didn't go through magpie aren't counted here.", { names }));
+  const p = el("p", "", t("eipgam doesn't read the session files of {names}, so their calls that didn't go through eipgam aren't counted here.", { names }));
   p.id = "ledReadsWhy";
   box.setAttribute("aria-labelledby", p.id);
   const acts = el("div", "reads-later-acts");
@@ -457,7 +457,7 @@ function openRangeMenu(anchor, current, hours, choose, chooseHours) {
   const lastH = el("label", "rm-times rm-hours");
   const hin = el("input", "rm-time");
   let keptH = 0;
-  try { keptH = periodHours("last:" + localStorage.getItem("magpie.usageHours") + "h"); } catch {}
+  try { keptH = periodHours("last:" + localStorage.getItem("eipgam.usageHours") + "h"); } catch {}
   Object.assign(hin, { type: "text", inputMode: "numeric", maxLength: 3, placeholder: "24", value: String(hours || keptH || ""), spellcheck: false, autocomplete: "off" });
   hin.setAttribute("aria-label", t("hours back"));
   hin.oninput = () => hin.removeAttribute("aria-invalid");
@@ -467,7 +467,7 @@ function openRangeMenu(anchor, current, hours, choose, chooseHours) {
     e.stopPropagation();
     const n = periodHours("last:" + hin.value.trim() + "h");
     if (!n) return hin.setAttribute("aria-invalid", "true");
-    try { localStorage.setItem("magpie.usageHours", String(n)); } catch {}
+    try { localStorage.setItem("eipgam.usageHours", String(n)); } catch {}
     closeProtoMenu();
     chooseHours(n);
   };
@@ -621,8 +621,8 @@ function costHead(c, note, title) {
   cost.append(el("span", note ? "unpriced" : "", note || t("effective prices")));
   cost.title = title;
 }
-// a request magpie sent a provider by itself to test it (SourceProbe)
-const probeWhy = () => t("magpie sent this itself to test the provider (Test, Detect APIs or a model list), not for an agent. It is not counted in any total.");
+// a request eipgam sent a provider by itself to test it (SourceProbe)
+const probeWhy = () => t("eipgam sent this itself to test the provider (Test, Detect APIs or a model list), not for an agent. It is not counted in any total.");
 const unpricedCalls = (n) => t(n === 1 ? "{n} call unpriced" : "{n} calls unpriced", { n: ledNum(n) });
 const unpricedCallsWhy = (n) => n ? t(n === 1 ? "{n} call had no known price and is not counted" : "{n} calls had no known price and are not counted", { n }) : t("Estimated at effective model prices. A model's price at one provider is set in that provider's Model settings and counts over its list price");
 // renderCosts redraws whatever on the Usage page shows a cost, once the
@@ -632,9 +632,9 @@ function renderCosts() {
   if (usage) renderUsage();
   if (ledger && usageTab === "requests") renderLedger();
   if (sessions) renderSessions();
-  document.dispatchEvent(new Event("magpie-costs-changed"));
+  document.dispatchEvent(new Event("eipgam-costs-changed"));
 }
-// sharedBalances (keyCards): the keys magpie found to read one account's
+// sharedBalances (keyCards): the keys eipgam found to read one account's
 // balance (sharedBalance, the first one's name) as one card, the first's,
 // with the keys it stands for (sharedKeys): mimi on Discord, a site's three
 // keys each showing the account's $8.39 and its curve. Keys that read
@@ -774,7 +774,7 @@ function quotaWarm(q) {
 }
 
 function ownCalls(n) {
-  return t("{n} by magpie itself", { n: fmtN(n) });
+  return t("{n} by eipgam itself", { n: fmtN(n) });
 }
 // quotaReadings: a line's last eight readings, newest first, each what was
 // left and when it was read (#802), a line each, ↻ where the window
@@ -807,9 +807,9 @@ new ResizeObserver(fitChartLabels).observe($("#view-usage"));
 
 // The Overview's lists — Agents, Models, Accounts, Gateway keys — each fold
 // away under their heading (#2378: 日常看账号维度较多，都要拉到最底下), and
-// stay folded across a reload (magpie.usageFolded, the folded ones' names).
+// stay folded across a reload (eipgam.usageFolded, the folded ones' names).
 let usageFolded = new Set();
-try { usageFolded = new Set(JSON.parse(localStorage.getItem("magpie.usageFolded") || "[]")); } catch {}
+try { usageFolded = new Set(JSON.parse(localStorage.getItem("eipgam.usageFolded") || "[]")); } catch {}
 const USAGE_FOLDS = { agents: ["usageAgents", "usageAgentsHid"], models: ["usageModels"], accounts: ["usageAccounts"], keys: ["usageKeys"] };
 const USAGE_FOLD_TITLES = {
   agents: ["Show the agents", "Fold the agents away"],
@@ -828,7 +828,7 @@ function mountUsageFolds() {
     b.onclick = () => {
       const id = b.dataset.fold;
       if (usageFolded.has(id)) usageFolded.delete(id); else usageFolded.add(id);
-      try { localStorage.setItem("magpie.usageFolded", JSON.stringify([...usageFolded])); } catch {}
+      try { localStorage.setItem("eipgam.usageFolded", JSON.stringify([...usageFolded])); } catch {}
       showUsageFolds();
       backToReader($("#view-usage"));
     };
@@ -852,12 +852,12 @@ function showUsageFolds() {
 // The Overview's lists are a ranking (onducoder on X: 能为 agent、模型、
 // 网关密钥、账号的消耗量增加一个排序): most tokens first, as the server
 // sends them, or by cost, by calls or by name, a pick at the right of each
-// list's heading, kept across a reload (magpie.usageSort, a list's name to
+// list's heading, kept across a reload (eipgam.usageSort, a list's name to
 // its order). Tokens count as the tokens tile counts them, the cache in or
 // out; an unpriced row's cost is unknown and goes last by cost.
 const USAGE_SORTS = [["tokens", "Tokens"], ["cost", "Cost"], ["calls", "Calls"], ["name", "Name"]];
 let usageSort = {};
-try { usageSort = JSON.parse(localStorage.getItem("magpie.usageSort") || "{}") || {}; } catch {}
+try { usageSort = JSON.parse(localStorage.getItem("eipgam.usageSort") || "{}") || {}; } catch {}
 const usageSortOf = (id) => USAGE_SORTS.some(([v]) => v === usageSort[id]) ? usageSort[id] : "tokens";
 function usageSorted(groups, id) {
   const by = usageSortOf(id);
@@ -887,7 +887,7 @@ function usageSortPick(id) {
     if (b.classList.contains("open")) return closeProtoMenu();
     openProtoMenu(b, USAGE_SORTS.map(([v, name]) => ({ v, name, note: "" })), usageSortOf(id), (v) => {
       if (v === "tokens") delete usageSort[id]; else usageSort[id] = v;
-      try { localStorage.setItem("magpie.usageSort", JSON.stringify(usageSort)); } catch {}
+      try { localStorage.setItem("eipgam.usageSort", JSON.stringify(usageSort)); } catch {}
       paint();
       if (usage) renderUsage();
     }, "Order by", "sess-menu", "right");
@@ -907,9 +907,9 @@ function usageParts(texts) {
 // tokens, read and written, can be counted in them too (#2378), as the
 // Requests tab's total always has them — the Overview's tiles, chart and
 // lists and, since #2591, the Sessions tab's alike. Kept as the reader
-// left it (magpie.usageWithCache).
+// left it (eipgam.usageWithCache).
 let usageWithCache = false;
-try { usageWithCache = localStorage.getItem("magpie.usageWithCache") === "1"; } catch {}
+try { usageWithCache = localStorage.getItem("eipgam.usageWithCache") === "1"; } catch {}
 const cacheOf = (x) => (x.cache_read || 0) + (x.cache_write || 0);
 const usageTokens = (x) => tokensOf(x) + (usageWithCache ? cacheOf(x) : 0);
 // the tokens tile's label: a pop-up of the two ways to count
@@ -927,7 +927,7 @@ function usageTokensPick() {
       { v: "1", name: "With cache", note: "Cache read and written counted too" },
     ], usageWithCache ? "1" : "", (v) => {
       usageWithCache = v === "1";
-      try { localStorage.setItem("magpie.usageWithCache", usageWithCache ? "1" : "0"); } catch {}
+      try { localStorage.setItem("eipgam.usageWithCache", usageWithCache ? "1" : "0"); } catch {}
       // the tab it was picked on follows; the pick lives on the Overview's
       // and the Sessions tab's tokens tiles (#2591)
       (usageTab === "sessions" ? renderSessions : renderUsage)();
@@ -981,8 +981,8 @@ function holdsLine(h, prov) {
       t("≈ {cost} at base rates, without long-context premiums: for comparing cycles", { cost: cost(h.baseCost) }),
       t("Neither is an official dollar allowance or a fixed quota; click the figure to switch"),
     ] : []),
-    t("Reckoned from what magpie routed through this account in this window: {tokens} tokens in {calls} calls, {cache} cache reads, over the {used} the vendor says is used", { tokens: fmtN(r.tokens || 0), calls: r.calls || 0, cache: fmtN(r.cacheRead || 0), used: Math.round(h.used) + "%" }),
-    t("Only magpie's calls are counted: if this account is also used elsewhere, this reads low"),
+    t("Reckoned from what eipgam routed through this account in this window: {tokens} tokens in {calls} calls, {cache} cache reads, over the {used} the vendor says is used", { tokens: fmtN(r.tokens || 0), calls: r.calls || 0, cache: fmtN(r.cacheRead || 0), used: Math.round(h.used) + "%" }),
+    t("Only eipgam's calls are counted: if this account is also used elsewhere, this reads low"),
     t("A heavier model fills a window sooner: this holds for the models used so far"),
   ].join("\n");
   return line;
@@ -992,8 +992,8 @@ function holdsLine(h, prov) {
 const holdsWhy = {
   low: () => t("Under {n}% of it is used: a rounded share that small is too coarse to scale up", { n: 5 }),
   clock: () => t("Its reset time isn't known, so neither is when it began"),
-  log: () => t("It began before magpie's request log, so some of its calls weren't seen"),
-  none: () => t("magpie hasn't routed a call through this account in it yet"),
+  log: () => t("It began before eipgam's request log, so some of its calls weren't seen"),
+  none: () => t("eipgam hasn't routed a call through this account in it yet"),
   credits: () => t("A call in it may have been paid from credits or extra usage, not from the window"),
 };
 // holdsUnknownLine: a window whose whole the server couldn't reckon
@@ -1001,7 +1001,7 @@ const holdsWhy = {
 // nothing before and a reader couldn't tell a gap from a fault.
 function holdsUnknownLine(why) {
   const line = el("span", "quota-holds-why", t("Whole: not enough data"));
-  line.title = t("The whole window can't be estimated from magpie's calls yet") + "\n" + holdsWhy[why]();
+  line.title = t("The whole window can't be estimated from eipgam's calls yet") + "\n" + holdsWhy[why]();
   return line;
 }
 
@@ -1148,13 +1148,13 @@ function renderUsage() {
     // (WorkBuddy's 积分): an account's, a model's, an agent's (lcyksp
     // on Discord), not only their tokens
     if (g.credited) sub.push(ledCredits(g).textContent);
-    // magpie's own calls apart from the agents' (#1839): magpie's row
+    // eipgam's own calls apart from the agents' (#1839): eipgam's row
     // says it is, and a model's, a key's or an account's how many of
     // its calls were
-    if (id === "usageAgents" && g.id === "magpie") who.firstChild.append(ownBadge());
+    if (id === "usageAgents" && g.id === "eipgam") who.firstChild.append(ownBadge());
     else if (g.own?.calls) sub.push(ownCalls(g.own.calls));
     if (g.errors) sub.push(t("{n} failed", { n: g.errors }));
-    // of those, the replies magpie ended stuck in a loop (#1858)
+    // of those, the replies eipgam ended stuck in a loop (#1858)
     if (g.loops) sub.push(t("{n} looped", { n: g.loops }));
     if (g.retried) sub.push(t("{n} answered on a retry", { n: g.retried }));
     // how long the streamed replies took to begin, and how fast they
@@ -1199,7 +1199,7 @@ function renderUsage() {
     b.setAttribute("aria-haspopup", "menu");
     b.setAttribute("aria-label", t("Actions for {name}", { name: g.name || g.id }));
     b.append(svg(DOTS, 14, 2.2));
-    // a client magpie doesn't know can be counted as one of the agents
+    // a client eipgam doesn't know can be counted as one of the agents
     // it does (#1958, NorethSea): a bridge that starts Codex under a name
     // of its own; the agent counting one has it put back on its own
     const counted = Object.entries(state.settings?.clientAgents || {}).filter(([, as]) => as === g.id).map(([c]) => c);
@@ -1306,7 +1306,7 @@ function renderUsage() {
   clear.hidden = false;
   clear.onclick = () => clearUsage();
   // the account cards say how many of this period's requests were
-  // magpie's own (ownLine), which they could only once the summary came
+  // eipgam's own (ownLine), which they could only once the summary came
   if (quotas && (u.accounts?.some((g) => g.own?.calls) || $("#subscriptionUsage .quota-own"))) renderQuotas();
 }
 
@@ -1409,16 +1409,16 @@ async function setModelPrice(model) {
 }
 
 // countable is whether the Usage page's Agents list offers to count a
-// client as an agent: one magpie doesn't know, not magpie's own (#1839)
+// client as an agent: one eipgam doesn't know, not eipgam's own (#1839)
 // nor the calls that named no client.
 const COUNT_AS = "M3 3v3.5A3.5 3.5 0 0 0 6.5 10H13M10 7l3 3-3 3";
 function countable(id) {
-  return !!id && id !== "other" && !/^magpie/i.test(id) && !(state.clients || []).some((a) => a.id === id);
+  return !!id && id !== "other" && !/^eipgam/i.test(id) && !(state.clients || []).some((a) => a.id === id);
 }
 // pickCountAs opens the agents a client can be counted as, under its menu
 // button.
 function pickCountAs(anchor, g) {
-  const opts = (state.clients || []).filter((a) => a.id !== "magpie").map((a) => ({ v: a.id, name: a.name, literalName: true, note: "" }));
+  const opts = (state.clients || []).filter((a) => a.id !== "eipgam").map((a) => ({ v: a.id, name: a.name, literalName: true, note: "" }));
   openProtoMenu(anchor, opts, "", (v) => countClientAs(g.id, v), "Count this client's calls as", "", "left", false, opts.length > 8 ? "Search agents…" : "");
 }
 // countClientAs counts a client's calls as an agent's on the Usage and
@@ -1481,8 +1481,8 @@ async function hideUsageAgent(id, hide) {
 // and the counting never hear of it; the tray panel's Allowances tab
 // (panelPageCut) and the menu bar (trayShown, onkashiko on X) leave it out
 // too. Each is kept by its tray card id and its kind
-// (cardHideKey), in magpie's settings (usageCardsHidden), so every window
-// and magpie web agree; one line at the section's end says how many, and
+// (cardHideKey), in eipgam's settings (usageCardsHidden), so every window
+// and eipgam web agree; one line at the section's end says how many, and
 // has them back.
 let quotaHidOpen = false; // the hidden cards listed under their line
 let usagePeek = ""; // a card a menu bar cell asked for, shown though hidden
@@ -1735,13 +1735,13 @@ const LED_PAGE = 100;
 // Remember the chart metric; start each app load split by model.
 let ledMetric = "tokens", ledSplit = "model";
 try {
-  const m = localStorage.getItem("magpie.ledMetric");
+  const m = localStorage.getItem("eipgam.ledMetric");
   if (["tokens", "cost", "calls", "speed", "traffic"].includes(m)) ledMetric = m;
 } catch {}
 // Columns or lines (molvqingtai on Discord), kept per viewer as the metric
 // is; anything but "line", or a read that fails, is columns.
 let ledLine = false;
-try { ledLine = localStorage.getItem("magpie.ledChart") === "line"; } catch {}
+try { ledLine = localStorage.getItem("eipgam.ledChart") === "line"; } catch {}
 
 // The filters a click set for the reader rather than one they picked in a
 // filter's menu: someone in the chart's ranking or a day of its columns
@@ -1844,7 +1844,7 @@ function ledParams(extra) {
 // asked again while it is read (the refresh button, the timer) waits for
 // that read, and another page or filter cancels it. Each pick and press
 // used to send one more, and a long history's reads, all still running,
-// took the browser's few connections to magpie, so the page never came.
+// took the browser's few connections to eipgam, so the page never came.
 // flight: { want, ctl, p }
 const ledFlights = { page: null, heat: null };
 function ledRead(kind, path, want) {
@@ -1936,7 +1936,7 @@ function ledTime(when) {
 }
 // the model the reply named: amber, as the Routing page's tag, when it is
 // another than the one sent; plain when it is that one under a dated name,
-// or the member a remote magpie's routing group sent it to, said in its title
+// or the member a remote eipgam's routing group sent it to, said in its title
 function ledServed(r) {
   if (!r.served) return el("span", "faint", "—");
   if (r.routed && !r.swapped) {
@@ -2092,7 +2092,7 @@ function ledDetail(r) {
   // where it came from: kept by the gateway since this version; a row from
   // before, or one read from a session file or reported, has none
   if (r.client_ip) add("Source IP", ledSource(r.client_ip), "led-ip");
-  else if (!r.source && !r.computer && !r.via && r.agent !== "magpie") add("Source IP", t("Not recorded"), "muted led-ip");
+  else if (!r.source && !r.computer && !r.via && r.agent !== "eipgam") add("Source IP", t("Not recorded"), "muted led-ip");
   add("Requested", r.req);
   {
     const local = r.source === "log";
@@ -2147,7 +2147,7 @@ function ledDetail(r) {
   // DeepSeek's image files kept out of it (#5407); a row from before has
   // none of them, and says nothing
   if (r.up_bytes > 0) add("Sent upstream", fmtBytes(r.up_bytes));
-  // and what it was made of, for a row whose body magpie read
+  // and what it was made of, for a row whose body eipgam read
   if (r.up_bytes > 0 && r.up_parts) {
     const p = ledUpParts({ up_bytes: r.up_bytes, up_measured: r.up_bytes, up_system: r.up_parts.system, up_tools: r.up_parts.tools, up_images: r.up_parts.images });
     add("Made of", LED_UP_PARTS.filter(([k]) => p[k] > 0).map(([k, label]) => t(label) + " " + fmtBytes(p[k])).join(" · "));
@@ -2174,17 +2174,17 @@ function ledDetail(r) {
   if (r.kind) add("Called for", window.kindName ? window.kindName(r.kind) : r.kind);
   if (r.ttft_ms) add("First token", ledTook(r.ttft_ms));
   // of it, what came before the request went to the vendor, and the
-  // vendor's wait from then to its first token. Before it, magpie's own
+  // vendor's wait from then to its first token. Before it, eipgam's own
   // time is told apart from the tries that failed first, a wait for a
   // slot and connecting and sending the body (#1532: a vendor that held a
-  // try ~100 s before its 503 read as 104 s in magpie); a record from
+  // try ~100 s before its 503 read as 104 s in eipgam); a record from
   // before they were kept has only the whole
   if (r.ttft_ms && r.sent_ms) {
     const split = r.own_ms != null;
-    // of magpie's own, what went on masking it (Settings → Privacy)
+    // of eipgam's own, what went on masking it (Settings → Privacy)
     const masking = split && r.masking_ms > 0 ? Math.min(r.masking_ms, r.own_ms) : 0;
     if (masking) add("Masking", ledTook(masking));
-    add("In magpie", ledTook((split ? r.own_ms : r.sent_ms) - masking));
+    add("In eipgam", ledTook((split ? r.own_ms : r.sent_ms) - masking));
     if (split) {
       if (r.retried_ms > 0) add("Tries that failed first", ledTook(r.retried_ms));
       if (r.queued_ms > 0) add("Waiting for a slot", ledTook(r.queued_ms));
@@ -2229,7 +2229,7 @@ function ledDetail(r) {
 
 // What was said in a request — what its agent was given, and what came back —
 // is in the agent's own session file, and read from it when a row is opened
-// (the server finds the call by its session and time); magpie keeps no copy.
+// (the server finds the call by its session and time); eipgam keeps no copy.
 // What came is kept here while the list is looked at, so a row opened again, or
 // drawn again as the list is read anew, doesn't ask again.
 const ledContent = new Map();
@@ -2255,7 +2255,7 @@ function ledLoadContent(r) {
 }
 const LED_WHY = {
   session: "No session was named with this request, so its session file can't be found",
-  agent: "magpie reads the session files of Claude Code, Claude Desktop and Codex only",
+  agent: "eipgam reads the session files of Claude Code, Claude Desktop and Codex only",
   missing: "This request isn't in the agent's session files: they may be deleted, moved, or not written yet",
   read: "The session file couldn't be read",
 };
@@ -2273,7 +2273,7 @@ function ledContentBox(c) {
     box.append(sec);
   }
   if (c.cut) box.append(el("p", "cx-none", t("There was more than is shown here")));
-  box.append(el("p", "cx-src", t("Read from the agent's session file; magpie keeps no copy")));
+  box.append(el("p", "cx-src", t("Read from the agent's session file; eipgam keeps no copy")));
   return box;
 }
 
@@ -2352,7 +2352,7 @@ let ledSpeedSort = { key: "tps", dir: -1 };
 // X, with a dozen relays: which one is slow, which one fails, which one
 // answers with another model), kept as left
 let ledSpeedBy = "model";
-try { ledSpeedBy = localStorage.getItem("magpie.ledSpeedBy") === "provider" ? "provider" : "model"; } catch {}
+try { ledSpeedBy = localStorage.getItem("eipgam.ledSpeedBy") === "provider" ? "provider" : "model"; } catch {}
 const LED_SPEED_COLS = [
   { key: "name", label: "Model", dir: 1 },
   { key: "tps", label: "Speed", dir: -1 },
@@ -2375,14 +2375,14 @@ const ledFail = (x) => x.tries ? (x.failed || 0) / x.tries : 0;
 // the last check of each model on each provider (relaycheck.js relayKeep):
 // its right answers and right tool calls, set beside the other providers'
 function ledChecks() {
-  try { return JSON.parse(localStorage.getItem("magpie.relayChecks") || "{}") || {}; } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem("eipgam.relayChecks") || "{}") || {}; } catch { return {}; }
 }
 const ledCheckShare = (x, key) => {
   const c = x.check, of = c && (key === "tools" ? c.tools_of : c.of);
   return of ? (key === "tools" ? c.tools : c.right) / of : -1;
 };
 let ledSpeedLast;
-window.addEventListener("magpie-relay-checked", () => { if (ledSpeedLast && $("#ledSpeed")) drawLedSpeed(ledSpeedLast); });
+window.addEventListener("eipgam-relay-checked", () => { if (ledSpeedLast && $("#ledSpeed")) drawLedSpeed(ledSpeedLast); });
 function ledSpeedOrder(list) {
   const { key, dir } = ledSpeedSort;
   const nm = (x) => (x.name || x.model) + (x.provider_name ? "\u0000" + x.provider_name : "");
@@ -2421,7 +2421,7 @@ function drawLedSpeed(l) {
   title.title = t("Medians of the answered requests that wrote {n} tokens or more", { n: l.speed_min || 100 });
   const by = sessSegs([["model", "Models"], ["provider", "Providers"]], ledSpeedBy, (to) => {
     ledSpeedBy = to;
-    try { localStorage.setItem("magpie.ledSpeedBy", to); } catch {}
+    try { localStorage.setItem("eipgam.ledSpeedBy", to); } catch {}
     if (!LED_SPEED_COLS.concat(to === "provider" ? LED_PROV_COLS : []).some((c) => c.key === ledSpeedSort.key)) ledSpeedSort = { key: "tps", dir: -1 };
     drawLedSpeed(l);
     $("#ledSpeed .segs .opt.on")?.focus({ preventScroll: true });
@@ -2513,12 +2513,12 @@ function drawLedSpeed(l) {
 // ---- what the bytes sent upstream were made of (theforeveriris on X:
 // "8.6 GB up from plain-text projects?"). Every request sends the whole
 // conversation again, so a request's bytes are about its context; the
-// card says so, splits the bytes of the requests whose body magpie read
+// card says so, splits the bytes of the requests whose body eipgam read
 // into the system prompt, the tools' definitions, images and the
 // conversation, and lists them by agent and by model, each with its bytes
 // a request. Opened from the ↑ on the Requests card, kept open as left.
 let ledUpOpen = false;
-try { ledUpOpen = localStorage.getItem("magpie.ledUp") === "1"; } catch {}
+try { ledUpOpen = localStorage.getItem("eipgam.ledUp") === "1"; } catch {}
 const LED_UP_PARTS = [
   ["conv", "Conversation", "c1"],
   ["tools", "Tool definitions", "c2"],
@@ -2565,7 +2565,7 @@ function drawLedUp(l, entering) {
     const dot = el("i", "dot");
     if (c) dot.style.background = "var(--" + c + ")";
     item.append(dot, el("span", "", t(label)), el("b", "", fmtBytes(n)), el("span", "pc", (100 * share < 1 ? "<1" : Math.round(100 * share)) + "%"));
-    if (key === "rest") item.title = t("Requests whose body magpie didn't read: a Responses WebSocket's turns, and bodies it couldn't take apart");
+    if (key === "rest") item.title = t("Requests whose body eipgam didn't read: a Responses WebSocket's turns, and bodies it couldn't take apart");
     legend.append(item);
     said.push(t(label) + " " + fmtBytes(n));
   }
@@ -2605,7 +2605,7 @@ function drawLedUp(l, entering) {
 let ledUpLast = null;
 function ledUpToggle(open) {
   ledUpOpen = open;
-  try { localStorage.setItem("magpie.ledUp", open ? "1" : "0"); } catch {}
+  try { localStorage.setItem("eipgam.ledUp", open ? "1" : "0"); } catch {}
   for (const b of document.querySelectorAll("#ledKpi .led-up-open")) b.setAttribute("aria-expanded", String(open));
   if (ledUpLast) drawLedUp(ledUpLast, open);
   if (!open) $("#ledKpi .led-up-open")?.focus({ preventScroll: true });
@@ -2718,7 +2718,7 @@ function renderLedgerDash(l) {
 // seconds, a second apart, as "↑ 1.2 MB/s · ↓ 40 KB/s" (songlairui on X).
 // The gateway counts them as they go (/api/usage/traffic), a stream's
 // reply as it comes, so nothing waits for a request to end. Read only
-// while the Requests are looked at; nothing shown when another magpie
+// while the Requests are looked at; nothing shown when another eipgam
 // serves the gateway, or when nothing is in flight and nothing flowed.
 const LED_FLOW_EVERY = 1000, LED_FLOW_SPAN = 3000;
 const ledFlow = { samples: [], timer: 0, text: "", reading: false };
@@ -2788,7 +2788,7 @@ function ledStyle(host) {
     b.onclick = () => {
       if (id === cur) return;
       ledLine = id === "line";
-      try { localStorage.setItem("magpie.ledChart", id); } catch {}
+      try { localStorage.setItem("eipgam.ledChart", id); } catch {}
       drawLedTrend();
     };
     host.append(b);
@@ -2895,7 +2895,7 @@ function drawLedTrend() {
     }
     slide(host, key);
   };
-  pill($("#ledMetric"), "ledMetric", LED_TREND, ledMetric, (id) => { ledMetric = id; try { localStorage.setItem("magpie.ledMetric", id); } catch {} drawLedTrend(); });
+  pill($("#ledMetric"), "ledMetric", LED_TREND, ledMetric, (id) => { ledMetric = id; try { localStorage.setItem("eipgam.ledMetric", id); } catch {} drawLedTrend(); });
   ledStyle($("#ledStyle"));
   const keyed = (l.callerKeys || []).length > 0;
   if (ledSplit === "callerKey" && !keyed) ledSplit = "model";
@@ -2940,7 +2940,7 @@ function drawLedTrend() {
 // sight; the pointer on a day says its date and what it had.
 let ledHeat = null, ledHeatWant = "", ledHeatMetric = "tokens";
 try {
-  const m = localStorage.getItem("magpie.ledHeatMetric");
+  const m = localStorage.getItem("eipgam.ledHeatMetric");
   if (["tokens", "calls", "cost"].includes(m)) ledHeatMetric = m;
 } catch {}
 const LED_HEAT = [["tokens", "Tokens"], ["calls", "Requests"], ["cost", "Cost"]];
@@ -3001,7 +3001,7 @@ function drawLedHeat() {
     b.onclick = () => {
       if (id === ledHeatMetric) return;
       ledHeatMetric = id;
-      try { localStorage.setItem("magpie.ledHeatMetric", id); } catch {}
+      try { localStorage.setItem("eipgam.ledHeatMetric", id); } catch {}
       drawLedHeat();
     };
     seg.append(b);
@@ -3344,7 +3344,7 @@ const ledRowSpeed = (r) => { const d = ledDecode(r); return d ? d.n / (d.w / 100
 // speed after the first token can't be under. Against Claude Code's own
 // stream it read 2–5% under for a reply of 1,400 tokens or more, 11–33% for
 // a shorter one or one asked with a tool's result, so only a reply of 1,000
-// or more is told. 0 when it tells none, and a call magpie timed tells its
+// or more is told. 0 when it tells none, and a call eipgam timed tells its
 // own (ledDecode). Only the row's: the period's speed counts timed calls
 // and session files' floors (usage.Row.Floor), not a gateway row's below.
 // Claude Code's, Claude Desktop's and Codex's files only (usage.FloorAgents):
@@ -3606,7 +3606,7 @@ function renderLedger() {
   }
   $("#ledSum").title = sum.join() == exact.join() ? "" : exact.join(" · ");
   // the two sources and their total, in the same block of cells as the totals
-  // above them: what magpie carried, what it only read about in the agents'
+  // above them: what eipgam carried, what it only read about in the agents'
   // own session files, and the two together. Each is a filter: picking one
   // lists only its requests, and the total is the way back. Its own numbers
   // are counted with the pick cleared (usage.RequestPage), so all three stay
@@ -3656,8 +3656,8 @@ function renderLedger() {
     }
     via.style.setProperty("--vias", String(n));
     tile(cells[0], "all requests", thru.calls + dir.calls + rep.calls, all, "");
-    tile(cells[1], "through magpie", thru.calls, thru, "through");
-    tile(cells[2], "not through magpie", dir.calls, dir, "direct");
+    tile(cells[1], "through eipgam", thru.calls, thru, "through");
+    tile(cells[2], "not through eipgam", dir.calls, dir, "direct");
     if (n === 4) tile(cells[3], "reported by apps", rep.calls, rep, "reported");
     via.hidden = false;
   } else {
@@ -3719,20 +3719,20 @@ function renderLedger() {
     // (it opened Routing, which the reader hadn't asked for: geesehowardt7)
     td(ledTime(r.t), "when", new Date(r.t).toLocaleString(intlLang()));
     const who = el("span", "who");
-    // an agent on another computer, whose magpie passed the request on
+    // an agent on another computer, whose eipgam passed the request on
     const name = r.agentName || r.agent;
     // one made on another computer, whose usage sync brought (#542)
     const at = r.computerName ? t("{agent} · on {computer}", { agent: name, computer: r.computerName }) : name;
     who.append(icon(r.icon || "generic"), el("span", "", [r.via ? t("{agent} · via {host}", { agent: at, host: r.via }) : at, r.callerKeyLabel || r.callerKeyName].filter(Boolean).join(" · ")));
-    // a request magpie made by itself, apart from the agents' own (#1839);
+    // a request eipgam made by itself, apart from the agents' own (#1839);
     // one that tested the provider (the editor's Test, Detect APIs, a model
     // list) is counted nowhere, and says so (neiko on Discord)
     const probe = r.source === "probe";
-    // an agent's call to a tool of magpie's MCP servers (ferock on Discord)
+    // an agent's call to a tool of eipgam's MCP servers (ferock on Discord)
     const mcp = r.source === "mcp";
-    // magpie's ask of a search API, for a search an agent's model made (cybercaius on Discord)
+    // eipgam's ask of a search API, for a search an agent's model made (cybercaius on Discord)
     const search = r.source === "search";
-    if (r.agent === "magpie") {
+    if (r.agent === "eipgam") {
       const own = ownBadge();
       if (probe) own.title = probeWhy();
       who.append(own);
@@ -3743,7 +3743,7 @@ function renderLedger() {
     // A session file names the provider it was set up to call, which is
     // where a call that went straight to a vendor went: nothing stood
     // between the agent and it. It is the file's own record and not a route
-    // magpie saw, so the id the file carries is shown as it is — never
+    // eipgam saw, so the id the file carries is shown as it is — never
     // resolved to a provider's name, which would promote an unknown request
     // to an official provider — and the row keeps saying it is a local
     // session. A row whose file names none says only that.
@@ -3778,14 +3778,14 @@ function renderLedger() {
     if (local && (r.session_account || r.session_provider)) {
       const k = el("span", "src local", t("Local session"));
       k.title = r.session_provider
-        ? t("Read from the agent's session file, which names the provider it was set up to call. The name shown is that record, not a route magpie saw.")
+        ? t("Read from the agent's session file, which names the provider it was set up to call. The name shown is that record, not a route eipgam saw.")
         : t("Read from the agent's session file. The account is shown only when local metadata identifies it; no service provider is inferred.");
       badges.append(k);
     }
     // a call an app reported itself (#1874): it went straight to its vendor
     if (r.source === "reported") {
       const k = el("span", "src reported", t("Reported"));
-      k.title = t("Reported by the app that made it, through POST /v1/magpie/usage/requests: the call went straight to its vendor, not through magpie.");
+      k.title = t("Reported by the app that made it, through POST /v1/eipgam/usage/requests: the call went straight to its vendor, not through eipgam.");
       badges.append(k);
     }
     if (probe) {
@@ -3795,13 +3795,13 @@ function renderLedger() {
     }
     if (mcp) {
       const k = el("span", "src mcp", "MCP");
-      k.title = t("{agent} called the tool {tool} of magpie's MCP server {server}. Its arguments are not kept, and it is not counted in any total: the model requests it made are rows of their own.", { agent: name, tool: r.req || "—", server: r.host || "magpie" });
+      k.title = t("{agent} called the tool {tool} of eipgam's MCP server {server}. Its arguments are not kept, and it is not counted in any total: the model requests it made are rows of their own.", { agent: name, tool: r.req || "—", server: r.host || "eipgam" });
       badges.append(k);
     }
     if (search) {
       // a search API's, or a plan's own search service's (r.provider)
       const k = el("span", "src search", t(r.provider ? "Web search" : "Search API"));
-      k.title = t("magpie asked {api} to search the web for {agent}. The query is not kept, and it is not counted in any total.", { api: r.req || "—", agent: name });
+      k.title = t("eipgam asked {api} to search the web for {agent}. The query is not kept, and it is not counted in any total.", { api: r.req || "—", agent: name });
       badges.append(k);
     }
     if (badges.childElementCount) wc.append(badges);
@@ -3960,7 +3960,7 @@ function wslBadge(s) {
 }
 
 // sessModelsText: a session's models, the first two and how many more, and
-// where magpie's gateway sent its calls, the most first: a routing group's
+// where eipgam's gateway sent its calls, the most first: a routing group's
 // member and the reasoning it was asked for
 function sessModelsText(s) {
   const via = s.via?.length ? "→ " + [s.via[0].model, s.via[0].effort].filter(Boolean).join(" · ") + (s.via.length > 1 ? " +" + (s.via.length - 1) : "") : "";
@@ -4027,7 +4027,7 @@ function sessUsageDetail(d, s, line) {
   }
 }
 
-// one place a session's calls went through magpie, in words
+// one place a session's calls went through eipgam, in words
 function viaText(v) {
   return `${v.provider}/${v.model}` + (v.effort ? " · " + v.effort : "") + " · " + t("{n} calls", { n: v.calls });
 }
@@ -4076,7 +4076,7 @@ function ledSaid(p, model) {
 
 const USAGE_TABS = [["usage", "Overview"], ["requests", "Requests"], ["sessions", "Sessions"], ["context", "Context"]];
 let usageTab = "usage";
-try { const k = localStorage.getItem("magpie.usageTab"); if (USAGE_TABS.some(([id]) => id === k)) usageTab = k; } catch {}
+try { const k = localStorage.getItem("eipgam.usageTab"); if (USAGE_TABS.some(([id]) => id === k)) usageTab = k; } catch {}
 let sessAgent = "all";
 let sessQuery = "";
 // The list is drawn in pages: every session is read (so the count beside it
@@ -4106,11 +4106,11 @@ let sessMetric = "tokens";
 const SESS_TOPS = [["tokens", "Tokens"], ["cost", "Cost"], ["active", "Active"]];
 let sessTopBy = "tokens";
 try {
-  const r = localStorage.getItem("magpie.sessRange");
+  const r = localStorage.getItem("eipgam.sessRange");
   if (SESS_RANGES.some(([id]) => id === r)) sessRange = r;
-  const m = localStorage.getItem("magpie.sessMetric");
+  const m = localStorage.getItem("eipgam.sessMetric");
   if (SESS_METRICS.some(([id]) => id === m)) sessMetric = m;
-  const b = localStorage.getItem("magpie.sessTop");
+  const b = localStorage.getItem("eipgam.sessTop");
   if (SESS_TOPS.some(([id]) => id === b)) sessTopBy = b;
 } catch {}
 let sessStats = null; // { from, to, days: [{ date, usage, active }], agents } for sessRange
@@ -4136,7 +4136,7 @@ function renderUsageTab() {
       if (id === usageTab) return;
       if (usageTab === "requests") ledLeave();
       usageTab = id;
-      try { localStorage.setItem("magpie.usageTab", id); } catch {}
+      try { localStorage.setItem("eipgam.usageTab", id); } catch {}
       $("#usageCost").replaceChildren();
       // to the Overview is to the allowances (#1588)
       loadUsage(id === "usage").catch((e) => status(e.message, "err"));
@@ -4466,7 +4466,7 @@ function renderSessRange(loading) {
     b.onclick = () => {
       if (id === sessRange) return;
       sessRange = id;
-      try { localStorage.setItem("magpie.sessRange", id); } catch {}
+      try { localStorage.setItem("eipgam.sessRange", id); } catch {}
       sessStats = null;
       loadSessions().catch((e) => status(e.message, "err"));
     };
@@ -4582,7 +4582,7 @@ function renderSessions() {
       const history = el("button", "text sess-show-history", t("All sessions"));
       history.onclick = () => {
         sessRange = "all";
-        try { localStorage.setItem("magpie.sessRange", sessRange); } catch {}
+        try { localStorage.setItem("eipgam.sessRange", sessRange); } catch {}
         sessStats = null;
         loadSessions().catch((e) => status(e.message, "err"));
       };
@@ -4859,7 +4859,7 @@ function renderSessChart(chart, st, used, ov, acts) {
     const head = el("div", "sess-chart-head");
     const seg = sessSegs(SESS_METRICS.map(([id, name]) => [id, name, off[id]]), metric, (id) => {
       sessMetric = id;
-      try { localStorage.setItem("magpie.sessMetric", id); } catch {}
+      try { localStorage.setItem("eipgam.sessMetric", id); } catch {}
       chart.redraw();
     });
     head.append(el("span", "label", t(shape === "week" ? "By week" : shape === "day" ? "By day" : "Activity")), seg, el("span", "grow"));
@@ -5013,7 +5013,7 @@ function renderSessTop() {
   const head = sessCardHead("Top sessions");
   const seg = sessSegs(SESS_TOPS, sessTopBy, (id) => {
     sessTopBy = id;
-    try { localStorage.setItem("magpie.sessTop", id); } catch {}
+    try { localStorage.setItem("eipgam.sessTop", id); } catch {}
     renderSessTop();
   });
   head.append(el("span", "grow"), seg);
@@ -5033,12 +5033,12 @@ function renderSessTop() {
     const r = el("div", "row sess sess-top");
     r.append(icon(icons.get(s.agent) || "generic"));
     const who = el("div", "who");
-    // a session magpie saw only through the gateway (#2285: a Pi
+    // a session eipgam saw only through the gateway (#2285: a Pi
     // subagent's, its file in a temp folder) has no folder and no prompt
     // unless gateway conversations are recorded: say so, not "(no prompt)"
     who.append(el("div", "name", s.title || t(s.gateway ? "(prompt not recorded)" : "(no prompt)")));
     const sub = el("div", "sub", [s.cwd ? baseName(s.cwd) : s.gateway ? t("Gateway session") : "", names[s.agent] || s.agent, s.models?.[0], ago(s.last)].filter(Boolean).join(" · "));
-    sub.title = s.cwd || (s.gateway ? t("Seen only through the gateway: the agent kept no session file magpie can read. Turn on Record gateway conversations in Sessions to keep its prompts.") : "");
+    sub.title = s.cwd || (s.gateway ? t("Seen only through the gateway: the agent kept no session file eipgam can read. Turn on Record gateway conversations in Sessions to keep its prompts.") : "");
     who.append(sub);
     r.append(who);
     const fc = fmtCost({ cost: s.cost, unpriced: !s.priced });
@@ -5068,7 +5068,7 @@ function renderSessTop() {
 // the ways a session's shape is told, and the one shown
 const SESS_SHAPES = [["messages", "Messages"], ["minutes", "Length"], ["autonomy", "Tool calls"]];
 let sessShapeBy = "messages";
-try { const v = localStorage.getItem("magpie.sessShape"); if (SESS_SHAPES.some(([id]) => id === v)) sessShapeBy = v; } catch {}
+try { const v = localStorage.getItem("eipgam.sessShape"); if (SESS_SHAPES.some(([id]) => id === v)) sessShapeBy = v; } catch {}
 
 // renderSessShape counts the range's sessions by how long they ran: by
 // messages, by minutes at work, or by tool calls a prompt
@@ -5081,7 +5081,7 @@ function renderSessShape() {
   const head = sessCardHead("Session shape");
   const seg = sessSegs(SESS_SHAPES, sessShapeBy, (id) => {
     sessShapeBy = id;
-    try { localStorage.setItem("magpie.sessShape", id); } catch {}
+    try { localStorage.setItem("eipgam.sessShape", id); } catch {}
     renderSessShape();
   });
   head.append(seg, el("span", "grow"), el("span", "tz", sh ? t(sh.total === 1 ? "{n} session" : "{n} sessions", { n: fmtN(sh.total) }) : ""));
@@ -5350,7 +5350,7 @@ function sessionItem(s) {
   r.append(go);
   const open = (e) => {
     if (window.getSelection()?.toString()) return;
-    if (!featuresOff.has("sessions")) return magpie.call("sessions", "reveal", s, e);
+    if (!featuresOff.has("sessions")) return eipgam.call("sessions", "reveal", s, e);
     // Sessions is switched off: there is no page to open it on
     sessListOpen = sessListOpen === key ? "" : key;
     // one open at a time: the one that was folds
@@ -5395,7 +5395,7 @@ function sessionDetail(s) {
 }
 
 // All sessions: the Sessions page, on the agent picked here if one is
-$("#sessAll").onclick = (e) => magpie.call("sessions", "reveal", sessAgent === "all" ? {} : { agent: sessAgent }, e);
+$("#sessAll").onclick = (e) => eipgam.call("sessions", "reveal", sessAgent === "all" ? {} : { agent: sessAgent }, e);
 $("#sessQ").oninput = (e) => { sessQuery = e.target.value; if (sessions) renderSessions(); };
 $("#sessQ").onkeydown = (e) => { if (e.key === "Escape" && e.target.value) { e.stopPropagation(); e.target.value = ""; sessQuery = ""; if (sessions) renderSessions(); } };
 
@@ -5403,7 +5403,7 @@ $("#sessQ").onkeydown = (e) => { if (e.key === "Escape" && e.target.value) { e.s
 //
 // Three choices (palette, language, what the tray icon opens) and the facts
 // people come looking for:
-// the version, where magpie keeps its files, the gateway's address.
+// the version, where eipgam keeps its files, the gateway's address.
 
 // The Usage page reads its numbers again while it is looked at, as often as
 // the reader says — off, or every 5 s to half an hour (a request through the
@@ -5414,7 +5414,7 @@ $("#sessQ").onkeydown = (e) => { if (e.key === "Escape" && e.target.value) { e.s
 const USAGE_EVERY = [[0, "Off"], [5, "5 s"], [10, "10 s"], [30, "30 s"], [60, "1 min"], [300, "5 min"], [900, "15 min"], [1800, "30 min"]];
 let usageEvery = 5; // seconds; 0 is off
 try {
-  const v = localStorage.getItem("magpie.usageEvery");
+  const v = localStorage.getItem("eipgam.usageEvery");
   if (USAGE_EVERY.some(([n]) => String(n) === v)) usageEvery = Number(v);
 } catch {}
 let usageLast = 0, usageReadAt = 0, sessionsAt = 0, quotasAsked = 0;
@@ -5430,7 +5430,7 @@ function renderUsageEvery() {
     if (b.classList.contains("open")) return closeProtoMenu();
     openProtoMenu(b, USAGE_EVERY.map(([n, name]) => ({ v: String(n), name: t(name), note: "" })), String(usageEvery), (v) => {
       usageEvery = Number(v);
-      try { localStorage.setItem("magpie.usageEvery", v); } catch {}
+      try { localStorage.setItem("eipgam.usageEvery", v); } catch {}
       usageLast = performance.now();
       renderUsageEvery();
     }, "Refresh every", "sess-menu");
@@ -5723,7 +5723,7 @@ function renderQuotaTrend() {
 function setQuotaRange(id) {
   if (id === quotaRange) return;
   quotaRange = id;
-  try { localStorage.setItem("magpie.quotaRange", id); } catch {}
+  try { localStorage.setItem("eipgam.quotaRange", id); } catch {}
   // A range also restores today's meters when leaving a historical cycle.
   renderQuotas();
 }

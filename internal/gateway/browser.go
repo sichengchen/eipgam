@@ -16,20 +16,20 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/browserext"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/browserext"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
-// Magpie Browser: the agents magpie serves use the user's own browser,
-// its tabs signed in to whatever the user is, through the Magpie Browser
-// extension (internal/browserext). Not a browser of magpie's own: a fresh
+// eipgam Browser: the agents eipgam serves use the user's own browser,
+// its tabs signed in to whatever the user is, through the eipgam Browser
+// extension (internal/browserext). Not a browser of eipgam's own: a fresh
 // profile is signed in to nothing, and an agent's own browser tool stops
 // working when its account changes.
 //
 // The extension holds a WebSocket to BrowserExtensionPath, taken only from
 // its own origin. An agent calls the tools at BrowserMCPPath (Streamable
-// HTTP, or `magpie mcp browser` over stdio), and each call is handed to
+// HTTP, or `eipgam mcp browser` over stdio), and each call is handed to
 // the extension, which carries it out with the DevTools protocol in the
 // tab and answers with MCP content.
 //
@@ -37,7 +37,7 @@ import (
 // is signed in, so a browser is used only by who it is the browser of.
 // One on this computer (a loopback connection) is this computer's, and
 // only this computer's agents use it. One elsewhere connects with a
-// gateway key (magpie in a container, whose host's browser reaches it
+// gateway key (eipgam in a container, whose host's browser reaches it
 // through a published port, or a browser on another computer), and is
 // that key's: only callers with that key use it, and this computer's
 // agents don't. A caller on another computer with no key, or with another
@@ -52,16 +52,16 @@ import (
 // (local); a connection lives only while its key is on (watchKey).
 
 // BrowserMCPPath is where the browser MCP server is served.
-const BrowserMCPPath = "/mcp/magpie/browser"
+const BrowserMCPPath = "/mcp/eipgam/browser"
 
 // BrowserExtensionPath is where the extension connects.
-const BrowserExtensionPath = "/v1/magpie/browser/extension"
+const BrowserExtensionPath = "/v1/eipgam/browser/extension"
 
 // BrowserStatusPath tells whether the extension is connected.
-const BrowserStatusPath = "/v1/magpie/browser"
+const BrowserStatusPath = "/v1/eipgam/browser"
 
 // BrowserSessionHeader names the agent session a call is from, so each
-// one goes on in the tab it was working in; `magpie mcp browser` sends one
+// one goes on in the tab it was working in; `eipgam mcp browser` sends one
 // a process.
 const BrowserSessionHeader = "X-Magpie-Browser-Session"
 
@@ -70,7 +70,7 @@ const BrowserSessionHeader = "X-Magpie-Browser-Session"
 // page to settle.
 const browserCallWait = 100 * time.Second
 
-// browserRelay is the extensions connected: each browser that has Magpie
+// browserRelay is the extensions connected: each browser that has eipgam
 // Browser (Chrome and Edge both, two profiles of one). A session goes on in
 // the one it picked (browser_tabs use), else the last to connect.
 type browserRelay struct {
@@ -85,7 +85,7 @@ type browserRelay struct {
 
 type browserConn struct {
 	c       *websocket.Conn
-	id      string // b1, b2: in the order they connected, while magpie runs
+	id      string // b1, b2: in the order they connected, while eipgam runs
 	version string
 	agent   string
 	// key is the gateway key the browser connected with, whose callers
@@ -95,7 +95,7 @@ type browserConn struct {
 	// isn't Current (turned off, removed, expired or rotated) the
 	// connection is closed (watchKey, call)
 	who access.Identity
-	// own: key is the one this magpie's own page made for the user's own
+	// own: key is the one this eipgam's own page made for the user's own
 	// browser (OwnBrowserKey) and the browser connected from this
 	// computer (local), so this computer's callers use it too, as they
 	// do one on loopback. From elsewhere the key alone is no proof: it is
@@ -104,7 +104,7 @@ type browserConn struct {
 	// calls (their pages read, and pages of theirs fed back).
 	own   bool
 	since time.Time
-	// told: an agent was told this extension is older than magpie's
+	// told: an agent was told this extension is older than eipgam's
 	// (browserOlder), once a connection
 	told atomic.Bool
 	wmu  sync.Mutex
@@ -152,7 +152,7 @@ func (b *browserRelay) current() *browserConn {
 
 // browserOwner is the gateway key whose browsers a session's calls go to:
 // the id in a "key:<id>/" the session starts with (after the "hub:" of a
-// call through magpie's router), "" for this computer's own.
+// call through eipgam's router), "" for this computer's own.
 func browserOwner(session string) string {
 	rest, ok := strings.CutPrefix(strings.TrimPrefix(session, "hub:"), "key:")
 	if !ok {
@@ -181,9 +181,9 @@ func (c *browserConn) serves(owner string) bool {
 	return c.key == owner
 }
 
-// ownBrowserKeyFile holds the id of the gateway key this magpie's page
-// made for the user's own browser, when magpie's folders are out of that
-// browser's reach (magpie in a container, the page on another computer):
+// ownBrowserKeyFile holds the id of the gateway key this eipgam's page
+// made for the user's own browser, when eipgam's folders are out of that
+// browser's reach (eipgam in a container, the page on another computer):
 // the extension downloaded from the page connects with it.
 func ownBrowserKeyFile() string { return filepath.Join(settings.Dir(), "browser-key") }
 
@@ -212,7 +212,7 @@ func SetOwnBrowserKey(id string) error {
 }
 
 // ScopeOwnBrowserKey makes the key the extension's zip was given
-// (OwnBrowserKey) a browser key, if a magpie from before browser keys made
+// (OwnBrowserKey) a browser key, if a eipgam from before browser keys made
 // it a full-access one: the extension, which holds the same secret, keeps
 // connecting, and a copy of the zip left in Downloads no longer reaches a
 // model, MCP server or stats. Only a key the GUI made for the zip is
@@ -223,7 +223,7 @@ func ScopeOwnBrowserKey() {
 		return
 	}
 	if err := access.ScopeBrowser(id); err != nil && !errors.Is(err, access.ErrNoKey) {
-		log.Printf("Magpie Browser's gateway key %s: can't make it a browser key: %v", id, err)
+		log.Printf("eipgam Browser's gateway key %s: can't make it a browser key: %v", id, err)
 	}
 }
 
@@ -360,7 +360,7 @@ func (b *browserRelay) call(ctx context.Context, session, tool string, args json
 		args = json.RawMessage("{}")
 	}
 	if err := c.send(ctx, map[string]any{"id": id, "session": session, "tool": tool, "args": args}); err != nil {
-		return nil, errors.New("couldn't reach Magpie Browser: " + err.Error())
+		return nil, errors.New("couldn't reach eipgam Browser: " + err.Error())
 	}
 	t := time.NewTimer(browserCallWait)
 	defer t.Stop()
@@ -368,20 +368,20 @@ func (b *browserRelay) call(ctx context.Context, session, tool string, args json
 	case r := <-ch:
 		return r, nil
 	case <-t.C:
-		return nil, errors.New("Magpie Browser didn't answer in " + browserCallWait.String() + ": the page may be stuck; take a snapshot or a screenshot to see where it is")
+		return nil, errors.New("eipgam Browser didn't answer in " + browserCallWait.String() + ": the page may be stuck; take a snapshot or a screenshot to see where it is")
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
 }
 
-var errBrowserAway = errors.New("Magpie Browser isn't connected, so there is no browser to use. Ask the user to set it up: magpie's Library → Magpie Browser → Set up, which loads the extension in Chrome, Edge or another Chromium browser. Once installed it connects by itself whenever that browser and magpie are both running.")
+var errBrowserAway = errors.New("eipgam Browser isn't connected, so there is no browser to use. Ask the user to set it up: eipgam's Library → eipgam Browser → Set up, which loads the extension in Chrome, Edge or another Chromium browser. Once installed it connects by itself whenever that browser and eipgam are both running.")
 
 // browserAway is why session has no browser to use.
 func browserAway(session string) error {
 	if browserOwner(session) == "" {
 		return errBrowserAway
 	}
-	return errors.New("Magpie Browser isn't connected with this gateway key, so there is no browser to use: a browser connects as a key's when its extension is given the key (the extension's popup → Gateway key), and is used only by that key's agents and magpie's own. Ask the user to set it up there.")
+	return errors.New("eipgam Browser isn't connected with this gateway key, so there is no browser to use: a browser connects as a key's when its extension is given the key (the extension's popup → Gateway key), and is used only by that key's agents and eipgam's own. Ask the user to set it up there.")
 }
 
 // browserExtensionKey is the gateway key the extension's request r comes
@@ -443,7 +443,7 @@ func (c *browserConn) watchKey(ctx context.Context, each time.Duration) {
 
 // drop closes the connection of a browser whose key is no longer on.
 func (c *browserConn) drop() {
-	log.Printf("Magpie Browser connected with gateway key %s: the key is no longer on, so the connection is closed", c.key)
+	log.Printf("eipgam Browser connected with gateway key %s: the key is no longer on, so the connection is closed", c.key)
 	c.c.Close(websocket.StatusPolicyViolation, "the gateway key this browser connected with is no longer on")
 }
 
@@ -452,7 +452,7 @@ func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 	who, ok := browserExtensionKey(r)
 	key := who.KeyID
 	if !ok {
-		http.Error(w, "only the Magpie Browser extension connects here: on this computer, or with a gateway key", http.StatusForbidden)
+		http.Error(w, "only the eipgam Browser extension connects here: on this computer, or with a gateway key", http.StatusForbidden)
 		return
 	}
 	ws, err := websocket.Accept(w, r, &websocket.AcceptOptions{OriginPatterns: []string{"chrome-extension://" + browserext.ID}})
@@ -473,7 +473,7 @@ func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if added {
 			s.browser.remove(c)
-			log.Printf("Magpie Browser disconnected")
+			log.Printf("eipgam Browser disconnected")
 		}
 	}()
 	for {
@@ -498,13 +498,13 @@ func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 				s.browser.add(c)
 				added = true
 				if key != "" {
-					log.Printf("Magpie Browser %s connected with gateway key %s", m.Version, key)
+					log.Printf("eipgam Browser %s connected with gateway key %s", m.Version, key)
 				} else {
-					log.Printf("Magpie Browser %s connected", m.Version)
+					log.Printf("eipgam Browser %s connected", m.Version)
 				}
 			}
 			if browserext.Older(m.Version, browserext.Version()) {
-				// an older extension: its folder gets this magpie's, which
+				// an older extension: its folder gets this eipgam's, which
 				// the browser reads when it starts again (or the extension's
 				// reload on chrome://extensions). The extension isn't told
 				// to reload itself: an unpacked one that calls
@@ -523,7 +523,7 @@ func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 // browserStatus says whether the extension is connected, for the GUI.
 func (s *Server) browserStatus(w http.ResponseWriter, r *http.Request) {
 	if !local(r) || fromBrowser(r) {
-		http.Error(w, "Magpie Browser's state is told to this computer's magpie only", http.StatusForbidden)
+		http.Error(w, "eipgam Browser's state is told to this computer's eipgam only", http.StatusForbidden)
 		return
 	}
 	out := map[string]any{"connected": false, "version": browserext.Version()}
@@ -540,10 +540,10 @@ func (s *Server) browserMCP(w http.ResponseWriter, r *http.Request) {
 	// no web page's, whatever Settings lists; another computer's only with
 	// a gateway key, and then only that key's browsers (browserSession)
 	if fromBrowser(r) || (!local(r) && access.Caller(r.Context()).KeyID == "") {
-		http.Error(w, "magpie's browser MCP server answers agents on this computer, or with a gateway key", http.StatusForbidden)
+		http.Error(w, "eipgam's browser MCP server answers agents on this computer, or with a gateway key", http.StatusForbidden)
 		return
 	}
-	serveMCP(w, r, "magpie's browser", "magpie-browser", 1<<20, s.browserMCPCall)
+	serveMCP(w, r, "eipgam's browser", "eipgam-browser", 1<<20, s.browserMCPCall)
 }
 
 func (s *Server) browserMCPCall(r *http.Request, m mcpMessage) (any, map[string]any) {
@@ -552,7 +552,7 @@ func (s *Server) browserMCPCall(r *http.Request, m mcpMessage) (any, map[string]
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "magpie-browser", "title": "Magpie Browser", "version": Version},
+			"serverInfo":      map[string]any{"name": "eipgam-browser", "title": "eipgam Browser", "version": Version},
 			"instructions":    browserInstructions,
 		}, nil
 	case "ping":
@@ -610,7 +610,7 @@ func (s *Server) browserMCPCall(r *http.Request, m mcpMessage) (any, map[string]
 		}
 		var result map[string]any
 		if json.Unmarshal(out, &result) != nil || result["content"] == nil {
-			return toolResult("Magpie Browser answered with something that isn't a tool result: update it (magpie's Library → Magpie Browser)", true), nil
+			return toolResult("eipgam Browser answered with something that isn't a tool result: update it (eipgam's Library → eipgam Browser)", true), nil
 		}
 		// with two browsers connected, the list of tabs says whose they are
 		if p.Name == "browser_tabs" && (tabs.Action == "" || tabs.Action == "list") {
@@ -644,7 +644,7 @@ func (s *Server) browserMCPCall(r *http.Request, m mcpMessage) (any, map[string]
 }
 
 // browserOlder puts a word before result, once a connection, when the
-// extension is older than this magpie's: its folder has the new one, but
+// extension is older than this eipgam's: its folder has the new one, but
 // the browser runs what it loaded until the extension is reloaded or the
 // browser starts again, so the agent tells the user.
 func (s *Server) browserOlder(session string, result map[string]any) map[string]any {
@@ -652,11 +652,11 @@ func (s *Server) browserOlder(session string, result map[string]any) map[string]
 	if c == nil || !browserext.Older(c.version, browserext.Version()) || !c.told.CompareAndSwap(false, true) {
 		return result
 	}
-	how := "it is reloaded on chrome://extensions (edge://extensions in Edge): magpie has put the new one in its folder already"
+	how := "it is reloaded on chrome://extensions (edge://extensions in Edge): eipgam has put the new one in its folder already"
 	if c.key != "" {
-		how = "it is downloaded again from magpie's Library → Magpie Browser, unzipped over the old folder and reloaded on chrome://extensions (edge://extensions in Edge)"
+		how = "it is downloaded again from eipgam's Library → eipgam Browser, unzipped over the old folder and reloaded on chrome://extensions (edge://extensions in Edge)"
 	}
-	note := fmt.Sprintf("Tell the user: Magpie Browser in their browser is %s and magpie has %s, which the browser doesn't run until %s.", c.version, browserext.Version(), how)
+	note := fmt.Sprintf("Tell the user: eipgam Browser in their browser is %s and eipgam has %s, which the browser doesn't run until %s.", c.version, browserext.Version(), how)
 	content, _ := result["content"].([]any)
 	result["content"] = append([]any{map[string]any{"type": "text", "text": note}}, content...)
 	return result
@@ -704,7 +704,7 @@ func (b *browserRelay) list(session string) string {
 		return browserAway(session).Error()
 	}
 	mine := b.forSession(session)
-	lines := []string{fmt.Sprintf("%d browsers with Magpie Browser are connected (* is the one calls go to; browser_tabs with action use and browser picks another, by id or name):", len(all))}
+	lines := []string{fmt.Sprintf("%d browsers with eipgam Browser are connected (* is the one calls go to; browser_tabs with action use and browser picks another, by id or name):", len(all))}
 	for _, c := range all {
 		mark := " "
 		if c == mine {

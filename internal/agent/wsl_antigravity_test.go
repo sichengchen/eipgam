@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// A distro with no agent magpie sets up, only the data of the Antigravity
+// A distro with no agent eipgam sets up, only the data of the Antigravity
 // app connected to it from Windows (its language server runs there and
 // keeps ~/.gemini/antigravity in the distro; @guyng35955 on X), is kept,
 // so internal/sessions reads its conversations; one with neither isn't.

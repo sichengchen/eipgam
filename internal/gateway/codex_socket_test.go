@@ -15,7 +15,7 @@ import (
 	"github.com/coder/websocket"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // socketTurn is what a fake ChatGPT backend saw of one turn.
@@ -159,10 +159,10 @@ func wholeReply(socketTurn) []string {
 	}
 }
 
-// brickhao on Discord: a Codex turn through magpie that streams past
+// brickhao on Discord: a Codex turn through eipgam that streams past
 // about 120 s was cut ("stream closed before response.completed") on a
 // network that cuts chatgpt.com's long HTTP replies, while Codex's own
-// WebSocket to the same backend ran to the end. magpie now sends a
+// WebSocket to the same backend ran to the end. eipgam now sends a
 // streamed turn over the backend's WebSocket, as Codex does, and hands
 // Codex the same events, and the headers the HTTP route says, over HTTP.
 func TestCodexTurnGoesOverWebSocket(t *testing.T) {
@@ -204,7 +204,7 @@ func TestCodexTurnGoesOverWebSocket(t *testing.T) {
 			t.Errorf("%s: %q, want %q", k, got, want)
 		}
 	}
-	// magpie's own models are added to the backend's etag
+	// eipgam's own models are added to the backend's etag
 	if got := rec.Header().Get("x-models-etag"); !strings.HasPrefix(got, `W/"e9`) {
 		t.Errorf("x-models-etag %q, not the backend's", got)
 	}

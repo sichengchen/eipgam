@@ -96,7 +96,7 @@ func rowCodeFiles(t *testing.T, roots []string) []string {
 		return os.Open(exports[path])
 	})}
 	info := &types.Info{Uses: map[*ast.Ident]types.Object{}, Defs: map[*ast.Ident]types.Object{}}
-	pkg, err := conf.Check("github.com/yetone/magpie/internal/usage", fset, files, info)
+	pkg, err := conf.Check("github.com/sichengchen/eipgam/internal/usage", fset, files, info)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -127,7 +127,7 @@ func TestCommandsEachAgentsFile(t *testing.T) {
 }
 
 // Words by their place: $1 is the first. Claude Code counts from 0, so
-// it is $ARGUMENTS[0] there; OpenCode and Pi count from 1 as magpie does.
+// it is $ARGUMENTS[0] there; OpenCode and Pi count from 1 as eipgam does.
 // An agent with no such thing gets no file, and says why; one with no
 // description gets none in its file.
 func TestCommandsWordsByPlace(t *testing.T) {
@@ -178,7 +178,7 @@ func TestCommandsWordsByPlace(t *testing.T) {
 	if err := toml.Unmarshal([]byte(read(t, files["gemini"])), &cmd); err != nil || cmd["prompt"] != "Fix {{args}}.\n" {
 		t.Errorf("gemini: %#v %v", cmd, err)
 	}
-	// $1 again: magpie's Gemini file goes, for it would say the wrong thing
+	// $1 again: eipgam's Gemini file goes, for it would say the wrong thing
 	c.Prompt = "Fix $1."
 	if _, err := SaveCommand("fix", c); err != nil {
 		t.Fatal(err)
@@ -189,9 +189,9 @@ func TestCommandsWordsByPlace(t *testing.T) {
 }
 
 // A command file of the user's own by the same name is never written
-// over, nor taken away; one magpie wrote that the user edited is theirs
-// from then on; one that says what magpie would write is taken as
-// magpie's.
+// over, nor taken away; one eipgam wrote that the user edited is theirs
+// from then on; one that says what eipgam would write is taken as
+// eipgam's.
 func TestCommandsLeaveTheUsersFiles(t *testing.T) {
 	h := sandbox(t)
 	files := commandAgents(t, h, "review")
@@ -211,7 +211,7 @@ func TestCommandsLeaveTheUsersFiles(t *testing.T) {
 		t.Fatalf("the user's own file was written over:\n%s", read(t, files["claude"]))
 	}
 
-	// the user edits magpie's OpenCode file, then the command changes: the
+	// the user edits eipgam's OpenCode file, then the command changes: the
 	// edit stays, and the page is told why
 	edited := read(t, files["opencode"]) + "And style.\n"
 	write(t, files["opencode"], edited)
@@ -227,13 +227,13 @@ func TestCommandsLeaveTheUsersFiles(t *testing.T) {
 		t.Errorf("problems: %+v", res.Problems)
 	}
 	if read(t, files["pi"]) != "Review $ARGUMENTS, twice.\n" {
-		t.Errorf("magpie's file wasn't updated: %q", read(t, files["pi"]))
+		t.Errorf("eipgam's file wasn't updated: %q", read(t, files["pi"]))
 	}
 
-	// removed: magpie's own files go, the user's stay
+	// removed: eipgam's own files go, the user's stay
 	ok(t)(RemoveCommands([]string{"review"}))
 	if _, err := os.Stat(files["pi"]); !os.IsNotExist(err) {
-		t.Errorf("magpie's pi file stayed: %v", err)
+		t.Errorf("eipgam's pi file stayed: %v", err)
 	}
 	if read(t, files["opencode"]) != edited || read(t, files["claude"]) != mine {
 		t.Error("removing took the user's files")
@@ -274,7 +274,7 @@ func TestCommandCheck(t *testing.T) {
 }
 
 // Carried to another computer (a backup, WebDAV sync), the commands come
-// along; a bundle from a magpie before them keeps this computer's.
+// along; a bundle from a eipgam before them keeps this computer's.
 func TestCommandsCarried(t *testing.T) {
 	h := sandbox(t)
 	commandAgents(t, h, "review")

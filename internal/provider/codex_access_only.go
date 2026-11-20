@@ -1,11 +1,11 @@
 package provider
 
-// A ChatGPT account kept "access token only" (EastonXvii on X): magpie
+// A ChatGPT account kept "access token only" (EastonXvii on X): eipgam
 // sends its requests with the access token it was given and never
 // refreshes the sign-in. A refresh rotates the refresh token, and the
 // sign-in it came from (Codex on another computer, the tool the file was
 // exported from) is then signed out. Kept so, that one stays signed in,
-// and magpie uses the account until its access token runs out (about ten
+// and eipgam uses the account until its access token runs out (about ten
 // days for a Codex sign-in): from then on it is lapsed, passed over by the
 // gateway, and its row says to import it again or sign in to it again.
 //
@@ -25,12 +25,12 @@ import (
 
 // errCodexAccessOnlySwitch: Codex is never signed in to an account kept
 // access token only, which it would refresh.
-const errCodexAccessOnlySwitch = "%s is kept access token only: magpie's requests use it, but Codex itself isn't signed in to it, as Codex would renew its sign-in"
+const errCodexAccessOnlySwitch = "%s is kept access token only: eipgam's requests use it, but Codex itself isn't signed in to it, as Codex would renew its sign-in"
 
 // accessOnlyLapse is what an account kept access token only says once
 // its access token has run out, or ChatGPT turned it away.
 func accessOnlyLapse(user string) string {
-	return user + "'s access token has expired, and it is kept access token only, so magpie doesn't renew it — import it again, or sign in to it again"
+	return user + "'s access token has expired, and it is kept access token only, so eipgam doesn't renew it — import it again, or sign in to it again"
 }
 
 // accessOnlyExpired says the access token of the Codex sign-in auth has
@@ -64,7 +64,7 @@ func accessOnlyToken(user, lapsed string, a codexAuth, accountID string, force b
 	}
 	if stale == "" && !accessTokenRunOut(tok, time.Now()) {
 		if force {
-			return "", "", fmt.Errorf("%s is kept access token only: magpie doesn't renew its sign-in", user)
+			return "", "", fmt.Errorf("%s is kept access token only: eipgam doesn't renew its sign-in", user)
 		}
 		return tok, accountID, nil
 	}
@@ -77,7 +77,7 @@ func accessOnlyToken(user, lapsed string, a codexAuth, accountID string, force b
 }
 
 // SetLoginAccessOnly keeps a saved ChatGPT account access token only, or
-// lets magpie renew its sign-in again. The account Codex is signed in to,
+// lets eipgam renew its sign-in again. The account Codex is signed in to,
 // here or in another of its folders, can't be kept so: Codex renews it
 // itself as it runs.
 func SetLoginAccessOnly(agent, user string, on bool) error {

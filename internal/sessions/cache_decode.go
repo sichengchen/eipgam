@@ -14,7 +14,7 @@ import (
 )
 
 // decodeCache is the kept file b, in the binary form (cache_binary.go) or
-// as json.Unmarshal reads the JSON one an older magpie wrote, with the files
+// as json.Unmarshal reads the JSON one an older eipgam wrote, with the files
 // decoded on a few goroutines: one Unmarshal of a long history's 40MB took
 // 320 to 440ms of every start (#3493). False when b isn't valid JSON, is of
 // another version or zone, or a file's parse doesn't decode.

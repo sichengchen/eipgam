@@ -11,13 +11,13 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// A magpie window asks Windows for the foreground only when it is shown
+// A eipgam window asks Windows for the foreground only when it is shown
 // for the user. shangyuan0818 on X: after a restart to update by itself
-// (Settings → AutoRestart), magpie's taskbar button flashed orange while
+// (Settings → AutoRestart), eipgam's taskbar button flashed orange while
 // they were in another app. Wails activates every window as it makes it,
 // hidden ones too: the panel's frame change (Frameless) and the main
 // window's centring are SetWindowPos calls without SWP_NOACTIVATE. The
-// new magpie, started in the background by the old one, may not take the
+// new eipgam, started in the background by the old one, may not take the
 // foreground, and Windows answers that ask by flashing the button until
 // it is clicked; where it may, a hidden window took the keyboard from the
 // app the user was in. The main window a restart by itself brings back
@@ -89,7 +89,7 @@ func noActivateCBT(code int, wParam w32.WPARAM, lParam w32.LPARAM) w32.LRESULT {
 	return w32.CallNextHookEx(w32.HHOOK(noActivateHook.Load()), code, wParam, lParam)
 }
 
-// quietActivation says hwnd, about to be activated, is a magpie window
+// quietActivation says hwnd, about to be activated, is a eipgam window
 // that mustn't be: hidden, or being shown quietly. Wails' message-only
 // window (the tray's, which its menu brings forward) and its disabled
 // main-thread window are left alone.

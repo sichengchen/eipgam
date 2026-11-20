@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // ModelSystemPrompt is the system prompt the user gave provider pid's
@@ -43,7 +43,7 @@ func setModelSystemPrompt(ref, text string) (bool, error) {
 	text = strings.TrimSpace(text)
 	if text != "" {
 		if !p.serves(model) {
-			return false, fmt.Errorf("%s has no model %s (magpie provider %s lists them)", p.ID, model, p.ID)
+			return false, fmt.Errorf("%s has no model %s (eipgam provider %s lists them)", p.ID, model, p.ID)
 		}
 		if len(text) > maxModelSystemPrompt {
 			return false, fmt.Errorf("a model's system prompt is at most %d KB", maxModelSystemPrompt>>10)

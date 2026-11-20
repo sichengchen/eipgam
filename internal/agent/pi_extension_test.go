@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // piExtensionHome is a sandbox home with a provider that decides
@@ -38,18 +38,18 @@ type piExtensionData struct {
 	Images      []piExtensionModel `json:"images"`
 }
 
-// readPiExtension is the data in the extension magpie wrote at path.
+// readPiExtension is the data in the extension eipgam wrote at path.
 func readPiExtension(t *testing.T, path string) piExtensionData {
 	t.Helper()
 	src := readFile(path)
 	if !strings.HasPrefix(src, piExtensionMark) {
-		t.Fatalf("%s is not magpie's: %.200s", path, src)
+		t.Fatalf("%s is not eipgam's: %.200s", path, src)
 	}
-	_, rest, ok := strings.Cut(src, "const MAGPIE = ")
+	_, rest, ok := strings.Cut(src, "const EIPGAM = ")
 	line, _, _ := strings.Cut(rest, ";\n")
 	var d piExtensionData
 	if !ok || json.Unmarshal([]byte(line), &d) != nil {
-		t.Fatalf("no MAGPIE data in %s: %.400s", path, rest)
+		t.Fatalf("no EIPGAM data in %s: %.400s", path, rest)
 	}
 	return d
 }
@@ -64,9 +64,9 @@ func hasModel(ms []piExtensionModel, id string) (piExtensionModel, bool) {
 }
 
 // Pi's codemode reaches classifier and image models, which models.json
-// can't define (wangbinyq on Discord): picking a model of magpie's writes
-// extensions/magpie.ts with magpie's decision and image models, and
-// taking Pi off magpie removes it.
+// can't define (wangbinyq on Discord): picking a model of eipgam's writes
+// extensions/eipgam.ts with eipgam's decision and image models, and
+// taking Pi off eipgam removes it.
 func TestPiExtensionListsDecisionAndImageModels(t *testing.T) {
 	home := piExtensionHome(t)
 	a := pi(home)
@@ -78,7 +78,7 @@ func TestPiExtensionListsDecisionAndImageModels(t *testing.T) {
 	if d.BaseURL != here(home).v1() {
 		t.Errorf("baseUrl = %q, want %q", d.BaseURL, here(home).v1())
 	}
-	if want := mustGet(t, filepath.Join(a.Dir, "models.json"), "providers.magpie.apiKey"); d.APIKey != strings.Trim(want, `"`) {
+	if want := mustGet(t, filepath.Join(a.Dir, "models.json"), "providers.eipgam.apiKey"); d.APIKey != strings.Trim(want, `"`) {
 		t.Errorf("apiKey = %q, models.json's is %s", d.APIKey, want)
 	}
 	if _, ok := hasModel(d.Classifiers, "mixed/typesafe/jev"); !ok {
@@ -94,7 +94,7 @@ func TestPiExtensionListsDecisionAndImageModels(t *testing.T) {
 	if strings.Join(img.Input, ",") != "text,image" || img.Name != "GPT Image 2 · Art" {
 		t.Errorf("image model = %+v", img)
 	}
-	if !strings.Contains(readFile(path), `pi.registerProvider("magpie-systemone"`) || !strings.Contains(readFile(path), `"typesafe-system-one"`) {
+	if !strings.Contains(readFile(path), `pi.registerProvider("eipgam-systemone"`) || !strings.Contains(readFile(path), `"typesafe-system-one"`) {
 		t.Errorf("extension source: %.300s", readFile(path))
 	}
 
@@ -102,12 +102,12 @@ func TestPiExtensionListsDecisionAndImageModels(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Errorf("extension left after Pi went off magpie: %v", err)
+		t.Errorf("extension left after Pi went off eipgam: %v", err)
 	}
 }
 
-// The catalog sync rewrites the extension as magpie's models change, and
-// removes it once models.json has no provider magpie.
+// The catalog sync rewrites the extension as eipgam's models change, and
+// removes it once models.json has no provider eipgam.
 func TestPiExtensionFollowsSync(t *testing.T) {
 	home := piExtensionHome(t)
 	a := pi(home)
@@ -126,25 +126,25 @@ func TestPiExtensionFollowsSync(t *testing.T) {
 		t.Errorf("after the drawing provider went: %+v", d)
 	}
 	models := filepath.Join(a.Dir, "models.json")
-	if err := edit.DelJSON(models, "providers.magpie"); err != nil {
+	if err := edit.DelJSON(models, "providers.eipgam"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Errorf("extension left with no provider magpie: %v", err)
+		t.Errorf("extension left with no provider eipgam: %v", err)
 	}
 }
 
-// A magpie.ts the user wrote themselves is theirs: never written over,
+// A eipgam.ts the user wrote themselves is theirs: never written over,
 // never removed.
 func TestPiExtensionLeavesTheUsersOwn(t *testing.T) {
 	home := piExtensionHome(t)
 	a := pi(home)
 	path := piExtensionPath(a.Dir)
 	os.MkdirAll(filepath.Dir(path), 0o755)
-	own := "// my own magpie helpers\nexport default function (pi) {}\n"
+	own := "// my own eipgam helpers\nexport default function (pi) {}\n"
 	os.WriteFile(path, []byte(own), 0o644)
 	if err := a.Field("model").Set(magpieID + "/mixed/deepseek-v4.1-flash"); err != nil {
 		t.Fatal(err)

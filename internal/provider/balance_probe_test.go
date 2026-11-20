@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/sichengchen/eipgam/internal/agentenv"
 )
 
 func probeSandbox(t *testing.T) {
@@ -130,7 +130,7 @@ func TestHandAddedRelayWithNoBalance(t *testing.T) {
 }
 
 // What is never looked at: a provider with its own Balance URL or a
-// preset, a host magpie knows, a model vendor's own API, this computer.
+// preset, a host eipgam knows, a model vendor's own API, this computer.
 func TestBalanceProbeLeavesOthersAlone(t *testing.T) {
 	for _, p := range []Provider{
 		{Chat: "https://relay.example.com/v1", Key: "k", BalanceURL: "https://relay.example.com/x"},

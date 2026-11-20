@@ -7,7 +7,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // kindDecision is the kind of model OpenAI's Decisions API is asked of
@@ -44,14 +44,14 @@ func (s *Server) decide(w http.ResponseWriter, r *http.Request) {
 	var asked string
 	json.Unmarshal(req["model"], &asked)
 	if asked == "" {
-		writeError(w, provider.Chat, 400, "name the model: \"model\" is a magpie model id, as /v1/models lists them (OpenAI's Decisions API takes gpt-6-luna)")
+		writeError(w, provider.Chat, 400, "name the model: \"model\" is a eipgam model id, as /v1/models lists them (OpenAI's Decisions API takes gpt-6-luna)")
 		return
 	}
 	// a decision model that answers System One, not this API (Bailian's
 	// decision-model-preview, Ark's, a Jev, a Clef, a plugin's, or a
 	// group of them): asked there, the request and its answer
 	// translated (decisions_systemone.go). One that serves this API
-	// itself (another magpie) is asked here, as it was.
+	// itself (another eipgam) is asked here, as it was.
 	if ts, ok := systemOneTargets(asked); ok && !slices.ContainsFunc(ts, func(t systemOneTarget) bool { return canDecide(t.p) }) {
 		s.decideBySystemOne(w, r, req, asked, ts)
 		return
@@ -68,7 +68,7 @@ func (d *decisionRequest) refuses(p provider.Provider) string {
 	if canDecide(p) {
 		return ""
 	}
-	return fmt.Sprintf("%s can't serve OpenAI's Decisions API (/v1/decisions): only an OpenAI API key, Azure OpenAI and another magpie serve it", p.Name)
+	return fmt.Sprintf("%s can't serve OpenAI's Decisions API (/v1/decisions): only an OpenAI API key, Azure OpenAI and another eipgam serve it", p.Name)
 }
 
 // counted is what the answer's usage says: input_tokens has the cached
@@ -94,7 +94,7 @@ func (d *decisionRequest) counted(b []byte) Usage {
 
 // canDecide is whether p can serve OpenAI's Decisions API: OpenAI's own
 // API with a key (a ChatGPT sign-in's backend has no such route), Azure
-// OpenAI, which serves it on its v1 API, or another magpie, which routes
+// OpenAI, which serves it on its v1 API, or another eipgam, which routes
 // it on. A relay or a plugin, whatever models it lists, is none.
 func canDecide(p provider.Provider) bool {
 	if p.IsPlugin() {
@@ -109,7 +109,7 @@ func canDecide(p provider.Provider) bool {
 // servesDecision is servesKind's for the Decisions API: a provider that
 // can serve it with the model on its list, or an OpenAI key asked for a
 // model the API takes. Azure's ids are its deployments' and another
-// magpie's are its own, so each has the model when its list says so.
+// eipgam's are its own, so each has the model when its list says so.
 func servesDecision(p provider.Provider, model string) bool {
 	if !canDecide(p) {
 		return false

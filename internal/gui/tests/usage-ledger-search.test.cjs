@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// magpie's ask of a search API for an agent's web search (cybercaius on
+// eipgam's ask of a search API for an agent's web search (cybercaius on
 // Discord: which search API a search used couldn't be seen) is a row of
 // the Requests tab: a "Search API" badge, the API's name where the model
 // asked for is, its host and masked key, how long it took and whether it
@@ -52,7 +52,7 @@ function server(lang, theme, called, asked) {
     if (url.pathname === "/api/usage/requests") { asked.push(url.searchParams); return json(page(url.searchParams, called)); }
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/archive") return json(`${url.searchParams.get("date")}/${url.searchParams.get("id")}` === KEPT ? ARCHIVED : { error: "not found" });
-    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/eipgam/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       p.setDefaultNavigationTimeout(60000);
       p.on("pageerror", (e) => errors.push(e.message));
       await p.route("**/*", server(lang, theme, called, asked));
-      await p.goto("http://magpie.test/");
+      await p.goto("http://eipgam.test/");
       await p.locator('[data-view="usage"]').first().click();
       await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       await p.locator("#ledVia .blk").first().waitFor();

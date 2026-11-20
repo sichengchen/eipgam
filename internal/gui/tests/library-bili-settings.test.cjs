@@ -6,7 +6,7 @@
 // compress.visibilityMarkers) under Advanced, folded until opened. Each change posts only
 // what changed to /api/library/bili/settings, and the status says whether
 // the running billion-context reloaded it. The model is picked from the
-// app's menu (never a <select>): magpie's models and the file's own
+// app's menu (never a <select>): eipgam's models and the file's own
 // recipes. A file billion-context can't read is said so, with nothing to
 // change. Every language, Chromium and WebKit, 1100 and 420 wide, nothing
 // sideways. No backend: the API is faked here.
@@ -20,7 +20,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = () => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.eipgam/library`, backups: `${HOME}/.eipgam/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("pi", "Pi")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 });
@@ -53,7 +53,7 @@ function server(lang, st) {
       st.posts.push(c);
       if ("growth" in c) st.growth = c.growth;
       if ("nudge" in c) st.nudge = c.nudge;
-      if ("model" in c) st.targets = ["magpie/" + c.model, ...st.targets.filter((x) => x !== "magpie/" + c.model)];
+      if ("model" in c) st.targets = ["eipgam/" + c.model, ...st.targets.filter((x) => x !== "eipgam/" + c.model)];
       if ("target" in c) st.targets = [c.target, ...st.targets.filter((x) => x !== c.target)];
       if ("summary" in c) st.summary = c.summary;
       if ("philosophy" in c) st.philosophy = c.philosophy;
@@ -77,7 +77,7 @@ const RELOADED = "Saved — the running billion-context uses it now";
 
 async function open(page, lang, st) {
   await page.route("**/*", server(lang, st));
-  await page.goto("http://magpie.test/");
+  await page.goto("http://eipgam.test/");
   await page.locator('button[data-view="library"]').click();
   const tabs = page.locator(":is(#view-library .lib-tabs .opt, .nav-s):visible");
   await tabs.first().waitFor();
@@ -125,10 +125,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const sum = rows.nth(0).locator(".lib-switch");
         assert(await sum.isDisabled(), "summary switch works with no model");
 
-        // a model of magpie's: picked and switched on in one go
+        // a model of eipgam's: picked and switched on in one go
         await rows.nth(0).locator(".lib-bili-model").click();
         const items = page.locator(".proto-menu .pm-item");
-        assert.equal(await items.count(), 3, "magpie's two models and the file's recipe");
+        assert.equal(await items.count(), 3, "eipgam's two models and the file's recipe");
         await page.locator(".proto-menu .pm-item", { hasText: "GPT-5.4 mini" }).click();
         await page.waitForFunction(() => document.querySelector("#view-library .lib-bili-set .lib-switch")?.getAttribute("aria-checked") === "true");
         assert.deepEqual(st.posts.at(-1), { model: "gpt-5.4-mini", summary: true });

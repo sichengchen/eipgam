@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/memory"
+	"github.com/sichengchen/eipgam/internal/memory"
 )
 
 // Memory in sync: what one computer's agents learned is known on the
@@ -64,7 +64,7 @@ func TestSyncMemory(t *testing.T) {
 	}
 	now(t)
 	fake.mu.Lock()
-	sealed := string(fake.files["/dav/magpie/magpie.magpie-backup"])
+	sealed := string(fake.files["/dav/eipgam/eipgam.eipgam-backup"])
 	fake.mu.Unlock()
 	if strings.Contains(sealed, "Replies in Chinese") {
 		t.Fatal("a memory on the server in the clear")

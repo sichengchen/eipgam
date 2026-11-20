@@ -16,15 +16,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // The gateway knows each agent's requests by what this package says of it.
@@ -41,7 +41,7 @@ func init() {
 	sessions.WSLRunning = WSLRunning
 	sessions.WSLListed = wslAnswered
 	sessions.WSLOff = func() bool { return !wslLooks() }
-	// an agy conversation started on magpie's gateway is picked up again
+	// an agy conversation started on eipgam's gateway is picked up again
 	// there, with the variables and --model it was started with
 	sessions.AgyStart = func() string {
 		if a, _ := FindIn(local(), "agy"); a != nil && a.Launch != nil {
@@ -51,7 +51,7 @@ func init() {
 	}
 	// a Copilot CLI signed in inside a running distro (#723)
 	provider.CopilotWSLDirs = copilotWSLDirs
-	// the Codex app's app-server is restarted when magpie becomes Codex's
+	// the Codex app's app-server is restarted when eipgam becomes Codex's
 	// provider for its used-up ChatGPT account, and when it stops being it;
 	// and when Codex is connected or disconnected, or its route otherwise
 	// changes, so a running app sends where its config now says
@@ -62,7 +62,7 @@ func init() {
 	provider.CodexNoAccount = codexNoAccount
 	// and whether the takeover was turned off by the user rather than
 	// ended by the reset (Keep on ChatGPT, Always ChatGPT, a Disconnect)
-	// and when magpie's list is named for the Codex app after its
+	// and when eipgam's list is named for the Codex app after its
 	// app-servers started, which list Codex's models alone till then
 	provider.CodexAppDesk = func() time.Time {
 		home, _ := homes()
@@ -83,8 +83,8 @@ func init() {
 	provider.CodexAppReopen = codexAppReopen
 	provider.CodexAppCrashed = codexAppCrashed
 	provider.CodexAppRelaunch = codexAppRelaunch
-	// and what the Codex app holds is read while Codex takes magpie's
-	// models beside its sign-in, Codex switched off in magpie or not
+	// and what the Codex app holds is read while Codex takes eipgam's
+	// models beside its sign-in, Codex switched off in eipgam or not
 	// Claude Code's own sign-in is left where the user put it while its
 	// requests go through the gateway, which moves them to an account with
 	// room by itself (oreoft on Discord)
@@ -101,28 +101,28 @@ func init() {
 }
 
 // codexAppRoute is where Codex's config sends it, as the app-server reads
-// it at its start: the keys magpie writes for that, never one the Codex
-// app writes itself (model, model_reasoning_effort); and whether magpie
+// it at its start: the keys eipgam writes for that, never one the Codex
+// app writes itself (model, model_reasoning_effort); and whether eipgam
 // is Codex's provider for its used-up ChatGPT account (AppOut). Not known
 // when Codex's config can't be read.
 //
 // The model list (model_catalog_json, the file and what it holds) is not
 // in it. A change of route ends the app's app-server, and the ChatGPT app
-// takes that as a crash and relaunches. The catalog follows magpie's names
+// takes that as a crash and relaunches. The catalog follows eipgam's names
 // and the effort new sessions start at, which the app saves on each pick,
 // so a route that hashed it ended the app every few minutes
 // (indekkusu141209 on X, #4550). A new list is read at the app's next
 // launch, and the Agents row offers a Restart for it (StaleCopies). The
 // list named where none was is another matter (CodexAppDesk).
 func codexAppRoute() (route string, out, known bool) {
-	// asked every 3s for as long as magpie runs: the config looked at once
+	// asked every 3s for as long as eipgam runs: the config looked at once
 	// for its keys, not once for each (#1665)
 	defer filememo.Hold()()
 	home, _ := homes()
 	a := codex(home)
 	// opened, not read: a config.toml of 1.5 MB (Codex keeps every
 	// project's trust level in it) read whole every 3s was 1.55 GB of a
-	// live magpie's 33 GB in 53 minutes; the keys below come from filememo
+	// live eipgam's 33 GB in 53 minutes; the keys below come from filememo
 	if f, err := os.Open(a.Path); err == nil {
 		f.Close()
 	} else if !errors.Is(err, fs.ErrNotExist) {
@@ -139,8 +139,8 @@ func codexAppRoute() (route string, out, known bool) {
 		b.WriteString(k + "=" + v + "\n")
 	}
 	t, _ := edit.GetTOMLTable(a.Path, "model_providers."+magpieID)
-	b.WriteString("magpie.base_url=" + t["base_url"] + "\n")
-	// and, while magpie's table is Codex's provider, whether it requires
+	b.WriteString("eipgam.base_url=" + t["base_url"] + "\n")
+	// and, while eipgam's table is Codex's provider, whether it requires
 	// OpenAI auth, which decides whether the app has its ChatGPT account
 	// at all (openaiAuth in codex.go): read as the app-server starts, like
 	// the rest. The app-server reads the account of the provider Codex is
@@ -151,7 +151,7 @@ func codexAppRoute() (route string, out, known bool) {
 	// at the reset, and the ChatGPT app showed an error and relaunched
 	// each time (xiaoq6285 on Discord, #4550)
 	if mp == magpieID {
-		b.WriteString("magpie.requires_openai_auth=" + t["requires_openai_auth"] + "\n")
+		b.WriteString("eipgam.requires_openai_auth=" + t["requires_openai_auth"] + "\n")
 	}
 	if out {
 		b.WriteString("out\n")
@@ -161,8 +161,8 @@ func codexAppRoute() (route string, out, known bool) {
 
 // codexNoAccount is whether the provider Codex's config.toml names takes
 // no ChatGPT account: a model_provider whose [model_providers] table
-// doesn't say requires_openai_auth = true (magpie's with the user's own
-// false, or magpie as the provider with no sign-in to keep). Codex then
+// doesn't say requires_openai_auth = true (eipgam's with the user's own
+// false, or eipgam as the provider with no sign-in to keep). Codex then
 // sends the table's own key and its app-server reads no account
 // (codex-rs ModelProviderInfo::account_state, resolve_provider_auth), so
 // switching the account in auth.json changes nothing a running Codex
@@ -190,10 +190,10 @@ func codexNoAccount() bool {
 	return t["requires_openai_auth"] != "true"
 }
 
-// others are clients that reach the gateway without being agents magpie
+// others are clients that reach the gateway without being agents eipgam
 // sets up: known only by their requests, to be drawn with a logo.
 var others = []*Agent{
-	{ID: "magpie", Name: "magpie", Icon: "magpie", UA: []string{"magpie"}},
+	{ID: "eipgam", Name: "eipgam", Icon: "eipgam", UA: []string{"eipgam"}},
 	{ID: "curl", Name: "curl", Icon: "curl", UA: []string{"curl"}},
 	// PI-Desktop (vastsa/PI-Desktop) runs Pi's own library, which says
 	// "pi (…)"; given a User-Agent of its own in its provider's settings
@@ -210,12 +210,12 @@ var others = []*Agent{
 	// DimCode (dimcode.dev) says "DimCode/<version>", or "DimAgent/<version>"
 	// to a provider set to send its identity (npm's dimagent 0.5.29,
 	// resolveDimOAuthIdentityHeaders). It is arcships' own app, apart from
-	// the Dim alpha magpie starts (dim.go); dimcode.dev's favicon is the
+	// the Dim alpha eipgam starts (dim.go); dimcode.dev's favicon is the
 	// same mark as dim-color. Unknown, it read as the cube and "DimAgent"
-	// on a Docker magpie's Routing page (Yayoi_no_yume on X)
+	// on a Docker eipgam's Routing page (Yayoi_no_yume on X)
 	{ID: "dimcode", Name: "DimCode", Icon: "dim-color", UA: []string{"dimagent", "dimcode"}},
 	// Kimi Code Desktop runs Kimi Code's engine on ~/.kimi-code, so it
-	// reaches magpie through Kimi Code's config, under a client name of
+	// reaches eipgam through Kimi Code's config, under a client name of
 	// its own ("kimi-code-desktop/…", jiabubu on Discord). Its icon is the
 	// app's own, from KimiCode-1.2.1-win-x64.exe's build/icon.ico.
 	{ID: "kimi-code-desktop", Name: "Kimi Code Desktop", Icon: "kimi-code-desktop", UA: []string{"kimi-code-desktop"}},
@@ -223,7 +223,7 @@ var others = []*Agent{
 	// Sessions lists those as Raft's (internal/sessions/raft.go), while
 	// their requests say "pi (…)" and are Pi's
 	{ID: "raft", Name: "Raft", Icon: "generic"},
-	// Magpie Memory reading conversations into memories: its requests are
+	// eipgam Memory reading conversations into memories: its requests are
 	// made as memdistill.Agent, by its token and never a User-Agent, and
 	// drawn with the brain the Library's Memory tab has (the owner, 11-12)
 	{ID: "memory", Name: "Memory", Icon: "memory"},
@@ -252,7 +252,7 @@ func ClientsIn(all []*Agent) []*Agent {
 	return append(out, others...)
 }
 
-// All returns every agent magpie knows about, detected or not: its own,
+// All returns every agent eipgam knows about, detected or not: its own,
 // then those plugins add.
 func All() []*Agent {
 	home, cfg := homes()
@@ -282,13 +282,13 @@ func homes() (home, cfg string) {
 	return home, cfg
 }
 
-// builtins are the agents magpie has wiring of its own for.
+// builtins are the agents eipgam has wiring of its own for.
 func builtins(home, cfg string) []*Agent {
 	return append(onMachine(home, cfg), wslAgents()...)
 }
 
 // local is All() without the agents in WSL distros, which wsl.exe is asked
-// for: what start-up moves look in, on every command, `magpie version`
+// for: what start-up moves look in, on every command, `eipgam version`
 // too, and the moves came before WSL agents. A wsl.exe that hangs held each
 // command 20s, its two listings' timeouts.
 func local() []*Agent {
@@ -298,7 +298,7 @@ func local() []*Agent {
 }
 
 // Starter is the agent on this machine typed as q, by its id or an alias
-// (no prefix: every argument after it is the agent's), that magpie starts
+// (no prefix: every argument after it is the agent's), that eipgam starts
 // from the command line (Agent.Start); nil for none.
 func Starter(q string) *Agent {
 	for _, a := range local() {
@@ -359,7 +359,7 @@ func jsonSet(path, key string) func(string) error {
 	}
 }
 
-// usesMagpie reports whether any of the values is a magpie/… reference.
+// usesMagpie reports whether any of the values is a eipgam/… reference.
 func usesMagpie(vals ...string) bool {
 	for _, v := range vals {
 		if strings.HasPrefix(v, magpieID+"/") {
@@ -369,12 +369,12 @@ func usesMagpie(vals ...string) bool {
 	return false
 }
 
-// prefixed is an agent's Spelled whose values of magpie's are all
-// magpie/<ref>, as its provider/model names them.
+// prefixed is an agent's Spelled whose values of eipgam's are all
+// eipgam/<ref>, as its provider/model names them.
 func prefixed(v string) bool { return strings.HasPrefix(v, magpieID+"/") }
 
-// openCodeSpelled is the Spelled of an OpenCode config at path: magpie's
-// provider, or one of the file's own that sends to magpie's gateway (v1),
+// openCodeSpelled is the Spelled of an OpenCode config at path: eipgam's
+// provider, or one of the file's own that sends to eipgam's gateway (v1),
 // as openCodeRef names a model there.
 func openCodeSpelled(path string, v1 func() string) func(string) bool {
 	return func(v string) bool {
@@ -525,7 +525,7 @@ func ownProvider(native func(p string) []catalog.Model, p string) []Option {
 	for i := range opts {
 		opts[i].GroupIcon = ic
 		// asked of the vendor on the agent's own sign-in or key: picked on
-		// a connected agent it takes the agent off magpie, which the
+		// a connected agent it takes the agent off eipgam, which the
 		// picker says and asks first (maxleebeta: Pi's own OpenCode Go
 		// model turned 「接入」 off, with nothing said)
 		opts[i].Direct = name
@@ -542,7 +542,7 @@ func magpieProviderJSON(shape string) any {
 
 // magpieProviderJSONFor is magpieProviderJSON for an agent whose catalog is
 // narrowed under a different id than its config shape (mimocode shares
-// OpenCode's shape but is seen as itself by magpie visible).
+// OpenCode's shape but is seen as itself by eipgam visible).
 func magpieProviderJSONFor(shape, catalog string) any {
 	return magpieProviderJSONAt(shape, catalog, gateway.URL())
 }
@@ -613,7 +613,7 @@ func magpieProviderJSONAt(shape, catalog, gw string) any {
 				e["modalities"] = map[string]any{"input": in, "output": []string{"text"}}
 			}
 			// without it OpenCode doesn't know when to compact, and a
-			// group's context (magpie group set … context=) never reaches
+			// group's context (eipgam group set … context=) never reaches
 			// it; an output of 0 is OpenCode's own default
 			if m.Context > 0 {
 				e["limit"] = openCodeLimit(m)
@@ -637,7 +637,7 @@ func magpieProviderJSONAt(shape, catalog, gw string) any {
 		// OpenCode 1 its camelCase promptCacheKey (the gateway's
 		// cacheKeyCamel), and 2.0.25 leaves it be. A setCacheKey of the
 		// user's own stays (openCodeKept)
-		return map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "magpie",
+		return map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "eipgam",
 			"options": map[string]any{"baseURL": gw + "/v1", "apiKey": openCodeKeyAt(catalog, gw), "setCacheKey": true}, "models": ms}
 	case "crush":
 		var ms []map[string]any
@@ -649,7 +649,7 @@ func magpieProviderJSONAt(shape, catalog, gw string) any {
 			// without it Crush caps every reply at 16384 tokens, a model
 			// that can write more of them never asked for it; an output
 			// above the window is cut to it, as it is for every other
-			// agent magpie hands a limit to
+			// agent eipgam hands a limit to
 			tokens := maxTokens(m)
 			if tokens == 0 {
 				tokens = 16384
@@ -671,14 +671,14 @@ func magpieProviderJSONAt(shape, catalog, gw string) any {
 		if ms == nil {
 			ms = []map[string]any{}
 		}
-		return map[string]any{"type": "openai", "name": "magpie", "base_url": gw + "/v1", "api_key": keyAt(gw), "models": ms}
+		return map[string]any{"type": "openai", "name": "eipgam", "base_url": gw + "/v1", "api_key": keyAt(gw), "models": ms}
 	case "pi":
 		return piProviderOn(catalog, models, gw, "")
 	}
 	return nil
 }
 
-// piBlockKept is theirsKept for magpie's provider in a Pi models.json at
+// piBlockKept is theirsKept for eipgam's provider in a Pi models.json at
 // path, where a sendSessionAffinityHeaders the file already has, the
 // user's own or pi-cache-optimizer's (#1103), stays as it is, as does a
 // model's maxTokens the user typed there (piOutputsKept), and an api they
@@ -703,11 +703,11 @@ func piBlockKept(path string, value func() any) func() any {
 	}, "models")
 }
 
-// openCodeKept is theirsKept for magpie's provider in an OpenCode config at
-// path: magpie's models are its own, written whole, but a variant the user
-// put on one of them stays (#2379), where it is or after magpie's, and one
-// they wrote over under a name of magpie's stays theirs. A variant as magpie
-// writes it under its name is magpie's: one the model has no longer, a
+// openCodeKept is theirsKept for eipgam's provider in an OpenCode config at
+// path: eipgam's models are its own, written whole, but a variant the user
+// put on one of them stays (#2379), where it is or after eipgam's, and one
+// they wrote over under a name of eipgam's stays theirs. A variant as eipgam
+// writes it under its name is eipgam's: one the model has no longer, a
 // level gone or a fast mode lost, goes.
 //
 // A setCacheKey the file has already is the user's, false too (#5468), and
@@ -762,7 +762,7 @@ func openCodeKept(path string, value func() any) func() any {
 	}, "models")
 }
 
-// withoutOption is magpie's provider block v without key in its object
+// withoutOption is eipgam's provider block v without key in its object
 // under in, for a value the user set there themselves: a copy, so a block
 // another writer holds is left as it was; in goes when nothing else is in it.
 func withoutOption(v any, in, key string) any {
@@ -825,7 +825,7 @@ func objectPairs(raw []byte) orderedJSON {
 //     same. OmO's and Prime Agent's folders are their own, and keep it.
 //   - mu (mu.go) is Pi 1.4.0 itself, and its desktop app runs that Pi on
 //     the same folder through a host of its own (desktop/scripts/kyrn,
-//     qybaihe/mu b71cd18) that magpie hasn't tried with Gemini's API, so
+//     qybaihe/mu b71cd18) that eipgam hasn't tried with Gemini's API, so
 //     it goes the way Pi's folder does.
 func piAsked(agentID string, m catalog.Model) catalog.Model {
 	if agentID == "stepcode" || agentID == "pi" || agentID == "mu" {
@@ -834,7 +834,7 @@ func piAsked(agentID string, m catalog.Model) catalog.Model {
 	return m
 }
 
-// piModelJSON is one of magpie's models as an entry of Pi's models.json.
+// piModelJSON is one of eipgam's models as an entry of Pi's models.json.
 // native selects the model's preferred gateway API (its own api and
 // baseUrl); without it the model is left on the provider's
 // openai-completions (Pencil, pencil.go).
@@ -850,7 +850,7 @@ func piModelJSON(m catalog.Model, gw string, native bool) map[string]any {
 func piModelOn(m catalog.Model, gw string, native bool, on string) map[string]any {
 	// reasoning lets Pi offer its thinking levels for the model: as
 	// /v1/models says it (provider.Entry.Thinks), so one that thinks with
-	// no levels magpie knows (Trae CN's kimi-k3-max, #2380) is offered
+	// no levels eipgam knows (Trae CN's kimi-k3-max, #2380) is offered
 	// Pi's own off to high, which the gateway fits to the model, where
 	// it had off alone
 	e := map[string]any{"id": m.ID, "name": m.Name, "reasoning": m.Reasoning || len(m.Efforts) > 0}
@@ -947,7 +947,7 @@ func piModelOn(m catalog.Model, gw string, native bool, on string) map[string]an
 
 // piPromptCache is how long, in seconds, the vendor keeps a model's prompt
 // cache for each of Pi's retention tiers, at the short end of what it
-// publishes; nil where magpie doesn't relay Pi's request as it is, or the
+// publishes; nil where eipgam doesn't relay Pi's request as it is, or the
 // vendor's lifetime isn't known. Claude on Anthropic's Messages API keeps
 // one 5 minutes, or an hour asked with a 1h cache_control (Pi's long); GPT
 // on OpenAI's Responses API keeps one in memory 5 to 10 minutes, and only
@@ -966,7 +966,7 @@ func piPromptCache(api any, id string) map[string]any {
 }
 
 // openCodeVariants are the reasoning levels OpenCode offers for a model of
-// magpie's, each asking the gateway for that effort as reasoning_effort
+// eipgam's, each asking the gateway for that effort as reasoning_effort
 // (@ai-sdk/openai-compatible's reasoningEffort). OpenCode 1.x offers none
 // for a model the config doesn't mark as reasoning, and adds these. OpenCode
 // 2 makes low, medium and high for every model of an openai-compatible
@@ -1006,7 +1006,7 @@ func openCodeVariants(efforts []string, fast bool) orderedJSON {
 // openCodeFast is the name of a fast variant, alone or after a level's.
 const openCodeFast = "fast"
 
-// openCodeVariant is the variant magpie writes under name: a level asked as
+// openCodeVariant is the variant eipgam writes under name: a level asked as
 // reasoning_effort (@ai-sdk/openai-compatible's reasoningEffort, which
 // OpenCode 2 reads too), and a fast one asks for priority processing too,
 // in the words Codex's /fast sends it: service_tier "priority". Each
@@ -1036,11 +1036,11 @@ func openCodeVariant(name string) map[string]any {
 	return v
 }
 
-// openCodeReasons is whether a model of magpie's is marked reasoning in
+// openCodeReasons is whether a model of eipgam's is marked reasoning in
 // opencode.json, which OpenCode 1 shows as 支持推理 in its model tooltip
 // and takes for a model that thinks (#725: OpenCode Zen's
 // mimo-v2.6-flash-free, which thinks with no levels to pick, said 不支持推理
-// through magpie where it says it reasons under OpenCode's own Zen). OpenCode
+// through eipgam where it says it reasons under OpenCode's own Zen). OpenCode
 // 1 also adds low, medium and high of its own to the variants of a reasoning
 // model (ProviderTransform.variants; checked with 1.18.34), so one with levels
 // is marked only when it has those three, else it would be offered levels it
@@ -1122,7 +1122,7 @@ func modelEffort(efforts []string, level string) string {
 // off is left out, for Pi to offer as before. Another vendor's model there
 // keeps off hidden: without none it always thinks, and ZCode's
 // GLM-5.3-Flash turned Pi's off away ("该模型始终支持思考，不可关闭", #699),
-// as a level left out is one Pi offers. A model whose levels magpie doesn't
+// as a level left out is one Pi offers. A model whose levels eipgam doesn't
 // know gets no map: Pi's own defaults, as before.
 func piThinkingLevels(efforts []string, claudeOff bool) map[string]any {
 	if len(efforts) == 0 {
@@ -1171,7 +1171,7 @@ func openCodeLike(at place, id, name, icon, bin, dir, auth string, ua []string, 
 		}
 	}
 	get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
-	// whether a model the file names is one of magpie's: magpie's
+	// whether a model the file names is one of eipgam's: eipgam's
 	// provider has to stay
 	onMagpie := func() bool {
 		return usesMagpie(get("model"), file().small())
@@ -1218,7 +1218,7 @@ func openCodeLike(at place, id, name, icon, bin, dir, auth string, ua []string, 
 		},
 		ListOnly: true,
 		Sync: func() error {
-			// a model of magpie's chosen, but its provider gone from the
+			// a model of eipgam's chosen, but its provider gone from the
 			// file: put it back, or the agent has nothing to send it to
 			return file().sync(onMagpie())
 		},
@@ -1255,9 +1255,9 @@ func openCodeRefAt(at place, path, id, v string) (string, error) {
 }
 
 // ownGatewayProvider is the provider in an OpenCode config, other than
-// magpie's own, whose baseURL is magpie's gateway (v1, as the agent reaches
+// eipgam's own, whose baseURL is eipgam's gateway (v1, as the agent reaches
 // it) and that lists the model ref, as a layout of one provider per family
-// of magpie's models has; "" when there is none. A provider under
+// of eipgam's models has; "" when there is none. A provider under
 // providers is read as OpenCode 2 reads it, before the same name under
 // provider (openCodeBaseURL).
 func ownGatewayProvider(path, ref, v1 string) string {
@@ -1306,7 +1306,7 @@ func ownGatewayProvider(path, ref, v1 string) string {
 	return ""
 }
 
-// sameGateway reports whether a base URL is magpie's gateway's (v1), its
+// sameGateway reports whether a base URL is eipgam's gateway's (v1), its
 // host spelled 127.0.0.1 or localhost.
 func sameGateway(base, v1 string) bool {
 	norm := func(u string) string {
@@ -1334,7 +1334,7 @@ func opencodeIn(at place) *Agent {
 // openCodeDir is the folder OpenCode reads its user config from:
 // $OPENCODE_CONFIG_DIR when set, else $XDG_CONFIG_HOME/opencode (cfg).
 // OpenCode 2, the one OpenChamber bundles (#321), reads that folder in place
-// of the other; OpenCode 1 reads both, the variable's last, so what magpie
+// of the other; OpenCode 1 reads both, the variable's last, so what eipgam
 // writes there wins in either.
 func openCodeDir(cfg string) string {
 	if d := strings.TrimSpace(appdir.Getenv("OPENCODE_CONFIG_DIR")); d != "" {
@@ -1358,7 +1358,7 @@ func piIn(at place) *Agent {
 
 // piDir is Pi's agent folder at a place: PI_CODING_AGENT_DIR's when set,
 // "~" in it standing for home, else ~/.pi/agent (config.js, getAgentDir).
-// A relative one is Pi's working directory's, which magpie can't know, so
+// A relative one is Pi's working directory's, which eipgam can't know, so
 // it is not taken; nor this machine's variable for a WSL distro's Pi.
 func piDir(at place) string {
 	if at.spell == nil {
@@ -1381,8 +1381,8 @@ func homeDir(home, d string) string {
 	return filepath.Clean(d)
 }
 
-// beforeMagpie is a copy of an agent's own files taken before magpie first
-// writes them (file.before-magpie beside each), which Disconnect puts back
+// beforeMagpie is a copy of an agent's own files taken before eipgam first
+// writes them (file.before-eipgam beside each), which Disconnect puts back
 // byte for byte when what it left says the same as the copy: the same
 // JSON, in the user's own order, spacing and comments-free layout. Where
 // they differ (the user changed something while connected), what
@@ -1401,14 +1401,14 @@ func (b beforeMagpie) take() {
 		raw, err := os.ReadFile(f)
 		switch {
 		case err == nil:
-			if edit.WriteAtomic(f+".before-magpie", raw) != nil {
-				os.Remove(f + ".before-magpie")
+			if edit.WriteAtomic(f+".before-eipgam", raw) != nil {
+				os.Remove(f + ".before-eipgam")
 			}
 		case errors.Is(err, fs.ErrNotExist):
-			os.Remove(f + ".before-magpie")
+			os.Remove(f + ".before-eipgam")
 			gone = append(gone, filepath.Base(f))
 		default:
-			os.Remove(f + ".before-magpie")
+			os.Remove(f + ".before-eipgam")
 		}
 	}
 	stash(map[string]string{b.absent: strings.Join(gone, "\n")})
@@ -1420,21 +1420,21 @@ func (b beforeMagpie) restore() error {
 	for _, f := range b.files {
 		cur, err := os.ReadFile(f)
 		if err != nil {
-			os.Remove(f + ".before-magpie")
+			os.Remove(f + ".before-eipgam")
 			continue
 		}
 		var now any
 		if json.Unmarshal(edit.TrimBOM(cur), &now) != nil { // a BOM is the user's own (#1534)
 			continue
 		}
-		if was, err := os.ReadFile(f + ".before-magpie"); err == nil {
+		if was, err := os.ReadFile(f + ".before-eipgam"); err == nil {
 			var then any
 			if json.Unmarshal(edit.TrimBOM(was), &then) == nil && reflect.DeepEqual(now, then) && !bytes.Equal(cur, was) {
 				if err := edit.WriteAtomic(f, was); err != nil {
 					return err
 				}
 			}
-			os.Remove(f + ".before-magpie")
+			os.Remove(f + ".before-eipgam")
 			continue
 		}
 		if slices.Contains(gone, filepath.Base(f)) && emptyJSON(now) {
@@ -1467,7 +1467,7 @@ func piLike(at place, id, name, dir string) *Agent {
 	return piLikeKeyed(at, id, name, dir, at.gwKey)
 }
 
-// piLikeKeyed is piLike whose provider "magpie" carries key's key: one
+// piLikeKeyed is piLike whose provider "eipgam" carries key's key: one
 // that names the agent (agentKeyAt) for an agent whose requests carry
 // nothing else of it (Prime Agent, primeagent.go).
 func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
@@ -1490,32 +1490,20 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 		b["apiKey"] = key()
 		return b
 	})
-	// Pi's own: magpie's decision and image models, for codemode
+	// Pi's own: eipgam's decision and image models, for codemode
 	// (pi_extension.go); a fork's extensions may not be Pi's
 	extension := func() error { return nil }
 	if id == "pi" {
 		extension = func() error { return piExtensionSynced(dir, modelsPath, at.v1(), key()) }
 	}
-	// the pi-magpie extension serves provider "magpie" live, so Pi's
-	// models.json block is not written and magpie's own stale one goes
-	// (pimagpie.go)
-	viaExt := func() bool { return id == "pi" && piMagpieInstalled(path) }
+	// eipgam's provider ID is separate from the pi-magpie extension's.
 	writeMagpie := func() error {
-		if viaExt() {
-			if err := dropPiBlock(modelsPath, func() string {
-				return wiringOff(name, modelsPath, func(k string) (string, bool) { return edit.GetJSON(modelsPath, "providers."+magpieID+"."+k) },
-					"baseUrl", at.v1(), "apiKey", key())
-			}); err != nil {
-				return err
-			}
-			return extension()
-		}
 		if err := edit.SetJSON(modelsPath, edit.KV{Path: "providers." + magpieID, Value: block()}); err != nil {
 			return err
 		}
 		return extension()
 	}
-	// the user's two files as they were before magpie's first write, put
+	// the user's two files as they were before eipgam's first write, put
 	// back byte for byte by Disconnect where it leaves them saying the same
 	before := beforeMagpie{at.key(id + ".before.absent"), []string{path, modelsPath}}
 	// the entries of enabledModels a sync took out (scope_gone.go)
@@ -1532,29 +1520,22 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 			if p, _ := get("defaultProvider"); p != magpieID {
 				return ""
 			}
-			if viaExt() {
-				return ""
-			}
 			return wiringOff(name, modelsPath, func(k string) (string, bool) { return edit.GetJSON(modelsPath, "providers."+magpieID+"."+k) },
 				"baseUrl", at.v1(), "apiKey", key())
 		},
 		ListOnly: true,
 		Sync: func() error {
-			if viaExt() {
-				if err := writeMagpie(); err != nil { // drops the stale block
-					return err
-				}
-			} else if err := syncJSON(modelsPath, "providers."+magpieID, block); err != nil {
+			if err := syncJSON(modelsPath, "providers."+magpieID, block); err != nil {
 				return err
 			}
 			if err := extension(); err != nil {
 				return err
 			}
-			// an entry on a model magpie no longer gives Pi names nothing
+			// an entry on a model eipgam no longer gives Pi names nothing
 			// (#2055, scope_gone.go)
 			return piScopeSynced(path, modelsPath, gone)
 		},
-		// a provider renamed takes its magpie/<id>/ entries in enabledModels
+		// a provider renamed takes its eipgam/<id>/ entries in enabledModels
 		// with it: an entry left on the old id names nothing, and Pi would
 		// leave that model out of Ctrl+P (#1919, #1828)
 		RenameRefs: func(from, to string) (bool, error) {
@@ -1607,14 +1588,14 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 			{
 				// Pi's startup thinking level, the same list its /thinking offers;
 				// Pi clamps it to what the model supports. Only this field is
-				// written, and only when it changed: rebuilding providers.magpie
+				// written, and only when it changed: rebuilding providers.eipgam
 				// here replaced model fields a person had edited, such as a
 				// contextWindow. Picking the model, and the catalog sync, still
 				// refresh the provider.
 				//
-				// For a model of magpie's, the levels are those Pi offers for
-				// it, from the entry magpie writes, and a level it doesn't
-				// offer is shown as the one Pi runs it at: magpie showed max
+				// For a model of eipgam's, the levels are those Pi offers for
+				// it, from the entry eipgam writes, and a level it doesn't
+				// offer is shown as the one Pi runs it at: eipgam showed max
 				// for a group Pi offered off alone for, so ran without
 				// reasoning (#597).
 				Key: "effort", Label: "thinking",
@@ -1644,9 +1625,9 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 			},
 		},
 	}
-	// the protocol it asks magpie's models on (pi_protocol.go)
+	// the protocol it asks eipgam's models on (pi_protocol.go)
 	if id == "pi" {
-		a.Fields = append(a.Fields, piProtocolField(at, modelsPath, writeMagpie, viaExt))
+		a.Fields = append(a.Fields, piProtocolField(at, modelsPath, writeMagpie))
 	}
 	return a
 }
@@ -1705,10 +1686,10 @@ func copilot(home, cfg string) *Agent {
 	}
 	own := func() []Option {
 		// "auto" is Copilot's own choice, not a model it lists; the rest
-		// come from the list magpie last fetched from Copilot.
+		// come from the list eipgam last fetched from Copilot.
 		out := []Option{{Value: "auto", Note: "let Copilot pick", Icon: "githubcopilot"}}
 		if live, _, ok := catalog.Live("copilot"); ok {
-			// magpie's list has Auto too, offered above
+			// eipgam's list has Auto too, offered above
 			live = slices.DeleteFunc(slices.Clone(live), func(m catalog.Model) bool { return m.ID == "auto" })
 			out = append(out, options(live, "")...)
 		}
@@ -1736,7 +1717,7 @@ func copilot(home, cfg string) *Agent {
 		// PATH, and running it only asks for the CLI to be installed
 		// (#3269): a command of the editor's is not the CLI
 		binNot: editorLauncher,
-		// magpie/<model> is a model of the provider named magpie in providers.json
+		// eipgam/<model> is a model of the provider named eipgam in providers.json
 		Spelled:  prefixed,
 		ListOnly: true,
 		Check: func() string {

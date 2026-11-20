@@ -26,7 +26,7 @@ const words = {
 };
 
 // model is the page's /api/privacy-model: a POST is recorded and moves it
-// along, as magpie would (downloading, then on and running on the GPU)
+// along, as eipgam would (downloading, then on and running on the GPU)
 function serve(lang, masking, model, posts) {
   const settings = () => ({ lang, theme: "light", redact: masking, redactPersonal: false });
   const state = { agents: [], profiles: [], settings: settings() };
@@ -74,7 +74,7 @@ async function open(engine, lang, width, masking, model, posts, context = {}) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, masking, model, posts));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings&tab=privacy");
+  await page.goto("http://eipgam.test/?view=settings&tab=privacy");
   await page.locator("#redactList .row").first().waitFor();
   await settingsDrawn(page);
   return { browser, page, errors };
@@ -103,11 +103,11 @@ const scoreWords = {
 // and a slow line with its fix under Rosetta and under Windows on Arm's
 // x64 emulation
 const runWords = {
-  en: { ne: "On, with CoreML on the Neural Engine", gpu: "On, with CoreML on the GPU", ml: "On, with CoreML", failed: "On, on the CPU: CoreML failed (prediction failed)", cpu: "On, on the CPU", rosetta: "On, slowly under Rosetta: the next update installs magpie for Apple silicon", emulated: "On, slowly under x64 emulation: the next update installs magpie for Arm" },
-  zh: { ne: "已开启，通过 CoreML 运行在神经网络引擎", gpu: "已开启，通过 CoreML 运行在 GPU", ml: "已开启，通过 CoreML 运行", failed: "已开启，运行在 CPU：CoreML 出错（prediction failed）", cpu: "已开启，运行在 CPU", rosetta: "已开启，但在 Rosetta 下运行较慢：下次更新会装上 Apple 芯片版 magpie", emulated: "已开启，但在 x64 转译下运行较慢：下次更新会装上 ARM 版 magpie" },
-  "zh-TW": { ne: "已開啟，透過 CoreML 執行於神經網路引擎", gpu: "已開啟，透過 CoreML 執行於 GPU", ml: "已開啟，透過 CoreML 執行", failed: "已開啟，執行於 CPU：CoreML 出錯（prediction failed）", cpu: "已開啟，執行於 CPU", rosetta: "已開啟，但在 Rosetta 下執行較慢：下次更新會裝上 Apple 晶片版 magpie", emulated: "已開啟，但在 x64 模擬下執行較慢：下次更新會裝上 ARM 版 magpie" },
-  ja: { ne: "オン、CoreML により Neural Engine で実行中", gpu: "オン、CoreML により GPU で実行中", ml: "オン、CoreML で実行中", failed: "オン、CPU で実行中：CoreML が失敗しました（prediction failed）", cpu: "オン、CPU で実行中", rosetta: "オン、Rosetta で動作中のため低速です。次のアップデートで Apple シリコン版の magpie が入ります", emulated: "オン、x64 エミュレーションで動作中のため低速です。次のアップデートで ARM 版の magpie が入ります" },
-  de: { ne: "An, mit CoreML auf der Neural Engine", gpu: "An, mit CoreML auf der GPU", ml: "An, mit CoreML", failed: "An, auf der CPU: CoreML ist ausgefallen (prediction failed)", cpu: "An, auf der CPU", rosetta: "An, unter Rosetta langsam: das nächste Update installiert magpie für Apple Silicon", emulated: "An, unter x64-Emulation langsam: das nächste Update installiert magpie für Arm" },
+  en: { ne: "On, with CoreML on the Neural Engine", gpu: "On, with CoreML on the GPU", ml: "On, with CoreML", failed: "On, on the CPU: CoreML failed (prediction failed)", cpu: "On, on the CPU", rosetta: "On, slowly under Rosetta: the next update installs eipgam for Apple silicon", emulated: "On, slowly under x64 emulation: the next update installs eipgam for Arm" },
+  zh: { ne: "已开启，通过 CoreML 运行在神经网络引擎", gpu: "已开启，通过 CoreML 运行在 GPU", ml: "已开启，通过 CoreML 运行", failed: "已开启，运行在 CPU：CoreML 出错（prediction failed）", cpu: "已开启，运行在 CPU", rosetta: "已开启，但在 Rosetta 下运行较慢：下次更新会装上 Apple 芯片版 eipgam", emulated: "已开启，但在 x64 转译下运行较慢：下次更新会装上 ARM 版 eipgam" },
+  "zh-TW": { ne: "已開啟，透過 CoreML 執行於神經網路引擎", gpu: "已開啟，透過 CoreML 執行於 GPU", ml: "已開啟，透過 CoreML 執行", failed: "已開啟，執行於 CPU：CoreML 出錯（prediction failed）", cpu: "已開啟，執行於 CPU", rosetta: "已開啟，但在 Rosetta 下執行較慢：下次更新會裝上 Apple 晶片版 eipgam", emulated: "已開啟，但在 x64 模擬下執行較慢：下次更新會裝上 ARM 版 eipgam" },
+  ja: { ne: "オン、CoreML により Neural Engine で実行中", gpu: "オン、CoreML により GPU で実行中", ml: "オン、CoreML で実行中", failed: "オン、CPU で実行中：CoreML が失敗しました（prediction failed）", cpu: "オン、CPU で実行中", rosetta: "オン、Rosetta で動作中のため低速です。次のアップデートで Apple シリコン版の eipgam が入ります", emulated: "オン、x64 エミュレーションで動作中のため低速です。次のアップデートで ARM 版の eipgam が入ります" },
+  de: { ne: "An, mit CoreML auf der Neural Engine", gpu: "An, mit CoreML auf der GPU", ml: "An, mit CoreML", failed: "An, auf der CPU: CoreML ist ausgefallen (prediction failed)", cpu: "An, auf der CPU", rosetta: "An, unter Rosetta langsam: das nächste Update installiert eipgam für Apple Silicon", emulated: "An, unter x64-Emulation langsam: das nächste Update installiert eipgam für Arm" },
 };
 const runs = {
   ne: { via: "CoreML", device: "Neural Engine" }, gpu: { via: "CoreML", device: "GPU" }, ml: { via: "CoreML" },
@@ -278,7 +278,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
   // the model is picked in the app's own menu beside the switch (#3578):
   // each model by its name, what it is and its size, in every language;
-  // picking one says so to magpie, and nothing is cut or moved
+  // picking one says so to eipgam, and nothing is cut or moved
   for (const lang of Object.keys(pickWords)) {
     for (const width of [1100, 640]) {
       test(`${engine} ${lang} ${width}px: the local model is picked from the app's menu`, async (t) => {
@@ -325,7 +325,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
   // the threshold (@Yayoi_no_yume on X): under the model, its default
   // or one the user picks from the app's menu, in every language; the
-  // pick is sent with the model it is for, and shown once magpie has it
+  // pick is sent with the model it is for, and shown once eipgam has it
   for (const lang of Object.keys(scoreWords)) {
     for (const width of [1100, 640]) {
       test(`${engine} ${lang} ${width}px: the model's threshold is picked from the app's menu`, async (t) => {

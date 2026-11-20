@@ -1,14 +1,14 @@
 package agent
 
-// Claude Code's status line, magpie's (steven_4422 on Discord: "show 5h
-// and 7d account usage in claude code"). `magpie statusline` (#1997)
+// Claude Code's status line, eipgam's (steven_4422 on Discord: "show 5h
+// and 7d account usage in claude code"). `eipgam statusline` (#1997)
 // prints the session's model and each account's windows as the gateway
 // last read them, but only a user who found it in the reference and wrote
 // it into settings.json had it. The Agents page offers it as a switch on
 // Claude Code's row: on writes settings.json's statusLine to run this
-// magpie's binary by its full path (a terminal's `magpie` may be another
+// eipgam's binary by its full path (a terminal's `eipgam` may be another
 // copy, or none: the app from the site puts none on PATH), off takes out
-// only a status line that runs `magpie statusline`. A status line of the
+// only a status line that runs `eipgam statusline`. A status line of the
 // user's own (claude-hud, a script) is never written over: the switch
 // isn't offered while one is there, and on is refused.
 //
@@ -23,17 +23,17 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// claudeStatusExe is the magpie a status line written now runs; a var for
+// claudeStatusExe is the eipgam a status line written now runs; a var for
 // tests.
 var claudeStatusExe = func() string {
 	if exe, err := update.Program(); err == nil && exe != "" {
 		return exe
 	}
-	return "magpie"
+	return "eipgam"
 }
 
 // claudeStatusCommand is the statusLine command that runs exe's
@@ -50,8 +50,8 @@ func claudeStatusCommand(exe, goos string) string {
 	return exe + " statusline"
 }
 
-// claudeStatusOurs says whether a statusLine command runs magpie's
-// statusline and nothing else: a magpie binary by any path or quoting, its
+// claudeStatusOurs says whether a statusLine command runs eipgam's
+// statusline and nothing else: a eipgam binary by any path or quoting, its
 // first argument statusline (with or without the accounts to keep).
 func claudeStatusOurs(cmd string) bool {
 	prog, rest, ok := shellWord(strings.TrimLeft(cmd, " \t"))
@@ -60,7 +60,7 @@ func claudeStatusOurs(cmd string) bool {
 	}
 	base := strings.ToLower(prog[strings.LastIndexAny(prog, `/\`)+1:])
 	base = strings.TrimSuffix(base, ".exe")
-	if base != "magpie" && !strings.HasPrefix(base, "magpie-") {
+	if base != "eipgam" && !strings.HasPrefix(base, "eipgam-") {
 		return false
 	}
 	// every word plain: a status line that runs more (&& a script, | a
@@ -127,7 +127,7 @@ func shellWord(s string) (word, rest string, ok bool) {
 // at path; settled is called after each write (no open session needs a
 // restart for it).
 func claudeStatusField(at place, path string, settled func()) Field {
-	// mine: settings.json has a status line; ours: it runs magpie's
+	// mine: settings.json has a status line; ours: it runs eipgam's
 	cur := func() (has, ours bool) {
 		if _, ok := edit.GetJSONRaw(path, "statusLine"); !ok {
 			return false, false
@@ -158,10 +158,10 @@ func claudeStatusField(at place, path string, settled func()) Field {
 					return nil
 				}
 				if has {
-					return fmt.Errorf("%s has a status line of its own; magpie leaves it as it is (take it out there first, or add `magpie statusline` to the command it runs)", at.native(path))
+					return fmt.Errorf("%s has a status line of its own; eipgam leaves it as it is (take it out there first, or add `eipgam statusline` to the command it runs)", at.native(path))
 				}
 				if !here {
-					return fmt.Errorf("magpie's status line is for Claude Code on this computer, not in WSL")
+					return fmt.Errorf("eipgam's status line is for Claude Code on this computer, not in WSL")
 				}
 				settled()
 				return edit.SetJSON(path, edit.KV{Path: "statusLine", Value: map[string]any{
@@ -178,7 +178,7 @@ func claudeStatusField(at place, path string, settled func()) Field {
 			if has, ours := cur(); has && !ours {
 				return nil
 			}
-			return []Option{{Value: "on", Note: "the 5h and 7d use of the accounts magpie serves, under Claude Code's prompt"}}
+			return []Option{{Value: "on", Note: "the 5h and 7d use of the accounts eipgam serves, under Claude Code's prompt"}}
 		},
 	}
 }

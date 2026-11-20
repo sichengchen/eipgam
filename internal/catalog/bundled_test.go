@@ -100,7 +100,7 @@ func TestFailedSyncKeepsLastGood(t *testing.T) {
 	}
 }
 
-// A first run with no network answers from the copy magpie ships with:
+// A first run with no network answers from the copy eipgam ships with:
 // prices, context windows, a provider's models. A test binary has it
 // off, so it is turned on here, and off it answers nothing.
 func TestFirstRunOfflineAnswersFromShippedCopy(t *testing.T) {
@@ -207,7 +207,7 @@ func TestSeed(t *testing.T) {
 
 // Sync writes the catalog whole through a rename: one being read while it
 // is written is read as it was, never cut short (the plugin host's mdev
-// and another magpie read it while a sync writes it).
+// and another eipgam read it while a sync writes it).
 func TestSyncWritesThroughRename(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Windows refuses a rename over a file held open; this holds one open to tell the two writes apart")

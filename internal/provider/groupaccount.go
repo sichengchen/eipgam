@@ -20,7 +20,7 @@ package provider
 // Kept, the account is its stable id (ResolveAccount: a signed-in
 // account's, kept through renames, a key's fingerprint), so "#" and the
 // id are what a member's id ends with; typed, it may be the name the
-// account is shown by. No model id magpie has met has a "#" in it.
+// account is shown by. No model id eipgam has met has a "#" in it.
 
 import (
 	"fmt"
@@ -74,7 +74,7 @@ func memberAccountKept(model, ref string) (kept string, ok bool) {
 }
 
 // checkMemberAccounts refuses a member's account that names a group, and
-// one magpie has no such account or key for, unless the group had that
+// one eipgam has no such account or key for, unless the group had that
 // member already (was): an account signed out since keeps its members, as
 // Group.Accounts keeps its entries.
 func checkMemberAccounts(members, was []string) error {
@@ -102,14 +102,14 @@ func checkMemberAccounts(members, was []string) error {
 			if p, err := Find(pid); err == nil {
 				return fmt.Errorf("%s has no account or key %q to send %s on", p.Name, acct, model)
 			}
-			return fmt.Errorf("magpie has no provider %q to send %s on account %q", pid, model, acct)
+			return fmt.Errorf("eipgam has no provider %q to send %s on account %q", pid, model, acct)
 		}
 	}
 	return nil
 }
 
 // withoutMemberAccounts is g with no member naming an account of its own,
-// each on every account again: for a group shared with another magpie,
+// each on every account again: for a group shared with another eipgam,
 // which has accounts of its own (ShareGroup, as Group.Accounts is
 // dropped). Two members left the same are one.
 func withoutMemberAccounts(g *Group) {

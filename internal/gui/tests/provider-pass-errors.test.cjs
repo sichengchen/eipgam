@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // ne9ko9 (Discord): a user who wants a provider's errors as the vendor sent
-// them, asked once, says so under Advanced: "Errors", magpie handles by
+// them, asked once, says so under Advanced: "Errors", eipgam handles by
 // default, Pass through picked from the app's menu (never a native
 // select). Picked and saved, it posts passErrors: true; one saved so opens
-// with Advanced open and Pass through shown, and magpie handles posts
+// with Advanced open and Pass through shown, and eipgam handles posts
 // false. A provider of a key, a preset's too, has it; a signed-in account
 // has none and its Save sends none. Every language, wide and narrow.
 const assert = require("node:assert/strict");
@@ -55,7 +55,7 @@ function serve(lang, posts) {
 }
 
 const strings = [
-  "Errors", "magpie handles", "Pass through",
+  "Errors", "eipgam handles", "Pass through",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://eipgam.test/?view=providers");
         const w = await page.evaluate(([lang, ks]) => Object.fromEntries(ks.map((k) => [k, (I18N[lang] || {})[k] || k])), [lang, [...strings, "Save"]]);
         await page.locator(".row.provider", { hasText: name }).click();
         await page.locator(".editor .bar").waitFor();
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         return posts.at(-1);
       };
 
-      test(`${engine} ${lang} ${width}: a provider of a key has magpie handle its errors by default, and is saved to pass them through`, async (t) => {
+      test(`${engine} ${lang} ${width}: a provider of a key has eipgam handle its errors by default, and is saved to pass them through`, async (t) => {
         const { page, errors, posts, w } = await open(t, "Local Aggregator");
         if (lang !== "en") {
           const missing = await page.evaluate(([lang, ks]) => ks.filter((k) => !(I18N[lang] || {})[k]), [lang, strings]);
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         assert.equal(await adv(page).evaluate((d) => d.open), false, "Advanced stays folded while it is as by default");
         await unfold(page);
-        assert.equal(await pick(page).innerText(), w["magpie handles"]);
+        assert.equal(await pick(page).innerText(), w["eipgam handles"]);
         assert.equal(await page.locator(".editor select").count(), 0, "no native select");
         await pick(page).scrollIntoViewIfNeeded();
         const r = await pick(page).boundingBox();
@@ -130,11 +130,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(errors, []);
       });
 
-      test(`${engine} ${lang} ${width}: one saved to pass them opens so with Advanced open, and magpie handles is saved`, async (t) => {
+      test(`${engine} ${lang} ${width}: one saved to pass them opens so with Advanced open, and eipgam handles is saved`, async (t) => {
         const { page, errors, posts, w } = await open(t, "Kept Relay");
         assert.equal(await adv(page).evaluate((d) => d.open), true, "Advanced opens with it set");
         assert.equal(await pick(page).innerText(), w["Pass through"]);
-        await choose(page, w, "magpie handles");
+        await choose(page, w, "eipgam handles");
         const saved = await save(page, posts, w);
         assert.equal(saved.body.id, "kept");
         assert.equal(saved.body.passErrors, false);

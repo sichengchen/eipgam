@@ -20,15 +20,15 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lazyre"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // ChatPagePath is DeepSeek's open-source web chat page (deepseek-ai/
 // chat-demo, MIT, its release v0.1.1 as built) served by the gateway, so
-// any of magpie's models chats in it, with magpie's own web search and
+// any of eipgam's models chats in it, with eipgam's own web search and
 // page reading behind its search and link tools (@yanghonghang on X).
 // The release's bundle names https://api.deepseek.com once, as the
 // origin it calls; it is served with the gateway's address and this path
@@ -40,7 +40,7 @@ const ChatPagePath = "/deepseek-chat"
 //go:embed chatpage/chat-demo-v0.1.1.zip
 var chatDemoZip []byte
 
-//go:embed chatpage/magpie.js
+//go:embed chatpage/eipgam.js
 var chatPageJS []byte
 
 // chatDemoSHA256 is the release asset's digest, as GitHub lists it for
@@ -94,8 +94,8 @@ var chatPageFiles = sync.OnceValues(func() (map[string][]byte, error) {
 	if at < 0 {
 		return nil, errors.New("the page's index.html loads no " + chatDemoMain)
 	}
-	files["index.html"] = slices.Concat(index[:at], []byte(`<script defer src="magpie.js"></script>`), index[at:])
-	files["magpie.js"] = chatPageJS
+	files["index.html"] = slices.Concat(index[:at], []byte(`<script defer src="eipgam.js"></script>`), index[at:])
+	files["eipgam.js"] = chatPageJS
 	return files, nil
 })
 
@@ -126,7 +126,7 @@ func chatPageFile(r *http.Request) string {
 }
 
 // chatPageOpen: r asks for one of the page's files, which lanGuard serves
-// to another machine without a key while magpie is shared, as it does the
+// to another machine without a key while eipgam is shared, as it does the
 // key page: the same bytes for everyone, with nothing of the user's in
 // them. Every call the page makes needs the key, which its holder types
 // into the page.
@@ -135,7 +135,7 @@ func chatPageOpen(r *http.Request) bool {
 }
 
 // chatPageCSP keeps the page to its own files and its own origin: no
-// script but the release's and magpie.js runs (the markdown it renders
+// script but the release's and eipgam.js runs (the markdown it renders
 // from a model's answer can't carry one), nothing is fetched from
 // elsewhere, and it can't be framed.
 const chatPageCSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
@@ -194,9 +194,9 @@ func (s *Server) chatPage(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-// chatModelCookie is the model the page's picker (magpie.js) chose; the
+// chatModelCookie is the model the page's picker (eipgam.js) chose; the
 // page itself always asks for deepseek-flash.
-const chatModelCookie = "magpie_chat_model"
+const chatModelCookie = "eipgam_chat_model"
 
 // chatPageModels lists the models the caller may chat with, for the
 // page's picker, and checks the key the page was given (the page's own
@@ -248,7 +248,7 @@ func chatError(w http.ResponseWriter, status int, msg string) {
 // ---- files ------------------------------------------------------------------
 
 // The page uploads each attachment once (POST /anthropic/v1/files) and
-// names it by id in its messages. magpie keeps them in memory, for the
+// names it by id in its messages. eipgam keeps them in memory, for the
 // caller that uploaded them, until it restarts: an id it no longer has
 // becomes a line asking for the file again, never a failed reply.
 const (
@@ -350,7 +350,7 @@ func (s *Server) chatFileDelete(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"id": id, "type": "file_deleted"})
 }
 
-// chatFileOf is the caller's file id, nil when magpie hasn't it.
+// chatFileOf is the caller's file id, nil when eipgam hasn't it.
 func chatFileOf(r *http.Request, id string) *chatUpload {
 	chatFiles.Lock()
 	defer chatFiles.Unlock()
@@ -389,7 +389,7 @@ func chatFileBlock(f *chatUpload) map[string]any {
 func (s *Server) chatASR(w http.ResponseWriter, r *http.Request) {
 	model := FirstServing(catalog.ServesTranscription)
 	if model == "" {
-		chatError(w, http.StatusNotImplemented, "voice input needs a speech-to-text model (whisper, gpt-4o-transcribe…): add a provider that serves one in magpie")
+		chatError(w, http.StatusNotImplemented, "voice input needs a speech-to-text model (whisper, gpt-4o-transcribe…): add a provider that serves one in eipgam")
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, 30<<20)
@@ -425,7 +425,7 @@ var chatVoices = map[string]string{"stella": "nova", "tide": "onyx"}
 func (s *Server) chatTTS(w http.ResponseWriter, r *http.Request) {
 	model := FirstServing(catalog.ServesSpeech)
 	if model == "" {
-		chatError(w, http.StatusNotImplemented, "reading aloud needs a text-to-speech model (tts-1, gpt-4o-mini-tts…): add a provider that serves one in magpie")
+		chatError(w, http.StatusNotImplemented, "reading aloud needs a text-to-speech model (tts-1, gpt-4o-mini-tts…): add a provider that serves one in eipgam")
 		return
 	}
 	var in struct {

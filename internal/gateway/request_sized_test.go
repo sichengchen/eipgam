@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // chunked hands its bytes out a piece at a time, as a socket does.
@@ -74,7 +74,7 @@ func TestRequestBodyReadOnceAtItsLength(t *testing.T) {
 // again for its last bytes: a Codex turn of 516 MB of generated images was
 // read into 1+2+…+512 MB and then all of it into 516 MB, 1.5 GB allocated
 // and copied outside the body's wait, and under -race on a loaded CI
-// machine the turn was answered 504 for magpie's own work (#5281).
+// machine the turn was answered 504 for eipgam's own work (#5281).
 func TestRequestBodyNotCopiedForItsLastBytes(t *testing.T) {
 	sent := bytes.Repeat([]byte("0123456789abcdef"), (4*sizedReadFirst+64<<10)/16) // 4 MB + 64 KB
 	var got []byte
@@ -98,7 +98,7 @@ func TestRequestBodyLengthNotTrusted(t *testing.T) {
 		t.Fatalf("read %q", got)
 	}
 	if lied > sizedReadFirst+64<<10 {
-		t.Fatalf("a client that said 512 MB and sent 5 bytes made magpie allocate %d bytes", lied)
+		t.Fatalf("a client that said 512 MB and sent 5 bytes made eipgam allocate %d bytes", lied)
 	}
 	long := strings.Repeat("y", 5000)
 	if got, err := readSized(&chunked{[]byte(long), 700}, 10); err != nil || string(got) != long {

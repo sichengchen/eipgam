@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// remotePicksFake is a remote magpie that tells its agents' picks.
+// remotePicksFake is a remote eipgam that tells its agents' picks.
 type remotePicksFake struct {
 	mu    sync.Mutex
 	picks map[string]map[string]string
@@ -51,7 +51,7 @@ func resetRemoteCache() {
 	remoteCache.Unlock()
 }
 
-// A client of a remote magpie (KoiLx0 on X) connects Claude Code on the
+// A client of a remote eipgam (KoiLx0 on X) connects Claude Code on the
 // model the remote's Claude Code is on, follows the remote's change, and
 // keeps a model the user picks here as theirs.
 func TestConnectFollowsTheRemoteMagpiesPicks(t *testing.T) {
@@ -112,16 +112,16 @@ func TestConnectFollowsTheRemoteMagpiesPicks(t *testing.T) {
 	fake.set("claude", "model", "group/not-listed-here")
 	c.followRemote(remotePicks(ctx, 0))
 	if m := writtenModel(path); m != "office/group/smart" {
-		t.Fatalf("moved to a model this magpie doesn't list: on %q", m)
+		t.Fatalf("moved to a model this eipgam doesn't list: on %q", m)
 	}
 	fake.set("claude", "model", "fake/claude-opus-9")
 	c.followRemote(remotePicks(ctx, 0))
 	if m := writtenModel(path); m != "office/fake/claude-opus-9" {
-		t.Fatalf("followed no more after a pick this magpie didn't list: on %q", m)
+		t.Fatalf("followed no more after a pick this eipgam didn't list: on %q", m)
 	}
 }
 
-// With no Remote magpie, connect asks no one and picks as before.
+// With no Remote eipgam, connect asks no one and picks as before.
 func TestConnectWithoutRemoteAsksNoOne(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	resetRemoteCache()

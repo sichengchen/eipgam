@@ -32,14 +32,14 @@ func touch(t *testing.T, p string) {
 func winForward(t *testing.T, handler func(self string) string, installed bool) winSetup {
 	t.Helper()
 	root := t.TempDir()
-	s := winSetup{self: filepath.Join(root, "magpie.exe"), cc: filepath.Join(root, "local", "Programs", "CC Switch", "cc-switch.exe")}
+	s := winSetup{self: filepath.Join(root, "eipgam.exe"), cc: filepath.Join(root, "local", "Programs", "CC Switch", "cc-switch.exe")}
 	touch(t, s.self)
 	if installed {
 		touch(t, s.cc)
 	}
 	t.Setenv("LOCALAPPDATA", filepath.Join(root, "local"))
 	k, e, st := schemeKey, executable, start
-	schemeKey = fmt.Sprintf(`Software\Classes\magpie-test-ccswitch-%d`, os.Getpid())
+	schemeKey = fmt.Sprintf(`Software\Classes\eipgam-test-ccswitch-%d`, os.Getpid())
 	t.Cleanup(func() {
 		for _, sub := range []string{`\shell\open\command`, `\shell\open`, `\shell`, `\DefaultIcon`, ``} {
 			_ = registry.DeleteKey(registry.CURRENT_USER, schemeKey+sub)
@@ -71,7 +71,7 @@ func command() string {
 	return v
 }
 
-// The handler an older magpie wrote runs this magpie: CC Switch, where its
+// The handler an older eipgam wrote runs this eipgam: CC Switch, where its
 // MSI installs it, gets the link and the handler.
 func TestForwardHandsTheHandlerBack(t *testing.T) {
 	s := winForward(t, func(self string) string { return `"` + self + `" "%1"` }, true)
@@ -106,7 +106,7 @@ func TestForwardToTheHandlersProgram(t *testing.T) {
 	}
 }
 
-// No CC Switch: nothing started, magpie's handler stays.
+// No CC Switch: nothing started, eipgam's handler stays.
 func TestForwardWithoutCCSwitch(t *testing.T) {
 	s := winForward(t, func(self string) string { return `"` + self + `" "%1"` }, false)
 	if err := Forward(link); !errors.Is(err, ErrNotInstalled) {

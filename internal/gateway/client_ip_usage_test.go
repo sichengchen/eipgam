@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
-	"github.com/yetone/magpie/internal/usageapi"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
+	"github.com/sichengchen/eipgam/internal/usageapi"
 )
 
 // A request's row says where it came from (geesehowardt7 on X): the
@@ -20,8 +20,8 @@ import (
 // gateway's usage API, which answers other computers, leaves it out.
 func TestUsageRowsKeepTheClientsAddress(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_TRUST_PROXY", "")
+	t.Setenv("EIPGAM_ADDR", "")
+	t.Setenv("EIPGAM_TRUST_PROXY", "")
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, `{"choices":[{"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],"usage":{"prompt_tokens":30,"completion_tokens":5}}`)
@@ -74,7 +74,7 @@ func TestUsageRowsKeepTheClientsAddress(t *testing.T) {
 
 	// the gateway's API leaves them out, for this computer and another
 	for _, from := range []string{"127.0.0.1:5000", "192.168.1.9:6000"} {
-		c, b := do("GET", "/v1/magpie/usage/requests?period=all", from, nil, "Authorization", "Bearer "+secrets[0])
+		c, b := do("GET", "/v1/eipgam/usage/requests?period=all", from, nil, "Authorization", "Bearer "+secrets[0])
 		var page usageapi.Ledger
 		if c != 200 || json.Unmarshal([]byte(b), &page) != nil || len(page.Rows) != 3 {
 			t.Fatal("requests from", from, c, b)

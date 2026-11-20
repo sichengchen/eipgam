@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/sessions"
 )
 
-// nori_tsukiji on X: with ZCode on the same computer as magpie, the Usage
-// page's "Local session" calls were the very calls magpie had routed, so each
+// nori_tsukiji on X: with ZCode on the same computer as eipgam, the Usage
+// page's "Local session" calls were the very calls eipgam had routed, so each
 // was counted twice. A ZCode request names its session without the sess_
 // prefix ZCode's database gives it (zcodeBareID), so the database's calls
 // never shared a session with the gateway's records and were never paired
@@ -75,7 +75,7 @@ func TestZCodeCallsPairWithTheGatewaysRecords(t *testing.T) {
 				}
 			}
 			if d := Direct(Today); d.Totals.Calls != 0 {
-				t.Fatalf("Direct counts %d calls ZCode made through magpie", d.Totals.Calls)
+				t.Fatalf("Direct counts %d calls ZCode made through eipgam", d.Totals.Calls)
 			}
 		})
 	}

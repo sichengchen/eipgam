@@ -13,7 +13,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const at = (min) => new Date(Date.now() - min * 60e3).toISOString();
 const ID = "ses_1a2b3c4d5e6fAAAAAAAAAAAAAA";
-const DIR = "~/Library/Application Support/magpie/trash/sessions";
+const DIR = "~/Library/Application Support/eipgam/trash/sessions";
 const KEYS = {
   confirm: "{agent} isn't installed here. These sessions leave this list; its own files are not touched, and Trash puts them back.",
   off: "Taken off the list",
@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const calls = [];
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://eipgam.test/?view=providers");
       const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
       if (lang !== "en") {
         const missing = await page.evaluate(([lang, keys]) => keys.filter((k) => !I18N[lang]?.[k]), [lang, Object.values(KEYS)]);

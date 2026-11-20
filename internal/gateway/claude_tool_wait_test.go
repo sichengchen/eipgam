@@ -8,14 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/sichengchen/eipgam/internal/claudetui"
+	"github.com/sichengchen/eipgam/internal/testenv"
 )
 
-// A turn's run waits on magpie's MCP calls for as long as the caller's tool
+// A turn's run waits on eipgam's MCP calls for as long as the caller's tool
 // takes, by -p and by the interactive mode: Claude Code neither moves one
 // still running after 120s to the background nor aborts one silent for 30
-// minutes. A value the user set in magpie's environment stays as they set
+// minutes. A value the user set in eipgam's environment stays as they set
 // it. Moved to the background, a client's ask_user_question that waited on
 // its user had a bash call written past it, and its answer then waited the
 // bash call's own 120s to reach the model (#6034, FunnyPartMent on X).
@@ -27,7 +27,7 @@ func TestClaudeRunWaitsOnToolCalls(t *testing.T) {
 			want string
 		}{
 			{name: "nothing set", want: "background 0 idle 0"},
-			{name: "magpie's env", env: map[string]string{"CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS": "600000"}, want: "background 600000 idle 0"},
+			{name: "eipgam's env", env: map[string]string{"CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS": "600000"}, want: "background 600000 idle 0"},
 		} {
 			t.Run(fmt.Sprintf("tui=%v/%s", tui, c.name), func(t *testing.T) {
 				for _, kv := range claudeToolWaitVars {
@@ -44,7 +44,7 @@ func TestClaudeRunWaitsOnToolCalls(t *testing.T) {
 					// the Claude Code it was handed
 					claudeTUIRuns = true
 					t.Cleanup(func() { claudeTUIRuns = false })
-					helper := filepath.Join(t.TempDir(), "magpie")
+					helper := filepath.Join(t.TempDir(), "eipgam")
 					testenv.Program(t, helper, "#!/bin/sh\n[ \"$1\" = \""+claudetui.Command+"\" ] || exit 9\necho start >> '"+helped+"'\nshift; claude=$1; shift\nexec \"$claude\" \"$@\"\n")
 					claudeTUIHelper = helper
 					t.Cleanup(func() { claudeTUIHelper = "" })

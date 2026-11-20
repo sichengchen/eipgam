@@ -15,7 +15,7 @@ import (
 // serves the app at its domain (lazyCatURL), which only devices running
 // LazyCat's client resolve, and publishes no container port on the box's
 // LAN address. So "Share on local network" offered
-// https://magpie.<box>.heiyu.space and http://172.28.3.65:3425, and neither
+// https://eipgam.<box>.heiyu.space and http://172.28.3.65:3425, and neither
 // was the http://192.168.0.100:3425 other devices on the home network use
 // (mtoolstec on X, after v0.1.3432).
 //
@@ -30,11 +30,11 @@ import (
 // LazyCat's client; "" outside LazyCat.
 func LazyCatURL() string { return lazyCatURL() }
 
-// LazyCatBox: magpie runs in a LazyCat app on the box's own network, so the
+// LazyCatBox: eipgam runs in a LazyCat app on the box's own network, so the
 // addresses it finds are the box's, which other devices on its LAN reach.
 func LazyCatBox() bool { return lazyCatURL() != "" && len(lazyCatBoxHosts()) > 0 }
 
-// lazyCatBoxHosts are the box's LAN addresses while magpie runs on its
+// lazyCatBoxHosts are the box's LAN addresses while eipgam runs on its
 // network: the IPv4 addresses (as LANHosts takes them) of the interfaces
 // the default route leaves by, which is the box's link to the router, not
 // one of its container bridges or the virtual address other LazyCat apps
@@ -56,7 +56,7 @@ func lazyCatBoxHosts() []string {
 	return lanHostsOf(ips)
 }
 
-// lazyCatHostNet: the network magpie is on is the box's: the box runs its
+// lazyCatHostNet: the network eipgam is on is the box's: the box runs its
 // apps in containers, so its own network has their bridges and veth pairs
 // (hostNetwork), and host.lzcapp, which LazyCat gives apps for the box, is
 // one of this network's own addresses (on a bridge network it is the

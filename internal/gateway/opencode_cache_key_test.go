@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sichengchen/eipgam/internal/provider"
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
 )
 
 // OpenCode 1 (opencode-ai 1.19.5) with its provider's setCacheKey writes

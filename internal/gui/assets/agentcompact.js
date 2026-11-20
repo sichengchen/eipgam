@@ -11,7 +11,7 @@ const compactFill = function (list, a) {
   const row = el("div", "row pref agent-compact");
   row.dataset.agent = kind;
   const who = el("div", "who"), box = el("div");
-  who.append(el("div", "name", t("Long conversations")), el("div", "sub", t("{agent} compacts at 272K or the size picked; the full window is slower and costlier. magpie's models only: a subscription's own models keep their own.", { agent: a.name })));
+  who.append(el("div", "name", t("Long conversations")), el("div", "sub", t("{agent} compacts at 272K or the size picked; the full window is slower and costlier. eipgam's models only: a subscription's own models keep their own.", { agent: a.name })));
   row.append(who, box);
   // what Codex's own config holds back, said under the row (renderAgentPrefs)
   const held = el("div", "compact-helds");
@@ -153,7 +153,7 @@ function claudeAttributionRow(list) {
 // The user's own settings of the agent's (agent.Field.Own: Claude Code's
 // permission mode, EricChenChannel on X), seldom changed, so folded under
 // Advanced after the sheet's list; written in the agent's own config, never
-// taken back when magpie lets go of the agent.
+// taken back when eipgam lets go of the agent.
 function ownFieldsFold(list, a) {
   const own = a.own || [];
   if (!own.length) return;

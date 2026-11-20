@@ -7,12 +7,12 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/sichengchen/eipgam/internal/appdir"
+	"github.com/sichengchen/eipgam/internal/proc"
 )
 
 // schemeKey is the per-user handler of ccswitch://, which both CC Switch's
-// MSI and an older magpie wrote; tests point it elsewhere.
+// MSI and an older eipgam wrote; tests point it elsewhere.
 var schemeKey = `Software\Classes\ccswitch`
 
 // executable is this program's path; tests stand in for it.
@@ -23,7 +23,7 @@ var start = func(exe, link string) error { return proc.StartReaped(proc.Command(
 
 // forward runs CC Switch with the link as its argument, as the handler its
 // MSI writes does ("…cc-switch.exe" "%1"). Then a handler that runs this
-// magpie is pointed at CC Switch, as its MSI writes it.
+// eipgam is pointed at CC Switch, as its MSI writes it.
 func forward(link string) error {
 	self, _ := executable()
 	cmd := handler()

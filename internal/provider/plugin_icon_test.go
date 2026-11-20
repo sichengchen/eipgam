@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // Lemon on Discord: can a plugin give its provider its own icon? The auth
@@ -24,7 +24,7 @@ func TestPluginOwnIcon(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("EIPGAM_PLUGIN_MARKET", "off")
 
 	png := []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR")
 	var fetched atomic.Int32
@@ -178,7 +178,7 @@ func TestKeptIconNotLookedForEachAsk(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("EIPGAM_PLUGIN_MARKET", "off")
 
 	png := []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR")
 	data := "data:image/png;base64," + base64.StdEncoding.EncodeToString(png)

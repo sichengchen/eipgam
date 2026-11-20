@@ -62,7 +62,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, new Date(), () => ({}), () => ({})));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://eipgam.test/?view=routing");
       await page.locator(".rt-act").first().waitFor();
       assert.equal(await page.locator(".rt-act", { hasText: "jd@example.com" }).count(), 3, "three seats are three cards: " + (await page.locator(".rt-acts").innerText()));
       const text = (await page.locator(".rt-act", { hasText: "jd@example.com" }).allInnerTexts()).join(" | ").toLowerCase();

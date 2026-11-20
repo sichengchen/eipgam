@@ -22,7 +22,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // Settings' Usage part: its list, its Advanced fold (the menu bar's
         // currency) and the Alerts, no service's rows
-        await page.goto("http://magpie.test/?view=settings&tab=usage");
+        await page.goto("http://eipgam.test/?view=settings&tab=usage");
         await page.locator("#setPage-usage #currencySegs .opt").first().waitFor();
         const parts = await page.evaluate(() => [...document.querySelectorAll("#setPage-usage > *")]
           .map((h) => h.querySelector("#currencySegs") ? "usage" : h.id));

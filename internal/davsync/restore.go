@@ -10,10 +10,10 @@ import (
 	"slices"
 	"time"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/backup"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // ErrOff is a Restore, Undo or SetAuto asked for with sync off.
@@ -43,7 +43,7 @@ func SetFollowServer(on bool) error {
 	})
 }
 
-// SetAuto sets how many minutes apart the gateway's magpie syncs by
+// SetAuto sets how many minutes apart the gateway's eipgam syncs by
 // itself, one of AutoChoices; Manual: never, only when asked (#847).
 func SetAuto(minutes int) error {
 	if !slices.Contains(AutoChoices, minutes) {
@@ -89,7 +89,7 @@ func Restore(ctx context.Context) ([]string, error) {
 			return err
 		}
 		if data == nil {
-			return errors.New("there is no magpie setup on the server yet: nothing to restore")
+			return errors.New("there is no eipgam setup on the server yet: nothing to restore")
 		}
 		remote, err := backup.Open(data, c.Passphrase)
 		if errors.Is(err, backup.ErrPassphrase) {
@@ -170,7 +170,7 @@ func Restore(ctx context.Context) ([]string, error) {
 // Upload writes this computer's setup over the server's file when that
 // file isn't a backup a sync can read — empty, cut short, another app's —
 // so a sync stopped on it has a way on that the user chooses. A file that
-// opens as a backup, one sealed with another passphrase, a newer magpie's,
+// opens as a backup, one sealed with another passphrase, a newer eipgam's,
 // and a page the server answered with instead of a file are never written
 // over. What the server held is kept in the sync folder first, and nothing
 // is written when it can't be. The write is made over the version read, so
@@ -193,9 +193,9 @@ func Upload(ctx context.Context) error {
 			_, err := backup.Open(data, c.Passphrase)
 			switch {
 			case err == nil:
-				return errors.New("the file on the server is a magpie backup this computer can open: Sync now merges with it instead, and nothing was written over it")
+				return errors.New("the file on the server is a eipgam backup this computer can open: Sync now merges with it instead, and nothing was written over it")
 			case errors.Is(err, backup.ErrPassphrase):
-				return errors.New("the file on the server is a magpie backup sealed with another passphrase, so it wasn't written over: use the passphrase set on your other computers")
+				return errors.New("the file on the server is a eipgam backup sealed with another passphrase, so it wasn't written over: use the passphrase set on your other computers")
 			}
 			err = described(c, data, err)
 			var nb *notBackup
@@ -223,7 +223,7 @@ func Upload(ctx context.Context) error {
 				}
 			}
 		}
-		b.Created, b.App = time.Now().UTC(), "magpie"
+		b.Created, b.App = time.Now().UTC(), "eipgam"
 		sealed, err := backup.Seal(b, c.Passphrase)
 		if err != nil {
 			return err
@@ -335,7 +335,7 @@ func (c Config) left() []string {
 	return out
 }
 
-// only is b with the parts c doesn't sync as a new magpie has them
+// only is b with the parts c doesn't sync as a new eipgam has them
 // (unset): what goes up to a server with none of its own. Another
 // computer that syncs such a part then puts its own there on joining, as
 // with any unset part (#5642), and none is brought down from this one.

@@ -6,8 +6,8 @@ import (
 )
 
 // A routing group's note (ConatusMoon2222 on X) is set from the terminal
-// with note=, given at add or set, shown by magpie group <id> and under its
-// row in magpie groups, and cleared with note= empty, when nothing shows.
+// with note=, given at add or set, shown by eipgam group <id> and under its
+// row in eipgam groups, and cleared with note= empty, when nothing shows.
 func TestGroupNoteCLI(t *testing.T) {
 	groupsHome(t)
 	if _, err := addGroup("Work", []string{"models=a/m", "note=for the office key"}); err != nil {

@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-// The terminal closing (SIGHUP) is left to magpie by bubbletea and by Wails
-// (ownSignals keeps it), so magpie tui and the app drain the gateway they
-// serve, its idle Claude sessions saved, before magpie dies of it: they
-// died first, and the next magpie had no session to resume (#7017).
+// The terminal closing (SIGHUP) is left to eipgam by bubbletea and by Wails
+// (ownSignals keeps it), so eipgam tui and the app drain the gateway they
+// serve, its idle Claude sessions saved, before eipgam dies of it: they
+// died first, and the next eipgam had no session to resume (#7017).
 func TestHangupDrainsTheGatewayFirst(t *testing.T) {
 	oldRun, oldTUI, oldGUI, oldApp, oldPanel := tuiRun, tuiStop, guiStop, openApp, openPanel
 	t.Cleanup(func() { tuiRun, tuiStop, guiStop, openApp, openPanel = oldRun, oldTUI, oldGUI, oldApp, oldPanel })

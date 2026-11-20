@@ -29,32 +29,32 @@ type fakeGitHub struct {
 
 func newFakeGitHub(t *testing.T) *fakeGitHub {
 	t.Helper()
-	g := &fakeGitHub{body: []byte(strings.Repeat("magpie release ", 8192))}
+	g := &fakeGitHub{body: []byte(strings.Repeat("eipgam release ", 8192))}
 	g.served = g.body
 	s := sha256.Sum256(g.body)
 	g.sum = hex.EncodeToString(s[:])
 	g.srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/yetone/magpie-releases/releases/download/v0.1.9/magpie.zip":
+		case "/sichengchen/eipgam/releases/download/v0.1.9/eipgam.zip":
 			g.direct.Add(1)
 			if g.directServes {
 				w.Write(g.served)
 				return
 			}
 			w.WriteHeader(http.StatusGatewayTimeout)
-		case "/repos/yetone/magpie-releases/releases/tags/v0.1.9":
+		case "/repos/sichengchen/eipgam/releases/tags/v0.1.9":
 			g.tags.Add(1)
-			fmt.Fprintf(w, `{"tag_name":"v0.1.9","assets":[{"url":"%[1]s/repos/yetone/magpie-releases/releases/assets/6","name":"SHA256SUMS"},{"url":"%[1]s/repos/yetone/magpie-releases/releases/assets/7","name":"magpie.zip","uploader":{"url":"%[1]s/users/x"}}]}`, g.srv.URL)
-		case "/repos/yetone/magpie-releases/releases/assets/7":
+			fmt.Fprintf(w, `{"tag_name":"v0.1.9","assets":[{"url":"%[1]s/repos/sichengchen/eipgam/releases/assets/6","name":"SHA256SUMS"},{"url":"%[1]s/repos/sichengchen/eipgam/releases/assets/7","name":"eipgam.zip","uploader":{"url":"%[1]s/users/x"}}]}`, g.srv.URL)
+		case "/repos/sichengchen/eipgam/releases/assets/7":
 			g.asset.Add(1)
 			if r.Header.Get("Accept") != "application/octet-stream" {
 				// GitHub describes the file instead
 				g.assetWithoutOctetStreamAsked.Add(1)
-				fmt.Fprint(w, `{"name":"magpie.zip"}`)
+				fmt.Fprint(w, `{"name":"eipgam.zip"}`)
 				return
 			}
-			http.Redirect(w, r, "/blob/magpie.zip?sig=x", http.StatusFound)
-		case "/blob/magpie.zip":
+			http.Redirect(w, r, "/blob/eipgam.zip?sig=x", http.StatusFound)
+		case "/blob/eipgam.zip":
 			g.blob.Add(1)
 			w.Write(g.served)
 		default:
@@ -70,7 +70,7 @@ func newFakeGitHub(t *testing.T) *fakeGitHub {
 }
 
 func (g *fakeGitHub) asset0() Asset {
-	return Asset{URL: g.srv.URL + "/yetone/magpie-releases/releases/download/v0.1.9/magpie.zip", SHA256: g.sum}
+	return Asset{URL: g.srv.URL + "/sichengchen/eipgam/releases/download/v0.1.9/eipgam.zip", SHA256: g.sum}
 }
 
 // github.com's download address answers 504 on every try: the download
@@ -78,7 +78,7 @@ func (g *fakeGitHub) asset0() Asset {
 // and the file is the release's, checked against the feed's hash.
 func TestDownloadGoesThroughTheAPIWhenGitHubIsBusy(t *testing.T) {
 	g := newFakeGitHub(t)
-	path := filepath.Join(t.TempDir(), "magpie.zip")
+	path := filepath.Join(t.TempDir(), "eipgam.zip")
 	if err := download(context.Background(), g.asset0(), path); err != nil {
 		t.Fatal(err)
 	}
@@ -102,8 +102,8 @@ func TestDownloadGoesThroughTheAPIWhenGitHubIsBusy(t *testing.T) {
 func TestDownloadTakesTheFeedsAPIAddress(t *testing.T) {
 	g := newFakeGitHub(t)
 	a := g.asset0()
-	a.API = g.srv.URL + "/repos/yetone/magpie-releases/releases/assets/7"
-	path := filepath.Join(t.TempDir(), "magpie.zip")
+	a.API = g.srv.URL + "/repos/sichengchen/eipgam/releases/assets/7"
+	path := filepath.Join(t.TempDir(), "eipgam.zip")
 	if err := download(context.Background(), a, path); err != nil {
 		t.Fatal(err)
 	}
@@ -116,8 +116,8 @@ func TestDownloadTakesTheFeedsAPIAddress(t *testing.T) {
 // through it changed fails its hash and is not kept.
 func TestAPIRouteFileIsCheckedLikeAnyOther(t *testing.T) {
 	g := newFakeGitHub(t)
-	g.served = []byte(strings.Repeat("not magpie ", 8192))
-	path := filepath.Join(t.TempDir(), "magpie.zip")
+	g.served = []byte(strings.Repeat("not eipgam ", 8192))
+	path := filepath.Join(t.TempDir(), "eipgam.zip")
 	err := download(context.Background(), g.asset0(), path)
 	if err == nil || !strings.Contains(err.Error(), "does not match its checksum") {
 		t.Fatalf("err = %v, want a checksum failure", err)
@@ -135,7 +135,7 @@ func TestAPIRouteFileIsCheckedLikeAnyOther(t *testing.T) {
 func TestMirrorKeepsPrecedenceOverTheAPIRoute(t *testing.T) {
 	g := newFakeGitHub(t)
 	ctx := WithMirror(context.Background(), "https://mirror.example/")
-	err := download(ctx, g.asset0(), filepath.Join(t.TempDir(), "magpie.zip"))
+	err := download(ctx, g.asset0(), filepath.Join(t.TempDir(), "eipgam.zip"))
 	if err == nil {
 		t.Fatal("download went through")
 	}
@@ -164,7 +164,7 @@ func site(t *testing.T, status int) (*httptest.Server, *atomic.Int32) {
 // address, github.com's beside it.
 func (g *fakeGitHub) onR2(siteURL string) Asset {
 	a := g.asset0()
-	a.GitHub, a.URL = a.URL, siteURL+"/files/v0.1.9/magpie.zip"
+	a.GitHub, a.URL = a.URL, siteURL+"/files/v0.1.9/eipgam.zip"
 	return a
 }
 
@@ -174,7 +174,7 @@ func TestDownloadGoesToGitHubWhenTheSiteIsBusy(t *testing.T) {
 	g := newFakeGitHub(t)
 	g.directServes = true
 	s, asked := site(t, http.StatusServiceUnavailable)
-	path := filepath.Join(t.TempDir(), "magpie.zip")
+	path := filepath.Join(t.TempDir(), "eipgam.zip")
 	if err := download(context.Background(), g.onR2(s.URL), path); err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +191,7 @@ func TestDownloadGoesToGitHubWhenTheSiteIsBusy(t *testing.T) {
 func TestDownloadGoesOnToTheAPIFromTheSite(t *testing.T) {
 	g := newFakeGitHub(t)
 	s, asked := site(t, http.StatusGatewayTimeout)
-	path := filepath.Join(t.TempDir(), "magpie.zip")
+	path := filepath.Join(t.TempDir(), "eipgam.zip")
 	if err := download(context.Background(), g.onR2(s.URL), path); err != nil {
 		t.Fatal(err)
 	}
@@ -203,10 +203,10 @@ func TestDownloadGoesOnToTheAPIFromTheSite(t *testing.T) {
 // Every route failing, the error names each, the site's first.
 func TestDownloadSaysEachRouteThatFailed(t *testing.T) {
 	g := newFakeGitHub(t)
-	g.served = []byte("not magpie")
+	g.served = []byte("not eipgam")
 	s, _ := site(t, http.StatusGatewayTimeout)
 	host := strings.TrimPrefix(s.URL, "http://")
-	err := download(context.Background(), g.onR2(s.URL), filepath.Join(t.TempDir(), "magpie.zip"))
+	err := download(context.Background(), g.onR2(s.URL), filepath.Join(t.TempDir(), "eipgam.zip"))
 	if err == nil {
 		t.Fatal("download went through")
 	}
@@ -237,9 +237,9 @@ func TestMirrorTakesTheGitHubAddressAfterTheSite(t *testing.T) {
 	t.Cleanup(func() { githubWeb = oldWeb })
 	a := g.onR2(s.URL)
 	// the github.com address as the feed gives it, for mirrored to know
-	a.GitHub = "https://github.com/yetone/magpie-releases/releases/download/v0.1.9/magpie.zip"
+	a.GitHub = "https://github.com/sichengchen/eipgam/releases/download/v0.1.9/eipgam.zip"
 	ctx := WithMirror(context.Background(), m.URL+"/")
-	if err := download(ctx, a, filepath.Join(t.TempDir(), "magpie.zip")); err == nil {
+	if err := download(ctx, a, filepath.Join(t.TempDir(), "eipgam.zip")); err == nil {
 		t.Fatal("download went through")
 	}
 	if asked.Load() != 1 {
@@ -266,7 +266,7 @@ func TestDownloadLeavesABrokenSiteForGitHub(t *testing.T) {
 		c.Close()
 	}))
 	t.Cleanup(s.Close)
-	path := filepath.Join(t.TempDir(), "magpie.zip")
+	path := filepath.Join(t.TempDir(), "eipgam.zip")
 	if err := download(context.Background(), g.onR2(s.URL), path); err != nil {
 		t.Fatal(err)
 	}

@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/access"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // listedBefore is keyAllowed as it was before #1762, every group read
@@ -206,7 +206,7 @@ func TestKeyListSeesChangesNextRequest(t *testing.T) {
 }
 
 // BenchmarkHeldKeyListsModels is #1762's catalog: two providers of 500
-// models each serving the same ids, so magpie finds 500 groups for them,
+// models each serving the same ids, so eipgam finds 500 groups for them,
 // listed for a key held to some models, one held to some accounts, and
 // one held to none.
 func BenchmarkHeldKeyListsModels(b *testing.B) {

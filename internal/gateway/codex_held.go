@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // codexHolds are the ChatGPT accounts Codex's turns are relayed on as they
@@ -36,7 +36,7 @@ type codexHold struct {
 
 // codexHoldKey is who a turn relayed to base on on goes to, for its hold;
 // "" for one not held: Codex's API key, which OpenAI's platform limits
-// by its own headers Codex reads, or a sign-in magpie can't name.
+// by its own headers Codex reads, or a sign-in eipgam can't name.
 func codexHoldKey(base string, on *provider.Provider) string {
 	if base != provider.CodexBase {
 		return ""

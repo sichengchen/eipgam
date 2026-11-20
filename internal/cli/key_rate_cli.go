@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-const keyRateUsage = "magpie provider key-rate <id> [key [rate|default]]"
+const keyRateUsage = "eipgam provider key-rate <id> [key [rate|default]]"
 
 // keyRateCmd shows, or sets, the price rate each of a provider's API keys
 // bills at (@tnt12231 on X: one relay, keys in groups at 0.5× and 1.2×):

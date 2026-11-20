@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/catalog"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // changqiu4890 on Discord: a routing group of chat models (three on a
@@ -19,7 +19,7 @@ import (
 // chat member's images API, never on the other relay's model of that name.
 func TestMixedGroupDrawsOnItsImageMemberOnly(t *testing.T) {
 	s, _ := easeled(t)
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("EIPGAM_PUBLIC_URL", "")
 	t.Cleanup(s.imageStore.running.Wait)
 	var mu sync.Mutex
 	asked := map[string][]string{}
@@ -62,7 +62,7 @@ func TestMixedGroupDrawsOnItsImageMemberOnly(t *testing.T) {
 		t.Fatal("the group doesn't draw")
 	}
 
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/smart-split","prompt":"a magpie"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/smart-split","prompt":"a eipgam"}`)
 	if code != 200 || a.Model != "cpa/gpt-image-2.5" {
 		t.Fatalf("group/smart-split: %d %s", code, raw)
 	}

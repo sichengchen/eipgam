@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // commandCodeInputRefusal is Command Code's answer, byte for byte as #5181
@@ -48,22 +48,22 @@ func commandCodeTakes(t *testing.T, body []byte) bool {
 }
 
 // #5181, #5259: Command Code turned a Codex compaction away for an input
-// item it doesn't take, and magpie passed the 400 to Codex, three times,
+// item it doesn't take, and eipgam passed the 400 to Codex, three times,
 // until the guard held the conversation for 5 minutes. Refused so — as
-// the 400 itself, through another magpie in front of it (as a 400 or its
+// the 400 itself, through another eipgam in front of it (as a 400 or its
 // 502), or in the summary's stream — the summary is asked again with the
 // conversation as text, which Command Code takes, and the subagent's task
 // is in it.
 func TestCodexCompactUnsupportedInputItemAsksAgainAsText(t *testing.T) {
-	remote := `{"error":{"message":` + quote("Remote magpie: Command Code: "+commandCodeInputRefusal) + `,"type":"invalid_request_error"}}`
+	remote := `{"error":{"message":` + quote("Remote eipgam: Command Code: "+commandCodeInputRefusal) + `,"type":"invalid_request_error"}}`
 	for _, tc := range []struct {
 		name   string
 		status int
 		body   string
 	}{
 		{"400", 400, commandCodeInputRefusal},
-		{"another magpie's 400", 400, remote},
-		{"another magpie's 502", 502, remote},
+		{"another eipgam's 400", 400, remote},
+		{"another eipgam's 502", 502, remote},
 		{"stream error", 200, sse(`data: {"type":"error",` + strings.TrimPrefix(commandCodeInputRefusal, "{"))},
 		{"failed response", 200, sse(`data: {"type":"response.failed","response":{"id":"r1","status":"failed",` + strings.TrimPrefix(commandCodeInputRefusal, "{") + `}`)},
 	} {
@@ -103,7 +103,7 @@ func TestCodexCompactUnsupportedInputItemAsksAgainAsText(t *testing.T) {
 	}
 }
 
-// Refused as text too, the summary is magpie's own, the subagent's task
+// Refused as text too, the summary is eipgam's own, the subagent's task
 // and follow-up in it as what was asked, and Codex goes on.
 func TestCodexCompactUnsupportedInputItemCompactsLocally(t *testing.T) {
 	f := &fake{t: t, refuse: func([]byte) (int, string) { return 400, commandCodeInputRefusal }}

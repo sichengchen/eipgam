@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // clientCache owns the marks of an explicitly opted-in Messages request.
@@ -88,7 +88,7 @@ func wantsClientCache(r *http.Request, from provider.Protocol) bool {
 
 // classifierClientCache reports whether a Messages body is Claude Code's
 // auto mode classifier carrying cache marks of its own. Desktop's
-// classifier marks its blocks but knows nothing of magpie's private header
+// classifier marks its blocks but knows nothing of eipgam's private header
 // (#3835): its marks are kept like an opted-in client's, validated as
 // theirs are. The bytes are looked at before the request is parsed, and
 // only a classifier-shaped body carrying a cache_control field is parsed
@@ -153,7 +153,7 @@ func cacheTTL(cc map[string]string) string {
 // ask for, on its tools, its system, its messages or the request itself,
 // "" for one that marks nothing. A Claude bridge run started for it keeps
 // its cache that long (runTTLFor): the client's Claude Code marks as its
-// user picked, an hour only when asked (Linka, a Docker magpie's relay
+// user picked, an hour only when asked (Linka, a Docker eipgam's relay
 // writing an hour's cache for a Mac set to 5m).
 func askedCacheTTL(a *aRequest) string {
 	ttl := ""

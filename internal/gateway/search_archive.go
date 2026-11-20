@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// A search magpie runs with a search API or a plan's own search service
-// is a request of magpie's own, as a model's search is (searchWith): the
+// A search eipgam runs with a search API or a plan's own search service
+// is a request of eipgam's own, as a model's search is (searchWith): the
 // Routing page lists it, naming the API or service and the key or account
 // it went with, Recent calls keeps its request and response, and with the
 // request archive on they are kept as a client's are, its usage row naming
@@ -99,10 +99,10 @@ func (t *searchTee) Read(p []byte) (int, error) {
 }
 
 // notePluginSearch notes, as ctx's ask's exchange, an ask of a plugin's
-// search API, which the plugin host sends: what magpie handed the plugin
+// search API, which the plugin host sends: what eipgam handed the plugin
 // (asked, pluginSearchAsked) and what it gave back, the pages it found or
 // the error it threw, with the status of a refusal. The request the
-// plugin itself made goes from the host, out of magpie's sight.
+// plugin itself made goes from the host, out of eipgam's sight.
 func notePluginSearch(ctx context.Context, spec string, asked map[string]any, got []plugin.SearchPage, err error) {
 	w := searchWireOf(ctx)
 	if w == nil {
@@ -125,7 +125,7 @@ func notePluginSearch(ctx context.Context, spec string, asked map[string]any, go
 	w.sent, w.body, w.status, w.head, w.answer, w.cut = r, body, status, http.Header{"Content-Type": {"application/json"}}, b, false
 }
 
-// pluginSearchAsked is what magpie hands a plugin's search hook, as its
+// pluginSearchAsked is what eipgam hands a plugin's search hook, as its
 // archive says it: the provider, the query, how many pages, the address
 // set (when one is) and the key masked or the account it signs in as.
 func pluginSearchAsked(v provider.SearchVendor, query string, count int, at, key, account string) map[string]any {
@@ -196,8 +196,8 @@ func (s *Server) keepSearch(ctx context.Context, rec *usage.Record, start time.T
 	}
 	where := cmp.Or(rec.Provider, rec.Host, rec.Requested)
 	err := rec.Error
-	// magpie asked, as for a model's search; whose search it was is For
-	rt := Route{Time: start, Agent: "magpie", Kind: "web_search", For: searchFor(ctx),
+	// eipgam asked, as for a model's search; whose search it was is For
+	rt := Route{Time: start, Agent: "eipgam", Kind: "web_search", For: searchFor(ctx),
 		Model: rec.Requested, Provider: where, Order: []Weighed{seat},
 		Tries: []Try{{ID: seat.ID, Model: seat.Model, Start: start, Done: true, Status: rec.Status, Millis: rec.Millis, Error: err}}}
 	rt.CallerKey, rt.CallerKeyName = callerKeyOf(ctx)

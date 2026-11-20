@@ -8,30 +8,30 @@ import (
 // An agent's own subscription first (freefcw on X): Codex, signed in to
 // ChatGPT and started by another app (Mirasim), asked for gpt-6-astra by
 // its bare name. Devin and Cursor served it too, so the name was the group
-// magpie found of it (auto-gpt-6-astra), which put the subscription that
+// eipgam found of it (auto-gpt-6-astra), which put the subscription that
 // renews soonest first: Devin. With found groups off the name went to the
 // first provider in the Providers order that served it, Devin again when
 // it was added first.
 //
 // A bare model's id an agent asks for, which that agent's own subscription
-// in magpie serves (a provider whose Account.Agent is the agent: Codex's
+// in eipgam serves (a provider whose Account.Agent is the agent: Codex's
 // ChatGPT accounts for Codex, Claude's for Claude Code), now goes to that
 // subscription, found groups on or off. What stays as it was:
 //   - a group the user made, or a found one they changed (no longer Auto),
 //     named by the bare id: theirs, routed as they set it;
-//   - a found group magpie set one of the agent's fields to (the gateway's
+//   - a found group eipgam set one of the agent's fields to (the gateway's
 //     SetToGroup asks the agent's record): the user picked it for the agent;
 //   - an id with a provider in it, or a group's ref (auto/<model>,
 //     group/<id>): already where the user said;
-//   - an agent with no subscription of its own in magpie, or one that
+//   - an agent with no subscription of its own in eipgam, or one that
 //     doesn't serve the model.
 //
 // With found groups off, a bare id several providers serve, none of them
 // the asking agent's own subscription, is refused for an agent that has
-// one in magpie (OffSpread): off, magpie picks no vendor for it.
+// one in eipgam (OffSpread): off, eipgam picks no vendor for it.
 
 // ownAgent is whether a provider is agent's own subscription: one of
-// the agent's sign-ins that magpie serves. Plugins sign in as "plugin",
+// the agent's sign-ins that eipgam serves. Plugins sign in as "plugin",
 // never an agent's id.
 func ownAgent(p Provider, agent string) bool {
 	return agent != "" && agent != "plugin" && p.Account != nil && p.Account.Agent == agent
@@ -116,7 +116,7 @@ func ownEntry(entries []Entry, agent, id string) *Entry {
 // OffSpread is the providers' ids ("provider/model") serving a bare model
 // id that a request of agent's goes to none of, while found groups are
 // off: several providers serve it, none of them the agent's own
-// subscription, and the agent has one in magpie. Off, magpie picks none of
+// subscription, and the agent has one in eipgam. Off, eipgam picks none of
 // them for the agent (freefcw on X); the request names one. nil when found
 // groups are on, the id isn't bare or names a group of the user's, one
 // provider serves it, or the agent has no subscription of its own here.

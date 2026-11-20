@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
 // fakePlugins has the plugins installed be specs (none on when off), each
@@ -101,11 +101,11 @@ func TestPluginToolsInHub(t *testing.T) {
 			t.Errorf("search's schema: %s", x.Spec["inputSchema"])
 		}
 	}
-	res, err := hub.Call(ctx, "claude", "search1api", "search", json.RawMessage(`{"query":"magpie"}`))
-	if err != nil || hubText(t, res) != `found {"query":"magpie"}` {
+	res, err := hub.Call(ctx, "claude", "search1api", "search", json.RawMessage(`{"query":"eipgam"}`))
+	if err != nil || hubText(t, res) != `found {"query":"eipgam"}` {
 		t.Fatalf("search: %s %v", res, err)
 	}
-	if want := `@magpie-community/tools-search1api search {"query":"magpie"} claude`; len(f.ran) != 1 || f.ran[0] != want {
+	if want := `@magpie-community/tools-search1api search {"query":"eipgam"} claude`; len(f.ran) != 1 || f.ran[0] != want {
 		t.Errorf("ran %q, want %q", f.ran, want)
 	}
 	if _, err := hub.Call(ctx, "codex", "search1api", "search", json.RawMessage(`{}`)); err == nil || !strings.Contains(err.Error(), "isn't switched on for codex") {

@@ -10,11 +10,11 @@ import (
 	"testing/synctest"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/sessions"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
-// linkaww on Discord, a magpie in Docker in gateway mode: Usage › Sessions
+// linkaww on Discord, a eipgam in Docker in gateway mode: Usage › Sessions
 // was all but empty. Its list is the sessions whose keys the stats name
 // (st.keys), and those were only the sessions read from this computer's
 // files: one that came through the gateway alone, which in gateway mode

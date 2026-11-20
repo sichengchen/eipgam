@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/edit"
+	"github.com/sichengchen/eipgam/internal/filememo"
+	"github.com/sichengchen/eipgam/internal/lastgood"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// The stash remembers what an agent's config said before magpie pointed it
+// The stash remembers what an agent's config said before eipgam pointed it
 // at the gateway, so switching back restores it instead of guessing.
 //
 // stash.json holds every agent's originals, so a change to it is read,
@@ -24,7 +24,7 @@ import (
 // two changes at once, or one cut short, never leave it half there, which
 // the next change read as no stash and wrote back over every agent's. A
 // file that doesn't parse (edited by hand, or half written by an older
-// magpie) is copied aside before it is written over, so what it held can
+// eipgam) is copied aside before it is written over, so what it held can
 // still be got back.
 var stashMu sync.Mutex
 
@@ -140,7 +140,7 @@ func peek(keys ...string) map[string]string {
 
 // forgetValues takes peeked values out of the stash once the write that
 // replaces them has gone through, each only while it is still the one
-// peeked: a value written since, here or by another magpie, stays stashed.
+// peeked: a value written since, here or by another eipgam, stays stashed.
 func forgetValues(peeked map[string]string) {
 	if len(peeked) == 0 {
 		return

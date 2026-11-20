@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [], posts = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, id, name, posts));
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://eipgam.test/?view=providers");
           await page.locator(".row.provider", { hasText: name }).first().click();
           await page.locator(".editor .acc").first().waitFor();
           const row = page.locator(".editor .accts .acc.add", { hasText: label[lang][0] });

@@ -23,7 +23,7 @@ const MODES = [
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 400000,
+    theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/eipgam", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 400000,
   };
   let mode = "bypassPermissions";
   const claude = () => {
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=agents");
+      await page.goto("http://eipgam.test/?view=agents");
       const agent = page.locator('.row.agent[data-id="claude"]');
       await agent.waitFor();
       await openAgentSettings(page, "claude");

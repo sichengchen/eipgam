@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // A defective upstream stitches the fragments of a streamed tool call's
@@ -81,7 +81,7 @@ func TestRelayedToolArgsLoseStitchedCR(t *testing.T) {
 }
 
 // TestTranslatedToolArgsLoseStitchedCR is the same call from an upstream
-// magpie speaks Chat to, translated for the Messages client.
+// eipgam speaks Chat to, translated for the Messages client.
 func TestTranslatedToolArgsLoseStitchedCR(t *testing.T) {
 	fresh(t)
 	f := &fake{t: t, reply: sse(

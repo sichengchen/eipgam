@@ -28,7 +28,7 @@ import (
 //
 // The subagent gets the file's name, description and prompt (the body).
 // Every other key is left out: an agent's tools, model, colour, emoji and
-// the like are not magpie's to write into every agent alike, and the
+// the like are not eipgam's to write into every agent alike, and the
 // subagent then uses what its agent has.
 //
 // Each one remembers the file it came from (From) and what it was then

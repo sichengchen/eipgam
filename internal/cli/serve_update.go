@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
 // serveUpdating is an update serve was asked for and is putting in.
@@ -35,9 +35,9 @@ var servePutIn = func(ctx context.Context, rel *update.Release, app, exe string)
 // serveLatest is update.Latest; a var for tests.
 var serveLatest = update.Latest
 
-// serveUpdateAsked answers provider.RemoteUpdatePath for `magpie serve`,
-// as the app's updater does (gui's updateAsked): another magpie using
-// this one as its Remote magpie updated to want. The new version is put
+// serveUpdateAsked answers provider.RemoteUpdatePath for `eipgam serve`,
+// as the app's updater does (gui's updateAsked): another eipgam using
+// this one as its Remote eipgam updated to want. The new version is put
 // in where serve runs from, and serve restarts into it once the gateway
 // is idle (serveFollow). Unattended, it never asks for a password: a
 // folder it can't write is said, as is a container (whose image is
@@ -85,17 +85,17 @@ func serveUpdateAsked(follow *serveFollow) func(want string) provider.RemoteUpda
 			defer cancel()
 			rel, err := serveLatest(ctx)
 			if err != nil {
-				log.Println("update asked by a magpie using this one:", err)
+				log.Println("update asked by a eipgam using this one:", err)
 				return
 			}
 			if !update.Newer(rel.Version, version) {
 				return
 			}
 			if err := servePutIn(ctx, rel, app, exe); err != nil {
-				log.Println("update asked by a magpie using this one:", err)
+				log.Println("update asked by a eipgam using this one:", err)
 				return
 			}
-			log.Printf("updated to %s, asked by a magpie using this one; restarting once idle", rel.Version)
+			log.Printf("updated to %s, asked by a eipgam using this one; restarting once idle", rel.Version)
 		}()
 		return provider.RemoteUpdate{State: "updating"}
 	}

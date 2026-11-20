@@ -19,7 +19,7 @@ function server(lang, posts) {
   const fixed = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", dock: false, dockWindow: false, proxy: "",
     redact: true, redactPersonal: false, redactWords: [], codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "",
-    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/magpie",
+    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/eipgam",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, turnDoneAlert: 0, featuresOff: [],
   };
@@ -80,7 +80,7 @@ async function open(engine, width, lang, posts, t) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, posts));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings&tab=usage");
+  await page.goto("http://eipgam.test/?view=settings&tab=usage");
   await settingsDrawn(page);
   return { page, errors };
 }

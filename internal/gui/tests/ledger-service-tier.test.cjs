@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", serve(lang));
-          await p.goto("http://magpie.test/?view=usage");
+          await p.goto("http://eipgam.test/?view=usage");
           const say = (s, v) => p.evaluate(([s, v]) => t(s, v), [s, v]);
           const label = await say("Service tier");
           if (lang !== "en") assert.notEqual(label, "Service tier", "translated");

@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/sichengchen/eipgam/internal/plugin"
 )
 
-// Google AI Studio's plugin (@dorokuma/magpie-gemini-web 0.15.3,
+// Google AI Studio's plugin (@dorokuma/eipgam-gemini-web 0.15.3,
 // lib/studio.mjs accountUsage) tells an account's cooldowns as windows
 // named after the model (the backend's model_id), used 100 until the
 // cooldown ends, with no model said. AI Studio limits each model's day on

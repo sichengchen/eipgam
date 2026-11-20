@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// The bounded patterns magpie had, each beside what replaced it.
+// The bounded patterns eipgam had, each beside what replaced it.
 var pairs = []struct {
 	bounded, open string
 	max           int

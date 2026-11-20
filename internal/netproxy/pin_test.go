@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/mtls"
+	"github.com/sichengchen/eipgam/internal/mtls"
 )
 
 func pinServer(t *testing.T, answer string) *httptest.Server {
@@ -107,8 +107,8 @@ func freshCert(t *testing.T) tls.Certificate {
 	}
 	tmpl := &x509.Certificate{
 		SerialNumber: big.NewInt(time.Now().UnixNano()),
-		Subject:      pkix.Name{CommonName: "api.magpie.local"},
-		DNSNames:     []string{"api.magpie.local"},
+		Subject:      pkix.Name{CommonName: "api.eipgam.local"},
+		DNSNames:     []string{"api.eipgam.local"},
 		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1)},
 		NotBefore:    time.Now().Add(-time.Hour),
 		NotAfter:     time.Now().Add(24 * time.Hour),

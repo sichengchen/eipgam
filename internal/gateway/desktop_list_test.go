@@ -7,16 +7,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/sichengchen/eipgam/internal/provider"
+	"github.com/sichengchen/eipgam/internal/settings"
+	"github.com/sichengchen/eipgam/internal/usage"
 )
 
 // moer2831 on Discord: a model picked for one of Claude Desktop's tiers ran
 // in its Code tab on Claude Code's generic prompt, not the one of the
 // Claude model of that tier ("直接蠢了一个度"). Desktop 4.29 hands Claude Code
 // behavesAs only from a profile's inferenceModels, so while a tier is
-// picked magpie lists Desktop's models there: every row /v1/models gives
+// picked eipgam lists Desktop's models there: every row /v1/models gives
 // Desktop, by its id and in its order, a pick tagged with its tier and
 // run as that tier's newest Claude model, a Claude model as itself.
 // Nothing picked, no list: Desktop finds the models on its own, as before.
@@ -154,7 +154,7 @@ func TestDesktopInferenceModels(t *testing.T) {
 }
 
 // chengming0v0 on Discord (v0.1.2806, Claude Desktop): once a tier was
-// picked, the models of an API-key provider read "mythos-magpie-0167851852"
+// picked, the models of an API-key provider read "mythos-eipgam-0167851852"
 // and the like in Desktop's menu. A profile's inferenceModels whose names
 // aren't bare tier words makes Desktop skip /v1/models
 // (adminListObviatesDiscovery, 4.4212), so an entry with no labelOverride
@@ -302,12 +302,12 @@ func TestDesktopInferenceModelsCatalogNamesClash(t *testing.T) {
 // magpieAliasAsked on every form claudeLooking makes.
 func TestUsageKnowsEveryAliasForm(t *testing.T) {
 	for _, id := range []string{
-		"anthropic/magpie-" + aliasNumber("sub/m"),
-		"mythos-magpie-" + aliasNumber("sub/m"),
-		"claude-magpie-" + aliasNumber("sub/m"),
-		"magpie-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5",
-		"magpie-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5[1m]",
-		"claude-opus-5-5", "gpt-6", "magpie",
+		"anthropic/eipgam-" + aliasNumber("sub/m"),
+		"mythos-eipgam-" + aliasNumber("sub/m"),
+		"claude-eipgam-" + aliasNumber("sub/m"),
+		"eipgam-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5",
+		"eipgam-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5[1m]",
+		"claude-opus-5-5", "gpt-6", "eipgam",
 	} {
 		if got, want := usage.MagpieAlias(id), magpieAliasAsked(id); got != want {
 			t.Errorf("usage.MagpieAlias(%q) = %v, gateway says %v", id, got, want)

@@ -95,7 +95,7 @@ async function open(engine, routes) {
   page.setDefaultTimeout(8000);
   page.setDefaultNavigationTimeout(60000);
   await page.route("**/*", serve(routes));
-  await page.goto("http://magpie.test/?view=routing");
+  await page.goto("http://eipgam.test/?view=routing");
   await page.locator(".rt-req").first().waitFor();
   await page.locator(".rt-ctx .ctx-card").waitFor();
   await page.waitForTimeout(400);

@@ -5,19 +5,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/sichengchen/eipgam/internal/settings"
 )
 
 // retryCapped bounds the Retry-After an agent is told, when Settings'
 // RetryAfterCap is set (#5371, tlerbao): a plan's quota running out rests
-// its account inside magpie until the plan's reset, hours away, and that
+// its account inside eipgam until the plan's reset, hours away, and that
 // horizon went to the agent as its wait. An agent with its own fallback
 // chain (OpenCode clamps one wait at 900s and asks the same model three
 // times) then sat about 45 minutes before it moved on.
 //
-// It is the one place every answer leaves the gateway: magpie's own
+// It is the one place every answer leaves the gateway: eipgam's own
 // turn-aways, a vendor's Retry-After passed on (keepRetry) and the
-// limits' 429s alike. What magpie reads to rest an account (the held
+// limits' 429s alike. What eipgam reads to rest an account (the held
 // try's header, restAfter) is read before here, so the account rests
 // exactly as long either way. Unset, nothing changes.
 func retryCapped(next http.Handler) http.Handler {

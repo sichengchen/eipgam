@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
-// wilsonxuuuu on X: Codex's requests for a remote magpie's auto group
+// wilsonxuuuu on X: Codex's requests for a remote eipgam's auto group
 // (cloud/auto/gpt-6.1-sol, the remote on 0.1.3295) were held 30s "in no
-// wait magpie knows of" and stopped, and the report pasted in the tweet
+// wait eipgam knows of" and stopped, and the report pasted in the tweet
 // was cut before its goroutines. A request held in a step that is no
 // named wait (here a lock routing needs, held and never let go) has a
 // report that says by name where the request itself stood, in its first
@@ -23,7 +23,7 @@ func TestHeldReportSaysWhereItStood(t *testing.T) {
 	fresh(t)
 	unroutedLimits(t, 20*time.Millisecond, time.Hour)
 	unknownLimit(t, 300*time.Millisecond)
-	// the remote magpie answers slowly, as an old one far off would
+	// the remote eipgam answers slowly, as an old one far off would
 	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(io.Discard, r.Body)
 		select {
@@ -39,7 +39,7 @@ func TestHeldReportSaysWhereItStood(t *testing.T) {
 		io.WriteString(w, "event: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\",\"output\":[]}}\n\n")
 	}))
 	t.Cleanup(remote.Close)
-	if err := provider.Save(provider.Provider{ID: "cloud", Name: "Remote magpie", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-x",
+	if err := provider.Save(provider.Provider{ID: "cloud", Name: "Remote eipgam", Preset: provider.RemoteMagpiePreset, Key: "sk-eipgam-x",
 		Chat: remote.URL + "/v1", Models: []string{"auto/gpt-6.1-sol"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,7 @@ func TestHeldReportSaysWhereItStood(t *testing.T) {
 func TestHeldOfFindsItsGoroutine(t *testing.T) {
 	dump := "goroutine 12 [running]:\nmain.x(0x1)\n\t/a.go:1 +0x2\n\n" +
 		"goroutine 1 [sync.Mutex.Lock, 2 minutes]:\nsync.(*Mutex).Lock(...)\n\t/go/sync/mutex.go:90\n" +
-		"github.com/yetone/magpie/internal/gateway.(*Server).pick(0xc000123, {0x10, 0x2})\n\t/m/internal/gateway/x.go:7 +0x1c\n" +
+		"github.com/sichengchen/eipgam/internal/gateway.(*Server).pick(0xc000123, {0x10, 0x2})\n\t/m/internal/gateway/x.go:7 +0x1c\n" +
 		"created by net/http.(*Server).Serve in goroutine 9\n\t/go/net/http/server.go:3 +0x5\n"
 	got := heldOf(dump, 1)
 	if got.at != "gateway.(*Server).pick (sync.Mutex.Lock, 2 minutes)" {

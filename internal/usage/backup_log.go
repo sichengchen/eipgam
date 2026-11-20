@@ -1,7 +1,7 @@
 package usage
 
 // The usage log in a backup file (JasonLeeForOnly on Discord, who moved
-// magpie to a new server with backup and restore and lost every call's
+// eipgam to a new server with backup and restore and lost every call's
 // history): LogBackup packs usage.jsonl's lines, gzipped, and MergeLog
 // adds the ones this computer's log doesn't have yet. A line is the
 // call's record as it was written, so a line already here, from an

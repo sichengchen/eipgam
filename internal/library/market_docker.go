@@ -3,14 +3,14 @@ package library
 import (
 	"strings"
 
-	"github.com/yetone/magpie/internal/lazyre"
+	"github.com/sichengchen/eipgam/internal/lazyre"
 )
 
 // A registry entry's runtimeArguments for an OCI package are docker run's
 // own options, written by whoever published the entry; anyone can publish
 // to the MCP registry the market searches, and the market shows such a
 // server as "docker" alone. Taken whole, `--network host` puts the
-// container on this computer's loopback, where magpie's gateway and its
+// container on this computer's loopback, where eipgam's gateway and its
 // GUI API take a request as the owner's, and `--privileged`, a bind mount
 // of / or of docker.sock, `--pid host` or `--env-file ~/.aws/…` reach past
 // the container to the computer. So an option is taken only when it keeps

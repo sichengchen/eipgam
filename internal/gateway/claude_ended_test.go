@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/sichengchen/eipgam/internal/provider"
 )
 
 // endedFixture is a run of the bridge's that parked on the client's
@@ -36,7 +36,7 @@ func newEndedFixture(t *testing.T, b *subscriptionBridge, token string) *endedFi
 	lines := []string{
 		`{"type":"user","uuid":"u1","sessionId":"` + sid + `"}`,
 		`{"type":"assistant","uuid":"a-words","sessionId":"` + sid + `","message":{"id":"msg_1","content":[{"type":"text","text":"I will ask."}]}}`,
-		`{"type":"assistant","uuid":"a-call","sessionId":"` + sid + `","message":{"id":"msg_1","content":[{"type":"tool_use","id":"toolu_ask","name":"mcp__magpie__AskUserQuestion"}]}}`,
+		`{"type":"assistant","uuid":"a-call","sessionId":"` + sid + `","message":{"id":"msg_1","content":[{"type":"tool_use","id":"toolu_ask","name":"mcp__eipgam__AskUserQuestion"}]}}`,
 		`{"type":"cost-state","sessionId":"` + sid + `"}`,
 	}
 	if err := os.WriteFile(filepath.Join(dir, sid+".jsonl"), []byte(strings.Join(lines, "\n")+"\n"), 0o600); err != nil {
@@ -208,9 +208,9 @@ func TestClaudeEndedRunsSessionsAreBounded(t *testing.T) {
 	})
 }
 
-// recih (#6528, case 2): a tunnel dropped mid-reply, magpie heard the
+// recih (#6528, case 2): a tunnel dropped mid-reply, eipgam heard the
 // client go away and ended its interactive run (letGo: the interactive
-// mode can't be taken back), and the client's own magpie retried the
+// mode can't be taken back), and the client's own eipgam retried the
 // request. The retry was told the whole conversation by a new Claude Code
 // (125K written); it goes on in a branch of the ended run's session, cut
 // before the turn, told only the turn.
@@ -242,7 +242,7 @@ func TestClaudeTurnSentAgainAfterItsRunEndedBranchesOffItsSession(t *testing.T) 
 	deadline := time.Now().Add(10 * time.Second)
 	for !strings.Contains(h.read(), "and run the tests") || h.heard() == firstTold {
 		if time.Now().After(deadline) {
-			t.Fatalf("the run was never told the turn:\n%s\nmagpie log:\n%s", h.read(), logs.String())
+			t.Fatalf("the run was never told the turn:\n%s\neipgam log:\n%s", h.read(), logs.String())
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
@@ -262,7 +262,7 @@ func TestClaudeTurnSentAgainAfterItsRunEndedBranchesOffItsSession(t *testing.T) 
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	// the client's magpie sends it again
+	// the client's eipgam sends it again
 	if again := h.ask(conv); again == "" {
 		t.Fatal("the retry was answered nothing")
 	}
@@ -284,7 +284,7 @@ func TestClaudeTurnSentAgainAfterItsRunEndedBranchesOffItsSession(t *testing.T) 
 		}
 	}
 	if branch != 1 || lead != 1 {
-		t.Fatalf("%d runs branched, %d started anew, want one of each; magpie log:\n%s", branch, lead, logs.String())
+		t.Fatalf("%d runs branched, %d started anew, want one of each; eipgam log:\n%s", branch, lead, logs.String())
 	}
 	if strings.Contains(logs.String(), "from a transcript of it") {
 		t.Errorf("the retry's run was told the conversation from a transcript:\n%s", logs.String())

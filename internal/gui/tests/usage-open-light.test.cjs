@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_OPEN_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.EIPGAM_OPEN_ASSETS || path.resolve(__dirname, "../assets");
 const H = 3600e3;
 const iso = (ms) => new Date(ms).toISOString();
 
@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const gate = { held: Promise.resolve() };
       await page.route("**/*", serve(lang, fixtures(Date.now()), gate));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://eipgam.test/");
       await page.locator('#nav button[data-view="usage"]').click();
       await page.locator(".subscription-card .quota-curve").first().waitFor();
       // both accounts share Codex's card, the second's curve behind its More

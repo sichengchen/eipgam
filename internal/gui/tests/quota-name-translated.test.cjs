@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A window's name is what magpie translates; its display is shown as it came
+// A window's name is what eipgam translates; its display is shown as it came
 // (quotaCount returns w.display for a window with no limit). A plugin that
 // puts its sentence in the display instead keeps the card English whatever
 // the interface's language is — the ZCode plugin's claim line was one
@@ -28,7 +28,7 @@ const quotaOf = (line) => [
     provider: "zcode", name: "ZCode", icon: "zcode", plan: "GLM Coding Pro", user: "ada@example.com",
     windows: [
       { name: "5 hours", used: 25, resetsAt: new Date(Date.now() + 36e5).toISOString() },
-      // the plugin's line: a sentence magpie knows, and a display of its own
+      // the plugin's line: a sentence eipgam knows, and a display of its own
       line,
     ],
   },
@@ -56,7 +56,7 @@ function serve(lang, line) {
   };
 }
 
-// what each language's name reads as; every language magpie has, so a long
+// what each language's name reads as; every language eipgam has, so a long
 // one can't be added later without this failing
 const claimWords = {
   en: CLAIM,
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, line));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://eipgam.test/?view=usage");
         const card = page.locator(".subscription-card", { hasText: "ZCode" });
         await card.waitFor();
         const labels = await card.locator(".quota-labels > span").allTextContents();

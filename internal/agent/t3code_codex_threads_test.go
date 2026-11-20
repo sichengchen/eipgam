@@ -40,11 +40,11 @@ func codexThreadBy(t *testing.T, dir, id, p, originator, model string) string {
 
 // xxxxpouqqs on X: "t3code 每次重新会话都出现类似于 The 'codex-2/gpt-6.1-sol'
 // model is not supported when using Codex with a ChatGPT account". T3
-// Code's magpie · Codex instance runs Codex in ~/.codex on magpie by -c
-// model_provider alone, so config.toml names no magpie and its threads
-// were moved onto OpenAI at magpie's next Sync (bringBack); Codex resumes
-// a thread on the provider it was started on, and T3 sent magpie's model
-// to ChatGPT. T3's threads stay on magpie, those an earlier magpie moved
+// Code's eipgam · Codex instance runs Codex in ~/.codex on eipgam by -c
+// model_provider alone, so config.toml names no eipgam and its threads
+// were moved onto OpenAI at eipgam's next Sync (bringBack); Codex resumes
+// a thread on the provider it was started on, and T3 sent eipgam's model
+// to ChatGPT. T3's threads stay on eipgam, those an earlier eipgam moved
 // come back, and the Codex CLI's still move to where Codex lists them.
 func TestT3CodexThreadsStayOnMagpie(t *testing.T) {
 	const (
@@ -53,13 +53,13 @@ func TestT3CodexThreadsStayOnMagpie(t *testing.T) {
 		t3Moved  = "019a0000-0000-7000-8000-0000000000b3"
 		t3Theirs = "019a0000-0000-7000-8000-0000000000b4"
 	)
-	table := "\n[model_providers.magpie]\nname = \"magpie\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n"
+	table := "\n[model_providers.eipgam]\nname = \"eipgam\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n"
 	t3With := func(t *testing.T, home, config string) {
 		t.Helper()
 		t.Setenv("T3CODE_HOME", "")
 		d := filepath.Join(home, ".t3", "userdata")
 		os.MkdirAll(d, 0o755)
-		if err := os.WriteFile(filepath.Join(d, "settings.json"), []byte(`{"providerInstances":{"magpie-codex":{"driver":"codex","enabled":true,"config":{`+config+`"launchArgs":"-c model_provider=\"magpie\""}}}}`), 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(d, "settings.json"), []byte(`{"providerInstances":{"eipgam-codex":{"driver":"codex","enabled":true,"config":{`+config+`"launchArgs":"-c model_provider=\"eipgam\""}}}}`), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -67,27 +67,27 @@ func TestT3CodexThreadsStayOnMagpie(t *testing.T) {
 		home, _ := codexHome(t, "", "model = \"gpt-5.4\"\n"+table)
 		dir := filepath.Join(home, ".codex")
 		t3With(t, home, "")
-		minePath := codexThreadBy(t, dir, t3Mine, "magpie", "T3 Code", "codex-2/gpt-6.1-sol")
-		codexThreadBy(t, dir, cliMine, "magpie", "codex_cli_rs", "codex-2/gpt-6.1-sol")
+		minePath := codexThreadBy(t, dir, t3Mine, "eipgam", "T3 Code", "codex-2/gpt-6.1-sol")
+		codexThreadBy(t, dir, cliMine, "eipgam", "codex_cli_rs", "codex-2/gpt-6.1-sol")
 		codexThreadBy(t, dir, t3Moved, "openai", "T3 Code", "codex-2/gpt-6.1-sol")
 		codexThreadBy(t, dir, t3Theirs, "openai", "T3 Code", "gpt-5.4")
 		codex(home).Sync()
-		for id, want := range map[string]string{t3Mine: "magpie", cliMine: "openai", t3Moved: "magpie", t3Theirs: "openai"} {
+		for id, want := range map[string]string{t3Mine: "eipgam", cliMine: "openai", t3Moved: "eipgam", t3Theirs: "openai"} {
 			if p := codexRowOn(t, dir, id); p != want {
 				t.Errorf("thread %s on %q, want %q", id, p, want)
 			}
 		}
-		if b, _ := os.ReadFile(minePath); !strings.Contains(string(b), `"model_provider":"magpie"`) {
+		if b, _ := os.ReadFile(minePath); !strings.Contains(string(b), `"model_provider":"eipgam"`) {
 			t.Fatalf("T3's rollout moved:\n%s", b)
 		}
 	})
 	t.Run("in another Codex home", func(t *testing.T) {
 		// the instance runs Codex in ~/.codex-t3: ~/.codex's threads on
-		// magpie are no T3 thread of magpie's, and move as before
+		// eipgam are no T3 thread of eipgam's, and move as before
 		home, _ := codexHome(t, "", "model = \"gpt-5.4\"\n"+table)
 		dir := filepath.Join(home, ".codex")
 		t3With(t, home, `"homePath":"~/.codex-t3",`)
-		codexThreadBy(t, dir, t3Mine, "magpie", "T3 Code", "codex-2/gpt-6.1-sol")
+		codexThreadBy(t, dir, t3Mine, "eipgam", "T3 Code", "codex-2/gpt-6.1-sol")
 		codex(home).Sync()
 		if p := codexRowOn(t, dir, t3Mine); p != "openai" {
 			t.Errorf("thread on %q, want openai", p)

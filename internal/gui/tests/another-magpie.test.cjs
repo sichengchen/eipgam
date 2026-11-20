@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Settings › Network and sharing › Another magpie (xuanwo on X: a magpie on a
+// Settings › Network and sharing › Another eipgam (xuanwo on X: a eipgam on a
 // server, its routing and usage, opened from the desktop app). The address
 // and the key are posted to /api/remote, which opens the window; an error
 // from it is said in the page's language; once kept, the key field shows it
@@ -30,14 +30,14 @@ function server(lang, web, posts, gets) {
       if (req.method() === "GET") { gets.n++; return json(kept); }
       const body = JSON.parse(req.postData());
       posts.push(body);
-      if (body.key === "wrong-wrong-wrong-wrong") return json({ error: "that magpie turned the key away: use the key in the link it printed (MAGPIE_WEB_KEY, or the k= in it)" }, 400);
-      if (/^http:\/\/magpie\.example\.com/.test(body.url)) return json({ error: "magpie.example.com is a name on the internet: open it over https://, or the key crosses the network unencrypted" }, 400);
+      if (body.key === "wrong-wrong-wrong-wrong") return json({ error: "that eipgam turned the key away: use the key in the link it printed (EIPGAM_WEB_KEY, or the k= in it)" }, 400);
+      if (/^http:\/\/eipgam\.example\.com/.test(body.url)) return json({ error: "eipgam.example.com is a name on the internet: open it over https://, or the key crosses the network unencrypted" }, 400);
       kept = { url: body.url.replace(/\?k=.*/, ""), hasKey: true };
       return json(kept);
     }
     if (url.pathname === "/api/remote/forget") { posts.push("forget"); kept = { url: "", hasKey: false }; return json(kept); }
     if (url.pathname === "/api/web-page") return json({ mode: "", port: 3430, serving: false });
-    if (url.pathname === "/api/settings") return json({ lang, theme: "light", gateway: "http://127.0.0.1:3425", lan: false, lanURLs: [], version: "0.1.900", dir: "/config/magpie", fx: { rate: 7.2, at: new Date().toISOString(), stale: false } });
+    if (url.pathname === "/api/settings") return json({ lang, theme: "light", gateway: "http://127.0.0.1:3425", lan: false, lanURLs: [], version: "0.1.900", dir: "/config/eipgam", fx: { rate: 7.2, at: new Date().toISOString(), stale: false } });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -49,14 +49,14 @@ function server(lang, web, posts, gets) {
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Another magpie opens a server's magpie with its key", async (t) => {
+  test(engine + ": Another eipgam opens a server's eipgam with its key", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const pages = [];
     t.after(async () => {
       if (process.env.ARTIFACT_DIR) {
         await fs.mkdir(process.env.ARTIFACT_DIR, { recursive: true });
-        for (const [i, p] of pages.entries()) await p.screenshot({ path: path.join(process.env.ARTIFACT_DIR, `${engine}-another-magpie-${i}.png`), fullPage: true });
+        for (const [i, p] of pages.entries()) await p.screenshot({ path: path.join(process.env.ARTIFACT_DIR, `${engine}-another-eipgam-${i}.png`), fullPage: true });
       }
       await browser.close();
     });
@@ -84,8 +84,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const head = page.locator("#remoteHead");
         const list = page.locator("#remoteList");
         await list.locator(".row.pref").first().waitFor();
-        assert.equal((await head.textContent()).trim(), await tr("Another magpie"));
-        if (lang !== "en") assert.notEqual(await tr("Another magpie"), "Another magpie", "translated");
+        assert.equal((await head.textContent()).trim(), await tr("Another eipgam"));
+        if (lang !== "en") assert.notEqual(await tr("Another eipgam"), "Another eipgam", "translated");
         assert.equal(await list.locator(".row.pref").count(), 2);
         const addr = list.locator("input.remote-url"), key = list.locator("input.remote-key");
         assert.equal(await key.getAttribute("type"), "password");
@@ -93,25 +93,25 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // a name on the internet over http: said in the page's language
         await reach(page, addr);
-        await addr.fill("http://magpie.example.com:3430");
+        await addr.fill("http://eipgam.example.com:3430");
         await key.fill(KEY);
         const openBtn = list.getByRole("button", { name: await tr("Open"), exact: true });
         await openBtn.click();
-        await page.locator("#status").filter({ hasText: await tr("{host} is a name on the internet: open it over https://, or the key crosses the network unencrypted", { host: "magpie.example.com" }) }).waitFor();
+        await page.locator("#status").filter({ hasText: await tr("{host} is a name on the internet: open it over https://, or the key crosses the network unencrypted", { host: "eipgam.example.com" }) }).waitFor();
         // a wrong key
-        await addr.fill("https://magpie.example.com");
+        await addr.fill("https://eipgam.example.com");
         await key.fill("wrong-wrong-wrong-wrong");
         await openBtn.click();
-        await page.locator("#status").filter({ hasText: await tr("That magpie turned the key away: use the key in the link it printed") }).waitFor();
+        await page.locator("#status").filter({ hasText: await tr("That eipgam turned the key away: use the key in the link it printed") }).waitFor();
         // the link it printed, with Enter
         await key.fill("");
-        await addr.fill("https://magpie.example.com/?k=" + KEY);
+        await addr.fill("https://eipgam.example.com/?k=" + KEY);
         await addr.press("Enter");
-        await until(page, () => posts.some((p) => p.url === "https://magpie.example.com/?k=" + KEY));
-        assert.deepEqual(posts.at(-1), { url: "https://magpie.example.com/?k=" + KEY, key: "" });
+        await until(page, () => posts.some((p) => p.url === "https://eipgam.example.com/?k=" + KEY));
+        assert.deepEqual(posts.at(-1), { url: "https://eipgam.example.com/?k=" + KEY, key: "" });
         const forget = list.getByRole("button", { name: await tr("Forget") });
         await forget.waitFor();
-        assert.equal(await addr.inputValue(), "https://magpie.example.com/", "kept without its key");
+        assert.equal(await addr.inputValue(), "https://eipgam.example.com/", "kept without its key");
         assert.equal(await key.inputValue(), "", "the key is never put back");
         assert.equal(await key.getAttribute("placeholder"), await tr("Kept"));
         assert.equal(await page.locator("#setPage-network select").count(), 0, "no native select");
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const { page, errors, tr } = await open("de", false, 360);
       const list = page.locator("#remoteList");
       await list.locator("input.remote-url").waitFor();
-      await list.locator("input.remote-url").fill("https://magpie.example.com/?k=" + KEY);
+      await list.locator("input.remote-url").fill("https://eipgam.example.com/?k=" + KEY);
       await list.getByRole("button", { name: await tr("Open"), exact: true }).click();
       await list.getByRole("button", { name: await tr("Forget") }).waitFor();
       const over = await list.evaluate((l) => [...l.querySelectorAll(".row.pref")].filter((r) => r.scrollWidth > r.clientWidth + 1 || r.getBoundingClientRect().right > innerWidth + 1).map((r) => r.textContent.slice(0, 40)));
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(errors, []);
     });
 
-    await t.test("a browser on the page has no Another magpie", async () => {
+    await t.test("a browser on the page has no Another eipgam", async () => {
       const { page, errors, gets } = await open("en", true);
       await page.locator("#portList .row").first().waitFor();
       assert.equal(await page.locator("#remoteHead").isVisible(), false);

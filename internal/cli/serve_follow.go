@@ -7,22 +7,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/sichengchen/eipgam/internal/gateway"
+	"github.com/sichengchen/eipgam/internal/update"
 )
 
-// `magpie serve` follows an update put in where it runs from. An update
-// is put in by another magpie: `magpie web` or the app updating itself
-// from the same program, or `magpie update` in a terminal. None of them
-// restarted the gateway `magpie serve` keeps, as the service `magpie
+// `eipgam serve` follows an update put in where it runs from. An update
+// is put in by another eipgam: `eipgam web` or the app updating itself
+// from the same program, or `eipgam update` in a terminal. None of them
+// restarted the gateway `eipgam serve` keeps, as the service `eipgam
 // daemon install` writes, a systemd user unit or a launch agent (acezan on
-// Discord: `magpie web` as a system unit updated itself, and the user
-// unit's serve ran on for good from "magpie.real (deleted)", the page
-// saying an older magpie served the gateway; #4335 on a Mac, where the
+// Discord: `eipgam web` as a system unit updated itself, and the user
+// unit's serve ran on for good from "eipgam.real (deleted)", the page
+// saying an older eipgam served the gateway; #4335 on a Mac, where the
 // old bundle is deleted and TCC turns the process away from Desktop,
 // Documents and Downloads). The updater can't reliably restart it: a
 // system unit doesn't reach the user's systemctl, and the app may not be
-// running at all. So serve looks itself, as the app and magpie web do
+// running at all. So serve looks itself, as the app and eipgam web do
 // (gui's followReplaced): once the program it started from is another
 // file, it waits until the gateway is idle, then runs the new program in
 // its own place, the same process under the same service manager or in
@@ -38,7 +38,7 @@ var (
 	serveFollowTick = 5 * time.Second
 	serveIdleSettle = 10 * time.Second
 	serveWaitMost   = time.Hour
-	// serveDrainMost is how long a restart `magpie update` asked for
+	// serveDrainMost is how long a restart `eipgam update` asked for
 	// waits for what is in flight; then serve restarts anyway
 	serveDrainMost = 10 * time.Minute
 )
@@ -59,7 +59,7 @@ type serveFollow struct {
 
 	mu      sync.Mutex
 	due     time.Time // when the replaced program was first seen
-	asked   time.Time // when `magpie update` asked for the restart while busy
+	asked   time.Time // when `eipgam update` asked for the restart while busy
 	stopped bool
 }
 
@@ -105,7 +105,7 @@ func (f *serveFollow) check(now time.Time) bool {
 	f.mu.Lock()
 	if f.due.IsZero() {
 		f.due = now
-		log.Printf("magpie serve: %s was updated; restarting into it once the gateway is idle", f.exe)
+		log.Printf("eipgam serve: %s was updated; restarting into it once the gateway is idle", f.exe)
 	}
 	waited := now.Sub(f.due)
 	f.mu.Unlock()
@@ -137,7 +137,7 @@ func (f *serveFollow) restartTo() string {
 	return f.exe
 }
 
-// answer is what `magpie update`'s ask (gateway.RestartPath) is told: serve
+// answer is what `eipgam update`'s ask (gateway.RestartPath) is told: serve
 // restarts into what it put in, at once when the gateway is idle (after
 // the answer is out), else once it is, as on its own next look; "current"
 // when nothing was put in where serve runs from, "unsupported" for a build
@@ -162,7 +162,7 @@ func (f *serveFollow) answer(string) gateway.RestartReply {
 	return gateway.RestartReply{State: "waiting", Busy: &b, Drain: int(serveDrainMost / time.Second)}
 }
 
-// answerNow is answer for `magpie update --force`: serve restarts at once,
+// answerNow is answer for `eipgam update --force`: serve restarts at once,
 // whatever is in flight.
 func (f *serveFollow) answerNow(string) gateway.RestartReply {
 	switch {

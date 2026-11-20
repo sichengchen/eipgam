@@ -8,16 +8,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/sichengchen/eipgam/internal/edit"
 )
 
 // Lice9735 on X, the Codex app on Windows: a chat from 25 days before
 // answered "模型提供商不匹配 — 此聊天使用的是 OpenAI，但你当前的提供商
-// 是 magpie。请切换至 OpenAI 以继续", and only a new chat worked. Codex
+// 是 eipgam。请切换至 OpenAI 以继续", and only a new chat worked. Codex
 // had been on a provider table of the user's own (openai-http) before
-// magpie became its provider, so bringOver moved that provider's threads
-// to magpie and left OpenAI's, which the Codex app lists and refuses to
-// go on with on magpie. Now OpenAI's come too, recorded as lendOwn's are
+// eipgam became its provider, so bringOver moved that provider's threads
+// to eipgam and left OpenAI's, which the Codex app lists and refuses to
+// go on with on eipgam. Now OpenAI's come too, recorded as lendOwn's are
 // (codex.lent, to the user's provider): the Disconnect gives them to that
 // provider, where Codex resumes them, and Codex on OpenAI again has them
 // back on OpenAI.
@@ -40,19 +40,19 @@ func TestCodexOpenAIThreadsFollowMagpieFromOwnProvider(t *testing.T) {
 		if err := cx.Fields[0].Set("fake/m1"); err != nil {
 			t.Fatal(err)
 		}
-		if p, _ := edit.GetTOMLTop(cfgPath, "model_provider"); p != "magpie" {
-			t.Fatalf("provider %q, want magpie:\n%s", p, read())
+		if p, _ := edit.GetTOMLTop(cfgPath, "model_provider"); p != "eipgam" {
+			t.Fatalf("provider %q, want eipgam:\n%s", p, read())
 		}
-		for id, want := range map[string]string{plain: "magpie", packed: "magpie", theirs: "magpie"} {
+		for id, want := range map[string]string{plain: "eipgam", packed: "eipgam", theirs: "eipgam"} {
 			if p := codexRowOn(t, dir, id); p != want {
 				t.Errorf("connected: thread %s on %q, want %q", id, p, want)
 			}
 		}
-		if b, _ := os.ReadFile(plainPath); !strings.Contains(string(b), `"model_provider":"magpie"`) {
+		if b, _ := os.ReadFile(plainPath); !strings.Contains(string(b), `"model_provider":"eipgam"`) {
 			t.Fatalf("rollout still on OpenAI, which the Codex app reads for a legacy thread:\n%s", b)
 		}
-		if p := zstMetaProvider(t, packedPath+".zst"); p != "magpie" {
-			t.Fatalf("packed rollout on %q, want magpie", p)
+		if p := zstMetaProvider(t, packedPath+".zst"); p != "eipgam" {
+			t.Fatalf("packed rollout on %q, want eipgam", p)
 		}
 		var l struct {
 			To  string   `json:"to"`
@@ -66,10 +66,10 @@ func TestCodexOpenAIThreadsFollowMagpieFromOwnProvider(t *testing.T) {
 		if err := cx.Sync(); err != nil {
 			t.Fatal(err)
 		}
-		if p := codexRowOn(t, dir, plain); p != "magpie" {
+		if p := codexRowOn(t, dir, plain); p != "eipgam" {
 			t.Fatalf("after a sync: %q", p)
 		}
-		// the Disconnect puts openai-http back, and every thread on magpie
+		// the Disconnect puts openai-http back, and every thread on eipgam
 		// goes there, where Codex resumes it
 		if err := cx.Unwire(); err != nil {
 			t.Fatal(err)
@@ -109,7 +109,7 @@ func TestCodexOpenAIThreadsFollowMagpieFromOwnProvider(t *testing.T) {
 			t.Fatal(err)
 		}
 		cx.Sync()
-		for id, want := range map[string]string{plain: "openai", theirs: "magpie"} {
+		for id, want := range map[string]string{plain: "openai", theirs: "eipgam"} {
 			if p := codexRowOn(t, dir, id); p != want {
 				t.Errorf("thread %s on %q, want %q", id, p, want)
 			}
@@ -142,7 +142,7 @@ func TestCodexThreadsLeftByTheBudgetAskAgain(t *testing.T) {
 	}
 	on := func() (n int) {
 		for _, id := range []string{a, b} {
-			if codexRowOn(t, dir, id) == "magpie" {
+			if codexRowOn(t, dir, id) == "eipgam" {
 				n++
 			}
 		}
@@ -159,7 +159,7 @@ func TestCodexThreadsLeftByTheBudgetAskAgain(t *testing.T) {
 		t.Fatal(err)
 	}
 	if n := on(); n != 2 {
-		t.Fatalf("%d thread(s) on magpie after the next sync, want both", n)
+		t.Fatalf("%d thread(s) on eipgam after the next sync, want both", n)
 	}
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
