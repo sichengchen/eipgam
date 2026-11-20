@@ -80,6 +80,26 @@ async function inRow(ver, btn) {
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
+  test(engine + ": macOS updates are installed by Homebrew", async (t) => {
+    const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
+    t.after(() => browser.close());
+    const command = "brew upgrade --cask sichengchen/tap/eipgam";
+    const ctl = { posts: [], update: {
+      state: "available", current: "0.2.0", latest: "0.2.1", stuck: "package",
+      packaged: { manager: "Homebrew", package: "sichengchen/tap/eipgam", command, cask: true },
+    } };
+    const errors = [];
+    const page = await open(browser, "en", ctl, errors, 900);
+    const about = page.locator("#about");
+    await about.getByText("Update with " + command, { exact: false }).waitFor();
+    assert.equal(await about.getByRole("button", { name: "Download", exact: true }).count(), 0);
+    for (const row of [".update-download-row", ".update-restart-row", ".update-mirror-row"]) {
+      await about.locator(row).waitFor({ state: "hidden" });
+    }
+    assert.deepEqual(ctl.posts, []);
+    assert.deepEqual(errors, []);
+  });
+
   test(engine + ": the update can be fetched from its release page", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());

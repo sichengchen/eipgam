@@ -37,7 +37,7 @@ func TestWhatsNewTellsFailureFromNone(t *testing.T) {
 	n := &whatsNew{}
 
 	j := n.get(context.Background(), true, "en")
-	if j.Error == "" || len(j.Releases) != 0 || j.URL != "https://github.com/sichengchen/eipgam/releases/tag/v0.1.737" {
+	if j.Error == "" || len(j.Releases) != 0 || j.URL != "https://github.com/sichengchen/macos-release/releases/tag/eipgam-v0.1.737" {
 		t.Fatalf("site failing: %+v", j)
 	}
 	// asked again once the site answers: no notes, and no error

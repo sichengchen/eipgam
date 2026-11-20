@@ -18,6 +18,7 @@ import (
 // the binary as it does elsewhere; the desktop app's own binary copied out
 // of its .app still isn't replaced by the terminal build.
 func TestUpdateTakesTheMacTerminalBuild(t *testing.T) {
+	t.Setenv("EIPGAM_UPDATE_FEED", "http://127.0.0.1:1")
 	dir := t.TempDir()
 	exe := filepath.Join(dir, "eipgam")
 	if err := os.WriteFile(exe, []byte("eipgam"), 0o755); err != nil {

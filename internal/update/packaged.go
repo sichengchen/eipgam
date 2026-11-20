@@ -22,12 +22,23 @@ type Packaged struct {
 	Package string `json:"package,omitempty"` // the package's name, when known
 }
 
+const HomebrewCask = "homebrew-cask"
+
+// MacDistribution is the update policy for the default macOS release channel.
+// An explicit local feed still lets source builds exercise the self-updater.
+func MacDistribution(goos string) *Packaged {
+	if goos == "darwin" && Feed() == "" {
+		return &Packaged{Manager: HomebrewCask, Package: "sichengchen/tap/eipgam"}
+	}
+	return nil
+}
+
 // Name is the manager as its users call it.
 func (p *Packaged) Name() string {
 	switch p.Manager {
 	case "dpkg":
 		return "apt"
-	case "homebrew":
+	case "homebrew", HomebrewCask:
 		return "Homebrew"
 	case "nix":
 		return "Nix"
@@ -55,6 +66,8 @@ func (p *Packaged) Command() string {
 		return "sudo dnf upgrade " + pkg
 	case "homebrew":
 		return "brew upgrade " + pkg
+	case HomebrewCask:
+		return "brew upgrade --cask " + pkg
 	case "scoop":
 		return "scoop update " + pkg
 	case "winget":
@@ -68,6 +81,9 @@ func (p *Packaged) Command() string {
 
 // Say is the sentence a terminal is told: who updates this eipgam, and how.
 func (p *Packaged) Say() string {
+	if p.Manager == HomebrewCask {
+		return "update eipgam through Homebrew with " + p.Command()
+	}
 	s := "this eipgam was installed with " + p.Name()
 	if p.Package != "" {
 		s += " (package " + p.Package + ")"

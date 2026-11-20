@@ -51,6 +51,9 @@ func serveUpdateAsked(follow *serveFollow) func(want string) provider.RemoteUpda
 		case !update.Newer(want, version):
 			return provider.RemoteUpdate{State: "current"}
 		}
+		if p := macDistribution(); p != nil {
+			return provider.RemoteUpdate{State: "unsupported", Why: "package", Manager: p.Name(), Command: p.Command()}
+		}
 		if s := settings.Load(); s.NoAutoUpdate || s.NoAutoDownload {
 			return provider.RemoteUpdate{State: "off"}
 		}

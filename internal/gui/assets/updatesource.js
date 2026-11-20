@@ -1,4 +1,10 @@
 // Settings › About’s download mirror.
+window.hideBrewUpdateControls = function () {
+  for (const row of document.querySelectorAll("#about :is(.update-pill-row, .update-download-row, .update-restart-row, .update-mirror-row)")) {
+    row.hidden = true;
+  }
+};
+
 window.setUpdateMirror = function (mirror) {
   return writingPrefs(api("settings/update-mirror", { mirror }))
     .then((ns) => { prefs = ns; mirrorEditing = false; mirrorDraft = mirrorErr = ""; renderSettings(); status(t("Saved"), "ok", 1500); return ns; });

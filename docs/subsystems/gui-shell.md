@@ -1033,16 +1033,19 @@ for a plugin that does not update by itself. See
 
 ### Release source
 
-The app and CLI check the same GitHub repository, `sichengchen/eipgam`.
-[`github.go`](../../internal/update/github.go) reads release metadata and
-notes and selects the configured channel. A download mirror can serve asset
-bytes. [`attest.go`](../../internal/update/attest.go) requires the asset's
-SHA-256 to be attested by the repository's release workflow for that tag
-and filename. If provenance cannot be verified, installation stops before
-the asset is fetched. The native Help, About and feedback links open the
-project repository, its docs or its GitHub issue form.
+The app and CLI read release metadata and notes for `eipgam-v*` tags
+from `sichengchen/macos-release` ([`github.go`](../../internal/update/github.go)).
+On macOS, [`MacDistribution`](../../internal/update/packaged.go) leaves
+installation to the Homebrew cask. Settings → About and remote update
+responses name the `brew upgrade --cask sichengchen/tap/eipgam` command.
+An explicit development feed can still exercise the self-updater. The
+optional privacy-filter helper uses the source repository and
+[`attest.go`](../../internal/update/attest.go) to verify its build.
+See [macOS releases](../release.md) for the release handoff.
 
 ### When an update downloads
+
+The self-updater paths below describe builds using an explicit development feed.
 
 With downloads automatic (`NoAutoDownload` off, the default), a version
 eipgam finds is downloaded at once, in the background, by whichever check

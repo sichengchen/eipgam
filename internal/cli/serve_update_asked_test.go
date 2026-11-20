@@ -20,6 +20,7 @@ import (
 // in the Docker image, a package manager's copy or a folder it can't
 // write, it says so instead.
 func TestServeUpdateAsked(t *testing.T) {
+	t.Setenv("EIPGAM_UPDATE_FEED", "http://127.0.0.1:1")
 	dir := t.TempDir()
 	exe := filepath.Join(dir, "eipgam")
 	if err := os.WriteFile(exe, []byte("eipgam"), 0o755); err != nil {

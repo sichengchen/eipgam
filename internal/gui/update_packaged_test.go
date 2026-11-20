@@ -67,3 +67,24 @@ func TestUpdatePackagedLeavesItToTheManager(t *testing.T) {
 		t.Fatalf("not packaged: exe %q, stuck %q", u.exe, u.stuck)
 	}
 }
+
+func TestMacUpdateLeavesInstallationToHomebrew(t *testing.T) {
+	t.Setenv("EIPGAM_UPDATE_FEED", "")
+	u := &updater{}
+	u.place("darwin", true)
+	j := u.json()
+	const command = "brew upgrade --cask sichengchen/tap/eipgam"
+	if u.bundle != "" || u.exe != "" || j.Packaged == nil || !j.Packaged.Cask || j.Packaged.Command != command {
+		t.Fatalf("macOS update targets: bundle %q, exe %q, package %+v", u.bundle, u.exe, j.Packaged)
+	}
+	if u.install(true) {
+		t.Fatal("the app updater took over a Homebrew installation")
+	}
+	old := Version
+	Version = "0.2.0"
+	t.Cleanup(func() { Version = old })
+	remote := u.updateAsked("0.2.1")
+	if remote.State != "unsupported" || remote.Why != "package" || remote.Command != command {
+		t.Fatalf("remote update: %+v", remote)
+	}
+}

@@ -189,6 +189,7 @@ const usage = `eipgam — one place to pick every agent's model
   eipgam settings [list|get <key>|set <key> <value>|reset <key>] [--json]
                                   every setting the window's Settings page saves, read and set as it saves them (eipgam settings help)
   eipgam update [check] [--proxy <url>] [--mirror <prefix>] [--addr host:port] [--force]
+                                  on macOS, install updates with brew upgrade --cask sichengchen/tap/eipgam
                                   install the newest release (check: only say if there is one); the running
                                   eipgam is restarted into it, found by --addr, EIPGAM_ADDR or the address it
                                   wrote down (a service started with EIPGAM_ADDR needs none of them); a restart waits at most 10

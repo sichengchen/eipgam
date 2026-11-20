@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -24,6 +25,7 @@ var (
 	updateCanElevate  = update.CanElevate
 	updateInContainer = gateway.InContainer
 	updatePackagedBy  = update.PackagedBy
+	macDistribution   = func() *update.Packaged { return update.MacDistribution(runtime.GOOS) }
 )
 
 // updateEveries are the intervals eipgam update auto takes, by their
@@ -202,7 +204,6 @@ func updateCmd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("eipgam update: %w", err)
 	}
-	base := updateBase(addr)
 	if len(args) > 1 && args[1] == "auto" {
 		return updateAutoCmd(args[2:])
 	}
@@ -215,6 +216,10 @@ func updateCmd(args []string) error {
 	if len(args) > 2 || len(args) == 2 && args[1] != "check" {
 		return fmt.Errorf("usage: eipgam update [check] [--proxy <url>] [--mirror <prefix>] [--addr host:port] [--force]")
 	}
+	if p := macDistribution(); p != nil && len(args) == 1 {
+		return fmt.Errorf("%s", p.Say())
+	}
+	base := updateBase(addr)
 	// the check is bounded; the download after it is not: a slow one
 	// still moving goes on, and one that stops sending is ended by
 	// update's stall timer (#5572)

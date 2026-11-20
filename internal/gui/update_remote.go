@@ -23,12 +23,15 @@ func (u *updater) updateAsked(want string) provider.RemoteUpdate {
 	case !update.Newer(want, Version):
 		return provider.RemoteUpdate{State: "current"}
 	}
-	if s := settings.Load(); s.NoAutoUpdate || s.NoAutoDownload {
-		return provider.RemoteUpdate{State: "off"}
-	}
 	u.mu.Lock()
 	restart, bundle, exe, stuck, packaged := u.autoRestart, u.bundle, u.exe, u.stuck, u.packaged
 	u.mu.Unlock()
+	if packaged != nil && packaged.Manager == update.HomebrewCask {
+		return provider.RemoteUpdate{State: "unsupported", Why: "package", Manager: packaged.Name(), Command: packaged.Command()}
+	}
+	if s := settings.Load(); s.NoAutoUpdate || s.NoAutoDownload {
+		return provider.RemoteUpdate{State: "off"}
+	}
 	if bundle == "" && exe == "" || restart == nil {
 		out := provider.RemoteUpdate{State: "unsupported", Why: stuck}
 		if stuck == "package" && packaged != nil {

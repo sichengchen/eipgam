@@ -140,16 +140,17 @@ A release counts only when all of these hold:
 - A CI Test run on the tagged commit, or a later one containing it, finished
   green. A run cancelled by the next push is not a pass.
 - The tag `vX.Y.Z` is on `main`, an ancestor of `origin/main`.
-- The release in `sichengchen/eipgam` has the app and CLI for both macOS architectures.
-- That release is marked Latest, the highest version.
+- The `eipgam-vX.Y.Z` release in `sichengchen/macos-release` has the
+  signed, notarized universal app, including its CLI.
+- The `sichengchen/tap/eipgam` cask points at the published archive with
+  its verified SHA-256. See [macOS releases](release.md).
 
 Check `git tag` for the next free version first, because releases can be
 made from more than one place. `git fetch --tags` and check the commit
 isn't tagged already: on 10-12 two sessions tagged 396a6a3d4 a minute
-apart, and the lower v0.1.1192 became Latest. A tag is not a release:
-check the release exists with its 17 assets before naming the version to
-anyone, and file a release whose build failed instead of letting the next
-tag cover it. v0.1.1213 (hdiutil "Resource busy") and v0.1.1218 (notarising
+apart, and the lower v0.1.1192 became Latest. Check the public archive and
+tap before naming the version to anyone, and file a release whose build
+failed. v0.1.1213 (hdiutil "Resource busy") and v0.1.1218 (notarising
 lost the network) were never published, and nobody noticed the first for
 1.5 hours (#1846). The same holds for a plugin version: `npm view
 <package>@<version> --prefer-online` before a mover's `min` or a reply

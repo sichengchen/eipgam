@@ -12,6 +12,17 @@ import (
 	"github.com/sichengchen/eipgam/internal/update"
 )
 
+func TestUpdateOnMacDirectsUsersToTheCask(t *testing.T) {
+	t.Setenv("EIPGAM_UPDATE_FEED", "")
+	old := macDistribution
+	macDistribution = func() *update.Packaged { return update.MacDistribution("darwin") }
+	t.Cleanup(func() { macDistribution = old })
+	const command = "brew upgrade --cask sichengchen/tap/eipgam"
+	if err := updateCmd([]string{"update"}); err == nil || !strings.Contains(err.Error(), command) {
+		t.Fatalf("macOS update returned %v, want the Homebrew command", err)
+	}
+}
+
 // `eipgam update` from the AUR's eipgam-bin (/usr/bin/eipgam) asked for the
 // password and replaced the package's file under pacman (shuhai on
 // Discord). It now says the version is out and the command that updates

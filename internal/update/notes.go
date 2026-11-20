@@ -28,9 +28,10 @@ type Note struct {
 // NotesFeed is an explicit notes feed for development and testing.
 func NotesFeed() string { return os.Getenv("EIPGAM_NOTES_FEED") }
 
-// ReleasePage is version's page on the eipgam repository.
+// ReleasePage is version's page on the shared macOS release repository.
 func ReleasePage(version string) string {
-	return Repository + "/releases/tag/v" + strings.TrimPrefix(strings.TrimSpace(version), "v")
+	return "https://github.com/" + macReleaseRepo + "/releases/tag/eipgam-v" +
+		url.PathEscape(strings.TrimPrefix(strings.TrimSpace(version), "v"))
 }
 
 // NotesBetween asks the site for the notes of every release after after

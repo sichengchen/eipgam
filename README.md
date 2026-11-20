@@ -8,22 +8,26 @@ eipgam is based on Magpie. Main differences:
 - **Supports 22 agents:** Claude Code, Claude Desktop, Claude Science, Codex, Gemini CLI, Antigravity CLI, OpenCode, Pi, Cursor CLI, Cursor Private Inference, Zed, VS Code Chat, VS Code Insiders, VSCodium Chat, Copilot CLI, Devin, Kimi Code, Muse Code, Grok Build, Grok App, Raycast, T3 Code.
 - **No mainland-China providers or China-only features.** The overseas services of Chinese vendors (Z.ai, Kimi, MiniMax, StepFun, Qwen intl, Alibaba Cloud, Qwen Cloud, SiliconFlow, Tencent Cloud intl, Xiaomi MiMo's Singapore and Europe plans) stay. China mirrors and daily check-ins are removed.
 
-## Build and install (macOS)
+## Install on macOS
 
-Needs Go and Node.
+The Homebrew cask installs the signed and notarized app and adds the
+`eipgam` command to your PATH. It supports Apple silicon and Intel Macs.
 
 ```sh
-make app VERSION=0.2.0
-codesign --force --deep --sign - --identifier com.sichengchen.eipgam eipgam.app
-ditto eipgam.app /Applications/eipgam.app
+brew install --cask sichengchen/tap/eipgam
 open /Applications/eipgam.app
 ```
 
-eipgam runs in the menu bar. For the `eipgam` command, use Settings → Command line, or link `/Applications/eipgam.app/Contents/MacOS/eipgam` into your PATH.
+eipgam runs in the menu bar. To upgrade, run:
 
-The app checks [eipgam releases on GitHub](https://github.com/sichengchen/eipgam/releases) for updates. It verifies the SHA-256 and GitHub build attestation before installation. Automatic checks are controlled in Settings → About.
+```sh
+brew upgrade --cask sichengchen/tap/eipgam
+```
 
 eipgam stores its configuration in `~/.config/eipgam` (or `$XDG_CONFIG_HOME/eipgam`).
+
+See [building from source](docs/reference.md#build-from-source) for development
+builds and [macOS releases](docs/release.md) for the maintainer workflow.
 
 ## Using it
 

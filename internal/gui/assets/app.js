@@ -4601,6 +4601,7 @@ function servedAnew(u) {
 // to off the Mac (C:\, #1277), or a container, whose image gets updated
 function updateStuck(u) {
   const p = u.packaged;
+  if (p?.cask) return t("Update with {cmd}", { cmd: p.command });
   if (p) return p.command ? t("{manager} installed eipgam ({pkg}), so {manager} updates it, not eipgam: {cmd}", { manager: p.manager, pkg: p.package, cmd: p.command }) : t("{manager} installed eipgam, so {manager} updates it, not eipgam.", { manager: p.manager });
   if (u.stuck === "container") return t("eipgam runs in a container, so it can't update itself; rebuild the image with the latest eipgam source and recreate the container.");
   if (u.stuck === "not-writable") return t("eipgam can't write to the folder it runs from ({dir}), so it can't update itself; move it to a folder you can write to and open it from there.", { dir: u.stuckDir || "" });
@@ -19939,7 +19940,12 @@ function renderSettings() {
   row(t("Restart automatically"), s.noAutoUpdate ? t("While automatic updates are on") : t("Once an update is downloaded, restarts into it without cutting off an agent's request"), "",
     segsOO(s.autoRestart, (v) => savePrefs({ ...keep, autoRestart: v }))).classList.add("update-restart-row", ...(s.noAutoUpdate ? ["off"] : []));
   const mr = row(t("Download source"), "", "");
-  import("./updatesource.js").then(() => mr.isConnected && renderUpdateMirror(mr, s), statusErr);
+  mr.classList.add("update-mirror-row");
+  import("./updatesource.js").then(() => {
+    if (!mr.isConnected) return;
+    if (updateLast?.packaged?.cask) hideBrewUpdateControls();
+    else renderUpdateMirror(mr, s);
+  }, statusErr);
   const open = el("button", "text", t("Open"));
   open.onclick = () => api("settings/reveal", {}).catch(statusErr);
   // portable (a data folder beside eipgam, #508): everything is in there
@@ -22186,6 +22192,7 @@ async function renderUpdate(r, u) {
     if (early) updateSeq.set(r, seq + 1); // stops timers
   } else if (!r.isConnected) return;
   updateLast = u, u.at ??= Date.now();
+  if (u.packaged?.cask) window.hideBrewUpdateControls?.();
   const who = r.querySelector(".who"), val = r.querySelector(".val");
   const sub = who.querySelector(".sub") || who.appendChild(el("div", "sub"));
   sub.classList.add("say");

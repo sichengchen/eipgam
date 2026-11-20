@@ -3337,9 +3337,14 @@ needs it is set up in the provider's editor. Use the `eipgam://` scheme to open 
 
 ## Install
 
-Download the macOS app for Apple silicon or Intel from
-[eipgam releases](https://github.com/sichengchen/eipgam/releases).
-For local builds from a checkout of this repository:
+Install the universal macOS app and CLI from the Homebrew cask.
+
+```sh
+brew install --cask sichengchen/tap/eipgam
+open /Applications/eipgam.app
+```
+
+### Build from source
 
 ```sh
 make build            # ./eipgam, including the desktop app
@@ -3349,39 +3354,35 @@ make release-windows  # cross-compile the Windows desktop app
 make release-linux    # build the Linux desktop app for this machine
 ```
 
-For macOS signing and installation, see the [README](../README.md).
 Linux desktop builds need GTK 3 and WebKitGTK 4.1. Windows desktop builds
 use WebView2. Termux uses `-tags nogui`.
 
 ### Updates
 
-eipgam checks for newer published releases in `sichengchen/eipgam`.
-The release workflow publishes the macOS app and CLI for Apple silicon
-and Intel. The local privacy filter downloads its versioned helper from
-the same repository and checks the attestation from `privacy-filter.yml`.
-Updates and release notes are also available from
-`eipgam update` and Settings → About.
+On macOS, install updates through Homebrew.
 
-GitHub supplies the asset's SHA-256. Before downloading, eipgam verifies
-a Sigstore build attestation from the tagged `release.yml` workflow in
-this repository for that asset name and digest. A missing or unreadable
-attestation stops installation. On macOS, the bundle must also pass
-`codesign` verification and match the installed app's signing team.
+```sh
+brew upgrade --cask sichengchen/tap/eipgam
+```
 
-A download mirror is an optional prefix in front of the GitHub asset URL.
-Set it in Settings → About → Download source or with
-`eipgam update mirror <prefix>`. Using a mirror still requires the
-GitHub metadata and attestation. `eipgam update mirror off` restores
-direct downloads. Set the update-specific proxy in Settings → Network
-and sharing or use `eipgam update --proxy <address>`.
+Settings → About and `eipgam update check` read release metadata and notes
+from the [shared macOS release repository](https://github.com/sichengchen/macos-release/releases).
+The [release workflow](release.md) signs the universal app with Developer ID,
+notarizes it, and updates the tap with the signed archive's SHA-256.
+
+The optional privacy filter downloads its versioned helper from
+`sichengchen/eipgam` and verifies the build attestation from
+`privacy-filter.yml`.
 
 ### Update channel
 
-`eipgam update channel every` follows each published release.
+`eipgam update channel every` checks each published version.
 `daily` uses the latest daily cutoff at 20:00 UTC. `stable` uses the
 newest release that had been out for three days when the current UTC
 week began on Monday. Both channels can also receive a release whose notes
 start a line with `**Urgent release:**` as soon as it is published.
+These settings control in-app checks. Homebrew upgrades to the version
+listed in the tap.
 
 ### As a background service
 

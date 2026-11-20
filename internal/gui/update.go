@@ -268,6 +268,10 @@ var (
 // only ever offered the release page. The app's own binary copied out of
 // its .app isn't replaced by the terminal build.
 func (u *updater) place(goos string, gui bool) {
+	if p := update.MacDistribution(goos); p != nil {
+		u.stuck, u.packaged = "package", p
+		return
+	}
 	if b := bundleOf(); b != "" {
 		if u.stuck = update.Stuck(b); u.stuck == "" {
 			u.bundle = b
@@ -336,6 +340,7 @@ type packagedJSON struct {
 	Manager string `json:"manager"` // as its users call it: pacman, apt, rpm, Homebrew, Nix
 	Package string `json:"package,omitempty"`
 	Command string `json:"command,omitempty"` // what updates it, "" when no one command does
+	Cask    bool   `json:"cask,omitempty"`
 }
 
 // check asks the feed and, when it can, stages the new version.
@@ -831,9 +836,9 @@ func (u *updater) jsonIn(lang string) updateJSON {
 		if u.stuck == "not-writable" {
 			j.StuckDir = u.exeDir
 		}
-		if u.stuck == "package" && u.packaged != nil {
-			j.Packaged = &packagedJSON{Manager: u.packaged.Name(), Package: u.packaged.Package, Command: u.packaged.Command()}
-		}
+	}
+	if p := u.packaged; p != nil && (u.state == "available" || p.Manager == update.HomebrewCask) {
+		j.Packaged = &packagedJSON{Manager: p.Name(), Package: p.Package, Command: p.Command(), Cask: p.Manager == update.HomebrewCask}
 	}
 	if u.state == "downloading" {
 		j.Done, j.Total, j.Step = u.done, u.total, u.step
