@@ -62,27 +62,26 @@ func TestPluginInstallsItsCLI(t *testing.T) {
 	// given up, the plugin's install hears of it and the call returns
 	os.WriteFile(filepath.Join(home, "cli-mode"), []byte("hang"), 0o600)
 	hctx, hcancel := context.WithCancel(ctx)
+	defer hcancel()
 	done := make(chan error, 1)
 	go func() { done <- InstallCLI(hctx, "cliinstall") }()
-	time.Sleep(200 * time.Millisecond)
+	waitWithin(t, "installer abort handler", 20*time.Second, func() bool {
+		_, err := os.Stat(filepath.Join(home, "cli-listening"))
+		return err == nil
+	})
 	hcancel()
 	select {
 	case err := <-done:
-		if err == nil {
-			t.Fatal("a cancelled install returned no error")
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("a cancelled install returned %v, want context.Canceled", err)
 		}
 	case <-ctx.Done():
 		t.Fatal("a cancelled install never returned")
 	}
-	for range 200 {
-		if _, err := os.Stat(filepath.Join(home, "cli-aborted")); err == nil {
-			break
-		}
-		time.Sleep(20 * time.Millisecond)
-	}
-	if _, err := os.Stat(filepath.Join(home, "cli-aborted")); err != nil {
-		t.Error("the plugin's install never heard it was given up")
-	}
+	waitWithin(t, "installer cancellation marker", 20*time.Second, func() bool {
+		_, err := os.Stat(filepath.Join(home, "cli-aborted"))
+		return err == nil
+	})
 
 	os.Remove(filepath.Join(home, "cli-mode"))
 	if err := InstallCLI(ctx, "cliinstall"); err != nil {
