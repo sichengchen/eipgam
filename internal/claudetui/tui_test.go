@@ -346,6 +346,15 @@ func fakeClaude(args []string) {
 		time.AfterFunc(d, func() { _ = os.WriteFile(listed, nil, 0o600) })
 	}
 	streams := 0
+	// FAKE_HISTORY: a resumed conversation's history is drawn above the
+	// prompt, and it talks of the dialogs
+	if os.Getenv("FAKE_HISTORY") != "" {
+		fmt.Print("\r\n> Why does it say asked to accept running in Bypass\x1b[1CPermissions\x1b[1Cmode?\r\n" +
+			"  ❯ No, exit\r\n  ❯ Yes, I accept\r\n  Do you trust this folder? Yes, I trust this folder\r\n" +
+			"  Choose the text style that looks best; Select login method; Press Enter to continue;\r\n" +
+			"  Enter to confirm · Esc to skip, keep browser tools off\r\n" +
+			strings.Repeat("  and more history of that conversation, long past the dialogs' words\r\n", 40))
+	}
 	fmt.Print("\r\n❯ ")
 	// the prompt's words, and the prompt as drawn, again as a paste
 	// starts and as one is taken in. As Claude Code 2.1.318 does, it draws
@@ -1179,6 +1188,50 @@ func TestShimAcceptsBypassDisclaimer(t *testing.T) {
 	out := runShim(t, []string{"FAKE_BYPASS=1", BypassEnv + "=1"}, append([]string{fakePath(t)}, pArgs...), []string{"hello"}, 3)
 	if out[0]["subtype"] != "init" || out[1]["type"] != "assistant" {
 		t.Fatalf("got %v, want an interactive turn", out)
+	}
+}
+
+// A resumed conversation whose history holds the dialogs' words and
+// option rows is not a dialog: the prompt box is showing, and the run
+// goes on, with no BypassEnv or TrustEnv to answer one (@alisenray on X:
+// every --resume failed at 45s, "not answered", no dialog on screen).
+func TestShimIgnoresDialogWordsInHistory(t *testing.T) {
+	out := runShim(t, []string{"FAKE_HISTORY=1"}, append([]string{fakePath(t)}, pArgs...), []string{"hello"}, 3)
+	if out[0]["subtype"] != "init" || out[1]["type"] != "assistant" {
+		t.Fatalf("got %v, want an interactive turn", out)
+	}
+}
+
+// The PTY may deliver history mentioning sign-in in one read and the
+// real prompt in another. With only the first read available, the shim
+// should keep waiting instead of rejecting the run as signed out.
+func TestShimWaitsAfterPartialSignInHistory(t *testing.T) {
+	history := []byte("\r\nThe conversation discusses Select login method and sign-in.\r\n")
+	s := &shim{screen: history, grid: newGrid(screenSize()), exited: make(chan struct{})}
+	s.grid.write(history)
+	close(s.exited)
+	if err := s.ready(); err == nil || !strings.Contains(err.Error(), EndedEarly) {
+		t.Fatalf("partial conversation history ended startup as a dialog: %v", err)
+	}
+}
+
+func TestSignInDialogUsesRenderedRows(t *testing.T) {
+	for _, tc := range []struct {
+		name, screen string
+		want         bool
+	}{
+		{"chooser", "Select login method:\n\n ❯ 1. Claude account with subscription\n   2. Anthropic Console account", true},
+		{"account prompt", "Log in with your Claude account to continue.", true},
+		{"browser handoff", "Open this URL in your browser:\nhttps://claude.ai/oauth/authorize?state=test", true},
+		{"inline history", "The conversation discusses Select login method and sign-in.", false},
+		{"rendered conversation", "Select login method:\n   1. Claude account with subscription\n\n❯\u00a0", false},
+		{"quoted browser link", "We discussed https://claude.ai/oauth/authorize in the previous turn.", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := signInDialog(tc.screen); got != tc.want {
+				t.Errorf("signInDialog = %v, want %v", got, tc.want)
+			}
+		})
 	}
 }
 

@@ -1,7 +1,8 @@
 // A plugin that runs its vendor's CLI and installs it itself (magpie's
 // auth.cli): the "CLI" is a file in HOME. HOME/cli-mode says how the
 // install goes: "fail" throws, "hang" waits until magpie gives it up
-// (and writes HOME/cli-aborted then), anything else installs it.
+// (and writes HOME/cli-aborted then). HOME/cli-listening marks when the
+// abort handler is ready. Anything else installs the CLI.
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
@@ -21,10 +22,13 @@ export const CLIInstallPlugin = async () => ({
         const m = mode()
         if (m === "fail") throw new Error("the download was refused")
         if (m === "hang") {
-          await new Promise((resolve) => signal?.addEventListener("abort", () => {
-            writeFileSync(join(home(), "cli-aborted"), "1")
-            resolve()
-          }))
+          await new Promise((resolve) => {
+            signal.addEventListener("abort", () => {
+              writeFileSync(join(home(), "cli-aborted"), "1")
+              resolve()
+            }, { once: true })
+            writeFileSync(join(home(), "cli-listening"), "1")
+          })
           throw new Error("aborted")
         }
         writeFileSync(bin(), "#!/bin/sh\n")

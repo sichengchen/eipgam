@@ -398,6 +398,12 @@ the fallback it was a 502, which a Claude Code client (paseo) asked again
 with backoff, so the chat hung (lwjef on X).
 `TestClaudeTUIUntrustedFolderAnswered` holds it.
 
+The interactive helper looks for the trust or bypass prompt and its option
+rows near the bottom of the terminal (`optionDialog` in
+[`tui.go`](../../internal/claudetui/tui.go)). A resumed conversation can
+mention either prompt without interrupting the turn
+(`TestShimIgnoresDialogWordsInHistory`).
+
 Before each such run the bridge decides as Claude Code does whether it
 would ask (`untrustedHere`, `claudeTrusts` in `claude_trusted.go`), from
 the user's own answers in the profile `provider.ClaudeTrustedProjects`
@@ -949,7 +955,7 @@ after three answers (`onboardTries`) ends the run, saying to run Claude
 Code once in a terminal. `TestShimGoesThroughOnboarding` holds it.
 
 If the interactive Claude Code doesn't start or show its prompt within 45
-seconds (`claudetui.ReadyWait`), asks how to sign in (`signIn`: a
+seconds (`claudetui.ReadyWait`), asks how to sign in (`signInDialog`: a
 Claude Code signed in for `-p` only, as in a container given
 `CLAUDE_CODE_OAUTH_TOKEN`), stays on its first-run screens, or asks
 about a folder the user hasn't trusted, the helper ends, saying why on
@@ -957,6 +963,11 @@ its stderr and in its exit (`fail` in `Run`). It never becomes `claude
 -p`. Until 11-01 it did, and wrote `<cache>/eipgam/claude-tui-broken`,
 after which every run went `-p` for up to a day; that mark is no longer
 written or read, and one left on disk does nothing.
+
+The helper reports sign-in only when the terminal shows a sign-in row that
+stays visible after the redraw settles. An input prompt below that row
+indicates a resumed conversation is ready. `TestShimWaitsAfterPartialSignInHistory`
+covers history arriving before the rest of the prompt.
 
 The helper answers the bridge's `initialize` only once the prompt is
 shown and Claude Code has listed the tools of eipgam's MCP server. Claude
