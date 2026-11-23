@@ -3565,6 +3565,8 @@ classifier) get none. `TestModelSystemAfterTheAgentsPrompt`,
 `TestModelSystemReachesAPluginsModel` in
 [`model_system_test.go`](../../internal/gateway/model_system_test.go).
 
+Copilot can report \`reasoning_tokens\` directly in Chat Completions usage. The gateway uses that value when \`completion_tokens_details\` supplies no reasoning count, for translated and relayed replies alike. See \`cUsage.usage\` in [chat.go](../../internal/gateway/chat.go).
+
 ## Verification
 
 ```sh
