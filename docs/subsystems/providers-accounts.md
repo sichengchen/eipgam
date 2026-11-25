@@ -511,6 +511,8 @@ and `TestHistoricalWindowHoldsUsesEachWindowsOwnReading`.
   `TestClaudeSwitchWaitsForClaudeCodesRefresh`,
   `TestClaudeSwitchStaleAndHeldLocks`.
 
+A provider copy inherits the original balance token only when it inherits the original API keys. A copy with its own key uses its own balance token if supplied. See [AddCopy](../../internal/provider/provider.go) and TestAddCopy.
+
 ## Verification
 
 ```sh
