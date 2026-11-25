@@ -3567,6 +3567,8 @@ classifier) get none. `TestModelSystemAfterTheAgentsPrompt`,
 
 Copilot can report \`reasoning_tokens\` directly in Chat Completions usage. The gateway uses that value when \`completion_tokens_details\` supplies no reasoning count, for translated and relayed replies alike. See \`cUsage.usage\` in [chat.go](../../internal/gateway/chat.go).
 
+On the native Gemini API, \`thinkingConfig\` in [codeassist.go](../../internal/gateway/codeassist.go) sends \`xhigh\` to a Gemini 4 model when its model levels allow it. Models with lower supported levels continue to receive the fitted effort.
+
 ## Verification
 
 ```sh
