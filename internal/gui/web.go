@@ -236,12 +236,15 @@ func CheckWebKey(k string) error {
 // back to the start-up log.
 func webGuard(cookie, key string, keep time.Duration, box boxSignIn, next http.Handler) http.Handler {
 	same := func(v string) bool { return subtle.ConstantTimeCompare([]byte(v), []byte(key)) == 1 }
-	signIn := func(rw http.ResponseWriter, r *http.Request, back string) {
+	setCookie := func(rw http.ResponseWriter, r *http.Request) {
 		// Priority=High (Chrome's): the page's host is often an address
 		// other services share on other ports, and a browser keeps a
 		// limited number of cookies for one host, all ports together;
 		// past it Chrome drops the low and medium ones first (#2033)
-		rw.Header().Add("Set-Cookie", (&http.Cookie{Name: cookie, Value: key, Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode, MaxAge: int(keep / time.Second)}).String()+"; Priority=High")
+		rw.Header().Add("Set-Cookie", (&http.Cookie{Name: cookie, Value: key, Path: "/", HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode, MaxAge: int(keep / time.Second)}).String()+"; Priority=High")
+	}
+	signIn := func(rw http.ResponseWriter, r *http.Request, back string) {
+		setCookie(rw, r)
 		http.Redirect(rw, r, back, http.StatusSeeOther)
 	}
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -287,6 +290,9 @@ func webGuard(cookie, key string, keep time.Duration, box boxSignIn, next http.H
 		sent := r.CookiesNamed(cookie)
 		for _, c := range sent {
 			if same(c.Value) {
+				if r.TLS != nil && r.Header.Get("Sec-Fetch-Mode") == "navigate" {
+					setCookie(rw, r)
+				}
 				next.ServeHTTP(rw, r)
 				return
 			}
