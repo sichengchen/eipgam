@@ -126,6 +126,8 @@ Built-in MCP cards use the bundled logo. Remote MCP logos use
 
 - An uninstalled agent appears in the Library only when `Applied` records resources eipgam wrote here (`held` in [`targets.go`](../../internal/library/targets.go)). Agent selections synced from another machine are kept for a future install.
 
+New skills created with [CreateSkill](../../internal/library/skills.go) omit unset invocation options and argument hints from SKILL.md. Existing skills keep their front matter.
+
 ## Verification
 
 ```sh

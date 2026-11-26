@@ -511,6 +511,10 @@ and `TestHistoricalWindowHoldsUsesEachWindowsOwnReading`.
   `TestClaudeSwitchWaitsForClaudeCodesRefresh`,
   `TestClaudeSwitchStaleAndHeldLocks`.
 
+A provider copy inherits the original balance token only when it inherits the original API keys. A copy with its own key uses its own balance token if supplied. See [AddCopy](../../internal/provider/provider.go) and TestAddCopy.
+
+Endpoint tests and API detection use the gateway's [response validation](../../internal/provider/notapi.go). A successful HTTP status with a web page, an empty body, or a response labeled as JSON that begins with neither JSON nor an event stream yields an endpoint error.
+
 ## Verification
 
 ```sh

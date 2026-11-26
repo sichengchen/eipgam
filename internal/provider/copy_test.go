@@ -52,8 +52,16 @@ func TestAddCopy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c, _ := Find(id); id != "relay-copy-2" || c.Name != "Relay copy 2" || c.Key != "sk-9" || len(c.Keys) != 0 {
+	if c, _ := Find(id); id != "relay-copy-2" || c.Name != "Relay copy 2" || c.Key != "sk-9" || len(c.Keys) != 0 || c.BalanceToken != "" {
 		t.Fatalf("second copy %s: %+v", id, c)
+	}
+	form.BalanceToken = "copy-token"
+	id, err = AddCopy(form, "relay")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c, _ := Find(id); c.BalanceToken != "copy-token" {
+		t.Fatalf("explicit balance token = %q", c.BalanceToken)
 	}
 	if _, err := AddCopy(form, "nope"); err == nil {
 		t.Fatal("a copy of nothing")

@@ -1467,6 +1467,8 @@ v0.1.4166's release check waited on the dialog with no gateway
 [`install_test.go`](../../internal/update/install_test.go),
 `TestInstallWordsEveryLanguage` and `TestInstallDialogSaysTheDownloadCanGo`.
 
+When [webGuard](../../internal/gui/web.go) serves the browser UI over TLS, it marks its sign-in cookie Secure. An authenticated page navigation over TLS refreshes existing cookies with this flag. HTTP sign-in retains its current cookie behavior.
+
 ## Verification
 
 The session readers include Cursor CLI chat stores, Cursor editor project
